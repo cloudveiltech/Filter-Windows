@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Te.Citadel.UI.Views.ProgressWait"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:citadelcontrols="clr-namespace:Te.Citadel.UI.Controls"
+             xmlns:citadelviewmodels="clr-namespace:Te.Citadel.UI.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mvvmlight="clr-namespace:GalaSoft.MvvmLight;assembly=GalaSoft.MvvmLight"
+             Width="716"
+             Height="386"
+             d:DesignHeight="386"
+             d:DesignWidth="716"
+             mc:Ignorable="d">
+    <Grid>
+
+        <!--  Infinitely looping Metro style progress ring.  -->
+        <MetroControls:ProgressRing HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource AccentColorBrush}" />
+
+        <!--  Simple wait message. TODO - Decoupled way to set this via view change command.  -->
+        <Label Width="258"
+               Margin="229,277,229,0"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Top"
+               HorizontalContentAlignment="Center"
+               Content="Please Wait"
+               FontFamily="Segoe UI"
+               FontSize="22"
+               FontWeight="UltraLight"
+               Foreground="Black" />
+    </Grid>
+</UserControl>

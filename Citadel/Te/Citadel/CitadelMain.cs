@@ -36,6 +36,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Te.Citadel.Util;
 
 namespace Te.Citadel
 {
@@ -109,6 +110,10 @@ namespace Te.Citadel
                     MainLogger.Error(e.InnerException.StackTrace);
                 }
             }
+
+            // No matter what, always ensure that critical flags are removed from our process before
+            // exiting.
+            ProcessProtection.Unprotect();
         }
     }
 }

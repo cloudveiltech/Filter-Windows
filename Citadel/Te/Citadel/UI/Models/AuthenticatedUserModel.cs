@@ -1,21 +1,19 @@
-﻿using Microsoft.Win32;
+﻿using GalaSoft.MvvmLight;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using Te.Citadel.Extensions;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Models
 {
-    internal class AuthenticatedUserModel
+    internal class AuthenticatedUserModel : ObservableObject
     {
         /// <summary>
         /// This class is used to make persisting the state of the larger and more complex
@@ -45,12 +43,64 @@ namespace Te.Citadel.UI.Models
             }
 
             [JsonProperty]
+            public bool Accepted
+            {
+                get;
+                set;
+            }
+
+            [JsonProperty]
             public Uri AuthRoute
             {
                 get;
                 set;
             }
         }
+
+        /// <summary>
+        /// Singleton because we love anti-patterns. Seriously though there should only ever be one
+        /// authenticated user at any given time, it needs to be accessible from many places and this
+        /// is the easiest way to accomplish that.
+        /// </summary>
+        private static AuthenticatedUserModel s_instance;
+
+        /// <summary>
+        /// Gets the single auth user instance.
+        /// </summary>
+        public static AuthenticatedUserModel Instance
+        {
+            get
+            {
+                if(s_instance == null)
+                {
+                    s_instance = new AuthenticatedUserModel();
+                }
+                return s_instance;
+            }
+        }
+
+        /// <summary>
+        /// Destroys the current saved user, which will lead to forced re-authentication.
+        /// </summary>
+        public static void Destroy()
+        {
+            if(s_instance != null && File.Exists(s_instance.m_savePath))
+            {
+                File.Delete(s_instance.m_savePath);
+            }
+
+            s_instance = new AuthenticatedUserModel();
+        }
+
+        /// <summary>
+        /// Remember if the user has accepted the terms after authenticating.
+        /// </summary>
+        private volatile bool m_termsAccepted;
+
+        /// <summary>
+        /// Path where we'll persist this object on the file system.
+        /// </summary>
+        private readonly string m_savePath;
 
         /// <summary>
         /// Logger.
@@ -61,12 +111,12 @@ namespace Te.Citadel.UI.Models
         /// Holds the entropy used to encrypt the last password used in a successful auth request.
         /// </summary>
         private byte[] m_entropy;
-        
+
         /// <summary>
         /// Holds an encrypted version of the last password used in a successful auth request.
         /// </summary>
         private byte[] m_passwordEncrypted;
-        
+
         /// <summary>
         /// Holds the last username used in a successful auth request.
         /// </summary>
@@ -114,7 +164,7 @@ namespace Te.Citadel.UI.Models
         /// <summary>
         /// Indicates whether or not the user has an active session as the result of a successful
         /// authentication request. This internally counts the saved set cookies.
-        /// </summary>        
+        /// </summary>
         public bool HasStoredSession
         {
             get
@@ -126,21 +176,45 @@ namespace Te.Citadel.UI.Models
         }
 
         /// <summary>
+        /// Gets or sets whether or not the user has accepted the terms. Since the user is presented
+        /// with terms AFTER authenticating, we shouldn't just assume that successful auth means 100%
+        /// authenticated. The terms need to be accepted, so we store that information as well.
+        /// </summary>
+        public bool HasAcceptedTerms
+        {
+            get
+            {
+                return m_termsAccepted;
+            }
+
+            set
+            {
+                m_termsAccepted = value;
+
+                if(m_termsAccepted)
+                {
+                    // Just save again whenever terms are accepted.
+                    Save();
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the URI used for the last successful authentication request. Entirely
         /// private, used internally. A property is used just to bind some logic to access.
         /// </summary>
-        private Uri AuthRoute
+        public Uri AuthRoute
         {
             get
             {
                 return m_lastAuthRoute;
             }
 
-            set
+            private set
             {
                 Debug.Assert(value != null);
 
-                if (value == null)
+                if(value == null)
                 {
                     throw new ArgumentException("Argument cannot be null.", nameof(AuthRoute));
                 }
@@ -149,18 +223,18 @@ namespace Te.Citadel.UI.Models
                 var isHttps = value.Scheme.OIEquals(Uri.UriSchemeHttps);
 
                 // Enforce that we're encrypting when not in debug.
-                #if !CITADEL_DEBUG
+#if !CITADEL_DEBUG
                 Debug.Assert(isHttps == true);
-                #else
+#else
                 Debug.Assert(isHttp == true || isHttps == true);
-                #endif
+#endif
 
                 // Enforce that we're encrypting when not in debug.
-                #if !CITADEL_DEBUG
+#if !CITADEL_DEBUG
                 if (!isHttps)
-                #else
-                if (!isHttp && !isHttps)
-                #endif
+#else
+                if(!isHttp && !isHttps)
+#endif
                 {
                     throw new ArgumentException("URI scheme not supported.", nameof(AuthRoute));
                 }
@@ -168,7 +242,7 @@ namespace Te.Citadel.UI.Models
                 m_lastAuthRoute = value;
             }
         }
-        
+
         /// <summary>
         /// Gets and privately the last username used in a successful auth request.
         /// </summary>
@@ -188,7 +262,7 @@ namespace Te.Citadel.UI.Models
                 // Ensure this is a valid string.
                 Debug.Assert(StringExtensions.Valid(value));
 
-                if (!StringExtensions.Valid(value))
+                if(!StringExtensions.Valid(value))
                 {
                     throw new ArgumentException("Expected valid, non-empty, non-whitespace string.", nameof(Username));
                 }
@@ -222,12 +296,12 @@ namespace Te.Citadel.UI.Models
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                if (value == null)
+                if(value == null)
                 {
                     throw new ArgumentException("Expected valid password byte array.", nameof(Password));
                 }
 
-                if (value.Length <= 0)
+                if(value.Length <= 0)
                 {
                     throw new ArgumentException("Got empty password byte array. Expect a length greater than zero.", nameof(Password));
                 }
@@ -259,12 +333,12 @@ namespace Te.Citadel.UI.Models
             {
                 Debug.Assert(value != null && value.Count > 0);
 
-                if (value == null)
+                if(value == null)
                 {
                     throw new ArgumentException("Expected valid HttpCookieCollection instance.", nameof(UserSessionCookies));
                 }
 
-                if (value.Count <= 0)
+                if(value.Count <= 0)
                 {
                     throw new ArgumentException("Supplied collection contains no entries.", nameof(UserSessionCookies));
                 }
@@ -276,18 +350,18 @@ namespace Te.Citadel.UI.Models
         /// <summary>
         /// Gets the Entropy bytes we supply during the protection/unprotection of the password
         /// member.
-        /// </summary>        
+        /// </summary>
         private byte[] Entropy
         {
             get
             {
                 // Enforce rigid synchronization.
-                lock (m_entropyLockObject)
+                lock(m_entropyLockObject)
                 {
                     // This is a random key name we're going to use. This key will have the entropy
                     // written to it in the registry.
                     const string keyName = "9e5f71f5-d68d-4349-8683-9910a54bc066";
-                    
+
                     // Get the name of our process, aka the Executable name.
                     var applicationNiceName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
@@ -305,12 +379,12 @@ namespace Te.Citadel.UI.Models
                     // If our entropy member is equal to our doesntExist value, then the key has not
                     // yet been set and we need to generate some new entropy, store it, and then
                     // return it.
-                    if (m_entropy.Length == 0 || (m_entropy.Length == doesntExist.Length && m_entropy == doesntExist))
+                    if(m_entropy.Length == 0 || (m_entropy.Length == doesntExist.Length && m_entropy == doesntExist))
                     {
                         // Doesn't exist, so create it.
                         m_entropy = new byte[20];
 
-                        using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+                        using(RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
                         {
                             rng.GetBytes(m_entropy);
                         }
@@ -327,47 +401,51 @@ namespace Te.Citadel.UI.Models
         /// <summary>
         /// Default ctor.
         /// </summary>
-        public AuthenticatedUserModel()
+        private AuthenticatedUserModel()
         {
+            m_savePath = AppDomain.CurrentDomain.BaseDirectory + "u.dat";
             m_logger = LogManager.GetLogger("Citadel");
             m_entropyLockObject = new object();
             m_username = string.Empty;
         }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="unencryptedPassword"></param>
-        /// <param name="authRoute"></param>
-        /// <returns></returns>
+        /// <param name="username">
+        /// </param>
+        /// <param name="unencryptedPassword">
+        /// </param>
+        /// <param name="authRoute">
+        /// </param>
+        /// <returns>
+        /// </returns>
         public async Task<AuthenticationResult> Authenticate(string username, byte[] unencryptedPassword, Uri authRoute)
         {
             // Disable forcing endpoint to be HTTPS when beta testing.
-            #if !CITADEL_DEBUG
+#if !CITADEL_DEBUG
             Debug.Assert(authRoute.Scheme.OIEquals(Uri.UriSchemeHttps));
 
             if (!authRoute.Scheme.OIEquals(Uri.UriSchemeHttps))
             {
                 throw new ArgumentException("Supplied auth route URI does not use the HTTPS scheme. Cannot authenticate over non-HTTPS connection.", nameof(authRoute));
             }
-            #endif
+#endif
 
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(username));
 
-            if (StringExtensions.Valid(username))
+            if(!StringExtensions.Valid(username))
             {
                 throw new ArgumentException("Supplied username cannot be null, empty or whitespace.", nameof(username));
             }
 
             Debug.Assert(unencryptedPassword != null && unencryptedPassword.Length > 0);
 
-            if (unencryptedPassword == null || unencryptedPassword.Length <= 0)
+            if(unencryptedPassword == null || unencryptedPassword.Length <= 0)
             {
                 throw new ArgumentException("Supplied password byte array cannot be null and must have a length greater than zero.", nameof(unencryptedPassword));
             }
-            //            
+            //
 
             // Will be saved if we get a success result.
             var sessionCookieContainer = new CookieContainer();
@@ -392,6 +470,7 @@ namespace Te.Citadel.UI.Models
                 request.AllowAutoRedirect = false;
                 request.UseDefaultCredentials = false;
                 request.Timeout = 5000;
+                request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
                 request.ReadWriteTimeout = 5000;
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
@@ -400,7 +479,7 @@ namespace Te.Citadel.UI.Models
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.
-                var formDataStart = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&user_password=", username));
+                var formDataStart = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&user_password=", username, FingerPrint.Value));
                 finalPostPayload = new byte[formDataStart.Length + unencryptedPassword.Length];
 
                 // Here we copy the byte range of the unencrypted password, in order to avoid having
@@ -409,45 +488,61 @@ namespace Te.Citadel.UI.Models
                 Array.Copy(formDataStart, finalPostPayload, formDataStart.Length);
                 Array.Copy(unencryptedPassword, 0, finalPostPayload, formDataStart.Length, unencryptedPassword.Length);
 
-                // Don't forget to the set the content length to the total length of our form POST data!
+                // Don't forget to the set the content length to the total length of our form POST
+                // data!
                 request.ContentLength = finalPostPayload.Length;
 
                 // Grab the request stream so we can POST our login form data to it.
-                using (var requestStream = await request.GetRequestStreamAsync())
+                using(var requestStream = await request.GetRequestStreamAsync())
                 {
                     // Write and close.
                     await requestStream.WriteAsync(finalPostPayload, 0, finalPostPayload.Length);
                     requestStream.Close();
                 }
-                
+
                 // Now that our login form data has been POST'ed, get a response.
-                using (var response = (HttpWebResponse)await request.GetResponseAsync())
+                using(var response = (HttpWebResponse)await request.GetResponseAsync())
                 {
                     // Get the response code as an int so we can range check it.
-                    var code = (int)response.StatusCode;                        
-                    
+                    var code = (int)response.StatusCode;
+
                     response.Close();
                     request.Abort();
 
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed.
-                    if (code >= 200 && code <= 299)
+                    if(code >= 200 && code <= 299)
                     {
                         this.Username = username;
                         this.Password = unencryptedPassword;
-                        this.UserSessionCookies = sessionCookieContainer;
+
+                        // We have to do this crazy nonsense with cookies, otherwise
+                        // .NET will assume a WHOLE BUNCH of about the paths and such
+                        // of cookies and will not send them correctly.
+                        var newCookieContainer = new CookieContainer();
+                        foreach(Cookie cookie in response.Cookies)
+                        {
+                            cookie.Domain = authRoute.Host;
+                            cookie.Path = string.Empty;
+                            newCookieContainer.Add(cookie);
+                        }
+
+                        this.UserSessionCookies = newCookieContainer;
                         this.AuthRoute = authRoute;
                     }
 
                     // Ensure that we actually have a code that is within the "success" range of
                     // codes define in HTTP before we call this a true success.
-                    if (code >= 200 && code <= 299)
+                    if(code >= 200 && code <= 299)
                     {
+                        // Just save these credentials automatically any time that we have a
+                        // successfull auth.
+                        Save();
                         return AuthenticationResult.Success;
                     }
                 }
             }
-            catch (Exception webException)
+            catch(Exception webException)
             {
                 connectionFailure = true;
 
@@ -455,12 +550,12 @@ namespace Te.Citadel.UI.Models
                 Debug.WriteLine(webException.StackTrace);
 
                 // We had an error. Attempt to log it.
-                if (m_logger != null)
+                if(m_logger != null)
                 {
                     m_logger.Error(webException.Message);
                     m_logger.Error(webException.StackTrace);
-                    
-                    if (webException.InnerException != null)
+
+                    if(webException.InnerException != null)
                     {
                         m_logger.Error(webException.InnerException.Message);
                         m_logger.Error(webException.InnerException.StackTrace);
@@ -472,18 +567,17 @@ namespace Te.Citadel.UI.Models
             }
             finally
             {
-                // This finally block is guaranteed TM to be run, so this is where we're
-                // going to clean up any decrypted versions of the user's password held
-                // in memory.
+                // This finally block is guaranteed TM to be run, so this is where we're going to
+                // clean up any decrypted versions of the user's password held in memory.
                 if(unencryptedPassword != null && unencryptedPassword.Length > 0)
                 {
                     Array.Clear(unencryptedPassword, 0, unencryptedPassword.Length);
-                }                
-                
+                }
+
                 if(finalPostPayload != null && finalPostPayload.Length > 0)
                 {
                     Array.Clear(finalPostPayload, 0, finalPostPayload.Length);
-                }            
+                }
             }
 
             // If we had success, we should/would have returned by now.
@@ -500,7 +594,7 @@ namespace Te.Citadel.UI.Models
         {
             var route = this.AuthRoute;
 
-            if (route != null)
+            if(route != null)
             {
                 return await ReAuthenticate(route);
             }
@@ -533,7 +627,7 @@ namespace Te.Citadel.UI.Models
             }
             finally
             {
-                if (password != null)
+                if(password != null)
                 {
                     Array.Clear(password, 0, password.Length);
                 }
@@ -541,93 +635,106 @@ namespace Te.Citadel.UI.Models
         }
 
         /// <summary>
-        /// Attempts to read a serialized version of this model from the given stream, and then
+        /// Attempts to read a serialized version of this model from the file system, and then
         /// populate the members of this instance with the values within the deserialized instance.
         /// </summary>
-        /// <param name="serialized">
-        /// The FileStream to attempt to read a serialized version of this class from.
-        /// </param>
         /// <returns>
-        /// True if the supplied stream contained a valid, serialized instance of this class and
-        /// required members in this instance were populated from it. False otherwise.
+        /// True if we were able to restore state from the filesystem and required members in this
+        /// instance were populated correctly. False otherwise.
         /// </returns>
-        public bool LoadFromSave(FileStream serialized)
+        public bool LoadFromSave()
         {
-            if (serialized == null || !serialized.CanRead)
+            if(!File.Exists(m_savePath))
             {
                 return false;
             }
 
+            byte[] plaintext = null;
+
             try
             {
-                var textReader = new StreamReader(serialized);
-                var savedData = textReader.ReadToEnd();
-
-
+                var savedData = File.ReadAllText(m_savePath);
                 var deserialized = JsonConvert.DeserializeObject<SerializableAuthenticatedUserModel>(savedData);
-                byte[] plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.CurrentUser);
+                plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.CurrentUser);
                 this.Username = deserialized.Username;
                 this.Password = plaintext;
                 this.AuthRoute = deserialized.AuthRoute;
 
+                // Set using private member, because public member calls
+                // save again.
+                this.m_termsAccepted = deserialized.Accepted;
+
+                // We have to do this crazy nonsense with cookies, otherwise
+                // .NET will assume a WHOLE BUNCH of about the paths and such
+                // of cookies and will not send them correctly.
                 var cookieCollection = new CookieContainer();
-                cookieCollection.SetCookies(deserialized.AuthRoute, deserialized.CookieString);
+                var allCookies = deserialized.CookieString.Split(',');
+                foreach(var cookieString in allCookies)
+                {
+                    var split = cookieString.Split('=');
 
-                this.UserSessionCookies = cookieCollection;
+                    if(split.Length == 2)
+                    {
+                        var newCookie = new Cookie(split[0], split[1]);
+                        newCookie.Domain = deserialized.AuthRoute.Host;
+                        newCookie.Path = string.Empty;
+                        cookieCollection.Add(newCookie);
+                    }
+                }
 
-                Array.Clear(plaintext, 0, plaintext.Length);
+                this.UserSessionCookies = cookieCollection;                
 
                 return true;
             }
-            catch (Exception err)
+            catch(Exception err)
             {
-                if (m_logger != null)
+                if(m_logger != null)
                 {
                     m_logger.Error(err.Message);
                     m_logger.Error(err.StackTrace);
 
-                    if (err.InnerException != null)
+                    if(err.InnerException != null)
                     {
                         m_logger.Error(err.InnerException.Message);
                         m_logger.Error(err.InnerException.StackTrace);
                     }
                 }
             }
+            finally
+            {
+                // Always clear our pword!!!!
+                if(plaintext != null && plaintext.Length > 0)
+                {
+                    Array.Clear(plaintext, 0, plaintext.Length);
+                }
+            }
 
             return false;
         }
-        
+
         /// <summary>
-        /// Attempts to serialize this instance, writing the result to the given output stream.
+        /// Attempts to serialize this instance, writing the result to a predetermined file.
         /// </summary>
-        /// <param name="outputStream">
-        /// The output file stream to write the serialization result to.
-        /// </param>
         /// <returns>
         /// True if this instance with required members was successfully serialized and the result
-        /// was written to the supplied output file stream. False otherwise.
+        /// was written to the file system. False otherwise.
         /// </returns>
-        public bool Save(FileStream outputStream)
+        public bool Save()
         {
-            if(outputStream == null || !outputStream.CanWrite)
-            {
-                return false;
-            }
-
             // User isn't authenticated if we have no cookies. No cookies == no auth cookies.
-            if (UserSessionCookies == null || UserSessionCookies.Count <= 0)
+            if(UserSessionCookies == null || UserSessionCookies.Count <= 0)
             {
                 Debug.WriteLine("While saving, user session cookies was null or had zero entries.");
                 return false;
             }
 
-            if (!StringExtensions.Valid(Username))
+            if(!StringExtensions.Valid(Username))
             {
                 Debug.WriteLine("While saving, username was null, empty or whitespace.");
                 return false;
             }
 
-            if (Password == null || Password.Length <= 0)
+            if(Password == null || Password.Length <= 0)
             {
                 Debug.WriteLine("While saving, password was null or empty.");
                 return false;
@@ -647,21 +754,21 @@ namespace Te.Citadel.UI.Models
                 // Set props equal to this, but, encrypt password again. Just want to ensure entropy
                 // etc is matched up. XXX TODO - Can probably go without this.
                 internalSerializable.Username = this.Username;
+                internalSerializable.Accepted = this.HasAcceptedTerms;
                 internalSerializable.EncryptedPassword = ProtectedData.Protect(tempDecryptedPassword, Entropy, DataProtectionScope.CurrentUser);
                 internalSerializable.CookieString = this.UserSessionCookies.GetCookieHeader(this.AuthRoute);
                 internalSerializable.AuthRoute = this.AuthRoute;
-                
+
                 // Serialize and write to output stream.
                 var serialized = JsonConvert.SerializeObject(internalSerializable, Formatting.Indented);
-                TextWriter ts = new StreamWriter(outputStream);
-                ts.Write(serialized);
+                File.WriteAllText(m_savePath, serialized);
 
                 return true;
             }
-            catch (Exception err)
+            catch(Exception err)
             {
                 // Had an error. Attempt to log it.
-                if (m_logger != null)
+                if(m_logger != null)
                 {
                     Debug.WriteLine(err.Message);
                     Debug.WriteLine(err.StackTrace);
@@ -669,7 +776,7 @@ namespace Te.Citadel.UI.Models
                     m_logger.Error(err.Message);
                     m_logger.Error(err.StackTrace);
 
-                    if (err.InnerException != null)
+                    if(err.InnerException != null)
                     {
                         Debug.WriteLine(err.InnerException.Message);
                         Debug.WriteLine(err.InnerException.StackTrace);
@@ -689,6 +796,6 @@ namespace Te.Citadel.UI.Models
             }
 
             return false;
-        }        
+        }
     }
 }

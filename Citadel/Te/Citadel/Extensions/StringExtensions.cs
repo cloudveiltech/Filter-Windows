@@ -65,8 +65,8 @@ namespace Te.Citadel.Extensions
 
                 for(var i = 0; i < thisLen; ++i)
                 {
-                    var thisByte = Marshal.ReadByte(bstrThis);
-                    var otherByte = Marshal.ReadByte(bstrOther);
+                    var thisByte = Marshal.ReadByte(bstrThis, i * 2);
+                    var otherByte = Marshal.ReadByte(bstrOther, i * 2);
 
                     if(thisByte != otherByte)
                     {
@@ -89,6 +89,37 @@ namespace Te.Citadel.Extensions
                     Marshal.ZeroFreeBSTR(bstrOther);
                 }
             }
+        }
+
+        public static byte[] SecureStringBytes(this SecureString str)
+        {
+            IntPtr bstrThis = IntPtr.Zero;
+            byte[] managed = new byte[0];
+            try
+            {
+                bstrThis = Marshal.SecureStringToBSTR(str);
+                int thisLen = Marshal.ReadInt32(bstrThis, -4);
+
+                managed = new byte[thisLen];
+
+                for(var i = 0; i < thisLen; ++i)
+                {   
+                    managed[i] = Marshal.ReadByte(bstrThis, i * 2);
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                // Always free the secure string byte array.
+                if(bstrThis != IntPtr.Zero)
+                {
+                    Marshal.ZeroFreeBSTR(bstrThis);
+                }
+            }
+
+            return managed;
         }
 
         /// <summary>
