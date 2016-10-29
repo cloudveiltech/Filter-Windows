@@ -1,9 +1,11 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using Te.Citadel.Extensions;
 
 namespace Te.Citadel.UI.Models
@@ -171,11 +173,7 @@ namespace Te.Citadel.UI.Models
                 {
                     ErrorMessage = "Invalid service provider address.";
                 }
-            }
-            catch(Exception e)
-            {
-                ErrorMessage = e.Message;
-            }
+            }           
             finally
             {
                 // Always purge password from memory ASAP.
@@ -190,8 +188,8 @@ namespace Te.Citadel.UI.Models
 
         public LoginModel()
         {
-            // Change here to your service address.
-            m_serviceProvider = "http://localhost/login.php";
+            // Set the default service provider to the app-global value.
+            m_serviceProvider = (string)Application.Current.Properties["ServiceProviderApi"] + "/login.php";
 
             m_errorMessage = string.Empty;
             UserName = string.Empty;

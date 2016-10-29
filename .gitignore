@@ -241,3 +241,8 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+Citadel/Citadel.VC.VC.opendb
+*.db
+
+# Ignore Listutil and other bundled projects for now.
+ListUtil/

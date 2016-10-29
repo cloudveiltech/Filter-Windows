@@ -98,16 +98,20 @@ namespace Te.Citadel.Extensions
             try
             {
                 bstrThis = Marshal.SecureStringToBSTR(str);
-                int thisLen = Marshal.ReadInt32(bstrThis, -4);
 
-                managed = new byte[thisLen];
+                if(bstrThis != IntPtr.Zero)
+                {
+                    int thisLen = Marshal.ReadInt32(bstrThis, -4);
 
-                for(var i = 0; i < thisLen; ++i)
-                {   
-                    managed[i] = Marshal.ReadByte(bstrThis, i * 2);
-                }
+                    managed = new byte[thisLen];
+
+                    for(var i = 0; i < thisLen; ++i)
+                    {
+                        managed[i] = Marshal.ReadByte(bstrThis, i * 2);
+                    }
+                }                
             }
-            catch
+            catch(Exception e)
             {
             }
             finally

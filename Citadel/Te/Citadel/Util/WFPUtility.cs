@@ -107,17 +107,7 @@ namespace Te.Citadel.Util
             }
             catch(Exception e)
             {
-                if(s_logger != null)
-                {
-                    s_logger.Error(e.Message);
-                    s_logger.Error(e.StackTrace);
-
-                    if(e.InnerException != null)
-                    {
-                        s_logger.Error(e.InnerException.Message);
-                        s_logger.Error(e.InnerException.StackTrace);
-                    }
-                }
+                LoggerUtil.RecursivelyLogException(s_logger, e);
             }
         }
 
@@ -190,17 +180,7 @@ namespace Te.Citadel.Util
             }
             catch(Exception e)
             {
-                if(s_logger != null)
-                {
-                    s_logger.Error(e.Message);
-                    s_logger.Error(e.StackTrace);
-
-                    if(e.InnerException != null)
-                    {
-                        s_logger.Error(e.InnerException.Message);
-                        s_logger.Error(e.InnerException.StackTrace);
-                    }
-                }
+                LoggerUtil.RecursivelyLogException(s_logger, e);
             }
         }
     }

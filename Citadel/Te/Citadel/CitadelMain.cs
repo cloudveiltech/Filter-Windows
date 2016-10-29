@@ -33,6 +33,7 @@ using Microsoft.VisualBasic.ApplicationServices;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,10 +83,8 @@ namespace Te.Citadel
 
     public static class CitadelMain
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly Logger MainLogger = LogManager.GetLogger("Citadel");
+
+        public static Logger MainLogger;
 
         /// <summary>
         /// 
@@ -94,21 +93,40 @@ namespace Te.Citadel
         [STAThread]
         public static void Main(string[] args)
         {            
+
             try
             {
+                var nlogCfgPath = AppDomain.CurrentDomain.BaseDirectory + @"Nlog.config";
+                // Nlog config is gone. Let's put it back.
+                // XXX TODO - Remove this once we switch to programatically setting it.
+                if(!File.Exists(nlogCfgPath))
+                {
+                    var nlogCfgUri = new Uri("pack://application:,,,/Resources/NLog.config");
+                    var resourceStream = System.Windows.Application.GetResourceStream(nlogCfgUri);
+                    TextReader tsr = new StreamReader(resourceStream.Stream);
+                    var nlogConfigText = tsr.ReadToEnd();
+                    resourceStream.Stream.Close();
+                    resourceStream.Stream.Dispose();
+                    File.WriteAllText(nlogCfgPath, nlogConfigText);
+                }
+
+                MainLogger = LogManager.GetLogger("Citadel");
+            }
+            catch
+            {
+                // What can be done?   
+            }
+            
+            try
+            {
+                MainLogger = LogManager.GetLogger("Citadel");
+
                 SingleAppInstanceManager appManager = new SingleAppInstanceManager();
                 appManager.Run(args);
             }
             catch (Exception e)
             {
-                MainLogger.Error(e.Message);
-                MainLogger.Error(e.StackTrace);
-
-                if(e.InnerException != null)
-                {
-                    MainLogger.Error(e.InnerException.Message);
-                    MainLogger.Error(e.InnerException.StackTrace);
-                }
+                LoggerUtil.RecursivelyLogException(MainLogger, e);
             }
 
             // No matter what, always ensure that critical flags are removed from our process before

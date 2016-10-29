@@ -542,28 +542,37 @@ namespace Te.Citadel.UI.Models
                     }
                 }
             }
-            catch(Exception webException)
+            catch(Exception e)
             {
                 connectionFailure = true;
 
-                Debug.WriteLine(webException.Message);
-                Debug.WriteLine(webException.StackTrace);
+                // Log the exception.
+                LoggerUtil.RecursivelyLogException(m_logger, e);
 
-                // We had an error. Attempt to log it.
-                if(m_logger != null)
+                if(e is WebException)
                 {
-                    m_logger.Error(webException.Message);
-                    m_logger.Error(webException.StackTrace);
+                    var ewx = e as WebException;
 
-                    if(webException.InnerException != null)
+                    if(ewx != null)
                     {
-                        m_logger.Error(webException.InnerException.Message);
-                        m_logger.Error(webException.InnerException.StackTrace);
+                        if(ewx.Status == WebExceptionStatus.ProtocolError)
+                        {
+                            var response = ewx.Response as HttpWebResponse;
 
-                        Debug.WriteLine(webException.InnerException.Message);
-                        Debug.WriteLine(webException.InnerException.StackTrace);
+                            if(response != null)
+                            {
+                                var statusAsInt = (int)response.StatusCode;
+                                if(statusAsInt > 399 && statusAsInt < 499)
+                                {
+                                    // Refused auth.
+                                    return AuthenticationResult.Failure;
+                                }
+                            }
+
+                            return AuthenticationResult.ConnectionFailed;
+                        }
                     }
-                }
+                }   
             }
             finally
             {
@@ -688,17 +697,7 @@ namespace Te.Citadel.UI.Models
             }
             catch(Exception err)
             {
-                if(m_logger != null)
-                {
-                    m_logger.Error(err.Message);
-                    m_logger.Error(err.StackTrace);
-
-                    if(err.InnerException != null)
-                    {
-                        m_logger.Error(err.InnerException.Message);
-                        m_logger.Error(err.InnerException.StackTrace);
-                    }
-                }
+                LoggerUtil.RecursivelyLogException(m_logger, err);
             }
             finally
             {
@@ -768,23 +767,7 @@ namespace Te.Citadel.UI.Models
             catch(Exception err)
             {
                 // Had an error. Attempt to log it.
-                if(m_logger != null)
-                {
-                    Debug.WriteLine(err.Message);
-                    Debug.WriteLine(err.StackTrace);
-
-                    m_logger.Error(err.Message);
-                    m_logger.Error(err.StackTrace);
-
-                    if(err.InnerException != null)
-                    {
-                        Debug.WriteLine(err.InnerException.Message);
-                        Debug.WriteLine(err.InnerException.StackTrace);
-
-                        m_logger.Error(err.InnerException.Message);
-                        m_logger.Error(err.InnerException.StackTrace);
-                    }
-                }
+                LoggerUtil.RecursivelyLogException(m_logger, err);
             }
             finally
             {

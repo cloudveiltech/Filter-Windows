@@ -13,6 +13,7 @@ using System.Windows.Input;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.Views;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.ViewModels
 {
@@ -53,6 +54,10 @@ namespace Te.Citadel.UI.ViewModels
                             if(!authSuccess)
                             {
                                 RequestViewChangeCommand.Execute(typeof(LoginView));
+
+                                // Force a refresh of the error message member as it's been internally
+                                // set in the model in this case. XXX TODO - Not the greatest design.
+                                RaisePropertyChanged(nameof(ErrorMessage));
                             }
                             else
                             {
@@ -61,7 +66,7 @@ namespace Te.Citadel.UI.ViewModels
                         }
                         catch(Exception e)
                         {
-                            Debug.WriteLine(e.Message);
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
                         
                     }), m_model.CanAttemptAuthentication);
@@ -101,17 +106,6 @@ namespace Te.Citadel.UI.ViewModels
             get
             {
                 return m_model.ErrorMessage;
-            }
-
-            set
-            {
-                if(value != null && !value.OIEquals(m_model.ErrorMessage))
-                {
-                    m_authenticateCommand.RaiseCanExecuteChanged();
-
-                    m_model.ErrorMessage = value;
-                    RaisePropertyChanged(nameof(ErrorMessage));
-                }
             }
         }
 

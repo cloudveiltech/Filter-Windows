@@ -143,7 +143,8 @@
                    FontSize="14"
                    FontWeight="UltraLight"
                    Foreground="Black"
-                   Text="{Binding Path=ErrorMessage}"
+                   Text="{Binding Path=ErrorMessage,
+                                  Mode=OneWay}"
                    TextWrapping="Wrap" />
     </Grid>
 </UserControl>

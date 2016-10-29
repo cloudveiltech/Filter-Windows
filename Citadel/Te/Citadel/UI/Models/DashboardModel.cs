@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Models
@@ -23,12 +24,11 @@ namespace Te.Citadel.UI.Models
         public async Task<bool> RequestAppDeactivation()
         {
             try
-            {
-                // Look at that great evil singletons create!
-                var authUri = AuthenticatedUserModel.Instance.AuthRoute;
-                var deactivateUriString = authUri.Scheme + "://" + authUri.Host + "/capi/deactivate.php";
-                Debug.WriteLine(deactivateUriString);
-                var deactivateRoute = new Uri(deactivateUriString);
+            {               
+                var deactivationRouteStr = (string)Application.Current.Properties["ServiceProviderApi"] + "/capi/deactivate.php";                
+                var deactivateRoute = new Uri(deactivationRouteStr);
+
+                m_logger.Info("Requesting shutdown from {0}.", deactivationRouteStr);
 
                 // Create a new request. We don't want auto redirect, we don't want the subsystem
                 // trying to look up proxy information to configure on our request, we want a 5
@@ -87,27 +87,6 @@ namespace Te.Citadel.UI.Models
                 // Why don't we log this stuff? Because .NET is a bit of a silly
                 // bird and takes non-success status codes like 403 to be an exception
                 // and 403 is the expected response from this request.
-
-                /*
-                Debug.WriteLine(webException.Message);
-                Debug.WriteLine(webException.StackTrace);
-
-                // We had an error. Attempt to log it.
-                if(m_logger != null)
-                {
-                    m_logger.Error(webException.Message);
-                    m_logger.Error(webException.StackTrace);
-
-                    if(webException.InnerException != null)
-                    {
-                        m_logger.Error(webException.InnerException.Message);
-                        m_logger.Error(webException.InnerException.StackTrace);
-
-                        Debug.WriteLine(webException.InnerException.Message);
-                        Debug.WriteLine(webException.InnerException.StackTrace);
-                    }
-                }
-                */
             }
 
             return false;

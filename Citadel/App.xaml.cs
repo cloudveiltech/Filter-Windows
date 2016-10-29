@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -25,7 +24,6 @@ using Te.Citadel.Util;
 using Te.HttpFilteringEngine;
 using opennlp.tools.doccat;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
@@ -36,17 +34,31 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
+        #region APP_UPDATE_MEMBER_VARS
+
+        /// <summary>
+        /// Delegate we supply to the WinSparkle DLL, which it will use to check with us if a
+        /// shutdown is okay. We can reply yes or no to this request. If we reply yes, then
+        /// WinSparkle will make an official shutdown request, allowing us to cleanly shutdown
+        /// before getting updated.
+        /// </summary>
+        private WinSparkle.WinSparkleCanShutdownCheckCallback m_winsparkleShutdownCheckCb;
+
+        /// <summary>
+        /// Delegate we supply to the WinSparkle DLL, which if we've given permission, means that
+        /// when WinSparkle invokes this method, we are to cleanly shutdown so that WinSparkle can
+        /// complete an application update.
+        /// </summary>
+        private WinSparkle.WinSparkleRequestShutdownCallback m_winsparkleShutdownRequestCb;
+
+        #endregion APP_UPDATE_MEMBER_VARS
+
         #region FilteringEngineVars
 
         /// <summary>
         /// Used to strip multiple whitespace.
         /// </summary>
         private Regex m_whitespaceRegex;
-
-        /// <summary>
-        /// Used to strip chars from a string that are not A-Z0-9 or space.
-        /// </summary>
-        private Regex m_nonAlphaNumRegex;
 
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're
@@ -244,7 +256,7 @@ namespace Te.Citadel
             // Set a global to hold the base URI of the service providers address.
             // This must be the base path where the server side auth system is
             // hosted.
-            Application.Current.Properties["ServiceProviderApi"] = "http://localhost/";
+            Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
 
             m_logger = LogManager.GetLogger("Citadel");
 
@@ -417,6 +429,42 @@ namespace Te.Citadel
         }
 
         /// <summary>
+        /// This will cause WinSparkle to begin checking for application updates.
+        /// </summary>
+        private void StartCheckForAppUpdates()
+        {
+            WinSparkle.CheckUpdateWithoutUI();
+        }
+
+        /// <summary>
+        /// Inits all the callbacks for WinSparkle, so that when we call for update checks and such,
+        /// it has all appropriate callbacks to request app shutdown, restart, etc, to allow for
+        /// updating.
+        /// </summary>
+        private void InitWinsparkle()
+        {
+            m_winsparkleShutdownCheckCb = new WinSparkle.WinSparkleCanShutdownCheckCallback(WinSparkleCheckIfShutdownOkay);
+            m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
+
+            var appcastUrl = string.Empty;
+            var baseServiceProviderAddress = (string)Application.Current.Properties["ServiceProviderApi"];
+            if(Environment.Is64BitProcess)
+            {
+                appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
+            }
+            else
+            {
+                appcastUrl = baseServiceProviderAddress + "/update/winx86/update.xml";
+            }
+
+            m_logger.Info("Setting appcast to {0}.", appcastUrl);
+
+            WinSparkle.SetCanShutdownCallback(m_winsparkleShutdownCheckCb);
+            WinSparkle.SetShutdownRequestCallback(m_winsparkleShutdownRequestCb);
+            WinSparkle.SetAppcastUrl(appcastUrl);
+        }
+
+        /// <summary>
         /// Sets up the filtering engine, gets discovered installations of firefox to trust the
         /// engine, sets up callbacks for classification and firewall checks, but does not start the
         /// engine.
@@ -493,7 +541,6 @@ namespace Te.Citadel
 
                 // Init our regexes
                 m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
-                
 
                 // Init Document classifier.            
                 var doccatModel = new DoccatModel(new java.io.ByteArrayInputStream(nlpModelBytes));
@@ -553,6 +600,9 @@ namespace Te.Citadel
         {
             // Setup our tray icon.
             InitTrayIcon();
+
+            // Get WinSparkle ready to work.
+            InitWinsparkle();
 
             var authTask = ChallengeUserAuthenticity();
             authTask.Wait();
@@ -614,7 +664,9 @@ namespace Te.Citadel
             // Unhook first.
             this.Exit -= OnApplicationExiting;
 
-            DoCleanShutdown(false);
+            // We lie to the DoCleanShutdown method because by passing true,
+            // it will disable the internet before shutting down.
+            DoCleanShutdown(true);
         }
 
         /// <summary>
@@ -666,7 +718,7 @@ namespace Te.Citadel
             );
 
             // Check for updates, always.
-            //WinSparkle.CheckUpdateWithoutUI();
+            StartCheckForAppUpdates();
         }
 
         /// <summary>
@@ -792,8 +844,17 @@ namespace Te.Citadel
                                     // then that means we're all good to go and start filtering.
                                     m_filterEngineStartupBgWorker = new BackgroundWorker();
                                     m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
-                                    {   
-                                        StartFiltering();
+                                    {
+                                        if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                                        {
+                                            StartFiltering();
+                                        }
+
+                                        // During testing, we'll allow the deactivate button to also
+                                        // function as a request for updates.                                        
+                                        #if CITADEL_DEBUG
+                                            StartCheckForAppUpdates();
+                                        #endif                                  
                                     });
                                     
                                     m_filterEngineStartupBgWorker.RunWorkerAsync();                                    
@@ -810,8 +871,7 @@ namespace Te.Citadel
             }
             catch(Exception err)
             {
-                Debug.WriteLine(err.Message);
-                Debug.WriteLine(err.StackTrace);
+                LoggerUtil.RecursivelyLogException(m_logger, err);
             }
         }
 
@@ -942,7 +1002,7 @@ namespace Te.Citadel
 
         private bool OnAppFirewallCheck(string appAbsolutePath)
         {
-            Debug.WriteLine(string.Format("Filtering app {0}.", appAbsolutePath));
+            //Debug.WriteLine(string.Format("Filtering app {0}.", appAbsolutePath));
             // Just filter anything accessing port 80 and 443.
             return true;
         }
@@ -971,22 +1031,29 @@ namespace Te.Citadel
                         HtmlDocument doc = new HtmlDocument();
                         doc.LoadHtml(rawText);
 
-                        foreach(var script in doc.DocumentNode.Descendants("script").ToArray())
+                        if(doc != null && doc.DocumentNode != null)
                         {
-                            script.Remove();
-                        }
+                            foreach(var script in doc.DocumentNode.Descendants("script").ToArray())
+                            {
+                                script.Remove();
+                            }
 
-                        foreach(var style in doc.DocumentNode.Descendants("style").ToArray())
-                        {
-                            style.Remove();
-                        }   
+                            foreach(var style in doc.DocumentNode.Descendants("style").ToArray())
+                            {
+                                style.Remove();
+                            }
 
-                        foreach(HtmlNode node in doc.DocumentNode.SelectNodes("//text()"))
-                        {
-                            textToClassifyBuilder.Append(node.InnerText);                            
-                        }
+                            var allTextNodes = doc.DocumentNode.SelectNodes("//text()");
+                            if(allTextNodes != null && allTextNodes.Count > 0)
+                            {
+                                foreach(HtmlNode node in allTextNodes)
+                                {
+                                    textToClassifyBuilder.Append(node.InnerText);
+                                }
+                            }
 
-                        m_logger.Info("From HTML: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
+                            m_logger.Info("From HTML: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
+                        }                        
                     }
                     else if(contentType.IndexOf("json") != -1)
                     {
@@ -1007,31 +1074,8 @@ namespace Te.Citadel
                             }
                         }
 
-                        
-                       //char[] arr = jsonText.ToCharArray();
-                       //
-                       //arr = Array.FindAll<char>(arr, (c => (char.IsLetterOrDigit(c)
-                       //                                  || char.IsWhiteSpace(c)
-                       //                                  || c == '-')));
-                       //
-                       //textToClassifyBuilder = new StringBuilder(new string(arr));
-                        
-
                         m_logger.Info("From Json: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
-
-                        
-                       //JObject obj = JObject.Parse(jsonText);
-                       //foreach(var pair in obj)
-                       //{
-                       //    textToClassifyBuilder.Append(pair.Key).Append(" ").Append(pair.Value).Append(" ");
-                       //}
-                        
-
-
                     }
-                    
-
-
 
                     var textToClassify = textToClassifyBuilder.ToString();
 
@@ -1065,16 +1109,28 @@ namespace Te.Citadel
                                 return categoryNumber;
                             }
                         }
+                        else
+                        {
+                            m_logger.Info("Did not find category registered: {0}.", bestCategoryName);
+                        }
                     }
                 }
-
-                // Default to zero. Means don't block this content.
-                return 0;
+                else
+                {
+                    m_logger.Info("NLP classifier is null.");
+                }
+            }
+            catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
             finally
             {
                 m_doccatSlimLock.ExitReadLock();
             }
+
+            // Default to zero. Means don't block this content.
+            return 0;
         }
 
         #endregion
@@ -1117,26 +1173,25 @@ namespace Te.Citadel
                 WFPUtility.EnableInternet();
             }
             catch { }
-            
-            // Make sure we have a task set to run again.
-            RunAtStartup = true;
-            
-            // Make sure our lists are up to date.
-            UpdateListData();
-            
-            ReloadFilteringRules();            
 
             if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
-            {   
+            {
+                m_logger.Info("Start engine.");
+
+                // Start the engine right away, to ensure the atomic bool IsRunning is set.
                 m_filteringEngine.Start();
-            }
-            else
-            {   
-                m_logger.Info("Can't start engine.");
-            }
-            
-            // Setup filter list update check timer.
-            m_updateFilterListsTimer = new Timer(OnFilterListUpdateTimer, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);            
+
+                // Make sure we have a task set to run again.
+                RunAtStartup = true;
+
+                // Make sure our lists are up to date.
+                UpdateListData();
+
+                ReloadFilteringRules();
+
+                // Setup filter list update check timer.
+                m_updateFilterListsTimer = new Timer(OnFilterListUpdateTimer, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            }      
         }
 
         /// <summary>
@@ -1336,6 +1391,31 @@ namespace Te.Citadel
                     }
                 }
             );
+        }
+
+        /// <summary>
+        /// Called by WinSparkle when it wants to check if it is alright to shut down this
+        /// application in order to install an update.
+        /// </summary>
+        /// <returns>
+        /// Return zero if a shutdown is not okay at this time, return one if it is okay to shut
+        /// down the application immediately after this function returns.
+        /// </returns>
+        private int WinSparkleCheckIfShutdownOkay()
+        {
+            // Winsparkle can always shut down. When we shut down, we disable the internet anyway,
+            // and WinSparkle should have already downloaded the installer by the time it asks
+            // for a shutdown. So, we're good to shut down any time.
+            return 1;
+        }
+
+        /// <summary>
+        /// Called by WinSparkle when it has confirmed that a shutdown is okay and WinSparkle is
+        /// ready to shut this application down so it can install a downloaded update.
+        /// </summary>
+        private void WinSparkleRequestsShutdown()
+        {
+            DoCleanShutdown(false);
         }
 
         /// <summary>

@@ -62,7 +62,7 @@ namespace Te.Citadel.UI.ViewModels
                         }
                         catch(Exception e)
                         {
-                            Debug.WriteLine(e.Message);
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
 
                     }));

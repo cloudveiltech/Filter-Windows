@@ -30,9 +30,9 @@ namespace Te.Citadel.Util
         public static async Task<byte[]> RequestResource(string route, bool noLogging = false)
         {
             try
-            {   
-                var serviceProviderApiUri = new Uri((string)Application.Current.Properties["ServiceProviderApi"]);
-                var requestString = serviceProviderApiUri.Scheme + "://" + serviceProviderApiUri.Host + route;                
+            {
+                var serviceProviderApiBasePath = (string)Application.Current.Properties["ServiceProviderApi"];
+                var requestString = serviceProviderApiBasePath + route;                
                 var requestRoute = new Uri(requestString);
 
                 // Create a new request. We don't want auto redirect, we don't want the subsystem
@@ -95,25 +95,10 @@ namespace Te.Citadel.Util
                 }
             }
             catch(Exception webException)
-            {
-                // Why don't we log this stuff? Because .NET is a bit of a silly
-                // bird and takes non-success status codes like 403 to be an exception
-                // and 403 is the expected response from this request.
-
+            {   
                 var logger = LogManager.GetLogger("Citadel");
 
-                // We had an error. Attempt to log it.
-                if(logger != null && noLogging == false)
-                {
-                    logger.Error(webException.Message);
-                    logger.Error(webException.StackTrace);
-
-                    if(webException.InnerException != null)
-                    {
-                        logger.Error(webException.InnerException.Message);
-                        logger.Error(webException.InnerException.StackTrace);
-                    }
-                }                
+                LoggerUtil.RecursivelyLogException(logger, webException);
             }
 
             return null;        
