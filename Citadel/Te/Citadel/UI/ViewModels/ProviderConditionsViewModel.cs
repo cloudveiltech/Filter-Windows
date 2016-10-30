@@ -90,6 +90,7 @@ namespace Te.Citadel.UI.ViewModels
 
         public ProviderConditionsViewModel()
         {
+
         }
 
         /// <summary>
@@ -106,20 +107,20 @@ namespace Te.Citadel.UI.ViewModels
             if(terms != null && terms.Length > 0)
             {
                 m_gotTerms = true;
-                m_model.Terms = System.Text.Encoding.UTF8.GetString(terms);             
-            }
-            else
-            {
-                m_model.Terms = string.Empty;
-            }
+                m_model.Terms = System.Text.Encoding.UTF8.GetString(terms);
 
-            await Application.Current.Dispatcher.BeginInvoke(
+                await Application.Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
                 (Action)delegate ()
                 {
                     RaisePropertyChanged(nameof(Terms));
                 }
-            );
+                );
+            }
+            else
+            {
+                m_model.Terms = string.Empty;
+            }            
         }
     }
 }

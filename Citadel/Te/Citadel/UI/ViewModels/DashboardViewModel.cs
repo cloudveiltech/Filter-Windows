@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.Views;
 using Te.Citadel.Util;
@@ -54,9 +55,9 @@ namespace Te.Citadel.UI.ViewModels
                                 {
                                     ProcessProtection.Unprotect();
                                 }
-
+                                
                                 // Init the shutdown of this application.
-                                Application.Current.Shutdown();
+                                Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
                                 return;
                             }
                         }

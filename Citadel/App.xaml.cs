@@ -90,9 +90,9 @@ namespace Te.Citadel
         private ReaderWriterLockSlim m_runAtStartupLock = new ReaderWriterLockSlim();
 
         /// <summary>
-        /// Timer used to query for filter list changes every X minutes.
+        /// Timer used to query for filter list changes every X minutes, as well as application updates.
         /// </summary>
-        private Timer m_updateFilterListsTimer;
+        private Timer m_updateCheckTimer;
 
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
@@ -320,7 +320,7 @@ namespace Te.Citadel
                 if(!AuthenticatedUserModel.Instance.HasAcceptedTerms)
                 {
                     // If terms have not been accepted, and window is closed, just full blown exit the app.
-                    Application.Current.Shutdown();
+                    Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
                     return;
                 }
 
@@ -433,7 +433,14 @@ namespace Te.Citadel
         /// </summary>
         private void StartCheckForAppUpdates()
         {
-            WinSparkle.CheckUpdateWithoutUI();
+            try
+            {
+                WinSparkle.CheckUpdateWithoutUI();
+            }
+            catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
         }
 
         /// <summary>
@@ -443,25 +450,32 @@ namespace Te.Citadel
         /// </summary>
         private void InitWinsparkle()
         {
-            m_winsparkleShutdownCheckCb = new WinSparkle.WinSparkleCanShutdownCheckCallback(WinSparkleCheckIfShutdownOkay);
-            m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
-
-            var appcastUrl = string.Empty;
-            var baseServiceProviderAddress = (string)Application.Current.Properties["ServiceProviderApi"];
-            if(Environment.Is64BitProcess)
+            try
             {
-                appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
+                m_winsparkleShutdownCheckCb = new WinSparkle.WinSparkleCanShutdownCheckCallback(WinSparkleCheckIfShutdownOkay);
+                m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
+
+                var appcastUrl = string.Empty;
+                var baseServiceProviderAddress = (string)Application.Current.Properties["ServiceProviderApi"];
+                if(Environment.Is64BitProcess)
+                {
+                    appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
+                }
+                else
+                {
+                    appcastUrl = baseServiceProviderAddress + "/update/winx86/update.xml";
+                }
+
+                m_logger.Info("Setting appcast to {0}.", appcastUrl);
+
+                WinSparkle.SetCanShutdownCallback(m_winsparkleShutdownCheckCb);
+                WinSparkle.SetShutdownRequestCallback(m_winsparkleShutdownRequestCb);
+                WinSparkle.SetAppcastUrl(appcastUrl);
             }
-            else
+            catch(Exception e)
             {
-                appcastUrl = baseServiceProviderAddress + "/update/winx86/update.xml";
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
-
-            m_logger.Info("Setting appcast to {0}.", appcastUrl);
-
-            WinSparkle.SetCanShutdownCallback(m_winsparkleShutdownCheckCb);
-            WinSparkle.SetShutdownRequestCallback(m_winsparkleShutdownRequestCb);
-            WinSparkle.SetAppcastUrl(appcastUrl);
         }
 
         /// <summary>
@@ -646,7 +660,9 @@ namespace Te.Citadel
         {
             // Unhook first.
             SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
-
+            this.Exit -= OnApplicationExiting;
+            
+            m_logger.Info("Sessions log off or OS shutdown detected.");
             DoCleanShutdown(true);
         }
 
@@ -662,11 +678,22 @@ namespace Te.Citadel
         private void OnApplicationExiting(object sender, ExitEventArgs e)
         {
             // Unhook first.
+            SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
             this.Exit -= OnApplicationExiting;
 
-            // We lie to the DoCleanShutdown method because by passing true,
-            // it will disable the internet before shutting down.
-            DoCleanShutdown(true);
+            m_logger.Info("Application shutdown detected.");
+
+            if(e.ApplicationExitCode <= (int)ExitCodes.ShutdownWithSafeguards)
+            {
+                // ShutdownWithSafeguards == 0, so anything less than or equal to this
+                // is considered to be a situation where we must install safegaurds
+                // to ensure application survival and persistence.
+                DoCleanShutdown(true);
+            }
+            else
+            {
+                DoCleanShutdown(false);
+            }            
         }
 
         /// <summary>
@@ -703,22 +730,28 @@ namespace Te.Citadel
                         {
                             // Just go to dashboard.
                             OnViewChangeRequest(typeof(DashboardView));
+
+                            // Check for updates when we have an already authenticated user.
+                            StartCheckForAppUpdates();
                         }
                         else
                         {
+                            // Must ensure we're not blocking internet if we're going to show terms.
+                            WFPUtility.EnableInternet();
+
                             // User still has not accepted terms. Show them.
                             OnViewChangeRequest(typeof(ProviderConditionsView));
                         }
                     }
                     else
                     {
-                        OnViewChangeRequest(typeof(LoginView));
+                        // Must ensure we're not blocking internet if we're going to ask to sign in.
+                        WFPUtility.EnableInternet();
+
+                        OnViewChangeRequest(typeof(LoginView));                        
                     }
                 }
             );
-
-            // Check for updates, always.
-            StartCheckForAppUpdates();
         }
 
         /// <summary>
@@ -812,7 +845,7 @@ namespace Te.Citadel
                 Current.Dispatcher.Invoke(
                     System.Windows.Threading.DispatcherPriority.Background,
                     (Action)delegate ()
-                    {
+                    {                        
                         UIElement current = (UserControl)m_mainWindow.CurrentView.Content;
                         UIElement newView = null;
                         
@@ -1136,19 +1169,19 @@ namespace Te.Citadel
         #endregion
 
         /// <summary>
-        /// Called every X minutes by the filter list update timer. We check for new lists, and
-        /// hot-swap the rules if we have found new ones.
+        /// Called every X minutes by the update timer. We check for new lists, and
+        /// hot-swap the rules if we have found new ones. We also check for program updates.
         /// </summary>
         /// <param name="state">
         /// This is always null. Ignore it.
         /// </param>
-        private void OnFilterListUpdateTimer(object state)
+        private void OnUpdateTimerElapsed(object state)
         {
             m_logger.Info("Checking for filter list updates.");
 
             // Stop the threaded timer while we do this. We have to stop it in order
             // to avoid overlapping calls.
-            this.m_updateFilterListsTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
             bool gotUpdatedFilterLists = UpdateListData();
 
@@ -1158,8 +1191,13 @@ namespace Te.Citadel
                 ReloadFilteringRules();
             }
 
+            m_logger.Info("Checking for application updates.");
+
+            // Check for app updates.
+            StartCheckForAppUpdates();
+
             // Enable the timer again.
-            this.m_updateFilterListsTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
         }
 
         /// <summary>
@@ -1190,7 +1228,7 @@ namespace Te.Citadel
                 ReloadFilteringRules();
 
                 // Setup filter list update check timer.
-                m_updateFilterListsTimer = new Timer(OnFilterListUpdateTimer, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
             }      
         }
 
@@ -1415,25 +1453,36 @@ namespace Te.Citadel
         /// </summary>
         private void WinSparkleRequestsShutdown()
         {
-            DoCleanShutdown(false);
+            Current.Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                (Action)delegate ()
+                {
+                    Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
+                }
+            );            
         }
 
         /// <summary>
         /// Called whenever the app is shut down with an authorized key, or when the system is
         /// shutting down, or when the user is logging off.
         /// </summary>
-        /// <param name="isDueToShutdownOrLogoff">
-        /// Indicates whether or not this is being called because of a logoff/shutdown event, or
-        /// if it's just being called because the application is exiting. If it's the latter, then
-        /// we can assume that the user has gotten permission to deactivate, so we don't want
-        /// to disable the internet or anything like that.
+        /// <param name="installSafeguards">
+        /// Indicates whether or not safeguards should be put in place when we exit the application
+        /// here. Safeguards means that we're going to do all that we can to ensure that our function
+        /// is not bypassed, and that we're going to be forced to run again.
         /// </param>
-        private void DoCleanShutdown(bool isDueToShutdownOrLogoff)
+        private void DoCleanShutdown(bool installSafeguards)
         {
             lock(m_cleanShutdownLock)
             {
                 if(!m_cleanShutdownComplete)
                 {
+                    // Pull our icon from the task tray.
+                    if(m_trayIcon != null)
+                    {
+                        m_trayIcon.Visible = false;
+                    }
+
                     // Pull our critical status.
                     if(ProcessProtection.IsProtected)
                     {
@@ -1442,32 +1491,25 @@ namespace Te.Citadel
 
                     // Shut down engine.
                     StopFiltering();
-
-                    if(AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                    
+                    if(installSafeguards)
                     {
-                        // Ensure that we're always run at startup, even in safe mode.
-                        // But, only do this if the user has accepted the terms of the app.
-                        // And also only do this if this shutdown isn't from the user
-                        // getting a granted deactivation request.
+                        // Ensure that we're run at startup, disable the internet, etc.                        
+                        RunAtStartup = true;
 
-                        if(isDueToShutdownOrLogoff)
+                        // While we're here, let's disable the internet so that the user
+                        // can't browse the web without us.                            
+                        try
                         {
-                            m_logger.Info("Shutting down due to logoff or OS shutdown.");
-                            RunAtStartup = true;
-
-                            // While we're here, let's disable the internet so that the user
-                            // can't browse the web without us.                            
-                            try
-                            {
-                                WFPUtility.DisableInternet();
-                            }
-                            catch { }
+                            WFPUtility.DisableInternet();
                         }
-                        else
-                        {
-                            // Means that our user got a granted deactivation request.
-                            m_logger.Info("Shutting down due to granted deactivation request.");
-                        }
+                        catch { }
+                    }
+                    else
+                    {
+                        // Means that our user got a granted deactivation request, or installed
+                        // but never activated.
+                        m_logger.Info("Shutting down without safeguards.");
                     }
 
                     // Make sure our credentials are saved.

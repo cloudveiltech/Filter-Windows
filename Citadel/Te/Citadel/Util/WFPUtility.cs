@@ -8,7 +8,29 @@ namespace Te.Citadel.Util
     internal static class WFPUtility
     {
         // A predictable GUID based on our application's path.
-        public static Guid INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, AppDomain.CurrentDomain.BaseDirectory);
+
+
+        // Use this if you want to be a real jerk and make it so you have to know the precise location
+        // where the filter was installed in order to be able to get that unique ID back, and be able to
+        // disable the filter. Bad. Prone to too many headaches.    
+        // public static Guid INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, AppDomain.CurrentDomain.BaseDirectory);
+
+        public static Guid INSTALLED_FILTER_ID;
+
+        static WFPUtility()
+        {
+            string machineName = string.Empty;
+            try
+            {
+                machineName = System.Environment.MachineName;
+            }
+            catch
+            {
+                machineName = "fallback";
+            }
+
+            INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName);
+        }
 
         public static readonly Logger s_logger = LogManager.GetLogger("Citadel");
 

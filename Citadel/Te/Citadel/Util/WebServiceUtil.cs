@@ -95,10 +95,12 @@ namespace Te.Citadel.Util
                 }
             }
             catch(Exception webException)
-            {   
-                var logger = LogManager.GetLogger("Citadel");
-
-                LoggerUtil.RecursivelyLogException(logger, webException);
+            {
+                if(noLogging == false)
+                {
+                    var logger = LogManager.GetLogger("Citadel");
+                    LoggerUtil.RecursivelyLogException(logger, webException);
+                }
             }
 
             return null;        

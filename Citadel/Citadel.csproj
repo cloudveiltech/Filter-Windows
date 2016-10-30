@@ -292,6 +292,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Te\Citadel\CitadelMain.cs" />
+    <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\ProviderConditionsModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />

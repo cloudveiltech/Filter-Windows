@@ -41,6 +41,14 @@ using Te.Citadel.Util;
 
 namespace Te.Citadel
 {
+    /// <summary>
+    /// Various exit codes indicating the reason for a shutdown.
+    /// </summary>
+    public enum ExitCodes : int
+    {
+        ShutdownWithSafeguards,
+        ShutdownWithoutSafeguards
+    }
 
     /// <summary>
     /// Enforces that only a single instance of this application can be run at any given time.

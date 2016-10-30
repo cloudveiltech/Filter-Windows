@@ -26,8 +26,7 @@
             <TextBlock Width="700"
                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                        Text="{Binding Terms,
-                                      Mode=OneWay,
-                                      UpdateSourceTrigger=PropertyChanged}" />
+                                      Mode=OneWay}" />
         </ScrollViewer>
 
         <TextBlock Width="646"
