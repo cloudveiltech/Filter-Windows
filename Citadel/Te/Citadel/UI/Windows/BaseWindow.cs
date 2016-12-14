@@ -11,6 +11,6 @@ namespace Te.Citadel.UI.Windows
 {
     public class BaseWindow : MetroWindow
     {
-
+        
     }
 }

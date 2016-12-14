@@ -31,6 +31,19 @@ namespace Te.Citadel.Util
         {
             try
             {
+                // Try to send the device name as well. Helps distinguish
+                // between clients under the same account.
+                string deviceName = string.Empty;
+
+                try
+                {
+                    deviceName = Environment.MachineName;
+                }
+                catch
+                {
+                    deviceName = "Unknown";
+                }
+
                 var serviceProviderApiBasePath = (string)Application.Current.Properties["ServiceProviderApi"];
                 var requestString = serviceProviderApiBasePath + route;                
                 var requestRoute = new Uri(requestString);
@@ -54,7 +67,7 @@ namespace Te.Citadel.Util
                 request.CookieContainer = AuthenticatedUserModel.Instance.UserSessionCookies;
 
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}", AuthenticatedUserModel.Instance.Username, FingerPrint.Value));
+                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&device_name={2}", AuthenticatedUserModel.Instance.Username, FingerPrint.Value, Uri.EscapeDataString(deviceName)));
 
                 // Don't forget to the set the content length to the total length of our form POST
                 // data!
@@ -83,7 +96,16 @@ namespace Te.Citadel.Util
                             using(var memoryStream = new MemoryStream())
                             {
                                 response.GetResponseStream().CopyTo(memoryStream);
-                                return memoryStream.ToArray();
+
+                                // We do this just in case we get something like a 204. The idea
+                                // here is that if we return a non-null, the call was a success.
+                                var responseBody = memoryStream.ToArray();
+                                if(responseBody == null)
+                                {
+                                    responseBody = new byte[0];
+                                }
+
+                                return responseBody;
                             }
                         }
                     }

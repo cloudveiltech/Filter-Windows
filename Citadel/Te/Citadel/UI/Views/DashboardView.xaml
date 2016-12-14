@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
              xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,37 +17,175 @@
         <CitadelViewModels:DashboardViewModel />
     </UserControl.DataContext>
     <Grid>
-        <Label Width="258"
-               Margin="229,10,229,0"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Top"
-               HorizontalContentAlignment="Center"
-               Content="Filter Active"
-               FontFamily="Segoe UI"
-               FontSize="22"
-               FontWeight="UltraLight"
-               Foreground="Black" />
 
-        <TextBlock Width="660"
-                   Height="127"
-                   Margin="28,70,28,0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
-                   TextWrapping="Wrap"><Run Text="Filtering is active. To disable the filter and uninstall, you may submit a deactivation request by clicking the button below. Your provider will see the request and verify the action." />
-            <LineBreak /><Run />
-            <LineBreak /><Run Text="When you submit a request, the status of any existing requests are checked and, if your request has been granted, filtering will be disabled and the application will exit." /></TextBlock>
+        <Controls:MetroAnimatedSingleRowTabControl>
+            <TabItem Header="Status">
+                <Grid>
+                    <Label Width="258"
+                           Margin="229,10,229,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Filter Active"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
 
-        <!--  Request deactivation button.  -->
-        <Button Width="136"
-                Margin="552,340,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Command="{Binding RequestDeactivateCommand}"
-                Content="Request Deactivation"
-                Style="{StaticResource AccentedSquareButtonStyle}" />
+                    <TextBlock Width="660"
+                               Height="98"
+                               Margin="28,70,28,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap"><Run Text="Filtering is active. To disable the filter and uninstall, you may submit a deactivation request by clicking the button below. Your provider will see the request and verify the action." />
+                        <LineBreak /><Run />
+                        <LineBreak /><Run Text="When you submit a request, the status of any existing requests are checked and, if your request has been granted, filtering will be disabled and the application will exit." /></TextBlock>
+
+                    <!--  Request deactivation button.  -->
+                    <Button Width="136"
+                            Margin="552,296,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding RequestDeactivateCommand}"
+                            Content="Request Deactivation"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Settings">
+                <Grid>
+
+                    <Label Width="258"
+                           Margin="21,10,431,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Relaxed Policy"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+
+                    <TextBlock Width="258"
+                               Height="98"
+                               Margin="21,70,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions, you can use the relaxed filtering rules for the given time span below."
+                               TextWrapping="Wrap" />
+
+                    <!--  View log directory button.  -->
+                    <Button Width="136"
+                            Margin="553,131,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding ViewLogsCommand}"
+                            Content="View Log Files"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+                    <Label Width="258"
+                           Margin="431,10,21,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Other"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+                    <TextBlock Width="258"
+                               Height="45"
+                               Margin="431,70,21,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               Text="Your administrator or support agent might request log information to assist you."
+                               TextWrapping="Wrap" />
+
+                    <Label Height="30"
+                           Margin="21,168,591,158"
+                           Content="Uses Available:"
+                           FontSize="12" />
+
+                    <Button Width="136"
+                            Margin="143,258,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding UseRelaxedPolicyCommand}"
+                            Content="Use Relaxed Policy"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Label Height="30"
+                           Margin="21,200,591,126"
+                           Content="Time Permitted:"
+                           FontSize="12" />
+
+
+                    <TextBlock Width="120"
+                               Height="30"
+                               Margin="159,174,431,154"
+                               FontSize="12"
+                               Text="{Binding Path=AvailableRelaxedRequests,
+                                              Mode=OneWay,
+                                              UpdateSourceTrigger=PropertyChanged}"
+                               TextAlignment="Right" />
+
+                    <TextBlock Width="120"
+                               Height="30"
+                               Margin="159,206,431,122"
+                               FontSize="12"
+                               Text="{Binding Path=RelaxedDuration,
+                                              Mode=OneWay,
+                                              UpdateSourceTrigger=PropertyChanged}"
+                               TextAlignment="Right" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Blocking Info">
+                <Grid>
+
+                    <Label Width="258"
+                           Margin="226,10,226,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Block Events"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+
+                    <TextBlock Width="690"
+                               Height="41"
+                               Margin="10,54,10,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               Text="This is a temporary view of block events that have occurred during this filtering session. This data is not persisted in storage, or transmitted anywhere. It is presented for insight and convenience."
+                               TextWrapping="Wrap" />
+
+                    <TextBlock x:Name="m_blockEventsTextBox"
+                               Margin="10 120 10 10"
+                               x:FieldModifier="private"
+                               ScrollViewer.CanContentScroll="False"
+                               ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                               ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                               TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </TabItem>
+        </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>
 </UserControl>

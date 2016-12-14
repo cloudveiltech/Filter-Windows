@@ -26,7 +26,7 @@ namespace Te.Citadel.Util
             }
             catch
             {
-                machineName = "fallback";
+                machineName = "Unknown";
             }
 
             INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName);

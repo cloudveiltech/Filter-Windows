@@ -292,6 +292,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Te\Citadel\CitadelMain.cs" />
+    <Compile Include="Te\Citadel\Data\Models\AppConfigModel.cs" />
+    <Compile Include="Te\Citadel\Data\Serialization\IntToMinutesTimespanConverter.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\ProviderConditionsModel.cs" />

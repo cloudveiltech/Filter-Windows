@@ -24,5 +24,10 @@ namespace Te.Citadel.UI.Views
         {
             InitializeComponent();
         }
+
+        public void AppendBlockActionEvent(string message)
+        {
+            m_blockEventsTextBox.Text = message + Environment.NewLine + m_blockEventsTextBox.Text;
+        }
     }
 }

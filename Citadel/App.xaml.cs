@@ -1,5 +1,8 @@
-﻿using Microsoft.Win32;
+﻿using HtmlAgilityPack;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using NLog;
+using opennlp.tools.doccat;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,12 +12,14 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using Te.Citadel.Data.Models;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.ViewModels;
@@ -22,10 +27,6 @@ using Te.Citadel.UI.Views;
 using Te.Citadel.UI.Windows;
 using Te.Citadel.Util;
 using Te.HttpFilteringEngine;
-using opennlp.tools.doccat;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
-using HtmlAgilityPack;
 
 namespace Te.Citadel
 {
@@ -34,13 +35,44 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
+
+        private class FilterListEntry
+        {
+            private volatile bool m_isBypass = false;
+
+            public byte CategoryId
+            {
+                get;
+                set;
+            }
+
+            public string CategoryName
+            {
+                get;
+                set;
+            }
+
+            public bool IsBypass
+            {
+                get
+                {
+                    return m_isBypass;
+                }
+
+                set
+                {
+                    m_isBypass = value;
+                }
+            }
+        }
+
         #region APP_UPDATE_MEMBER_VARS
 
         /// <summary>
         /// Delegate we supply to the WinSparkle DLL, which it will use to check with us if a
         /// shutdown is okay. We can reply yes or no to this request. If we reply yes, then
-        /// WinSparkle will make an official shutdown request, allowing us to cleanly shutdown
-        /// before getting updated.
+        /// WinSparkle will make an official shutdown request, allowing us to cleanly shutdown before
+        /// getting updated.
         /// </summary>
         private WinSparkle.WinSparkleCanShutdownCheckCallback m_winsparkleShutdownCheckCb;
 
@@ -61,8 +93,8 @@ namespace Te.Citadel
         private Regex m_whitespaceRegex;
 
         /// <summary>
-        /// Used for synchronization whenever our NLP model gets updated while we're
-        /// already initialized.
+        /// Used for synchronization whenever our NLP model gets updated while we're already
+        /// initialized.
         /// </summary>
         private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
 
@@ -75,14 +107,15 @@ namespace Te.Citadel
         private Engine.FirewallCheckHandler m_firewallCheckCb;
 
         private Engine.ClassifyContentHandler m_classifyCb;
+        
 
         /// <summary>
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
         /// along. We use this object to store what strings we map to numbers.
         /// </summary>
-        private ConcurrentDictionary<string, byte> m_generatedCategoriesMap = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
+        private ConcurrentDictionary<string, FilterListEntry> m_generatedCategoriesMap = new ConcurrentDictionary<string, FilterListEntry>(StringComparer.OrdinalIgnoreCase);
 
-        #endregion
+        #endregion FilteringEngineVars
 
         /// <summary>
         /// Used for synchronization when creating run at startup task.
@@ -90,7 +123,8 @@ namespace Te.Citadel
         private ReaderWriterLockSlim m_runAtStartupLock = new ReaderWriterLockSlim();
 
         /// <summary>
-        /// Timer used to query for filter list changes every X minutes, as well as application updates.
+        /// Timer used to query for filter list changes every X minutes, as well as application
+        /// updates.
         /// </summary>
         private Timer m_updateCheckTimer;
 
@@ -113,7 +147,7 @@ namespace Te.Citadel
         /// <summary>
         /// Logger.
         /// </summary>
-        private readonly Logger m_logger;        
+        private readonly Logger m_logger;
 
         /// <summary>
         /// Shown when the program is minimized to the tray. The app is always minimized to the tray
@@ -131,6 +165,50 @@ namespace Te.Citadel
         /// Primary and only window we use.
         /// </summary>
         private MainWindow m_mainWindow;
+
+        /// <summary>
+        /// App function config file.
+        /// </summary>
+        private AppConfigModel m_config;
+
+        /// <summary>
+        /// This int stores the number of block actions that have elapsed within the given threshold
+        /// timespan.
+        /// </summary>
+        private long m_thresholdTicks;
+
+        /// <summary>
+        /// This timer resets the threshold tick count.
+        /// </summary>
+        private Timer m_thresholdCountTimer;
+
+        /// <summary>
+        /// This timer is used when the threshold has been hit. It is used to set an expiry period
+        /// for the internet lockout once the threshold has been hit.
+        /// </summary>
+        private Timer m_thresholdEnforcementTimer;
+
+        /// <summary>
+        /// Stores all, if any, applications that should be forced throught the filter.
+        /// </summary>
+        private HashSet<string> m_blacklistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Stores all, if any, applications that should not be forced through the filter.
+        /// </summary>
+        private HashSet<string> m_whitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// This timer is used to count down to the expiry time for relaxed policy use.
+        /// </summary>
+        private Timer m_relaxedPolicyExpiryTimer;
+
+        /// <summary>
+        /// This timer is used to track a 24 hour cooldown period after the exhaustion of all
+        /// available relaxed policy uses. Once the timer is expired, it will reset the count to the
+        /// config default and then disable itself.
+        /// </summary>
+        private Timer m_relaxedPolicyResetTimer;
 
         #region Views
 
@@ -202,8 +280,8 @@ namespace Te.Citadel
             {
                 try
                 {
-                    // You MUST call this before entering the write lock, otherwise
-                    // you're gonna deadlock your app.
+                    // You MUST call this before entering the write lock, otherwise you're gonna
+                    // deadlock your app.
                     var currentValue = RunAtStartup;
 
                     m_runAtStartupLock.EnterWriteLock();
@@ -231,6 +309,7 @@ namespace Te.Citadel
                                 }
                             }
                             break;
+
                         case false:
                             {
                                 string deleteTaskCommand = "/delete /F /tn \"Citadel\"";
@@ -252,10 +331,9 @@ namespace Te.Citadel
         /// Default ctor.
         /// </summary>
         public CitadelApp()
-        {   
-            // Set a global to hold the base URI of the service providers address.
-            // This must be the base path where the server side auth system is
-            // hosted.
+        {
+            // Set a global to hold the base URI of the service providers address. This must be the
+            // base path where the server side auth system is hosted.
             Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
 
             m_logger = LogManager.GetLogger("Citadel");
@@ -272,7 +350,6 @@ namespace Te.Citadel
             this.Exit += OnApplicationExiting;
 
             // Do stuff that must be done on the UI thread first.
-            InitAppWideCommands();
             InitViews();
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -288,23 +365,32 @@ namespace Te.Citadel
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception err = e.ExceptionObject as Exception;
-            Debug.WriteLine(err.Message);
+            LoggerUtil.RecursivelyLogException(m_logger, err);
         }
 
         /// <summary>
-        /// Initializes commands made available to certain object types application-wide.
+        /// Called only in circumstances where the application config requires use of the block
+        /// action threshold tracking functionality.
         /// </summary>
-        private void InitAppWideCommands()
-        {
-            Debug.WriteLine("Running");
-
-            // All commands in our app resources are designed for use by BaseCitadelViewModel
-            // instances.
-            foreach(CommandBinding commandBinding in Resources.Values.OfType<CommandBinding>())
+        private void InitThresholdData()
+        {            
+            // If exists, stop it first.
+            if(m_thresholdCountTimer != null)
             {
-                // Give all view models in our application the ability to request view changes.
-                CommandManager.RegisterClassCommandBinding(typeof(UserControl), commandBinding);
+                m_thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
+
+            // Create the threshold count timer and start it with the configured timespan.
+            m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, m_config.ThresholdTriggerPeriod, Timeout.InfiniteTimeSpan);
+
+            // If exists, stop it first.
+            if(m_thresholdEnforcementTimer != null)
+            {
+                m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+
+            // Create the enforcement timer, but don't start it.
+            m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
         }
 
         /// <summary>
@@ -316,10 +402,10 @@ namespace Te.Citadel
 
             m_mainWindow.Closing += ((object sender, CancelEventArgs e) =>
             {
-
                 if(!AuthenticatedUserModel.Instance.HasAcceptedTerms)
                 {
-                    // If terms have not been accepted, and window is closed, just full blown exit the app.
+                    // If terms have not been accepted, and window is closed, just full blown exit
+                    // the app.
                     Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
                     return;
                 }
@@ -334,7 +420,7 @@ namespace Te.Citadel
             m_viewLogin = new LoginView();
 
             if(m_viewLogin.DataContext != null && m_viewLogin.DataContext is BaseCitadelViewModel)
-            {   
+            {
                 ((BaseCitadelViewModel)(m_viewLogin.DataContext)).ViewChangeRequest += OnViewChangeRequest;
             }
 
@@ -385,8 +471,8 @@ namespace Te.Citadel
                 }
                 else
                 {
-                    // We're going to hash our local version and compare. If they
-                    // don't match, we're going to update our lists.
+                    // We're going to hash our local version and compare. If they don't match, we're
+                    // going to update our lists.
 
                     using(var fs = File.OpenRead(listDataFilePath))
                     {
@@ -484,7 +570,7 @@ namespace Te.Citadel
         /// engine.
         /// </summary>
         private void InitEngine()
-        {   
+        {
             // Get our CA-Bundle resource and unpack it to the application directory.
             var caCertPackURI = new Uri("pack://application:,,,/Resources/ca-cert.pem");
             var resourceStream = GetResourceStream(caCertPackURI);
@@ -500,6 +586,12 @@ namespace Te.Citadel
             // Dump the text to the local file system.
             var localCaBundleCertPath = AppDomain.CurrentDomain.BaseDirectory + "ca-cert.pem";
             File.WriteAllText(localCaBundleCertPath, caFileText);
+
+            X509Certificate2Collection collection = new X509Certificate2Collection(new X509Certificate2(Encoding.UTF8.GetBytes(caFileText)));
+            foreach(X509Certificate2 x509 in collection)
+            {
+                Debug.WriteLine("certificate name: {0}", x509.Subject);
+            }
 
             // Set firewall CB.
             m_firewallCheckCb = OnAppFirewallCheck;
@@ -520,7 +612,7 @@ namespace Te.Citadel
             m_filteringEngine.OnInfo += EngineOnInfo;
             m_filteringEngine.OnWarning += EngineOnWarning;
             m_filteringEngine.OnError += EngineOnError;
-            
+
             // Now establish trust with FireFox. XXX TODO - This can actually be done elsewhere. We
             // used to have to do this after the engine started up to wait for it to write the CA to
             // disk and then use certutil to install it in FF. However, thanks to FireFox giving the
@@ -556,7 +648,7 @@ namespace Te.Citadel
                 // Init our regexes
                 m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
-                // Init Document classifier.            
+                // Init Document classifier.
                 var doccatModel = new DoccatModel(new java.io.ByteArrayInputStream(nlpModelBytes));
                 m_documentClassifier = new DocumentCategorizerME(doccatModel);
 
@@ -569,13 +661,13 @@ namespace Te.Citadel
 
                     if(selectedCategoriesHashset.Contains(modelCategory))
                     {
-                        // This is an enabled category.
-                        // Make the category name unique by prepending NLP
+                        // This is an enabled category. Make the category name unique by prepending
+                        // NLP
                         modelCategory = "NLP" + modelCategory;
 
                         m_logger.Info("Setting up NLP classification category: {0}", modelCategory);
 
-                        byte existingCategory = 0;
+                        FilterListEntry existingCategory;
                         if(!m_generatedCategoriesMap.TryGetValue(modelCategory, out existingCategory))
                         {
                             // We can't generate anymore categories. Sorry, but the rest get ignored.
@@ -584,12 +676,15 @@ namespace Te.Citadel
                                 break;
                             }
 
-                            existingCategory = (byte)((m_generatedCategoriesMap.Count) + 1);
+                            existingCategory = new FilterListEntry();
+                            existingCategory.CategoryName = modelCategory;
+                            existingCategory.IsBypass = false;
+                            existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
 
                             m_generatedCategoriesMap.GetOrAdd(modelCategory, existingCategory);
                         }
 
-                        m_filteringEngine.SetCategoryEnabled(existingCategory, true);
+                        m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
                     }
                 }
 
@@ -623,7 +718,7 @@ namespace Te.Citadel
             m_lastAuthWasSuccess = authTask.Result;
 
             // Init the Engine in the background.
-            InitEngine();            
+            InitEngine();
 
             var startupArgs = e.Argument as StartupEventArgs;
 
@@ -643,7 +738,7 @@ namespace Te.Citadel
                 {
                     MinimizeToTray(false);
                 }
-            }            
+            }
         }
 
         /// <summary>
@@ -661,7 +756,7 @@ namespace Te.Citadel
             // Unhook first.
             SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
             this.Exit -= OnApplicationExiting;
-            
+
             m_logger.Info("Sessions log off or OS shutdown detected.");
             DoCleanShutdown(true);
         }
@@ -685,15 +780,15 @@ namespace Te.Citadel
 
             if(e.ApplicationExitCode <= (int)ExitCodes.ShutdownWithSafeguards)
             {
-                // ShutdownWithSafeguards == 0, so anything less than or equal to this
-                // is considered to be a situation where we must install safegaurds
-                // to ensure application survival and persistence.
+                // ShutdownWithSafeguards == 0, so anything less than or equal to this is considered
+                // to be a situation where we must install safegaurds to ensure application survival
+                // and persistence.
                 DoCleanShutdown(true);
             }
             else
             {
                 DoCleanShutdown(false);
-            }            
+            }
         }
 
         /// <summary>
@@ -707,6 +802,9 @@ namespace Te.Citadel
         /// </param>
         private void OnBackgroundInitComplete(object sender, RunWorkerCompletedEventArgs e)
         {
+            // Must ensure we're not blocking internet now that we're running.
+            WFPUtility.EnableInternet();
+
             if(e.Cancelled || e.Error != null)
             {
                 m_logger.Error("Error during initialization.");
@@ -719,7 +817,7 @@ namespace Te.Citadel
                 Current.Shutdown(-1);
                 return;
             }
-            
+
             Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
                 (Action)delegate ()
@@ -736,19 +834,13 @@ namespace Te.Citadel
                         }
                         else
                         {
-                            // Must ensure we're not blocking internet if we're going to show terms.
-                            WFPUtility.EnableInternet();
-
                             // User still has not accepted terms. Show them.
                             OnViewChangeRequest(typeof(ProviderConditionsView));
                         }
                     }
                     else
                     {
-                        // Must ensure we're not blocking internet if we're going to ask to sign in.
-                        WFPUtility.EnableInternet();
-
-                        OnViewChangeRequest(typeof(LoginView));                        
+                        OnViewChangeRequest(typeof(LoginView));
                     }
                 }
             );
@@ -826,8 +918,7 @@ namespace Te.Citadel
 
             var authResult = await AuthenticatedUserModel.Instance.ReAuthenticate();
 
-            // If we have a saved session, but we can't connect, we'll allow the user 
-            // to proceed.
+            // If we have a saved session, but we can't connect, we'll allow the user to proceed.
             return authResult == AuthenticatedUserModel.AuthenticationResult.Success || authResult == AuthenticatedUserModel.AuthenticationResult.ConnectionFailed;
         }
 
@@ -839,16 +930,16 @@ namespace Te.Citadel
         /// The type of view requested.
         /// </param>
         private void OnViewChangeRequest(Type viewType)
-        {   
+        {
             try
             {
                 Current.Dispatcher.Invoke(
                     System.Windows.Threading.DispatcherPriority.Background,
                     (Action)delegate ()
-                    {                        
+                    {
                         UIElement current = (UserControl)m_mainWindow.CurrentView.Content;
                         UIElement newView = null;
-                        
+
                         switch(viewType.Name)
                         {
                             case nameof(LoginView):
@@ -873,8 +964,9 @@ namespace Te.Citadel
                                 {
                                     newView = m_viewDashboard;
 
-                                    // If we've been sent to the dashboard, the view from which no one can escape,
-                                    // then that means we're all good to go and start filtering.
+                                    // If we've been sent to the dashboard, the view from which no
+                                    // one can escape, then that means we're all good to go and start
+                                    // filtering.
                                     m_filterEngineStartupBgWorker = new BackgroundWorker();
                                     m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
                                     {
@@ -884,13 +976,13 @@ namespace Te.Citadel
                                         }
 
                                         // During testing, we'll allow the deactivate button to also
-                                        // function as a request for updates.                                        
-                                        #if CITADEL_DEBUG
-                                            StartCheckForAppUpdates();
-                                        #endif                                  
+                                        // function as a request for updates.
+#if CITADEL_DEBUG
+                                        StartCheckForAppUpdates();
+#endif
                                     });
-                                    
-                                    m_filterEngineStartupBgWorker.RunWorkerAsync();                                    
+
+                                    m_filterEngineStartupBgWorker.RunWorkerAsync();
                                 }
                                 break;
                         }
@@ -921,11 +1013,11 @@ namespace Te.Citadel
             // Get the default FireFox profiles path.
             string defaultFirefoxProfilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             defaultFirefoxProfilesPath += @"\Mozilla\Firefox\Profiles";
-            
+
             // Figure out if firefox is running. If later it is and we kill it, store the path to
             // firefox.exe so we can restart the process after we're done.
             string firefoxExePath = string.Empty;
-            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;            
+            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;
 
             var prefsFiles = Directory.GetFiles(defaultFirefoxProfilesPath, "prefs.js", SearchOption.AllDirectories);
 
@@ -955,13 +1047,13 @@ namespace Te.Citadel
                     Debug.WriteLine(string.Format("FF Config {0} already propertly configured.", prefFile));
                 }
             }
-            
+
             if((needsOverwriting.Count + needsAddition.Count > 0))
             {
                 if(firefoxIsRunning)
                 {
-                    // We need to kill firefox before editing the preferences, otherwise they'll just get
-                    // overwritten.                
+                    // We need to kill firefox before editing the preferences, otherwise they'll just
+                    // get overwritten.
                     foreach(var ff in Process.GetProcessesByName("firefox"))
                     {
                         firefoxExePath = ff.MainModule.FileName;
@@ -1001,7 +1093,7 @@ namespace Te.Citadel
                 {
                     p.StartInfo.FileName = firefoxExePath;
                     p.StartInfo.UseShellExecute = false;
-                    p.Start();                    
+                    p.Start();
                 }
             }
         }
@@ -1023,8 +1115,52 @@ namespace Te.Citadel
             m_logger.Error(message);
         }
 
+        /// <summary>
+        /// Called back the engine whenever a request was blocked.
+        /// </summary>
+        /// <param name="category">
+        /// The category of the rule that caused the block action.
+        /// </param>
+        /// <param name="payloadSizeBlocked">
+        /// The total number of bytes in the response that was blocked before downloading.
+        /// </param>
+        /// <param name="fullRequest">
+        /// The full request that was blocked.
+        /// </param>
         private void OnRequestBlocked(byte category, uint payloadSizeBlocked, string fullRequest)
         {
+            if(m_config.UseThreshold)
+            {
+                var currentTicks = Interlocked.Increment(ref m_thresholdTicks);
+
+                if(currentTicks >= m_config.ThresholdLimit)
+                {
+                    try
+                    {
+                        m_logger.Warn("Block action threshold met or exceeded. Disabling internet.");
+                        WFPUtility.DisableInternet();
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+
+                    this.m_thresholdEnforcementTimer.Change(m_config.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
+                }
+            }
+
+            // Add this blocked request to the dashboard.
+            Current.Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                (Action)delegate ()
+                {
+                    if(m_viewDashboard != null)
+                    {
+                        m_viewDashboard.AppendBlockActionEvent(fullRequest);
+                    }
+                }
+            );
+
             m_logger.Info(string.Format("Request Blocked: {0}", fullRequest));
         }
 
@@ -1035,8 +1171,26 @@ namespace Te.Citadel
 
         private bool OnAppFirewallCheck(string appAbsolutePath)
         {
-            //Debug.WriteLine(string.Format("Filtering app {0}.", appAbsolutePath));
-            // Just filter anything accessing port 80 and 443.
+            if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
+            {
+                // Just filter anything accessing port 80 and 443.
+                return true;
+            }
+
+            var appName = Path.GetFileName(appAbsolutePath);
+
+            if(m_blacklistedApplications.Count > 0 && m_blacklistedApplications.Contains(appName))
+            {
+                // Blacklist is in effect and this app is blacklisted. So, force it through.
+                return true;
+            }
+
+            if(m_whitelistedApplications.Count > 0 && m_whitelistedApplications.Contains(appName))
+            {
+                // Whitelist is in effect and this app is whitelisted. So, don't force it through.
+                return false;
+            }
+
             return true;
         }
 
@@ -1086,7 +1240,7 @@ namespace Te.Citadel
                             }
 
                             m_logger.Info("From HTML: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
-                        }                        
+                        }
                     }
                     else if(contentType.IndexOf("json") != -1)
                     {
@@ -1123,13 +1277,13 @@ namespace Te.Citadel
 
                         var bestCategoryName = "NLP" + m_documentClassifier.getBestCategory(classificationResult);
 
-                        byte categoryNumber = 0;
+                        FilterListEntry categoryNumber = new FilterListEntry();
 
                         var bestCategoryScore = classificationResult.Max();
 
                         if(m_generatedCategoriesMap.TryGetValue(bestCategoryName, out categoryNumber))
                         {
-                            if(categoryNumber > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber))
+                            if(categoryNumber.CategoryId > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber.CategoryId))
                             {
                                 var threshold = .9;
                                 if(bestCategoryScore < threshold)
@@ -1139,7 +1293,7 @@ namespace Te.Citadel
                                 }
 
                                 m_logger.Info("Classified text content as {0}.", bestCategoryName);
-                                return categoryNumber;
+                                return categoryNumber.CategoryId;
                             }
                         }
                         else
@@ -1166,11 +1320,51 @@ namespace Te.Citadel
             return 0;
         }
 
-        #endregion
+        #endregion EngineCallbacks
 
         /// <summary>
-        /// Called every X minutes by the update timer. We check for new lists, and
-        /// hot-swap the rules if we have found new ones. We also check for program updates.
+        /// Called by the threshold trigger timer whenever it's set time has passed. Here we'll reset
+        /// the current count of block actions we're tracking.
+        /// </summary>
+        /// <param name="state">
+        /// Async state object. Not used.
+        /// </param>
+        private void OnThresholdTriggerPeriodElapsed(object state)
+        {
+            this.m_thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            // Reset count to zero.
+            Interlocked.Exchange(ref m_thresholdTicks, 0);
+
+            this.m_thresholdCountTimer.Change(m_config.ThresholdTriggerPeriod, Timeout.InfiniteTimeSpan);
+        }
+
+        /// <summary>
+        /// Called whenever the threshold timeout period has elapsed. Here we'll restore internet
+        /// access.
+        /// </summary>
+        /// <param name="state">
+        /// Async state object. Not used.
+        /// </param>
+        private void OnThresholdTimeoutPeriodElapsed(object state)
+        {
+            try
+            {
+                WFPUtility.EnableInternet();
+            }
+            catch(Exception e)
+            {
+                m_logger.Warn("Error when trying to reinstate internet on threshold timeout period elapsed.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+
+            // Disable the timer before we leave.
+            this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        /// <summary>
+        /// Called every X minutes by the update timer. We check for new lists, and hot-swap the
+        /// rules if we have found new ones. We also check for program updates.
         /// </summary>
         /// <param name="state">
         /// This is always null. Ignore it.
@@ -1179,16 +1373,28 @@ namespace Te.Citadel
         {
             m_logger.Info("Checking for filter list updates.");
 
-            // Stop the threaded timer while we do this. We have to stop it in order
-            // to avoid overlapping calls.
+            // Stop the threaded timer while we do this. We have to stop it in order to avoid
+            // overlapping calls.
             this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            bool gotUpdatedFilterLists = UpdateListData();
+            // First, let's re-authenticate to ensure that we hold a current, valid session.
+            var authResultTask = ChallengeUserAuthenticity();
+            authResultTask.Wait();
+            var authResult = authResultTask.Result;
 
-            if(gotUpdatedFilterLists)
+            if(authResult)
             {
-                // Got new data. Gotta reload.
-                ReloadFilteringRules();
+                bool gotUpdatedFilterLists = UpdateListData();
+
+                if(gotUpdatedFilterLists)
+                {
+                    // Got new data. Gotta reload.
+                    ReloadFilteringRules();
+                }
+            }
+            else
+            {
+                m_logger.Warn("Failed re-authentication during list update process.");
             }
 
             m_logger.Info("Checking for application updates.");
@@ -1229,7 +1435,7 @@ namespace Te.Citadel
 
                 // Setup filter list update check timer.
                 m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-            }      
+            }
         }
 
         /// <summary>
@@ -1258,120 +1464,225 @@ namespace Te.Citadel
                 {
                     using(var zip = new ZipArchive(file, ZipArchiveMode.Read))
                     {
-                        foreach(var entry in zip.Entries)
+                        try
                         {
-                            // Extract the category name and text file from this filter data entry.
-                            var categoryName = entry.FullName.ToLower();
-                            var listName = entry.Name.ToLower();
-                            categoryName = categoryName.Substring(0, categoryName.Length - (listName.Length + 1));
-
-                            if(categoryName.OIEquals("nlp"))
+                            string cfgJson = string.Empty;
+                            foreach(var entry in zip.Entries)
                             {
-                                if(listName.OIEquals("categories.json"))
+                                if(entry.Name.OIEquals("cfg.json"))
                                 {
-                                    // This is a list of all categories within the model that
-                                    // have been chosen for use.
-                                    using(TextReader catReader = new StreamReader(entry.Open()))
+                                    using(var cfgStream = entry.Open())
+                                    using(TextReader tr = new StreamReader(cfgStream))
                                     {
-                                        nlpCategoriesJson = catReader.ReadToEnd();
-                                        continue;
-                                    }
-                                }
-                                else if(Path.GetExtension(listName).OIEquals(".model"))
-                                {
-                                    // This is the NLP model itself.
-                                    using(var modelFileStream = entry.Open())
-                                    using(var modelMemStream = new MemoryStream())
-                                    {
-                                        modelFileStream.CopyTo(modelMemStream);
-                                        nlpModelBytes = modelMemStream.ToArray();
-                                        continue;
+                                        cfgJson = tr.ReadToEnd();
+                                        break;
                                     }
                                 }
                             }
 
-                            // Try and fetch an existing category matching this name, or create a new one.
-                            byte existingCategory = 0;
-                            if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+                            if(!StringExtensions.Valid(cfgJson))
                             {
-                                // We can't generate anymore categories. Sorry, but the rest get ignored.
-                                if(m_generatedCategoriesMap.Count >= byte.MaxValue)
-                                {
-                                    break;
-                                }
-
-                                existingCategory = (byte)((m_generatedCategoriesMap.Count) + 1);
-
-                                // In case we're re-loading, call to unload any existing rules for this category first.
-                                m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory);
-
-                                m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
+                                m_logger.Error("Could not find valid JSON config for filter.");
+                                return;
                             }
 
-                            // Just turn this category on.
-                            m_logger.Info("Enabling category: " + existingCategory);
-                            m_filteringEngine.SetCategoryEnabled(existingCategory, true);
+                            Debug.WriteLine(cfgJson);
 
-                            bool areTriggers = false;
-
-                            switch(listName)
+                            // Deserialize config
+                            try
                             {
-                                case "rules.txt":
-                                case "triggers.txt":
-                                    {
-                                        // If it's a whitelist category, we need to prepend whitelist markers to each line.
-                                        string prefix = categoryName.OIEquals("whitelist") ? "@@" : string.Empty;
+                                m_config = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson);
+                            }
+                            catch(Exception deserializationError)
+                            {
+                                m_logger.Error("Failed to deserialize JSON config.");
+                                LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
+                                return;
+                            }
 
-                                        var builder = new StringBuilder();
-                                        var c = 0;
-                                        using(TextReader tr = new StreamReader(entry.Open()))
+                            // Setup blacklist or whitelisted apps.
+                            foreach(var appName in m_config.BlacklistedApplications)
+                            {
+                                m_blacklistedApplications.Add(appName);
+                            }
+
+                            foreach(var appName in m_config.WhitelistedApplications)
+                            {
+                                m_whitelistedApplications.Add(appName);
+                            }
+
+                            if(m_config.UseThreshold)
+                            {
+                                // Setup the threshold timers and related data members.
+                                InitThresholdData();
+                            }
+
+                            if(m_config.CannotTerminate)
+                            {
+                                // Turn on process protection if requested.
+                                if(!ProcessProtection.IsProtected)
+                                {
+                                    ProcessProtection.Protect();
+                                }
+                            }
+
+                            if(m_config.Bypass.Count > 0 && m_config.BypassesPermitted > 0)
+                            {
+                                Current.Dispatcher.BeginInvoke(
+                                    System.Windows.Threading.DispatcherPriority.Normal,
+                                    (Action)delegate ()
+                                    {
+                                        // Bypass lists have been enabled.
+                                        if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
                                         {
+                                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+                                            dashboardViewModel.AvailableRelaxedRequests = m_config.BypassesPermitted;
+                                            dashboardViewModel.RelaxedDuration = new DateTime(m_config.BypassDuration.Ticks).ToString("HH:mm");
+
+                                            dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
+                                        }
+                                    }
+                                );
+                            }
+
+                            foreach(var entry in zip.Entries)
+                            {
+                                if(entry.Name.OIEquals("cfg.json"))
+                                {
+                                    continue;
+                                }
+
+                                var categoryName = entry.FullName;
+                                var listName = entry.Name.ToLower();
+                                var ssLen = categoryName.Length - (listName.Length + 1);
+
+                                if(ssLen <= 0)
+                                {
+                                    // Just in case this is some glitch or issue where a top level file
+                                    // has been included that is not part of any category. Skip such
+                                    // an entry.
+                                    continue;
+                                }
+
+                                categoryName = categoryName.Substring(0, ssLen);
+                                
+                                // Handle NLP entries, if any.
+                                if(categoryName.OIEquals("nlp"))
+                                {
+                                    if(listName.OIEquals("categories.json"))
+                                    {
+                                        // This is a list of all categories within the model that
+                                        // have been chosen for use.
+                                        using(TextReader catReader = new StreamReader(entry.Open()))
+                                        {
+                                            nlpCategoriesJson = catReader.ReadToEnd();
+                                            continue;
+                                        }
+                                    }
+                                    else if(Path.GetExtension(listName).OIEquals(".model"))
+                                    {
+                                        // This is the NLP model itself.
+                                        using(var modelFileStream = entry.Open())
+                                        using(var modelMemStream = new MemoryStream())
+                                        {
+                                            modelFileStream.CopyTo(modelMemStream);
+                                            nlpModelBytes = modelMemStream.ToArray();
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                                // Try and fetch an existing category matching this name, or create a new one.
+                                FilterListEntry existingCategory;
+                                if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+                                {
+                                    // We can't generate anymore categories. Sorry, but the rest get ignored.
+                                    if(m_generatedCategoriesMap.Count >= byte.MaxValue)
+                                    {
+                                        break;
+                                    }
+
+                                    existingCategory = new FilterListEntry();
+                                    existingCategory.CategoryName = categoryName;
+                                    existingCategory.IsBypass = false;
+                                    existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
+
+                                    // In case we're re-loading, call to unload any existing rules for this category first.
+                                    m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory.CategoryId);
+
+                                    m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
+                                }
+
+                                // Enable this category we've fetched here.
+                                m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
+
+                                uint rulesLoaded, rulesFailed;
+
+                                switch(listName)
+                                {
+                                    case "rules.txt":                                    
+                                        {
+                                            // Need to prepend @@ to lines if it's a whitelist.
+                                            string rulePrefix = m_config.Whitelists.Contains(entry.FullName) ? "@@" : string.Empty;
+                                            bool isBypass = m_config.Bypass.Contains(entry.FullName);
+
+                                            var builder = new StringBuilder();
                                             string line = null;
-                                            while((line = tr.ReadLine()) != null)
-                                            {
-                                                ++c;
-                                                builder.Append(prefix + line + "\n");
+                                            using(TextReader tr = new StreamReader(entry.Open()))
+                                            {   
+                                                while((line = tr.ReadLine()) != null)
+                                                {   
+                                                    builder.Append(rulePrefix + line + "\n");
+                                                }
+
+                                                tr.Close();
+                                                
+                                                var listContents = builder.ToString();
+                                                builder.Clear();
+
+                                                if(StringExtensions.Valid(listContents))
+                                                {
+                                                    m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory.CategoryId, false, out rulesLoaded, out rulesFailed);
+                                                    totalTriggersLoaded += rulesLoaded;
+                                                    listContents = string.Empty;
+                                                }
+
+                                                // Set if it's a bypass list or not.
+                                                existingCategory.IsBypass = isBypass;
+
+                                                // Force GC to run because this will clear A LOT of memory.
+                                                System.GC.Collect();
                                             }
-                                            
-                                            tr.Close();
                                         }
+                                        break;
 
-                                        areTriggers = listName.OIEquals("triggers.txt");
-
-                                        uint rulesLoaded, rulesFailed;
-                                        if(areTriggers)
+                                    case "triggers.txt":
                                         {   
-                                            var listContents = builder.ToString();
-                                            builder.Clear();
-                                            m_filteringEngine.LoadTextTriggersFromString(listContents, existingCategory, false, out rulesLoaded);
-                                            totalTriggersLoaded += rulesLoaded;
-                                            listContents = string.Empty;
+                                            using(TextReader tr = new StreamReader(entry.Open()))
+                                            {
+                                                var triggers = tr.ReadToEnd();
+                                                if(StringExtensions.Valid(triggers))
+                                                {
+                                                    m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false, out rulesLoaded);
+                                                    totalTriggersLoaded += rulesLoaded;
+                                                    tr.Close();
+                                                }                                               
 
-                                            // Force GC to run because this will clear A LOT of memory.
-                                            System.GC.Collect();
+                                                // Force GC to run because this will clear A LOT of memory.
+                                                System.GC.Collect();
+                                            }
                                         }
-                                        else
-                                        {
-                                            var listContents = builder.ToString();
-                                            builder.Clear();
-                                            m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory, false, out rulesLoaded, out rulesFailed);
-                                            totalFiltersLoaded += rulesLoaded;
-                                            listContents = string.Empty;
-                                            listContents = null;
-
-                                            // Force GC to run because this will clear A LOT of memory.
-                                            System.GC.Collect();
-                                        }
-                                    }
-                                    break;
+                                        break;
+                                }
                             }
                         }
-
-                        zip.Dispose();
+                        finally
+                        {
+                            zip.Dispose();
+                            file.Close();
+                            file.Dispose();
+                        }
                     }
-
-                    file.Close();
-                    file.Dispose();
                 }
 
                 if(nlpModelBytes != null && StringExtensions.Valid(nlpCategoriesJson))
@@ -1383,13 +1694,114 @@ namespace Te.Citadel
                 var listLoadInfo = string.Format("Loaded {0} filtering rules and {1} text triggers.", totalFiltersLoaded, totalTriggersLoaded);
                 Debug.WriteLine(listLoadInfo);
                 m_logger.Info(listLoadInfo);
-
-
             }
             else
             {
                 m_logger.Error("No filtering rules.");
             }
+        }
+
+        /// <summary>
+        /// Called whenever a relaxed policy has been requested.
+        /// </summary>
+        private void OnRelaxedPolicyRequested()
+        {
+            // Start the count down timer.
+            if(m_relaxedPolicyExpiryTimer == null)
+            {
+                m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
+            }
+
+            // Disable every category that is a bypass category.
+            foreach(var entry in m_generatedCategoriesMap.Values)
+            {
+                if(entry.IsBypass)
+                {
+                    m_filteringEngine.SetCategoryEnabled(entry.CategoryId, false);
+                }
+            }
+
+            m_relaxedPolicyExpiryTimer.Change(m_config.BypassDuration, Timeout.InfiniteTimeSpan);
+
+            bool allUsesExhausted = false;
+
+            Current.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                (Action)delegate ()
+                {
+                    if(m_viewDashboard != null)
+                    {
+                        if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
+                        {
+                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+
+                            dashboardViewModel.AvailableRelaxedRequests -= 1;
+
+                            if(dashboardViewModel.AvailableRelaxedRequests <= 0)
+                            {
+                                dashboardViewModel.AvailableRelaxedRequests = 0;
+                                allUsesExhausted = true;
+                            }
+                        }
+                    }
+                }
+            );
+
+            if(allUsesExhausted)
+            {
+                m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, TimeSpan.FromDays(1), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        /// <summary>
+        /// Called whenever the relaxed policy duration has expired.
+        /// </summary>
+        /// <param name="state">
+        /// Async state. Not used.
+        /// </param>
+        private void OnRelaxedPolicyTimerExpired(object state)
+        {
+            // Disable the expiry timer.
+            m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            // Enable every category that is a bypass category.
+            foreach(var entry in m_generatedCategoriesMap.Values)
+            {
+                if(entry.IsBypass)
+                {
+                    m_filteringEngine.SetCategoryEnabled(entry.CategoryId, true);
+                }
+            }           
+        }
+
+        /// <summary>
+        /// Called whenever the relaxed policy reset timer has expired. This expiry refreshes the
+        /// available relaxed policy requests to the configured value.
+        /// </summary>
+        /// <param name="state">
+        /// Async state. Not used.
+        /// </param>
+        private void OnRelaxedPolicyResetExpired(object state)
+        {
+            // Disable the reset timer.
+            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            // Reset the available count.
+            Current.Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                (Action)delegate ()
+                {
+                    if(m_viewDashboard != null)
+                    {
+                        if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
+                        {
+                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+
+                            dashboardViewModel.AvailableRelaxedRequests = m_config.BypassesPermitted;
+                        }
+                    }
+                }
+            );
         }
 
         /// <summary>
@@ -1436,14 +1848,14 @@ namespace Te.Citadel
         /// application in order to install an update.
         /// </summary>
         /// <returns>
-        /// Return zero if a shutdown is not okay at this time, return one if it is okay to shut
-        /// down the application immediately after this function returns.
+        /// Return zero if a shutdown is not okay at this time, return one if it is okay to shut down
+        /// the application immediately after this function returns.
         /// </returns>
         private int WinSparkleCheckIfShutdownOkay()
         {
             // Winsparkle can always shut down. When we shut down, we disable the internet anyway,
-            // and WinSparkle should have already downloaded the installer by the time it asks
-            // for a shutdown. So, we're good to shut down any time.
+            // and WinSparkle should have already downloaded the installer by the time it asks for a
+            // shutdown. So, we're good to shut down any time.
             return 1;
         }
 
@@ -1459,7 +1871,7 @@ namespace Te.Citadel
                 {
                     Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
                 }
-            );            
+            );
         }
 
         /// <summary>
@@ -1491,14 +1903,14 @@ namespace Te.Citadel
 
                     // Shut down engine.
                     StopFiltering();
-                    
+
                     if(installSafeguards)
                     {
-                        // Ensure that we're run at startup, disable the internet, etc.                        
+                        // Ensure that we're run at startup, disable the internet, etc.
                         RunAtStartup = true;
 
-                        // While we're here, let's disable the internet so that the user
-                        // can't browse the web without us.                            
+                        // While we're here, let's disable the internet so that the user can't browse
+                        // the web without us.
                         try
                         {
                             WFPUtility.DisableInternet();
@@ -1507,14 +1919,14 @@ namespace Te.Citadel
                     }
                     else
                     {
-                        // Means that our user got a granted deactivation request, or installed
-                        // but never activated.
+                        // Means that our user got a granted deactivation request, or installed but
+                        // never activated.
                         m_logger.Info("Shutting down without safeguards.");
                     }
 
                     // Make sure our credentials are saved.
                     AuthenticatedUserModel.Instance.Save();
-                    
+
                     // Flag that clean shutdown was completed already.
                     m_cleanShutdownComplete = true;
                 }

@@ -246,3 +246,6 @@ Citadel/Citadel.VC.VC.opendb
 
 # Ignore Listutil and other bundled projects for now.
 ListUtil/
+
+# Ignore RestoreInetUtil
+RestoreInetUtil/

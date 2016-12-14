@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Windows
 {
@@ -23,6 +24,20 @@ namespace Te.Citadel.UI.Windows
         public MainWindow()
         {
             InitializeComponent();
+
+            try
+            {
+                // Show binary version # in the title bar.
+                string title = this.Title;
+
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                title += " - Version " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+                this.Title = title;
+            }
+            catch (Exception e)
+            {   
+                LoggerUtil.RecursivelyLogException(NLog.LogManager.GetLogger("Citadel"), e);
+            }
         }
     }
 }
