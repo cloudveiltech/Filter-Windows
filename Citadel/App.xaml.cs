@@ -8,9 +8,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -1129,16 +1131,20 @@ namespace Te.Citadel
         /// </param>
         private void OnRequestBlocked(byte category, uint payloadSizeBlocked, string fullRequest)
         {
+            bool internetShutOff = false;
+
             if(m_config.UseThreshold)
             {
                 var currentTicks = Interlocked.Increment(ref m_thresholdTicks);
 
                 if(currentTicks >= m_config.ThresholdLimit)
                 {
+                    internetShutOff = true;
+
                     try
                     {
                         m_logger.Warn("Block action threshold met or exceeded. Disabling internet.");
-                        WFPUtility.DisableInternet();
+                        WFPUtility.DisableInternet();                        
                     }
                     catch(Exception e)
                     {
@@ -1157,6 +1163,13 @@ namespace Te.Citadel
                     if(m_viewDashboard != null)
                     {
                         m_viewDashboard.AppendBlockActionEvent(fullRequest);
+
+                        if(internetShutOff)
+                        {
+                            var restoreDate = DateTime.Now.AddTicks(m_config.ThresholdTimeoutPeriod.Ticks);
+
+                            m_viewDashboard.ShowDisabledInternetMessage(restoreDate);
+                        }
                     }
                 }
             );
@@ -1358,6 +1371,18 @@ namespace Te.Citadel
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
 
+            // Change UI state of dashboard to not show disabled message anymore.
+            Current.Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+                (Action)delegate ()
+                {
+                    if(m_viewDashboard != null)
+                    {
+                        m_viewDashboard.HideDisabledInternetMessage();
+                    }
+                }
+            );
+
             // Disable the timer before we leave.
             this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
@@ -1540,6 +1565,8 @@ namespace Te.Citadel
                                             dashboardViewModel.RelaxedDuration = new DateTime(m_config.BypassDuration.Ticks).ToString("HH:mm");
 
                                             dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
+
+                                            dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                                         }
                                     }
                                 );
@@ -1723,6 +1750,11 @@ namespace Te.Citadel
 
             m_relaxedPolicyExpiryTimer.Change(m_config.BypassDuration, Timeout.InfiniteTimeSpan);
 
+            DecrementRelaxedPolicy();
+        }
+
+        private void DecrementRelaxedPolicy()
+        {
             bool allUsesExhausted = false;
 
             Current.Dispatcher.Invoke(
@@ -1749,7 +1781,47 @@ namespace Te.Citadel
 
             if(allUsesExhausted)
             {
-                m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, TimeSpan.FromDays(1), Timeout.InfiniteTimeSpan);
+                // Refresh tomorrow at midnight.
+                var today = DateTime.Now;
+                var tomorrow = today.AddDays(1);
+                var span = tomorrow - today;
+
+                if(m_relaxedPolicyResetTimer == null)
+                {
+                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
+                }                
+
+                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        /// <summary>
+        /// Called when the user has manually requested to relinquish a relaxed policy.
+        /// </summary>
+        private void OnRelinquishRelaxedPolicyRequested()
+        {
+            bool relaxedInEffect = false;
+            // Determine if a relaxed policy is currently in effect.
+            foreach(var entry in m_generatedCategoriesMap.Values)
+            {
+                if(entry.IsBypass && m_filteringEngine.IsCategoryEnabled(entry.CategoryId) == false)
+                {
+                    relaxedInEffect = true;
+                    break;
+                }
+            }
+            
+            // Ensure timer is stopped and re-enable categories by simply
+            // calling the timer's expiry callback.
+            OnRelaxedPolicyTimerExpired(null);
+
+            // If a policy was not already in effect, then the user is choosing to
+            // relinquish a policy not yet used. So just eat it up. If  this is not
+            // the case, then the policy has already been decremented, so don't
+            // bother.
+            if(!relaxedInEffect)
+            {
+                DecrementRelaxedPolicy();
             }
         }
 
@@ -1909,13 +1981,16 @@ namespace Te.Citadel
                         // Ensure that we're run at startup, disable the internet, etc.
                         RunAtStartup = true;
 
-                        // While we're here, let's disable the internet so that the user can't browse
-                        // the web without us.
-                        try
+                        if(m_config.BlockInternet)
                         {
-                            WFPUtility.DisableInternet();
+                            // While we're here, let's disable the internet so that the user can't browse
+                            // the web without us. Only do this of course if configured.
+                            try
+                            {
+                                WFPUtility.DisableInternet();
+                            }
+                            catch { }
                         }
-                        catch { }
                     }
                     else
                     {

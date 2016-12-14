@@ -29,5 +29,17 @@ namespace Te.Citadel.UI.Views
         {
             m_blockEventsTextBox.Text = message + Environment.NewLine + m_blockEventsTextBox.Text;
         }
+
+        public void ShowDisabledInternetMessage(DateTime restoreTime)
+        {
+            m_disabledInternetGrid.Visibility = Visibility.Visible;
+
+            m_internetRestorationTimeLabel.Content = restoreTime.ToLongDateString() + " " + restoreTime.ToShortTimeString();
+        }
+
+        public void HideDisabledInternetMessage()
+        {
+            m_disabledInternetGrid.Visibility = Visibility.Hidden;
+        }
     }
 }

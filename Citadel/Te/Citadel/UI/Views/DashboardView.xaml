@@ -18,9 +18,14 @@
     </UserControl.DataContext>
     <Grid>
 
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
+
         <Controls:MetroAnimatedSingleRowTabControl>
             <TabItem Header="Status">
                 <Grid>
+
                     <Label Width="258"
                            Margin="229,10,229,0"
                            HorizontalAlignment="Center"
@@ -47,12 +52,60 @@
 
                     <!--  Request deactivation button.  -->
                     <Button Width="136"
-                            Margin="552,296,0,0"
+                            Margin="562,296,0,0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             Command="{Binding RequestDeactivateCommand}"
                             Content="Request Deactivation"
                             Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Grid x:Name="m_disabledInternetGrid"
+                          x:FieldModifier="private"
+                          Visibility="Hidden">
+
+                        <Rectangle HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"
+                                   Fill="White" />
+
+                        <Label Width="258"
+                               Margin="229,10,229,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               HorizontalContentAlignment="Center"
+                               Content="Internet Disabled"
+                               FontFamily="Segoe UI"
+                               FontSize="22"
+                               FontWeight="UltraLight"
+                               Foreground="Black" />
+
+                        <TextBlock Width="660"
+                                   Height="98"
+                                   Margin="28,70,28,0"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Top"
+                                   FontFamily="Segoe UI"
+                                   FontSize="14"
+                                   FontWeight="UltraLight"
+                                   Foreground="Black"
+                                   TextWrapping="Wrap">
+                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
+
+                        <Label x:Name="m_internetRestorationTimeLabel"
+                               Width="258"
+                               Margin="226,197,226,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               HorizontalContentAlignment="Center"
+                               x:FieldModifier="private"
+                               Content="Internet Disabled"
+                               FontFamily="Segoe UI"
+                               FontSize="18"
+                               FontWeight="UltraLight"
+                               Foreground="Black" />
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -117,8 +170,8 @@
                            Content="Uses Available:"
                            FontSize="12" />
 
-                    <Button Width="136"
-                            Margin="143,258,0,0"
+                    <Button Width="171"
+                            Margin="108,258,0,0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             Command="{Binding UseRelaxedPolicyCommand}"
@@ -148,6 +201,15 @@
                                               Mode=OneWay,
                                               UpdateSourceTrigger=PropertyChanged}"
                                TextAlignment="Right" />
+
+
+                    <Button Width="171"
+                            Margin="108,295,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding RelinquishRelaxedPolicyCommand}"
+                            Content="Relinquish Relaxed Policy"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
                 </Grid>
             </TabItem>
 

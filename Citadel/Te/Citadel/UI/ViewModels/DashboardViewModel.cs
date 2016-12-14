@@ -40,7 +40,12 @@ namespace Te.Citadel.UI.ViewModels
         /// Private data member for the public UseRelaxedPolicyCommand property.
         /// </summary>
         private RelayCommand m_useRelaxedPolicyCommand;
-        
+
+        /// <summary>
+        /// Private data member for the public RelinquishRelaxedPolicyCommand property.
+        /// </summary>
+        private RelayCommand m_relinquishRelaxedPolicyCommand;
+
         internal DashboardModel Model
         {
             get
@@ -150,6 +155,22 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_useRelaxedPolicyCommand;
+            }
+        }
+
+        public RelayCommand RelinquishRelaxedPolicyCommand
+        {
+            get
+            {
+                if(m_relinquishRelaxedPolicyCommand == null)
+                {
+                    m_relinquishRelaxedPolicyCommand = new RelayCommand(() =>
+                    {
+                        m_model.RelinquishRelaxedPolicy();
+                    }, () => AvailableRelaxedRequests > 0);
+                }
+
+                return m_relinquishRelaxedPolicyCommand;
             }
         }
 

@@ -15,9 +15,11 @@ namespace Te.Citadel.UI.Models
     internal class DashboardModel : ObservableObject
     {
 
-        public delegate void RelaxedPolicyRequestedDelegate();
+        public delegate void RelaxedPolicyRequestDelegate();
 
-        public event RelaxedPolicyRequestedDelegate RelaxedPolicyRequested;
+        public event RelaxedPolicyRequestDelegate RelaxedPolicyRequested;
+
+        public event RelaxedPolicyRequestDelegate RelinquishRelaxedPolicyRequested;
 
         private readonly Logger m_logger;
 
@@ -52,6 +54,11 @@ namespace Te.Citadel.UI.Models
         public void RequestRelaxedPolicy()
         {
             RelaxedPolicyRequested?.Invoke();
+        }
+
+        public void RelinquishRelaxedPolicy()
+        {
+            RelinquishRelaxedPolicyRequested?.Invoke();
         }
 
         public int AvailableRelaxedRequests
