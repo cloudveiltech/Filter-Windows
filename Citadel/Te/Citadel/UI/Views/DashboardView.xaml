@@ -94,13 +94,11 @@
                             <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
 
                         <Label x:Name="m_internetRestorationTimeLabel"
-                               Width="258"
-                               Margin="226,197,226,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
                                HorizontalContentAlignment="Center"
                                x:FieldModifier="private"
-                               Content="Internet Disabled"
+                               Content=""
                                FontFamily="Segoe UI"
                                FontSize="18"
                                FontWeight="UltraLight"

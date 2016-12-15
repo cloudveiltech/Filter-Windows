@@ -1204,7 +1204,7 @@ namespace Te.Citadel
                 return false;
             }
 
-            return true;
+            return false;
         }
 
         private byte OnClassifyContent(byte[] data, string contentType)
@@ -1528,12 +1528,18 @@ namespace Te.Citadel
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_config.BlacklistedApplications)
                             {
-                                m_blacklistedApplications.Add(appName);
+                                if(StringExtensions.Valid(appName))
+                                {
+                                    m_blacklistedApplications.Add(appName);
+                                }
                             }
 
                             foreach(var appName in m_config.WhitelistedApplications)
                             {
-                                m_whitelistedApplications.Add(appName);
+                                if(StringExtensions.Valid(appName))
+                                {
+                                    m_whitelistedApplications.Add(appName);
+                                }
                             }
 
                             if(m_config.UseThreshold)
