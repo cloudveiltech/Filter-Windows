@@ -255,7 +255,7 @@ namespace Te.Citadel
                     p.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                     p.StartInfo.FileName = "schtasks";
                     p.StartInfo.CreateNoWindow = true;
-                    p.StartInfo.Arguments += "/nh /fo TABLE /tn \"Citadel\"";
+                    p.StartInfo.Arguments += string.Format("/nh /fo TABLE /tn \"{0}\"", System.Diagnostics.Process.GetCurrentProcess().ProcessName);
                     p.StartInfo.RedirectStandardError = true;
                     p.Start();
 
@@ -265,7 +265,7 @@ namespace Te.Citadel
                     p.WaitForExit();
 
                     var runAtStartup = false;
-                    if(p.ExitCode == 0 && output.IndexOf("Citadel") != -1)
+                    if(p.ExitCode == 0 && output.IndexOf(System.Diagnostics.Process.GetCurrentProcess().ProcessName) != -1)
                     {
                         runAtStartup = true;
                     }
@@ -300,7 +300,7 @@ namespace Te.Citadel
                     {
                         case true:
                             {
-                                string createTaskCommand = "/create /F /sc onlogon /tn \"Citadel\" /rl highest /tr \"'" + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "'/StartMinimized\"";
+                                string createTaskCommand = string.Format("/create /F /sc onlogon /tn \"{0}\" /rl highest /tr \"'", System.Diagnostics.Process.GetCurrentProcess().ProcessName) + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "'/StartMinimized\"";
                                 p.StartInfo.Arguments += createTaskCommand;
 
                                 // Only create an entry if there isn't already one.
@@ -314,7 +314,7 @@ namespace Te.Citadel
 
                         case false:
                             {
-                                string deleteTaskCommand = "/delete /F /tn \"Citadel\"";
+                                string deleteTaskCommand = string.Format("/delete /F /tn \"{0}\"", System.Diagnostics.Process.GetCurrentProcess().ProcessName);
                                 p.StartInfo.Arguments += deleteTaskCommand;
                                 p.Start();
                                 p.WaitForExit();
@@ -336,7 +336,7 @@ namespace Te.Citadel
         {
             // Set a global to hold the base URI of the service providers address. This must be the
             // base path where the server side auth system is hosted.
-            Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
+            Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
 
             m_logger = LogManager.GetLogger("Citadel");
 
@@ -857,7 +857,7 @@ namespace Te.Citadel
         {
             m_trayIcon = new System.Windows.Forms.NotifyIcon();
 
-            var iconPackUri = new Uri("pack://application:,,,/Resources/citadel.ico");
+            var iconPackUri = new Uri("pack://application:,,,/Resources/appicon.ico");
             var resourceStream = GetResourceStream(iconPackUri);
 
             m_trayIcon.Icon = new System.Drawing.Icon(resourceStream.Stream);
@@ -1914,7 +1914,7 @@ namespace Te.Citadel
 
                         if(showTip)
                         {
-                            m_trayIcon.ShowBalloonTip(1500, "Still Running", "Citadel will continue running in the background.", System.Windows.Forms.ToolTipIcon.Info);
+                            m_trayIcon.ShowBalloonTip(1500, "Still Running", string.Format("{0} will continue running in the background.", System.Diagnostics.Process.GetCurrentProcess().ProcessName), System.Windows.Forms.ToolTipIcon.Info);
                         }
                     }
                 }
