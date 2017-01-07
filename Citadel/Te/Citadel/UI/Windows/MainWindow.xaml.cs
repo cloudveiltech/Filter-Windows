@@ -28,6 +28,7 @@ namespace Te.Citadel.UI.Windows
             try
             {
                 // Show binary version # in the title bar.
+                string title = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
                 System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 title += " - Version " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
