@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Te.Citadel.Extensions
 {
@@ -44,8 +40,7 @@ namespace Te.Citadel.Extensions
         /// otherwise.
         /// </returns>
         public static bool OEquals(this SecureString str, SecureString other)
-        {   
-
+        {
             IntPtr bstrThis = IntPtr.Zero;
             IntPtr bstrOther = IntPtr.Zero;
 
@@ -79,12 +74,12 @@ namespace Te.Citadel.Extensions
             finally
             {
                 // Always free the secure string byte array.
-                if (bstrThis != IntPtr.Zero)
-                {   
+                if(bstrThis != IntPtr.Zero)
+                {
                     Marshal.ZeroFreeBSTR(bstrThis);
                 }
 
-                if (bstrOther != IntPtr.Zero)
+                if(bstrOther != IntPtr.Zero)
                 {
                     Marshal.ZeroFreeBSTR(bstrOther);
                 }
@@ -109,7 +104,7 @@ namespace Te.Citadel.Extensions
                     {
                         managed[i] = Marshal.ReadByte(bstrThis, i * 2);
                     }
-                }                
+                }
             }
             catch(Exception e)
             {

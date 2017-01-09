@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security;
+﻿using System.Security;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -36,7 +35,7 @@ namespace Te.Citadel.UI.Controls
 
             // Update DependencyProperty whenever the password changes
             m_passwordBox.PasswordChanged += (sender, args) =>
-            {                
+            {
                 Password = ((PasswordBox)sender).SecurePassword;
             };
         }

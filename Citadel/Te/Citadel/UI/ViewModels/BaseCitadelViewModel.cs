@@ -2,7 +2,6 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using NLog;
 using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Te.Citadel.UI.ViewModels
@@ -59,7 +58,7 @@ namespace Te.Citadel.UI.ViewModels
             get
             {
                 if(m_changeViewCommand == null)
-                {   
+                {
                     m_changeViewCommand = new RelayCommand<Type>(RequestViewChange);
                 }
 

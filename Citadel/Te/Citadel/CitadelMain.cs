@@ -32,11 +32,7 @@
 using Microsoft.VisualBasic.ApplicationServices;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Te.Citadel.Util;
 
 namespace Te.Citadel
@@ -58,18 +54,18 @@ namespace Te.Citadel
         private CitadelApp m_app;
 
         /// <summary>
-        /// 
         /// </summary>
         public SingleAppInstanceManager()
         {
-            IsSingleInstance = true;            
+            IsSingleInstance = true;
         }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="eventArgs"></param>
-        /// <returns></returns>
+        /// <param name="eventArgs">
+        /// </param>
+        /// <returns>
+        /// </returns>
         protected override bool OnStartup(StartupEventArgs eventArgs)
         {
             m_app = new CitadelApp();
@@ -79,9 +75,9 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="eventArgs"></param>
+        /// <param name="eventArgs">
+        /// </param>
         protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)
         {
             base.OnStartupNextInstance(eventArgs);
@@ -91,22 +87,20 @@ namespace Te.Citadel
 
     public static class CitadelMain
     {
-
         public static Logger MainLogger;
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">
+        /// </param>
         [STAThread]
         public static void Main(string[] args)
-        {            
-
+        {
             try
             {
                 var nlogCfgPath = AppDomain.CurrentDomain.BaseDirectory + @"Nlog.config";
-                // Nlog config is gone. Let's put it back.
-                // XXX TODO - Remove this once we switch to programatically setting it.
+                // Nlog config is gone. Let's put it back. XXX TODO - Remove this once we switch to
+                // programatically setting it.
                 if(!File.Exists(nlogCfgPath))
                 {
                     var nlogCfgUri = new Uri("pack://application:,,,/Resources/NLog.config");
@@ -122,9 +116,9 @@ namespace Te.Citadel
             }
             catch
             {
-                // What can be done?   
+                // What can be done?
             }
-            
+
             try
             {
                 MainLogger = LogManager.GetLogger("Citadel");
@@ -132,7 +126,7 @@ namespace Te.Citadel
                 SingleAppInstanceManager appManager = new SingleAppInstanceManager();
                 appManager.Run(args);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(MainLogger, e);
             }

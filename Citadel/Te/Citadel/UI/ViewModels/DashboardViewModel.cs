@@ -1,11 +1,9 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
+﻿using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
@@ -17,13 +15,46 @@ namespace Te.Citadel.UI.ViewModels
     public class DashboardViewModel : BaseCitadelViewModel
     {
         /// <summary>
+        /// Class for displaying block event information in a DataGrid.
+        /// </summary>
+        public class ViewableBlockedRequests : ObservableObject
+        {
+            public string CategoryName
+            {
+                get;
+                private set;
+            }
+
+            public string FullRequest
+            {
+                get;
+                private set;
+            }
+
+            public ViewableBlockedRequests(string category, string fullRequest)
+            {
+                this.CategoryName = category;
+                this.FullRequest = fullRequest;
+            }
+        }
+
+        /// <summary>
         /// The model.
         /// </summary>
         private DashboardModel m_model = new DashboardModel();
 
+        /// <summary>
+        /// List of observable block actions that the user can view.
+        /// </summary>
+        public ObservableCollection<ViewableBlockedRequests> BlockEvents
+        {
+            get;
+            set;
+        }
+
         public DashboardViewModel()
         {
-
+            BlockEvents = new ObservableCollection<ViewableBlockedRequests>();
         }
 
         /// <summary>
@@ -80,7 +111,7 @@ namespace Te.Citadel.UI.ViewModels
                                 {
                                     ProcessProtection.Unprotect();
                                 }
-                                
+
                                 // Init the shutdown of this application.
                                 Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
                                 return;
@@ -90,7 +121,6 @@ namespace Te.Citadel.UI.ViewModels
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
-
                     }));
                 }
 
@@ -106,7 +136,7 @@ namespace Te.Citadel.UI.ViewModels
                 {
                     m_viewLogsCommand = new RelayCommand(() =>
                     {
-                        // Scan all Nlog log targets 
+                        // Scan all Nlog log targets
                         var logDir = string.Empty;
 
                         var targets = NLog.LogManager.Configuration.AllTargets;
@@ -116,7 +146,7 @@ namespace Te.Citadel.UI.ViewModels
                             if(target is NLog.Targets.FileTarget)
                             {
                                 var fTarget = (NLog.Targets.FileTarget)target;
-                                var logEventInfo = new NLog.LogEventInfo{ TimeStamp = DateTime.Now };
+                                var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
                                 var fName = fTarget.FileName.Render(logEventInfo);
 
                                 if(!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
@@ -135,7 +165,7 @@ namespace Te.Citadel.UI.ViewModels
 
                         // Call process start with the dir path, explorer will handle it.
                         Process.Start(logDir);
-                    });                    
+                    });
                 }
 
                 return m_viewLogsCommand;
@@ -151,7 +181,7 @@ namespace Te.Citadel.UI.ViewModels
                     m_useRelaxedPolicyCommand = new RelayCommand(() =>
                     {
                         m_model.RequestRelaxedPolicy();
-                    }, () => true);//AvailableRelaxedRequests > 0);
+                    }, () => AvailableRelaxedRequests > 0);
                 }
 
                 return m_useRelaxedPolicyCommand;
@@ -167,7 +197,7 @@ namespace Te.Citadel.UI.ViewModels
                     m_relinquishRelaxedPolicyCommand = new RelayCommand(() =>
                     {
                         m_model.RelinquishRelaxedPolicy();
-                    }, () => AvailableRelaxedRequests > 0);
+                    }, () => true);
                 }
 
                 return m_relinquishRelaxedPolicyCommand;

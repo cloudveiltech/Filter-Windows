@@ -1,9 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
 using System.Diagnostics;
-using System.Net;
 using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
@@ -91,43 +89,43 @@ namespace Te.Citadel.UI.Models
         public bool CanAttemptAuthentication()
         {
             // Can't auth when we're in the middle of it.
-            if (m_currentlyAuthenticating)
-            {   
+            if(m_currentlyAuthenticating)
+            {
                 return false;
             }
 
-            // Check to see if the service provider string represents a HTTP or HTTPS URI. If
-            // not, then it's not valid.
-            if (!StringExtensions.Valid(ServiceProvider))
+            // Check to see if the service provider string represents a HTTP or HTTPS URI. If not,
+            // then it's not valid.
+            if(!StringExtensions.Valid(ServiceProvider))
             {
                 return false;
             }
 
             Uri result;
-            if (!Uri.TryCreate(ServiceProvider, UriKind.Absolute, out result))
+            if(!Uri.TryCreate(ServiceProvider, UriKind.Absolute, out result))
             {
                 return false;
             }
 
             // Enforce that we're encrypting when not in debug.
-            #if !CITADEL_DEBUG
+#if !CITADEL_DEBUG
                 if(!result.Scheme.OIEquals(Uri.UriSchemeHttps))
-            #else
-                if(!result.Scheme.OIEquals(Uri.UriSchemeHttp) && !result.Scheme.OIEquals(Uri.UriSchemeHttps))
-            #endif
+#else
             if(!result.Scheme.OIEquals(Uri.UriSchemeHttp) && !result.Scheme.OIEquals(Uri.UriSchemeHttps))
-            {
-                return false;
-            }
+#endif
+                if(!result.Scheme.OIEquals(Uri.UriSchemeHttp) && !result.Scheme.OIEquals(Uri.UriSchemeHttps))
+                {
+                    return false;
+                }
 
             // Ensure some sort of username has been supplied.
-            if (!StringExtensions.Valid(UserName))
+            if(!StringExtensions.Valid(UserName))
             {
                 return false;
             }
 
             // Ensure some sort of password has been supplied.
-            if (UserPassword == null || UserPassword.Length <= 0)
+            if(UserPassword == null || UserPassword.Length <= 0)
             {
                 return false;
             }
@@ -163,6 +161,7 @@ namespace Te.Citadel.UI.Models
                                 ErrorMessage = "Failed to login to service provider.";
                             }
                             break;
+
                         case AuthenticatedUserModel.AuthenticationResult.Success:
                             {
                                 return true;
@@ -173,7 +172,7 @@ namespace Te.Citadel.UI.Models
                 {
                     ErrorMessage = "Invalid service provider address.";
                 }
-            }           
+            }
             finally
             {
                 // Always purge password from memory ASAP.
@@ -189,7 +188,7 @@ namespace Te.Citadel.UI.Models
         public LoginModel()
         {
             // Set the default service provider to the app-global value.
-            m_serviceProvider = (string)Application.Current.Properties["ServiceProviderApi"] + "/login.php";            
+            m_serviceProvider = (string)Application.Current.Properties["ServiceProviderApi"] + "/login.php";
             m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();

@@ -430,7 +430,7 @@ namespace Te.Citadel.UI.Models
                 throw new ArgumentException("Supplied auth route URI does not use the HTTPS scheme. Cannot authenticate over non-HTTPS connection.", nameof(authRoute));
             }
 #endif
-            
+
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(username));
 
@@ -523,9 +523,9 @@ namespace Te.Citadel.UI.Models
                         this.Username = username;
                         this.Password = unencryptedPassword;
 
-                        // We have to do this crazy nonsense with cookies, otherwise
-                        // .NET will assume a WHOLE BUNCH of about the paths and such
-                        // of cookies and will not send them correctly.
+                        // We have to do this crazy nonsense with cookies, otherwise .NET will assume
+                        // a WHOLE BUNCH of about the paths and such of cookies and will not send
+                        // them correctly.
                         var newCookieContainer = new CookieContainer();
                         foreach(Cookie cookie in response.Cookies)
                         {
@@ -579,7 +579,7 @@ namespace Te.Citadel.UI.Models
                             return AuthenticationResult.ConnectionFailed;
                         }
                     }
-                }   
+                }
             }
             finally
             {
@@ -676,13 +676,11 @@ namespace Te.Citadel.UI.Models
                 this.Password = plaintext;
                 this.AuthRoute = deserialized.AuthRoute;
 
-                // Set using private member, because public member calls
-                // save again.
+                // Set using private member, because public member calls save again.
                 this.m_termsAccepted = deserialized.Accepted;
 
-                // We have to do this crazy nonsense with cookies, otherwise
-                // .NET will assume a WHOLE BUNCH of about the paths and such
-                // of cookies and will not send them correctly.
+                // We have to do this crazy nonsense with cookies, otherwise .NET will assume a WHOLE
+                // BUNCH of about the paths and such of cookies and will not send them correctly.
                 var cookieCollection = new CookieContainer();
                 var allCookies = deserialized.CookieString.Split(',');
                 foreach(var cookieString in allCookies)
@@ -698,7 +696,7 @@ namespace Te.Citadel.UI.Models
                     }
                 }
 
-                this.UserSessionCookies = cookieCollection;                
+                this.UserSessionCookies = cookieCollection;
 
                 return true;
             }

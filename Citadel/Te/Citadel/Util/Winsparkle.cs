@@ -2,7 +2,6 @@
 
 namespace Te.Citadel.Util
 {
-    
     internal class WinSparkle
     {
         /// <summary>
@@ -48,5 +47,4 @@ namespace Te.Citadel.Util
         [DllImport("WinSparkle.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "win_sparkle_check_update_without_ui", ExactSpelling = true)]
         public static extern void CheckUpdateWithoutUI();
     }
-    
 }

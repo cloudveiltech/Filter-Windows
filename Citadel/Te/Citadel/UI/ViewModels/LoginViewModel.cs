@@ -1,15 +1,6 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+﻿using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.Views;
@@ -17,7 +8,6 @@ using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.ViewModels
 {
-    
     /// <summary>
     /// The LoginViewModel class serves as the ViewModel for the LoginView UserControl.
     /// </summary>
@@ -31,7 +21,7 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
         /// </summary>
-        private RelayCommand m_authenticateCommand;        
+        private RelayCommand m_authenticateCommand;
 
         /// <summary>
         /// Command to run an authentication request for the credentials given in the view.
@@ -44,10 +34,10 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(m_authenticateCommand == null)
                 {
-                    m_authenticateCommand = new RelayCommand((Action)(async ()=>
+                    m_authenticateCommand = new RelayCommand((Action)(async () =>
                     {
                         try
-                        {   
+                        {
                             RequestViewChangeCommand.Execute(typeof(ProgressWait));
                             var authSuccess = await m_model.Authenticate();
 
@@ -55,8 +45,9 @@ namespace Te.Citadel.UI.ViewModels
                             {
                                 RequestViewChangeCommand.Execute(typeof(LoginView));
 
-                                // Force a refresh of the error message member as it's been internally
-                                // set in the model in this case. XXX TODO - Not the greatest design.
+                                // Force a refresh of the error message member as it's been
+                                // internally set in the model in this case. XXX TODO - Not the
+                                // greatest design.
                                 RaisePropertyChanged(nameof(ErrorMessage));
                             }
                             else
@@ -68,13 +59,12 @@ namespace Te.Citadel.UI.ViewModels
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
-                        
                     }), m_model.CanAttemptAuthentication);
                 }
-                
+
                 return m_authenticateCommand;
             }
-        }       
+        }
 
         /// <summary>
         /// Binding path for the service provider input field.
@@ -88,8 +78,8 @@ namespace Te.Citadel.UI.ViewModels
 
             set
             {
-                if (value != null && !value.OIEquals(m_model.ServiceProvider))
-                {   
+                if(value != null && !value.OIEquals(m_model.ServiceProvider))
+                {
                     m_authenticateCommand.RaiseCanExecuteChanged();
 
                     m_model.ServiceProvider = value;
@@ -115,7 +105,7 @@ namespace Te.Citadel.UI.ViewModels
         public string UserName
         {
             get
-            {                
+            {
                 return m_model.UserName;
             }
 
@@ -136,13 +126,13 @@ namespace Te.Citadel.UI.ViewModels
         public SecureString UserPassword
         {
             get
-            {   
+            {
                 return m_model.UserPassword;
             }
 
             set
             {
-                if (value != null && !value.OEquals(m_model.UserPassword))
+                if(value != null && !value.OEquals(m_model.UserPassword))
                 {
                     m_authenticateCommand.RaiseCanExecuteChanged();
 

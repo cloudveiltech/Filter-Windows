@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Te.Citadel.Data.Serialization;
 
 namespace Te.Citadel.Data.Models
@@ -14,9 +11,8 @@ namespace Te.Citadel.Data.Models
     /// should function. This includes which filtering lists to use, how to apply those filtering
     /// lists, which applications to filter, which protection mechanisms to employ, etc.
     /// </summary>
-    class AppConfigModel
+    internal class AppConfigModel
     {
-
         /// <summary>
         /// Relative paths to all bundled files that should be applied to blacklisting functionality.
         /// </summary>
@@ -163,7 +159,6 @@ namespace Te.Citadel.Data.Models
 
         public AppConfigModel()
         {
-
         }
     }
 }

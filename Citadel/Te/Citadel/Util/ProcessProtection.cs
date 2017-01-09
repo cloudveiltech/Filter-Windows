@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Te.Citadel.Util
 {
-
     /// <summary>
     /// Class responsible for exposing undocumented functionality making the host process unkillable.
     /// </summary>
@@ -43,7 +38,7 @@ namespace Te.Citadel.Util
                 finally
                 {
                     s_isProtectedLock.ExitReadLock();
-                }                
+                }
             }
         }
 
@@ -67,7 +62,7 @@ namespace Te.Citadel.Util
             finally
             {
                 s_isProtectedLock.ExitWriteLock();
-            }            
+            }
         }
 
         /// <summary>
@@ -89,7 +84,7 @@ namespace Te.Citadel.Util
             finally
             {
                 s_isProtectedLock.ExitWriteLock();
-            }            
+            }
         }
     }
 }

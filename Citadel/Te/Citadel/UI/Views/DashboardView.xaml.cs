@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Views
 {
@@ -25,9 +15,16 @@ namespace Te.Citadel.UI.Views
             InitializeComponent();
         }
 
-        public void AppendBlockActionEvent(string message)
+        public void AppendBlockActionEvent(string category, string fullRequest)
         {
-            m_blockEventsTextBox.Text = message + Environment.NewLine + m_blockEventsTextBox.Text;
+            // Keep number of items truncated to 50.
+            if(m_blockEventsDataGrid.Items.Count > 50)
+            {
+                m_blockEventsDataGrid.Items.RemoveAt(0);
+            }
+
+            // Add the item to view.
+            m_blockEventsDataGrid.Items.Add(new DashboardViewModel.ViewableBlockedRequests(category, fullRequest));
         }
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)
@@ -40,6 +37,11 @@ namespace Te.Citadel.UI.Views
         public void HideDisabledInternetMessage()
         {
             m_disabledInternetGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
+        {
+            var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
         }
     }
 }

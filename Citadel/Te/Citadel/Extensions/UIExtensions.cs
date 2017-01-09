@@ -8,7 +8,7 @@ namespace Te.Citadel.Extensions
     public static class UIExtensions
     {
         public static void Disconnect(this UIElement child)
-        {   
+        {
             var parent = VisualTreeHelper.GetParent(child);
 
             if(parent == null)
@@ -19,7 +19,7 @@ namespace Te.Citadel.Extensions
 
             var panel = parent as Panel;
 
-            if (panel != null)
+            if(panel != null)
             {
                 panel.Children.Remove(child);
                 Debug.WriteLine("panel");
@@ -27,9 +27,9 @@ namespace Te.Citadel.Extensions
             }
 
             var decorator = parent as Decorator;
-            if (decorator != null)
+            if(decorator != null)
             {
-                if (decorator.Child == child)
+                if(decorator.Child == child)
                 {
                     decorator.Child = null;
                 }
@@ -38,9 +38,9 @@ namespace Te.Citadel.Extensions
             }
 
             var contentPresenter = parent as ContentPresenter;
-            if (contentPresenter != null)
+            if(contentPresenter != null)
             {
-                if (contentPresenter.Content == child)
+                if(contentPresenter.Content == child)
                 {
                     contentPresenter.Content = null;
                 }
@@ -49,9 +49,9 @@ namespace Te.Citadel.Extensions
             }
 
             var contentControl = parent as ContentControl;
-            if (contentControl != null)
+            if(contentControl != null)
             {
-                if (contentControl.Content == child)
+                if(contentControl.Content == child)
                 {
                     contentControl.Content = null;
                 }
@@ -60,7 +60,7 @@ namespace Te.Citadel.Extensions
             }
 
             var itemsControl = parent as ItemsControl;
-            if (itemsControl != null)
+            if(itemsControl != null)
             {
                 itemsControl.Items.Remove(child);
                 Debug.WriteLine("ic");

@@ -1,20 +1,13 @@
 ﻿using GalaSoft.MvvmLight;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Models
 {
     internal class DashboardModel : ObservableObject
     {
-
         public delegate void RelaxedPolicyRequestDelegate();
 
         public event RelaxedPolicyRequestDelegate RelaxedPolicyRequested;
@@ -35,12 +28,13 @@ namespace Te.Citadel.UI.Models
         public async Task<bool> RequestAppDeactivation()
         {
             try
-            {               
-                var deactivationRouteStr = "/capi/deactivate.php"; 
+            {
+                var deactivationRouteStr = "/capi/deactivate.php";
 
                 var response = await WebServiceUtil.RequestResource(deactivationRouteStr);
 
-                // WebServiceUtil.RequestResource gives null on failure, non-null on success of any kind.
+                // WebServiceUtil.RequestResource gives null on failure, non-null on success of any
+                // kind.
                 return response != null;
             }
             catch(Exception e)

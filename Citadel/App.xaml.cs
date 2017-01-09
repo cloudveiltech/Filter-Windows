@@ -8,11 +8,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -37,7 +35,6 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
-
         private class FilterListEntry
         {
             private volatile bool m_isBypass = false;
@@ -109,7 +106,6 @@ namespace Te.Citadel
         private Engine.FirewallCheckHandler m_firewallCheckCb;
 
         private Engine.ClassifyContentHandler m_classifyCb;
-        
 
         /// <summary>
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
@@ -375,7 +371,7 @@ namespace Te.Citadel
         /// action threshold tracking functionality.
         /// </summary>
         private void InitThresholdData()
-        {            
+        {
             // If exists, stop it first.
             if(m_thresholdCountTimer != null)
             {
@@ -1147,7 +1143,7 @@ namespace Te.Citadel
                     try
                     {
                         m_logger.Warn("Block action threshold met or exceeded. Disabling internet.");
-                        WFPUtility.DisableInternet();                        
+                        WFPUtility.DisableInternet();
                     }
                     catch(Exception e)
                     {
@@ -1158,6 +1154,17 @@ namespace Te.Citadel
                 }
             }
 
+            string categoryNameString = string.Empty;
+
+            foreach(var cats in m_generatedCategoriesMap)
+            {
+                if(cats.Value.CategoryId == category)
+                {
+                    categoryNameString = cats.Value.CategoryName;
+                    break;
+                }
+            }
+
             // Add this blocked request to the dashboard.
             Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
@@ -1165,7 +1172,7 @@ namespace Te.Citadel
                 {
                     if(m_viewDashboard != null)
                     {
-                        m_viewDashboard.AppendBlockActionEvent(fullRequest);
+                        m_viewDashboard.AppendBlockActionEvent(categoryNameString, fullRequest);
 
                         if(internetShutOff)
                         {
@@ -1401,7 +1408,6 @@ namespace Te.Citadel
         {
             try
             {
-
                 m_logger.Info("Checking for filter list updates.");
 
                 // Stop the threaded timer while we do this. We have to stop it in order to avoid
@@ -1410,7 +1416,7 @@ namespace Te.Citadel
 
                 /*
                  * Not necessary. Left in case needed later/elsewhere.
-                 * 
+                 *
                 // First, let's re-authenticate to ensure that we hold a current, valid session.
                 var authResultTask = ChallengeUserAuthenticity();
                 authResultTask.Wait();
@@ -1454,8 +1460,7 @@ namespace Te.Citadel
                 // Enable the timer again.
                 if(!WebServiceUtil.HasInternetService)
                 {
-                    // If we have no internet, keep polling every 15 seconds.
-                    // We need that data ASAP.
+                    // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
                     this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
                 }
                 else
@@ -1479,7 +1484,6 @@ namespace Te.Citadel
 
             try
             {
-
                 if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
                 {
                     m_logger.Info("Start engine.");
@@ -1490,8 +1494,8 @@ namespace Te.Citadel
                     // Make sure we have a task set to run again.
                     RunAtStartup = true;
 
-                    // Make sure our lists are up to date and try to update the app,
-                    // etc etc. Just call our update timer complete handler manually.
+                    // Make sure our lists are up to date and try to update the app, etc etc. Just
+                    // call our update timer complete handler manually.
                     OnUpdateTimerElapsed(null);
 
                     ReloadFilteringRules();
@@ -1631,14 +1635,14 @@ namespace Te.Citadel
 
                                 if(ssLen <= 0)
                                 {
-                                    // Just in case this is some glitch or issue where a top level file
-                                    // has been included that is not part of any category. Skip such
-                                    // an entry.
+                                    // Just in case this is some glitch or issue where a top level
+                                    // file has been included that is not part of any category. Skip
+                                    // such an entry.
                                     continue;
                                 }
 
                                 categoryName = categoryName.Substring(0, ssLen);
-                                
+
                                 // Handle NLP entries, if any.
                                 if(categoryName.OIEquals("nlp"))
                                 {
@@ -1665,11 +1669,13 @@ namespace Te.Citadel
                                     }
                                 }
 
-                                // Try and fetch an existing category matching this name, or create a new one.
+                                // Try and fetch an existing category matching this name, or create a
+                                // new one.
                                 FilterListEntry existingCategory;
                                 if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
                                 {
-                                    // We can't generate anymore categories. Sorry, but the rest get ignored.
+                                    // We can't generate anymore categories. Sorry, but the rest get
+                                    // ignored.
                                     if(m_generatedCategoriesMap.Count >= byte.MaxValue)
                                     {
                                         break;
@@ -1680,7 +1686,8 @@ namespace Te.Citadel
                                     existingCategory.IsBypass = false;
                                     existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
 
-                                    // In case we're re-loading, call to unload any existing rules for this category first.
+                                    // In case we're re-loading, call to unload any existing rules
+                                    // for this category first.
                                     m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory.CategoryId);
 
                                     m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
@@ -1693,7 +1700,7 @@ namespace Te.Citadel
 
                                 switch(listName)
                                 {
-                                    case "rules.txt":                                    
+                                    case "rules.txt":
                                         {
                                             // Need to prepend @@ to lines if it's a whitelist.
                                             string rulePrefix = m_config.Whitelists.Contains(entry.FullName) ? "@@" : string.Empty;
@@ -1702,14 +1709,14 @@ namespace Te.Citadel
                                             var builder = new StringBuilder();
                                             string line = null;
                                             using(TextReader tr = new StreamReader(entry.Open()))
-                                            {   
+                                            {
                                                 while((line = tr.ReadLine()) != null)
-                                                {   
+                                                {
                                                     builder.Append(rulePrefix + line + "\n");
                                                 }
 
                                                 tr.Close();
-                                                
+
                                                 var listContents = builder.ToString();
                                                 builder.Clear();
 
@@ -1723,14 +1730,15 @@ namespace Te.Citadel
                                                 // Set if it's a bypass list or not.
                                                 existingCategory.IsBypass = isBypass;
 
-                                                // Force GC to run because this will clear A LOT of memory.
+                                                // Force GC to run because this will clear A LOT of
+                                                // memory.
                                                 System.GC.Collect();
                                             }
                                         }
                                         break;
 
                                     case "triggers.txt":
-                                        {   
+                                        {
                                             using(TextReader tr = new StreamReader(entry.Open()))
                                             {
                                                 var triggers = tr.ReadToEnd();
@@ -1739,9 +1747,10 @@ namespace Te.Citadel
                                                     m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false, out rulesLoaded);
                                                     totalTriggersLoaded += rulesLoaded;
                                                     tr.Close();
-                                                }                                               
+                                                }
 
-                                                // Force GC to run because this will clear A LOT of memory.
+                                                // Force GC to run because this will clear A LOT of
+                                                // memory.
                                                 System.GC.Collect();
                                             }
                                         }
@@ -1835,7 +1844,7 @@ namespace Te.Citadel
                 if(m_relaxedPolicyResetTimer == null)
                 {
                     m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
-                }                
+                }
 
                 m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
             }
@@ -1857,17 +1866,16 @@ namespace Te.Citadel
                 }
             }
 
-            // Ensure timer is stopped and re-enable categories by simply
-            // calling the timer's expiry callback.
+            // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry
+            // callback.
             if(relaxedInEffect)
             {
                 OnRelaxedPolicyTimerExpired(null);
             }
 
-            // If a policy was not already in effect, then the user is choosing to
-            // relinquish a policy not yet used. So just eat it up. If  this is not
-            // the case, then the policy has already been decremented, so don't
-            // bother.
+            // If a policy was not already in effect, then the user is choosing to relinquish a
+            // policy not yet used. So just eat it up. If this is not the case, then the policy has
+            // already been decremented, so don't bother.
             if(!relaxedInEffect)
             {
                 DecrementRelaxedPolicy();
@@ -1892,7 +1900,7 @@ namespace Te.Citadel
                 {
                     m_filteringEngine.SetCategoryEnabled(entry.CategoryId, true);
                 }
-            }           
+            }
         }
 
         /// <summary>
@@ -2032,8 +2040,8 @@ namespace Te.Citadel
 
                         if(m_config.BlockInternet)
                         {
-                            // While we're here, let's disable the internet so that the user can't browse
-                            // the web without us. Only do this of course if configured.
+                            // While we're here, let's disable the internet so that the user can't
+                            // browse the web without us. Only do this of course if configured.
                             try
                             {
                                 WFPUtility.DisableInternet();

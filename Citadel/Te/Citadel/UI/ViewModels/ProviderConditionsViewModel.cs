@@ -90,7 +90,6 @@ namespace Te.Citadel.UI.ViewModels
 
         public ProviderConditionsViewModel()
         {
-
         }
 
         /// <summary>
@@ -99,9 +98,8 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         private async void GetTermsAsync()
         {
-            // Seriously, this will just keep asking over and over and over
-            // again thanks to WPF probing this property if this fails. So, don't
-            // log errors here.
+            // Seriously, this will just keep asking over and over and over again thanks to WPF
+            // probing this property if this fails. So, don't log errors here.
             var terms = await WebServiceUtil.RequestResource("/capi/getterms.php", true);
 
             if(terms != null && terms.Length > 0)
@@ -120,7 +118,7 @@ namespace Te.Citadel.UI.ViewModels
             else
             {
                 m_model.Terms = string.Empty;
-            }            
+            }
         }
     }
 }

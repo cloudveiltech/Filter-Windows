@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NLog;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 
 namespace Te.Citadel.Util
 {
-    static class LoggerUtil
+    internal static class LoggerUtil
     {
-
         /// <summary>
         /// Recursively logs the given exception to the supplied logger. Steps through all inner
         /// exceptions until there are none left, writting the message and stack strace.

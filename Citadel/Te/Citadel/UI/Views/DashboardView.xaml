@@ -177,7 +177,6 @@
                            Content="Time Permitted:"
                            FontSize="12" />
 
-
                     <TextBlock Width="120"
                                Height="30"
                                Margin="159,174,431,154"
@@ -196,7 +195,6 @@
                                               UpdateSourceTrigger=PropertyChanged}"
                                TextAlignment="Right" />
 
-
                     <Button Width="171"
                             Margin="108,295,0,0"
                             HorizontalAlignment="Left"
@@ -210,6 +208,13 @@
             <TabItem Header="Blocking Info">
                 <Grid>
 
+                    <!--  This style on the grid will force the cells in the DataGrid to truncate their text.  -->
+                    <Grid.Resources>
+                        <Style x:Key="TextBlockStyleKey" TargetType="{x:Type TextBlock}">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        </Style>
+                    </Grid.Resources>
+
                     <Label Width="258"
                            Margin="226,10,226,0"
                            HorizontalAlignment="Center"
@@ -222,24 +227,59 @@
                            Foreground="Black" />
 
                     <TextBlock Width="690"
-                               Height="41"
-                               Margin="10,54,10,0"
+                               Height="62"
+                               Margin="13,54,13,0"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Top"
                                FontFamily="Segoe UI"
                                FontSize="14"
                                FontWeight="UltraLight"
                                Foreground="Black"
-                               Text="This is a temporary view of block events that have occurred during this filtering session. This data is not persisted in storage, or transmitted anywhere. It is presented for insight and convenience."
-                               TextWrapping="Wrap" />
+                               TextWrapping="Wrap"><Run Text="This is a temporary view of block events that have occurred during this filtering session. This data is not persisted in storage, or transmitted anywhere. It is presented for insight and convenience." /><Run Text=" You may also request a block action to be reviewed" /><Run Text=" by selecting it below." /><Run Text=" Note that in this case, the selected information will be shared with your provider." /></TextBlock>
 
-                    <TextBlock x:Name="m_blockEventsTextBox"
-                               Margin="10 120 10 10"
-                               x:FieldModifier="private"
-                               ScrollViewer.CanContentScroll="False"
-                               ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                               ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                               TextTrimming="CharacterEllipsis" />
+                    <Button Height="25"
+                            Margin="554,312,10,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            Click="OnRequestReviewBlockActionClicked"
+                            Content="Request Review">
+                        <Button.Style>
+                            <!--  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
+                            <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=m_dataGridMarkupRuleLists, Path=SelectedItem}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <DataGrid x:Name="m_blockEventsDataGrid"
+                              Grid.Row="0"
+                              Margin="10,121,10,43"
+                              x:FieldModifier="private"
+                              AutoGenerateColumns="False"
+                              ItemsSource="{Binding BlockEvents}"
+                              VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="150"
+                                                Binding="{Binding CategoryName}"
+                                                Header="Category" />
+
+                            <DataGridTextColumn Width="100*"
+                                                Binding="{Binding FullRequest}"
+                                                Header="Request" />
+                        </DataGrid.Columns>
+
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>
