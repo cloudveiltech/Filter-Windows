@@ -151,7 +151,7 @@ namespace Te.Citadel.UI.ViewModels
                     m_useRelaxedPolicyCommand = new RelayCommand(() =>
                     {
                         m_model.RequestRelaxedPolicy();
-                    }, () => AvailableRelaxedRequests > 0);
+                    }, () => true);//AvailableRelaxedRequests > 0);
                 }
 
                 return m_useRelaxedPolicyCommand;

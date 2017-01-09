@@ -1856,10 +1856,13 @@ namespace Te.Citadel
                     break;
                 }
             }
-            
+
             // Ensure timer is stopped and re-enable categories by simply
             // calling the timer's expiry callback.
-            OnRelaxedPolicyTimerExpired(null);
+            if(relaxedInEffect)
+            {
+                OnRelaxedPolicyTimerExpired(null);
+            }
 
             // If a policy was not already in effect, then the user is choosing to
             // relinquish a policy not yet used. So just eat it up. If  this is not
