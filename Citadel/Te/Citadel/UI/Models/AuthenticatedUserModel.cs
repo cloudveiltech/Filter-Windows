@@ -430,7 +430,7 @@ namespace Te.Citadel.UI.Models
                 throw new ArgumentException("Supplied auth route URI does not use the HTTPS scheme. Cannot authenticate over non-HTTPS connection.", nameof(authRoute));
             }
 #endif
-
+            
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(username));
 
@@ -446,6 +446,13 @@ namespace Te.Citadel.UI.Models
                 throw new ArgumentException("Supplied password byte array cannot be null and must have a length greater than zero.", nameof(unencryptedPassword));
             }
             //
+
+            // Don't bother if we don't have internet.
+            var hasInternet = await WebServiceUtil.GetHasInternetServiceAsync();
+            if(hasInternet == false)
+            {
+                return AuthenticationResult.ConnectionFailed;
+            }
 
             // Will be saved if we get a success result.
             var sessionCookieContainer = new CookieContainer();

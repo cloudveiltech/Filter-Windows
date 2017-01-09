@@ -18,10 +18,6 @@
     </UserControl.DataContext>
     <Grid>
 
-        <Grid.Resources>
-            <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        </Grid.Resources>
-
         <Controls:MetroAnimatedSingleRowTabControl>
             <TabItem Header="Status">
                 <Grid>

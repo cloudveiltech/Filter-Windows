@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,51 @@ namespace Te.Citadel.Util
 {
     internal class WebServiceUtil
     {
+        /// <summary>
+        /// Gets whether or not internet connectivity is available by pinging google's pub DNS in a
+        /// synchronous fashion.
+        /// </summary>
+        public static bool HasInternetService
+        {
+            get
+            {
+                try
+                {
+                    // We'll ping google's public DNS servers to avoid getting
+                    // flagged as some sort of bot.
+                    Ping googleDnsPing = new Ping();
+                    byte[] buffer = new byte[32];
+                    PingReply reply = googleDnsPing.Send(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions());
+                    return (reply.Status == IPStatus.Success);
+                }
+                catch { }
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks for internet connectivity by pinging google's pub DNS in an asynchronous fashion.
+        /// </summary>
+        /// <returns>
+        /// True if a response to the ping was received, false otherwise.
+        /// </returns>
+        public static async Task<bool> GetHasInternetServiceAsync()
+        {
+            try
+            {
+                // We'll ping google's public DNS servers to avoid getting
+                // flagged as some sort of bot.
+                Ping googleDnsPing = new Ping();
+                byte[] buffer = new byte[32];
+                PingReply reply = await googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions());
+                return (reply.Status == IPStatus.Success);
+            }
+            catch { }
+
+            return false;
+        }
+
         /// <summary>
         /// Request a generic resource from the service server(s).
         /// </summary>

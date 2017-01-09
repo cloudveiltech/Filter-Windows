@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Citadel")]
+[assembly: AssemblyTitle("CloudVeil")]
 [assembly: AssemblyDescription("Web Content Filter")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Technik Empire")]
-[assembly: AssemblyProduct("Citadel")]
-[assembly: AssemblyCopyright("Copyright ©  2016, Licensed under modified GPLv3")]
+[assembly: AssemblyProduct("CloudVeil")]
+[assembly: AssemblyCopyright("Copyright ©  2017, Licensed under modified GPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -467,7 +467,7 @@ namespace Te.Citadel
 
                 bool needsUpdate = false;
 
-                if(!File.Exists(listDataFilePath))
+                if(!File.Exists(listDataFilePath) || new FileInfo(listDataFilePath).Length == 0)
                 {
                     needsUpdate = true;
                 }
@@ -721,6 +721,9 @@ namespace Te.Citadel
 
             // Init the Engine in the background.
             InitEngine();
+
+            // Init update timer.
+            m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
             var startupArgs = e.Argument as StartupEventArgs;
 
@@ -1396,19 +1399,39 @@ namespace Te.Citadel
         /// </param>
         private void OnUpdateTimerElapsed(object state)
         {
-            m_logger.Info("Checking for filter list updates.");
-
-            // Stop the threaded timer while we do this. We have to stop it in order to avoid
-            // overlapping calls.
-            this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
-            // First, let's re-authenticate to ensure that we hold a current, valid session.
-            var authResultTask = ChallengeUserAuthenticity();
-            authResultTask.Wait();
-            var authResult = authResultTask.Result;
-
-            if(authResult)
+            try
             {
+
+                m_logger.Info("Checking for filter list updates.");
+
+                // Stop the threaded timer while we do this. We have to stop it in order to avoid
+                // overlapping calls.
+                this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+                /*
+                 * Not necessary. Left in case needed later/elsewhere.
+                 * 
+                // First, let's re-authenticate to ensure that we hold a current, valid session.
+                var authResultTask = ChallengeUserAuthenticity();
+                authResultTask.Wait();
+                var authResult = authResultTask.Result;
+
+                if(authResult)
+                {
+                    bool gotUpdatedFilterLists = UpdateListData();
+
+                    if(gotUpdatedFilterLists)
+                    {
+                        // Got new data. Gotta reload.
+                        ReloadFilteringRules();
+                    }
+                }
+                else
+                {
+                    m_logger.Warn("Failed re-authentication during list update process.");
+                }
+                */
+
                 bool gotUpdatedFilterLists = UpdateListData();
 
                 if(gotUpdatedFilterLists)
@@ -1416,19 +1439,30 @@ namespace Te.Citadel
                     // Got new data. Gotta reload.
                     ReloadFilteringRules();
                 }
+
+                m_logger.Info("Checking for application updates.");
+
+                // Check for app updates.
+                StartCheckForAppUpdates();
             }
-            else
+            catch(Exception e)
             {
-                m_logger.Warn("Failed re-authentication during list update process.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
-
-            m_logger.Info("Checking for application updates.");
-
-            // Check for app updates.
-            StartCheckForAppUpdates();
-
-            // Enable the timer again.
-            this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            finally
+            {
+                // Enable the timer again.
+                if(!WebServiceUtil.HasInternetService)
+                {
+                    // If we have no internet, keep polling every 15 seconds.
+                    // We need that data ASAP.
+                    this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
+                }
+                else
+                {
+                    this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                }
+            }
         }
 
         /// <summary>
@@ -1443,23 +1477,29 @@ namespace Te.Citadel
             }
             catch { }
 
-            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            try
             {
-                m_logger.Info("Start engine.");
 
-                // Start the engine right away, to ensure the atomic bool IsRunning is set.
-                m_filteringEngine.Start();
+                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                {
+                    m_logger.Info("Start engine.");
 
-                // Make sure we have a task set to run again.
-                RunAtStartup = true;
+                    // Start the engine right away, to ensure the atomic bool IsRunning is set.
+                    m_filteringEngine.Start();
 
-                // Make sure our lists are up to date.
-                UpdateListData();
+                    // Make sure we have a task set to run again.
+                    RunAtStartup = true;
 
-                ReloadFilteringRules();
+                    // Make sure our lists are up to date and try to update the app,
+                    // etc etc. Just call our update timer complete handler manually.
+                    OnUpdateTimerElapsed(null);
 
-                // Setup filter list update check timer.
-                m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                    ReloadFilteringRules();
+                }
+            }
+            catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
 

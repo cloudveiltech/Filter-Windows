@@ -303,8 +303,10 @@
     <Compile Include="Te\Citadel\Data\Serialization\IntToMinutesTimespanConverter.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
+    <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\ProviderConditionsModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\ProviderConditionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>

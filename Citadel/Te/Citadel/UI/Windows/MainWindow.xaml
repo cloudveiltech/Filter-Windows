@@ -2,7 +2,9 @@
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+                  xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
                   xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views"
+                  xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                   xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                   xmlns:local="clr-namespace:Te.Citadel.UI.Windows"
@@ -15,6 +17,60 @@
                   ResizeMode="NoResize"
                   WindowStartupLocation="CenterScreen"
                   mc:Ignorable="d">
+
+    <local:BaseWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="InternetConnectedIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding InternetIsConnected, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding InternetIsConnected, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InternetDisconnectedIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding InternetIsConnected, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding InternetIsConnected, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </local:BaseWindow.Resources>
+
+    <local:BaseWindow.DataContext>
+        <CitadelViewModels:MainWindowViewModel />
+    </local:BaseWindow.DataContext>
+
+    <local:BaseWindow.RightWindowCommands>
+        <MetroControls:WindowCommands>
+            <StackPanel Orientation="Horizontal">
+                <!--  Internet Disconnected Status Icon.  -->
+                <IconPacks:PackIconFontAwesome Width="20"
+                                               Height="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Foreground="Black"
+                                               Kind="ExclamationCircle"
+                                               Style="{StaticResource InternetDisconnectedIconStyle}"
+                                               ToolTip="No Internet Connection" />
+
+                <!--  Internet Connected Status Icon.  -->
+                <IconPacks:PackIconFontAwesome Width="20"
+                                               Height="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Foreground="Black"
+                                               Kind="CheckCircle"
+                                               Style="{StaticResource InternetConnectedIconStyle}"
+                                               ToolTip="Internet Connected" />
+            </StackPanel>
+        </MetroControls:WindowCommands>
+    </local:BaseWindow.RightWindowCommands>
 
     <Grid>
         <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
