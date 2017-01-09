@@ -332,7 +332,8 @@ namespace Te.Citadel
         {
             // Set a global to hold the base URI of the service providers address. This must be the
             // base path where the server side auth system is hosted.
-            Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
+            //Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
+            Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
 
             m_logger = LogManager.GetLogger("Citadel");
 
@@ -1723,7 +1724,7 @@ namespace Te.Citadel
                                                 if(StringExtensions.Valid(listContents))
                                                 {
                                                     m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory.CategoryId, false, out rulesLoaded, out rulesFailed);
-                                                    totalTriggersLoaded += rulesLoaded;
+                                                    totalFiltersLoaded += rulesLoaded;
                                                     listContents = string.Empty;
                                                 }
 
