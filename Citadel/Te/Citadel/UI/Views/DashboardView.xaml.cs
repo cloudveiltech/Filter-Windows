@@ -2,13 +2,14 @@
 using System.Windows;
 using System.Windows.Controls;
 using Te.Citadel.UI.ViewModels;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Views
 {
     /// <summary>
     /// Interaction logic for DashboardView.xaml
     /// </summary>
-    public partial class DashboardView : UserControl
+    public partial class DashboardView : BaseView
     {
         public DashboardView()
         {
@@ -17,14 +18,22 @@ namespace Te.Citadel.UI.Views
 
         public void AppendBlockActionEvent(string category, string fullRequest)
         {
-            // Keep number of items truncated to 50.
-            if(m_blockEventsDataGrid.Items.Count > 50)
+            try
             {
-                m_blockEventsDataGrid.Items.RemoveAt(0);
-            }
+                var dataCtx = (DashboardViewModel)this.DataContext;
+                // Keep number of items truncated to 50.
+                if(dataCtx.BlockEvents.Count > 50)
+                {
+                    dataCtx.BlockEvents.RemoveAt(0);
+                }
 
-            // Add the item to view.
-            m_blockEventsDataGrid.Items.Add(new DashboardViewModel.ViewableBlockedRequests(category, fullRequest));
+                // Add the item to view.
+                dataCtx.BlockEvents.Add(new DashboardViewModel.ViewableBlockedRequests(category, fullRequest));
+            }
+            catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
         }
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)
@@ -39,9 +48,31 @@ namespace Te.Citadel.UI.Views
             m_disabledInternetGrid.Visibility = Visibility.Hidden;
         }
 
-        private void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
+        private async void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
         {
-            var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
+            try
+            {
+                var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
+
+                if(selectedBlockEvent != null)
+                {
+                    var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("category={0}&full_request={1}", selectedBlockEvent.CategoryName, Uri.EscapeDataString(selectedBlockEvent.FullRequest)));
+                    var result = await WebServiceUtil.SendResource("/capi/reportreview.php", formData, false);
+
+                    if(result)
+                    {
+                        await DisplayDialogToUser("Success", "Thank you for your feedback. Your review request was successfully received.");
+                    }
+                    else
+                    {
+                        await DisplayDialogToUser("Error", "We were unable to receive your feedback. Please check your internet connection and if this issue persists, contact support.");
+                    }
+                }
+            }
+            catch(Exception err)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, err);
+            }
         }
     }
 }

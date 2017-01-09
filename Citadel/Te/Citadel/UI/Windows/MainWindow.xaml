@@ -74,6 +74,5 @@
 
     <Grid>
         <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
-
     </Grid>
 </local:BaseWindow>

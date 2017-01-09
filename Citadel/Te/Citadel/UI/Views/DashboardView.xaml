@@ -1,17 +1,17 @@
-﻿<UserControl x:Class="Te.Citadel.UI.Views.DashboardView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
-             xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
-             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Te.Citadel.UI.Views"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             Width="716"
-             Height="386"
-             d:DesignHeight="386"
-             d:DesignWidth="716"
-             mc:Ignorable="d">
+﻿<local:BaseView x:Class="Te.Citadel.UI.Views.DashboardView"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+                xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+                xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                Width="716"
+                Height="386"
+                d:DesignHeight="386"
+                d:DesignWidth="716"
+                mc:Ignorable="d">
 
     <UserControl.DataContext>
         <CitadelViewModels:DashboardViewModel />
@@ -238,7 +238,7 @@
                                TextWrapping="Wrap"><Run Text="This is a temporary view of block events that have occurred during this filtering session. This data is not persisted in storage, or transmitted anywhere. It is presented for insight and convenience." /><Run Text=" You may also request a block action to be reviewed" /><Run Text=" by selecting it below." /><Run Text=" Note that in this case, the selected information will be shared with your provider." /></TextBlock>
 
                     <Button Height="25"
-                            Margin="554,312,10,0"
+                            Margin="554,315,10,0"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Top"
                             Click="OnRequestReviewBlockActionClicked"
@@ -248,7 +248,7 @@
                             <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
                                 <Setter Property="IsEnabled" Value="True" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=m_dataGridMarkupRuleLists, Path=SelectedItem}" Value="{x:Null}">
+                                    <DataTrigger Binding="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
                                         <Setter Property="IsEnabled" Value="False" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -261,15 +261,19 @@
                               Margin="10,121,10,43"
                               x:FieldModifier="private"
                               AutoGenerateColumns="False"
-                              ItemsSource="{Binding BlockEvents}"
+                              CanUserAddRows="False"
+                              ItemsSource="{Binding BlockEvents,
+                                                    Mode=OneWay}"
                               VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
                             <DataGridTextColumn Width="150"
-                                                Binding="{Binding CategoryName}"
+                                                Binding="{Binding CategoryName,
+                                                                  Mode=OneWay}"
                                                 Header="Category" />
 
                             <DataGridTextColumn Width="100*"
-                                                Binding="{Binding FullRequest}"
+                                                Binding="{Binding FullRequest,
+                                                                  Mode=OneWay}"
                                                 Header="Request" />
                         </DataGrid.Columns>
 
@@ -284,4 +288,4 @@
             </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>
-</UserControl>
+</local:BaseView>

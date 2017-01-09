@@ -5,7 +5,7 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for ProviderConditionsView.xaml
     /// </summary>
-    public partial class ProviderConditionsView : UserControl
+    public partial class ProviderConditionsView : BaseView
     {
         public ProviderConditionsView()
         {

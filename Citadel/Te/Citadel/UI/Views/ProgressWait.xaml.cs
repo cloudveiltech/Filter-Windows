@@ -5,7 +5,7 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for LoginView.xaml
     /// </summary>
-    public partial class ProgressWait : UserControl
+    public partial class ProgressWait : BaseView
     {
         public ProgressWait()
         {
