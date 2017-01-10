@@ -641,6 +641,8 @@ namespace Te.Citadel
         {
             try
             {
+                m_doccatSlimLock.EnterWriteLock();
+
                 var selectedCategoriesList = JsonConvert.DeserializeObject<List<string>>(jsonCategories);
                 var selectedCategoriesHashset = new HashSet<string>(selectedCategoriesList, StringComparer.OrdinalIgnoreCase);
 
@@ -686,8 +688,6 @@ namespace Te.Citadel
                         m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
                     }
                 }
-
-                m_doccatSlimLock.EnterWriteLock();
             }
             finally
             {
