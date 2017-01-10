@@ -1466,7 +1466,15 @@ namespace Te.Citadel
                 }
                 else
                 {
-                    this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                    if(m_config != null)
+                    {
+                        this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                    }
+                    else
+                    {
+                        this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                    }
+                    
                 }
             }
         }
@@ -1569,6 +1577,15 @@ namespace Te.Citadel
                                 LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
                                 return;
                             }
+
+                            if(m_config.UpdateFrequency.Minutes <= 0)
+                            {
+                                // Just to ensure that we enforce a minimum value here.
+                                m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
+                            }
+
+                            // Put the new update frequence into effect.
+                            this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
 
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_config.BlacklistedApplications)

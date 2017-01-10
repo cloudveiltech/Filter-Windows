@@ -148,6 +148,16 @@ namespace Te.Citadel.Data.Models
         } = 0;
 
         /// <summary>
+        /// How often the client should be looking for updates.
+        /// </summary>
+        [JsonConverter(typeof(IntToMinutesTimespanConverter))]
+        public TimeSpan UpdateFrequency
+        {
+            get;
+            set;
+        } = TimeSpan.FromMinutes(5);
+
+        /// <summary>
         /// The total amount of time, in minutes, that bypass filteres are in effect when granted.
         /// </summary>
         [JsonConverter(typeof(IntToMinutesTimespanConverter))]
@@ -159,6 +169,7 @@ namespace Te.Citadel.Data.Models
 
         public AppConfigModel()
         {
+            
         }
     }
 }
