@@ -1253,7 +1253,7 @@ namespace Te.Citadel
                             {
                                 style.Remove();
                             }
-
+                            
                             var allTextNodes = doc.DocumentNode.SelectNodes("//text()");
                             if(allTextNodes != null && allTextNodes.Count > 0)
                             {

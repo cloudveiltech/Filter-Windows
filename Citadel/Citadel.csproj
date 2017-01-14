@@ -265,12 +265,8 @@
       <HintPath>packages\NLog.4.4.1\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="opennlp-tools-1.6.0, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\OpenNLP.NET.1.6.0\lib\opennlp-tools-1.6.0.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="opennlp-uima-1.6.0, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\OpenNLP.NET.1.6.0\lib\opennlp-uima-1.6.0.dll</HintPath>
+    <Reference Include="OpenNLP.IKVM, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Com.TechnikEmpire.ApacheOpenNLP.1.7.0\lib\OpenNLP.IKVM.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
