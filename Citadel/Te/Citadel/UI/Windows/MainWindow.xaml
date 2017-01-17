@@ -49,6 +49,7 @@
     <local:BaseWindow.RightWindowCommands>
         <MetroControls:WindowCommands>
             <StackPanel Orientation="Horizontal">
+                <Label Content="Internet " />
                 <!--  Internet Disconnected Status Icon.  -->
                 <IconPacks:PackIconFontAwesome Width="20"
                                                Height="20"

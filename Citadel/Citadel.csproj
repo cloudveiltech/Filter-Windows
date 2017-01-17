@@ -319,6 +319,7 @@
     <Compile Include="Te\Citadel\Util\WebServiceUtil.cs" />
     <Compile Include="Te\Citadel\Util\WFPUtility.cs" />
     <Compile Include="Te\Citadel\Util\Winsparkle.cs" />
+    <Compile Include="Te\Citadel\Util\X509Extensions.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

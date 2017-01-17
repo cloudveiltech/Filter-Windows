@@ -554,7 +554,8 @@ namespace Te.Citadel
             var caCertPackURI = new Uri("pack://application:,,,/Resources/ca-cert.pem");
             var resourceStream = GetResourceStream(caCertPackURI);
             TextReader tsr = new StreamReader(resourceStream.Stream);
-            var caFileText = tsr.ReadToEnd();
+            var caFileBuilder = new StringBuilder(tsr.ReadToEnd());
+            caFileBuilder.AppendLine();
 
             // Get our blocked HTML page
             var blockedPagePackURI = new Uri("pack://application:,,,/Resources/BlockedPage.html");
@@ -562,15 +563,27 @@ namespace Te.Citadel
             tsr = new StreamReader(resourceStream.Stream);
             var blockedHtmlPage = tsr.ReadToEnd();
 
+            // Get Microsoft root authorities. We need this in order to permit Windows Update and
+            // such in the event that it is forced through the filter.
+            X509Store localStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
+            localStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            foreach(var cert in localStore.Certificates)
+            {
+                if(cert.Subject.IndexOf("Microsoft") != -1 && cert.Subject.IndexOf("Root") != -1)
+                {
+                    m_logger.Info("Adding cert: {0}.", cert.Subject);
+                    caFileBuilder.AppendLine(cert.ExportToPem());
+                }
+                else
+                {
+                    m_logger.Info("Skipping cert: {0}.", cert.Subject);
+                }
+            }
+            //
+
             // Dump the text to the local file system.
             var localCaBundleCertPath = AppDomain.CurrentDomain.BaseDirectory + "ca-cert.pem";
-            File.WriteAllText(localCaBundleCertPath, caFileText);
-
-            X509Certificate2Collection collection = new X509Certificate2Collection(new X509Certificate2(Encoding.UTF8.GetBytes(caFileText)));
-            foreach(X509Certificate2 x509 in collection)
-            {
-                Debug.WriteLine("certificate name: {0}", x509.Subject);
-            }
+            File.WriteAllText(localCaBundleCertPath, caFileBuilder.ToString());
 
             // Set firewall CB.
             m_firewallCheckCb = OnAppFirewallCheck;
