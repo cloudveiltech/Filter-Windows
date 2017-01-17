@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -234,96 +235,75 @@ namespace Te.Citadel
 
         #endregion Views
 
-        /// <summary>
-        /// Gets/sets whether or not this application should run at startup.
-        /// </summary>
-        public bool RunAtStartup
+        public bool CheckIfStartupTaskExists()
         {
-            get
+            try
             {
-                try
+
+                m_runAtStartupLock.EnterReadLock();
+
+                using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
                 {
-                    m_runAtStartupLock.EnterReadLock();
-
-                    Process p = new Process();
-                    p.StartInfo.UseShellExecute = false;
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    p.StartInfo.FileName = "schtasks";
-                    p.StartInfo.CreateNoWindow = true;
-                    p.StartInfo.Arguments += string.Format("/nh /fo TABLE /tn \"{0}\"", System.Diagnostics.Process.GetCurrentProcess().ProcessName);
-                    p.StartInfo.RedirectStandardError = true;
-                    p.Start();
-
-                    string output = p.StandardOutput.ReadToEnd();
-                    string errorOutput = p.StandardError.ReadToEnd();
-
-                    p.WaitForExit();
-
-                    var runAtStartup = false;
-                    if(p.ExitCode == 0 && output.IndexOf(System.Diagnostics.Process.GetCurrentProcess().ProcessName) != -1)
+                    var t = ts.GetTask(Process.GetCurrentProcess().ProcessName);
+                    if(t == null)
                     {
-                        runAtStartup = true;
+                        return false;
                     }
 
-                    return runAtStartup;
-                }
-                finally
-                {
-                    m_runAtStartupLock.ExitReadLock();
+                    return true;
                 }
             }
-
-            set
+            finally
             {
-                try
-                {
-                    // You MUST call this before entering the write lock, otherwise you're gonna
-                    // deadlock your app.
-                    var currentValue = RunAtStartup;
-
-                    m_runAtStartupLock.EnterWriteLock();
-
-                    Process p = new Process();
-                    p.StartInfo.UseShellExecute = false;
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    p.StartInfo.FileName = "schtasks";
-                    p.StartInfo.CreateNoWindow = true;
-                    p.StartInfo.RedirectStandardError = true;
-
-                    switch(value)
-                    {
-                        case true:
-                            {
-                                string createTaskCommand = string.Format("/create /F /sc onlogon /tn \"{0}\" /rl highest /tr \"'", System.Diagnostics.Process.GetCurrentProcess().ProcessName) + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "'/StartMinimized\"";
-                                p.StartInfo.Arguments += createTaskCommand;
-
-                                // Only create an entry if there isn't already one.
-                                if(currentValue == false)
-                                {
-                                    p.Start();
-                                    p.WaitForExit();
-                                }
-                            }
-                            break;
-
-                        case false:
-                            {
-                                string deleteTaskCommand = string.Format("/delete /F /tn \"{0}\"", System.Diagnostics.Process.GetCurrentProcess().ProcessName);
-                                p.StartInfo.Arguments += deleteTaskCommand;
-                                p.Start();
-                                p.WaitForExit();
-                            }
-                            break;
-                    }
-                }
-                finally
-                {
-                    m_runAtStartupLock.ExitWriteLock();
-                }
+                m_runAtStartupLock.ExitReadLock();
             }
         }
+
+        public void EnsureStarupTaskExists()
+        {
+            try
+            {
+                m_runAtStartupLock.EnterWriteLock();
+
+                using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
+                {
+                    // Start off by deleting existing tasks always.
+                    ts.RootFolder.DeleteTask(Process.GetCurrentProcess().ProcessName, false);
+
+                    // Create a new task definition and assign properties
+                    var td = ts.NewTask();
+                    td.Principal.RunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel.Highest;
+                    td.Settings.Priority = ProcessPriorityClass.RealTime;
+                    td.Settings.DisallowStartIfOnBatteries = false;
+                    td.Settings.StopIfGoingOnBatteries = false;
+                    td.Settings.WakeToRun = true;
+                    td.Settings.AllowDemandStart = false;
+                    td.Settings.AllowHardTerminate = false;
+                    td.Settings.Hidden = true;
+                    td.Settings.Enabled = true;
+                    td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;                    
+                    td.Settings.ExecutionTimeLimit = TimeSpan.FromDays(365);
+                    td.RegistrationInfo.Description = "Runs the content filter at startup.";
+
+                    // Create a trigger that will fire the task at this time every other day
+                    var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
+                    logonTrigger.Enabled = true;
+                    logonTrigger.ExecutionTimeLimit = TimeSpan.FromDays(365);
+                    td.Triggers.Add(logonTrigger);
+
+                    // Create an action that will launch Notepad whenever the trigger fires
+                    td.Actions.Add(new Microsoft.Win32.TaskScheduler.ExecAction(Process.GetCurrentProcess().MainModule.FileName, "/StartMinimized", null));
+
+                    // Register the task in the root folder
+                    ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td);
+                }
+            }
+            finally
+            {
+                m_runAtStartupLock.ExitWriteLock();
+            }
+        }
+
 
         /// <summary>
         /// Default ctor.
@@ -350,7 +330,7 @@ namespace Te.Citadel
 
             // Do stuff that must be done on the UI thread first.
             InitViews();
-
+            
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // Run the background init worker for non-UI related initialization.
@@ -754,13 +734,29 @@ namespace Te.Citadel
         /// Event args.
         /// </param>
         private void OnOsShutdownOrLogoff(object sender, SessionEndedEventArgs e)
-        {
-            // Unhook first.
-            SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
-            this.Exit -= OnApplicationExiting;
+        {   
+            try
+            {
+                m_logger.Info("Sessions log off or OS shutdown detected.");
 
-            m_logger.Info("Sessions log off or OS shutdown detected.");
-            DoCleanShutdown(true);
+                // Unhook first.
+                SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
+                this.Exit -= OnApplicationExiting;
+            }
+            catch(Exception err)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, err);
+            }
+
+            try
+            {   
+                DoCleanShutdown(true);
+            }
+            catch(Exception err)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, err);
+            }
+            
         }
 
         /// <summary>
@@ -777,8 +773,8 @@ namespace Te.Citadel
             // Unhook first.
             SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
             this.Exit -= OnApplicationExiting;
-
-            m_logger.Info("Application shutdown detected.");
+            
+            m_logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
 
             if(e.ApplicationExitCode <= (int)ExitCodes.ShutdownWithSafeguards)
             {
@@ -828,6 +824,9 @@ namespace Te.Citadel
                     {
                         if(AuthenticatedUserModel.Instance.HasAcceptedTerms)
                         {
+                            // Re-save auth.
+                            AuthenticatedUserModel.Instance.Save();
+
                             // Just go to dashboard.
                             OnViewChangeRequest(typeof(DashboardView));
 
@@ -1050,25 +1049,26 @@ namespace Te.Citadel
                 }
             }
 
+            // Always kill firefox.
+            if(firefoxIsRunning)
+            {
+                // We need to kill firefox before editing the preferences, otherwise they'll just
+                // get overwritten.
+                foreach(var ff in Process.GetProcessesByName("firefox"))
+                {
+                    firefoxExePath = ff.MainModule.FileName;
+
+                    try
+                    {
+                        ff.Kill();
+                        ff.Dispose();
+                    }
+                    catch { }
+                }
+            }
+
             if((needsOverwriting.Count + needsAddition.Count > 0))
             {
-                if(firefoxIsRunning)
-                {
-                    // We need to kill firefox before editing the preferences, otherwise they'll just
-                    // get overwritten.
-                    foreach(var ff in Process.GetProcessesByName("firefox"))
-                    {
-                        firefoxExePath = ff.MainModule.FileName;
-
-                        try
-                        {
-                            ff.Kill();
-                            ff.Dispose();
-                        }
-                        catch { }
-                    }
-                }
-
                 // Replace with the enabled param in files that have this option disabled.
                 foreach(var prefFilePath in needsOverwriting)
                 {
@@ -1415,30 +1415,6 @@ namespace Te.Citadel
                 // overlapping calls.
                 this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-                /*
-                 * Not necessary. Left in case needed later/elsewhere.
-                 *
-                // First, let's re-authenticate to ensure that we hold a current, valid session.
-                var authResultTask = ChallengeUserAuthenticity();
-                authResultTask.Wait();
-                var authResult = authResultTask.Result;
-
-                if(authResult)
-                {
-                    bool gotUpdatedFilterLists = UpdateListData();
-
-                    if(gotUpdatedFilterLists)
-                    {
-                        // Got new data. Gotta reload.
-                        ReloadFilteringRules();
-                    }
-                }
-                else
-                {
-                    m_logger.Warn("Failed re-authentication during list update process.");
-                }
-                */
-
                 bool gotUpdatedFilterLists = UpdateListData();
 
                 if(gotUpdatedFilterLists)
@@ -1501,7 +1477,7 @@ namespace Te.Citadel
                     m_filteringEngine.Start();
 
                     // Make sure we have a task set to run again.
-                    RunAtStartup = true;
+                    EnsureStarupTaskExists();
 
                     // Make sure our lists are up to date and try to update the app, etc etc. Just
                     // call our update timer complete handler manually.
@@ -1983,7 +1959,7 @@ namespace Te.Citadel
 
                         if(showTip)
                         {
-                            m_trayIcon.ShowBalloonTip(1500, "Still Running", string.Format("{0} will continue running in the background.", System.Diagnostics.Process.GetCurrentProcess().ProcessName), System.Windows.Forms.ToolTipIcon.Info);
+                            m_trayIcon.ShowBalloonTip(1500, "Still Running", string.Format("{0} will continue running in the background.", Process.GetCurrentProcess().ProcessName), System.Windows.Forms.ToolTipIcon.Info);
                         }
                     }
                 }
@@ -2051,10 +2027,15 @@ namespace Te.Citadel
                     // Shut down engine.
                     StopFiltering();
 
+                    if(m_lastAuthWasSuccess && AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                    {
+                        AuthenticatedUserModel.Instance.Save();
+                    }
+
                     if(installSafeguards)
                     {
                         // Ensure that we're run at startup, disable the internet, etc.
-                        RunAtStartup = true;
+                        EnsureStarupTaskExists();
 
                         if(m_config.BlockInternet)
                         {
@@ -2073,9 +2054,6 @@ namespace Te.Citadel
                         // never activated.
                         m_logger.Info("Shutting down without safeguards.");
                     }
-
-                    // Make sure our credentials are saved.
-                    AuthenticatedUserModel.Instance.Save();
 
                     // Flag that clean shutdown was completed already.
                     m_cleanShutdownComplete = true;

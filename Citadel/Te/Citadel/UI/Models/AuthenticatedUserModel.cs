@@ -55,6 +55,35 @@ namespace Te.Citadel.UI.Models
                 get;
                 set;
             }
+
+            [JsonIgnore]
+            public bool IsValid
+            {
+                get
+                {
+                    if(!StringExtensions.Valid(Username))
+                    {
+                        return false;
+                    }
+
+                    if(EncryptedPassword == null || EncryptedPassword.Length <= 0)
+                    {
+                        return false;
+                    }
+
+                    if(!StringExtensions.Valid(CookieString))
+                    {
+                        return false;
+                    }
+
+                    if(AuthRoute == null || (!AuthRoute.Scheme.OIEquals("https") && !AuthRoute.Scheme.OIEquals("http")))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
         }
 
         /// <summary>
@@ -671,6 +700,12 @@ namespace Te.Citadel.UI.Models
             {
                 var savedData = File.ReadAllText(m_savePath);
                 var deserialized = JsonConvert.DeserializeObject<SerializableAuthenticatedUserModel>(savedData);
+
+                if(deserialized == null || !deserialized.IsValid)
+                {
+                    return false;
+                }
+
                 plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.CurrentUser);
                 this.Username = deserialized.Username;
                 this.Password = plaintext;
@@ -765,7 +800,18 @@ namespace Te.Citadel.UI.Models
 
                 // Serialize and write to output stream.
                 var serialized = JsonConvert.SerializeObject(internalSerializable, Formatting.Indented);
-                File.WriteAllText(m_savePath, serialized);
+
+                var randomFileName = Directory.GetParent(m_savePath).FullName + Path.DirectorySeparatorChar + Path.GetRandomFileName();
+                File.WriteAllText(randomFileName, serialized);
+
+                if(File.Exists(m_savePath))
+                {
+                    File.Replace(randomFileName, m_savePath, m_savePath + ".bak", true);
+                }
+                else
+                {
+                    File.Move(randomFileName, m_savePath);
+                }
 
                 return true;
             }

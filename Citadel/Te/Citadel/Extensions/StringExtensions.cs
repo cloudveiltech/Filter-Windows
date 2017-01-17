@@ -132,7 +132,7 @@ namespace Te.Citadel.Extensions
         /// </returns>
         public static bool Valid(string str)
         {
-            return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str);
+            return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str) && str.Length > 0;
         }
     }
 }
