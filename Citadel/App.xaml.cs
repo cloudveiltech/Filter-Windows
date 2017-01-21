@@ -252,6 +252,7 @@ namespace Te.Citadel
 
                     return true;
                 }
+                
             }
             finally
             {
@@ -264,7 +265,8 @@ namespace Te.Citadel
             try
             {
                 m_runAtStartupLock.EnterWriteLock();
-
+                
+                
                 using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
                 {
                     // Start off by deleting existing tasks always.
@@ -276,19 +278,25 @@ namespace Te.Citadel
                     td.Settings.Priority = ProcessPriorityClass.RealTime;
                     td.Settings.DisallowStartIfOnBatteries = false;
                     td.Settings.StopIfGoingOnBatteries = false;
-                    td.Settings.WakeToRun = true;
+                    td.Settings.WakeToRun = false;
                     td.Settings.AllowDemandStart = false;
+                    td.Settings.IdleSettings.RestartOnIdle = false;                    
+                    td.Settings.IdleSettings.StopOnIdleEnd = false;
+                    td.Settings.RestartCount = 0;                    
                     td.Settings.AllowHardTerminate = false;
                     td.Settings.Hidden = true;
+                    td.Settings.Volatile = true;
                     td.Settings.Enabled = true;
-                    td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;                    
-                    td.Settings.ExecutionTimeLimit = TimeSpan.FromDays(365);
+                    td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;
+                    td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
+
                     td.RegistrationInfo.Description = "Runs the content filter at startup.";
 
                     // Create a trigger that will fire the task at this time every other day
                     var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
-                    logonTrigger.Enabled = true;
-                    logonTrigger.ExecutionTimeLimit = TimeSpan.FromDays(365);
+                    logonTrigger.Enabled = true;                    
+                    logonTrigger.Repetition.StopAtDurationEnd = false;
+                    logonTrigger.ExecutionTimeLimit = TimeSpan.Zero;
                     td.Triggers.Add(logonTrigger);
 
                     // Create an action that will launch Notepad whenever the trigger fires
@@ -296,7 +304,7 @@ namespace Te.Citadel
 
                     // Register the task in the root folder
                     ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td);
-                }
+                }                
             }
             finally
             {
@@ -323,7 +331,8 @@ namespace Te.Citadel
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
             // Hook the shutdown/logoff event.
-            SystemEvents.SessionEnded += OnOsShutdownOrLogoff;
+            Current.SessionEnding += OnSessionEnding;
+            //SystemEvents.SessionEnded += OnOsShutdownOrLogoff;
 
             // Hook app exiting function. This must be done on this main app thread.
             this.Exit += OnApplicationExiting;
@@ -339,6 +348,16 @@ namespace Te.Citadel
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync(e);
+        }
+
+        private void OnSessionEnding(object sender, SessionEndingCancelEventArgs e)
+        {
+            m_logger.Info("Session ending.");
+
+            // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
+            ProcessProtection.Unprotect();
+
+            Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -736,6 +755,7 @@ namespace Te.Citadel
             }
         }
 
+        /*
         /// <summary>
         /// Called whenever the user is logging off or shutting down the system. Here we simply react
         /// to the event by safely terminating the program.
@@ -747,10 +767,10 @@ namespace Te.Citadel
         /// Event args.
         /// </param>
         private void OnOsShutdownOrLogoff(object sender, SessionEndedEventArgs e)
-        {   
+        {
             try
             {
-                m_logger.Info("Sessions log off or OS shutdown detected.");
+                m_logger.Info("Session log off or OS shutdown detected.");
 
                 // Unhook first.
                 SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
@@ -771,7 +791,9 @@ namespace Te.Citadel
             }
             
         }
+        */
 
+        
         /// <summary>
         /// Called when the application is about to exit.
         /// </summary>
@@ -782,25 +804,37 @@ namespace Te.Citadel
         /// Event args.
         /// </param>
         private void OnApplicationExiting(object sender, ExitEventArgs e)
-        {
-            // Unhook first.
-            SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
-            this.Exit -= OnApplicationExiting;
-            
-            m_logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
-
-            if(e.ApplicationExitCode <= (int)ExitCodes.ShutdownWithSafeguards)
+        {   
+            try
             {
-                // ShutdownWithSafeguards == 0, so anything less than or equal to this is considered
-                // to be a situation where we must install safegaurds to ensure application survival
-                // and persistence.
-                DoCleanShutdown(true);
+                m_logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
+                // Unhook first.
+                //SystemEvents.SessionEnded -= OnOsShutdownOrLogoff;
+                this.Exit -= OnApplicationExiting;
             }
-            else
+            catch(Exception err)
             {
-                DoCleanShutdown(false);
+                LoggerUtil.RecursivelyLogException(m_logger, err);
+            }
+
+            try
+            {   
+                if(e.ApplicationExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
+                {
+                    DoCleanShutdown(false);                    
+                }
+                else
+                {
+                    // Unless explicitly told not to, always use safeguards.
+                    DoCleanShutdown(true);
+                }
+            }
+            catch(Exception err)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, err);
             }
         }
+        
 
         /// <summary>
         /// Called when the background initialization function has returned.
@@ -1602,10 +1636,7 @@ namespace Te.Citadel
                             if(m_config.CannotTerminate)
                             {
                                 // Turn on process protection if requested.
-                                if(!ProcessProtection.IsProtected)
-                                {
-                                    ProcessProtection.Protect();
-                                }
+                                ProcessProtection.Protect();
                             }
 
                             if(m_config.Bypass.Count > 0 && m_config.BypassesPermitted > 0)
@@ -1639,7 +1670,7 @@ namespace Te.Citadel
                                 var categoryName = entry.FullName;
                                 var listName = entry.Name.ToLower();
                                 var ssLen = categoryName.Length - (listName.Length + 1);
-
+                                
                                 if(ssLen <= 0)
                                 {
                                     // Just in case this is some glitch or issue where a top level
@@ -1676,6 +1707,16 @@ namespace Te.Citadel
                                     }
                                 }
 
+                                // Skip this file if it's not in a whitelist, blacklist or bypass list.
+                                if(!m_config.Blacklists.Contains(entry.FullName) &&
+                                    !m_config.Whitelists.Contains(entry.FullName) &&
+                                    !m_config.Bypass.Contains(entry.FullName)
+                                    )
+                                {
+                                    m_logger.Info("Skipping included but non-configured list entry {0}.", entry.FullName);
+                                    continue;
+                                }
+
                                 // Try and fetch an existing category matching this name, or create a
                                 // new one.
                                 FilterListEntry existingCategory;
@@ -1694,7 +1735,7 @@ namespace Te.Citadel
                                     existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
 
                                     // In case we're re-loading, call to unload any existing rules
-                                    // for this category first.
+                                    // for this category first.                                    
                                     m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory.CategoryId);
 
                                     m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
@@ -1751,8 +1792,7 @@ namespace Te.Citadel
                                                 var triggers = tr.ReadToEnd();
                                                 if(StringExtensions.Valid(triggers))
                                                 {
-                                                    m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false, out rulesLoaded);
-                                                    totalTriggersLoaded += rulesLoaded;
+                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false);                                                    
                                                     tr.Close();
                                                 }
 
@@ -2025,40 +2065,90 @@ namespace Te.Citadel
             {
                 if(!m_cleanShutdownComplete)
                 {
-                    // Pull our icon from the task tray.
-                    if(m_trayIcon != null)
+                    try
                     {
-                        m_trayIcon.Visible = false;
+                        // Stop WinSparkle.
+                        WinSparkle.Cleanup();
+                    }
+                    catch(Exception e)
+                    {   
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
 
-                    // Pull our critical status.
-                    if(ProcessProtection.IsProtected)
+                    try
                     {
+                        // Pull our icon from the task tray.
+                        if(m_trayIcon != null)
+                        {
+                            m_trayIcon.Visible = false;
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+
+                    try
+                    {
+                        // Pull our critical status.
                         ProcessProtection.Unprotect();
                     }
-
-                    // Shut down engine.
-                    StopFiltering();
-
-                    if(m_lastAuthWasSuccess && AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                    catch(Exception e)
                     {
-                        AuthenticatedUserModel.Instance.Save();
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
+
+                    try
+                    {
+                        // Shut down engine.
+                        StopFiltering();
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+
+                    try
+                    {
+                        if(m_lastAuthWasSuccess && AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                        {
+                            AuthenticatedUserModel.Instance.Save();
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+                    
 
                     if(installSafeguards)
                     {
-                        // Ensure that we're run at startup, disable the internet, etc.
-                        EnsureStarupTaskExists();
-
-                        if(m_config.BlockInternet)
+                        try
                         {
-                            // While we're here, let's disable the internet so that the user can't
-                            // browse the web without us. Only do this of course if configured.
-                            try
+                            // Ensure that we're run at startup, disable the internet, etc.
+                            EnsureStarupTaskExists();
+                        }
+                        catch(Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                        }
+
+                        try
+                        {
+                            if(m_config.BlockInternet)
                             {
-                                WFPUtility.DisableInternet();
+                                // While we're here, let's disable the internet so that the user can't
+                                // browse the web without us. Only do this of course if configured.
+                                try
+                                {
+                                    WFPUtility.DisableInternet();
+                                }
+                                catch { }
                             }
-                            catch { }
+                        }
+                        catch(Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
                     }
                     else

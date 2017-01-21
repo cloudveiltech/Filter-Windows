@@ -43,7 +43,7 @@ namespace Te.Citadel
     public enum ExitCodes : int
     {
         ShutdownWithSafeguards,
-        ShutdownWithoutSafeguards
+        ShutdownWithoutSafeguards = 100,
     }
 
     /// <summary>
