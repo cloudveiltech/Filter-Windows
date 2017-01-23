@@ -1062,6 +1062,11 @@ namespace Te.Citadel
             string defaultFirefoxProfilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             defaultFirefoxProfilesPath += @"\Mozilla\Firefox\Profiles";
 
+            if(!Directory.Exists(defaultFirefoxProfilesPath))
+            {
+                return;
+            }
+
             // Figure out if firefox is running. If later it is and we kill it, store the path to
             // firefox.exe so we can restart the process after we're done.
             string firefoxExePath = string.Empty;
@@ -1078,6 +1083,11 @@ namespace Te.Citadel
 
             foreach(var prefFile in prefsFiles)
             {
+                if(!File.Exists(prefFile))
+                {
+                    continue;
+                }
+
                 var fileText = File.ReadAllText(prefFile);
 
                 if(fileText.IndexOf(prefDisabled) != -1)
