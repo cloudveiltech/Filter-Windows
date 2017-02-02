@@ -1260,16 +1260,21 @@ namespace Te.Citadel
 
             var appName = Path.GetFileName(appAbsolutePath);
 
+            if(m_whitelistedApplications.Count > 0)
+            {
+                if(m_whitelistedApplications.Contains(appName))
+                {
+                    // Whitelist is in effect and this app is whitelisted. So, don't force it through.
+                    return false;
+                }
+
+                return true;
+            }
+
             if(m_blacklistedApplications.Count > 0 && m_blacklistedApplications.Contains(appName))
             {
                 // Blacklist is in effect and this app is blacklisted. So, force it through.
                 return true;
-            }
-
-            if(m_whitelistedApplications.Count > 0 && m_whitelistedApplications.Contains(appName))
-            {
-                // Whitelist is in effect and this app is whitelisted. So, don't force it through.
-                return false;
             }
 
             return false;
