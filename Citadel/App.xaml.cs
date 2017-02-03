@@ -285,7 +285,7 @@ namespace Te.Citadel
                     td.Settings.RestartCount = 0;                    
                     td.Settings.AllowHardTerminate = false;
                     td.Settings.Hidden = true;
-                    td.Settings.Volatile = true;
+                    td.Settings.Volatile = false;
                     td.Settings.Enabled = true;
                     td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;
                     td.Settings.ExecutionTimeLimit = TimeSpan.Zero;

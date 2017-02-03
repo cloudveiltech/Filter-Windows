@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Threading;
 
 namespace Te.Citadel.Data.Serialization
 {
@@ -16,7 +17,19 @@ namespace Te.Citadel.Data.Serialization
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var minutes = int.Parse((string)reader.Value);
+            // To account for errors. Default to zero when NaN, etc.
+            int minutes = 0;
+
+            if(!int.TryParse((string)reader.Value, out minutes))
+            {
+                minutes = 0;
+            }
+
+            if(minutes == 0)
+            {
+                return Timeout.InfiniteTimeSpan;
+            }
+
             return TimeSpan.FromMinutes(minutes);
         }
 
