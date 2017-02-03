@@ -1616,7 +1616,7 @@ namespace Te.Citadel
                                 return;
                             }
 
-                            if(m_config.UpdateFrequency.Minutes <= 0)
+                            if(m_config.UpdateFrequency.Minutes <= 0 || m_config.UpdateFrequency == Timeout.InfiniteTimeSpan)
                             {
                                 // Just to ensure that we enforce a minimum value here.
                                 m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
