@@ -1,8 +1,8 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
-* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Copyright © 2017 Jesse Nicholson  
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 using System;
@@ -13,171 +13,85 @@ using System.Text;
 namespace Te.Citadel.Util
 {
     internal class FingerPrint
-    {
+    {   
+        static FingerPrint()
+        {
+            using(var sec = new SHA256CryptoServiceProvider())
+            {
+                var sb = new StringBuilder();
+
+                ManagementObjectCollection collection = null;
+                ManagementObjectSearcher searcher = null;
+
+                searcher = new ManagementObjectSearcher("Select * From Win32_BIOS");
+                collection = searcher.Get();
+                foreach(ManagementObject mo in collection)
+                {
+                    try
+                    {
+                        sb.Append(mo["SerialNumber"].ToString());
+                    }
+                    catch { }
+
+                    try
+                    {
+                        sb.Append(mo["Manufacturer"].ToString());
+                    }
+                    catch { }
+
+                    try
+                    {
+                        sb.Append(mo["Name"].ToString());
+                    }
+                    catch { }
+                }
+                collection.Dispose();
+                searcher.Dispose();
+
+                searcher = new ManagementObjectSearcher("Select * From Win32_BaseBoard");
+                collection = searcher.Get();
+                foreach(ManagementObject mo in collection)
+                {
+                    try
+                    {
+                        sb.Append(mo["SerialNumber"].ToString());
+                    }
+                    catch { }
+
+                    try
+                    {
+                        sb.Append(mo["Manufacturer"].ToString());
+                    }
+                    catch { }
+
+                    try
+                    {
+                        sb.Append(mo["Name"].ToString());
+                    }
+                    catch { }
+                }
+                collection.Dispose();
+                searcher.Dispose();
+
+                byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
+                s_fingerPrint = BitConverter.ToString(bt).Replace("-", "");
+            }
+        }
+
+        /// <summary>
+        /// Container for the device unique ID.
+        /// </summary>
         private static string s_fingerPrint;
 
+        /// <summary>
+        /// Gets a unique identifier for this device based on miscelleneous unique ID's.
+        /// </summary>
         public static string Value
         {
             get
             {
-                if(string.IsNullOrEmpty(s_fingerPrint))
-                {
-                    s_fingerPrint = GetHash("CPU >> " + CpuID + "\nBIOS >> " +
-                BiosID + "\nBASE >> " + BaseboardID
-                +//"\nDISK >> "+ diskId() + "\nVIDEO >> " +
-                VideoCardID + "\nMAC >> " + MacID
-                                         );
-                }
-
                 return s_fingerPrint;
             }
         }
-
-        private static string GetHash(string s)
-        {
-            using(SHA256 sec = new SHA256CryptoServiceProvider())
-            {
-                byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(s));
-                return BitConverter.ToString(bt).Replace("-", "");
-            }
-        }
-
-        #region Original Device ID Getting Code
-
-        //Return a hardware identifier
-        private static string GetIdentifier(string wmiClass, string wmiProperty, string wmiMustBeTrue)
-        {
-            string result = "";
-            var mc = new ManagementClass(wmiClass);
-            var moc = mc.GetInstances();
-            foreach(var mo in moc)
-            {
-                if(mo[wmiMustBeTrue].ToString() == "True")
-                {
-                    //Only get the first one
-                    if(result == "")
-                    {
-                        try
-                        {
-                            result = mo[wmiProperty].ToString();
-                            break;
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
-        //Return a hardware identifier
-        private static string GetIdentifier(string wmiClass, string wmiProperty)
-        {
-            string result = "";
-            var mc = new ManagementClass(wmiClass);
-            var moc = mc.GetInstances();
-            foreach(var mo in moc)
-            {
-                //Only get the first one
-                if(result == "")
-                {
-                    try
-                    {
-                        result = mo[wmiProperty].ToString();
-                        break;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            return result;
-        }
-
-        private static string CpuID
-        {
-            get
-            {
-                //Uses first CPU identifier available in order of preference
-                //Don't get all identifiers, as it is very time consuming
-                string retVal = GetIdentifier("Win32_Processor", "UniqueId");
-                if(retVal == "") //If no UniqueID, use ProcessorID
-                {
-                    retVal = GetIdentifier("Win32_Processor", "ProcessorId");
-                    if(retVal == "") //If no ProcessorId, use Name
-                    {
-                        retVal = GetIdentifier("Win32_Processor", "Name");
-                        if(retVal == "") //If no Name, use Manufacturer
-                        {
-                            retVal = GetIdentifier("Win32_Processor", "Manufacturer");
-                        }
-                        //Add clock speed for extra security
-                        retVal += GetIdentifier("Win32_Processor", "MaxClockSpeed");
-                    }
-                }
-                return retVal;
-            }
-        }
-
-        //BIOS Identifier
-        private static string BiosID
-        {
-            get
-            {
-                return GetIdentifier("Win32_BIOS", "Manufacturer")
-                + GetIdentifier("Win32_BIOS", "SMBIOSBIOSVersion")
-                + GetIdentifier("Win32_BIOS", "IdentificationCode")
-                + GetIdentifier("Win32_BIOS", "SerialNumber")
-                + GetIdentifier("Win32_BIOS", "ReleaseDate")
-                + GetIdentifier("Win32_BIOS", "Version");
-            }
-        }
-
-        //Main physical hard drive ID
-        private static string DiskID
-        {
-            get
-            {
-                return GetIdentifier("Win32_DiskDrive", "Model")
-                + GetIdentifier("Win32_DiskDrive", "Manufacturer")
-                + GetIdentifier("Win32_DiskDrive", "Signature")
-                + GetIdentifier("Win32_DiskDrive", "TotalHeads");
-            }
-        }
-
-        //Motherboard ID
-        private static string BaseboardID
-        {
-            get
-            {
-                return GetIdentifier("Win32_BaseBoard", "Model")
-                + GetIdentifier("Win32_BaseBoard", "Manufacturer")
-                + GetIdentifier("Win32_BaseBoard", "Name")
-                + GetIdentifier("Win32_BaseBoard", "SerialNumber");
-            }
-        }
-
-        //Primary video controller ID
-        private static string VideoCardID
-        {
-            get
-            {
-                return GetIdentifier("Win32_VideoController", "DriverVersion")
-                + GetIdentifier("Win32_VideoController", "Name");
-            }
-        }
-
-        //First enabled network card ID
-        private static string MacID
-        {
-            get
-            {
-                return GetIdentifier("Win32_NetworkAdapterConfiguration",
-                "MACAddress", "IPEnabled");
-            }
-        }
-
-        #endregion Original Device ID Getting Code
     }
 }

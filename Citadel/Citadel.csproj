@@ -353,7 +353,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Te\Citadel\Extensions\StringExtensions.cs" />
-    <Compile Include="Te\Citadel\Extensions\UIExtensions.cs" />
     <Compile Include="Te\Citadel\UI\Controls\SecureInputBox.xaml.cs">
       <DependentUpon>SecureInputBox.xaml</DependentUpon>
     </Compile>
