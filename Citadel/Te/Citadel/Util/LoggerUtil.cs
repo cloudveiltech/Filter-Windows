@@ -1,4 +1,11 @@
-﻿using NLog;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using NLog;
 using System;
 using System.Diagnostics;
 
@@ -39,6 +46,22 @@ namespace Te.Citadel.Util
 
                 e = e.InnerException;
             }
+        }
+
+        /// <summary>
+        /// Gets the application wide logger.
+        /// </summary>
+        /// <returns>
+        /// The configured application wide logger.
+        /// </returns>
+        /// <remarks>
+        /// Note that this should be configured already in Nlog config. This is a convenience
+        /// function to avoid re-typing the log name everywhere. It offers no security or guarantee
+        /// that the named log here will exist.
+        /// </remarks>
+        internal static Logger GetAppWideLogger()
+        {
+            return LogManager.GetLogger("Citadel");
         }
     }
 }

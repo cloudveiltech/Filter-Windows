@@ -1,4 +1,11 @@
-﻿using NLog;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using NLog;
 using System;
 using System.IO;
 using System.Net;
@@ -178,7 +185,7 @@ namespace Te.Citadel.Util
             {
                 if(noLogging == false)
                 {
-                    var logger = LogManager.GetLogger("Citadel");
+                    var logger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(logger, webException);
                 }
             }
@@ -268,7 +275,7 @@ namespace Te.Citadel.Util
             {
                 if(noLogging == false)
                 {
-                    var logger = LogManager.GetLogger("Citadel");
+                    var logger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(logger, webException);
                 }
             }

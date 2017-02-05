@@ -235,6 +235,12 @@ namespace Te.Citadel
 
         #endregion Views
 
+        /// <summary>
+        /// Gets whether or not a startup task exists for this application.
+        /// </summary>
+        /// <returns>
+        /// True if a startup task exists for this application, false otherwise.
+        /// </returns>
         public bool CheckIfStartupTaskExists()
         {
             try
@@ -260,6 +266,13 @@ namespace Te.Citadel
             }
         }
 
+        /// <summary>
+        /// Forces the installation of a startup task for this application, removing any existing
+        /// task scheduler entries for this application before doing so. The task is installed to run
+        /// with maximum priority, and to have task scheduler simply fire and forget, rather than
+        /// monitoring the task and restarting it, or setting the task run duration and such. The
+        /// task is simply set to run indefinitely at maximum priority at user login.
+        /// </summary>
         public void EnsureStarupTaskExists()
         {
             try
@@ -322,8 +335,8 @@ namespace Te.Citadel
             // base path where the server side auth system is hosted.
             //Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
             Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
-
-            m_logger = LogManager.GetLogger("Citadel");
+            
+            m_logger = LoggerUtil.GetAppWideLogger();
 
             this.Startup += CitadelOnStartup;
         }
@@ -1245,11 +1258,32 @@ namespace Te.Citadel
             m_logger.Info(string.Format("Request Blocked: {0}", fullRequest));
         }
 
+        /// <summary>
+        /// Called whenever the engine reports that elements were removed from the payload of a
+        /// response to the given request.
+        /// </summary>
+        /// <param name="numElementsRemoved">
+        /// The number of elements removed.
+        /// </param>
+        /// <param name="fullRequest">
+        /// The request who's response payload has had the elements removed.
+        /// </param>
         private void OnElementsBlocked(uint numElementsRemoved, string fullRequest)
         {
             Debug.WriteLine("Elements blocked.");
         }
 
+        /// <summary>
+        /// Called whenever the Engine want's to check if the application at the supplied absolute
+        /// path should have its traffic forced through itself or not.
+        /// </summary>
+        /// <param name="appAbsolutePath">
+        /// The absolute path to an application that the filter is inquiring about.
+        /// </param>
+        /// <returns>
+        /// True if the application at the specified absolute path should have its traffic forced
+        /// through the filtering engine, false otherwise.
+        /// </returns>
         private bool OnAppFirewallCheck(string appAbsolutePath)
         {
             if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
@@ -1268,6 +1302,7 @@ namespace Te.Citadel
                     return false;
                 }
 
+                // Whitelist is in effect, and this app is not whitelisted, so force it through.
                 return true;
             }
 
@@ -1277,9 +1312,28 @@ namespace Te.Citadel
                 return true;
             }
 
-            return false;
+            // This app was not hit by either an enforced whitelist or blacklist. So, by default
+            // we will filter everything.
+            return true;
         }
 
+        /// <summary>
+        /// Called by the engine when the engine fails to classify a request or response by its
+        /// metadata. The engine provides a full byte array of the content of the request or
+        /// response, along with the declared content type of the data. This is currently used for
+        /// NLP classification, but can be adapted with minimal changes to the Engine.
+        /// </summary>
+        /// <param name="data">
+        /// The data to be classified.
+        /// </param>
+        /// <param name="contentType">
+        /// The declared content type of the data.
+        /// </param>
+        /// <returns>
+        /// A numeric category ID that the content was deemed to belong to. Zero is returned here if
+        /// the content is not deemed to be part of any known category, which is a general indication
+        /// to the engine that the content should not be blocked.
+        /// </returns>
         private byte OnClassifyContent(byte[] data, string contentType)
         {
             try

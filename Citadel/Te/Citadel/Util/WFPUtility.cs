@@ -1,4 +1,11 @@
-﻿using NLog;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using NLog;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -32,7 +39,7 @@ namespace Te.Citadel.Util
             INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName);
         }
 
-        public static readonly Logger s_logger = LogManager.GetLogger("Citadel");
+        public static readonly Logger s_logger = LoggerUtil.GetAppWideLogger();
 
         /// <summary>
         /// Disables all outbound traffic from this device persistently until this action is

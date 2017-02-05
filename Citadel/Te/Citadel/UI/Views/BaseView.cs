@@ -1,21 +1,24 @@
-﻿using MahApps.Metro.Controls;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Te.Citadel.UI.Windows;
-using System.Diagnostics;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Views
 {
-    
     public class BaseView : UserControl
-    {   
+    {
         /// <summary>
         /// Expose the application logging system to each view out of the box.
         /// </summary>
@@ -32,7 +35,7 @@ namespace Te.Citadel.UI.Views
         /// </summary>
         public BaseView()
         {
-            m_logger = LogManager.GetLogger("Citadel");
+            m_logger = LoggerUtil.GetAppWideLogger();
         }
 
         protected override void OnVisualParentChanged(DependencyObject oldParent)

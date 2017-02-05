@@ -1,4 +1,11 @@
-﻿using GalaSoft.MvvmLight;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using GalaSoft.MvvmLight;
 using NLog;
 using System;
 using System.Threading.Tasks;
@@ -22,7 +29,7 @@ namespace Te.Citadel.UI.Models
 
         public DashboardModel()
         {
-            m_logger = LogManager.GetLogger("Citadel");
+            m_logger = LoggerUtil.GetAppWideLogger();
         }
 
         public async Task<bool> RequestAppDeactivation()

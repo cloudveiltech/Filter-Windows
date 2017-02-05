@@ -1,4 +1,11 @@
-﻿using GalaSoft.MvvmLight;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using GalaSoft.MvvmLight;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
@@ -433,7 +440,7 @@ namespace Te.Citadel.UI.Models
         private AuthenticatedUserModel()
         {
             m_savePath = AppDomain.CurrentDomain.BaseDirectory + "u.dat";
-            m_logger = LogManager.GetLogger("Citadel");
+            m_logger = LoggerUtil.GetAppWideLogger();
             m_entropyLockObject = new object();
             m_username = string.Empty;
         }

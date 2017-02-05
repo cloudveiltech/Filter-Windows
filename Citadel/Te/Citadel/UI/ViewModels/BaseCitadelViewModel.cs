@@ -1,8 +1,16 @@
-﻿using GalaSoft.MvvmLight;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using NLog;
 using System;
 using System.Windows.Input;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.ViewModels
 {
@@ -34,7 +42,7 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         public BaseCitadelViewModel()
         {
-            m_logger = LogManager.GetLogger("Citadel");
+            m_logger = LoggerUtil.GetAppWideLogger();
         }
 
         /// <summary>
