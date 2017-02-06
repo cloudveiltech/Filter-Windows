@@ -1,5 +1,4 @@
 ﻿using HtmlAgilityPack;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
 using opennlp.tools.doccat;
@@ -8,10 +7,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Management;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -245,7 +246,6 @@ namespace Te.Citadel
         {
             try
             {
-
                 m_runAtStartupLock.EnterReadLock();
 
                 using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
@@ -258,7 +258,6 @@ namespace Te.Citadel
 
                     return true;
                 }
-                
             }
             finally
             {
@@ -278,8 +277,7 @@ namespace Te.Citadel
             try
             {
                 m_runAtStartupLock.EnterWriteLock();
-                
-                
+
                 using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
                 {
                     // Start off by deleting existing tasks always.
@@ -293,9 +291,9 @@ namespace Te.Citadel
                     td.Settings.StopIfGoingOnBatteries = false;
                     td.Settings.WakeToRun = false;
                     td.Settings.AllowDemandStart = false;
-                    td.Settings.IdleSettings.RestartOnIdle = false;                    
+                    td.Settings.IdleSettings.RestartOnIdle = false;
                     td.Settings.IdleSettings.StopOnIdleEnd = false;
-                    td.Settings.RestartCount = 0;                    
+                    td.Settings.RestartCount = 0;
                     td.Settings.AllowHardTerminate = false;
                     td.Settings.Hidden = true;
                     td.Settings.Volatile = false;
@@ -307,7 +305,7 @@ namespace Te.Citadel
 
                     // Create a trigger that will fire the task at this time every other day
                     var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
-                    logonTrigger.Enabled = true;                    
+                    logonTrigger.Enabled = true;
                     logonTrigger.Repetition.StopAtDurationEnd = false;
                     logonTrigger.ExecutionTimeLimit = TimeSpan.Zero;
                     td.Triggers.Add(logonTrigger);
@@ -317,14 +315,13 @@ namespace Te.Citadel
 
                     // Register the task in the root folder
                     ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td);
-                }                
+                }
             }
             finally
             {
                 m_runAtStartupLock.ExitWriteLock();
             }
         }
-
 
         /// <summary>
         /// Default ctor.
@@ -335,7 +332,7 @@ namespace Te.Citadel
             // base path where the server side auth system is hosted.
             //Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
             Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
-            
+
             m_logger = LoggerUtil.GetAppWideLogger();
 
             this.Startup += CitadelOnStartup;
@@ -352,7 +349,7 @@ namespace Te.Citadel
 
             // Do stuff that must be done on the UI thread first.
             InitViews();
-            
+
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // Run the background init worker for non-UI related initialization.
@@ -606,10 +603,6 @@ namespace Te.Citadel
                     m_logger.Info("Adding cert: {0}.", cert.Subject);
                     caFileBuilder.AppendLine(cert.ExportToPem());
                 }
-                else
-                {
-                    m_logger.Info("Skipping cert: {0}.", cert.Subject);
-                }
             }
             //
 
@@ -795,18 +788,16 @@ namespace Te.Citadel
             }
 
             try
-            {   
+            {
                 DoCleanShutdown(true);
             }
             catch(Exception err)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
-            
         }
         */
 
-        
         /// <summary>
         /// Called when the application is about to exit.
         /// </summary>
@@ -817,7 +808,7 @@ namespace Te.Citadel
         /// Event args.
         /// </param>
         private void OnApplicationExiting(object sender, ExitEventArgs e)
-        {   
+        {
             try
             {
                 m_logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
@@ -831,10 +822,10 @@ namespace Te.Citadel
             }
 
             try
-            {   
+            {
                 if(e.ApplicationExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
                 {
-                    DoCleanShutdown(false);                    
+                    DoCleanShutdown(false);
                 }
                 else
                 {
@@ -847,7 +838,6 @@ namespace Te.Citadel
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
         }
-        
 
         /// <summary>
         /// Called when the background initialization function has returned.
@@ -1122,8 +1112,8 @@ namespace Te.Citadel
             // Always kill firefox.
             if(firefoxIsRunning)
             {
-                // We need to kill firefox before editing the preferences, otherwise they'll just
-                // get overwritten.
+                // We need to kill firefox before editing the preferences, otherwise they'll just get
+                // overwritten.
                 foreach(var ff in Process.GetProcessesByName("firefox"))
                 {
                     firefoxExePath = ff.MainModule.FileName;
@@ -1298,7 +1288,8 @@ namespace Te.Citadel
             {
                 if(m_whitelistedApplications.Contains(appName))
                 {
-                    // Whitelist is in effect and this app is whitelisted. So, don't force it through.
+                    // Whitelist is in effect and this app is whitelisted. So, don't force it
+                    // through.
                     return false;
                 }
 
@@ -1306,14 +1297,20 @@ namespace Te.Citadel
                 return true;
             }
 
-            if(m_blacklistedApplications.Count > 0 && m_blacklistedApplications.Contains(appName))
+            if(m_blacklistedApplications.Count > 0)
             {
-                // Blacklist is in effect and this app is blacklisted. So, force it through.
-                return true;
+                if(m_blacklistedApplications.Contains(appName))
+                {
+                    // Blacklist is in effect and this app is blacklisted. So, force it through.
+                    return true;
+                }
+
+                // Blacklist in effect but this app is not on the blacklist. Don't force it through.
+                return false;
             }
 
-            // This app was not hit by either an enforced whitelist or blacklist. So, by default
-            // we will filter everything.
+            // This app was not hit by either an enforced whitelist or blacklist. So, by default we
+            // will filter everything. We should never get here, but just in case.
             return true;
         }
 
@@ -1369,7 +1366,7 @@ namespace Te.Citadel
                             {
                                 style.Remove();
                             }
-                            
+
                             var allTextNodes = doc.DocumentNode.SelectNodes("//text()");
                             if(allTextNodes != null && allTextNodes.Count > 0)
                             {
@@ -1566,7 +1563,6 @@ namespace Te.Citadel
                     {
                         this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
                     }
-                    
                 }
             }
         }
@@ -1739,7 +1735,7 @@ namespace Te.Citadel
                                 var categoryName = entry.FullName;
                                 var listName = entry.Name.ToLower();
                                 var ssLen = categoryName.Length - (listName.Length + 1);
-                                
+
                                 if(ssLen <= 0)
                                 {
                                     // Just in case this is some glitch or issue where a top level
@@ -1776,7 +1772,8 @@ namespace Te.Citadel
                                     }
                                 }
 
-                                // Skip this file if it's not in a whitelist, blacklist or bypass list.
+                                // Skip this file if it's not in a whitelist, blacklist or bypass
+                                // list.
                                 if(!m_config.Blacklists.Contains(entry.FullName) &&
                                     !m_config.Whitelists.Contains(entry.FullName) &&
                                     !m_config.Bypass.Contains(entry.FullName)
@@ -1804,7 +1801,7 @@ namespace Te.Citadel
                                     existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
 
                                     // In case we're re-loading, call to unload any existing rules
-                                    // for this category first.                                    
+                                    // for this category first.
                                     m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory.CategoryId);
 
                                     m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
@@ -1861,7 +1858,7 @@ namespace Te.Citadel
                                                 var triggers = tr.ReadToEnd();
                                                 if(StringExtensions.Valid(triggers))
                                                 {
-                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false);                                                    
+                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false);
                                                     tr.Close();
                                                 }
 
@@ -2049,6 +2046,83 @@ namespace Te.Citadel
             );
         }
 
+        private void TryInitiateDnsEnforcement()
+        {
+            try
+            {
+                IPAddress primaryDns = null;
+                IPAddress secondaryDns = null;
+                // Check if any DNS servers are defined, and if so, set them.
+                if(StringExtensions.Valid(m_config.PrimaryDns))
+                {
+                    m_logger.Info("Primary DNS set to {0} in config.", m_config.PrimaryDns);
+                    IPAddress.TryParse(m_config.PrimaryDns.Trim(), out primaryDns);
+                }
+
+                if(StringExtensions.Valid(m_config.SecondaryDns))
+                {
+                    m_logger.Info("Secondary DNS set to {0} in config.", m_config.SecondaryDns);
+                    IPAddress.TryParse(m_config.SecondaryDns.Trim(), out secondaryDns);
+                }
+
+                if(primaryDns != null || secondaryDns != null)
+                {
+                    var setDnsForNic = new Action<string, IPAddress, IPAddress>((nicName, pDns, sDns) =>
+                    {
+                        using(var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+                        {
+                            using(var networkConfigs = networkConfigMng.GetInstances())
+                            {
+                                foreach(var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
+                                {
+                                    using(var newDNS = managementObject.GetMethodParameters("SetDNSServerSearchOrder"))
+                                    {
+                                        List<string> dnsServers = new List<string>();
+                                        var existingDns = (string[])newDNS["DNSServerSearchOrder"];
+                                        if(existingDns != null && existingDns.Length > 0)
+                                        {
+                                            dnsServers = new List<string>(existingDns);
+                                        }
+
+                                        if(pDns != null)
+                                        {
+                                            dnsServers.Insert(0, pDns.ToString());
+                                        }
+                                        if(sDns != null)
+                                        {
+                                            if(dnsServers.Count > 0)
+                                            {
+                                                dnsServers.Insert(1, sDns.ToString());
+                                            }
+                                            else
+                                            {
+                                                dnsServers.Add(sDns.ToString());
+                                            }
+
+                                        }
+                                        m_logger.Info("Setting DNS for adapter {1} to {0}.", nicName, string.Join(",", dnsServers.ToArray()));
+                                        newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
+                                        managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+
+                    foreach(var iface in ifaces)
+                    {
+                        setDnsForNic(iface.Description, primaryDns, secondaryDns);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
         /// <summary>
         /// Stops the filtering engine, shuts it down.
         /// </summary>
@@ -2140,7 +2214,7 @@ namespace Te.Citadel
                         WinSparkle.Cleanup();
                     }
                     catch(Exception e)
-                    {   
+                    {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
 
@@ -2188,7 +2262,6 @@ namespace Te.Citadel
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
-                    
 
                     if(installSafeguards)
                     {
@@ -2206,8 +2279,9 @@ namespace Te.Citadel
                         {
                             if(m_config.BlockInternet)
                             {
-                                // While we're here, let's disable the internet so that the user can't
-                                // browse the web without us. Only do this of course if configured.
+                                // While we're here, let's disable the internet so that the user
+                                // can't browse the web without us. Only do this of course if
+                                // configured.
                                 try
                                 {
                                     WFPUtility.DisableInternet();

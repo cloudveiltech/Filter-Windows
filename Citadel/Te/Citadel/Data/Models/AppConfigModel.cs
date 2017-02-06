@@ -174,6 +174,26 @@ namespace Te.Citadel.Data.Models
             set;
         } = Timeout.InfiniteTimeSpan;
 
+        /// <summary>
+        /// A string representation of the primary DNS server that should be set for the local
+        /// device. May be empty, and thus not defined.
+        /// </summary>
+        public string PrimaryDns
+        {
+            get;
+            set;
+        } = string.Empty;
+
+        /// <summary>
+        /// A string representation of the secondary DNS server that should be set for the local
+        /// device. May be empty, and thus not defined.
+        /// </summary>
+        public string SecondaryDns
+        {
+            get;
+            set;
+        } = string.Empty;
+
         public AppConfigModel()
         {
             
