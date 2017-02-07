@@ -1428,7 +1428,8 @@ namespace Te.Citadel
                         {
                             if(categoryNumber.CategoryId > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber.CategoryId))
                             {
-                                var threshold = .9;
+                                var threshold = m_config != null ? m_config.NlpThreshold : 0.9f;
+
                                 if(bestCategoryScore < threshold)
                                 {
                                     m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", bestCategoryName, threshold, bestCategoryScore);
@@ -1676,6 +1677,8 @@ namespace Te.Citadel
                                 m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
                             }
 
+                            m_logger.Info("NLP threshold configured to {0}.", m_config.NlpThreshold);
+
                             // Enforce DNS if present.
                             TryEnfornceDns();
 
@@ -1843,7 +1846,7 @@ namespace Te.Citadel
 
                                                 if(StringExtensions.Valid(listContents))
                                                 {
-                                                    m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory.CategoryId, false, out rulesLoaded, out rulesFailed);
+                                                    m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory.CategoryId, true, out rulesLoaded, out rulesFailed);
                                                     totalFiltersLoaded += rulesLoaded;
                                                     listContents = string.Empty;
                                                 }
@@ -1865,7 +1868,7 @@ namespace Te.Citadel
                                                 var triggers = tr.ReadToEnd();
                                                 if(StringExtensions.Valid(triggers))
                                                 {
-                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, false);
+                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, true);
                                                     tr.Close();
                                                 }
 

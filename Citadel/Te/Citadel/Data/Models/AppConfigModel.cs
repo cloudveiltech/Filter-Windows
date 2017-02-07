@@ -194,6 +194,16 @@ namespace Te.Citadel.Data.Models
             set;
         } = string.Empty;
 
+        /// <summary>
+        /// The minimum threshold, that is the match probability, that any NLP classification must
+        /// meet or exceed in order to be considered a true match.
+        /// </summary>
+        public float NlpThreshold
+        {
+            get;
+            set;
+        } = 0.9f;
+
         public AppConfigModel()
         {
             
