@@ -33,7 +33,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release x86|x64' ">
     <OutputPath>bin\Release x86\</OutputPath>
-    <DefineConstants>TRACE;CITADEL_DEBUG</DefineConstants>
+    <DefineConstants>TRACE;CITADEL_DEBUG,UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -54,7 +54,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release x64|x64'">
     <OutputPath>bin\Release x64\</OutputPath>
-    <DefineConstants>TRACE;CITADEL_DEBUG</DefineConstants>
+    <DefineConstants>TRACE;CITADEL_DEBUG,UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>

@@ -195,7 +195,7 @@ namespace Te.Citadel.UI.Models
         public LoginModel()
         {
             // Set the default service provider to the app-global value.
-            m_serviceProvider = (string)Application.Current.Properties["ServiceProviderApi"] + "/login.php";
+            m_serviceProvider = (string)Application.Current.GetServiceProviderApiPath() + "/login.php";
             m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();

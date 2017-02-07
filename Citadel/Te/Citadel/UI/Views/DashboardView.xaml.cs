@@ -8,6 +8,8 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using Te.Citadel.Extensions;
+using Te.Citadel.UI.Models;
 using Te.Citadel.UI.ViewModels;
 using Te.Citadel.Util;
 
@@ -57,12 +59,25 @@ namespace Te.Citadel.UI.Views
 
         private async void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
         {
+            // XXX TODO - Having this code in here is sloppy. Clean this up.
+            
             try
             {
+
                 var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
+                
 
                 if(selectedBlockEvent != null)
                 {
+#if UNBLOCK_REQUESTS_IN_BROWSER
+
+                    if(selectedBlockEvent != null)
+                    {
+                    }
+                    var reportPath = Application.Current.GetServiceProviderExternalUnblockRequestPath();
+                    reportPath = string.Format(@"{0}?category_name={1}&user_id={2}&blocked_request={3}", reportPath, Uri.EscapeDataString(selectedBlockEvent.CategoryName), Uri.EscapeDataString(AuthenticatedUserModel.Instance.Username), Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(selectedBlockEvent.FullRequest)));
+                    System.Diagnostics.Process.Start(reportPath);
+#else
                     var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("category={0}&full_request={1}", selectedBlockEvent.CategoryName, Uri.EscapeDataString(selectedBlockEvent.FullRequest)));
                     var result = await WebServiceUtil.SendResource("/capi/reportreview.php", formData, false);
 
@@ -74,6 +89,7 @@ namespace Te.Citadel.UI.Views
                     {
                         await DisplayDialogToUser("Error", "We were unable to receive your feedback. Please check your internet connection and if this issue persists, contact support.");
                     }
+#endif
                 }
             }
             catch(Exception err)

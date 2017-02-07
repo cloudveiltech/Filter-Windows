@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows;
+using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
 
 namespace Te.Citadel.Util
@@ -75,7 +76,7 @@ namespace Te.Citadel.Util
         /// </returns>
         private static HttpWebRequest GetApiBaseRequest(string route)
         {
-            var serviceProviderApiBasePath = (string)Application.Current.Properties["ServiceProviderApi"];
+            var serviceProviderApiBasePath = (string)Application.Current.GetServiceProviderApiPath();
             var requestString = serviceProviderApiBasePath + route;
             var requestRoute = new Uri(requestString);
 

@@ -338,12 +338,7 @@ namespace Te.Citadel
         /// Default ctor.
         /// </summary>
         public CitadelApp()
-        {
-            // Set a global to hold the base URI of the service providers address. This must be the
-            // base path where the server side auth system is hosted.
-            //Application.Current.Properties["ServiceProviderApi"] = "https://manage.cloudveil.org/citadel";
-            Application.Current.Properties["ServiceProviderApi"] = "https://technikempire.com/citadel";
-
+        {   
             m_logger = LoggerUtil.GetAppWideLogger();
 
             this.Startup += CitadelOnStartup;
@@ -561,7 +556,7 @@ namespace Te.Citadel
                 m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
 
                 var appcastUrl = string.Empty;
-                var baseServiceProviderAddress = (string)Application.Current.Properties["ServiceProviderApi"];
+                var baseServiceProviderAddress = (string)Application.Current.GetServiceProviderApiPath();
                 if(Environment.Is64BitProcess)
                 {
                     appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
