@@ -1,4 +1,10 @@
-﻿using HtmlAgilityPack;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
 using Newtonsoft.Json;
 using NLog;
 using opennlp.tools.doccat;
@@ -37,36 +43,6 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
-        private class FilterListEntry
-        {
-            private volatile bool m_isBypass = false;
-
-            public byte CategoryId
-            {
-                get;
-                set;
-            }
-
-            public string CategoryName
-            {
-                get;
-                set;
-            }
-
-            public bool IsBypass
-            {
-                get
-                {
-                    return m_isBypass;
-                }
-
-                set
-                {
-                    m_isBypass = value;
-                }
-            }
-        }
-
         #region APP_UPDATE_MEMBER_VARS
 
         /// <summary>
@@ -99,7 +75,7 @@ namespace Te.Citadel
         /// </summary>
         private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
 
-        private DocumentCategorizerME m_documentClassifier;
+        private List<DocumentCategorizerME> m_documentClassifiers = new List<DocumentCategorizerME>();
 
         private Engine m_filteringEngine;
 
@@ -113,7 +89,7 @@ namespace Te.Citadel
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
         /// along. We use this object to store what strings we map to numbers.
         /// </summary>
-        private ConcurrentDictionary<string, FilterListEntry> m_generatedCategoriesMap = new ConcurrentDictionary<string, FilterListEntry>(StringComparer.OrdinalIgnoreCase);
+        private ConcurrentDictionary<string, MappedFilterListCategoryModel> m_generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
 
         #endregion FilteringEngineVars
 
@@ -127,6 +103,11 @@ namespace Te.Citadel
         /// updates.
         /// </summary>
         private Timer m_updateCheckTimer;
+
+        /// <summary>
+        /// Used to ensure synchronized access while performing list updates.
+        /// </summary>
+        private object m_listUpdateLock = new object();
 
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
@@ -170,6 +151,11 @@ namespace Te.Citadel
         /// App function config file.
         /// </summary>
         private AppConfigModel m_config;
+
+        /// <summary>
+        /// Json deserialization/serialization settings for our config related data.
+        /// </summary>
+        private JsonSerializerSettings m_configSerializerSettings;
 
         /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold
@@ -295,37 +281,39 @@ namespace Te.Citadel
                     ts.RootFolder.DeleteTask(Process.GetCurrentProcess().ProcessName, false);
 
                     // Create a new task definition and assign properties
-                    var td = ts.NewTask();
-                    td.Principal.RunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel.Highest;
-                    td.Settings.Priority = ProcessPriorityClass.RealTime;
-                    td.Settings.DisallowStartIfOnBatteries = false;
-                    td.Settings.StopIfGoingOnBatteries = false;
-                    td.Settings.WakeToRun = false;
-                    td.Settings.AllowDemandStart = false;
-                    td.Settings.IdleSettings.RestartOnIdle = false;
-                    td.Settings.IdleSettings.StopOnIdleEnd = false;
-                    td.Settings.RestartCount = 0;
-                    td.Settings.AllowHardTerminate = false;
-                    td.Settings.Hidden = true;
-                    td.Settings.Volatile = false;
-                    td.Settings.Enabled = true;
-                    td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;
-                    td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
+                    using(var td = ts.NewTask())
+                    {
+                        td.Principal.RunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel.Highest;
+                        td.Settings.Priority = ProcessPriorityClass.RealTime;
+                        td.Settings.DisallowStartIfOnBatteries = false;
+                        td.Settings.StopIfGoingOnBatteries = false;
+                        td.Settings.WakeToRun = false;
+                        td.Settings.AllowDemandStart = false;
+                        td.Settings.IdleSettings.RestartOnIdle = false;
+                        td.Settings.IdleSettings.StopOnIdleEnd = false;
+                        td.Settings.RestartCount = 0;
+                        td.Settings.AllowHardTerminate = false;
+                        td.Settings.Hidden = true;
+                        td.Settings.Volatile = false;
+                        td.Settings.Enabled = true;
+                        td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;
+                        td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
 
-                    td.RegistrationInfo.Description = "Runs the content filter at startup.";
+                        td.RegistrationInfo.Description = "Runs the content filter at startup.";
 
-                    // Create a trigger that will fire the task at this time every other day
-                    var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
-                    logonTrigger.Enabled = true;
-                    logonTrigger.Repetition.StopAtDurationEnd = false;
-                    logonTrigger.ExecutionTimeLimit = TimeSpan.Zero;
-                    td.Triggers.Add(logonTrigger);
+                        // Create a trigger that will fire the task at this time every other day
+                        var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
+                        logonTrigger.Enabled = true;
+                        logonTrigger.Repetition.StopAtDurationEnd = false;
+                        logonTrigger.ExecutionTimeLimit = TimeSpan.Zero;
+                        td.Triggers.Add(logonTrigger);
 
-                    // Create an action that will launch Notepad whenever the trigger fires
-                    td.Actions.Add(new Microsoft.Win32.TaskScheduler.ExecAction(Process.GetCurrentProcess().MainModule.FileName, "/StartMinimized", null));
+                        // Create an action that will launch Notepad whenever the trigger fires
+                        td.Actions.Add(new Microsoft.Win32.TaskScheduler.ExecAction(Process.GetCurrentProcess().MainModule.FileName, "/StartMinimized", null));
 
-                    // Register the task in the root folder
-                    ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td);
+                        // Register the task in the root folder
+                        ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td);
+                    }
                 }
             }
             finally
@@ -338,7 +326,7 @@ namespace Te.Citadel
         /// Default ctor.
         /// </summary>
         public CitadelApp()
-        {   
+        {
             m_logger = LoggerUtil.GetAppWideLogger();
 
             this.Startup += CitadelOnStartup;
@@ -644,74 +632,69 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Initializes the NLP classification with the given model and list of categories from
-        /// within the model that we'll consider enabled. That is to say, any classification result
-        /// that yeilds a category found in the supplied json list of categories will trigger a block
-        /// action.
+        /// Loads the given NLP model and list of categories from within the model that we'll
+        /// consider enabled. That is to say, any classification result that yeilds a category found
+        /// in the supplied list of enabled categories found within the loaded model will trigger a
+        /// block action.
         /// </summary>
         /// <param name="nlpModelBytes">
         /// The bytes from a loaded NLP classification model.
         /// </param>
-        /// <param name="jsonCategories">
-        /// A JSON serialized array of category names within the supplied model that will be treated
-        /// as enabled. Classification results that yeild a category listed in this array will
-        /// trigger a block action.
+        /// <param name="nlpConfig">
+        /// A model file describing data about the model, such as a list of categories that, should
+        /// they be returned by the classifer, should trigger a block action.
         /// </param>
         /// <remarks>
         /// Note that this must be called AFTER we have already initialized the filtering engine,
-        /// because we make calls to enable new categories.
+        /// because we make calls to enable new categories within the engine.
         /// </remarks>
-        private void InitNlp(byte[] nlpModelBytes, string jsonCategories)
+        private void LoadNlpModel(byte[] nlpModelBytes, NLPConfigurationModel nlpConfig)
         {
             try
             {
                 m_doccatSlimLock.EnterWriteLock();
-
-                var selectedCategoriesList = JsonConvert.DeserializeObject<List<string>>(jsonCategories);
-                var selectedCategoriesHashset = new HashSet<string>(selectedCategoriesList, StringComparer.OrdinalIgnoreCase);
+                
+                var selectedCategoriesHashset = new HashSet<string>(nlpConfig.SelectedCategoryNames, StringComparer.OrdinalIgnoreCase);
 
                 // Init our regexes
                 m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
                 // Init Document classifier.
                 var doccatModel = new DoccatModel(new java.io.ByteArrayInputStream(nlpModelBytes));
-                m_documentClassifier = new DocumentCategorizerME(doccatModel);
+                var classifier = new DocumentCategorizerME(doccatModel);
 
                 // Get the number of categories and iterate over all categories in the model.
-                var numCategories = m_documentClassifier.getNumberOfCategories();
+                var numCategories = classifier.getNumberOfCategories();
 
                 for(int i = 0; i < numCategories; ++i)
                 {
-                    var modelCategory = m_documentClassifier.getCategory(i);
+                    var modelCategory = classifier.getCategory(i);
 
                     if(selectedCategoriesHashset.Contains(modelCategory))
                     {
                         // This is an enabled category. Make the category name unique by prepending
-                        // NLP
-                        modelCategory = "NLP" + modelCategory;
+                        // the relative path the NLP model file. This will ensure that categories with
+                        // the same name across multiple NLP models will be insulated against
+                        // collision.
+                        var relativeNlpPath = nlpConfig.RelativeModelPath.Substring(0, nlpConfig.RelativeModelPath.LastIndexOf('/') + 1) + Path.GetFileNameWithoutExtension(nlpConfig.RelativeModelPath) + "/";
+                        modelCategory = relativeNlpPath + modelCategory;
 
                         m_logger.Info("Setting up NLP classification category: {0}", modelCategory);
 
-                        FilterListEntry existingCategory;
-                        if(!m_generatedCategoriesMap.TryGetValue(modelCategory, out existingCategory))
+                        MappedFilterListCategoryModel existingCategory = null;
+                        if(TryFetchOrCreateCategoryMap(modelCategory, out existingCategory))
                         {
-                            // We can't generate anymore categories. Sorry, but the rest get ignored.
-                            if(m_generatedCategoriesMap.Count >= byte.MaxValue)
-                            {
-                                break;
-                            }
-
-                            existingCategory = new FilterListEntry();
-                            existingCategory.CategoryName = modelCategory;
-                            existingCategory.IsBypass = false;
-                            existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
-
-                            m_generatedCategoriesMap.GetOrAdd(modelCategory, existingCategory);
+                            m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
                         }
-
-                        m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
+                        else
+                        {
+                            m_logger.Error("Failed to get category map for NLP model.");
+                        }
                     }
                 }
+
+                // Push this classifier to our list of classifiers.
+                m_documentClassifiers.Add(classifier);
             }
             finally
             {
@@ -735,6 +718,10 @@ namespace Te.Citadel
 
             // Get WinSparkle ready to work.
             InitWinsparkle();
+
+            // Setup json serialization settings.
+            m_configSerializerSettings = new JsonSerializerSettings();
+            m_configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
             var authTask = ChallengeUserAuthenticity();
             authTask.Wait();
@@ -1345,45 +1332,25 @@ namespace Te.Citadel
 
                 contentType = contentType.ToLower();
 
-                //Debug.WriteLine("Content classification requested.");
-                m_logger.Info(string.Format("Classify data of length {0} and type {1}.", data.Length, contentType));
+                // Debug.WriteLine("Content classification requested.");
+                // m_logger.Info(string.Format("Classify data of length {0} and type {1}.", data.Length, contentType));
 
                 // Only attempt text classification if we have a text classifier, silly.
-                if(m_documentClassifier != null)
+                if(m_documentClassifiers != null && m_documentClassifiers.Count > 0)
                 {
+                    
                     var textToClassifyBuilder = new StringBuilder();
 
                     if(contentType.IndexOf("html") != -1)
-                    {
+                    {   
                         // This might be plain text, might be HTML. We need to find out.
-                        var rawText = Encoding.UTF8.GetString(data);
+                        var rawText = Encoding.UTF8.GetString(data).ToCharArray();
 
-                        HtmlDocument doc = new HtmlDocument();
-                        doc.LoadHtml(rawText);
+                        var extractor = new FastHtmlTextExtractor();
 
-                        if(doc != null && doc.DocumentNode != null)
-                        {
-                            foreach(var script in doc.DocumentNode.Descendants("script").ToArray())
-                            {
-                                script.Remove();
-                            }
-
-                            foreach(var style in doc.DocumentNode.Descendants("style").ToArray())
-                            {
-                                style.Remove();
-                            }
-
-                            var allTextNodes = doc.DocumentNode.SelectNodes("//text()");
-                            if(allTextNodes != null && allTextNodes.Count > 0)
-                            {
-                                foreach(HtmlNode node in allTextNodes)
-                                {
-                                    textToClassifyBuilder.Append(node.InnerText);
-                                }
-                            }
-
-                            m_logger.Info("From HTML: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
-                        }
+                        var extractedText = extractor.Extract(rawText);
+                        m_logger.Info("From HTML: Classify this string: {0}", extractedText);
+                        textToClassifyBuilder.Append(extractedText);
                     }
                     else if(contentType.IndexOf("json") != -1)
                     {
@@ -1411,44 +1378,43 @@ namespace Te.Citadel
 
                     if(textToClassify.Length > 0)
                     {
-                        m_logger.Info("Got text to classify of length {0}.", textToClassify.Length);
-
-                        // Remove all multi-whitespace, newlines etc.
-                        textToClassify = m_whitespaceRegex.Replace(textToClassify, " ");
-
-                        var classificationResult = m_documentClassifier.categorize(textToClassify);
-
-                        var bestCategoryName = "NLP" + m_documentClassifier.getBestCategory(classificationResult);
-
-                        FilterListEntry categoryNumber = new FilterListEntry();
-
-                        var bestCategoryScore = classificationResult.Max();
-
-                        if(m_generatedCategoriesMap.TryGetValue(bestCategoryName, out categoryNumber))
+                        foreach(var classifier in m_documentClassifiers)
                         {
-                            if(categoryNumber.CategoryId > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber.CategoryId))
+                            m_logger.Info("Got text to classify of length {0}.", textToClassify.Length);
+
+                            // Remove all multi-whitespace, newlines etc.
+                            textToClassify = m_whitespaceRegex.Replace(textToClassify, " ");
+
+                            var classificationResult = classifier.categorize(textToClassify);
+
+                            var bestCategoryName = "NLP" + classifier.getBestCategory(classificationResult);
+
+                            MappedFilterListCategoryModel categoryNumber = null;
+
+                            var bestCategoryScore = classificationResult.Max();
+
+                            if(m_generatedCategoriesMap.TryGetValue(bestCategoryName, out categoryNumber))
                             {
-                                var threshold = m_config != null ? m_config.NlpThreshold : 0.9f;
-
-                                if(bestCategoryScore < threshold)
+                                if(categoryNumber.CategoryId > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber.CategoryId))
                                 {
-                                    m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", bestCategoryName, threshold, bestCategoryScore);
-                                    return 0;
-                                }
+                                    var threshold = m_config != null ? m_config.NlpThreshold : 0.9f;
 
-                                m_logger.Info("Classified text content as {0}.", bestCategoryName);
-                                return categoryNumber.CategoryId;
+                                    if(bestCategoryScore < threshold)
+                                    {
+                                        m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", bestCategoryName, threshold, bestCategoryScore);
+                                        return 0;
+                                    }
+
+                                    m_logger.Info("Classified text content as {0}.", bestCategoryName);
+                                    return categoryNumber.CategoryId;
+                                }
+                            }
+                            else
+                            {
+                                m_logger.Info("Did not find category registered: {0}.", bestCategoryName);
                             }
                         }
-                        else
-                        {
-                            m_logger.Info("Did not find category registered: {0}.", bestCategoryName);
-                        }
                     }
-                }
-                else
-                {
-                    m_logger.Info("NLP classifier is null.");
                 }
             }
             catch(Exception e)
@@ -1622,287 +1588,322 @@ namespace Te.Citadel
                 return;
             }
 
-            // Load our filtering list data.
-            var listDataFilePath = AppDomain.CurrentDomain.BaseDirectory + "a.dat";
-
-            if(File.Exists(listDataFilePath))
+            lock(m_listUpdateLock)
             {
-                uint totalFiltersLoaded = 0;
-                uint totalTriggersLoaded = 0;
+                // Load our configuration file and load configured lists, etc.
+                var configDataFilePath = AppDomain.CurrentDomain.BaseDirectory + "a.dat";
 
-                byte[] nlpModelBytes = null;
-                string nlpCategoriesJson = string.Empty;
-
-                using(var file = File.OpenRead(listDataFilePath))
+                if(File.Exists(configDataFilePath))
                 {
-                    using(var zip = new ZipArchive(file, ZipArchiveMode.Read))
+                    using(var file = File.OpenRead(configDataFilePath))
                     {
-                        try
+                        using(var zip = new ZipArchive(file, ZipArchiveMode.Read))
                         {
-                            string cfgJson = string.Empty;
-                            foreach(var entry in zip.Entries)
-                            {
-                                if(entry.Name.OIEquals("cfg.json"))
-                                {
-                                    using(var cfgStream = entry.Open())
-                                    using(TextReader tr = new StreamReader(cfgStream))
-                                    {
-                                        cfgJson = tr.ReadToEnd();
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(!StringExtensions.Valid(cfgJson))
-                            {
-                                m_logger.Error("Could not find valid JSON config for filter.");
-                                return;
-                            }
-
-                            // Deserialize config
                             try
                             {
-                                m_config = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson);
-                            }
-                            catch(Exception deserializationError)
-                            {
-                                m_logger.Error("Failed to deserialize JSON config.");
-                                LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
-                                return;
-                            }
-
-                            if(m_config.UpdateFrequency.Minutes <= 0 || m_config.UpdateFrequency == Timeout.InfiniteTimeSpan)
-                            {
-                                // Just to ensure that we enforce a minimum value here.
-                                m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
-                            }
-
-                            m_logger.Info("NLP threshold configured to {0}.", m_config.NlpThreshold);
-
-                            // Enforce DNS if present.
-                            TryEnfornceDns();
-
-                            // Put the new update frequence into effect.
-                            this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
-
-                            // Setup blacklist or whitelisted apps.
-                            foreach(var appName in m_config.BlacklistedApplications)
-                            {
-                                if(StringExtensions.Valid(appName))
+                                // Find the configuration JSON file.
+                                string cfgJson = string.Empty;
+                                foreach(var entry in zip.Entries)
                                 {
-                                    m_blacklistedApplications.Add(appName);
-                                }
-                            }
-
-                            foreach(var appName in m_config.WhitelistedApplications)
-                            {
-                                if(StringExtensions.Valid(appName))
-                                {
-                                    m_whitelistedApplications.Add(appName);
-                                }
-                            }
-
-                            if(m_config.UseThreshold)
-                            {
-                                // Setup the threshold timers and related data members.
-                                InitThresholdData();
-                            }
-
-                            if(m_config.CannotTerminate)
-                            {
-                                // Turn on process protection if requested.
-                                ProcessProtection.Protect();
-                            }
-
-                            if(m_config.Bypass.Count > 0 && m_config.BypassesPermitted > 0)
-                            {
-                                Current.Dispatcher.BeginInvoke(
-                                    System.Windows.Threading.DispatcherPriority.Normal,
-                                    (Action)delegate ()
+                                    if(entry.Name.OIEquals("cfg.json"))
                                     {
-                                        // Bypass lists have been enabled.
-                                        if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
+                                        using(var cfgStream = entry.Open())
+                                        using(TextReader tr = new StreamReader(cfgStream))
                                         {
-                                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
-                                            dashboardViewModel.AvailableRelaxedRequests = m_config.BypassesPermitted;
-                                            dashboardViewModel.RelaxedDuration = new DateTime(m_config.BypassDuration.Ticks).ToString("HH:mm");
-
-                                            dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
-
-                                            dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
-                                        }
-                                    }
-                                );
-                            }
-
-                            foreach(var entry in zip.Entries)
-                            {
-                                if(entry.Name.OIEquals("cfg.json"))
-                                {
-                                    continue;
-                                }
-
-                                var categoryName = entry.FullName;
-                                var listName = entry.Name.ToLower();
-                                var ssLen = categoryName.Length - (listName.Length + 1);
-
-                                if(ssLen <= 0)
-                                {
-                                    // Just in case this is some glitch or issue where a top level
-                                    // file has been included that is not part of any category. Skip
-                                    // such an entry.
-                                    continue;
-                                }
-
-                                categoryName = categoryName.Substring(0, ssLen);
-
-                                // Handle NLP entries, if any.
-                                if(categoryName.OIEquals("nlp"))
-                                {
-                                    if(listName.OIEquals("categories.json"))
-                                    {
-                                        // This is a list of all categories within the model that
-                                        // have been chosen for use.
-                                        using(TextReader catReader = new StreamReader(entry.Open()))
-                                        {
-                                            nlpCategoriesJson = catReader.ReadToEnd();
-                                            continue;
-                                        }
-                                    }
-                                    else if(Path.GetExtension(listName).OIEquals(".model"))
-                                    {
-                                        // This is the NLP model itself.
-                                        using(var modelFileStream = entry.Open())
-                                        using(var modelMemStream = new MemoryStream())
-                                        {
-                                            modelFileStream.CopyTo(modelMemStream);
-                                            nlpModelBytes = modelMemStream.ToArray();
-                                            continue;
+                                            cfgJson = tr.ReadToEnd();
+                                            break;
                                         }
                                     }
                                 }
 
-                                // Skip this file if it's not in a whitelist, blacklist or bypass
-                                // list.
-                                if(!m_config.Blacklists.Contains(entry.FullName) &&
-                                    !m_config.Whitelists.Contains(entry.FullName) &&
-                                    !m_config.Bypass.Contains(entry.FullName)
-                                    )
+                                if(!StringExtensions.Valid(cfgJson))
                                 {
-                                    m_logger.Info("Skipping included but non-configured list entry {0}.", entry.FullName);
-                                    continue;
+                                    m_logger.Error("Could not find valid JSON config for filter.");
+                                    return;
                                 }
 
-                                // Try and fetch an existing category matching this name, or create a
-                                // new one.
-                                FilterListEntry existingCategory;
-                                if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+                                // Deserialize config
+                                try
                                 {
-                                    // We can't generate anymore categories. Sorry, but the rest get
-                                    // ignored.
-                                    if(m_generatedCategoriesMap.Count >= byte.MaxValue)
+                                    m_config = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson, m_configSerializerSettings);
+                                }
+                                catch(Exception deserializationError)
+                                {
+                                    m_logger.Error("Failed to deserialize JSON config.");
+                                    LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
+                                    return;
+                                }
+
+                                if(m_config.UpdateFrequency.Minutes <= 0 || m_config.UpdateFrequency == Timeout.InfiniteTimeSpan)
+                                {
+                                    // Just to ensure that we enforce a minimum value here.
+                                    m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
+                                }
+
+                                // Enforce DNS if present.
+                                TryEnfornceDns();
+
+                                // Put the new update frequence into effect.
+                                this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
+
+                                // Setup blacklist or whitelisted apps.
+                                foreach(var appName in m_config.BlacklistedApplications)
+                                {
+                                    if(StringExtensions.Valid(appName))
                                     {
-                                        break;
+                                        m_blacklistedApplications.Add(appName);
                                     }
-
-                                    existingCategory = new FilterListEntry();
-                                    existingCategory.CategoryName = categoryName;
-                                    existingCategory.IsBypass = false;
-                                    existingCategory.CategoryId = (byte)((m_generatedCategoriesMap.Count) + 1);
-
-                                    // In case we're re-loading, call to unload any existing rules
-                                    // for this category first.
-                                    m_filteringEngine.UnloadAllFilterRulesForCategory(existingCategory.CategoryId);
-
-                                    m_generatedCategoriesMap.GetOrAdd(categoryName, existingCategory);
                                 }
 
-                                // Enable this category we've fetched here.
-                                m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
-
-                                uint rulesLoaded, rulesFailed;
-
-                                switch(listName)
+                                foreach(var appName in m_config.WhitelistedApplications)
                                 {
-                                    case "rules.txt":
-                                        {
-                                            // Need to prepend @@ to lines if it's a whitelist.
-                                            string rulePrefix = m_config.Whitelists.Contains(entry.FullName) ? "@@" : string.Empty;
-                                            bool isBypass = m_config.Bypass.Contains(entry.FullName);
+                                    if(StringExtensions.Valid(appName))
+                                    {
+                                        m_whitelistedApplications.Add(appName);
+                                    }
+                                }
 
-                                            var builder = new StringBuilder();
-                                            string line = null;
-                                            using(TextReader tr = new StreamReader(entry.Open()))
+                                // Setup blocking threshold, anti-tamper mechamisms etc.
+                                if(m_config.UseThreshold)
+                                {
+                                    // Setup the threshold timers and related data members.
+                                    InitThresholdData();
+                                }
+
+                                if(m_config.CannotTerminate)
+                                {
+                                    // Turn on process protection if requested.
+                                    ProcessProtection.Protect();
+                                }
+
+                                // Update our dashboard view model if there are bypasses configured.
+                                // Force this up to the UI thread because it's a UI model.
+                                if(m_config.BypassesPermitted > 0)
+                                {
+                                    Current.Dispatcher.BeginInvoke(
+                                        System.Windows.Threading.DispatcherPriority.Normal,
+                                        (Action)delegate ()
+                                        {
+                                            // Bypass lists have been enabled.
+                                            if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
                                             {
-                                                while((line = tr.ReadLine()) != null)
-                                                {
-                                                    builder.Append(rulePrefix + line + "\n");
-                                                }
+                                                var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+                                                dashboardViewModel.AvailableRelaxedRequests = m_config.BypassesPermitted;
+                                                dashboardViewModel.RelaxedDuration = new DateTime(m_config.BypassDuration.Ticks).ToString("HH:mm");
 
-                                                tr.Close();
+                                                dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
-                                                var listContents = builder.ToString();
-                                                builder.Clear();
-
-                                                if(StringExtensions.Valid(listContents))
-                                                {
-                                                    m_filteringEngine.LoadAbpFormattedString(listContents, existingCategory.CategoryId, true, out rulesLoaded, out rulesFailed);
-                                                    totalFiltersLoaded += rulesLoaded;
-                                                    listContents = string.Empty;
-                                                }
-
-                                                // Set if it's a bypass list or not.
-                                                existingCategory.IsBypass = isBypass;
-
-                                                // Force GC to run because this will clear A LOT of
-                                                // memory.
-                                                System.GC.Collect();
+                                                dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                                             }
                                         }
-                                        break;
-
-                                    case "triggers.txt":
-                                        {
-                                            using(TextReader tr = new StreamReader(entry.Open()))
-                                            {
-                                                var triggers = tr.ReadToEnd();
-                                                if(StringExtensions.Valid(triggers))
-                                                {
-                                                    totalTriggersLoaded += m_filteringEngine.LoadTextTriggersFromString(triggers, existingCategory.CategoryId, true);
-                                                    tr.Close();
-                                                }
-
-                                                // Force GC to run because this will clear A LOT of
-                                                // memory.
-                                                System.GC.Collect();
-                                            }
-                                        }
-                                        break;
+                                    );
                                 }
+
+                                // Flush any and all existing categories.
+                                foreach(var categoryEntries in m_generatedCategoriesMap)
+                                {
+                                    // Handle case where it's a bypass list.
+                                    if(categoryEntries.Value is MappedBypassListCategoryModel)
+                                    {
+                                        m_filteringEngine.UnloadAllFilterRulesForCategory(((MappedBypassListCategoryModel)categoryEntries.Value).CategoryIdAsWhitelist);
+                                        m_filteringEngine.UnloadAllTextTriggersForCategory(((MappedBypassListCategoryModel)categoryEntries.Value).CategoryIdAsWhitelist);
+                                    }
+
+                                    m_filteringEngine.UnloadAllFilterRulesForCategory(categoryEntries.Value.CategoryId);
+                                    m_filteringEngine.UnloadAllTextTriggersForCategory(categoryEntries.Value.CategoryId);
+                                }
+
+                                // Now clear all generated categories. These will be re-generated as needed.
+                                m_generatedCategoriesMap.Clear();
+
+                                // Now drop all existing NLP models.
+                                try
+                                {
+                                    m_doccatSlimLock.EnterWriteLock();                                    
+                                    m_documentClassifiers.Clear();
+                                }
+                                finally
+                                {
+                                    m_doccatSlimLock.ExitWriteLock();
+                                }
+
+                                // Load all configured NLP models.
+                                foreach(var nlpEntry in m_config.ConfiguredNlpModels)
+                                {
+                                    var modelEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(nlpEntry.RelativeModelPath)).FirstOrDefault();
+                                    if(modelEntry != null)
+                                    {
+                                        using(var mStream = modelEntry.Open())
+                                        using(var ms = new MemoryStream())
+                                        {   
+                                            mStream.CopyTo(ms);
+                                            LoadNlpModel(ms.ToArray(), nlpEntry);
+                                        }
+                                    }
+                                }
+
+                                uint totalFilterRulesLoaded = 0;
+                                uint totalFilterRulesFailed = 0;
+                                uint totalTriggersLoaded = 0;
+
+                                // Load all configured list files.
+                                foreach(var listModel in m_config.ConfiguredLists)
+                                {
+                                    var listEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(listModel.RelativeListPath)).FirstOrDefault();
+                                    if(listEntry != null)
+                                    {   
+                                        var thisListCategoryName = listModel.RelativeListPath.Substring(0, listModel.RelativeListPath.LastIndexOf('/') + 1) + Path.GetFileNameWithoutExtension(listModel.RelativeListPath);
+
+                                        MappedFilterListCategoryModel categoryModel = null;                                      
+                                        
+                                        switch(listModel.ListType)
+                                        {
+                                            case PlainTextFilteringListType.Blacklist:
+                                                {
+                                                    using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                    {
+                                                        var blacklistRules = tr.ReadToEnd();
+
+                                                        if(StringExtensions.Valid(blacklistRules))
+                                                        {
+                                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                                            {
+                                                                uint tmpLoaded, tmpFailed;
+                                                                m_filteringEngine.LoadAbpFormattedString(blacklistRules, categoryModel.CategoryId, false, out tmpLoaded, out tmpFailed);
+                                                                m_filteringEngine.SetCategoryEnabled(categoryModel.CategoryId, true);
+                                                                totalFilterRulesLoaded += tmpLoaded;
+                                                                totalFilterRulesFailed += tmpFailed;
+
+                                                                m_logger.Info("{0} loaded and {1} failed for blacklist category {2}.", tmpLoaded, tmpFailed, thisListCategoryName);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                break;
+
+                                            case PlainTextFilteringListType.BypassList:
+                                                {
+                                                    MappedBypassListCategoryModel bypassCategoryModel = null;
+
+                                                    // Must be loaded twice. Once as a blacklist, once as a whitelist.
+                                                    if(TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
+                                                    {
+
+                                                        // Load first as blacklist.
+                                                        using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                        {
+                                                            var asBlacklistRules = tr.ReadToEnd();
+
+                                                            if(StringExtensions.Valid(asBlacklistRules))
+                                                            {
+                                                                uint tmpLoaded, tmpFailed;
+                                                                m_filteringEngine.LoadAbpFormattedString(asBlacklistRules, bypassCategoryModel.CategoryId, false, out tmpLoaded, out tmpFailed);
+                                                                m_filteringEngine.SetCategoryEnabled(bypassCategoryModel.CategoryId, true);
+                                                                totalFilterRulesLoaded += tmpLoaded;
+                                                                totalFilterRulesFailed += tmpFailed;
+
+                                                                m_logger.Info("{0} loaded and {1} failed for bypass blacklist category {2}.", tmpLoaded, tmpFailed, thisListCategoryName);
+                                                            }
+                                                        }
+
+                                                        GC.Collect();
+
+                                                        // Load second as whitelist, but start off with the category disabled.
+                                                        using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                        {
+                                                            var rulesSb = new StringBuilder();
+                                                            string line = null;
+                                                            while((line = tr.ReadLine()) != null)
+                                                            {
+                                                                rulesSb.Append("@@" + line.Trim() + "\n");
+                                                            }
+
+                                                            var asWhitelistRules = rulesSb.ToString();
+                                                            if(StringExtensions.Valid(asWhitelistRules))
+                                                            {
+                                                                uint tmpLoaded, tmpFailed;
+                                                                m_filteringEngine.LoadAbpFormattedString(asWhitelistRules, bypassCategoryModel.CategoryIdAsWhitelist, false, out tmpLoaded, out tmpFailed);
+                                                                m_filteringEngine.SetCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
+                                                                totalFilterRulesLoaded += tmpLoaded;
+                                                                totalFilterRulesFailed += tmpFailed;
+
+                                                                m_logger.Info("{0} loaded and {1} failed for bypass generated whitelist category {2}.", tmpLoaded, tmpFailed, bypassCategoryModel.CategoryNameAsWhitelist);
+                                                            }
+                                                        }
+
+                                                        GC.Collect();
+                                                    }
+                                                }
+                                                break;
+
+                                            case PlainTextFilteringListType.TextTrigger:
+                                                {
+                                                    using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                    {
+                                                        // Always a blacklist.
+                                                        var textTriggerRules = tr.ReadToEnd();
+
+                                                        if(StringExtensions.Valid(textTriggerRules))
+                                                        {
+                                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                                            {
+                                                                var tmpLoadedTriggersCount = m_filteringEngine.LoadTextTriggersFromString(textTriggerRules, categoryModel.CategoryId, false);
+                                                                m_filteringEngine.SetCategoryEnabled(categoryModel.CategoryId, true);
+
+                                                                m_logger.Info("Loaded {0} text triggers for category {1}.", tmpLoadedTriggersCount, thisListCategoryName);
+
+                                                                totalTriggersLoaded += tmpLoadedTriggersCount;
+                                                            }                                                            
+                                                        }
+                                                    }
+
+                                                    GC.Collect();                                                   
+                                                }
+                                                break;
+
+                                            case PlainTextFilteringListType.Whitelist:
+                                                {
+                                                    using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                    {
+                                                        var rulesSb = new StringBuilder();
+                                                        string line = null;
+                                                        while((line = tr.ReadLine()) != null)
+                                                        {
+                                                            rulesSb.Append("@@" + line.Trim() + "\n");
+                                                        }
+
+                                                        var whitelistRules = rulesSb.ToString();
+                                                        if(StringExtensions.Valid(whitelistRules))
+                                                        {
+                                                            uint tmpLoaded, tmpFailed;
+                                                            m_filteringEngine.LoadAbpFormattedString(whitelistRules, categoryModel.CategoryId, false, out tmpLoaded, out tmpFailed);
+                                                            m_filteringEngine.SetCategoryEnabled(categoryModel.CategoryId, true);
+                                                            totalFilterRulesLoaded += tmpLoaded;
+                                                            totalFilterRulesFailed += tmpFailed;
+
+                                                            m_logger.Info("{0} loaded and {1} failed for whitelist category {2}.", tmpLoaded, tmpFailed, thisListCategoryName);
+                                                        }
+                                                    }
+
+                                                    GC.Collect();
+                                                }
+                                                break;
+                                        }
+                                    }
+                                }
+
+                                m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                             }
-                        }
-                        finally
-                        {
-                            zip.Dispose();
-                            file.Close();
-                            file.Dispose();
+                            finally
+                            {
+                                zip.Dispose();
+                                file.Close();
+                                file.Dispose();
+                                GC.Collect();
+                            }
                         }
                     }
                 }
-
-                if(nlpModelBytes != null && StringExtensions.Valid(nlpCategoriesJson))
-                {
-                    m_logger.Info("Initializing NLP classification.");
-                    InitNlp(nlpModelBytes, nlpCategoriesJson);
-                }
-
-                var listLoadInfo = string.Format("Loaded {0} filtering rules and {1} text triggers.", totalFiltersLoaded, totalTriggersLoaded);
-                Debug.WriteLine(listLoadInfo);
-                m_logger.Info(listLoadInfo);
-            }
-            else
-            {
-                m_logger.Error("No filtering rules.");
             }
         }
 
@@ -1920,9 +1921,9 @@ namespace Te.Citadel
             // Disable every category that is a bypass category.
             foreach(var entry in m_generatedCategoriesMap.Values)
             {
-                if(entry.IsBypass)
+                if(entry is MappedBypassListCategoryModel)
                 {
-                    m_filteringEngine.SetCategoryEnabled(entry.CategoryId, false);
+                    m_filteringEngine.SetCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
                 }
             }
 
@@ -1982,10 +1983,13 @@ namespace Te.Citadel
             // Determine if a relaxed policy is currently in effect.
             foreach(var entry in m_generatedCategoriesMap.Values)
             {
-                if(entry.IsBypass && m_filteringEngine.IsCategoryEnabled(entry.CategoryId) == false)
+                if(entry is MappedBypassListCategoryModel)
                 {
-                    relaxedInEffect = true;
-                    break;
+                    if(m_filteringEngine.IsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                    {
+                        relaxedInEffect = true;
+                        break;
+                    }                    
                 }
             }
 
@@ -2019,9 +2023,9 @@ namespace Te.Citadel
             // Enable every category that is a bypass category.
             foreach(var entry in m_generatedCategoriesMap.Values)
             {
-                if(entry.IsBypass)
-                {
-                    m_filteringEngine.SetCategoryEnabled(entry.CategoryId, true);
+                if(entry is MappedBypassListCategoryModel)
+                {                 
+                    m_filteringEngine.SetCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, false);
                 }
             }
         }
@@ -2159,7 +2163,7 @@ namespace Te.Citadel
                         foreach(var iface in ifaces)
                         {
                             bool needsUpdate = false;
-                                                        
+
                             if(primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
                             {
                                 needsUpdate = true;
@@ -2194,6 +2198,66 @@ namespace Te.Citadel
             {
                 m_filteringEngine.Stop();
             }
+        }
+        
+        /// <summary>
+        /// Attempts to fetch a FilterListEntry instance for the supplied category name, or create a
+        /// new one if one does not exist. Whether one is created, or an existing instance is
+        /// discovered, a valid, unique FilterListEntry for the supplied category shall be returned.
+        /// </summary>
+        /// <param name="categoryName">
+        /// The category name for which to fetch or generate a new FilterListEntry instance.
+        /// </param>
+        /// <returns>
+        /// The unique FilterListEntry for the supplied category name, whether an existing instance was found
+        /// or a new one was created.
+        /// </returns>
+        /// <remarks>
+        /// This will always fail if more than 255 categories are created!
+        /// </remarks>
+        private bool TryFetchOrCreateCategoryMap<T>(string categoryName, out T model) where T : MappedFilterListCategoryModel
+        {
+            m_logger.Info("CATEGORY {0}", categoryName);
+
+            MappedFilterListCategoryModel existingCategory = null;
+            if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+            {
+                // We can't generate anymore categories. Sorry, but the rest get ignored.
+                if(m_generatedCategoriesMap.Count >= byte.MaxValue)
+                {
+                    m_logger.Error("The maximum number of filtering categories has been exceeded.");
+                    model = null;
+                    return false;
+                }
+
+                if(typeof(T) == typeof(MappedBypassListCategoryModel))
+                {
+                    MappedFilterListCategoryModel secondCategory = null;
+
+                    if(TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", out secondCategory))
+                    {
+                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
+                        m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
+                        model = newModel;
+                        return true;
+                    }
+                    else
+                    {
+                        model = null;
+                        return false;
+                    }
+                }
+                else
+                {
+                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName);
+                    m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
+                    model = newModel;
+                    return true;
+                }
+            }
+
+            model = existingCategory as T;
+            return true;
         }
 
         /// <summary>

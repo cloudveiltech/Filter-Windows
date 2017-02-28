@@ -71,11 +71,21 @@ namespace Te.Citadel.UI.Views
                 {
 #if UNBLOCK_REQUESTS_IN_BROWSER
 
-                    if(selectedBlockEvent != null)
+                    // Try to send the device name as well. Helps distinguish between clients under the
+                    // same account.
+                    string deviceName = string.Empty;
+
+                    try
                     {
+                        deviceName = Environment.MachineName;
                     }
+                    catch
+                    {
+                        deviceName = "Unknown";
+                    }
+
                     var reportPath = Application.Current.GetServiceProviderExternalUnblockRequestPath();
-                    reportPath = string.Format(@"{0}?category_name={1}&user_id={2}&blocked_request={3}", reportPath, Uri.EscapeDataString(selectedBlockEvent.CategoryName), Uri.EscapeDataString(AuthenticatedUserModel.Instance.Username), Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(selectedBlockEvent.FullRequest)));
+                    reportPath = string.Format(@"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}", reportPath, Uri.EscapeDataString(selectedBlockEvent.CategoryName), Uri.EscapeDataString(AuthenticatedUserModel.Instance.Username), Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)), Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(selectedBlockEvent.FullRequest)));
                     System.Diagnostics.Process.Start(reportPath);
 #else
                     var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("category={0}&full_request={1}", selectedBlockEvent.CategoryName, Uri.EscapeDataString(selectedBlockEvent.FullRequest)));

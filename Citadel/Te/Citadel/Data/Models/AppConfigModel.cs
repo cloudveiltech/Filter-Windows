@@ -20,6 +20,7 @@ namespace Te.Citadel.Data.Models
     /// </summary>
     internal class AppConfigModel
     {
+        /*
         /// <summary>
         /// Relative paths to all bundled files that should be applied to blacklisting functionality.
         /// </summary>
@@ -47,6 +48,8 @@ namespace Te.Citadel.Data.Models
             get;
             set;
         } = new HashSet<string>();
+
+        */
 
         /// <summary>
         /// List of all executable names that should have their net traffic forced through the
@@ -198,11 +201,31 @@ namespace Te.Citadel.Data.Models
         /// The minimum threshold, that is the match probability, that any NLP classification must
         /// meet or exceed in order to be considered a true match.
         /// </summary>
+        [JsonConverter(typeof(SafeFloatConverter))]        
         public float NlpThreshold
         {
             get;
             set;
         } = 0.9f;
+
+        /// <summary>
+        /// List of all configured NLP models, if any.
+        /// </summary>
+        public List<NLPConfigurationModel> ConfiguredNlpModels
+        {
+            get;
+            set;
+        } = new List<NLPConfigurationModel>();
+
+        /// <summary>
+        /// List of all plain text filter lists. These can be blacklists, whitelists, text trigger
+        /// lists etc.
+        /// </summary>
+        public List<FilteringPlainTextListModel> ConfiguredLists
+        {
+            get;
+            set;
+        } = new List<FilteringPlainTextListModel>();
 
         public AppConfigModel()
         {
