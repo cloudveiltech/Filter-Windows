@@ -300,6 +300,7 @@
   <ItemGroup>
     <Compile Include="Te\Citadel\CitadelMain.cs" />
     <Compile Include="Te\Citadel\Data\Models\AppConfigModel.cs" />
+    <Compile Include="Te\Citadel\Data\Models\CategoryMappedDocumentCategorizerModel.cs" />
     <Compile Include="Te\Citadel\Data\Models\FilteringPlainTextListModel.cs" />
     <Compile Include="Te\Citadel\Data\Models\MappedBypassListCategoryModel.cs" />
     <Compile Include="Te\Citadel\Data\Models\MappedFilterListCategoryModel.cs" />

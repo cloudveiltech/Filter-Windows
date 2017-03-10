@@ -75,7 +75,7 @@ namespace Te.Citadel
         /// </summary>
         private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
 
-        private List<DocumentCategorizerME> m_documentClassifiers = new List<DocumentCategorizerME>();
+        private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 
         private Engine m_filteringEngine;
 
@@ -591,13 +591,18 @@ namespace Te.Citadel
             X509Store localStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
             localStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
             foreach(var cert in localStore.Certificates)
-            {
+            {   
+                caFileBuilder.AppendLine(cert.ExportToPem());
+
+                /* XXX TODO - Instead of only trusting microsoft CA's, let's trust all machine-local CA's. 
+                 * It's not unreasonable to expect the user and OS to handle these properly.
                 if(cert.Subject.IndexOf("Microsoft") != -1 && cert.Subject.IndexOf("Root") != -1)
                 {
                     m_logger.Info("Adding cert: {0}.", cert.Subject);
                     caFileBuilder.AppendLine(cert.ExportToPem());
                 }
-            }
+                */
+            }            
             //
 
             // Dump the text to the local file system.
@@ -656,6 +661,8 @@ namespace Te.Citadel
                 
                 var selectedCategoriesHashset = new HashSet<string>(nlpConfig.SelectedCategoryNames, StringComparer.OrdinalIgnoreCase);
 
+                var mappedAllCategorySet = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
                 // Init our regexes
                 m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
@@ -670,19 +677,21 @@ namespace Te.Citadel
                 {
                     var modelCategory = classifier.getCategory(i);
 
+                    // Make the category name unique by prepending
+                    // the relative path the NLP model file. This will ensure that categories with
+                    // the same name across multiple NLP models will be insulated against
+                    // collision.
+                    var relativeNlpPath = nlpConfig.RelativeModelPath.Substring(0, nlpConfig.RelativeModelPath.LastIndexOf('/') + 1) + Path.GetFileNameWithoutExtension(nlpConfig.RelativeModelPath) + "/";
+                    var mappedModelCategory = relativeNlpPath + modelCategory;
+
+                    mappedAllCategorySet.Add(modelCategory, mappedModelCategory);
+
                     if(selectedCategoriesHashset.Contains(modelCategory))
                     {
-                        // This is an enabled category. Make the category name unique by prepending
-                        // the relative path the NLP model file. This will ensure that categories with
-                        // the same name across multiple NLP models will be insulated against
-                        // collision.
-                        var relativeNlpPath = nlpConfig.RelativeModelPath.Substring(0, nlpConfig.RelativeModelPath.LastIndexOf('/') + 1) + Path.GetFileNameWithoutExtension(nlpConfig.RelativeModelPath) + "/";
-                        modelCategory = relativeNlpPath + modelCategory;
-
                         m_logger.Info("Setting up NLP classification category: {0}", modelCategory);
 
                         MappedFilterListCategoryModel existingCategory = null;
-                        if(TryFetchOrCreateCategoryMap(modelCategory, out existingCategory))
+                        if(TryFetchOrCreateCategoryMap(mappedModelCategory, out existingCategory))
                         {
                             m_filteringEngine.SetCategoryEnabled(existingCategory.CategoryId, true);
                         }
@@ -694,7 +703,7 @@ namespace Te.Citadel
                 }
 
                 // Push this classifier to our list of classifiers.
-                m_documentClassifiers.Add(classifier);
+                m_documentClassifiers.Add(new CategoryMappedDocumentCategorizerModel(classifier, mappedAllCategorySet));
             }
             finally
             {
@@ -1385,33 +1394,29 @@ namespace Te.Citadel
                             // Remove all multi-whitespace, newlines etc.
                             textToClassify = m_whitespaceRegex.Replace(textToClassify, " ");
 
-                            var classificationResult = classifier.categorize(textToClassify);
-
-                            var bestCategoryName = "NLP" + classifier.getBestCategory(classificationResult);
+                            var classificationResult = classifier.ClassifyText(textToClassify);
 
                             MappedFilterListCategoryModel categoryNumber = null;
 
-                            var bestCategoryScore = classificationResult.Max();
-
-                            if(m_generatedCategoriesMap.TryGetValue(bestCategoryName, out categoryNumber))
+                            if(m_generatedCategoriesMap.TryGetValue(classificationResult.BestCategoryName, out categoryNumber))
                             {
                                 if(categoryNumber.CategoryId > 0 && m_filteringEngine.IsCategoryEnabled(categoryNumber.CategoryId))
                                 {
                                     var threshold = m_config != null ? m_config.NlpThreshold : 0.9f;
 
-                                    if(bestCategoryScore < threshold)
+                                    if(classificationResult.BestCategoryScore < threshold)
                                     {
-                                        m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", bestCategoryName, threshold, bestCategoryScore);
+                                        m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", classificationResult.BestCategoryName, threshold, classificationResult.BestCategoryScore);
                                         return 0;
                                     }
 
-                                    m_logger.Info("Classified text content as {0}.", bestCategoryName);
+                                    m_logger.Info("Classified text content as {0}.", classificationResult.BestCategoryName);
                                     return categoryNumber.CategoryId;
                                 }
                             }
                             else
                             {
-                                m_logger.Info("Did not find category registered: {0}.", bestCategoryName);
+                                m_logger.Info("Did not find category registered: {0}.", classificationResult.BestCategoryName);
                             }
                         }
                     }

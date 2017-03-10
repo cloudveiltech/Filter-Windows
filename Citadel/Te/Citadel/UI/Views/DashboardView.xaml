@@ -19,9 +19,9 @@
                 d:DesignWidth="716"
                 mc:Ignorable="d">
 
-    <UserControl.DataContext>
+    <local:BaseView.DataContext>
         <CitadelViewModels:DashboardViewModel />
-    </UserControl.DataContext>
+    </local:BaseView.DataContext>
     <Grid>
 
         <Controls:MetroAnimatedSingleRowTabControl>

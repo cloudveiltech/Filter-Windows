@@ -57,7 +57,7 @@ namespace Te.Citadel.UI.Views
             m_disabledInternetGrid.Visibility = Visibility.Hidden;
         }
 
-        private async void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
+        private void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
         {
             // XXX TODO - Having this code in here is sloppy. Clean this up.
             
