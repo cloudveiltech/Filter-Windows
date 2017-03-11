@@ -1880,13 +1880,16 @@ namespace Te.Citadel
                                                         var whitelistRules = rulesSb.ToString();
                                                         if(StringExtensions.Valid(whitelistRules))
                                                         {
-                                                            uint tmpLoaded, tmpFailed;
-                                                            m_filteringEngine.LoadAbpFormattedString(whitelistRules, categoryModel.CategoryId, false, out tmpLoaded, out tmpFailed);
-                                                            m_filteringEngine.SetCategoryEnabled(categoryModel.CategoryId, true);
-                                                            totalFilterRulesLoaded += tmpLoaded;
-                                                            totalFilterRulesFailed += tmpFailed;
+                                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                                            {
+                                                                uint tmpLoaded, tmpFailed;
+                                                                m_filteringEngine.LoadAbpFormattedString(whitelistRules, categoryModel.CategoryId, false, out tmpLoaded, out tmpFailed);
+                                                                m_filteringEngine.SetCategoryEnabled(categoryModel.CategoryId, true);
+                                                                totalFilterRulesLoaded += tmpLoaded;
+                                                                totalFilterRulesFailed += tmpFailed;
 
-                                                            m_logger.Info("{0} loaded and {1} failed for whitelist category {2}.", tmpLoaded, tmpFailed, thisListCategoryName);
+                                                                m_logger.Info("{0} loaded and {1} failed for whitelist category {2}.", tmpLoaded, tmpFailed, thisListCategoryName);
+                                                            }
                                                         }
                                                     }
 
