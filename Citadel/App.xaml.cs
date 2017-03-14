@@ -1696,8 +1696,12 @@ namespace Te.Citadel
                                                 dashboardViewModel.AvailableRelaxedRequests = m_config.BypassesPermitted;
                                                 dashboardViewModel.RelaxedDuration = new DateTime(m_config.BypassDuration.Ticks).ToString("HH:mm");
 
+                                                // Ensure we don't overlap this event multiple times by decrementing first.
+                                                dashboardViewModel.Model.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
                                                 dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
+                                                // Ensure we don't overlap this event multiple times by decrementing first.
+                                                dashboardViewModel.Model.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
                                                 dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                                             }
                                         }

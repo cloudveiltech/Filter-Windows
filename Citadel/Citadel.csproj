@@ -274,6 +274,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -308,6 +309,12 @@
     <Compile Include="Te\Citadel\Data\Serialization\IntToMinutesTimespanConverter.cs" />
     <Compile Include="Te\Citadel\Data\Serialization\SafeFloatConverter.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
+    <Compile Include="Te\Citadel\PostInstallCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Te\Citadel\PostInstallCommand.Designer.cs">
+      <DependentUpon>PostInstallCommand.cs</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\ProviderConditionsModel.cs" />

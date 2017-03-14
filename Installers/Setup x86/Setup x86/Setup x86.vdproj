@@ -891,6 +891,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_8F2FDD598682426EB7DBCD2C9C3105F9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_94B9A2D50A9BBB1DB03791708D85E2D7"
         "OwnerKey" = "8:_A60F8458350DD2BADD34BF6BE7886835"
         "MsmSig" = "8:_UNDEFINED"
@@ -4068,6 +4074,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8F2FDD598682426EB7DBCD2C9C3105F9"
+            {
+            "SourcePath" = "8:..\\..\\..\\Citadel\\Te\\Citadel\\PostInstallCommand.cs"
+            "TargetName" = "8:PostInstallCommand.cs"
+            "Tag" = "8:"
+            "Folder" = "8:_A39A12E20DA14090809BAFF375C2CE71"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_94B9A2D50A9BBB1DB03791708D85E2D7"
             {
             "AssemblyRegister" = "3:1"
@@ -5566,15 +5592,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{87D3267A-A977-4FAF-A719-27D484968DDB}"
-        "PackageCode" = "8:{BB49D682-9BFC-4BD7-879A-1EB99810B489}"
+        "ProductCode" = "8:{41F02267-7708-4119-9562-A2F2489D599C}"
+        "PackageCode" = "8:{08ED7029-E7A9-4432-8346-C877C0917CB9}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.4.11"
+        "ProductVersion" = "8:0.4.15"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

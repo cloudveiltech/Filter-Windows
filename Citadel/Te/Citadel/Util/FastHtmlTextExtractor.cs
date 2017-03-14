@@ -116,7 +116,14 @@ namespace Te.Citadel.Util
                 else
                 {
                     lastSpace = false;
-                    extracted[extractedPos++] = input[next];
+                    if(!char.IsLetterOrDigit(input[next]) && !char.IsPunctuation(input[next]))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        extracted[extractedPos++] = input[next];
+                    }
                 }
             }
 
