@@ -324,7 +324,7 @@ namespace Te.Citadel.UI.Models
             get
             {
                 // Create a decrypted copy and return it. Should be destroyed ASAP.
-                byte[] plaintext = ProtectedData.Unprotect(m_passwordEncrypted, Entropy, DataProtectionScope.CurrentUser);
+                byte[] plaintext = ProtectedData.Unprotect(m_passwordEncrypted, Entropy, DataProtectionScope.LocalMachine);
                 return plaintext;
             }
 
@@ -342,7 +342,7 @@ namespace Te.Citadel.UI.Models
                     throw new ArgumentException("Got empty password byte array. Expect a length greater than zero.", nameof(Password));
                 }
 
-                m_passwordEncrypted = ProtectedData.Protect(value, Entropy, DataProtectionScope.CurrentUser);
+                m_passwordEncrypted = ProtectedData.Protect(value, Entropy, DataProtectionScope.LocalMachine);
 
                 // Clear out the unencrypted password bytes ASAP.
                 Array.Clear(value, 0, value.Length);
@@ -394,15 +394,25 @@ namespace Te.Citadel.UI.Models
                 // Enforce rigid synchronization.
                 lock(m_entropyLockObject)
                 {
-                    // This is a random key name we're going to use. This key will have the entropy
-                    // written to it in the registry.
-                    const string keyName = "9e5f71f5-d68d-4349-8683-9910a54bc066";
+                    string machineName = string.Empty;
 
+                    try
+                    {
+                        machineName = System.Environment.MachineName;
+                    }
+                    catch
+                    {
+                        machineName = "Unknown";
+                    }
+
+                    // This key will have the entropy written to it in the registry.
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName).ToString();
+                    
                     // Get the name of our process, aka the Executable name.
-                    var applicationNiceName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                    var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the CURRENT_USER\SYSTEM sub key for read/write.
-                    RegistryKey key = Registry.CurrentUser.OpenSubKey("Software", true);
+                    RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", true);
 
                     // Create or open our application's key.
                     key.CreateSubKey(applicationNiceName);
@@ -438,11 +448,12 @@ namespace Te.Citadel.UI.Models
         /// Default ctor.
         /// </summary>
         private AuthenticatedUserModel()
-        {
+        {   
             m_savePath = AppDomain.CurrentDomain.BaseDirectory + "u.dat";
             m_logger = LoggerUtil.GetAppWideLogger();
             m_entropyLockObject = new object();
             m_username = string.Empty;
+            m_logger.Info("Authenticated user model loading from {0}.", m_savePath);
         }
 
         /// <summary>
@@ -713,7 +724,7 @@ namespace Te.Citadel.UI.Models
                     return false;
                 }
 
-                plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.CurrentUser);
+                plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.LocalMachine);
                 this.Username = deserialized.Username;
                 this.Password = plaintext;
                 this.AuthRoute = deserialized.AuthRoute;
@@ -801,7 +812,7 @@ namespace Te.Citadel.UI.Models
                 // etc is matched up. XXX TODO - Can probably go without this.
                 internalSerializable.Username = this.Username;
                 internalSerializable.Accepted = this.HasAcceptedTerms;
-                internalSerializable.EncryptedPassword = ProtectedData.Protect(tempDecryptedPassword, Entropy, DataProtectionScope.CurrentUser);
+                internalSerializable.EncryptedPassword = ProtectedData.Protect(tempDecryptedPassword, Entropy, DataProtectionScope.LocalMachine);
                 internalSerializable.CookieString = this.UserSessionCookies.GetCookieHeader(this.AuthRoute);
                 internalSerializable.AuthRoute = this.AuthRoute;
 
