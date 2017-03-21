@@ -18,10 +18,7 @@ namespace Te.Citadel.Extensions
 
         public static string GetServiceProviderApiPath(this Application app)
         {
-            return "https://technikempire.com/citadel";
-
-            //https://technikempire.com/citadel
-            //https://manage.cloudveil.org/citadel
+            return "https://manage.cloudveil.org/citadel";
         }
 
         public static string GetServiceProviderExternalUnblockRequestPath(this Application app)
