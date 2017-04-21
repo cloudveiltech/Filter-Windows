@@ -123,7 +123,7 @@ namespace Te.Citadel
         /// <summary>
         /// Holds a record of the result from the last time the user's authenticity was challenged.
         /// </summary>
-        private bool m_lastAuthWasSuccess = false;
+        private volatile bool m_lastAuthWasSuccess = false;
 
         /// <summary>
         /// Logger.
