@@ -251,5 +251,5 @@ RestoreInetUtil/
 # Ignore BuildBot
 BuildBot/
 
-# Ignore HTTPFilteringEngine
-Citadel/Lib/HttpFilteringEngine
+# Allow WinSparkle binaries
+!**/Citadel/Lib/WinSparkle/*
