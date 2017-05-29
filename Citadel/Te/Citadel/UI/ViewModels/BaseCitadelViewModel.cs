@@ -9,6 +9,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using NLog;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Te.Citadel.Util;
 
@@ -28,9 +29,44 @@ namespace Te.Citadel.UI.ViewModels
         public delegate void ViewChangeRequestCallback(Type T);
 
         /// <summary>
-        /// Event for when a view requests another view.
+        /// Callback when a view requests another view.
         /// </summary>
-        public event ViewChangeRequestCallback ViewChangeRequest;
+        public ViewChangeRequestCallback ViewChangeRequest;
+
+        /// <summary>
+        /// Ask user a question.
+        /// </summary>
+        /// <param name="title">
+        /// The question title.
+        /// </param>
+        /// <param name="question">
+        /// The question.
+        /// </param>
+        /// <returns>
+        /// The binary response.
+        /// </returns>
+        public delegate Task<bool> UserFeedbackCallback(string title, string question);
+
+        /// <summary>
+        /// Callback for when a view wants to ask the user a question in a modal.
+        /// </summary>
+        public UserFeedbackCallback UserFeedbackRequest;
+
+        /// <summary>
+        /// Tell the user something.
+        /// </summary>
+        /// <param name="title">
+        /// The modal title.
+        /// </param>
+        /// <param name="statement">
+        /// The statement
+        /// </param>
+        public delegate void UserNotificationCallback(string title, string statement);
+
+        /// <summary>
+        /// Callback for when a view wants to post a notification to the user in a modal.
+        /// </summary>
+        public UserNotificationCallback UserNotificationRequest;
 
         /// <summary>
         /// Logger for views.
@@ -99,6 +135,16 @@ namespace Te.Citadel.UI.ViewModels
         protected void RequestViewChange(Type viewType)
         {
             ViewChangeRequest?.Invoke(viewType);
+        }
+
+        protected async Task<bool> AskUserQuestion(string title, string question)
+        {
+            return await UserFeedbackRequest?.Invoke(title, question);
+        }
+
+        protected void PostNotificationToUser(string title, string message)
+        {
+            UserNotificationRequest?.Invoke(title, message);
         }
     }
 }

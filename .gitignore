@@ -242,6 +242,9 @@ _Pvt_Extensions
 Citadel/Citadel.VC.VC.opendb
 *.db
 
+# Ignore installers
+*.msi
+
 # Ignore Listutil and other bundled projects for now.
 ListUtil/
 

@@ -73,9 +73,7 @@ namespace Te.Citadel
         private Regex m_whitespaceRegex;
 
         private CategoryIndex m_categoryIndex = new CategoryIndex(short.MaxValue);
-
-        private FilterDbCollection m_filters;
-
+        
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're already
         /// initialized.
@@ -439,7 +437,7 @@ namespace Te.Citadel
 
             if(m_viewLogin.DataContext != null && m_viewLogin.DataContext is BaseCitadelViewModel)
             {
-                ((BaseCitadelViewModel)(m_viewLogin.DataContext)).ViewChangeRequest += OnViewChangeRequest;
+                ((BaseCitadelViewModel)(m_viewLogin.DataContext)).ViewChangeRequest = OnViewChangeRequest;
             }
 
             m_viewProgressWait = new ProgressWait();
@@ -448,7 +446,8 @@ namespace Te.Citadel
 
             if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is BaseCitadelViewModel)
             {
-                ((BaseCitadelViewModel)(m_viewDashboard.DataContext)).ViewChangeRequest += OnViewChangeRequest;
+                ((BaseCitadelViewModel)(m_viewDashboard.DataContext)).ViewChangeRequest = OnViewChangeRequest;
+                ((BaseCitadelViewModel)(m_viewDashboard.DataContext)).UserNotificationRequest = OnNotifyUserRequest;
             }
 
             // Set the current view to ProgressWait because we're gonna do background init next.
@@ -979,19 +978,11 @@ namespace Te.Citadel
 
                             case nameof(ProviderConditionsView):
                             {
-                                if(m_viewProviderConditions != null)
-                                {
-                                    if(m_viewProviderConditions.DataContext != null && m_viewProviderConditions.DataContext is BaseCitadelViewModel)
-                                    {
-                                        ((BaseCitadelViewModel)(m_viewProviderConditions.DataContext)).ViewChangeRequest -= OnViewChangeRequest;
-                                    }
-                                }
-
                                 m_viewProviderConditions = new ProviderConditionsView();
 
                                 if(m_viewProviderConditions.DataContext != null && m_viewProviderConditions.DataContext is BaseCitadelViewModel)
                                 {
-                                    ((BaseCitadelViewModel)(m_viewProviderConditions.DataContext)).ViewChangeRequest += OnViewChangeRequest;
+                                    ((BaseCitadelViewModel)(m_viewProviderConditions.DataContext)).ViewChangeRequest = OnViewChangeRequest;
                                 }
 
                                 newView = m_viewProviderConditions;
@@ -1036,6 +1027,21 @@ namespace Te.Citadel
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
+        }
+
+        /// <summary>
+        /// Called when a view or view model is requesting to post information to the user via a
+        /// modal.
+        /// </summary>
+        /// <param name="title">
+        /// The title.
+        /// </param>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        private void OnNotifyUserRequest(string title, string message)
+        {
+            m_mainWindow.ShowUserMessage(title, message);
         }
 
         /// <summary>

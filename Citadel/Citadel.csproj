@@ -439,6 +439,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\UserLicense.txt" />
     <Resource Include="Resources\appicon.ico" />
     <Resource Include="Resources\NLog.config" />
     <Resource Include="Resources\BlockedPage.html" />

@@ -8,7 +8,9 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using System.Windows.Resources;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.Views;
 using Te.Citadel.Util;
@@ -104,12 +106,17 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         private async void GetTermsAsync()
         {   
-            var terms = await WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.UserTerms);
+            var userTermsUri = @"pack://application:,,,/Resources/UserLicense.txt";
+            byte[] userTermsBytes = null;
+            StreamResourceInfo enSentModelInfo = System.Windows.Application.GetResourceStream(new Uri(userTermsUri));
 
-            if(terms != null && terms.Length > 0)
+            using(var memoryStream = new MemoryStream())
             {
+                enSentModelInfo.Stream.CopyTo(memoryStream);
+                userTermsBytes = memoryStream.ToArray();
+
                 m_haveTerms = true;
-                m_terms = System.Text.Encoding.UTF8.GetString(terms);
+                m_terms = System.Text.Encoding.UTF8.GetString(userTermsBytes);
 
                 await Application.Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
@@ -119,7 +126,7 @@ namespace Te.Citadel.UI.ViewModels
                         RaisePropertyChanged(nameof(HaveTerms));
                     }
                 );
-            }   
+            }
         }
     }
 }

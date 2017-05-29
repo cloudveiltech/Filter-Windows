@@ -106,11 +106,12 @@ namespace Te.Citadel.UI.ViewModels
                         try
                         {
                             RequestViewChangeCommand.Execute(typeof(ProgressWait));
-                            var authSuccess = await m_model.RequestAppDeactivation();
+                            var deactivationRequestSuccess = await m_model.RequestAppDeactivation();
 
-                            if(!authSuccess)
+                            if(!deactivationRequestSuccess)
                             {
                                 RequestViewChangeCommand.Execute(typeof(DashboardView));
+                                PostNotificationToUser("Request Received", "Your deactivation request has been received, but approval is still pending.");
                             }
                             else
                             {

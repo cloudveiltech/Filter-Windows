@@ -25,193 +25,8 @@
     <Grid>
 
         <Controls:MetroAnimatedSingleRowTabControl>
-            <TabItem Header="Status">
-                <Grid>
 
-                    <Label Width="258"
-                           Margin="229,10,229,0"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           HorizontalContentAlignment="Center"
-                           Content="Filter Active"
-                           FontFamily="Segoe UI"
-                           FontSize="22"
-                           FontWeight="UltraLight"
-                           Foreground="Black" />
-
-                    <TextBlock Width="660"
-                               Height="98"
-                               Margin="28,70,28,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
-                               FontFamily="Segoe UI"
-                               FontSize="14"
-                               FontWeight="UltraLight"
-                               Foreground="Black"
-                               TextWrapping="Wrap"><Run Text="Filtering is active. To disable the filter and uninstall, you may submit a deactivation request by clicking the button below. Your provider will see the request and verify the action." />
-                        <LineBreak /><Run />
-                        <LineBreak /><Run Text="When you submit a request, the status of any existing requests are checked and, if your request has been granted, filtering will be disabled and the application will exit." /></TextBlock>
-
-                    <!--  Request deactivation button.  -->
-                    <Button Width="136"
-                            Margin="562,296,0,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Command="{Binding RequestDeactivateCommand}"
-                            Content="Request Deactivation"
-                            Style="{StaticResource AccentedSquareButtonStyle}" />
-
-                    <Grid x:Name="m_disabledInternetGrid"
-                          x:FieldModifier="private"
-                          Visibility="Hidden">
-
-                        <Rectangle HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Stretch"
-                                   Fill="White" />
-
-                        <Label Width="258"
-                               Margin="229,10,229,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
-                               HorizontalContentAlignment="Center"
-                               Content="Internet Disabled"
-                               FontFamily="Segoe UI"
-                               FontSize="22"
-                               FontWeight="UltraLight"
-                               Foreground="Black" />
-
-                        <TextBlock Width="660"
-                                   Height="98"
-                                   Margin="28,70,28,0"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Top"
-                                   FontFamily="Segoe UI"
-                                   FontSize="14"
-                                   FontWeight="UltraLight"
-                                   Foreground="Black"
-                                   TextWrapping="Wrap">
-                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
-                            <LineBreak />
-                            <LineBreak />
-                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
-
-                        <Label x:Name="m_internetRestorationTimeLabel"
-                               HorizontalAlignment="Stretch"
-                               VerticalAlignment="Center"
-                               HorizontalContentAlignment="Center"
-                               x:FieldModifier="private"
-                               Content=""
-                               FontFamily="Segoe UI"
-                               FontSize="18"
-                               FontWeight="UltraLight"
-                               Foreground="Black" />
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="Settings">
-                <Grid>
-
-                    <Label Width="258"
-                           Margin="21,10,431,0"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           HorizontalContentAlignment="Center"
-                           Content="Relaxed Policy"
-                           FontFamily="Segoe UI"
-                           FontSize="22"
-                           FontWeight="UltraLight"
-                           Foreground="Black" />
-
-                    <TextBlock Width="258"
-                               Height="98"
-                               Margin="21,70,431,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
-                               FontFamily="Segoe UI"
-                               FontSize="14"
-                               FontWeight="UltraLight"
-                               Foreground="Black"
-                               Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions, you can use the relaxed filtering rules for the given time span below."
-                               TextWrapping="Wrap" />
-
-                    <!--  View log directory button.  -->
-                    <Button Width="136"
-                            Margin="553,131,0,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Command="{Binding ViewLogsCommand}"
-                            Content="View Log Files"
-                            Style="{StaticResource AccentedSquareButtonStyle}" />
-                    <Label Width="258"
-                           Margin="431,10,21,0"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           HorizontalContentAlignment="Center"
-                           Content="Other"
-                           FontFamily="Segoe UI"
-                           FontSize="22"
-                           FontWeight="UltraLight"
-                           Foreground="Black" />
-                    <TextBlock Width="258"
-                               Height="45"
-                               Margin="431,70,21,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
-                               FontFamily="Segoe UI"
-                               FontSize="14"
-                               FontWeight="UltraLight"
-                               Foreground="Black"
-                               Text="Your administrator or support agent might request log information to assist you."
-                               TextWrapping="Wrap" />
-
-                    <Label Height="30"
-                           Margin="21,168,591,158"
-                           Content="Uses Available:"
-                           FontSize="12" />
-
-                    <Button Width="171"
-                            Margin="108,258,0,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Command="{Binding UseRelaxedPolicyCommand}"
-                            Content="Use Relaxed Policy"
-                            Style="{StaticResource AccentedSquareButtonStyle}" />
-
-                    <Label Height="30"
-                           Margin="21,200,591,126"
-                           Content="Time Permitted:"
-                           FontSize="12" />
-
-                    <TextBlock Width="120"
-                               Height="30"
-                               Margin="159,174,431,154"
-                               FontSize="12"
-                               Text="{Binding Path=AvailableRelaxedRequests,
-                                              Mode=OneWay,
-                                              UpdateSourceTrigger=PropertyChanged}"
-                               TextAlignment="Right" />
-
-                    <TextBlock Width="120"
-                               Height="30"
-                               Margin="159,206,431,122"
-                               FontSize="12"
-                               Text="{Binding Path=RelaxedDuration,
-                                              Mode=OneWay,
-                                              UpdateSourceTrigger=PropertyChanged}"
-                               TextAlignment="Right" />
-
-                    <Button Width="171"
-                            Margin="108,295,0,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Command="{Binding RelinquishRelaxedPolicyCommand}"
-                            Content="Relinquish Relaxed Policy"
-                            Style="{StaticResource AccentedSquareButtonStyle}" />
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="Blocking Info">
+            <TabItem Header="History">
                 <Grid>
 
                     <!--  This style on the grid will force the cells in the DataGrid to truncate their text.  -->
@@ -221,27 +36,20 @@
                         </Style>
                     </Grid.Resources>
 
-                    <Label Width="258"
-                           Margin="226,10,226,0"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           HorizontalContentAlignment="Center"
-                           Content="Block Events"
-                           FontFamily="Segoe UI"
-                           FontSize="22"
-                           FontWeight="UltraLight"
-                           Foreground="Black" />
-
                     <TextBlock Width="690"
                                Height="62"
-                               Margin="13,54,13,0"
+                               Margin="10,53,10,0"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Top"
                                FontFamily="Segoe UI"
                                FontSize="14"
                                FontWeight="UltraLight"
                                Foreground="Black"
-                               TextWrapping="Wrap"><Run Text="This is a temporary view of block events that have occurred during this filtering session. This data is not persisted in storage, or transmitted anywhere. It is presented for insight and convenience." /><Run Text=" You may also request a block action to be reviewed" /><Run Text=" by selecting it below." /><Run Text=" Note that in this case, the selected information will be shared with your provider." /></TextBlock>
+                               TextWrapping="Wrap">
+                        <Span FontFamily="MyriadPro-Regular"
+                              FontSize="14"
+                              Foreground="#FF231F20"><Run Text="Request review of a blocked url by selecting the item and then click Request Review." /></Span>
+                    </TextBlock>
 
                     <Button Height="25"
                             Margin="554,315,10,0"
@@ -292,6 +100,247 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+
+            <TabItem Header="Settings">
+                <Grid>
+
+                    <Label Width="258"
+                           Margin="21,10,431,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Relaxed Policy"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+
+                    <TextBlock Width="258"
+                               Height="98"
+                               Margin="21,70,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap">
+                        <Run Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions on certain websites, you can use the relaxed filtering rules for the given time span below." />
+                        <Run />
+                    </TextBlock>
+
+                    <Label Height="30"
+                           Margin="21,168,591,158"
+                           Content="Uses Available:"
+                           FontSize="12" />
+
+                    <Button Width="171"
+                            Margin="108,258,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding UseRelaxedPolicyCommand}"
+                            Content="Use Relaxed Policy"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Label Height="30"
+                           Margin="21,200,591,126"
+                           Content="Time Permitted:"
+                           FontSize="12" />
+
+                    <TextBlock Width="120"
+                               Height="30"
+                               Margin="159,174,431,154"
+                               FontSize="12"
+                               Text="{Binding Path=AvailableRelaxedRequests,
+                                              Mode=OneWay,
+                                              UpdateSourceTrigger=PropertyChanged}"
+                               TextAlignment="Right" />
+
+                    <TextBlock Width="120"
+                               Height="30"
+                               Margin="159,206,431,122"
+                               FontSize="12"
+                               Text="{Binding Path=RelaxedDuration,
+                                              Mode=OneWay,
+                                              UpdateSourceTrigger=PropertyChanged}"
+                               TextAlignment="Right" />
+
+                    <Button Width="171"
+                            Margin="108,295,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding RelinquishRelaxedPolicyCommand}"
+                            Content="Relinquish Relaxed Policy"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Advanced">
+                <Grid>
+
+
+
+                    <Label Width="258"
+                           Margin="21,10,431,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Help"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+
+                    <TextBlock Width="258"
+                               Height="36"
+                               Margin="21,70,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="http://www.cloudveil.org" RequestNavigate="OnHyperlinkClicked">
+                            www.cloudveil.org
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock Width="258"
+                               Height="36"
+                               Margin="21,110,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="https://cloudveil.zendesk.com/hc/en-us" RequestNavigate="OnHyperlinkClicked">
+                            Knowledgebase
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock Width="258"
+                               Height="36"
+                               Margin="21,150,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="mailto:support@cloudveil.org" RequestNavigate="OnHyperlinkClicked">
+                            support@cloudveil.org
+                        </Hyperlink>
+                        <LineBreak />
+                        <Run>
+                            (888) 782-4962
+                        </Run>
+                    </TextBlock>
+
+                    <TextBlock Width="258"
+                               Height="36"
+                               Margin="21,293,431,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               Text="Review Logs"
+                               TextWrapping="Wrap" />
+
+                    <!--  View log directory button.  -->
+                    <Button Width="136"
+                            Margin="144,294,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding ViewLogsCommand}"
+                            Content="View Log Files"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <!--  Request deactivation button.  -->
+                    <Button Width="136"
+                            Margin="553,294,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Command="{Binding RequestDeactivateCommand}"
+                            Content="Deactivate"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Grid x:Name="m_disabledInternetGrid"
+                          x:FieldModifier="private"
+                          Visibility="Hidden">
+
+                        <Rectangle HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"
+                                   Fill="White" />
+
+                        <Label Width="258"
+                               Margin="229,10,229,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               HorizontalContentAlignment="Center"
+                               Content="Internet Disabled"
+                               FontFamily="Segoe UI"
+                               FontSize="22"
+                               FontWeight="UltraLight"
+                               Foreground="Black" />
+
+                        <TextBlock Width="660"
+                                   Height="98"
+                                   Margin="28,70,28,0"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Top"
+                                   FontFamily="Segoe UI"
+                                   FontSize="14"
+                                   FontWeight="UltraLight"
+                                   Foreground="Black"
+                                   TextWrapping="Wrap">
+                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
+
+                        <Label x:Name="m_internetRestorationTimeLabel"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               HorizontalContentAlignment="Center"
+                               x:FieldModifier="private"
+                               Content=""
+                               FontFamily="Segoe UI"
+                               FontSize="18"
+                               FontWeight="UltraLight"
+                               Foreground="Black" />
+                    </Grid>
+                    <Label Width="258"
+                           Margin="431,10,21,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           HorizontalContentAlignment="Center"
+                           Content="Request Deactivation"
+                           FontFamily="Segoe UI"
+                           FontSize="22"
+                           FontWeight="UltraLight"
+                           Foreground="Black" />
+                    <TextBlock Width="258"
+                               Height="146"
+                               Margin="431,70,21,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               FontFamily="Segoe UI"
+                               FontSize="14"
+                               FontWeight="UltraLight"
+                               Foreground="Black"
+                               TextWrapping="Wrap"><Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. Cloud-Veil will see your request and verify the action." />
+                        <LineBreak /><Run />
+                        <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." /></TextBlock>
+
+                </Grid>
+            </TabItem>
+
         </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>
 </local:BaseView>

@@ -6,6 +6,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Te.Citadel.Extensions;
@@ -106,6 +107,12 @@ namespace Te.Citadel.UI.Views
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
+        }
+
+        private void OnHyperlinkClicked(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }
