@@ -12,6 +12,7 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
+using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Models
 {
@@ -143,41 +144,30 @@ namespace Te.Citadel.UI.Models
         public async Task<bool> Authenticate()
         {
             ErrorMessage = string.Empty;
-
-            Debug.WriteLine("Authenticate.");
-
+            
             var unencrypedPwordBytes = this.m_userPassword.SecureStringBytes();
-            Uri authUri;
-
             try
             {
-                if(Uri.TryCreate(ServiceProvider, UriKind.Absolute, out authUri))
-                {
-                    var res = await AuthenticatedUserModel.Instance.Authenticate(this.m_userName, unencrypedPwordBytes, authUri);
+                var res = await AuthenticatedUserModel.Instance.Authenticate(this.m_userName, unencrypedPwordBytes);
 
-                    switch(res)
+                switch(res)
+                {
+                    case AuthenticatedUserModel.AuthenticationResult.ConnectionFailed:
                     {
-                        case AuthenticatedUserModel.AuthenticationResult.ConnectionFailed:
-                            {
-                                ErrorMessage = "Could not connect to service provider.";
-                            }
-                            break;
-
-                        case AuthenticatedUserModel.AuthenticationResult.Failure:
-                            {
-                                ErrorMessage = "Failed to login to service provider.";
-                            }
-                            break;
-
-                        case AuthenticatedUserModel.AuthenticationResult.Success:
-                            {
-                                return true;
-                            }
+                        ErrorMessage = "Could not connect to service provider.";
                     }
-                }
-                else
-                {
-                    ErrorMessage = "Invalid service provider address.";
+                    break;
+
+                    case AuthenticatedUserModel.AuthenticationResult.Failure:
+                    {
+                        ErrorMessage = "Failed to login to service provider.";
+                    }
+                    break;
+
+                    case AuthenticatedUserModel.AuthenticationResult.Success:
+                    {
+                        return true;
+                    }
                 }
             }
             finally
@@ -195,7 +185,7 @@ namespace Te.Citadel.UI.Models
         public LoginModel()
         {
             // Set the default service provider to the app-global value.
-            m_serviceProvider = (string)Application.Current.GetServiceProviderApiPath() + "/login.php";
+            m_serviceProvider = WebServiceUtil.GetServiceProviderApiAuthPath();
             m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();

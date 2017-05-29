@@ -1,3 +1,0 @@
-[submodule "Lib\\HttpFilteringEngine"]
-	path = Lib\\HttpFilteringEngine
-	url = git@github.com:TechnikEmpire/HttpFilteringEngine.git

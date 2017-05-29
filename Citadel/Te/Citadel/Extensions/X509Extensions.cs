@@ -9,7 +9,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace Te.Citadel.Util
+namespace Te.Citadel.Extensions
 {
     public static class X509Extensions
     {

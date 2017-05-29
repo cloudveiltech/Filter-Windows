@@ -32,7 +32,8 @@
             <TextBlock Width="700"
                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                        Text="{Binding Terms,
-                                      Mode=OneWay}" />
+                                      Mode=OneWay,
+                                      UpdateSourceTrigger=PropertyChanged}" />
         </ScrollViewer>
 
         <TextBlock Width="646"
@@ -49,6 +50,9 @@
                 VerticalAlignment="Top"
                 Command="{Binding AcceptCommand}"
                 Content="Accept"
+                IsEnabled="{Binding Path=HaveTerms,
+                                    Mode=OneWay,
+                                    UpdateSourceTrigger=PropertyChanged}"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
 
         <!--  Decline terms action button.  -->
@@ -58,6 +62,9 @@
                 VerticalAlignment="Top"
                 Command="{Binding DeclineCommand}"
                 Content="Decline"
+                IsEnabled="{Binding Path=HaveTerms,
+                                    Mode=OneWay,
+                                    UpdateSourceTrigger=PropertyChanged}"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
     </Grid>
 </local:BaseView>

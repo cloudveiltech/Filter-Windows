@@ -247,3 +247,9 @@ ListUtil/
 
 # Ignore RestoreInetUtil
 RestoreInetUtil/
+
+# Ignore BuildBot
+BuildBot/
+
+# Ignore HTTPFilteringEngine
+Citadel/Lib/HttpFilteringEngine

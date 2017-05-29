@@ -14,7 +14,7 @@ namespace Te.Citadel.Data.Models
         /// filtering engine, as a whitelist. Bypass filters are loaded as both a whitelist and a
         /// blacklist, and then the whitelist is toggled on and off.
         /// </summary>
-        public byte CategoryIdAsWhitelist
+        public short CategoryIdAsWhitelist
         {
             get;
             private set;
@@ -41,7 +41,7 @@ namespace Te.Citadel.Data.Models
         /// <param name="isBypass">
         /// Whether or not this category is a bypassable category.
         /// </param>
-        public MappedBypassListCategoryModel(byte categoryId, byte categoryIdAsWhitelist, string categoryName, string categoryNameAsWhitelist) : base(categoryId, categoryName)
+        public MappedBypassListCategoryModel(short categoryId, short categoryIdAsWhitelist, string categoryName, string categoryNameAsWhitelist) : base(categoryId, categoryName)
         {
             CategoryIdAsWhitelist = categoryIdAsWhitelist;
             CategoryNameAsWhitelist = categoryNameAsWhitelist;

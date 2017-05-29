@@ -36,9 +36,7 @@ namespace Te.Citadel.UI.Models
         {
             try
             {
-                var deactivationRouteStr = "/capi/deactivate.php";
-
-                var response = await WebServiceUtil.RequestResource(deactivationRouteStr);
+                var response = await WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.DeactivationRequest);
 
                 // WebServiceUtil.RequestResource gives null on failure, non-null on success of any
                 // kind.

@@ -23,7 +23,7 @@ namespace Te.Citadel.Data.Models
         /// Gets the unique 8 bit unsigned integer that represents the category ID within the
         /// filtering engine.
         /// </summary>
-        public byte CategoryId
+        public short CategoryId
         {
             get;
             private set;
@@ -47,7 +47,7 @@ namespace Te.Citadel.Data.Models
         /// <param name="categoryName">
         /// The category name.
         /// </param>
-        public MappedFilterListCategoryModel(byte categoryId, string categoryName)
+        public MappedFilterListCategoryModel(short categoryId, string categoryName)
         {
             CategoryId = categoryId;
             CategoryName = categoryName;

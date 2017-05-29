@@ -8,19 +8,43 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug x64|Win = Debug x64|Win
+		Debug x64|x64 = Debug x64|x64
+		Debug x64|x86 = Debug x64|x86
 		Debug x86|Win = Debug x86|Win
+		Debug x86|x64 = Debug x86|x64
+		Debug x86|x86 = Debug x86|x86
 		Release x64|Win = Release x64|Win
+		Release x64|x64 = Release x64|x64
+		Release x64|x86 = Release x64|x86
 		Release x86|Win = Release x86|Win
+		Release x86|x64 = Release x86|x64
+		Release x86|x86 = Release x86|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|Win.ActiveCfg = Debug x64|x64
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|Win.Build.0 = Debug x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|x64.ActiveCfg = Debug x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|x64.Build.0 = Debug x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|x86.ActiveCfg = Debug x64|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x64|x86.Build.0 = Debug x64|x86
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|Win.ActiveCfg = Debug x86|x86
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|Win.Build.0 = Debug x86|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|x64.ActiveCfg = Debug x86|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|x64.Build.0 = Debug x86|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|x86.ActiveCfg = Debug x86|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Debug x86|x86.Build.0 = Debug x86|x86
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|Win.ActiveCfg = Release x64|x64
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|Win.Build.0 = Release x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|x64.ActiveCfg = Release x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|x64.Build.0 = Release x64|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|x86.ActiveCfg = Release x64|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x64|x86.Build.0 = Release x64|x86
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|Win.ActiveCfg = Release x86|x86
 		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|Win.Build.0 = Release x86|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|x64.ActiveCfg = Release x86|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|x64.Build.0 = Release x86|x64
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|x86.ActiveCfg = Release x86|x86
+		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}.Release x86|x86.Build.0 = Release x86|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,7 +26,7 @@ namespace Te.Citadel.Data.Serialization
             // To account for errors. Default to zero when NaN, etc.
             float val = 0;
 
-            if(!float.TryParse((string)reader.Value, out val))
+            if(!float.TryParse(reader.Value.ToString(), out val))
             {
                 return null;
             }

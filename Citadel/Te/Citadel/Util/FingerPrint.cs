@@ -16,7 +16,7 @@ namespace Te.Citadel.Util
     {   
         static FingerPrint()
         {
-            using(var sec = new SHA256CryptoServiceProvider())
+            using(var sec = new SHA1CryptoServiceProvider())
             {
                 var sb = new StringBuilder();
 

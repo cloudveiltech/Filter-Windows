@@ -20,37 +20,6 @@ namespace Te.Citadel.Data.Models
     /// </summary>
     internal class AppConfigModel
     {
-        /*
-        /// <summary>
-        /// Relative paths to all bundled files that should be applied to blacklisting functionality.
-        /// </summary>
-        public HashSet<string> Blacklists
-        {
-            get;
-            set;
-        } = new HashSet<string>();
-
-        /// <summary>
-        /// Relative paths to all bundled files that should be applied to whitelisting functionality.
-        /// </summary>
-        public HashSet<string> Whitelists
-        {
-            get;
-            set;
-        } = new HashSet<string>();
-
-        /// <summary>
-        /// Relative paths to all bundled files that should be applied as a blacklist, with the
-        /// option to invert the lists functionality into a whitelist on demand.
-        /// </summary>
-        public HashSet<string> Bypass
-        {
-            get;
-            set;
-        } = new HashSet<string>();
-
-        */
-
         /// <summary>
         /// List of all executable names that should have their net traffic forced through the
         /// application. Note that this cannot be used in conjunction with the whitelisted

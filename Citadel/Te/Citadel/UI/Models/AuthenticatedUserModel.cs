@@ -10,11 +10,15 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Windows;
+using Te.Citadel.Data.Serialization;
 using Te.Citadel.Extensions;
 using Te.Citadel.Util;
 
@@ -42,8 +46,15 @@ namespace Te.Citadel.UI.Models
                 set;
             }
 
+            [JsonProperty]            
+            public List<Cookie> Cookies
+            {
+                get;
+                set;
+            }
+
             [JsonProperty]
-            public string CookieString
+            public string CSRFTokenString
             {
                 get;
                 set;
@@ -51,13 +62,6 @@ namespace Te.Citadel.UI.Models
 
             [JsonProperty]
             public bool Accepted
-            {
-                get;
-                set;
-            }
-
-            [JsonProperty]
-            public Uri AuthRoute
             {
                 get;
                 set;
@@ -78,12 +82,7 @@ namespace Te.Citadel.UI.Models
                         return false;
                     }
 
-                    if(!StringExtensions.Valid(CookieString))
-                    {
-                        return false;
-                    }
-
-                    if(AuthRoute == null || (!AuthRoute.Scheme.OIEquals("https") && !AuthRoute.Scheme.OIEquals("http")))
+                    if(Cookies == null || Cookies.Count == 0)
                     {
                         return false;
                     }
@@ -159,16 +158,16 @@ namespace Te.Citadel.UI.Models
         private string m_username;
 
         /// <summary>
-        /// Holds the URI of the last successful authentication request.
-        /// </summary>
-        private Uri m_lastAuthRoute;
-
-        /// <summary>
         /// Container supplied to HttpRequest and friends during auth requests. This container should
         /// be populated with session cookies that we'll store and persist for the purpose of future
         /// requests to restricted material.
         /// </summary>
         private CookieContainer m_userSessionCookies;
+
+        /// <summary>
+        /// Storage of the current user's csfr token. Refreshed at every re-log.
+        /// </summary>
+        private string m_xCsfrToken = string.Empty;
 
         /// <summary>
         /// Used in the Entropy property getter to enforce synchronization.
@@ -226,56 +225,6 @@ namespace Te.Citadel.UI.Models
             set
             {
                 m_termsAccepted = value;
-
-                if(m_termsAccepted)
-                {
-                    // Just save again whenever terms are accepted.
-                    Save();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the URI used for the last successful authentication request. Entirely
-        /// private, used internally. A property is used just to bind some logic to access.
-        /// </summary>
-        public Uri AuthRoute
-        {
-            get
-            {
-                return m_lastAuthRoute;
-            }
-
-            private set
-            {
-                Debug.Assert(value != null);
-
-                if(value == null)
-                {
-                    throw new ArgumentException("Argument cannot be null.", nameof(AuthRoute));
-                }
-
-                var isHttp = value.Scheme.OIEquals(Uri.UriSchemeHttp);
-                var isHttps = value.Scheme.OIEquals(Uri.UriSchemeHttps);
-
-                // Enforce that we're encrypting when not in debug.
-#if !CITADEL_DEBUG
-                Debug.Assert(isHttps == true);
-#else
-                Debug.Assert(isHttp == true || isHttps == true);
-#endif
-
-                // Enforce that we're encrypting when not in debug.
-#if !CITADEL_DEBUG
-                if (!isHttps)
-#else
-                if(!isHttp && !isHttps)
-#endif
-                {
-                    throw new ArgumentException("URI scheme not supported.", nameof(AuthRoute));
-                }
-
-                m_lastAuthRoute = value;
             }
         }
 
@@ -384,6 +333,38 @@ namespace Te.Citadel.UI.Models
         }
 
         /// <summary>
+        /// Get and privately sets the CSFR used in a successful auth request.
+        /// </summary>
+        /// <exception cref="ArgumentException">
+        /// When being set, if the supplied string is null, empty or whitespace, the setter will
+        /// throw.
+        /// </exception>
+        public string UserCsrfToken
+        {
+            get
+            {
+                return m_xCsfrToken;
+            }
+
+            private set
+            {
+                Debug.Assert(value != null && !string.IsNullOrEmpty(value) && !string.IsNullOrWhiteSpace(UserCsrfToken));
+
+                if(value == null)
+                {
+                    throw new ArgumentException("Expected valid string for csrf token.", nameof(UserCsrfToken));
+                }
+
+                if(string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException("Supplied csrf token is null, empty or whitespace.", nameof(UserCsrfToken));
+                }
+
+                m_xCsfrToken = value;
+            }
+        }
+        
+        /// <summary>
         /// Gets the Entropy bytes we supply during the protection/unprotection of the password
         /// member.
         /// </summary>
@@ -466,7 +447,7 @@ namespace Te.Citadel.UI.Models
         /// </param>
         /// <returns>
         /// </returns>
-        public async Task<AuthenticationResult> Authenticate(string username, byte[] unencryptedPassword, Uri authRoute)
+        public async Task<AuthenticationResult> Authenticate(string username, byte[] unencryptedPassword)
         {
             // Disable forcing endpoint to be HTTPS when beta testing.
 #if !CITADEL_DEBUG
@@ -477,6 +458,29 @@ namespace Te.Citadel.UI.Models
                 throw new ArgumentException("Supplied auth route URI does not use the HTTPS scheme. Cannot authenticate over non-HTTPS connection.", nameof(authRoute));
             }
 #endif
+            string csrfDataStr = string.Empty;
+            CookieContainer cookies = null;
+            var csrfData = await  WebServiceUtil.GetCsfrData(m_xCsfrToken, m_userSessionCookies);
+            if(csrfData == null)
+            {
+                if(string.IsNullOrEmpty(m_xCsfrToken) || string.IsNullOrWhiteSpace(m_xCsfrToken))
+                {
+                    // This really shouldn't happen. The only reason that we shouldn't get a 
+                    // token back (assuming server is OK) is that we were redirected, because
+                    // we're already authed. However, if this happened, yet we don't have an
+                    // existing token, then we can't be authed, or our state is really
+                    // screwed up, which shouldn't happen.
+                    throw new Exception("Could not fetch CSRF token, and no existing one was found.");
+                }
+
+                csrfDataStr = m_xCsfrToken;
+                cookies = m_userSessionCookies;
+            }
+            else
+            {
+                csrfDataStr = csrfData.Item1;
+                cookies = csrfData.Item2;
+            }
 
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(username));
@@ -500,10 +504,7 @@ namespace Te.Citadel.UI.Models
             {
                 return AuthenticationResult.ConnectionFailed;
             }
-
-            // Will be saved if we get a success result.
-            var sessionCookieContainer = new CookieContainer();
-
+            
             // Will be set if we get any sort of web exception.
             bool connectionFailure = false;
 
@@ -511,17 +512,32 @@ namespace Te.Citadel.UI.Models
             // and ASAP, since it will contain the user's password in a decrypted state.
             byte[] finalPostPayload = null;
 
+            // Try to send the device name as well. Helps distinguish between clients under the
+            // same account.
+            string deviceName = string.Empty;
+
             try
             {
+                deviceName = Environment.MachineName;
+            }
+            catch
+            {
+                deviceName = "Unknown";
+            }
+
+            try
+            {
+                m_logger.Info("Attempting authentication via POST to {0}", WebServiceUtil.GetServiceProviderApiAuthPath());
+
                 // Create a new request. We don't want auto redirect, we don't want the subsystem
                 // trying to look up proxy information to configure on our request, we want a 5
                 // second timeout on any and all operations and we want to look like Firefox in a
                 // generic way. Here we also set the cookie container, so we can capture session
                 // cookies if we're successful.
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(authRoute);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebServiceUtil.GetServiceProviderApiAuthPath());
                 request.Method = "POST";
                 request.Proxy = null;
-                request.AllowAutoRedirect = false;
+                request.AllowAutoRedirect = true;                
                 request.UseDefaultCredentials = false;
                 request.Timeout = 5000;
                 request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
@@ -529,11 +545,13 @@ namespace Te.Citadel.UI.Models
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
                 request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-                request.CookieContainer = sessionCookieContainer;
+                request.CookieContainer = cookies;
+                
+                request.Headers.Add("X-CSRF-TOKEN", csrfDataStr);
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.
-                var formDataStart = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&user_password=", username, FingerPrint.Value));
+                var formDataStart = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&password=", username, FingerPrint.Value, deviceName));
                 finalPostPayload = new byte[formDataStart.Length + unencryptedPassword.Length];
 
                 // Here we copy the byte range of the unencrypted password, in order to avoid having
@@ -564,30 +582,23 @@ namespace Te.Citadel.UI.Models
                     request.Abort();
 
                     // Check if the response status code is outside the "success" range of codes
-                    // defined in HTTP. If so, we failed.
-                    if(code >= 200 && code <= 299)
+                    // defined in HTTP. If so, we failed. We include redirect codes (3XX) as
+                    // success, since our server side will just redirect us if we're already
+                    // authed.
+                    if(code >= 200 && code <= 399)
                     {
                         this.Username = username;
                         this.Password = unencryptedPassword;
 
-                        // We have to do this crazy nonsense with cookies, otherwise .NET will assume
-                        // a WHOLE BUNCH of about the paths and such of cookies and will not send
-                        // them correctly.
-                        var newCookieContainer = new CookieContainer();
-                        foreach(Cookie cookie in response.Cookies)
-                        {
-                            cookie.Domain = authRoute.Host;
-                            cookie.Path = string.Empty;
-                            newCookieContainer.Add(cookie);
-                        }
-
-                        this.UserSessionCookies = newCookieContainer;
-                        this.AuthRoute = authRoute;
+                        this.UserSessionCookies = response.Headers.GetResponseCookiesFromService();
+                        this.UserCsrfToken = csrfDataStr;
                     }
 
                     // Ensure that we actually have a code that is within the "success" range of
-                    // codes define in HTTP before we call this a true success.
-                    if(code >= 200 && code <= 299)
+                    // codes define in HTTP before we call this a true success. We include redirect
+                    // codes (3XX) as success, since our server side will just redirect us if we're
+                    // already authed.
+                    if(code >= 200 && code <= 399)
                     {
                         // Just save these credentials automatically any time that we have a
                         // successfull auth.
@@ -599,16 +610,25 @@ namespace Te.Citadel.UI.Models
             catch(Exception e)
             {
                 connectionFailure = true;
-
-                // Log the exception.
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-
+                
                 if(e is WebException)
                 {
                     var ewx = e as WebException;
 
                     if(ewx != null)
                     {
+                        using(WebResponse response = ewx.Response)
+                        {
+                            HttpWebResponse httpResponse = (HttpWebResponse)response;
+                            m_logger.Info("Error code: {0}", httpResponse.StatusCode);
+                            using(Stream data = response.GetResponseStream())
+                            using(var reader = new StreamReader(data))
+                            {
+                                string text = reader.ReadToEnd();
+                                m_logger.Info(text);
+                            }
+                        }
+
                         if(ewx.Status == WebExceptionStatus.ProtocolError)
                         {
                             var response = ewx.Response as HttpWebResponse;
@@ -627,6 +647,9 @@ namespace Te.Citadel.UI.Models
                         }
                     }
                 }
+
+                // Log the exception.
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
             finally
             {
@@ -648,44 +671,22 @@ namespace Te.Citadel.UI.Models
         }
 
         /// <summary>
-        /// Attempts to re-authenticate with the saved route, username and password.
-        /// </summary>
-        /// <returns>
-        /// An AuthenticationResult enum value indicated the result of the operation.
-        /// </returns>
-        public async Task<AuthenticationResult> ReAuthenticate()
-        {
-            var route = this.AuthRoute;
-
-            if(route != null)
-            {
-                return await ReAuthenticate(route);
-            }
-
-            return AuthenticationResult.Failure;
-        }
-
-        /// <summary>
         /// Attempts to ReAuthenticate with the existing credentials.
         /// </summary>
-        /// <param name="authRoute">
-        /// The URI to direct the authentication request to.
-        /// </param>
         /// <returns>
         /// True if re-authentication was a success, false otherwise.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// In the event that the supplied Uri is not HTTPS, this method will throw.
         /// </exception>
-        public async Task<AuthenticationResult> ReAuthenticate(Uri authRoute)
+        public async Task<AuthenticationResult> ReAuthenticate()
         {
             var user = Username;
             var password = Password;
 
             try
             {
-                var result = await Authenticate(user, password, authRoute);
-
+                var result = await Authenticate(user, password);
                 return result;
             }
             finally
@@ -717,7 +718,9 @@ namespace Te.Citadel.UI.Models
             try
             {
                 var savedData = File.ReadAllText(m_savePath);
-                var deserialized = JsonConvert.DeserializeObject<SerializableAuthenticatedUserModel>(savedData);
+                var jsonSettings = new JsonSerializerSettings();
+                jsonSettings.Converters.Add(new CookieListConverter());
+                var deserialized = JsonConvert.DeserializeObject<SerializableAuthenticatedUserModel>(savedData, jsonSettings);
 
                 if(deserialized == null || !deserialized.IsValid)
                 {
@@ -725,28 +728,21 @@ namespace Te.Citadel.UI.Models
                 }
 
                 plaintext = ProtectedData.Unprotect(deserialized.EncryptedPassword, Entropy, DataProtectionScope.LocalMachine);
+
                 this.Username = deserialized.Username;
-                this.Password = plaintext;
-                this.AuthRoute = deserialized.AuthRoute;
+                this.Password = plaintext;                
 
                 // Set using private member, because public member calls save again.
                 this.m_termsAccepted = deserialized.Accepted;
 
-                // We have to do this crazy nonsense with cookies, otherwise .NET will assume a WHOLE
-                // BUNCH of about the paths and such of cookies and will not send them correctly.
+                this.UserCsrfToken = deserialized.CSRFTokenString;
+                
+                // Load up our cookies.
                 var cookieCollection = new CookieContainer();
-                var allCookies = deserialized.CookieString.Split(',');
-                foreach(var cookieString in allCookies)
-                {
-                    var split = cookieString.Split('=');
-
-                    if(split.Length == 2)
-                    {
-                        var newCookie = new Cookie(split[0], split[1]);
-                        newCookie.Domain = deserialized.AuthRoute.Host;
-                        newCookie.Path = string.Empty;
-                        cookieCollection.Add(newCookie);
-                    }
+                var allCookies = deserialized.Cookies;
+                foreach(var cookie in allCookies)
+                {   
+                    cookieCollection.Add(cookie);                    
                 }
 
                 this.UserSessionCookies = cookieCollection;
@@ -813,8 +809,8 @@ namespace Te.Citadel.UI.Models
                 internalSerializable.Username = this.Username;
                 internalSerializable.Accepted = this.HasAcceptedTerms;
                 internalSerializable.EncryptedPassword = ProtectedData.Protect(tempDecryptedPassword, Entropy, DataProtectionScope.LocalMachine);
-                internalSerializable.CookieString = this.UserSessionCookies.GetCookieHeader(this.AuthRoute);
-                internalSerializable.AuthRoute = this.AuthRoute;
+                internalSerializable.Cookies = this.UserSessionCookies.GetCookies(new Uri(WebServiceUtil.GetServiceProviderApiPath())).OfType<Cookie>().ToList();
+                internalSerializable.CSRFTokenString = this.UserCsrfToken;
 
                 // Serialize and write to output stream.
                 var serialized = JsonConvert.SerializeObject(internalSerializable, Formatting.Indented);

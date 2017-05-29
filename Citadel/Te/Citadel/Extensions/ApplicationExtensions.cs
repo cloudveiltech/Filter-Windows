@@ -15,15 +15,5 @@ namespace Te.Citadel.Extensions
         {
             app.Shutdown((int)code);
         }
-
-        public static string GetServiceProviderApiPath(this Application app)
-        {
-            return "https://manage.cloudveil.org/citadel";
-        }
-
-        public static string GetServiceProviderExternalUnblockRequestPath(this Application app)
-        {
-            return "https://manage.cloudveil.org/unblock_request/new_request";
-        }
     }
 }

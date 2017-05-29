@@ -26,8 +26,8 @@ namespace Te.Citadel.Data.Serialization
         {
             // To account for errors. Default to zero when NaN, etc.
             int minutes = 0;
-
-            if(!int.TryParse((string)reader.Value, out minutes))
+            
+            if(!int.TryParse(reader.Value.ToString(), out minutes))
             {
                 minutes = 0;
             }

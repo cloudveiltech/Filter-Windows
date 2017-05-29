@@ -17,15 +17,9 @@ namespace Te.Citadel.UI.ViewModels
 {
     public class ProviderConditionsViewModel : BaseCitadelViewModel
     {
-        /// <summary>
-        /// Flag so we only ever go after the remote terms once.
-        /// </summary>
-        private volatile bool m_gotTerms = false;
+        private string m_terms;
 
-        /// <summary>
-        /// The model.
-        /// </summary>
-        private ProviderConditionsModel m_model = new ProviderConditionsModel();
+        private volatile bool m_haveTerms = false;
 
         /// <summary>
         /// Private data member for the public AcceptCommand property.
@@ -49,6 +43,7 @@ namespace Te.Citadel.UI.ViewModels
                     m_acceptCommand = new RelayCommand((Action)(() =>
                     {
                         AuthenticatedUserModel.Instance.HasAcceptedTerms = true;
+                        AuthenticatedUserModel.Instance.Save();
                         RequestViewChangeCommand.Execute(typeof(DashboardView));
                     }));
                 }
@@ -86,17 +81,21 @@ namespace Te.Citadel.UI.ViewModels
         {
             get
             {
-                if(!m_gotTerms)
-                {
-                    GetTermsAsync();
-                }
+                return m_terms;
+            }
+        }
 
-                return m_model.Terms;
+        public bool HaveTerms
+        {
+            get
+            {
+                return m_haveTerms;
             }
         }
 
         public ProviderConditionsViewModel()
         {
+            GetTermsAsync();
         }
 
         /// <summary>
@@ -104,28 +103,23 @@ namespace Te.Citadel.UI.ViewModels
         /// success.
         /// </summary>
         private async void GetTermsAsync()
-        {
-            // Seriously, this will just keep asking over and over and over again thanks to WPF
-            // probing this property if this fails. So, don't log errors here.
-            var terms = await WebServiceUtil.RequestResource("/capi/getterms.php", true);
+        {   
+            var terms = await WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.UserTerms);
 
             if(terms != null && terms.Length > 0)
             {
-                m_gotTerms = true;
-                m_model.Terms = System.Text.Encoding.UTF8.GetString(terms);
+                m_haveTerms = true;
+                m_terms = System.Text.Encoding.UTF8.GetString(terms);
 
                 await Application.Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
-                (Action)delegate ()
-                {
-                    RaisePropertyChanged(nameof(Terms));
-                }
+                    (Action)delegate ()
+                    {
+                        RaisePropertyChanged(nameof(Terms));
+                        RaisePropertyChanged(nameof(HaveTerms));
+                    }
                 );
-            }
-            else
-            {
-                m_model.Terms = string.Empty;
-            }
+            }   
         }
     }
 }

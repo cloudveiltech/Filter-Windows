@@ -5,8 +5,11 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using AngleSharp.Parser.Html;
 using NLog;
+using System.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -14,11 +17,29 @@ using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Te.Citadel.Util
 {
     internal class WebServiceUtil
     {
+        private static readonly Dictionary<ServiceResource, string> s_namedResourceMap = new Dictionary<ServiceResource, string>
+        {
+            { ServiceResource.UserDataRequest, "/api/user/me/data/get" },
+            { ServiceResource.UserDataSumCheck, "/api/user/me/data/check" },
+            { ServiceResource.DeactivationRequest, "/api/user/me/deactivate" },
+            { ServiceResource.UserTerms, "/api/user/me/terms" }
+        };
+        
+        public enum ServiceResource
+        {
+            UserDataRequest,
+            UserDataSumCheck,
+            DeactivationRequest,
+            UserTerms
+        };
+
         /// <summary>
         /// Gets whether or not internet connectivity is available by pinging google's pub DNS in a
         /// synchronous fashion.
@@ -64,6 +85,23 @@ namespace Te.Citadel.Util
             return false;
         }
 
+        public static string GetServiceProviderApiAuthPath()
+        {
+            return GetServiceProviderApiPath() + "/login";
+        }
+
+        public static string GetServiceProviderApiPath()
+        {
+            return "https://technikempire.com/citadel";
+            //return "http://localhost";
+            //return "https://manage.cloudveil.org/citadel";
+        }
+
+        public static string GetServiceProviderExternalUnblockRequestPath()
+        {
+            return "https://manage.cloudveil.org/unblock_request/new_request";
+        }
+
         /// <summary>
         /// Builds out an HttpWebRequest specifically configured for use with the service provider
         /// API.
@@ -76,7 +114,7 @@ namespace Te.Citadel.Util
         /// </returns>
         private static HttpWebRequest GetApiBaseRequest(string route)
         {
-            var serviceProviderApiBasePath = (string)Application.Current.GetServiceProviderApiPath();
+            var serviceProviderApiBasePath = GetServiceProviderApiPath();
             var requestString = serviceProviderApiBasePath + route;
             var requestRoute = new Uri(requestString);
 
@@ -96,8 +134,65 @@ namespace Te.Citadel.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
             request.CookieContainer = AuthenticatedUserModel.Instance.UserSessionCookies;
+            if(!string.IsNullOrEmpty(AuthenticatedUserModel.Instance.UserCsrfToken) && !string.IsNullOrWhiteSpace(AuthenticatedUserModel.Instance.UserCsrfToken))
+            {   
+                request.Headers.Add("X-CSRF-TOKEN", AuthenticatedUserModel.Instance.UserCsrfToken);
+            }
 
             return request;
+        }
+
+        public static async Task<Tuple<string, CookieContainer>> GetCsfrData(string oldCsfrToken, CookieContainer oldCookies)
+        {
+            var request = GetApiBaseRequest("/login");            
+            request.Method = "GET";
+
+            // Now that our login form data has been POST'ed, get a response.
+            using(var response = (HttpWebResponse)await request.GetResponseAsync())
+            {
+                // Get the response code as an int so we can range check it.
+                var code = (int)response.StatusCode;
+
+                try
+                {   
+                    // Check if response code is considered a success code.
+                    if(code >= 200 && code <= 299)
+                    {
+                        using(var memoryStream = new MemoryStream())
+                        {
+                            response.GetResponseStream().CopyTo(memoryStream);
+
+                            var responseBody = memoryStream.ToArray();
+                            if(responseBody != null && responseBody.Length > 0)
+                            {
+                                var asHtmlString = System.Text.Encoding.UTF8.GetString(responseBody);
+
+                                var parser = new HtmlParser();
+                                var document = parser.Parse(asHtmlString);
+
+                                var csfrMetaTag = document.QuerySelector("[name=csrf-token]");
+                                var csrfToken = csfrMetaTag.GetAttribute("content");
+
+
+                                return new Tuple<string, CookieContainer>(csrfToken, response.Headers.GetResponseCookiesFromService());
+                            }
+                        }
+                    }
+                    else if(code >= 300 && code <= 399)
+                    {
+                        // Don't create a new session. We were redirected,
+                        // which means these session values are still valid.   
+                        return new Tuple<string, CookieContainer>(oldCsfrToken, oldCookies);
+                    }
+                }
+                catch(Exception webException)
+                {
+                    var logger = LoggerUtil.GetAppWideLogger();
+                    LoggerUtil.RecursivelyLogException(logger, webException);
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -114,7 +209,7 @@ namespace Te.Citadel.Util
         /// <returns>
         /// A non-null byte array on success. Null byte array on failure.
         /// </returns>
-        public static async Task<byte[]> RequestResource(string route, bool noLogging = false)
+        public static async Task<byte[]> RequestResource(ServiceResource resource, bool noLogging = false)
         {
             try
             {
@@ -131,10 +226,10 @@ namespace Te.Citadel.Util
                     deviceName = "Unknown";
                 }
 
-                var request = GetApiBaseRequest(route);
+                var request = GetApiBaseRequest(s_namedResourceMap[resource]);
 
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&device_name={2}", AuthenticatedUserModel.Instance.Username, FingerPrint.Value, Uri.EscapeDataString(deviceName)));
+                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&device_id={2}", AuthenticatedUserModel.Instance.Username, FingerPrint.Value, Uri.EscapeDataString(deviceName)));
 
                 // Don't forget to the set the content length to the total length of our form POST
                 // data!
@@ -166,7 +261,7 @@ namespace Te.Citadel.Util
                                 // We do this just in case we get something like a 204. The idea here
                                 // is that if we return a non-null, the call was a success.
                                 var responseBody = memoryStream.ToArray();
-                                if(responseBody == null)
+                                if(responseBody == null || code == 204)
                                 {
                                     responseBody = new byte[0];
                                 }
@@ -211,7 +306,7 @@ namespace Te.Citadel.Util
         /// <returns>
         /// True if the web service gave a success response, false otherwise.
         /// </returns>
-        public static async Task<bool> SendResource(string route, byte[] formEncodedData, bool noLogging = true)
+        public static async Task<bool> SendResource(ServiceResource resource, byte[] formEncodedData, bool noLogging = true)
         {
             try
             {
@@ -228,10 +323,10 @@ namespace Te.Citadel.Util
                     deviceName = "Unknown";
                 }
 
-                var request = GetApiBaseRequest(route);
+                var request = GetApiBaseRequest(s_namedResourceMap[resource]);
 
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&device_name={2}&", AuthenticatedUserModel.Instance.Username, FingerPrint.Value, Uri.EscapeDataString(deviceName)));
+                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("user_id={0}&identifier={1}&device_id={2}&", AuthenticatedUserModel.Instance.Username, FingerPrint.Value, Uri.EscapeDataString(deviceName)));
 
                 // Merge all data.
                 var finalData = new byte[formData.Length + formEncodedData.Length];

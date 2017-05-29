@@ -301,6 +301,11 @@ namespace Te.Citadel.Util
         {
             int z = 0;
 
+            if(pos == -1 || pos >= input.Length)
+            {
+                return false;
+            }
+
             do
             {
                 if(char.IsWhiteSpace(input[pos]) || input[pos] == '\0')
