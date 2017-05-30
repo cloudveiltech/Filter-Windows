@@ -1177,11 +1177,9 @@ namespace Te.Citadel
         }
 
         private enum BlockActionCause
-        {
-            TextTrigger,
+        {   
             RequestUrl,
-            TextClassification,
-            ImageClassification
+            ContentClassification
         }
 
         /// <summary>
@@ -1501,6 +1499,15 @@ namespace Te.Citadel
             {
                 var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
 
+                Uri requestUri = null;
+
+                if(!parsedHeaders.TryGetRequestUri(out requestUri))
+                {
+                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
+                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing request URI.");
+                    return;
+                }
+
                 string contentType = null;
                 string httpVersion = null;
 
@@ -1535,6 +1542,7 @@ namespace Te.Citadel
                     {
                         shouldBlock = true;
                         customBlockResponseData = GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1);
+                        OnRequestBlocked(contentClassResult, BlockActionCause.ContentClassification, requestUri);
                         m_logger.Info("Response blocked by content classification.");
                     }
                 }
@@ -1559,15 +1567,6 @@ namespace Te.Citadel
                     matched = filters[i];
                     matchedCategory = filters[i].CategoryId;
                     return true;
-                }
-                else
-                {
-                    /*
-                    if(!m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId))
-                    {
-                        m_logger.Info("Category {0} not enabled for rule {1}.", filters[i].CategoryId, filters[i].OriginalRule);
-                    }
-                    */
                 }
             }
 
