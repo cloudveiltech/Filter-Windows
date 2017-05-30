@@ -537,7 +537,7 @@ namespace Te.Citadel.UI.Models
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebServiceUtil.GetServiceProviderApiAuthPath());
                 request.Method = "POST";
                 request.Proxy = null;
-                request.AllowAutoRedirect = true;                
+                request.AllowAutoRedirect = false;                
                 request.UseDefaultCredentials = false;
                 request.Timeout = 5000;
                 request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
@@ -577,32 +577,40 @@ namespace Te.Citadel.UI.Models
                 {
                     // Get the response code as an int so we can range check it.
                     var code = (int)response.StatusCode;
-
-                    response.Close();
-                    request.Abort();
-
+                    
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed. We include redirect codes (3XX) as
                     // success, since our server side will just redirect us if we're already
                     // authed.
-                    if(code >= 200 && code <= 399)
+                    if(code > 199 && code < 399)
                     {
+                        if(code > 299 && code < 399)
+                        {
+                            // Make sure we weren't redirected back to login. If we were, then our
+                            // auth failed.
+                            if(response.Headers["Location"] != null)
+                            {   
+                                if(response.Headers["Location"].ToLower().IndexOf("login") != -1)
+                                {
+                                    response.Close();
+                                    request.Abort();
+                                    return AuthenticationResult.Failure;
+                                }
+                            }
+                        }
+
                         this.Username = username;
                         this.Password = unencryptedPassword;
 
                         this.UserSessionCookies = response.Headers.GetResponseCookiesFromService();
                         this.UserCsrfToken = csrfDataStr;
-                    }
 
-                    // Ensure that we actually have a code that is within the "success" range of
-                    // codes define in HTTP before we call this a true success. We include redirect
-                    // codes (3XX) as success, since our server side will just redirect us if we're
-                    // already authed.
-                    if(code >= 200 && code <= 399)
-                    {
                         // Just save these credentials automatically any time that we have a
                         // successfull auth.
                         Save();
+
+                        response.Close();
+                        request.Abort();
                         return AuthenticationResult.Success;
                     }
                 }
@@ -688,6 +696,11 @@ namespace Te.Citadel.UI.Models
             {
                 var result = await Authenticate(user, password);
                 return result;
+            }
+            catch(WebException e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+                return AuthenticationResult.ConnectionFailed;
             }
             finally
             {
