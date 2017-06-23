@@ -44,8 +44,7 @@ namespace Te.Citadel.UI.ViewModels
                 {
                     m_acceptCommand = new RelayCommand((Action)(() =>
                     {
-                        AuthenticatedUserModel.Instance.HasAcceptedTerms = true;
-                        AuthenticatedUserModel.Instance.Save();
+                        WebServiceUtil.Default.HasAcceptedTerms = true;
                         RequestViewChangeCommand.Execute(typeof(DashboardView));
                     }));
                 }
@@ -67,7 +66,7 @@ namespace Te.Citadel.UI.ViewModels
                     {
                         Debug.WriteLine("Decline");
                         // Destroy existing/saved user data and redirect back to login.
-                        AuthenticatedUserModel.Destroy();
+                        WebServiceUtil.Destroy();
                         RequestViewChangeCommand.Execute(typeof(LoginView));
                     }));
                 }

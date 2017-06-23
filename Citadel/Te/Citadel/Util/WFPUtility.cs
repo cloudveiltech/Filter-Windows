@@ -96,10 +96,10 @@ namespace Te.Citadel.Util
                 // PERSIST OR BOOT?
                 fwpFilter.flags = NativeConstants.FWPM_FILTER_FLAG_PERSISTENT;
                 //fwpFilter.flags = NativeConstants.FWPM_FILTER_FLAG_BOOTTIME;
-
+                
                 fwpFilter.action.type = FWP_ACTION_TYPE.FWP_ACTION_BLOCK;
                 fwpFilter.weight.type = FWP_DATA_TYPE_.FWP_EMPTY; // auto-weight.
-                fwpFilter.numFilterConditions = 0; // this applies to all application traffic
+                fwpFilter.numFilterConditions = 0; // this applies to all application traffic                
                 fwpFilter.displayData.name = "Citadel INet Block";
                 fwpFilter.displayData.description = "Enforce filter use for internet access.";
 

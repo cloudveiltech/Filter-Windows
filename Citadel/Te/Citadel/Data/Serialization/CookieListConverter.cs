@@ -27,7 +27,7 @@ namespace Te.Citadel.Data.Serialization
         {
             var ret = new List<Cookie>();
 
-            foreach(var jo in JArray.Load(reader))
+            foreach(var jo in JArray.Parse((string)reader.Value))
             {
                 var httpOnly = jo["HttpOnly"].ToObject<bool>();
                 var discard = jo["Discard"].ToObject<bool>();
@@ -54,7 +54,7 @@ namespace Te.Citadel.Data.Serialization
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            writer.WriteValue(JsonConvert.SerializeObject(value));
         }
     }
 }

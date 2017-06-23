@@ -172,6 +172,21 @@
                             Command="{Binding RelinquishRelaxedPolicyCommand}"
                             Content="Relinquish Relaxed Policy"
                             Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Grid x:Name="m_disabledInternetGrid" x:FieldModifier="private" Visibility="Hidden">
+
+                        <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="White" />
+
+                        <Label Width="258" Margin="229,10,229,0" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" Content="Internet Disabled" FontFamily="Segoe UI" FontSize="22" FontWeight="UltraLight" Foreground="Black" />
+
+                        <TextBlock Width="660" Height="98" Margin="28,70,28,0" HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Segoe UI" FontSize="14" FontWeight="UltraLight" Foreground="Black" TextWrapping="Wrap">
+                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
+
+                        <Label x:Name="m_internetRestorationTimeLabel" HorizontalAlignment="Stretch" VerticalAlignment="Center" HorizontalContentAlignment="Center" x:FieldModifier="private" Content="" FontFamily="Segoe UI" FontSize="18" FontWeight="UltraLight" Foreground="Black" />
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -270,51 +285,7 @@
                             Content="Deactivate"
                             Style="{StaticResource AccentedSquareButtonStyle}" />
 
-                    <Grid x:Name="m_disabledInternetGrid"
-                          x:FieldModifier="private"
-                          Visibility="Hidden">
-
-                        <Rectangle HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Stretch"
-                                   Fill="White" />
-
-                        <Label Width="258"
-                               Margin="229,10,229,0"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Top"
-                               HorizontalContentAlignment="Center"
-                               Content="Internet Disabled"
-                               FontFamily="Segoe UI"
-                               FontSize="22"
-                               FontWeight="UltraLight"
-                               Foreground="Black" />
-
-                        <TextBlock Width="660"
-                                   Height="98"
-                                   Margin="28,70,28,0"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Top"
-                                   FontFamily="Segoe UI"
-                                   FontSize="14"
-                                   FontWeight="UltraLight"
-                                   Foreground="Black"
-                                   TextWrapping="Wrap">
-                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
-                            <LineBreak />
-                            <LineBreak />
-                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
-
-                        <Label x:Name="m_internetRestorationTimeLabel"
-                               HorizontalAlignment="Stretch"
-                               VerticalAlignment="Center"
-                               HorizontalContentAlignment="Center"
-                               x:FieldModifier="private"
-                               Content=""
-                               FontFamily="Segoe UI"
-                               FontSize="18"
-                               FontWeight="UltraLight"
-                               Foreground="Black" />
-                    </Grid>
+                    
                     <Label Width="258"
                            Margin="431,10,21,0"
                            HorizontalAlignment="Center"

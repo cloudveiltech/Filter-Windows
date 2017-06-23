@@ -481,6 +481,7 @@ namespace Te.Citadel.Data.Filtering
                     if(m_connection != null)
                     {
                         m_connection.Close();
+                        m_connection = null;
                     }
                 }
 

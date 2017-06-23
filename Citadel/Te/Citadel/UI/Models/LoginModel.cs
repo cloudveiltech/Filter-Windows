@@ -148,23 +148,23 @@ namespace Te.Citadel.UI.Models
             var unencrypedPwordBytes = this.m_userPassword.SecureStringBytes();
             try
             {
-                var res = await AuthenticatedUserModel.Instance.Authenticate(this.m_userName, unencrypedPwordBytes);
+                var res = await WebServiceUtil.Default.Authenticate(this.m_userName, unencrypedPwordBytes);
 
                 switch(res)
                 {
-                    case AuthenticatedUserModel.AuthenticationResult.ConnectionFailed:
+                    case AuthenticationResult.ConnectionFailed:
                     {
                         ErrorMessage = "Could not connect to service provider.";
                     }
                     break;
 
-                    case AuthenticatedUserModel.AuthenticationResult.Failure:
+                    case AuthenticationResult.Failure:
                     {
                         ErrorMessage = "Failed to login to service provider.";
                     }
                     break;
 
-                    case AuthenticatedUserModel.AuthenticationResult.Success:
+                    case AuthenticationResult.Success:
                     {
                         return true;
                     }
@@ -185,7 +185,7 @@ namespace Te.Citadel.UI.Models
         public LoginModel()
         {
             // Set the default service provider to the app-global value.
-            m_serviceProvider = WebServiceUtil.GetServiceProviderApiAuthPath();
+            m_serviceProvider = WebServiceUtil.Default.ServiceProviderApiAuthPath;
             m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();

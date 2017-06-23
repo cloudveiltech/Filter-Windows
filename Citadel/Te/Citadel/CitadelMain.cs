@@ -49,7 +49,7 @@ namespace Te.Citadel
             m_app.Run();
             return false;
         }
-
+        
         /// <summary>
         /// </summary>
         /// <param name="eventArgs">
@@ -95,13 +95,12 @@ namespace Te.Citadel
 
             try
             {
-                MainLogger = LoggerUtil.GetAppWideLogger();
-
                 SingleAppInstanceManager appManager = new SingleAppInstanceManager();
                 appManager.Run(args);
             }
             catch(Exception e)
             {
+                MainLogger = LoggerUtil.GetAppWideLogger();
                 LoggerUtil.RecursivelyLogException(MainLogger, e);
             }
 

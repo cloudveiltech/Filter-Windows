@@ -84,11 +84,13 @@ namespace Te.Citadel.Extensions
 
                         if(domainValue == null || domainValue.Length == 0)
                         {
-                            domainValue = new Uri(WebServiceUtil.GetServiceProviderApiPath()).Host;
+                            domainValue = new Uri(WebServiceUtil.Default.ServiceProviderApiPath).Host;
                         }
 
-                        var cookie = new Cookie(name, cookieValue, pathValue, domainValue);                        
-                        cookie.Expires = DateTime.ParseExact(expiresValue, "ddd, dd-MMMM-yyyy HH:mm:ss Z", CultureInfo.InvariantCulture);
+                        var cookie = new Cookie(name, cookieValue, pathValue, domainValue);
+
+                        DateTime cookieExpireTime = Convert.ToDateTime(expiresValue);
+                        cookie.Expires = cookieExpireTime.ToUniversalTime();
 
                         if(parsedCookieMatch.Groups.Count >= 7)
                         {

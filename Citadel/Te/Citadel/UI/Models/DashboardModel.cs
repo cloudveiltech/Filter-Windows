@@ -36,7 +36,7 @@ namespace Te.Citadel.UI.Models
         {
             try
             {
-                var response = await WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.DeactivationRequest);
+                var response = await WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest);
 
                 // WebServiceUtil.RequestResource gives null on failure, non-null on success of any
                 // kind.

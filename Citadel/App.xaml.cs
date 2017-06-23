@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -32,17 +33,17 @@ using System.Windows.Controls;
 using Te.Citadel.Data.Filtering;
 using Te.Citadel.Data.Models;
 using Te.Citadel.Extensions;
-using Te.Citadel.UI.Models;
 using Te.Citadel.UI.ViewModels;
 using Te.Citadel.UI.Views;
 using Te.Citadel.UI.Windows;
 using Te.Citadel.Util;
 using Te.HttpFilteringEngine;
+using WindowsFirewallHelper;
 
 namespace Te.Citadel
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interaction logic for App.xaml 
     /// </summary>
     public partial class CitadelApp : Application
     {
@@ -68,15 +69,14 @@ namespace Te.Citadel
         #region FilteringEngineVars
 
         /// <summary>
-        /// Used to strip multiple whitespace.
+        /// Used to strip multiple whitespace. 
         /// </summary>
         private Regex m_whitespaceRegex;
 
         private CategoryIndex m_categoryIndex = new CategoryIndex(short.MaxValue);
 
         /// <summary>
-        /// Used for synchronization whenever our NLP model gets updated while we're already
-        /// initialized.
+        /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
         /// </summary>
         private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
 
@@ -113,13 +113,12 @@ namespace Te.Citadel
         private BagOfTextTriggers m_textTriggers;
 
         /// <summary>
-        /// Used for synchronization when creating run at startup task.
+        /// Used for synchronization when creating run at startup task. 
         /// </summary>
         private ReaderWriterLockSlim m_runAtStartupLock = new ReaderWriterLockSlim();
 
         /// <summary>
-        /// Timer used to query for filter list changes every X minutes, as well as application
-        /// updates.
+        /// Timer used to query for filter list changes every X minutes, as well as application updates. 
         /// </summary>
         private Timer m_updateCheckTimer;
 
@@ -130,17 +129,12 @@ namespace Te.Citadel
         private volatile bool m_cleanShutdownComplete = false;
 
         /// <summary>
-        /// Used to ensure clean shutdown once.
+        /// Used to ensure clean shutdown once. 
         /// </summary>
         private Object m_cleanShutdownLock = new object();
 
         /// <summary>
-        /// Holds a record of the result from the last time the user's authenticity was challenged.
-        /// </summary>
-        private volatile bool m_lastAuthWasSuccess = false;
-
-        /// <summary>
-        /// Logger.
+        /// Logger. 
         /// </summary>
         private readonly Logger m_logger;
 
@@ -157,28 +151,27 @@ namespace Te.Citadel
         private BackgroundWorker m_backgroundInitWorker;
 
         /// <summary>
-        /// Primary and only window we use.
+        /// Primary and only window we use. 
         /// </summary>
         private MainWindow m_mainWindow;
 
         /// <summary>
-        /// App function config file.
+        /// App function config file. 
         /// </summary>
         private AppConfigModel m_config;
 
         /// <summary>
-        /// Json deserialization/serialization settings for our config related data.
+        /// Json deserialization/serialization settings for our config related data. 
         /// </summary>
         private JsonSerializerSettings m_configSerializerSettings;
 
         /// <summary>
-        /// This int stores the number of block actions that have elapsed within the given threshold
-        /// timespan.
+        /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
         private long m_thresholdTicks;
 
         /// <summary>
-        /// This timer resets the threshold tick count.
+        /// This timer resets the threshold tick count. 
         /// </summary>
         private Timer m_thresholdCountTimer;
 
@@ -189,17 +182,17 @@ namespace Te.Citadel
         private Timer m_thresholdEnforcementTimer;
 
         /// <summary>
-        /// Stores all, if any, applications that should be forced throught the filter.
+        /// Stores all, if any, applications that should be forced throught the filter. 
         /// </summary>
         private HashSet<string> m_blacklistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Stores all, if any, applications that should not be forced through the filter.
+        /// Stores all, if any, applications that should not be forced through the filter. 
         /// </summary>
         private HashSet<string> m_whitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// This timer is used to count down to the expiry time for relaxed policy use.
+        /// This timer is used to count down to the expiry time for relaxed policy use. 
         /// </summary>
         private Timer m_relaxedPolicyExpiryTimer;
 
@@ -217,7 +210,7 @@ namespace Te.Citadel
         private Timer m_dnsEnforcementTimer;
 
         /// <summary>
-        /// Used to ensure synchronized access when setting DNS settings.
+        /// Used to ensure synchronized access when setting DNS settings. 
         /// </summary>
         private object m_dnsEnforcementLock = new object();
 
@@ -236,22 +229,22 @@ namespace Te.Citadel
         private ProviderConditionsView m_viewProviderConditions;
 
         /// <summary>
-        /// Used to show the user a nice spinny wheel while they wait for something.
+        /// Used to show the user a nice spinny wheel while they wait for something. 
         /// </summary>
         private ProgressWait m_viewProgressWait;
 
         /// <summary>
-        /// Primary view for a subscribed, authenticated user.
+        /// Primary view for a subscribed, authenticated user. 
         /// </summary>
         private DashboardView m_viewDashboard;
 
         #endregion Views
 
         /// <summary>
-        /// Gets whether or not a startup task exists for this application.
+        /// Gets whether or not a startup task exists for this application. 
         /// </summary>
         /// <returns>
-        /// True if a startup task exists for this application, false otherwise.
+        /// True if a startup task exists for this application, false otherwise. 
         /// </returns>
         public bool CheckIfStartupTaskExists()
         {
@@ -337,7 +330,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Default ctor.
+        /// Default ctor. 
         /// </summary>
         public CitadelApp()
         {
@@ -345,18 +338,20 @@ namespace Te.Citadel
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
-            
+
             this.Startup += CitadelOnStartup;
         }
 
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
             // Hook the shutdown/logoff event.
-            Current.SessionEnding += OnSessionEnding;
-            //SystemEvents.SessionEnded += OnOsShutdownOrLogoff;
+            Current.SessionEnding += OnAppSessionEnding;
 
             // Hook app exiting function. This must be done on this main app thread.
             this.Exit += OnApplicationExiting;
+
+            // Before we do any network stuff, ensure we have windows firewall access.
+            EnsureWindowsFirewallAccess();
 
             // Do stuff that must be done on the UI thread first.
             InitViews();
@@ -371,7 +366,50 @@ namespace Te.Citadel
             m_backgroundInitWorker.RunWorkerAsync(e);
         }
 
-        private void OnSessionEnding(object sender, SessionEndingCancelEventArgs e)
+        private void EnsureWindowsFirewallAccess()
+        {
+            try
+            {
+                string thisProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+                // Get all existing rules matching our process name and destroy them.
+                var myRules = FirewallManager.Instance.Rules.Where(r => r.Name.Equals(thisProcessName, StringComparison.OrdinalIgnoreCase)).ToArray();
+                if(myRules != null && myRules.Length > 0)
+                {
+                    foreach(var rule in myRules)
+                    {
+                        FirewallManager.Instance.Rules.Remove(rule);
+                    }
+                }
+
+                // Create inbound/outbound firewall rules and add them.
+                var inboundRule = FirewallManager.Instance.CreateApplicationRule(
+                    FirewallProfiles.Domain | FirewallProfiles.Private | FirewallProfiles.Public, 
+                    thisProcessName,
+                    FirewallAction.Allow, thisAssembly.Location
+                );
+                inboundRule.Direction = FirewallDirection.Inbound;
+
+                FirewallManager.Instance.Rules.Add(inboundRule);
+
+                var outboundRule = FirewallManager.Instance.CreateApplicationRule(
+                    FirewallProfiles.Domain | FirewallProfiles.Private | FirewallProfiles.Public, 
+                    thisProcessName,
+                    FirewallAction.Allow, thisAssembly.Location
+                );
+                outboundRule.Direction = FirewallDirection.Outbound;
+
+                FirewallManager.Instance.Rules.Add(outboundRule);
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error while attempting to configure firewall application exception.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+        }
+
+        private void OnAppSessionEnding(object sender, SessionEndingCancelEventArgs e)
         {
             m_logger.Info("Session ending.");
 
@@ -413,7 +451,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called to initialize the various application views on startup.
+        /// Called to initialize the various application views on startup. 
         /// </summary>
         private void InitViews()
         {
@@ -421,7 +459,7 @@ namespace Te.Citadel
 
             m_mainWindow.Closing += ((object sender, CancelEventArgs e) =>
             {
-                if(!AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                if(!WebServiceUtil.Default.HasAcceptedTerms)
                 {
                     // If terms have not been accepted, and window is closed, just full blown exit
                     // the app.
@@ -454,19 +492,20 @@ namespace Te.Citadel
             }
 
             // Set the current view to ProgressWait because we're gonna do background init next.
+            this.MainWindow = m_mainWindow;
             m_mainWindow.Show();
             OnViewChangeRequest(typeof(ProgressWait));
         }
 
         /// <summary>
-        /// Downloads, if necessary and able, a fresh copy of the filtering data for this user.
+        /// Downloads, if necessary and able, a fresh copy of the filtering data for this user. 
         /// </summary>
         /// <returns>
-        /// True if new list data was downloaded, false otherwise.
+        /// True if new list data was downloaded, false otherwise. 
         /// </returns>
         private bool UpdateListData()
         {
-            var currentRemoteListsHashReq = WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.UserDataSumCheck);
+            var currentRemoteListsHashReq = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck);
             currentRemoteListsHashReq.Wait();
             var rHashBytes = currentRemoteListsHashReq.Result;
 
@@ -505,7 +544,7 @@ namespace Te.Citadel
                 if(needsUpdate)
                 {
                     m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
-                    var filterListDataReq = WebServiceUtil.RequestResource(WebServiceUtil.ServiceResource.UserDataRequest);
+                    var filterListDataReq = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataRequest);
                     filterListDataReq.Wait();
 
                     var filterDataZipBytes = filterListDataReq.Result;
@@ -528,7 +567,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// This will cause WinSparkle to begin checking for application updates.
+        /// This will cause WinSparkle to begin checking for application updates. 
         /// </summary>
         private void StartCheckForAppUpdates()
         {
@@ -544,8 +583,7 @@ namespace Te.Citadel
 
         /// <summary>
         /// Inits all the callbacks for WinSparkle, so that when we call for update checks and such,
-        /// it has all appropriate callbacks to request app shutdown, restart, etc, to allow for
-        /// updating.
+        /// it has all appropriate callbacks to request app shutdown, restart, etc, to allow for updating.
         /// </summary>
         private void InitWinsparkle()
         {
@@ -555,7 +593,7 @@ namespace Te.Citadel
                 m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
 
                 var appcastUrl = string.Empty;
-                var baseServiceProviderAddress = WebServiceUtil.GetServiceProviderApiPath();
+                var baseServiceProviderAddress = WebServiceUtil.Default.ServiceProviderApiPath;
                 if(Environment.Is64BitProcess)
                 {
                     appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
@@ -579,8 +617,7 @@ namespace Te.Citadel
 
         /// <summary>
         /// Sets up the filtering engine, gets discovered installations of firefox to trust the
-        /// engine, sets up callbacks for classification and firewall checks, but does not start the
-        /// engine.
+        /// engine, sets up callbacks for classification and firewall checks, but does not start the engine.
         /// </summary>
         private void InitEngine()
         {
@@ -655,7 +692,7 @@ namespace Te.Citadel
         /// block action.
         /// </summary>
         /// <param name="nlpModelBytes">
-        /// The bytes from a loaded NLP classification model.
+        /// The bytes from a loaded NLP classification model. 
         /// </param>
         /// <param name="nlpConfig">
         /// A model file describing data about the model, such as a list of categories that, should
@@ -723,13 +760,13 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Runs initialization off the UI thread.
+        /// Runs initialization off the UI thread. 
         /// </summary>
         /// <param name="sender">
-        /// Event origin.
+        /// Event origin. 
         /// </param>
         /// <param name="e">
-        /// Event args.
+        /// Event args. 
         /// </param>
         private void DoBackgroundInit(object sender, DoWorkEventArgs e)
         {
@@ -745,7 +782,6 @@ namespace Te.Citadel
 
             var authTask = ChallengeUserAuthenticity();
             authTask.Wait();
-            m_lastAuthWasSuccess = authTask.Result;
 
             // Init the Engine in the background.
             InitEngine();
@@ -775,13 +811,13 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called when the application is about to exit.
+        /// Called when the application is about to exit. 
         /// </summary>
         /// <param name="sender">
-        /// Event origin.
+        /// Event origin. 
         /// </param>
         /// <param name="e">
-        /// Event args.
+        /// Event args. 
         /// </param>
         private void OnApplicationExiting(object sender, ExitEventArgs e)
         {
@@ -816,13 +852,13 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called when the background initialization function has returned.
+        /// Called when the background initialization function has returned. 
         /// </summary>
         /// <param name="sender">
-        /// Event origin.
+        /// Event origin. 
         /// </param>
         /// <param name="e">
-        /// Event args.
+        /// Event args. 
         /// </param>
         private void OnBackgroundInitComplete(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -845,13 +881,10 @@ namespace Te.Citadel
                 System.Windows.Threading.DispatcherPriority.Normal,
                 (Action)delegate ()
                 {
-                    if(m_lastAuthWasSuccess)
+                    if(WebServiceUtil.Default.HasStoredCredentials)
                     {
-                        if(AuthenticatedUserModel.Instance.HasAcceptedTerms)
+                        if(WebServiceUtil.Default.HasAcceptedTerms)
                         {
-                            // Re-save auth.
-                            AuthenticatedUserModel.Instance.Save();
-
                             // Just go to dashboard.
                             OnViewChangeRequest(typeof(DashboardView));
 
@@ -928,26 +961,26 @@ namespace Te.Citadel
         private async Task<bool> ChallengeUserAuthenticity()
         {
             // Check if we have a stored session, and if not try and reload one.
-            if(!AuthenticatedUserModel.Instance.HasStoredSession)
+            if(!WebServiceUtil.Default.HasStoredCredentials)
             {
-                if(!AuthenticatedUserModel.Instance.LoadFromSave())
+                if(!WebServiceUtil.Default.LoadFromSave())
                 {
                     m_logger.Info("Failed to load saved instance of athenticated user.");
                     return false;
                 }
 
                 // If we loaded, check again.
-                if(!AuthenticatedUserModel.Instance.HasStoredSession)
+                if(!WebServiceUtil.Default.HasStoredCredentials)
                 {
-                    m_logger.Info("Authenticated user does not have a valid session.");
+                    m_logger.Info("Authenticated does not have stored credentials. Redirecting user to login.");
                     return false;
                 }
             }
 
-            var authResult = await AuthenticatedUserModel.Instance.ReAuthenticate();
+            var authResult = await WebServiceUtil.Default.ReAuthenticate();
 
             // If we have a saved session, but we can't connect, we'll allow the user to proceed.
-            return authResult == AuthenticatedUserModel.AuthenticationResult.Success || authResult == AuthenticatedUserModel.AuthenticationResult.ConnectionFailed;
+            return authResult == AuthenticationResult.Success || authResult == AuthenticationResult.ConnectionFailed;
         }
 
         /// <summary>
@@ -955,7 +988,7 @@ namespace Te.Citadel
         /// view type.
         /// </summary>
         /// <param name="viewType">
-        /// The type of view requested.
+        /// The type of view requested. 
         /// </param>
         private void OnViewChangeRequest(Type viewType)
         {
@@ -1000,8 +1033,7 @@ namespace Te.Citadel
                                 newView = m_viewDashboard;
 
                                 // If we've been sent to the dashboard, the view from which no one
-                                // can escape, then that means we're all good to go and start
-                                // filtering.
+                                // can escape, then that means we're all good to go and start filtering.
                                 m_filterEngineStartupBgWorker = new BackgroundWorker();
                                 m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
                                 {
@@ -1036,14 +1068,13 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called when a view or view model is requesting to post information to the user via a
-        /// modal.
+        /// Called when a view or view model is requesting to post information to the user via a modal. 
         /// </summary>
         /// <param name="title">
-        /// The title.
+        /// The title. 
         /// </param>
         /// <param name="message">
-        /// The message.
+        /// The message. 
         /// </param>
         private void OnNotifyUserRequest(string title, string message)
         {
@@ -1051,12 +1082,11 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Searches for FireFox installations and enables trust of the local certificate store.
+        /// Searches for FireFox installations and enables trust of the local certificate store. 
         /// </summary>
         /// <remarks>
         /// If any profile is discovered that does not have the local CA cert store checking enabled
-        /// already, all instances of firefox will be killed and then restarted when calling this
-        /// method.
+        /// already, all instances of firefox will be killed and then restarted when calling this method.
         /// </remarks>
         private void EstablishTrustWithFirefox()
         {
@@ -1076,43 +1106,98 @@ namespace Te.Citadel
 
             var prefsFiles = Directory.GetFiles(defaultFirefoxProfilesPath, "prefs.js", SearchOption.AllDirectories);
 
-            // Represents the root CA option in both the enabled and disabled states.
-            var prefDisabled = "user_pref(\"security.enterprise_roots.enabled\", false);";
-            var prefEnabled = "user_pref(\"security.enterprise_roots.enabled\", true);";
+            /*
+            var valuesThatNeedToBeSet = new Dictionary<string, string>()
+            {
+                {"user_pref(\"security.enterprise_roots.enabled\"", ", true);" },
+                {"user_pref(\"extensions.e10sMultiBlockedByAddons\"", ", true);" },
+                {"user_pref(\"extensions.e10s.rollout.hasAddon\"", ", true);" },
+                {"user_pref(\"e10s.rollout.cohort\"", ", \"disqualified-test\");" },
+                {"user_pref(\"e10s.rollout.cohortSample\"", ", \"0.561671\");" },
+                {"user_pref(\"e10s.rollout.cohortSample.multi\"", ", \"0.561671\");" },
+                {"user_pref(\"browser.urlbar.daysBeforeHidingSuggestionsPrompt\"", ", 0);" },
+                {"user_pref(\"security.cert_pinning.enforcement_level\"", ", 0);" }
+            };
+            */
 
-            var needsOverwriting = new List<string>();
-            var needsAddition = new List<string>();
+            var valuesThatNeedToBeSet = new Dictionary<string, string>();
+
+            var firefoxUserCfgValuesUri = new Uri("pack://application:,,,/Resources/FireFoxUserCFG.txt");
+            var resourceStream = GetResourceStream(firefoxUserCfgValuesUri);
+
+            using(TextReader tsr = new StreamReader(resourceStream.Stream))
+            {
+                string cfgLine = null;
+                while((cfgLine = tsr.ReadLine()) != null)
+                {
+                    if(cfgLine.Length > 0)
+                    {
+                        var firstSpace = cfgLine.IndexOf(' ');
+
+                        if(firstSpace != -1)
+                        {
+                            var key = cfgLine.Substring(0, firstSpace);
+                            var value = cfgLine.Substring(firstSpace);
+
+                            if(!valuesThatNeedToBeSet.ContainsKey(key))
+                            {
+                                valuesThatNeedToBeSet.Add(key, value);
+                            }
+                        }
+                    }
+                }
+            }
 
             foreach(var prefFile in prefsFiles)
             {
-                if(!File.Exists(prefFile))
+                var userFile = Path.GetDirectoryName(prefFile) + Path.DirectorySeparatorChar + "user.js";
+
+                string[] fileText = new string[0];
+
+                if(File.Exists(userFile))
                 {
-                    continue;
+                    fileText = File.ReadAllLines(prefFile);
                 }
 
-                var fileText = File.ReadAllText(prefFile);
+                var notFound = new Dictionary<string, string>();
 
-                if(fileText.IndexOf(prefDisabled) != -1)
+                foreach(var kvp in valuesThatNeedToBeSet)
                 {
-                    // This profile has an entry explicitly disabling the root CA option.
-                    needsOverwriting.Add(prefFile);
+                    var entryIndex = Array.FindIndex(fileText, l => l.StartsWith(kvp.Key));
+
+                    if(entryIndex != -1)
+                    {
+                        if(!fileText[entryIndex].EndsWith(kvp.Value))
+                        {
+                            fileText[entryIndex] = kvp.Key + kvp.Value;
+                            m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                        }
+                        else
+                        {
+                            m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                        }
+                    }
+                    else
+                    {
+                        notFound.Add(kvp.Key, kvp.Value);
+                    }
                 }
-                else if(fileText.IndexOf(prefEnabled) == -1)
+
+                var fileTextList = new List<string>(fileText);
+
+                foreach(var nfk in notFound)
                 {
-                    // This profile has no entry for the root CA option.
-                    needsAddition.Add(prefFile);
+                    m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
+                    fileTextList.Add(nfk.Key + nfk.Value);
                 }
-                else
-                {
-                    Debug.WriteLine(string.Format("FF Config {0} already propertly configured.", prefFile));
-                }
+
+                File.WriteAllLines(userFile, fileTextList);
             }
 
             // Always kill firefox.
             if(firefoxIsRunning)
             {
-                // We need to kill firefox before editing the preferences, otherwise they'll just get
-                // overwritten.
+                // We need to kill firefox before editing the preferences, otherwise they'll just get overwritten.
                 foreach(var ff in Process.GetProcessesByName("firefox"))
                 {
                     firefoxExePath = ff.MainModule.FileName;
@@ -1123,25 +1208,6 @@ namespace Te.Citadel
                         ff.Dispose();
                     }
                     catch { }
-                }
-            }
-
-            if((needsOverwriting.Count + needsAddition.Count > 0))
-            {
-                // Replace with the enabled param in files that have this option disabled.
-                foreach(var prefFilePath in needsOverwriting)
-                {
-                    var fileText = File.ReadAllText(prefFilePath);
-                    fileText = fileText.Replace(prefDisabled, prefEnabled);
-                    File.WriteAllText(prefFilePath, fileText);
-                }
-
-                // Append the enabled param to files that don't have this option defined at all.
-                foreach(var prefFilePath in needsAddition)
-                {
-                    var fileText = File.ReadAllText(prefFilePath);
-                    fileText += Environment.NewLine + prefEnabled;
-                    File.WriteAllText(prefFilePath, fileText);
                 }
             }
 
@@ -1177,23 +1243,22 @@ namespace Te.Citadel
         }
 
         private enum BlockActionCause
-        {   
+        {
             RequestUrl,
             ContentClassification
         }
 
         /// <summary>
-        /// Called whenever a block action occurs.
+        /// Called whenever a block action occurs. 
         /// </summary>
         /// <param name="category">
-        /// The ID of the category that the blocked content was deemed to belong to.
+        /// The ID of the category that the blocked content was deemed to belong to. 
         /// </param>
         /// <param name="cause">
-        /// The type of classification that led to the block action.
+        /// The type of classification that led to the block action. 
         /// </param>
         /// <param name="requestUri">
-        /// The URI of the request that was blocked or the request which generated the blocked
-        /// response.
+        /// The URI of the request that was blocked or the request which generated the blocked response. 
         /// </param>
         /// <param name="matchingRule">
         /// The raw rule that caused the block action. May not be applicable for all block actions.
@@ -1260,10 +1325,10 @@ namespace Te.Citadel
         /// response to the given request.
         /// </summary>
         /// <param name="numElementsRemoved">
-        /// The number of elements removed.
+        /// The number of elements removed. 
         /// </param>
         /// <param name="fullRequest">
-        /// The request who's response payload has had the elements removed.
+        /// The request who's response payload has had the elements removed. 
         /// </param>
         private void OnElementsBlocked(uint numElementsRemoved, string fullRequest)
         {
@@ -1275,7 +1340,7 @@ namespace Te.Citadel
         /// path should have its traffic forced through itself or not.
         /// </summary>
         /// <param name="appAbsolutePath">
-        /// The absolute path to an application that the filter is inquiring about.
+        /// The absolute path to an application that the filter is inquiring about. 
         /// </param>
         /// <returns>
         /// True if the application at the specified absolute path should have its traffic forced
@@ -1295,8 +1360,7 @@ namespace Te.Citadel
             {
                 if(m_whitelistedApplications.Contains(appName))
                 {
-                    // Whitelist is in effect and this app is whitelisted. So, don't force it
-                    // through.
+                    // Whitelist is in effect and this app is whitelisted. So, don't force it through.
                     return false;
                 }
 
@@ -1416,16 +1480,15 @@ namespace Te.Citadel
                         customBlockResponseData = GetBlockedResponse(httpVersion, true);
                         return;
                     }
-                }               
+                }
 
                 string contentType = null;
                 if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
-                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageEnd));
+                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageBegin));
 
                     // This is the start of a response with a content type that we want to inspect.
-                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd
-                    // callback.
+                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
                     if(isHtml || isJson)
@@ -1455,7 +1518,7 @@ namespace Te.Citadel
         /// inspection. This could be a request or a response, it doesn't really matter.
         /// </summary>
         /// <param name="requestHeaders">
-        /// The headers for the request that this callback is being invoked for.
+        /// The headers for the request that this callback is being invoked for. 
         /// </param>
         /// <param name="requestPayload">
         /// The payload of the request that this callback is being invoked for. May be empty. Either
@@ -1471,7 +1534,7 @@ namespace Te.Citadel
         /// empty, then you're being asked to filter a response payload.
         /// </param>
         /// <param name="shouldBlock">
-        /// An out param where we can specify if this content should be blocked or not.
+        /// An out param where we can specify if this content should be blocked or not. 
         /// </param>
         /// <param name="customBlockResponseData">
         /// </param>
@@ -1626,10 +1689,10 @@ namespace Te.Citadel
         /// NLP classification, but can be adapted with minimal changes to the Engine.
         /// </summary>
         /// <param name="data">
-        /// The data to be classified.
+        /// The data to be classified. 
         /// </param>
         /// <param name="contentType">
-        /// The declared content type of the data.
+        /// The declared content type of the data. 
         /// </param>
         /// <returns>
         /// A numeric category ID that the content was deemed to belong to. Zero is returned here if
@@ -1783,7 +1846,7 @@ namespace Te.Citadel
         /// the current count of block actions we're tracking.
         /// </summary>
         /// <param name="state">
-        /// Async state object. Not used.
+        /// Async state object. Not used. 
         /// </param>
         private void OnThresholdTriggerPeriodElapsed(object state)
         {
@@ -1796,11 +1859,10 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called whenever the threshold timeout period has elapsed. Here we'll restore internet
-        /// access.
+        /// Called whenever the threshold timeout period has elapsed. Here we'll restore internet access. 
         /// </summary>
         /// <param name="state">
-        /// Async state object. Not used.
+        /// Async state object. Not used. 
         /// </param>
         private void OnThresholdTimeoutPeriodElapsed(object state)
         {
@@ -1835,7 +1897,7 @@ namespace Te.Citadel
         /// rules if we have found new ones. We also check for program updates.
         /// </summary>
         /// <param name="state">
-        /// This is always null. Ignore it.
+        /// This is always null. Ignore it. 
         /// </param>
         private void OnUpdateTimerElapsed(object state)
         {
@@ -1867,7 +1929,7 @@ namespace Te.Citadel
             finally
             {
                 // Enable the timer again.
-                if(!WebServiceUtil.HasInternetService)
+                if(!WebServiceUtil.GetHasInternetServiceAsync().Result)
                 {
                     // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
                     this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
@@ -1887,7 +1949,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Starts the filtering engine.
+        /// Starts the filtering engine. 
         /// </summary>
         private void StartFiltering()
         {
@@ -1924,7 +1986,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Queries the service provider for updated filtering rules.
+        /// Queries the service provider for updated filtering rules. 
         /// </summary>
         private void ReloadFilteringRules()
         {
@@ -2045,10 +2107,11 @@ namespace Te.Citadel
                                 );
                             }
 
-                            // Recreate our filter collection and reset all categories to be
-                            // disabled.
-                            m_filterCollection = new FilterDbCollection(AppDomain.CurrentDomain.BaseDirectory + "rules.db", true, true);
-                            m_categoryIndex.SetAll(false);
+                            // Recreate our filter collection and reset all categories to be disabled.
+                            if(m_filterCollection != null)
+                            {
+                                m_filterCollection.Dispose();
+                            }
 
                             // Recreate our triggers container.
                             if(m_textTriggers != null)
@@ -2056,12 +2119,32 @@ namespace Te.Citadel
                                 m_textTriggers.Dispose();
                             }
 
+                            // We need to force clearing of all connection pools, then force a
+                            // shutdown on the native side of our SQlite managed wrapper in order to
+                            // force connections to existing databases to be destroyed. This is
+                            // primarily a concern for in-memory databases, because without this
+                            // code, those in memory db's will persist so long as any connection is
+                            // left open to them.
+                            try
+                            {
+                                SQLiteConnection.ClearAllPools();
+                            }
+                            catch { }
+
+                            try
+                            {
+                                SQLiteConnection.Shutdown(true, true);
+                            }
+                            catch { }
+
+                            m_filterCollection = new FilterDbCollection(AppDomain.CurrentDomain.BaseDirectory + "rules.db", true, true);
+                            m_categoryIndex.SetAll(false);
+
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                             // be an in-memory DB or not.
                             m_textTriggers = new BagOfTextTriggers(AppDomain.CurrentDomain.BaseDirectory + "t.dat", true, true);
 
-                            // Now clear all generated categories. These will be re-generated as
-                            // needed.
+                            // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();
 
                             // Now drop all existing NLP models.
@@ -2129,8 +2212,7 @@ namespace Te.Citadel
                                         {
                                             MappedBypassListCategoryModel bypassCategoryModel = null;
 
-                                            // Must be loaded twice. Once as a blacklist, once as a
-                                            // whitelist.
+                                            // Must be loaded twice. Once as a blacklist, once as a whitelist.
                                             if(TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
                                             {
                                                 // Load first as blacklist.
@@ -2244,7 +2326,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called whenever a relaxed policy has been requested.
+        /// Called whenever a relaxed policy has been requested. 
         /// </summary>
         private void OnRelaxedPolicyRequested()
         {
@@ -2311,7 +2393,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called when the user has manually requested to relinquish a relaxed policy.
+        /// Called when the user has manually requested to relinquish a relaxed policy. 
         /// </summary>
         private void OnRelinquishRelaxedPolicyRequested()
         {
@@ -2328,8 +2410,7 @@ namespace Te.Citadel
                 }
             }
 
-            // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry
-            // callback.
+            // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
             if(relaxedInEffect)
             {
                 OnRelaxedPolicyTimerExpired(null);
@@ -2345,10 +2426,10 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Called whenever the relaxed policy duration has expired.
+        /// Called whenever the relaxed policy duration has expired. 
         /// </summary>
         /// <param name="state">
-        /// Async state. Not used.
+        /// Async state. Not used. 
         /// </param>
         private void OnRelaxedPolicyTimerExpired(object state)
         {
@@ -2370,7 +2451,7 @@ namespace Te.Citadel
         /// available relaxed policy requests to the configured value.
         /// </summary>
         /// <param name="state">
-        /// Async state. Not used.
+        /// Async state. Not used. 
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
@@ -2400,7 +2481,7 @@ namespace Te.Citadel
         /// those DNS settings on all available non-tunnel adapters.
         /// </summary>
         /// <param name="state">
-        /// State object for timer. Always null, unused.
+        /// State object for timer. Always null, unused. 
         /// </param>
         private void TryEnfornceDns(object state = null)
         {
@@ -2525,7 +2606,7 @@ namespace Te.Citadel
         }
 
         /// <summary>
-        /// Stops the filtering engine, shuts it down.
+        /// Stops the filtering engine, shuts it down. 
         /// </summary>
         private void StopFiltering()
         {
@@ -2541,14 +2622,14 @@ namespace Te.Citadel
         /// discovered, a valid, unique FilterListEntry for the supplied category shall be returned.
         /// </summary>
         /// <param name="categoryName">
-        /// The category name for which to fetch or generate a new FilterListEntry instance.
+        /// The category name for which to fetch or generate a new FilterListEntry instance. 
         /// </param>
         /// <returns>
         /// The unique FilterListEntry for the supplied category name, whether an existing instance
         /// was found or a new one was created.
         /// </returns>
         /// <remarks>
-        /// This will always fail if more than 255 categories are created!
+        /// This will always fail if more than 255 categories are created! 
         /// </remarks>
         private bool TryFetchOrCreateCategoryMap<T>(string categoryName, out T model) where T : MappedFilterListCategoryModel
         {
@@ -2600,8 +2681,7 @@ namespace Te.Citadel
         /// application is now hiding away.
         /// </summary>
         /// <param name="showTip">
-        /// Bool that determines if a short tooltip explaining that the application is now in the
-        /// background.
+        /// Bool that determines if a short tooltip explaining that the application is now in the background. 
         /// </param>
         private void MinimizeToTray(bool showTip = false)
         {
@@ -2712,18 +2792,6 @@ namespace Te.Citadel
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
 
-                    try
-                    {
-                        if(m_lastAuthWasSuccess && AuthenticatedUserModel.Instance.HasAcceptedTerms)
-                        {
-                            AuthenticatedUserModel.Instance.Save();
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
-
                     if(installSafeguards)
                     {
                         try
@@ -2738,11 +2806,10 @@ namespace Te.Citadel
 
                         try
                         {
-                            if(m_config.BlockInternet)
+                            if(m_config != null && m_config.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user
-                                // can't browse the web without us. Only do this of course if
-                                // configured.
+                                // can't browse the web without us. Only do this of course if configured.
                                 try
                                 {
                                     WFPUtility.DisableInternet();
