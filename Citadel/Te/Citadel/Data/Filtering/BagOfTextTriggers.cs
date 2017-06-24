@@ -32,6 +32,22 @@ namespace Te.Citadel.Data.Filtering
         private SQLiteConnection m_connection;
 
         /// <summary>
+        /// Holds whether or not this instance has any triggers loaded.
+        /// </summary>
+        private volatile bool m_hasTriggers = false;
+
+        /// <summary>
+        /// Get whether or not this instance has any triggers loaded.
+        /// </summary>
+        public bool HasTriggers
+        {
+            get
+            {
+                return m_hasTriggers;
+            }
+        }
+
+        /// <summary>
         /// Constructs a new BagOfTextTriggers.
         /// </summary>
         /// <param name="dbAbsolutePath">
@@ -198,6 +214,8 @@ namespace Te.Citadel.Data.Filtering
                 transaction.Commit();
             }
 
+            m_hasTriggers = loaded > 0;
+
             return loaded;
         }
 
@@ -277,6 +295,14 @@ namespace Te.Citadel.Data.Filtering
         /// </returns>
         public bool ContainsTrigger(string input, out short firstMatchCategory, out string matchedTrigger, Func<short, bool> categoryAppliesCb, bool rebuildAndTestFragments = false, int maxRebuildLen = -1)
         {
+            firstMatchCategory = -1;
+            matchedTrigger = null;
+
+            if(!m_hasTriggers)
+            {
+                return false;
+            }
+
             var split = Split(input);
 
             using(var myConn = new SQLiteConnection(m_connection))
@@ -364,8 +390,6 @@ namespace Te.Citadel.Data.Filtering
                 }
             }
 
-            firstMatchCategory = -1;
-            matchedTrigger = null;
             return false;
         }
 

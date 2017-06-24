@@ -1705,7 +1705,7 @@ namespace Te.Citadel
             {
                 m_filteringRwLock.EnterReadLock();
 
-                if(m_textTriggers != null)
+                if(m_textTriggers != null && m_textTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
