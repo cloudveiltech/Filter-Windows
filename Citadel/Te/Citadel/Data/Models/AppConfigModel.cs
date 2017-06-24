@@ -196,6 +196,23 @@ namespace Te.Citadel.Data.Models
             set;
         } = new List<FilteringPlainTextListModel>();
 
+        /// <summary>
+        /// The maximum number of combined words to assemble when doing text trigger sliding window
+        /// scanning. The window will dynamically go as it increments through the list of extracted
+        /// words until it reaches this limit, or the maximum number of words avaibale. This can
+        /// amount to many tens of thousands of scans for a simple short paragraph of text. So, this
+        /// configuration option enables setting an upper limit for the maximum number of word
+        /// combinations to submit as a query as the scanner "slides" across the text string. -1, the
+        /// default, means no limit. This can be very process intensive and will most likely impact
+        /// user experience.
+        /// </summary>
+        [JsonConverter(typeof(SafeIntConverter))]
+        public int MaxTextTriggerScanningSize
+        {
+            get;
+            set;
+        } = -1;
+
         public AppConfigModel()
         {
             

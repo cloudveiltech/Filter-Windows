@@ -11,28 +11,23 @@ using System;
 namespace Te.Citadel.Data.Serialization
 {
     /// <summary>
-    /// This class is passed to JSON.NET for the purpose of deserializing float values in a way that
-    /// will cause the property being handled to not wind up with an invalid value, if the json float
+    /// This class is passed to JSON.NET for the purpose of deserializing int values in a way that
+    /// will cause the property being handled to not wind up with an invalid value, if the json int
     /// string is invalid.
     /// </summary>
-    internal class SafeFloatConverter : JsonConverter
+    internal class SafeIntConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(float) || objectType == typeof(double);
+            return objectType == typeof(int);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             // To account for errors. Default to zero when NaN, etc.
-            float val = 0;
+            int val = 0;
 
-            if(!float.TryParse(reader.Value.ToString(), out val))
-            {
-                return null;
-            }
-
-            if(float.IsNaN(val))
+            if(!int.TryParse(reader.Value.ToString(), out val))
             {
                 return null;
             }

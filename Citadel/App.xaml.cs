@@ -1721,7 +1721,7 @@ namespace Te.Citadel
 
                         short matchedCategory = -1;
                         string trigger = null;
-                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml))
+                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, m_config != null ? m_config.MaxTextTriggerScanningSize : -1))
                         {
                             var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
