@@ -1398,7 +1398,7 @@ namespace Te.Citadel
                 // headers together. We're only interested, in all of our filtering code, in headers
                 // that are unique to requests or responses, so this should be fine.
                 var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
-
+                
                 Uri requestUri = null;
                 string httpVersion = null;
 
