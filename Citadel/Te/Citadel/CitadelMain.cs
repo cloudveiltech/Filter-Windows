@@ -5,11 +5,15 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Microsoft.VisualBasic.ApplicationServices;
 using NLog;
 using System;
 using System.IO;
 using Te.Citadel.Util;
+using System.Threading;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Linq;
+using Te.Citadel.WinApi;
 
 namespace Te.Citadel
 {
@@ -22,48 +26,11 @@ namespace Te.Citadel
         ShutdownWithoutSafeguards = 100,
     }
 
-    /// <summary>
-    /// Enforces that only a single instance of this application can be run at any given time.
-    /// </summary>
-    public class SingleAppInstanceManager : WindowsFormsApplicationBase
-    {
-        private CitadelApp m_app;
-
-        /// <summary>
-        /// </summary>
-        public SingleAppInstanceManager()
-        {
-            IsSingleInstance = true;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="eventArgs">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        protected override bool OnStartup(StartupEventArgs eventArgs)
-        {
-            m_app = new CitadelApp();
-            m_app.InitializeComponent();
-            m_app.Run();
-            return false;
-        }
-        
-        /// <summary>
-        /// </summary>
-        /// <param name="eventArgs">
-        /// </param>
-        protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)
-        {
-            base.OnStartupNextInstance(eventArgs);
-            m_app.BringAppToFocus();
-        }
-    }
-
     public static class CitadelMain
     {
-        public static Logger MainLogger;
+        private static Logger MainLogger;
+
+        private static Mutex InstanceMutex = null;
 
         /// <summary>
         /// </summary>
@@ -74,10 +41,42 @@ namespace Te.Citadel
         {
             try
             {
+                string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
+                bool createdNew;
+                InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
+                if(!createdNew)
+                {
+                    var thisProcess = Process.GetCurrentProcess();
+                    var processes = Process.GetProcessesByName(thisProcess.ProcessName).Where(p => p.Id != thisProcess.Id);
+
+                    foreach(Process runningProcess in processes)
+                    {
+                        foreach(var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
+                        {
+                            // Send window show.
+                            WindowHelpers.SendMessage(handle, (uint)WindowMessages.SHOWWINDOW, 9, 0);
+                        }
+                    }
+
+                    // Close this instance.
+                    System.Windows.Application.Current.Shutdown(-1);
+                    return;
+                }
+            }
+            catch(Exception e)
+            {   
+                return;
+            }
+
+            try
+            {
                 // Let's always overwrite the NLog config with our packed version to ensure
                 // that this doesn't get screwed or tampered easily.\
                 var nlogCfgPath = AppDomain.CurrentDomain.BaseDirectory + @"NLog.config";
-                
+
                 var nlogCfgUri = new Uri("pack://application:,,,/Resources/NLog.config");
                 var resourceStream = System.Windows.Application.GetResourceStream(nlogCfgUri);
                 TextReader tsr = new StreamReader(resourceStream.Stream);
@@ -94,9 +93,16 @@ namespace Te.Citadel
             }
 
             try
-            {
-                SingleAppInstanceManager appManager = new SingleAppInstanceManager();
-                appManager.Run(args);
+            {  
+                var app = new CitadelApp();
+                app.InitializeComponent();
+                app.Run();
+
+                // Always release mutex.
+                if(InstanceMutex != null)
+                {
+                    InstanceMutex.ReleaseMutex();
+                }
             }
             catch(Exception e)
             {
@@ -107,6 +113,7 @@ namespace Te.Citadel
             // No matter what, always ensure that critical flags are removed from our process before
             // exiting.
             ProcessProtection.Unprotect();
+            
         }
     }
 }

@@ -457,6 +457,11 @@ namespace Te.Citadel
         {
             m_mainWindow = new Citadel.UI.Windows.MainWindow();
 
+            m_mainWindow.WindowRestoreRequested += (() =>
+            {
+                BringAppToFocus();
+            });
+
             m_mainWindow.Closing += ((object sender, CancelEventArgs e) =>
             {
                 if(!WebServiceUtil.Default.HasAcceptedTerms)

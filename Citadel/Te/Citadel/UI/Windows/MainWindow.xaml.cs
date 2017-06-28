@@ -6,6 +6,8 @@
 */
 
 using System;
+using System.Windows;
+using System.Windows.Interop;
 using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Windows
