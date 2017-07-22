@@ -1,4 +1,4 @@
 [submodule "Citadel/Lib/HttpFilteringEngine"]
-	path = Citadel/Lib/HttpFilteringEngine
+	path = CitadelGUI/Lib/HttpFilteringEngine
 	url = git@github.com:TechnikEmpire/HttpFilteringEngine.git
 	ignore = dirty
