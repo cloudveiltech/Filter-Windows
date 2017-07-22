@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO.Pipes;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
@@ -39,6 +40,10 @@ using Te.Citadel.UI.Windows;
 using Te.Citadel.Util;
 using Te.HttpFilteringEngine;
 using WindowsFirewallHelper;
+using Citadel.Core.Windows.WinAPI;
+using Te.Citadel.IPC;
+using Citadel.Core.Windows.Util;
+using Te.Citadel.Services;
 
 namespace Te.Citadel
 {
@@ -75,6 +80,8 @@ namespace Te.Citadel
 
         private CategoryIndex m_categoryIndex = new CategoryIndex(short.MaxValue);
 
+        private IPCServer m_ipcServer;
+
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
         /// </summary>
@@ -97,6 +104,12 @@ namespace Te.Citadel
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
 
         private static readonly string s_EpochHttpDateTime = s_Epoch.ToString("r");
+
+        /// <summary>
+        /// Applications we never ever want to filter. Right now, this is just OS
+        /// binaries.
+        /// </summary>
+        private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
@@ -289,7 +302,7 @@ namespace Te.Citadel
 
                     // Create a new task definition and assign properties
                     using(var td = ts.NewTask())
-                    {
+                    {   
                         td.Principal.RunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel.Highest;
                         td.Settings.Priority = ProcessPriorityClass.RealTime;
                         td.Settings.DisallowStartIfOnBatteries = false;
@@ -350,11 +363,31 @@ namespace Te.Citadel
             // Hook app exiting function. This must be done on this main app thread.
             this.Exit += OnApplicationExiting;
 
+            try
+            {
+                m_ipcServer = new IPCServer(IPCChannels.MainAppChannel);
+                m_ipcServer.ShowWindowCommandRecieved += () =>
+                {
+                    BringAppToFocus();
+                };
+            }
+            catch(Exception ipce)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ipce);
+            }
+
             // Before we do any network stuff, ensure we have windows firewall access.
             EnsureWindowsFirewallAccess();
 
             // Do stuff that must be done on the UI thread first.
-            InitViews();
+            try
+            {
+                InitViews();
+            }
+            catch(Exception ve)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ve);
+            }
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
@@ -645,22 +678,36 @@ namespace Te.Citadel
 
             // Get Microsoft root authorities. We need this in order to permit Windows Update and
             // such in the event that it is forced through the filter.
-            X509Store localStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
-            localStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-            foreach(var cert in localStore.Certificates)
-            {
-                caFileBuilder.AppendLine(cert.ExportToPem());
 
-                /* XXX TODO - Instead of only trusting microsoft CA's, let's trust all machine-local CA's.
-                 * It's not unreasonable to expect the user and OS to handle these properly.
-                if(cert.Subject.IndexOf("Microsoft") != -1 && cert.Subject.IndexOf("Root") != -1)
+            var toTrust = new List<StoreName>() {
+                StoreName.Root,
+                StoreName.AuthRoot,
+                StoreName.CertificateAuthority,
+                StoreName.TrustedPublisher,
+                StoreName.TrustedPeople
+            };
+
+            foreach(var trust in toTrust)
+            {
+                using(X509Store localStore = new X509Store(trust, StoreLocation.LocalMachine))
                 {
-                    m_logger.Info("Adding cert: {0}.", cert.Subject);
-                    caFileBuilder.AppendLine(cert.ExportToPem());
+                    localStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+                    foreach(var cert in localStore.Certificates)
+                    {
+                        caFileBuilder.AppendLine(cert.ExportToPem());
+
+                        /* XXX TODO - Instead of only trusting microsoft CA's, let's trust all machine-local CA's.
+                         * It's not unreasonable to expect the user and OS to handle these properly.
+                        if(cert.Subject.IndexOf("Microsoft") != -1 && cert.Subject.IndexOf("Root") != -1)
+                        {
+                            m_logger.Info("Adding cert: {0}.", cert.Subject);
+                            caFileBuilder.AppendLine(cert.ExportToPem());
+                        }
+                        */
+                    }
+                    localStore.Close();
                 }
-                */
             }
-            //
 
             // Dump the text to the local file system.
             var localCaBundleCertPath = AppDomain.CurrentDomain.BaseDirectory + "ca-cert.pem";
@@ -687,7 +734,14 @@ namespace Te.Citadel
             // used to have to do this after the engine started up to wait for it to write the CA to
             // disk and then use certutil to install it in FF. However, thanks to FireFox giving the
             // option to trust the local certificate store, we don't have to do that anymore.
-            EstablishTrustWithFirefox();
+            try
+            {
+                EstablishTrustWithFirefox();
+            }
+            catch(Exception ffe)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ffe);
+            }
         }
 
         /// <summary>
@@ -791,6 +845,16 @@ namespace Te.Citadel
             // Init the Engine in the background.
             InitEngine();
 
+            // Force start our cascade of protective processes.
+            try
+            {
+                ServiceSpawner.Instance.InitializeServices();
+            }
+            catch(Exception se)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, se);
+            }
+
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
@@ -841,11 +905,16 @@ namespace Te.Citadel
             try
             {
                 if(e.ApplicationExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
-                {
+                {   
                     DoCleanShutdown(false);
                 }
                 else
                 {
+                    // Enforce that our error code is set according to our
+                    // own understanding. Anything less than 100 will indicate
+                    // that the application was not terminated correctly.
+                    e.ApplicationExitCode = (int)ExitCodes.ShutdownWithoutSafeguards;
+
                     // Unless explicitly told not to, always use safeguards.
                     DoCleanShutdown(true);
                 }
@@ -882,32 +951,26 @@ namespace Te.Citadel
                 return;
             }
 
-            Current.Dispatcher.BeginInvoke(
-                System.Windows.Threading.DispatcherPriority.Normal,
-                (Action)delegate ()
+            if(WebServiceUtil.Default.HasStoredCredentials)
+            {
+                if(WebServiceUtil.Default.HasAcceptedTerms)
                 {
-                    if(WebServiceUtil.Default.HasStoredCredentials)
-                    {
-                        if(WebServiceUtil.Default.HasAcceptedTerms)
-                        {
-                            // Just go to dashboard.
-                            OnViewChangeRequest(typeof(DashboardView));
+                    // Just go to dashboard.
+                    OnViewChangeRequest(typeof(DashboardView));
 
-                            // Check for updates when we have an already authenticated user.
-                            StartCheckForAppUpdates();
-                        }
-                        else
-                        {
-                            // User still has not accepted terms. Show them.
-                            OnViewChangeRequest(typeof(ProviderConditionsView));
-                        }
-                    }
-                    else
-                    {
-                        OnViewChangeRequest(typeof(LoginView));
-                    }
+                    // Check for updates when we have an already authenticated user.
+                    StartCheckForAppUpdates();
                 }
-            );
+                else
+                {
+                    // User still has not accepted terms. Show them.
+                    OnViewChangeRequest(typeof(ProviderConditionsView));
+                }
+            }
+            else
+            {
+                OnViewChangeRequest(typeof(LoginView));
+            }
         }
 
         /// <summary>
@@ -1353,6 +1416,78 @@ namespace Te.Citadel
         /// </returns>
         private bool OnAppFirewallCheck(string appAbsolutePath)
         {
+            // XXX TODO - The engine shouldn't even tell us about SYSTEM processes
+            // and just silently let them through.
+            if(appAbsolutePath.OIEquals("SYSTEM"))
+            {
+                return false;
+            }
+
+            // Lets completely avoid piping anything from the operating
+            // system in the filter, with the sole exception of Microsoft
+            // edge.
+            if((appAbsolutePath.IndexOf("MicrosoftEdge", StringComparison.OrdinalIgnoreCase) == -1) && appAbsolutePath.IndexOf(@"\Windows\", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                if(s_foreverWhitelistedApplications.Contains(appAbsolutePath))
+                {
+                    return false;
+                }
+
+                // Here we'll simply check if the binary is signed. If so, we'll
+                // validate the certificate. If the cert is good, let's just go
+                // and bypass this binary altogether.
+                // However, note that this does not verify that the signed binary
+                // is actually valid for the certificate. That is, it doesn't
+                // ensure file integrity. Also, note that even if we went
+                // all the way as to use WinVerifyTrust() from wintrust.dll
+                // to completely verify integrity etc, this can still be
+                // bypassed by adding a self signed signing authority to the
+                // windows trusted certs.
+                //
+                // So, all we can do is kick the can further down the road.
+                // This should be sufficient to prevent the lay person from
+                // dropping a browser into the Windows folder.
+                // 
+                // Leaving above notes just for the sake of knowledge. We
+                // can kick the can pretty darn far down the road by asking
+                // Windows Resource Protection if the file really belongs
+                // to the OS. Viruses are known to call SfcIsFileProtected
+                // in order to avoid getting caught messing with these files
+                // so if viruses avoid them, I think we've booted the can
+                // so far down the road that we need not worry about being
+                // exploited here. The OS would need to be funamentally
+                // compromised and that wouldn't be our fault.
+                //
+                // The only other way we could get exploited here by getting
+                // our hook to sfc.dll hijacked. There are countermeasures
+                // of course but not right now.
+
+                // If the result is greater than zero, then this is a
+                // protected operating system file according to the
+                // operating system.
+                if(SFC.SfcIsFileProtected(IntPtr.Zero, appAbsolutePath) > 0)
+                {   
+                    s_foreverWhitelistedApplications.Add(appAbsolutePath);
+                    return false;
+                }
+
+                /* I don't think we need this at all anymore. Besides,
+                 * many windows assemblies are not signed from what 
+                 * explorer is telling me.
+                var cert = X509Certificate.CreateFromSignedFile(appAbsolutePath);
+                if(cert != null)
+                {
+                    var cert2 = new X509Certificate2(cert.Handle);
+
+                    if(cert2.Verify())
+                    {
+                        
+
+                    }
+                }
+                */
+            }
+            
             if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
             {
                 // Just filter anything accessing port 80 and 443.
@@ -2754,6 +2889,8 @@ namespace Te.Citadel
             {
                 if(!m_cleanShutdownComplete)
                 {
+                    m_ipcServer.Dispose();
+
                     try
                     {
                         // Stop WinSparkle.

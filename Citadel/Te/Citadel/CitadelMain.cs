@@ -13,19 +13,13 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
-using Te.Citadel.WinApi;
+using Citadel.Core.Windows.WinAPI;
+using Te.Citadel.IPC;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace Te.Citadel
 {
-    /// <summary>
-    /// Various exit codes indicating the reason for a shutdown.
-    /// </summary>
-    public enum ExitCodes : int
-    {
-        ShutdownWithSafeguards,
-        ShutdownWithoutSafeguards = 100,
-    }
-
     public static class CitadelMain
     {
         private static Logger MainLogger;
@@ -46,19 +40,54 @@ namespace Te.Citadel
                 appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
 
                 bool createdNew;
-                InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
+                try
+                {
+                    InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
+                }
+                catch
+                {
+                    // We can get access denied if SYSTEM is running this.
+                    createdNew = false;
+                }
+                
                 if(!createdNew)
                 {
-                    var thisProcess = Process.GetCurrentProcess();
-                    var processes = Process.GetProcessesByName(thisProcess.ProcessName).Where(p => p.Id != thisProcess.Id);
-
-                    foreach(Process runningProcess in processes)
+                    try
                     {
-                        foreach(var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
+                        var thisProcess = Process.GetCurrentProcess();
+                        var processes = Process.GetProcessesByName(thisProcess.ProcessName).Where(p => p.Id != thisProcess.Id);
+
+                        foreach(Process runningProcess in processes)
                         {
-                            // Send window show.
-                            WindowHelpers.SendMessage(handle, (uint)WindowMessages.SHOWWINDOW, 9, 0);
+                            foreach(var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
+                            {
+                                // Send window show.
+                                WindowHelpers.SendMessage(handle, (uint)WindowMessages.SHOWWINDOW, 9, 0);
+                            }
                         }
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                    }
+
+
+                    // In case we have some out of sync state where the app is running at a higher
+                    // privilege level than us, the app won't get our messages. So, let's attempt
+                    // an IPC named pipe to deliver the message as well.
+                    try
+                    {
+                        using(var c = new IPCClient(IPCChannels.MainAppChannel))
+                        {
+                            c.SendMessage(new IPCMessage(IPCCommand.ShowWindow));
+                            Task.Delay(5000);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        // The only way we got here is if the server isn't running, in
+                        // which case we can do nothing because its beyond our domain.
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                     }
 
                     // Close this instance.
@@ -67,30 +96,18 @@ namespace Te.Citadel
                 }
             }
             catch(Exception e)
-            {   
+            {
+                // The only way we got here is if the server isn't running, in
+                // which case we can do nothing because its beyond our domain.
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                 return;
             }
 
             try
             {
-                // Let's always overwrite the NLog config with our packed version to ensure
-                // that this doesn't get screwed or tampered easily.\
-                var nlogCfgPath = AppDomain.CurrentDomain.BaseDirectory + @"NLog.config";
-
-                var nlogCfgUri = new Uri("pack://application:,,,/Resources/NLog.config");
-                var resourceStream = System.Windows.Application.GetResourceStream(nlogCfgUri);
-                TextReader tsr = new StreamReader(resourceStream.Stream);
-                var nlogConfigText = tsr.ReadToEnd();
-                resourceStream.Stream.Close();
-                resourceStream.Stream.Dispose();
-                File.WriteAllText(nlogCfgPath, nlogConfigText);
-
                 MainLogger = LoggerUtil.GetAppWideLogger();
             }
-            catch
-            {
-                // What can be done? WHAT. CAN. BE. DONE!?!?! X(
-            }
+            catch { }
 
             try
             {  
@@ -106,8 +123,30 @@ namespace Te.Citadel
             }
             catch(Exception e)
             {
-                MainLogger = LoggerUtil.GetAppWideLogger();
-                LoggerUtil.RecursivelyLogException(MainLogger, e);
+                try
+                {
+                    MainLogger = LoggerUtil.GetAppWideLogger();
+                    LoggerUtil.RecursivelyLogException(MainLogger, e);
+                }
+                catch(Exception be)
+                {
+                    var sb = new StringBuilder();
+                    while(e != null)
+                    {
+                        sb.AppendLine(e.Message);
+                        sb.AppendLine(e.StackTrace);
+                        e = e.InnerException;
+                    }
+
+                    while(be != null)
+                    {
+                        sb.AppendLine(be.Message);
+                        sb.AppendLine(be.StackTrace);
+                        be = be.InnerException;
+                    }
+
+                    File.WriteAllText(@"C:\CloudVeil.log", sb.ToString());
+                }
             }
 
             // No matter what, always ensure that critical flags are removed from our process before

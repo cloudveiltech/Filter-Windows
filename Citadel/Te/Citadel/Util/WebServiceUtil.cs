@@ -6,6 +6,7 @@
 */
 
 using AngleSharp.Parser.Html;
+using Citadel.Core.Windows.Util;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;

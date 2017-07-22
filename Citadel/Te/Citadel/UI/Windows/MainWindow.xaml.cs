@@ -21,6 +21,11 @@ namespace Te.Citadel.UI.Windows
         {
             InitializeComponent();
 
+            this.Activated += MainWindow_Activated;
+        }
+
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
             try
             {
                 // Show binary version # in the title bar.
@@ -30,9 +35,9 @@ namespace Te.Citadel.UI.Windows
                 title += " - Version " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
                 this.Title = title;
             }
-            catch(Exception e)
+            catch(Exception err)
             {
-                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), err);
             }
         }
     }
