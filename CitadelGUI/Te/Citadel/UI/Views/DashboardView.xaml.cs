@@ -1,23 +1,20 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Jesse Nicholson
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Util;
 using System;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using Te.Citadel.Extensions;
-using Te.Citadel.UI.Models;
 using Te.Citadel.UI.ViewModels;
-using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Views
 {
     /// <summary>
-    /// Interaction logic for DashboardView.xaml
+    /// Interaction logic for DashboardView.xaml 
     /// </summary>
     public partial class DashboardView : BaseView
     {
@@ -61,19 +58,17 @@ namespace Te.Citadel.UI.Views
         private async void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
         {
             // XXX TODO - Having this code in here is sloppy. Clean this up.
-            
+
             try
             {
-
                 var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
-                
 
                 if(selectedBlockEvent != null)
                 {
 #if UNBLOCK_REQUESTS_IN_BROWSER
 
-                    // Try to send the device name as well. Helps distinguish between clients under the
-                    // same account.
+                    // Try to send the device name as well. Helps distinguish between clients under
+                    // the same account.
                     string deviceName = string.Empty;
 
                     try
@@ -87,11 +82,11 @@ namespace Te.Citadel.UI.Views
 
                     var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
                     reportPath = string.Format(
-                        @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}", 
-                        reportPath, 
-                        Uri.EscapeDataString(selectedBlockEvent.CategoryName), 
-                        Uri.EscapeDataString(WebServiceUtil.Default.Username), 
-                        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)), 
+                        @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}",
+                        reportPath,
+                        Uri.EscapeDataString(selectedBlockEvent.CategoryName),
+                        Uri.EscapeDataString(WebServiceUtil.Default.Username),
+                        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)),
                         Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(selectedBlockEvent.FullRequest))
                         );
 

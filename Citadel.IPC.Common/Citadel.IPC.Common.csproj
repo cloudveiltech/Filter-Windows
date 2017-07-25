@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Citadel</RootNamespace>
     <AssemblyName>Citadel.IPC.Common</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,7 +32,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NamedPipeWrapper, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\Citadel\packages\Com.TechnikEmpire.NamedPipeWrapper.1.5.0\lib\net40\NamedPipeWrapper.dll</HintPath>
+      <HintPath>..\packages\Com.TechnikEmpire.NamedPipeWrapper.1.5.0\lib\net40\NamedPipeWrapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.11\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -44,13 +49,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IPC\Models\SynchronizedModel.cs" />
+    <Compile Include="IPC\IPCClient.cs" />
+    <Compile Include="IPC\IPCServer.cs" />
+    <Compile Include="IPC\Messages\AuthenticationMessage.cs" />
+    <Compile Include="IPC\Messages\BaseMessage.cs" />
+    <Compile Include="IPC\Messages\ClientOnlyMessage.cs" />
+    <Compile Include="IPC\Messages\ClientToClientMessage.cs" />
+    <Compile Include="IPC\Messages\DeactivationMessage.cs" />
+    <Compile Include="IPC\Messages\FilterStatusMessage.cs" />
+    <Compile Include="IPC\Messages\NotifyBlockActionMessage.cs" />
+    <Compile Include="IPC\Messages\RelaxedPolicyMessage.cs" />
+    <Compile Include="IPC\Messages\ServerOnlyMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
+      <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
+      <Name>Citadel.Core.Windows</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

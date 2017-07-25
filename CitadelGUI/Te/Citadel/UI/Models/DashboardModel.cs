@@ -5,6 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Util;
+using Citadel.IPC;
 using GalaSoft.MvvmLight;
 using NLog;
 using System;
@@ -36,11 +38,16 @@ namespace Te.Citadel.UI.Models
         {
             try
             {
-                var response = await WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest);
+                using(var ipcClient = new IPCClient())
+                {
+                    ipcClient.ConnectedToServer = () =>
+                    {
+                        ipcClient.RequestDeactivation();
+                    };
 
-                // WebServiceUtil.RequestResource gives null on failure, non-null on success of any
-                // kind.
-                return response != null;
+                    ipcClient.WaitForConnection();
+                    Task.Delay(3000).Wait();
+                }
             }
             catch(Exception e)
             {

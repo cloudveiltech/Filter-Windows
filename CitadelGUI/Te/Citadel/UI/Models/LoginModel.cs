@@ -1,18 +1,17 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Jesse Nicholson
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util;
+using Citadel.IPC;
 using GalaSoft.MvvmLight;
 using System;
-using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
-using System.Windows;
-using Te.Citadel.Extensions;
-using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Models
 {
@@ -89,10 +88,10 @@ namespace Te.Citadel.UI.Models
         }
 
         /// <summary>
-        /// Determines whether or not the current state permits initiating an authentication request.
+        /// Determines whether or not the current state permits initiating an authentication request. 
         /// </summary>
         /// <returns>
-        /// True if the current state is valid for an authentication request, false otherwise.
+        /// True if the current state is valid for an authentication request, false otherwise. 
         /// </returns>
         public bool CanAttemptAuthentication()
         {
@@ -141,34 +140,27 @@ namespace Te.Citadel.UI.Models
             return true;
         }
 
-        public async Task<bool> Authenticate()
+        public async void Authenticate()
         {
             ErrorMessage = string.Empty;
-            
+
             var unencrypedPwordBytes = this.m_userPassword.SecureStringBytes();
+
             try
             {
-                var res = await WebServiceUtil.Default.Authenticate(this.m_userName, unencrypedPwordBytes);
+                await Task.Run(() =>
+                {   
+                    using(var ipcClient = new IPCClient())
+                    {                        
+                        ipcClient.ConnectedToServer = () =>
+                        {                            
+                            ipcClient.AttemptAuthentication(m_userName, m_userPassword);
+                        };
 
-                switch(res)
-                {
-                    case AuthenticationResult.ConnectionFailed:
-                    {
-                        ErrorMessage = "Could not connect to service provider.";
+                        ipcClient.WaitForConnection();                        
+                        Task.Delay(3000).Wait();
                     }
-                    break;
-
-                    case AuthenticationResult.Failure:
-                    {
-                        ErrorMessage = "Failed to login to service provider.";
-                    }
-                    break;
-
-                    case AuthenticationResult.Success:
-                    {
-                        return true;
-                    }
-                }
+                });
             }
             finally
             {
@@ -178,8 +170,6 @@ namespace Te.Citadel.UI.Models
                     Array.Clear(unencrypedPwordBytes, 0, unencrypedPwordBytes.Length);
                 }
             }
-
-            return false;
         }
 
         public LoginModel()

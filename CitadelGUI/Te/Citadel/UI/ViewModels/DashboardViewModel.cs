@@ -6,12 +6,14 @@
 */
 
 using Citadel.Core.Windows.Util;
+using Citadel.IPC;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
 using Te.Citadel.UI.Models;
@@ -102,29 +104,23 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(m_deactivationCommand == null)
                 {
-                    m_deactivationCommand = new RelayCommand((Action)(async () =>
+                    m_deactivationCommand = new RelayCommand((Action)(() =>
                     {
                         try
                         {
-                            RequestViewChangeCommand.Execute(typeof(ProgressWait));
-                            var deactivationRequestSuccess = await m_model.RequestAppDeactivation();
-
-                            if(!deactivationRequestSuccess)
+                            Task.Run(() =>
                             {
-                                RequestViewChangeCommand.Execute(typeof(DashboardView));
-                                PostNotificationToUser("Request Received", "Your deactivation request has been received, but approval is still pending.");
-                            }
-                            else
-                            {
-                                if(ProcessProtection.IsProtected)
+                                using(var ipcClient = new IPCClient())
                                 {
-                                    ProcessProtection.Unprotect();
-                                }
+                                    ipcClient.ConnectedToServer = () =>
+                                    {
+                                        ipcClient.RequestDeactivation();
+                                    };
 
-                                // Init the shutdown of this application.
-                                Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
-                                return;
-                            }
+                                    ipcClient.WaitForConnection();
+                                    Task.Delay(3000).Wait();
+                                }
+                            });
                         }
                         catch(Exception e)
                         {

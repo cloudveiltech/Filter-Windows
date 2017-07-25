@@ -5,6 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Security;
@@ -41,26 +43,12 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(m_authenticateCommand == null)
                 {
-                    m_authenticateCommand = new RelayCommand((Action)(async () =>
+                    m_authenticateCommand = new RelayCommand((Action)(() =>
                     {
                         try
-                        {
-                            RequestViewChangeCommand.Execute(typeof(ProgressWait));
-                            var authSuccess = await m_model.Authenticate();
-
-                            if(!authSuccess)
-                            {
-                                RequestViewChangeCommand.Execute(typeof(LoginView));
-
-                                // Force a refresh of the error message member as it's been
-                                // internally set in the model in this case. XXX TODO - Not the
-                                // greatest design.
-                                RaisePropertyChanged(nameof(ErrorMessage));
-                            }
-                            else
-                            {
-                                RequestViewChangeCommand.Execute(typeof(ProviderConditionsView));
-                            }
+                        {   
+                            m_model.Authenticate();
+                            
                         }
                         catch(Exception e)
                         {

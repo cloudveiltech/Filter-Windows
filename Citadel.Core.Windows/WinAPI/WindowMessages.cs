@@ -10,7 +10,7 @@
 
 using System;
 
-namespace Citadel.Core.Windows.WinAPI
+namespace Citadel.Core.WinAPI
 {
     public enum WindowMessages : int
     {

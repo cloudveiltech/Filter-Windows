@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Citadel.Core.Windows.WinAPI
+namespace Citadel.Core.WinAPI
 {
     public static class WindowHelpers
     {

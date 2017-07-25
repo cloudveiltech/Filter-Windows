@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Util;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using NLog;
@@ -18,7 +19,7 @@ namespace Te.Citadel.UI.ViewModels
     /// <summary>
     /// Serves as the base class for all ViewModels.
     /// </summary>
-    public class BaseCitadelViewModel : ViewModelBase
+    public class BaseCitadelViewModel : ObservableObject
     {
         /// <summary>
         /// View change request.
@@ -74,8 +75,8 @@ namespace Te.Citadel.UI.ViewModels
         protected readonly Logger m_logger;
 
         /// <summary>
-        /// Default ctor.
-        /// </summary>
+        /// Constructs a new BaseCitadelViewModel instance. 
+        /// </summary>        
         public BaseCitadelViewModel()
         {
             m_logger = LoggerUtil.GetAppWideLogger();

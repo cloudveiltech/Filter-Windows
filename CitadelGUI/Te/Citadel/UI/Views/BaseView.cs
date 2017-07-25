@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Util;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using NLog;

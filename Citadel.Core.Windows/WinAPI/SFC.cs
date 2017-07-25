@@ -8,7 +8,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Citadel.Core.Windows.WinAPI
+namespace Citadel.Core.WinAPI
 {
     public static class SFC
     {

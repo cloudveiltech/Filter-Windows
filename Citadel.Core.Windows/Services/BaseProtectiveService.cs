@@ -16,6 +16,7 @@ using System.Text;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Threading;
 
 namespace Te.Citadel.Services
 {
@@ -114,7 +115,7 @@ namespace Te.Citadel.Services
             }
             else
             {
-                Shutdown();
+                Shutdown((ExitCodes)exitCode);
             }
         }
 
@@ -126,60 +127,93 @@ namespace Te.Citadel.Services
             // and recreate and restart it.
             if(File.Exists(m_processBinaryAbsPath))
             {
-                switch(m_isTargetService)
+                bool createdNew = true;
+                var mutex = new Mutex(true, string.Format(@"Global\{0}", m_processBinaryAbsPath.Replace("\\", "").Replace(" ", "")), out createdNew);
+
+                if(createdNew)
                 {
-                    case true:
+                    switch(m_isTargetService)
                     {
-                        var uninstallStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                        uninstallStartInfo.Arguments = "Uninstall";
-                        uninstallStartInfo.UseShellExecute = false;
-                        uninstallStartInfo.CreateNoWindow = true;
-                        Process.Start(uninstallStartInfo).WaitForExit();
-
-                        var installStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                        installStartInfo.Arguments = "Install";
-                        installStartInfo.UseShellExecute = false;
-                        installStartInfo.CreateNoWindow = true;
-                        Process.Start(installStartInfo).WaitForExit();
-
-                        using(var service = new ServiceController(string.Format("{0} - {1}", Path.GetFileNameWithoutExtension(m_processBinaryAbsPath), FingerPrint.Value).ToLower()))
+                        case true:
                         {
-                            TimeSpan timeout = TimeSpan.FromSeconds(60);
-                            service.Start();
-                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-                        }
-                    }
-                    break;
-
-                    case false:
-                    {
-                        try
-                        {
-                            var startInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                            startInfo.LoadUserProfile = true;
-                            startInfo.UseShellExecute = false;
-                            startInfo.CreateNoWindow = false;
-                            startInfo.Verb = "runas";
-                            Process.Start(startInfo);
-                            //Process.Start(string.Format("{0}", m_processBinaryAbsPath));
-                            //ProcessExecution.StartProcessAsCurrentUser(null, m_processBinaryAbsPath, null, true);
-                        }
-                        catch(Exception e)
-                        {
-                            var sb = new StringBuilder();
-
-                            while(e != null)
+                            var uninstallStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                            uninstallStartInfo.Arguments = "Uninstall";
+                            uninstallStartInfo.UseShellExecute = false;
+                            uninstallStartInfo.CreateNoWindow = true;
+                            var uninstallProc = Process.Start(uninstallStartInfo);
+                            if(!uninstallProc.WaitForExit(200))
                             {
-                                sb.Append(e.Message);
-                                sb.Append(e.StackTrace);
-                                e = e.InnerException;
+                                uninstallProc.Kill();
                             }
 
-                            File.WriteAllText(@"C:\CloudVeil.log", sb.ToString());
+                            var installStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                            installStartInfo.Arguments = "Install";
+                            installStartInfo.UseShellExecute = false;
+                            installStartInfo.CreateNoWindow = true;
+
+                            var installProc = Process.Start(installStartInfo);
+                            if(!installProc.WaitForExit(200))
+                            {
+                                installProc.Kill();
+                            }
+
+                            TimeSpan timeout = TimeSpan.FromSeconds(60);
+
+                            foreach(var service in ServiceController.GetServices())
+                            {
+                                if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(m_processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
+                                {   
+                                    if(service.Status == ServiceControllerStatus.StartPending)
+                                    {
+                                        service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                    }
+
+                                    if(service.Status != ServiceControllerStatus.Running)
+                                    {
+                                        service.Start();
+                                        service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                    }
+                                }
+                            }
                         }
-                        
+                        break;
+
+                        case false:
+                        {
+                            try
+                            {
+                                var startInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                startInfo.LoadUserProfile = true;
+                                startInfo.UseShellExecute = false;
+                                startInfo.CreateNoWindow = false;
+                                startInfo.Verb = "runas";
+                                Process.Start(startInfo);
+                                //Process.Start(string.Format("{0}", m_processBinaryAbsPath));
+                                //ProcessExecution.StartProcessAsCurrentUser(null, m_processBinaryAbsPath, null, true);
+                            }
+                            catch(Exception e)
+                            {
+                                var sb = new StringBuilder();
+
+                                while(e != null)
+                                {
+                                    sb.Append(e.Message);
+                                    sb.Append(e.StackTrace);
+                                    e = e.InnerException;
+                                }
+
+                                File.WriteAllText(@"C:\CloudVeil.log", sb.ToString());
+                            }
+
+                        }
+                        break;
                     }
-                    break;
+                }
+                else
+                {
+                    // Someone else is trying to save our process. Give it a second
+                    // before we try to grab a new watch handle to it.
+                    Task.Delay(1000).Wait();
                 }
 
                 foreach(var proc in Process.GetProcesses())
@@ -197,6 +231,6 @@ namespace Te.Citadel.Services
         /// This will be called when the base class has determined that the function of this object
         /// is fundamentally over.
         /// </summary>
-        public abstract void Shutdown();
+        public abstract void Shutdown(ExitCodes code);
     }
 }

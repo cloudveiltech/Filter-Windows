@@ -13,10 +13,11 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
-using Citadel.Core.Windows.WinAPI;
-using Te.Citadel.IPC;
 using System.Threading.Tasks;
 using System.Text;
+using Citadel.Core.WinAPI;
+using Citadel.Core.Windows.Util;
+using Citadel.IPC;
 
 namespace Te.Citadel
 {
@@ -77,10 +78,12 @@ namespace Te.Citadel
                     // an IPC named pipe to deliver the message as well.
                     try
                     {
-                        using(var c = new IPCClient(IPCChannels.MainAppChannel))
+                        using(var ipcClient = new IPCClient())
                         {
-                            c.SendMessage(new IPCMessage(IPCCommand.ShowWindow));
-                            Task.Delay(5000);
+                            ipcClient.RequestPrimaryClientShowUI();
+
+                            // Wait plenty of time before dispose to allow delivery of the msg.
+                            Task.Delay(500).Wait();
                         }
                     }
                     catch(Exception e)
@@ -91,7 +94,7 @@ namespace Te.Citadel
                     }
 
                     // Close this instance.
-                    System.Windows.Application.Current.Shutdown(-1);
+                    Environment.Exit(-1);
                     return;
                 }
             }
