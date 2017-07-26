@@ -18,6 +18,7 @@ using System.IO;
 using System.Net;
 using System.Security.Principal;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Te.Citadel.Extensions;
@@ -905,18 +906,35 @@ namespace Te.Citadel
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        private void OnRelaxedPolicyRequested()
+        private async void OnRelaxedPolicyRequested()
         {
-            // XXX FIXME
+            using(var ipcClient = new IPCClient())
+            {
+                ipcClient.ConnectedToServer = () =>
+                {
+                    ipcClient.RequestRelaxedPolicy();
+                };
 
+                ipcClient.WaitForConnection();
+                await Task.Delay(3000);
+            }
         }
 
         /// <summary>
         /// Called when the user has manually requested to relinquish a relaxed policy. 
         /// </summary>
-        private void OnRelinquishRelaxedPolicyRequested()
+        private async void OnRelinquishRelaxedPolicyRequested()
         {
-            // XXX FIXME
+            using(var ipcClient = new IPCClient())
+            {
+                ipcClient.ConnectedToServer = () =>
+                {
+                    ipcClient.RelinquishRelaxedPolicy();
+                };
+
+                ipcClient.WaitForConnection();
+                await Task.Delay(3000);
+            }
         }
 
         /// <summary>

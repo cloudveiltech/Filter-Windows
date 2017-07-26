@@ -2414,11 +2414,11 @@ namespace CitadelService.Services
 
                 if(allUsesExhausted)
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted - m_config.BypassesUsed, m_config.BypassDuration);
+                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
                 }
                 else
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                    m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted - m_config.BypassesUsed, m_config.BypassDuration);
                 }
             }
             else

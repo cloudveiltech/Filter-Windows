@@ -271,7 +271,19 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-#region IDisposable Support
+        public void RequestRelaxedPolicy()
+        {
+            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Requested);
+            PushMessage(msg);
+        }
+
+        public void RelinquishRelaxedPolicy()
+        {
+            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Relinquished);
+            PushMessage(msg);
+        }
+
+        #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
