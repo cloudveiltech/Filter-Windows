@@ -43,7 +43,7 @@ namespace Te.Citadel
                 bool createdNew;
                 try
                 {
-                    InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
+                    InstanceMutex = new Mutex(true, string.Format(@"Local\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
                 }
                 catch
                 {
