@@ -222,6 +222,8 @@ namespace CitadelService.Services
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
+        private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
+
         private FilterDbCollection m_filterCollection;
 
         private BagOfTextTriggers m_textTriggers;
@@ -517,11 +519,6 @@ namespace CitadelService.Services
             // Create the threshold count timer and start it with the configured timespan.
             m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, m_config.ThresholdTriggerPeriod, Timeout.InfiniteTimeSpan);
 
-            // If exists, stop it first.
-            if(m_thresholdEnforcementTimer != null)
-            {
-                m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
 
             // Create the enforcement timer, but don't start it.
             m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
@@ -1270,7 +1267,7 @@ namespace CitadelService.Services
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
-
+                    
                     this.m_thresholdEnforcementTimer.Change(m_config.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
                 }
             }
@@ -1336,9 +1333,12 @@ namespace CitadelService.Services
             // the sole exception of Microsoft edge.
             if((appAbsolutePath.IndexOf("MicrosoftEdge", StringComparison.OrdinalIgnoreCase) == -1) && appAbsolutePath.IndexOf(@"\Windows\", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                if(s_foreverWhitelistedApplications.Contains(appAbsolutePath))
+                lock(s_foreverWhitelistedApplications)
                 {
-                    return false;
+                    if(s_foreverWhitelistedApplications.Contains(appAbsolutePath))
+                    {
+                        return false;
+                    }
                 }
 
                 // Here we'll simply check if the binary is signed. If so, we'll validate the
@@ -1366,7 +1366,11 @@ namespace CitadelService.Services
                 // according to the operating system.
                 if(SFC.SfcIsFileProtected(IntPtr.Zero, appAbsolutePath) > 0)
                 {
-                    s_foreverWhitelistedApplications.Add(appAbsolutePath);
+                    lock(s_foreverWhitelistedApplications)
+                    {
+                        s_foreverWhitelistedApplications.Add(appAbsolutePath);
+                    }
+
                     return false;
                 }
 
@@ -1385,41 +1389,61 @@ namespace CitadelService.Services
                 */
             }
 
-            if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
+            try
             {
-                // Just filter anything accessing port 80 and 443.
-                return true;
-            }
+                m_filteringRwLock.EnterReadLock();
 
-            var appName = Path.GetFileName(appAbsolutePath);
-
-            if(m_whitelistedApplications.Count > 0)
-            {
-                if(m_whitelistedApplications.Contains(appName))
+                if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
                 {
-                    // Whitelist is in effect and this app is whitelisted. So, don't force it through.
-                    return false;
-                }
-
-                // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                return true;
-            }
-
-            if(m_blacklistedApplications.Count > 0)
-            {
-                if(m_blacklistedApplications.Contains(appName))
-                {
-                    // Blacklist is in effect and this app is blacklisted. So, force it through.
+                    // Just filter anything accessing port 80 and 443.
+                    m_logger.Info("1Filtering application: {0}", appAbsolutePath);
                     return true;
                 }
 
-                // Blacklist in effect but this app is not on the blacklist. Don't force it through.
+                var appName = Path.GetFileName(appAbsolutePath);
+
+                if(m_whitelistedApplications.Count > 0)
+                {
+                    if(m_whitelistedApplications.Contains(appName))
+                    {
+                        // Whitelist is in effect and this app is whitelisted. So, don't force it through.
+                        return false;
+                    }
+
+                    // Whitelist is in effect, and this app is not whitelisted, so force it through.
+                    m_logger.Info("2Filtering application: {0}", appAbsolutePath);
+                    return true;
+                }
+
+                if(m_blacklistedApplications.Count > 0)
+                {
+                    if(m_blacklistedApplications.Contains(appName))
+                    {
+                        // Blacklist is in effect and this app is blacklisted. So, force it through.
+                        m_logger.Info("3Filtering application: {0}", appAbsolutePath);
+                        return true;
+                    }
+
+                    // Blacklist in effect but this app is not on the blacklist. Don't force it through.
+                    return false;
+                }
+
+                // This app was not hit by either an enforced whitelist or blacklist. So, by default we
+                // will filter everything. We should never get here, but just in case.
+
+                m_logger.Info("4Filtering application: {0}", appAbsolutePath);
+                return true;
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error in {0}", nameof(OnAppFirewallCheck));
+                LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
-
-            // This app was not hit by either an enforced whitelist or blacklist. So, by default we
-            // will filter everything. We should never get here, but just in case.
-            return true;
+            finally
+            {
+                m_filteringRwLock.ExitReadLock();
+            }
         }
 
         private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out Engine.ProxyNextAction nextAction, out byte[] customBlockResponseData)
@@ -1892,8 +1916,6 @@ namespace CitadelService.Services
         /// </param>
         private void OnThresholdTriggerPeriodElapsed(object state)
         {
-            this.m_thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
             // Reset count to zero.
             Interlocked.Exchange(ref m_thresholdTicks, 0);
 
@@ -1939,9 +1961,7 @@ namespace CitadelService.Services
 
                 m_logger.Info("Checking for filter list updates.");
 
-                // Stop the threaded timer while we do this. We have to stop it in order to avoid
-                // overlapping calls.
-                this.m_updateCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                m_updateRwLock.EnterWriteLock();
 
                 bool gotUpdatedFilterLists = UpdateListData();
 
@@ -1979,6 +1999,8 @@ namespace CitadelService.Services
                         this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
                     }
                 }
+
+                m_updateRwLock.ExitWriteLock();
 
                 // Handled, so give the user back their normal UI.
                 Status = FilterStatus.Running;
@@ -2089,9 +2111,6 @@ namespace CitadelService.Services
 
                             // Enforce DNS if present.
                             TryEnfornceDns();
-
-                            // Put the new update frequence into effect.
-                            this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
 
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_config.BlacklistedApplications)
@@ -2341,6 +2360,12 @@ namespace CitadelService.Services
                         }
                     }
                 }
+
+                if(m_config != null)
+                {
+                    // Put the new update frequence into effect.
+                    this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                }
             }
             catch(Exception e)
             {
@@ -2458,9 +2483,6 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyTimerExpired(object state)
         {
-            // Disable the expiry timer.
-            m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
             // Enable every category that is a bypass category.
             foreach(var entry in m_generatedCategoriesMap.Values)
             {
@@ -2469,6 +2491,9 @@ namespace CitadelService.Services
                     m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, false);
                 }
             }
+
+            // Disable the expiry timer.
+            m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         /// <summary>
@@ -2480,14 +2505,14 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            // Disable the reset timer.
-            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
             if(m_config != null)
             {
                 m_config.BypassesUsed = 0;
                 m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted, m_config.BypassDuration);
             }
+
+            // Disable the reset timer.
+            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         /// <summary>
@@ -2501,16 +2526,6 @@ namespace CitadelService.Services
         {
             lock(m_dnsEnforcementLock)
             {
-                if(m_dnsEnforcementTimer != null)
-                {
-                    // Cancel anything pending in the timer.
-                    m_dnsEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                }
-                else
-                {
-                    m_dnsEnforcementTimer = new Timer(TryEnfornceDns, null, Timeout.Infinite, Timeout.Infinite);
-                }
-
                 try
                 {
                     IPAddress primaryDns = null;
@@ -2615,7 +2630,14 @@ namespace CitadelService.Services
                     LoggerUtil.RecursivelyLogException(m_logger, e);
                 }
 
-                m_dnsEnforcementTimer.Change(TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
+                if(m_dnsEnforcementTimer == null)
+                {
+                    m_dnsEnforcementTimer = new Timer(TryEnfornceDns, null, Timeout.Infinite, Timeout.Infinite);
+                }
+                else
+                {
+                    m_dnsEnforcementTimer.Change(TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
+                }
             }
         }
 

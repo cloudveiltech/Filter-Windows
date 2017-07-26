@@ -403,10 +403,6 @@
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
       <Name>Citadel.IPC.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CitadelService\CitadelService.csproj">
-      <Project>{ee522e2c-f9fb-41d9-913f-2fea9a374078}</Project>
-      <Name>CitadelService</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
