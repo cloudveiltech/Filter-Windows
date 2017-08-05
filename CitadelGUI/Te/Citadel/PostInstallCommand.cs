@@ -1,7 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.ServiceProcess;
+using System.Threading.Tasks;
 
 namespace Te.Citadel
 {
@@ -28,8 +32,84 @@ namespace Te.Citadel
         {
             base.Commit(savedState);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-            System.Diagnostics.Process.Start(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\CloudVeil.exe");
+            System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
+
+            int sessionId = 0;
+
+            try
+            {
+                sessionId = Process.GetCurrentProcess().SessionId;
+            }
+            catch {
+                sessionId = 0;
+            }
+
+            if(sessionId <= 0)
+            {
+                var filterServiceAssemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FilterServiceProvider.exe");
+
+                var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+                uninstallStartInfo.Arguments = "Uninstall";
+                uninstallStartInfo.UseShellExecute = false;
+                uninstallStartInfo.CreateNoWindow = true;
+                var uninstallProc = Process.Start(uninstallStartInfo);
+                uninstallProc.WaitForExit();
+
+                var installStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+                installStartInfo.Arguments = "Install";
+                installStartInfo.UseShellExecute = false;
+                installStartInfo.CreateNoWindow = true;
+
+                var installProc = Process.Start(installStartInfo);
+                installProc.WaitForExit();
+
+                EnsureStartServicePostInstall(filterServiceAssemblyPath);
+            }
+
             base.Dispose();
+        }
+
+        private void EnsureStartServicePostInstall(string filterServiceAssemblyPath)
+        {
+            // XXX TODO - This is a dirty hack.
+            int tries = 0;
+
+            while(!TryStartService(filterServiceAssemblyPath) && tries < 20)
+            {
+                Task.Delay(200).Wait();
+                ++tries;
+            }
+        }
+
+        private bool TryStartService(string filterServiceAssemblyPath)
+        {
+            try
+            {
+                TimeSpan timeout = TimeSpan.FromSeconds(60);
+
+                foreach(var service in ServiceController.GetServices())
+                {
+                    if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(filterServiceAssemblyPath), StringComparison.OrdinalIgnoreCase) != -1)
+                    {
+                        if(service.Status == ServiceControllerStatus.StartPending)
+                        {
+                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                        }
+
+                        if(service.Status != ServiceControllerStatus.Running)
+                        {
+                            service.Start();
+                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;   
+            }
         }
     }
 }

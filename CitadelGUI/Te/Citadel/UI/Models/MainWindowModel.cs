@@ -25,11 +25,11 @@ namespace Te.Citadel.UI.Models
             m_timer = new Timer(new TimerCallback(OnUpdateTimer), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
         }
 
-        private async void OnUpdateTimer(object state)
+        private void OnUpdateTimer(object state)
         {
             m_timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
-            var result = await WebServiceUtil.GetHasInternetServiceAsync();
+            var result = WebServiceUtil.GetHasInternetServiceAsync();
 
             this.InternetIsConnected = result;
 

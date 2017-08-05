@@ -20,6 +20,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
 
@@ -145,9 +146,16 @@ namespace Citadel.Core.Windows.Util
         private object m_entropyLockObject;
 
         /// <summary>
+        /// Used in the Password property getter to enforce synchronization.
+        /// </summary>
+        private object m_passwordLockObject;
+
+        /// <summary>
         /// Holds an encrypted version of the last password used in a successful auth request. 
         /// </summary>
         private byte[] m_passwordEncrypted;
+
+        private object m_authenticationLock = new object();
 
         /// <summary>
         /// Holds the last username used in a successful auth request. 
@@ -165,26 +173,32 @@ namespace Citadel.Core.Windows.Util
         {
             get
             {
-                // Create a decrypted copy and return it. Should be destroyed ASAP.
-                byte[] plaintext = ProtectedData.Unprotect(m_passwordEncrypted, Entropy, DataProtectionScope.LocalMachine);
-                return plaintext;
+                lock(m_passwordLockObject)
+                {
+                    // Create a decrypted copy and return it. Should be destroyed ASAP.
+                    byte[] plaintext = ProtectedData.Unprotect(m_passwordEncrypted, Entropy, DataProtectionScope.LocalMachine);
+                    return plaintext;
+                }
             }
 
             set
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                if(value == null)
+                lock(m_passwordLockObject)
                 {
-                    throw new ArgumentException("Expected valid password byte array.", nameof(Password));
-                }
+                    if(value == null)
+                    {
+                        throw new ArgumentException("Expected valid password byte array.", nameof(Password));
+                    }
 
-                if(value.Length <= 0)
-                {
-                    throw new ArgumentException("Got empty password byte array. Expect a length greater than zero.", nameof(Password));
-                }
+                    if(value.Length <= 0)
+                    {
+                        throw new ArgumentException("Got empty password byte array. Expect a length greater than zero.", nameof(Password));
+                    }
 
-                m_passwordEncrypted = ProtectedData.Protect(value, Entropy, DataProtectionScope.LocalMachine);
+                    m_passwordEncrypted = ProtectedData.Protect(value, Entropy, DataProtectionScope.LocalMachine);
+                }
 
                 // Clear out the unencrypted password bytes ASAP.
                 Array.Clear(value, 0, value.Length);
@@ -275,7 +289,8 @@ namespace Citadel.Core.Windows.Util
         {
             get
             {
-                return "https://manage.cloudveil.org/citadel";
+                //return "https://manage.cloudveil.org/citadel";
+                return "https://technikempire.com/citadel";
             }
         }
 
@@ -299,30 +314,33 @@ namespace Citadel.Core.Windows.Util
         {
             get
             {
-                if(UserSessionCookies == null || UserSessionCookies.Count <= 0)
+                lock(m_authenticationLock)
                 {
-                    return true;
-                }
-
-                bool retVal = false;
-
-                var allCookies = UserSessionCookies.GetCookies(new Uri(ServiceProviderApiAuthPath)).OfType<Cookie>().ToList();
-                foreach(var cookie in allCookies)
-                {
-                    if(cookie.Expired)
+                    if(UserSessionCookies == null || UserSessionCookies.Count <= 0)
                     {
-                        retVal = true;
-                        break;
+                        return true;
                     }
-                }
 
-                if(retVal)
-                {
-                    // Ensure we remove old junk cookies.
-                    UserSessionCookies = new CookieContainer();
-                }
+                    bool retVal = false;
 
-                return retVal;
+                    var allCookies = UserSessionCookies.GetCookies(new Uri(ServiceProviderApiAuthPath)).OfType<Cookie>().ToList();
+                    foreach(var cookie in allCookies)
+                    {
+                        if(cookie.Expired)
+                        {
+                            retVal = true;
+                            break;
+                        }
+                    }
+
+                    if(retVal)
+                    {
+                        // Ensure we remove old junk cookies.
+                        UserSessionCookies = new CookieContainer();
+                    }
+
+                    return retVal;
+                }
             }
         }
 
@@ -356,6 +374,7 @@ namespace Citadel.Core.Windows.Util
             m_savePath = AppDomain.CurrentDomain.BaseDirectory + "u.dat";
             m_logger = LoggerUtil.GetAppWideLogger();
             m_entropyLockObject = new object();
+            m_passwordLockObject = new object();
         }
 
         /// <summary>
@@ -364,14 +383,14 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// True if a response to the ping was received, false otherwise. 
         /// </returns>
-        public static async Task<bool> GetHasInternetServiceAsync()        {
+        public static bool GetHasInternetServiceAsync()        {
             
             try
             {
                 // We'll ping google's public DNS servers to avoid getting flagged as some sort of bot.
                 Ping googleDnsPing = new Ping();
                 byte[] buffer = new byte[32];
-                PingReply reply = await googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions());
+                PingReply reply = googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions()).Result;
                 return (reply.Status == IPStatus.Success);
             }
             catch { }
@@ -379,13 +398,13 @@ namespace Citadel.Core.Windows.Util
             return false;
         }
 
-        public async Task<AuthenticationResult> Authenticate(string username, byte[] unencryptedPassword)
+        public AuthenticationResult Authenticate(string username, byte[] unencryptedPassword)
         {
             m_logger.Info(nameof(Authenticate));
 
             string csrfDataStr = CSRFToken;
 
-            var apiAuthData = await GetCsfrData();
+            var apiAuthData = GetCsfrData();
 
             csrfDataStr = apiAuthData.Item1;
             var cookies = apiAuthData.Item2;
@@ -407,7 +426,7 @@ namespace Citadel.Core.Windows.Util
             //
 
             // Don't bother if we don't have internet.
-            var hasInternet = await GetHasInternetServiceAsync();
+            var hasInternet = GetHasInternetServiceAsync();
             if(hasInternet == false)
             {
                 return AuthenticationResult.ConnectionFailed;
@@ -463,15 +482,15 @@ namespace Citadel.Core.Windows.Util
                 authRequest.ContentLength = finalPostPayload.Length;
 
                 // Grab the request stream so we can POST our login form data to it.
-                using(var requestStream = await authRequest.GetRequestStreamAsync())
+                using(var requestStream = authRequest.GetRequestStream())
                 {
                     // Write and close.
-                    await requestStream.WriteAsync(finalPostPayload, 0, finalPostPayload.Length);
+                    requestStream.Write(finalPostPayload, 0, finalPostPayload.Length);
                     requestStream.Close();
                 }
 
                 // Now that our login form data has been POST'ed, get a response.
-                using(var response = (HttpWebResponse)await authRequest.GetResponseAsync())
+                using(var response = (HttpWebResponse)authRequest.GetResponse())
                 {
                     // Get the response code as an int so we can range check it.
                     var code = (int)response.StatusCode;
@@ -576,27 +595,32 @@ namespace Citadel.Core.Windows.Util
             return connectionFailure ? AuthenticationResult.ConnectionFailed : AuthenticationResult.Failure;
         }
 
-        public async Task<AuthenticationResult> ReAuthenticate()
+        public AuthenticationResult ReAuthenticate()
         {
             m_logger.Info(nameof(ReAuthenticate));
+
             var user = Username;
             var password = Password;
 
-            try
+            lock(m_authenticationLock)
             {
-                var result = await Authenticate(user, password);
-                return result;
-            }
-            catch(WebException e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-                return AuthenticationResult.ConnectionFailed;
-            }
-            finally
-            {
-                if(password != null)
+                try
                 {
-                    Array.Clear(password, 0, password.Length);
+
+                    var result = Authenticate(user, password);
+                    return result;
+                }
+                catch(WebException e)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                    return AuthenticationResult.ConnectionFailed;
+                }
+                finally
+                {
+                    if(password != null)
+                    {
+                        Array.Clear(password, 0, password.Length);
+                    }
                 }
             }
         }
@@ -640,7 +664,7 @@ namespace Citadel.Core.Windows.Util
             return request;
         }
 
-        private async Task<Tuple<string, CookieContainer>> GetCsfrData()
+        private Tuple<string, CookieContainer> GetCsfrData()
         {
             if(!IsSessionExpired)
             {
@@ -652,7 +676,7 @@ namespace Citadel.Core.Windows.Util
             request.Method = "GET";
 
             // Now that our login form data has been POST'ed, get a response.
-            using(var response = (HttpWebResponse)await request.GetResponseAsync())
+            using(var response = (HttpWebResponse)request.GetResponse())
             {
                 // Get the response code as an int so we can range check it.
                 var code = (int)response.StatusCode;
@@ -721,7 +745,7 @@ namespace Citadel.Core.Windows.Util
             {
                 if(IsSessionExpired)
                 {
-                    var reAuthResult = await ReAuthenticate();
+                    var reAuthResult = ReAuthenticate();
                     if(reAuthResult != AuthenticationResult.Success)
                     {
                         m_logger.Error("In {0}, user session was expired and could not re-auth.", nameof(RequestResource));
@@ -868,7 +892,7 @@ namespace Citadel.Core.Windows.Util
             {
                 if(IsSessionExpired)
                 {
-                    var reAuthResult = await ReAuthenticate();
+                    var reAuthResult = ReAuthenticate();
                     if(reAuthResult != AuthenticationResult.Success)
                     {
                         m_logger.Error("In {0}, user session was expired and could not re-auth.", nameof(SendResource));

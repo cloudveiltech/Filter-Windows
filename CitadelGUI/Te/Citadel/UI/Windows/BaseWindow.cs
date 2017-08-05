@@ -8,6 +8,7 @@
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -21,6 +22,8 @@ namespace Te.Citadel.UI.Windows
         public delegate void OnWindowRestoreRequested();
 
         public event OnWindowRestoreRequested WindowRestoreRequested;
+
+        private ReaderWriterLockSlim m_modalLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Post a yes no question to the user in a dialogue. Caller must ensure that they're calling
@@ -37,13 +40,28 @@ namespace Te.Citadel.UI.Windows
         /// </returns>
         public async Task<bool> AskUserYesNoQuestion(string title, string question)
         {
-            MetroDialogSettings mds = new MetroDialogSettings();
-            mds.AffirmativeButtonText = "Yes";
-            mds.NegativeButtonText = "No";
+            // Why does this work? Because there is only 1 UI thread,
+            // and if not, you've got big problems.
+            if(m_modalLock.IsWriteLockHeld)
+            {
+                return false;
+            }
 
-            var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, mds);
+            try
+            {
+                m_modalLock.EnterWriteLock();
+                MetroDialogSettings mds = new MetroDialogSettings();
+                mds.AffirmativeButtonText = "Yes";
+                mds.NegativeButtonText = "No";
 
-            return userQueryResult == MessageDialogResult.Affirmative;
+                var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, mds);
+
+                return userQueryResult == MessageDialogResult.Affirmative;
+            }
+            finally
+            {
+                m_modalLock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -60,11 +78,27 @@ namespace Te.Citadel.UI.Windows
         /// The text to display in the acceptance button.
         /// </param>
         public void ShowUserMessage(string title, string message, string acceptButtonText = "Ok")
-        {
-            MetroDialogSettings mds = new MetroDialogSettings();
-            mds.AffirmativeButtonText = acceptButtonText;
+        {   
+            // Why does this work? Because there is only 1 UI thread,
+            // and if not, you've got big problems.
+            if(m_modalLock.IsWriteLockHeld)
+            {
+                return;
+            }
 
-            DialogManager.ShowMessageAsync(this, title, message, MessageDialogStyle.Affirmative, mds);
+            try
+            {
+                m_modalLock.EnterWriteLock();
+
+                MetroDialogSettings mds = new MetroDialogSettings();
+                mds.AffirmativeButtonText = acceptButtonText;
+
+                DialogManager.ShowMessageAsync(this, title, message, MessageDialogStyle.Affirmative, mds);
+            }
+            finally
+            {
+                m_modalLock.ExitWriteLock();
+            }
         }
 
         protected override void OnSourceInitialized(EventArgs e)

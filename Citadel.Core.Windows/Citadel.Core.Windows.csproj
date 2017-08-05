@@ -111,6 +111,7 @@
       <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net46\System.Security.Cryptography.X509Certificates.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Text.Encoding.CodePages, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encoding.CodePages.4.3.0\lib\net46\System.Text.Encoding.CodePages.dll</HintPath>
@@ -170,9 +171,10 @@
     <Compile Include="Util\LoggerUtil.cs" />
     <Compile Include="Util\ProcessExecution.cs" />
     <Compile Include="Util\ProcessProtection.cs" />
+    <Compile Include="Util\Update\AppcastUpdater.cs" />
+    <Compile Include="Util\Update\ApplicationUpdate.cs" />
     <Compile Include="Util\WebServiceUtil.cs" />
     <Compile Include="Util\WFPUtility.cs" />
-    <Compile Include="Util\Winsparkle.cs" />
     <Compile Include="WinAPI\SFC.cs" />
     <Compile Include="WinAPI\WindowHelpers.cs" />
     <Compile Include="WinAPI\WindowMessages.cs" />

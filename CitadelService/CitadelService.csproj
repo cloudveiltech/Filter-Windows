@@ -419,14 +419,16 @@
     <EmbeddedResource Include="Services\Warden.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\NLog.config" />
     <EmbeddedResource Include="Resources\ca-cert.pem" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
-      <Project>{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}</Project>
+      <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Citadel.Core.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
@@ -452,8 +454,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y "$(ProjectDir)Lib\HttpFilteringEngine\build\$(ConfigurationName)\*.*" "$(TargetDir)"
-xcopy /Y "$(ProjectDir)Lib\WinSparkle\$(ConfigurationName)\*.*" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /Y "$(ProjectDir)Lib\HttpFilteringEngine\build\$(ConfigurationName)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

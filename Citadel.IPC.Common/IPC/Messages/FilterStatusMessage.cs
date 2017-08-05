@@ -40,24 +40,7 @@ namespace Citadel.IPC.Messages
         /// Means that the filter has disabled all internet, because block action threshold detection
         /// is enabled in the client configuration, and this has been met or exceeded.
         /// </summary>
-        CooldownPeriodEnforced,
-
-        /// <summary>
-        /// Status indicates that the server has initiated the process of shutting down with
-        /// safeguards. This means that the filter has started to shut itself down, but will be
-        /// retaining and enacting its given rights to ensure its own persistence. This will happen
-        /// in every other scenario except for when a proper deactivation and uninstallation process
-        /// is followed. Examples are when a system shutdown is detected, a user logs off, etc.
-        /// </summary>
-        ExitingWithSafeguards,
-
-        /// <summary>
-        /// Status indicates that the server has initiated the process of shutting down without
-        /// safeguards. This means that the filter is relinquishing its rights and power to ensure
-        /// its own persistence. This typically will only ever happen if/when a proper deactivation
-        /// and uninstallation process is followed successfully.
-        /// </summary>
-        ExitingWithoutSafeguards
+        CooldownPeriodEnforced
     }
 
     /// <summary>

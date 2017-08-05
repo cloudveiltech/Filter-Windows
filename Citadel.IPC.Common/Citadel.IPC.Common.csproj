@@ -55,11 +55,14 @@
     <Compile Include="IPC\Messages\BaseMessage.cs" />
     <Compile Include="IPC\Messages\ClientOnlyMessage.cs" />
     <Compile Include="IPC\Messages\ClientToClientMessage.cs" />
+    <Compile Include="IPC\Messages\ClientUpdateResponseMessage.cs" />
     <Compile Include="IPC\Messages\DeactivationMessage.cs" />
     <Compile Include="IPC\Messages\FilterStatusMessage.cs" />
     <Compile Include="IPC\Messages\NotifyBlockActionMessage.cs" />
     <Compile Include="IPC\Messages\RelaxedPolicyMessage.cs" />
     <Compile Include="IPC\Messages\ServerOnlyMessage.cs" />
+    <Compile Include="IPC\Messages\ServerUpdateQueryMessage.cs" />
+    <Compile Include="IPC\Messages\ServerUpdateNotificationMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

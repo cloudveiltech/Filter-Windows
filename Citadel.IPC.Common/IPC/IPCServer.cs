@@ -10,10 +10,7 @@ using Citadel.IPC.Messages;
 using NamedPipeWrapper;
 using NLog;
 using System;
-using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -21,12 +18,12 @@ using System.Security.Principal;
 namespace Citadel.IPC
 {
     /// <summary>
-    /// Arguments for the RelaxPolicyRequestHander delegate.
+    /// Arguments for the RelaxPolicyRequestHander delegate. 
     /// </summary>
     public class RelaxedPolicyEventArgs : EventArgs
     {
         /// <summary>
-        /// The relaxed policy command issued by the client.
+        /// The relaxed policy command issued by the client. 
         /// </summary>
         public RelaxedPolicyCommand Command
         {
@@ -35,10 +32,10 @@ namespace Citadel.IPC
         }
 
         /// <summary>
-        /// Constructs a new RelaxedPolicyEventArgs from the given client message.
+        /// Constructs a new RelaxedPolicyEventArgs from the given client message. 
         /// </summary>
         /// <param name="msg">
-        /// The client message.
+        /// The client message. 
         /// </param>
         public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg)
         {
@@ -50,17 +47,17 @@ namespace Citadel.IPC
     /// Delegate for the handler of client relaxed policy messages. 
     /// </summary>
     /// <param name="args">
-    /// Relaxed policy request arguments.
+    /// Relaxed policy request arguments. 
     /// </param>
     public delegate void RelaxPolicyRequestHander(RelaxedPolicyEventArgs args);
 
     /// <summary>
-    /// Arguments for the DeactivationRequestHandler delegate.
+    /// Arguments for the DeactivationRequestHandler delegate. 
     /// </summary>
     public class DeactivationRequestEventArgs : EventArgs
     {
         /// <summary>
-        /// Whether or not the request was granted. Defaults to false.
+        /// Whether or not the request was granted. Defaults to false. 
         /// </summary>
         public bool Granted
         {
@@ -69,7 +66,7 @@ namespace Citadel.IPC
         } = false;
 
         /// <summary>
-        /// Constructs a new DeactivationRequestEventArgs instance.
+        /// Constructs a new DeactivationRequestEventArgs instance. 
         /// </summary>
         public DeactivationRequestEventArgs()
         {
@@ -80,17 +77,17 @@ namespace Citadel.IPC
     /// Delegate for the handler of client deactivation requests. 
     /// </summary>
     /// <param name="args">
-    /// Deactivation request arguments.
+    /// Deactivation request arguments. 
     /// </param>
     public delegate void DeactivationRequestHandler(DeactivationRequestEventArgs args);
 
     /// <summary>
-    /// Arguments for the AuthenticationRequestHandler delegate.
+    /// Arguments for the AuthenticationRequestHandler delegate. 
     /// </summary>
     public class AuthenticationRequestArgs : EventArgs
     {
         /// <summary>
-        /// The username with which to attempt authentication.
+        /// The username with which to attempt authentication. 
         /// </summary>
         public string Username
         {
@@ -99,7 +96,7 @@ namespace Citadel.IPC
         }
 
         /// <summary>
-        /// The password with which to attempt authentication.
+        /// The password with which to attempt authentication. 
         /// </summary>
         public SecureString Password
         {
@@ -111,7 +108,7 @@ namespace Citadel.IPC
         /// Constructs a new AuthenticationRequestArgs instance from the given client message. 
         /// </summary>
         /// <param name="msg">
-        /// The client authentication message.
+        /// The client authentication message. 
         /// </param>
         public AuthenticationRequestArgs(AuthenticationMessage msg)
         {
@@ -136,14 +133,14 @@ namespace Citadel.IPC
     /// Delegate for the handler of client authentication requests. 
     /// </summary>
     /// <param name="args">
-    /// Authentication request arguments.
+    /// Authentication request arguments. 
     /// </param>
     public delegate void AuthenticationRequestHandler(AuthenticationRequestArgs args);
 
     /// <summary>
-    /// Delegate for the handler of client connection and disconnection.
+    /// Generic void, parameterless delegate.
     /// </summary>
-    public delegate void ClientConnectDisconnectHandler();
+    public delegate void ServerGenericParameterlessHandler();
 
     /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
@@ -151,44 +148,49 @@ namespace Citadel.IPC
     /// </summary>
     public class IPCServer : IDisposable
     {
-
         /// <summary>
-        /// Actual named pipe server wrapper.
+        /// Actual named pipe server wrapper. 
         /// </summary>
         private NamedPipeServer<BaseMessage> m_server;
 
         /// <summary>
-        /// Delegate to be called when a client requests a relaxed policy.
+        /// Delegate to be called when a client requests a relaxed policy. 
         /// </summary>
         public RelaxPolicyRequestHander RelaxedPolicyRequested;
 
         /// <summary>
-        /// Delegate to be called when a client requests filter deactivation.
+        /// Delegate to be called when a client requests filter deactivation. 
         /// </summary>
         public DeactivationRequestHandler DeactivationRequested;
 
         /// <summary>
-        /// Delegate to be called when a client attempts to authenticate.
+        /// Delegate to be called when a client attempts to authenticate. 
         /// </summary>
         public AuthenticationRequestHandler AttemptAuthentication;
 
         /// <summary>
-        /// Delegate to be called when a client connects.
+        /// Delegate to be called when a client connects. 
         /// </summary>
-        public ClientConnectDisconnectHandler ClientConnected;
+        public ServerGenericParameterlessHandler ClientConnected;
 
         /// <summary>
-        /// Delegate to be called when a client disconnects.
+        /// Delegate to be called when a client disconnects. 
         /// </summary>
-        public ClientConnectDisconnectHandler ClientDisconnected;
+        public ServerGenericParameterlessHandler ClientDisconnected;
 
         /// <summary>
-        /// Delegate to be called when a client is querying the state of the filter.
+        /// Delegate to be called when a client is querying the state of the filter. 
         /// </summary>
         public StateChangeHandler ClientServerStateQueried;
 
         /// <summary>
-        /// Our logger.
+        /// Delegate to be called when a client has responded accepting a pending
+        /// application update.
+        /// </summary>
+        public ServerGenericParameterlessHandler ClientAcceptedPendingUpdate;
+
+        /// <summary>
+        /// Our logger. 
         /// </summary>
         private readonly Logger m_logger;
 
@@ -202,8 +204,7 @@ namespace Citadel.IPC
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerPrint.Value).ToLower();
 
-            // Not necessary. Leaving in case.
-            // var security = GetSecurityForChannel();
+            // Not necessary. Leaving in case. var security = GetSecurityForChannel();
 
             m_server = new NamedPipeServer<BaseMessage>(channel);//, security);
 
@@ -219,12 +220,12 @@ namespace Citadel.IPC
         }
 
         private void M_server_Error(Exception exception)
-        {   
+        {
             LoggerUtil.RecursivelyLogException(m_logger, exception);
         }
 
         private void OnClientConnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
-        {   
+        {
             m_logger.Debug("Client connected.");
             ClientConnected?.Invoke();
         }
@@ -240,10 +241,10 @@ namespace Citadel.IPC
         /// Handles a received client message. 
         /// </summary>
         /// <param name="connection">
-        /// The connection over which the message was received.
+        /// The connection over which the message was received. 
         /// </param>
         /// <param name="message">
-        /// The client's message to us.
+        /// The client's message to us. 
         /// </param>
         private void OnClientMessage(NamedPipeConnection<BaseMessage, BaseMessage> connection, BaseMessage message)
         {
@@ -286,8 +287,6 @@ namespace Citadel.IPC
 
                 if(cast != null && cast.Command == DeactivationCommand.Requested)
                 {
-                    
-
                     var args = new DeactivationRequestEventArgs();
                     DeactivationRequested?.Invoke(args);
 
@@ -315,8 +314,6 @@ namespace Citadel.IPC
 
                 if(cast != null)
                 {
-                    
-
                     var args = new RelaxedPolicyEventArgs(cast);
                     RelaxedPolicyRequested?.Invoke(args);
                 }
@@ -329,8 +326,6 @@ namespace Citadel.IPC
 
                 if(cast != null)
                 {
-                    
-
                     // Just relay this message to all clients.
                     PushMessage(cast);
                 }
@@ -344,6 +339,21 @@ namespace Citadel.IPC
                 if(cast != null)
                 {
                     ClientServerStateQueried?.Invoke(new StateChangeEventArgs(cast));
+                }
+            }
+            else if(msgRealType == typeof(Messages.ClientUpdateResponseMessage))
+            {
+                m_logger.Debug("Client message is {0}", nameof(Messages.ClientUpdateResponseMessage));
+
+                var cast = (Messages.ClientUpdateResponseMessage)message;
+
+                if(cast != null)
+                {
+                    if(cast.Accepted)
+                    {
+                        m_logger.Debug("Client has accepted update.");
+                        ClientAcceptedPendingUpdate?.Invoke();
+                    }                    
                 }
             }
             else
@@ -375,7 +385,7 @@ namespace Citadel.IPC
         /// The status to send to all clients. 
         /// </param>
         public void NotifyStatus(FilterStatus status)
-        {   
+        {
             var msg = new FilterStatusMessage(status);
             PushMessage(msg);
         }
@@ -411,11 +421,31 @@ namespace Citadel.IPC
         /// Notifies clients of the current authentication state. 
         /// </summary>
         /// <param name="action">
-        /// The authentication command which reflects the current auth state.
+        /// The authentication command which reflects the current auth state. 
         /// </param>
         public void NotifyAuthenticationStatus(AuthenticationAction action)
         {
             var msg = new AuthenticationMessage(action);
+            PushMessage(msg);
+        }
+
+        /// <summary>
+        /// Notifies all clients of an available update. 
+        /// </summary>
+        /// <param name="message">
+        /// The update message.
+        /// </param>
+        public void NotifyApplicationUpdateAvailable(ServerUpdateQueryMessage message)
+        {
+            PushMessage(message);
+        }
+
+        /// <summary>
+        /// Notifies all clients that the server is updating itself.
+        /// </summary>
+        public void NotifyUpdating()
+        {
+            var msg = new ServerUpdateNotificationMessage();
             PushMessage(msg);
         }
 
@@ -444,10 +474,8 @@ namespace Citadel.IPC
         {
             PipeSecurity pipeSecurity = new PipeSecurity();
 
-
             var permissions = PipeAccessRights.CreateNewInstance | PipeAccessRights.Read | PipeAccessRights.Synchronize | PipeAccessRights.Write;
-            
-            
+
             /*
             ps.AddAccessRule(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
             ps.AddAccessRule(new PipeAccessRule("SYSTEM", PipeAccessRights.FullControl, AccessControlType.Allow));
@@ -462,7 +490,6 @@ namespace Citadel.IPC
             ps.AddAccessRule(pa);
             */
 
-            
             var everyoneSid = new SecurityIdentifier(System.Security.Principal.WellKnownSidType.WorldSid, null);
             var everyoneAcct = everyoneSid.Translate(typeof(NTAccount));
 
@@ -470,7 +497,6 @@ namespace Citadel.IPC
             pipeSecurity.AddAccessRule(par);
             pipeSecurity.SetAccessRule(par);
 
-            
             var authUsersSid = new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null);
             var authUsersAcct = authUsersSid.Translate(typeof(NTAccount));
 
@@ -492,7 +518,6 @@ namespace Citadel.IPC
                 new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
                 PipeAccessRights.FullControl, AccessControlType.Allow));
             */
-
 
             /*
             // XXX TODO - We MIGHT want to tighten this up later. However, we want to ensure that
@@ -528,7 +553,8 @@ namespace Citadel.IPC
             */
         }
 
-#region IDisposable Support
+        #region IDisposable Support
+
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -555,20 +581,18 @@ namespace Citadel.IPC
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~IPCServer() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free
+        //       unmanaged resources. ~IPCServer() { // Do not change this code. Put cleanup code in
+        // Dispose(bool disposing) above. Dispose(false); }
 
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            // TODO: uncomment the following line if the finalizer is overridden above. GC.SuppressFinalize(this);
         }
-#endregion
+
+        #endregion IDisposable Support
     }
 }

@@ -20,12 +20,7 @@ using System.Threading.Tasks;
 
 
 namespace Citadel.IPC
-{
-
-    public delegate void ConnectToServerHandler();
-
-    public delegate void DisconnectedFromServerHandler();
-
+{   
     public class StateChangeEventArgs : EventArgs
     {
         public FilterStatus State
@@ -55,18 +50,20 @@ namespace Citadel.IPC
 
     public delegate void BlockActionReportHandler(NotifyBlockActionMessage msg);
 
-    public delegate void RelaxedPolicyExpirationHandler();
-
     public delegate void RelaxedPolicyInfoReceivedHandler(RelaxedPolicyMessage msg);
+
+    public delegate void ClientGenericParameterlessHandler();
+
+    public delegate void ServerUpdateRequestHandler(ServerUpdateQueryMessage msg);
 
     public class IPCClient : IDisposable
     {
 
         private NamedPipeClient<BaseMessage> m_client;
 
-        public ConnectToServerHandler ConnectedToServer;
+        public ClientGenericParameterlessHandler ConnectedToServer;
 
-        public DisconnectedFromServerHandler DisconnectedFromServer;
+        public ClientGenericParameterlessHandler DisconnectedFromServer;
 
         public StateChangeHandler StateChanged;
 
@@ -76,11 +73,15 @@ namespace Citadel.IPC
 
         public BlockActionReportHandler BlockActionReceived;
 
-        public RelaxedPolicyExpirationHandler RelaxedPolicyExpired;
+        public ClientGenericParameterlessHandler RelaxedPolicyExpired;
 
         public RelaxedPolicyInfoReceivedHandler RelaxedPolicyInfoReceived;
 
         public ClientToClientMessageHandler ClientToClientCommandReceived;
+
+        public ServerUpdateRequestHandler ServerAppUpdateRequestReceived;
+
+        public ClientGenericParameterlessHandler ServerUpdateStarting;
 
         /// <summary>
         /// Our logger.
@@ -204,6 +205,24 @@ namespace Citadel.IPC
                     ClientToClientCommandReceived?.Invoke(cast);
                 }
             }
+            else if(msgRealType == typeof(Messages.ServerUpdateQueryMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateQueryMessage));
+                var cast = (Messages.ServerUpdateQueryMessage)message;
+                if(cast != null)
+                {
+                    ServerAppUpdateRequestReceived?.Invoke(cast);
+                }
+            }
+            else if(msgRealType == typeof(Messages.ServerUpdateNotificationMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateNotificationMessage));
+                var cast = (Messages.ServerUpdateNotificationMessage)message;
+                if(cast != null)
+                {
+                    ServerUpdateStarting?.Invoke();
+                }
+            }
             else
             {
                 // Unknown type.
@@ -217,27 +236,6 @@ namespace Citadel.IPC
         {
             var msg = new DeactivationMessage(DeactivationCommand.Requested);
             PushMessage(msg);
-        }
-
-        private void PushMessage(BaseMessage msg)
-        {
-#if CLIFTON
-            var bf = new BinaryFormatter();
-            using(var ms = new MemoryStream())
-            {
-                bf.Serialize(ms, msg);
-                m_client.WriteBytes(ms.ToArray()).Wait();
-                m_client.Flush();
-            }
-#else
-            var bf = new BinaryFormatter();
-            using(var ms = new MemoryStream())
-            {
-                bf.Serialize(ms, msg);
-            }
-
-            m_client.PushMessage(msg);
-#endif
         }
 
         /// <summary>
@@ -281,6 +279,23 @@ namespace Citadel.IPC
         {
             var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Relinquished);
             PushMessage(msg);
+        }
+
+        public void NotifyAcceptUpdateRequest()
+        {
+            var msg = new ClientUpdateResponseMessage(true);
+            PushMessage(msg);
+        }
+
+        private void PushMessage(BaseMessage msg)
+        {
+            var bf = new BinaryFormatter();
+            using(var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, msg);
+            }
+
+            m_client.PushMessage(msg);
         }
 
         #region IDisposable Support

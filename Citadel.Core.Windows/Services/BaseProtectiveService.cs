@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Jesse Nicholson
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -8,15 +8,13 @@
 using Citadel.Core.Windows.Util;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.ServiceProcess;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Te.Citadel.Services
 {
@@ -48,21 +46,33 @@ namespace Te.Citadel.Services
 
         private Process m_processHandle = null;
 
+        private string m_mutexName = string.Empty;
+
+        private static readonly HashSet<char> s_toRemoveFromPath = new HashSet<char>
+        {
+            Path.DirectorySeparatorChar,
+            Path.AltDirectorySeparatorChar,
+            Path.PathSeparator,
+            ':'
+        };
+
         /// <summary>
         /// Creates a new instance of a base process protecting service with the name of another
         /// process we are responsible for watching and keeping alive.
         /// </summary>
         /// <param name="processNameToObserve">
-        /// The name of the process we are to observe and protect.
+        /// The name of the process we are to observe and protect. 
         /// </param>
         /// <param name="isService">
-        /// Whether or not the process we are protecting is a service.
+        /// Whether or not the process we are protecting is a service. 
         /// </param>
         public BaseProtectiveService(string processNameToObserve, bool isService)
         {
             m_processToWatch = processNameToObserve;
-            m_baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            m_processBinaryAbsPath = string.Format("{0}{1}.exe", m_baseDirectory, processNameToObserve);
+            m_baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(BaseProtectiveService)).Location);
+            m_processBinaryAbsPath = Path.Combine(m_baseDirectory, string.Format("{0}.exe", processNameToObserve));
+
+            m_mutexName = string.Join("", m_processBinaryAbsPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
 
             m_isTargetService = isService;
 
@@ -72,7 +82,7 @@ namespace Te.Citadel.Services
         private void EnsureAlreadyRunning()
         {
             foreach(var proc in Process.GetProcesses())
-            {   
+            {
                 if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase))
                 {
                     // Found the process already alive. Return and do nothing.
@@ -82,7 +92,7 @@ namespace Te.Citadel.Services
             }
 
             // Didn't find the process alive. Start it.
-            Resuscitate();
+            InfinitelyStartAwaitTarget();
         }
 
         private void SetProcessHandle(Process proc)
@@ -101,6 +111,21 @@ namespace Te.Citadel.Services
             m_processHandle.Exited += OnProcExit;
         }
 
+        private async void InfinitelyStartAwaitTarget()
+        {
+            int numTries = 0;
+            while(Resuscitate() == false && numTries < 60)
+            {
+                await Task.Delay(1000);
+                ++numTries;
+            }
+
+            if(numTries >= 60)
+            {
+                Shutdown(ExitCodes.ShutdownCriticalError);
+            }
+        }
+
         private void OnProcExit(object sender, EventArgs e)
         {
             var exitCode = -1;
@@ -109,9 +134,9 @@ namespace Te.Citadel.Services
                 exitCode = m_processHandle.ExitCode;
             }
 
-            if(exitCode < (int)ExitCodes.ShutdownWithSafeguards || exitCode >= int.MaxValue || exitCode > (int)ExitCodes.ShutdownWithoutSafeguards)
+            if(exitCode < (int)ExitCodes.ShutdownWithSafeguards)
             {
-                Resuscitate();
+                InfinitelyStartAwaitTarget();
             }
             else
             {
@@ -119,114 +144,128 @@ namespace Te.Citadel.Services
             }
         }
 
-        protected virtual void Resuscitate()
+        protected virtual bool Resuscitate()
         {
-            // No try/catch here beacuse we want the service to die
-            // if something goes wrong. This way, whoever is watching
-            // THIS service, if any, will see the improper shutdown
-            // and recreate and restart it.
-            if(File.Exists(m_processBinaryAbsPath))
+            bool success = false;
+
+            bool createdNew = true;
+            var mutex = new Mutex(true, string.Format(@"Global\{0}", m_mutexName), out createdNew);
+
+            try
             {
-                bool createdNew = true;
-                var mutex = new Mutex(true, string.Format(@"Global\{0}", m_processBinaryAbsPath.Replace("\\", "").Replace(" ", "")), out createdNew);
-
-                if(createdNew)
+                if(File.Exists(m_processBinaryAbsPath))
                 {
-                    switch(m_isTargetService)
+                    if(createdNew)
                     {
-                        case true:
+                        switch(m_isTargetService)
                         {
-                            var uninstallStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                            uninstallStartInfo.Arguments = "Uninstall";
-                            uninstallStartInfo.UseShellExecute = false;
-                            uninstallStartInfo.CreateNoWindow = true;
-                            var uninstallProc = Process.Start(uninstallStartInfo);
-                            if(!uninstallProc.WaitForExit(200))
+                            case true:
                             {
-                                uninstallProc.Kill();
-                            }
+                                var uninstallStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                uninstallStartInfo.Arguments = "Uninstall";
+                                uninstallStartInfo.UseShellExecute = false;
+                                uninstallStartInfo.CreateNoWindow = true;
+                                var uninstallProc = Process.Start(uninstallStartInfo);
+                                uninstallProc.WaitForExit();
 
-                            var installStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                            installStartInfo.Arguments = "Install";
-                            installStartInfo.UseShellExecute = false;
-                            installStartInfo.CreateNoWindow = true;
+                                var installStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                installStartInfo.Arguments = "Install";
+                                installStartInfo.UseShellExecute = false;
+                                installStartInfo.CreateNoWindow = true;
 
-                            var installProc = Process.Start(installStartInfo);
-                            if(!installProc.WaitForExit(200))
-                            {
-                                installProc.Kill();
-                            }
+                                var installProc = Process.Start(installStartInfo);
+                                installProc.WaitForExit();
 
-                            TimeSpan timeout = TimeSpan.FromSeconds(60);
+                                TimeSpan timeout = TimeSpan.FromSeconds(60);
 
-                            foreach(var service in ServiceController.GetServices())
-                            {
-                                if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(m_processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
-                                {   
-                                    if(service.Status == ServiceControllerStatus.StartPending)
-                                    {
-                                        service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-                                    }
-
-                                    if(service.Status != ServiceControllerStatus.Running)
-                                    {
-                                        service.Start();
-                                        service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
-                        case false:
-                        {
-                            try
-                            {
-                                var startInfo = new ProcessStartInfo(m_processBinaryAbsPath);
-                                startInfo.LoadUserProfile = true;
-                                startInfo.UseShellExecute = false;
-                                startInfo.CreateNoWindow = false;
-                                startInfo.Verb = "runas";
-                                Process.Start(startInfo);
-                                //Process.Start(string.Format("{0}", m_processBinaryAbsPath));
-                                //ProcessExecution.StartProcessAsCurrentUser(null, m_processBinaryAbsPath, null, true);
-                            }
-                            catch(Exception e)
-                            {
-                                var sb = new StringBuilder();
-
-                                while(e != null)
+                                foreach(var service in ServiceController.GetServices())
                                 {
-                                    sb.Append(e.Message);
-                                    sb.Append(e.StackTrace);
-                                    e = e.InnerException;
+                                    if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(m_processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
+                                    {
+                                        if(service.Status == ServiceControllerStatus.StartPending)
+                                        {
+                                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                        }
+
+                                        if(service.Status != ServiceControllerStatus.Running)
+                                        {
+                                            service.Start();
+                                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                        }
+                                    }
                                 }
 
-                                File.WriteAllText(@"C:\CloudVeil.log", sb.ToString());
+                                success = true;
                             }
+                            break;
 
+                            case false:
+                            {
+                                try
+                                {
+                                    var startInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                    startInfo.LoadUserProfile = true;
+                                    startInfo.UseShellExecute = false;
+                                    startInfo.CreateNoWindow = false;
+                                    startInfo.Verb = "runas";
+                                    Process.Start(startInfo);
+
+                                    return true;
+                                }
+                                catch(Exception e)
+                                {
+                                    var sb = new StringBuilder();
+
+                                    while(e != null)
+                                    {
+                                        sb.Append(e.Message);
+                                        sb.Append(e.StackTrace);
+                                        e = e.InnerException;
+                                    }
+
+                                    success = false;
+                                }
+                            }
+                            break;
                         }
-                        break;
+                    }
+                    else
+                    {
+                        // Someone else is trying to save our process.
+                        success = false;
                     }
                 }
-                else
+            }
+            catch(Exception e)
+            {
+                success = false;
+            }
+
+            if(mutex != null)
+            {
+                if(createdNew)
                 {
-                    // Someone else is trying to save our process. Give it a second
-                    // before we try to grab a new watch handle to it.
-                    Task.Delay(1000).Wait();
+                    mutex.ReleaseMutex();
                 }
 
+                mutex.Dispose();
+            }
+
+            if(success == true)
+            {
                 foreach(var proc in Process.GetProcesses())
                 {
                     if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase))
-                    {   
+                    {
                         SetProcessHandle(proc);
                         break;
                     }
                 }
             }
+
+            return success;
         }
-        
+
         /// <summary>
         /// This will be called when the base class has determined that the function of this object
         /// is fundamentally over.

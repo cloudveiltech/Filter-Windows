@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using CitadelService.Services;
-using Topshelf;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
 using Citadel.Core.Windows.Util;
+using CitadelService.Services;
+using System;
+using System.Threading;
+using Topshelf;
 
 namespace CitadelService
 {
-    class Program
+    internal class Program
     {
         private static Mutex InstanceMutex;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -47,9 +50,9 @@ namespace CitadelService
 
                     x.RunAsLocalSystem();
 
-                    // We don't need recovery options, because there will be multiple
-                    // services all watching eachother that will all record eachother
-                    // in the event of a failure or forced termination.
+                    // We don't need recovery options, because there will be multiple services all
+                    // watching eachother that will all record eachother in the event of a failure or
+                    // forced termination.
                     /*
                     //http://docs.topshelf-project.com/en/latest/configuration/config_api.html#id1
                     x.EnableServiceRecovery(rc =>
@@ -57,21 +60,26 @@ namespace CitadelService
                         rc.OnCrashOnly();
                         rc.RestartService(0);
                         rc.RestartService(0);
-                        rc.RestartService(0);                        
+                        rc.RestartService(0);
                     });
                     */
                 });
+
+                InstanceMutex.ReleaseMutex();
             }
             else
             {
                 Console.WriteLine("Service already running. Exiting.");
 
-                // We have to exit with a safe code so that if another
-                // monitor is running, it won't see this process end
-                // and then panic and try to restart it when it's already
-                // running!
-                
+                // We have to exit with a safe code so that if another monitor is running, it won't
+                // see this process end and then panic and try to restart it when it's already running!
+
                 Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
+            }
+
+            if(InstanceMutex != null)
+            {
+                InstanceMutex.Dispose();
             }
         }
     }

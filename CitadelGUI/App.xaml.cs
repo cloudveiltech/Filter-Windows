@@ -9,6 +9,7 @@ using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
+using Microsoft.Win32;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -125,40 +127,7 @@ namespace Te.Citadel
         #endregion Views
 
         /// <summary>
-        /// Gets whether or not a startup task exists for this application. 
-        /// </summary>
-        /// <returns>
-        /// True if a startup task exists for this application, false otherwise. 
-        /// </returns>
-        public bool CheckIfStartupTaskExists()
-        {
-            try
-            {
-                m_runAtStartupLock.EnterReadLock();
-
-                using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
-                {
-                    var t = ts.GetTask(Process.GetCurrentProcess().ProcessName);
-                    if(t == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-            finally
-            {
-                m_runAtStartupLock.ExitReadLock();
-            }
-        }
-
-        /// <summary>
-        /// Forces the installation of a startup task for this application, removing any existing
-        /// task scheduler entries for this application before doing so. The task is installed to run
-        /// with maximum priority, and to have task scheduler simply fire and forget, rather than
-        /// monitoring the task and restarting it, or setting the task run duration and such. The
-        /// task is simply set to run indefinitely at maximum priority at user login.
+        /// Makes this app run at startup for the current user.
         /// </summary>
         public void EnsureStarupTaskExists()
         {
@@ -166,50 +135,14 @@ namespace Te.Citadel
             {
                 m_runAtStartupLock.EnterWriteLock();
 
-                using(var ts = new Microsoft.Win32.TaskScheduler.TaskService())
+                using(var rk = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
                 {
-                    // Start off by deleting existing tasks always.
-                    ts.RootFolder.DeleteTask(Process.GetCurrentProcess().ProcessName, false);
-
-                    // Create a new task definition and assign properties
-                    using(var td = ts.NewTask())
-                    {
-                        td.Principal.RunLevel = Microsoft.Win32.TaskScheduler.TaskRunLevel.Highest;
-                        td.Principal.UserId = WindowsIdentity.GetCurrent().Name;
-                        td.Principal.LogonType = Microsoft.Win32.TaskScheduler.TaskLogonType.InteractiveToken;
-
-                        td.Settings.Priority = ProcessPriorityClass.RealTime;
-                        td.Settings.DisallowStartIfOnBatteries = false;
-                        td.Settings.StopIfGoingOnBatteries = false;
-                        td.Settings.WakeToRun = false;
-                        td.Settings.AllowDemandStart = false;
-                        td.Settings.IdleSettings.RestartOnIdle = false;
-                        td.Settings.IdleSettings.StopOnIdleEnd = false;
-                        td.Settings.RestartCount = 0;
-                        td.Settings.AllowHardTerminate = false;
-                        //td.Settings.RunOnlyIfLoggedOn = true;
-                        td.Settings.Hidden = true;
-                        td.Settings.Volatile = false;
-                        td.Settings.Enabled = true;
-                        td.Settings.Compatibility = Microsoft.Win32.TaskScheduler.TaskCompatibility.V2;
-                        td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
-
-                        td.RegistrationInfo.Description = "Runs the content filter at startup.";
-
-                        // Create a trigger that will fire the task at this time every other day
-                        var logonTrigger = new Microsoft.Win32.TaskScheduler.LogonTrigger();
-                        logonTrigger.Enabled = true;
-                        logonTrigger.Repetition.StopAtDurationEnd = false;
-                        logonTrigger.ExecutionTimeLimit = TimeSpan.Zero;
-                        td.Triggers.Add(logonTrigger);
-
-                        // Create an action that will launch Notepad whenever the trigger fires
-                        td.Actions.Add(new Microsoft.Win32.TaskScheduler.ExecAction(Process.GetCurrentProcess().MainModule.FileName, "/StartMinimized", null));
-
-                        // Register the task in the root folder
-                        ts.RootFolder.RegisterTaskDefinition(Process.GetCurrentProcess().ProcessName, td, Microsoft.Win32.TaskScheduler.TaskCreation.CreateOrUpdate, WindowsIdentity.GetCurrent().Name, null, Microsoft.Win32.TaskScheduler.TaskLogonType.InteractiveToken);
-                    }
+                    rk.SetValue(Process.GetCurrentProcess().ProcessName, Assembly.GetEntryAssembly().Location);
                 }
+            }
+            catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
             finally
             {
@@ -236,7 +169,7 @@ namespace Te.Citadel
         {
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;
-
+            
             // Hook app exiting function. This must be done on this main app thread.            
             this.Exit += OnApplicationExiting;
 
@@ -280,6 +213,35 @@ namespace Te.Citadel
                         }
                         break;
                     }
+                };
+
+                m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
+                {
+                    BringAppToFocus();
+
+                    var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
+
+                    await Current.Dispatcher.BeginInvoke(
+                        System.Windows.Threading.DispatcherPriority.Normal,
+                        (Action) async delegate ()
+                        {
+                            if(m_mainWindow != null)
+                            {   
+                                var result = await m_mainWindow.AskUserYesNoQuestion("Update Available", updateAvailableString);
+
+                                if(result)
+                                {
+                                    m_ipcClient.NotifyAcceptUpdateRequest();
+
+                                    m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
+                                }
+                            }
+                        });
+                };
+
+                m_ipcClient.ServerUpdateStarting = () =>
+                {   
+                    Application.Current.Shutdown(ExitCodes.ShutdownForUpdate);
                 };
 
                 m_ipcClient.DeactivationResultReceived = (granted) =>
@@ -398,35 +360,8 @@ namespace Te.Citadel
                         }
                         break;
 
-                        case FilterStatus.ExitingWithoutSafeguards:
-                        {
-                            m_logger.Info("Client shutdown without safeguards command received.");
-                            m_ipcClient.Dispose();
-
-                            Dispatcher.BeginInvoke((Action)delegate ()
-                            {
-                                Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
-                            });
-                            
-                        }
-                        break;
-
-                        case FilterStatus.ExitingWithSafeguards:
-                        {
-                            m_logger.Info("Client shutdown with safeguards command received.");
-                            m_ipcClient.Dispose();
-
-                            Dispatcher.BeginInvoke((Action)delegate ()
-                            {
-                                Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
-                            });
-                        }
-                        break;
-
                         case FilterStatus.Running:
                         {
-                            BringAppToFocus();
-
                             OnViewChangeRequest(typeof(DashboardView));
 
                             // Change UI state of dashboard to not show disabled message anymore. If
@@ -479,18 +414,34 @@ namespace Te.Citadel
             m_backgroundInitWorker.RunWorkerAsync(e);
         }
 
+        private void ScheduleAppRestart(int secondDelay = 30)
+        {
+            m_logger.Info("Scheduling GUI restart {0} seconds from now.", secondDelay);
+
+            var executingProcess = Process.GetCurrentProcess().MainModule.FileName;
+
+            ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
+            updaterStartupInfo.FileName = "cmd.exe";
+            updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", secondDelay, executingProcess);
+            updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            updaterStartupInfo.CreateNoWindow = true;
+            Process.Start(updaterStartupInfo);
+        }
+
         private void OnAppSessionEnding(object sender, SessionEndingCancelEventArgs e)
         {
             m_logger.Info("Session ending.");
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             ProcessProtection.Unprotect();
-
-            m_ipcClient.Dispose();
+            
             Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
                 Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
             });
+
+            // Does this cause a hand up??
+            // m_ipcClient.Dispose();
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -557,18 +508,6 @@ namespace Te.Citadel
             // Setup our tray icon.
             InitTrayIcon();
 
-            // XXX FIXME Force start our cascade of protective processes.
-            /*
-            try
-            {
-                ServiceSpawner.Instance.InitializeServices();
-            }
-            catch(Exception se)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, se);
-            }
-            */
-
             var startupArgs = e.Argument as StartupEventArgs;
 
             if(startupArgs != null)
@@ -621,12 +560,17 @@ namespace Te.Citadel
                 }
                 else
                 {
-                    // Enforce that our error code is set according to our own understanding.
-                    // Anything less than 100 will indicate that the application was not terminated correctly.
-                    e.ApplicationExitCode = (int)ExitCodes.ShutdownWithoutSafeguards;
-
                     // Unless explicitly told not to, always use safeguards.
                     DoCleanShutdown(true);
+                }
+
+                if(e.ApplicationExitCode == (int)ExitCodes.ShutdownForUpdate)
+                {
+                    // Give us a nice long minute to restart.
+                    // If the user restarts us manually in the meantime who cares
+                    // we have a global mutex preventing multiple instance
+                    // and this scheduled startup will just not run.
+                    ScheduleAppRestart();
                 }
             }
             catch(Exception err)
@@ -697,6 +641,8 @@ namespace Te.Citadel
                     {
                         this.m_mainWindow.Show();
                         this.m_mainWindow.WindowState = WindowState.Normal;
+                        this.m_mainWindow.Topmost = true;
+                        this.m_mainWindow.Topmost = false;
                     }
 
                     if(m_trayIcon != null)

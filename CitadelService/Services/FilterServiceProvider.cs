@@ -8,6 +8,7 @@
 using Citadel.Core.Extensions;
 using Citadel.Core.WinAPI;
 using Citadel.Core.Windows.Util;
+using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using CitadelService.Data.Filtering;
@@ -29,6 +30,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Management;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Security;
@@ -77,8 +79,6 @@ namespace CitadelService.Services
         }
 
         #endregion Windows Service API
-
-        #region APP_UPDATE_MEMBER_VARS
 
         private FilterStatus Status
         {
@@ -155,24 +155,7 @@ namespace CitadelService.Services
         /// The number of IPC clients connected to this server. 
         /// </summary>
         private int m_connectedClients = 0;
-
-        /// <summary>
-        /// Delegate we supply to the WinSparkle DLL, which it will use to check with us if a
-        /// shutdown is okay. We can reply yes or no to this request. If we reply yes, then
-        /// WinSparkle will make an official shutdown request, allowing us to cleanly shutdown before
-        /// getting updated.
-        /// </summary>
-        private WinSparkle.WinSparkleCanShutdownCheckCallback m_winsparkleShutdownCheckCb;
-
-        /// <summary>
-        /// Delegate we supply to the WinSparkle DLL, which if we've given permission, means that
-        /// when WinSparkle invokes this method, we are to cleanly shutdown so that WinSparkle can
-        /// complete an application update.
-        /// </summary>
-        private WinSparkle.WinSparkleRequestShutdownCallback m_winsparkleShutdownRequestCb;
-
-        #endregion APP_UPDATE_MEMBER_VARS
-
+        
         #region FilteringEngineVars
 
         /// <summary>
@@ -319,6 +302,12 @@ namespace CitadelService.Services
         /// </summary>
         private object m_dnsEnforcementLock = new object();
 
+        private AppcastUpdater m_updater = null;
+
+        private ApplicationUpdate m_lastFetchedUpdate = null;
+
+        private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
+
         /// <summary>
         /// Default ctor. 
         /// </summary>
@@ -340,31 +329,100 @@ namespace CitadelService.Services
 
             try
             {
+                var bitVersionUri = string.Empty;
+                if(Environment.Is64BitProcess)
+                {
+                    bitVersionUri = "/update/winx64/update.xml";
+                }
+                else
+                {
+                    bitVersionUri = "/update/winx86/update.xml";
+                }
+
+                var appUpdateInfoUrl = string.Format("{0}/{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
+
+                m_logger.Info("Checking for application updates at {0}.", appUpdateInfoUrl);
+
+                m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
+            }
+            catch(Exception e)
+            {
+                // This is a critical error. We cannot recover from this.
+                m_logger.Error("Critical error - Could not create application updater.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+
+                Environment.Exit(-1);
+            }
+
+            try
+            {
                 m_ipcServer = new IPCServer();
 
-                m_ipcServer.AttemptAuthentication = async (args) =>
+                m_ipcServer.AttemptAuthentication = (args) =>
                 {
-                    await ChallengeUserAuthenticity(args.Username, args.Password);
+                    ChallengeUserAuthenticity(args.Username, args.Password);
+                };
+
+                m_ipcServer.ClientAcceptedPendingUpdate = () =>
+                {
+                    try
+                    {
+                        m_appcastUpdaterLock.EnterWriteLock();
+
+                        if(m_lastFetchedUpdate != null)
+                        {
+                            m_lastFetchedUpdate.DownloadUpdate().Wait();
+
+                            m_ipcServer.NotifyUpdating();
+                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();                            
+                            Task.Delay(200).Wait();
+
+                            m_logger.Info("Shutting down to update.");
+
+                            if(m_appcastUpdaterLock.IsWriteLockHeld)
+                            {
+                                m_appcastUpdaterLock.ExitWriteLock();
+                            }
+
+                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+                    finally
+                    {
+                        if(m_appcastUpdaterLock.IsWriteLockHeld)
+                        {
+                            m_appcastUpdaterLock.ExitWriteLock();
+                        }
+                    }
+                    
                 };
 
                 m_ipcServer.DeactivationRequested = (args) =>
                 {
                     Status = FilterStatus.Synchronizing;
 
-                    var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest).Result;
-
-                    args.Granted = response != null;
-
-                    if(args.Granted)
+                    try
                     {
-                        // Give us a second precious to make sure our shut down msg gets through.
-                        Status = FilterStatus.ExitingWithoutSafeguards;
-                        Task.Delay(500).Wait();
+                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest).Result;
 
-                        Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                        args.Granted = response != null;
+
+                        if(args.Granted)
+                        {
+                            Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                        }
+                        else
+                        {
+                            Status = FilterStatus.Running;
+                        }
                     }
-                    else
+                    catch(Exception e)
                     {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
                         Status = FilterStatus.Running;
                     }
                 };
@@ -419,11 +477,7 @@ namespace CitadelService.Services
             {
                 // This is a critical error. We cannot recover from this.
                 m_logger.Error("Critical error - Could not start IPC server.");
-                LoggerUtil.RecursivelyLogException(m_logger, ipce);
-
-                // Give us a second precious to make sure our shut down msg gets through.
-                Status = FilterStatus.ExitingWithoutSafeguards;
-                Task.Delay(500).Wait();
+                LoggerUtil.RecursivelyLogException(m_logger, ipce);                
 
                 Environment.Exit(-1);
             }
@@ -490,11 +544,7 @@ namespace CitadelService.Services
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             ProcessProtection.Unprotect();
-
-            // Give us a second precious to make sure our shut down msg gets through.
-            Status = FilterStatus.ExitingWithoutSafeguards;
-            Task.Delay(500).Wait();
-
+            
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }
 
@@ -593,52 +643,31 @@ namespace CitadelService.Services
             return false;
         }
 
-        /// <summary>
-        /// This will cause WinSparkle to begin checking for application updates. 
-        /// </summary>
-        private void StartCheckForAppUpdates()
-        {
+        private void ProbeMasterForApplicationUpdates()
+        {   
+            Status = FilterStatus.Synchronizing;
+
             try
             {
-                WinSparkle.CheckUpdateWithoutUI();
+                m_appcastUpdaterLock.EnterWriteLock();
+
+                m_lastFetchedUpdate = m_updater.CheckForUpdate().Result;
+
+                if(m_lastFetchedUpdate != null)
+                {
+                    m_logger.Info("Found update. Asking clients to accept update.");
+                    m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString()));
+                }
             }
             catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
-        }
-
-        /// <summary>
-        /// Inits all the callbacks for WinSparkle, so that when we call for update checks and such,
-        /// it has all appropriate callbacks to request app shutdown, restart, etc, to allow for updating.
-        /// </summary>
-        private void InitWinsparkle()
-        {
-            try
+            finally
             {
-                m_winsparkleShutdownCheckCb = new WinSparkle.WinSparkleCanShutdownCheckCallback(WinSparkleCheckIfShutdownOkay);
-                m_winsparkleShutdownRequestCb = new WinSparkle.WinSparkleRequestShutdownCallback(WinSparkleRequestsShutdown);
+                m_appcastUpdaterLock.ExitWriteLock();
 
-                var appcastUrl = string.Empty;
-                var baseServiceProviderAddress = WebServiceUtil.Default.ServiceProviderApiPath;
-                if(Environment.Is64BitProcess)
-                {
-                    appcastUrl = baseServiceProviderAddress + "/update/winx64/update.xml";
-                }
-                else
-                {
-                    appcastUrl = baseServiceProviderAddress + "/update/winx86/update.xml";
-                }
-
-                m_logger.Info("Setting appcast to {0}.", appcastUrl);
-
-                WinSparkle.SetCanShutdownCallback(m_winsparkleShutdownCheckCb);
-                WinSparkle.SetShutdownRequestCallback(m_winsparkleShutdownRequestCb);
-                WinSparkle.SetAppcastUrl(appcastUrl);
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                Status = FilterStatus.Running;
             }
         }
 
@@ -839,11 +868,8 @@ namespace CitadelService.Services
         /// <param name="e">
         /// Event args. 
         /// </param>
-        private async void DoBackgroundInit(object sender, DoWorkEventArgs e)
+        private void DoBackgroundInit(object sender, DoWorkEventArgs e)
         {
-            // Get WinSparkle ready to work.
-            InitWinsparkle();
-
             // Setup json serialization settings.
             m_configSerializerSettings = new JsonSerializerSettings();
             m_configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -871,7 +897,7 @@ namespace CitadelService.Services
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
-            await ChallengeUserAuthenticity();
+            ChallengeUserAuthenticity();
         }
 
         /// <summary>
@@ -907,10 +933,6 @@ namespace CitadelService.Services
                 else
                 {
                     m_logger.Info("Filter service provider process shutting down with safeguards.");
-
-                    // Enforce that our error code is set according to our own understanding.
-                    // Anything less than 100 will indicate that the application was not terminated correctly.
-                    Environment.ExitCode = (int)ExitCodes.ShutdownWithoutSafeguards;
 
                     // Unless explicitly told not to, always use safeguards.
                     DoCleanShutdown(true);
@@ -949,10 +971,8 @@ namespace CitadelService.Services
             }
 
             if(WebServiceUtil.Default.HasStoredCredentials)
-            {
-                // Check for updates when we have an already authenticated user.
-                Status = FilterStatus.Synchronizing;
-                StartCheckForAppUpdates();
+            {   
+                ProbeMasterForApplicationUpdates();
             }
             else
             {
@@ -968,7 +988,7 @@ namespace CitadelService.Services
         /// True if a connection was established with the service provider, or if we discovered a
         /// previously saved, validated authentication request. False otherwise.
         /// </returns>
-        private async Task ChallengeUserAuthenticity(string userName = null, SecureString password = null)
+        private void ChallengeUserAuthenticity(string userName = null, SecureString password = null)
         {
             try
             {
@@ -979,7 +999,7 @@ namespace CitadelService.Services
                     {
                         unencrypedPwordBytes = password.SecureStringBytes();
 
-                        var res = await WebServiceUtil.Default.Authenticate(userName, unencrypedPwordBytes);
+                        var res = WebServiceUtil.Default.Authenticate(userName, unencrypedPwordBytes);
 
                         PostAuthenticationResultToClients(res);
                     }
@@ -1018,7 +1038,7 @@ namespace CitadelService.Services
                     }
                 }
 
-                var authTaskResult = await WebServiceUtil.Default.ReAuthenticate();
+                var authTaskResult = WebServiceUtil.Default.ReAuthenticate();
 
                 PostAuthenticationResultToClients(authTaskResult);
             }
@@ -1974,7 +1994,7 @@ namespace CitadelService.Services
                 m_logger.Info("Checking for application updates.");
 
                 // Check for app updates.
-                StartCheckForAppUpdates();
+                ProbeMasterForApplicationUpdates();
             }
             catch(Exception e)
             {
@@ -1983,7 +2003,7 @@ namespace CitadelService.Services
             finally
             {
                 // Enable the timer again.
-                if(!WebServiceUtil.GetHasInternetServiceAsync().Result)
+                if(!WebServiceUtil.GetHasInternetServiceAsync())
                 {
                     // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
                     this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
@@ -2713,31 +2733,6 @@ namespace CitadelService.Services
         }
 
         /// <summary>
-        /// Called by WinSparkle when it wants to check if it is alright to shut down this
-        /// application in order to install an update.
-        /// </summary>
-        /// <returns>
-        /// Return zero if a shutdown is not okay at this time, return one if it is okay to shut down
-        /// the application immediately after this function returns.
-        /// </returns>
-        private int WinSparkleCheckIfShutdownOkay()
-        {
-            // Winsparkle can always shut down. When we shut down, we disable the internet anyway,
-            // and WinSparkle should have already downloaded the installer by the time it asks for a
-            // shutdown. So, we're good to shut down any time.
-            return 1;
-        }
-
-        /// <summary>
-        /// Called by WinSparkle when it has confirmed that a shutdown is okay and WinSparkle is
-        /// ready to shut this application down so it can install a downloaded update.
-        /// </summary>
-        private void WinSparkleRequestsShutdown()
-        {
-            Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
-        }
-
-        /// <summary>
         /// Called whenever the app is shut down with an authorized key, or when the system is
         /// shutting down, or when the user is logging off.
         /// </summary>
@@ -2753,16 +2748,6 @@ namespace CitadelService.Services
                 if(!m_cleanShutdownComplete)
                 {
                     m_ipcServer.Dispose();
-
-                    try
-                    {
-                        // Stop WinSparkle.
-                        WinSparkle.Cleanup();
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
 
                     try
                     {
@@ -2790,9 +2775,10 @@ namespace CitadelService.Services
                         {
                             // Ensure we're automatically running at startup.
                             var scProcNfo = new ProcessStartInfo("sc.exe");
+                            scProcNfo.UseShellExecute = false;
                             scProcNfo.WindowStyle = ProcessWindowStyle.Hidden;
                             scProcNfo.Arguments = "config \"FilterServiceProvider\" start= auto";
-                            Process.Start(scProcNfo);
+                            Process.Start(scProcNfo).WaitForExit();
                         }
                         catch(Exception e)
                         {
