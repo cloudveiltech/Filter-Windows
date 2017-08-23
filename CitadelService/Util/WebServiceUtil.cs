@@ -115,7 +115,7 @@ namespace Citadel.Core.Windows.Util
 
                         if(sub != null)
                         {
-                            authToken = (string)sub.GetValue(keyName);
+                            authToken = sub.GetValue(keyName) as string;
 
                             if(authToken == null || authToken.Length == 0)
                             {
