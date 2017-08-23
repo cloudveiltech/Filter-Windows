@@ -8,6 +8,8 @@
 using Citadel.Core.Windows.Util;
 using GalaSoft.MvvmLight;
 using System;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 using Te.Citadel.Util;
 
@@ -29,11 +31,22 @@ namespace Te.Citadel.UI.Models
         {
             m_timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
-            var result = WebServiceUtil.GetHasInternetServiceAsync();
+            bool hasInternet = false;
+            try
+            {
+                // We'll ping google's public DNS servers to avoid getting flagged as some sort of bot.
+                Ping googleDnsPing = new Ping();
+                byte[] buffer = new byte[32];
+                PingReply reply = googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions()).Result;
+                hasInternet = (reply.Status == IPStatus.Success);
+            }
+            catch {
+                hasInternet = false;
+            }
 
-            this.InternetIsConnected = result;
+            this.InternetIsConnected = hasInternet;
 
-            if(result == false)
+            if(hasInternet == false)
             {
                 // If we're disconnected, we're going to check every 10 seconds if we're connected.
                 // if we're connected, we'll set it a little higher.

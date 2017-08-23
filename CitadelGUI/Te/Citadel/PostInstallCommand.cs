@@ -33,38 +33,25 @@ namespace Te.Citadel
             base.Commit(savedState);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
+            
+            var filterServiceAssemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FilterServiceProvider.exe");
 
-            int sessionId = 0;
+            var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+            uninstallStartInfo.Arguments = "Uninstall";
+            uninstallStartInfo.UseShellExecute = false;
+            uninstallStartInfo.CreateNoWindow = true;
+            var uninstallProc = Process.Start(uninstallStartInfo);
+            uninstallProc.WaitForExit();
 
-            try
-            {
-                sessionId = Process.GetCurrentProcess().SessionId;
-            }
-            catch {
-                sessionId = 0;
-            }
+            var installStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+            installStartInfo.Arguments = "Install";
+            installStartInfo.UseShellExecute = false;
+            installStartInfo.CreateNoWindow = true;
 
-            if(sessionId <= 0)
-            {
-                var filterServiceAssemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FilterServiceProvider.exe");
+            var installProc = Process.Start(installStartInfo);
+            installProc.WaitForExit();
 
-                var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
-                uninstallStartInfo.Arguments = "Uninstall";
-                uninstallStartInfo.UseShellExecute = false;
-                uninstallStartInfo.CreateNoWindow = true;
-                var uninstallProc = Process.Start(uninstallStartInfo);
-                uninstallProc.WaitForExit();
-
-                var installStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
-                installStartInfo.Arguments = "Install";
-                installStartInfo.UseShellExecute = false;
-                installStartInfo.CreateNoWindow = true;
-
-                var installProc = Process.Start(installStartInfo);
-                installProc.WaitForExit();
-
-                EnsureStartServicePostInstall(filterServiceAssemblyPath);
-            }
+            EnsureStartServicePostInstall(filterServiceAssemblyPath);
 
             base.Dispose();
         }

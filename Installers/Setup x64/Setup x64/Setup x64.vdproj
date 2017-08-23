@@ -8888,8 +8888,8 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{0CF8D239-7DFF-4F0B-8B62-6E50903E1D93}"
-        "PackageCode" = "8:{2A04CB96-E7C9-4E70-B266-CCC128354DBF}"
+        "ProductCode" = "8:{D593BDC0-1DE0-48A7-9C23-9D7D4DB872C3}"
+        "PackageCode" = "8:{2D7BCAE5-1520-46B2-93E8-E48F46C4EA7B}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"

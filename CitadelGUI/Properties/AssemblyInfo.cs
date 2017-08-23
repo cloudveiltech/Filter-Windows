@@ -11,11 +11,11 @@ using System.Windows;
 
 // General Information about an assembly is controlled through the following set of attributes.
 // Change these attribute values to modify the information associated with an assembly.
-[assembly: AssemblyTitle("CloudVeil")]
-[assembly: AssemblyDescription("Web Content Filter")]
+[assembly: AssemblyTitle("CloudVeil GUI")]
+[assembly: AssemblyDescription("Web Content Filter GUI")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Technik Empire")]
-[assembly: AssemblyProduct("CloudVeil")]
+[assembly: AssemblyProduct("CloudVeil GUI")]
 [assembly: AssemblyCopyright("Copyright © 2017 Jesse Nicholson, Licensed under the Mozilla Public License V2.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

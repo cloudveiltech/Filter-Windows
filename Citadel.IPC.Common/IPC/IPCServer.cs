@@ -194,6 +194,16 @@ namespace Citadel.IPC
         /// </summary>
         private readonly Logger m_logger;
 
+        public bool WaitingForAuth
+        {
+            get
+            {
+                return m_waitingForAuth;
+            }
+        }
+
+        private volatile bool m_waitingForAuth = false;
+
         /// <summary>
         /// Constructs a new named pipe server for IPC, with a channel name derived from the class
         /// namespace and the current machine's digital fingerprint.
@@ -204,9 +214,9 @@ namespace Citadel.IPC
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerPrint.Value).ToLower();
 
-            // Not necessary. Leaving in case. var security = GetSecurityForChannel();
+            var security = GetSecurityForChannel();
 
-            m_server = new NamedPipeServer<BaseMessage>(channel);//, security);
+            m_server = new NamedPipeServer<BaseMessage>(channel, security);
 
             m_server.ClientConnected += OnClientConnected;
             m_server.ClientDisconnected += OnClientDisconnected;
@@ -385,7 +395,7 @@ namespace Citadel.IPC
         /// The status to send to all clients. 
         /// </param>
         public void NotifyStatus(FilterStatus status)
-        {
+        {   
             var msg = new FilterStatusMessage(status);
             PushMessage(msg);
         }
@@ -425,6 +435,21 @@ namespace Citadel.IPC
         /// </param>
         public void NotifyAuthenticationStatus(AuthenticationAction action)
         {
+            switch(m_waitingForAuth)
+            {
+                case true:
+                {
+                    m_waitingForAuth = action == AuthenticationAction.Authenticated ? false : true;
+                }
+                break;
+
+                case false:
+                {
+                    m_waitingForAuth = action == AuthenticationAction.Required;
+                }
+                break;
+            }         
+
             var msg = new AuthenticationMessage(action);
             PushMessage(msg);
         }
@@ -451,17 +476,27 @@ namespace Citadel.IPC
 
         private void PushMessage(BaseMessage msg)
         {
-#if CLIFTON
-            var bf = new BinaryFormatter();
-            using(var ms = new MemoryStream())
+            if(m_waitingForAuth)
             {
-                bf.Serialize(ms, msg);
-                m_server.WriteBytes(ms.ToArray()).Wait();
-                m_server.Flush();
+                // We'll only allow auth messages through until authentication has
+                // been confirmed.
+                if(msg.GetType() == typeof(AuthenticationMessage))
+                {
+                    m_server.PushMessage(msg);
+                }
+                else if(msg.GetType() == typeof(RelaxedPolicyMessage))
+                {
+                    m_server.PushMessage(msg);
+                }
+                else if(msg.GetType() == typeof(NotifyBlockActionMessage))
+                {
+                    m_server.PushMessage(msg);
+                }
             }
-#else
-            m_server.PushMessage(msg);
-#endif
+            else
+            {
+                m_server.PushMessage(msg);
+            }
         }
 
         /// <summary>
@@ -476,81 +511,11 @@ namespace Citadel.IPC
 
             var permissions = PipeAccessRights.CreateNewInstance | PipeAccessRights.Read | PipeAccessRights.Synchronize | PipeAccessRights.Write;
 
-            /*
-            ps.AddAccessRule(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
-            ps.AddAccessRule(new PipeAccessRule("SYSTEM", PipeAccessRights.FullControl, AccessControlType.Allow));
-
-            return ps;
-            */
-
-            /*
-            ps.AddAccessRule(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
-            ps.AddAccessRule(new PipeAccessRule(System.Security.Principal.WindowsIdentity.GetCurrent().Name, PipeAccessRights.FullControl, AccessControlType.Allow));
-            ps.AddAccessRule(new PipeAccessRule("SYSTEM", PipeAccessRights.FullControl, AccessControlType.Allow));
-            ps.AddAccessRule(pa);
-            */
-
-            var everyoneSid = new SecurityIdentifier(System.Security.Principal.WellKnownSidType.WorldSid, null);
-            var everyoneAcct = everyoneSid.Translate(typeof(NTAccount));
-
-            var par = new PipeAccessRule(everyoneAcct, permissions, AccessControlType.Allow);
-            pipeSecurity.AddAccessRule(par);
-            pipeSecurity.SetAccessRule(par);
-
             var authUsersSid = new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null);
             var authUsersAcct = authUsersSid.Translate(typeof(NTAccount));
-
-            pipeSecurity.AddAccessRule(new PipeAccessRule(authUsersAcct, permissions, AccessControlType.Allow));
             pipeSecurity.SetAccessRule(new PipeAccessRule(authUsersAcct, permissions, AccessControlType.Allow));
 
             return pipeSecurity;
-
-            /*
-            // Allow Everyone read and write access to the pipe.
-            pipeSecurity.SetAccessRule(new PipeAccessRule(
-                "Authenticated Users",
-                new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null),
-                PipeAccessRights.ReadWrite, AccessControlType.Allow));
-
-            // Allow the Administrators group full access to the pipe.
-            pipeSecurity.SetAccessRule(new PipeAccessRule(
-                "Administrators",
-                new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-                PipeAccessRights.FullControl, AccessControlType.Allow));
-            */
-
-            /*
-            // XXX TODO - We MIGHT want to tighten this up later. However, we want to ensure that
-            // regardless of the privilege level of the client (GUI), we can connect to the channel.
-            // A much BETTER option is to pull in Bouncy Castle Portable and write a pipe wrapper
-            // that encrypts the channel. This way we can embed credentials in the client and server
-            // and pin those credentials in order to seal tight this potential attack vector.
-            //
-            // In our current state, we're not too worried about people reading the pipe data. In the
-            // future this could become a threat if we become dependent on anything exchanged over
-            // IPC. At present time, the server (process) ultimately makes all the decisions based on
-            // the data from the upstream remote service provider so it's not like someone can make a
-            // tool to tell the server, over this channel to quit.
-            var everyone = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
-
-            var users = new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null);
-
-            PipeSecurity sec = null;
-
-            using(var npc = new NamedPipeServerStream(Path.GetRandomFileName(), PipeDirection.InOut, -1, PipeTransmissionMode.Message, PipeOptions.Asynchronous, 65536, 65536))
-            {
-                sec = npc.GetAccessControl();
-            }
-
-            sec.PurgeAccessRules(everyone);
-            sec.PurgeAuditRules(everyone);
-            sec.PurgeAccessRules(users);
-            sec.PurgeAuditRules(users);
-            sec.SetAccessRule(new PipeAccessRule(everyone, PipeAccessRights.FullControl, AccessControlType.Allow));
-            sec.SetAccessRule(new PipeAccessRule(users, PipeAccessRights.FullControl, AccessControlType.Allow));
-
-            return sec;
-            */
         }
 
         #region IDisposable Support

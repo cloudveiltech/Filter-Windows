@@ -19,6 +19,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Security.Principal;
+using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +38,25 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
+        private class ServiceRunner : BaseProtectiveService
+        {
+            public ServiceRunner() : base("FilterServiceProvider", true)
+            {
+
+            }
+
+            public override void Shutdown(ExitCodes code)
+            {
+                // If our service has exited cleanly while we're running,
+                // lets assume that we should exit WITH safeguards.
+                // XXX TODO.
+                Current.Dispatcher.BeginInvoke((Action)delegate ()
+                {
+                    Application.Current.Shutdown(code);
+                });
+            }
+        }
+
         /// <summary>
         /// Used for synchronization when creating run at startup task. 
         /// </summary>
@@ -103,41 +123,33 @@ namespace Te.Citadel
         /// </summary>
         private IPCClient m_ipcClient;
 
-        private class ServiceRunner : BaseProtectiveService
-        {
-            public ServiceRunner() : base("FilterServiceProvider", true)
-            {
-
-            }
-
-            public override void Shutdown(ExitCodes code)
-            {
-                // If our service has exited cleanly while we're running,
-                // lets assume that we should exit WITH safeguards.
-                // XXX TODO.
-                Current.Dispatcher.BeginInvoke((Action)delegate ()
-                {
-                    Application.Current.Shutdown(code);
-                });
-            }
-        }
-
-        private ServiceRunner m_serviceRunner;
-
         #endregion Views
 
         /// <summary>
         /// Makes this app run at startup for the current user.
         /// </summary>
-        public void EnsureStarupTaskExists()
+        public void ConfigureStartupTask(bool delete)
         {
             try
             {
                 m_runAtStartupLock.EnterWriteLock();
 
-                using(var rk = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+                using(var rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
                 {
-                    rk.SetValue(Process.GetCurrentProcess().ProcessName, Assembly.GetEntryAssembly().Location);
+                    if(delete)
+                    {
+                        rk.DeleteValue(Process.GetCurrentProcess().ProcessName, false);
+                    }
+                    else
+                    {
+                        rk.SetValue(Process.GetCurrentProcess().ProcessName, Assembly.GetEntryAssembly().Location);
+
+                        // Make sure that our task isn't disabled elsewhere.                        
+                        using(var drk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run", true))
+                        {
+                            drk.DeleteValue(Process.GetCurrentProcess().ProcessName, false);
+                        }
+                    }
                 }
             }
             catch(Exception e)
@@ -148,7 +160,7 @@ namespace Te.Citadel
             {
                 m_runAtStartupLock.ExitWriteLock();
             }
-        }
+        }        
 
         /// <summary>
         /// Default ctor. 
@@ -156,8 +168,6 @@ namespace Te.Citadel
         public CitadelApp()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
-
-            m_serviceRunner = new ServiceRunner();
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -167,11 +177,83 @@ namespace Te.Citadel
 
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
+
+            // Here we need to check 2 things. First, we need to check to make sure
+            // that our filter service is running. Second, and if the first condition
+            // proves to be false, we need to check if we are running as an admin.
+            // If we are not admin, we need to schedule a restart of the app to
+            // force us to run as admin. If we are admin, then we will create
+            // an instance of the service starter class that will take care of
+            // forcing our service into existence.
+            bool needRestartAsAdmin = false;
+            bool mainServiceViable = true;
+            try
+            {
+                var sc = new ServiceController("FilterServiceProvider");
+
+                switch(sc.Status)
+                {
+                    case ServiceControllerStatus.Stopped:
+                    case ServiceControllerStatus.StopPending:
+                    {
+                        mainServiceViable = false;
+                    }
+                    break;
+                }
+            }
+            catch(Exception ae)
+            {
+                mainServiceViable = false;
+            }
+
+            if(!mainServiceViable)
+            {
+                var id = WindowsIdentity.GetCurrent();
+                
+                var principal = new WindowsPrincipal(id);
+                if(principal.IsInRole(WindowsBuiltInRole.Administrator))
+                {
+                    needRestartAsAdmin = false;
+                }
+                else
+                {
+                    needRestartAsAdmin = id.Owner == id.User;
+                }
+
+                if(needRestartAsAdmin)
+                {
+                    // Restart program and run as admin
+                    ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
+                    updaterStartupInfo.FileName = "cmd.exe";
+                    updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
+                    updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    updaterStartupInfo.Verb = "runas";
+                    updaterStartupInfo.CreateNoWindow = true;
+                    Process.Start(updaterStartupInfo);
+
+                    Environment.Exit(-1);
+                    return;
+                }
+                else
+                {
+                    // Just creating an instance of this will
+                    // do the job of forcing our service to start.
+                    // Letting it fly off into garbage collection land
+                    // should have no effect. The service is self-sustaining
+                    // after this point.
+                    var provider = new ServiceRunner();
+                }
+            }
+
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;
             
             // Hook app exiting function. This must be done on this main app thread.            
             this.Exit += OnApplicationExiting;
+
+            // Make sure we run on startup.
+            ConfigureStartupTask(true);
+            ConfigureStartupTask(false);
 
             // Do stuff that must be done on the UI thread first. Here we HAVE to set our initial
             // view state BEFORE we initialize IPC. If we change it after, then we're going to get
@@ -248,19 +330,15 @@ namespace Te.Citadel
                 {
                     if(granted == true)
                     {
-                        if(ProcessProtection.IsProtected)
+                        if(CriticalKernelProcessUtility.IsMyProcessKernelCritical)
                         {
-                            ProcessProtection.Unprotect();
+                            CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
                         }
 
                         m_logger.Info("Deactivation request granted on client.");
 
                         // Init the shutdown of this application.
-                        m_ipcClient.Dispose();
-                        Dispatcher.BeginInvoke((Action)delegate ()
-                        {
-                            Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
-                        });
+                        Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
                     }
                     else
                     {
@@ -380,8 +458,30 @@ namespace Te.Citadel
                         break;
 
                         case FilterStatus.Synchronizing:
-                        {
+                        {   
+                            // Update our timestamps for last sync.
                             OnViewChangeRequest(typeof(ProgressWait));
+                        }
+                        break;
+
+                        case FilterStatus.Synchronized:
+                        {
+                            // Update our timestamps for last sync.
+                            OnViewChangeRequest(typeof(DashboardView));
+
+                            // Change UI state of dashboard to not show disabled message anymore. If
+                            // we're not already in a disabled state, this will have no effect.
+                            Current.Dispatcher.BeginInvoke(
+                                System.Windows.Threading.DispatcherPriority.Normal,
+                                (Action)delegate ()
+                                {
+                                    if(m_viewDashboard != null && m_viewDashboard.DataContext != null)
+                                    {
+                                        var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+                                        dashboardViewModel.LastSync = DateTime.Now;
+                                    }
+                                }
+                            );
                         }
                         break;
                     }
@@ -433,12 +533,9 @@ namespace Te.Citadel
             m_logger.Info("Session ending.");
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
-            ProcessProtection.Unprotect();
-            
-            Current.Dispatcher.BeginInvoke((Action)delegate ()
-            {
-                Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
-            });
+            CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
+
+            Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
 
             // Does this cause a hand up??
             // m_ipcClient.Dispose();
@@ -919,11 +1016,15 @@ namespace Te.Citadel
                 {
                     m_ipcClient.Dispose();
 
+                    // Always delete our startup task...
+                    ConfigureStartupTask(true);
+
                     if(ensureRunAtStartup)
                     {
                         try
                         {   
-                            EnsureStarupTaskExists();
+                            // ... then re-create it if necessary.
+                            ConfigureStartupTask(false);
                         }
                         catch(Exception e)
                         {
@@ -947,7 +1048,7 @@ namespace Te.Citadel
                     try
                     {
                         // Pull our critical status.
-                        ProcessProtection.Unprotect();
+                        CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
                     }
                     catch(Exception e)
                     {

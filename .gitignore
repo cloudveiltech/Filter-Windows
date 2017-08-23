@@ -254,5 +254,9 @@ RestoreInetUtil/
 # Ignore BuildBot
 BuildBot/
 
-# Allow WinSparkle binaries
-!**/Citadel/Lib/WinSparkle/*
+# Ignore tests
+Tests/
+
+# Ignore incomplete things
+RegistryExtensions.cs
+AccessControl.cs

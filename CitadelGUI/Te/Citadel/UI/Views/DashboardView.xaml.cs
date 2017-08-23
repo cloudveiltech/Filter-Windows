@@ -67,6 +67,8 @@ namespace Te.Citadel.UI.Views
                 {
 #if UNBLOCK_REQUESTS_IN_BROWSER
 
+                    // XXX TODO - FIXME - WEB SERVICE UTIL SHOULDN'T BE EVERYWHERE
+                    /*
                     // Try to send the device name as well. Helps distinguish between clients under
                     // the same account.
                     string deviceName = string.Empty;
@@ -91,6 +93,8 @@ namespace Te.Citadel.UI.Views
                         );
 
                     System.Diagnostics.Process.Start(reportPath);
+
+                    */
 #else
                     var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("category={0}&full_request={1}", selectedBlockEvent.CategoryName, Uri.EscapeDataString(selectedBlockEvent.FullRequest)));
                     var result = await WebServiceUtil.SendResource("/capi/reportreview.php", formData, false);

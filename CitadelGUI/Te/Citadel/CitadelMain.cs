@@ -156,7 +156,7 @@ namespace Te.Citadel
             }
 
             // No matter what, always ensure that critical flags are removed from our process before exiting.
-            ProcessProtection.Unprotect();
+            CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
         }
     }
 }

@@ -236,5 +236,28 @@ namespace Te.Citadel.UI.ViewModels
                 RaisePropertyChanged(nameof(RelaxedDuration));
             }
         }
+
+        public string LastSyncStr
+        {
+            get
+            {
+                return m_model.LastSyncStr;
+            }
+        }
+
+        public DateTime LastSync
+        {
+            get
+            {
+                return m_model.LastSync;
+            }
+
+            set
+            {
+                m_model.LastSync = value;
+                RaisePropertyChanged(nameof(LastSync));
+                RaisePropertyChanged(nameof(LastSyncStr));
+            }
+        }
     }
 }

@@ -2,3 +2,6 @@
 	path = CitadelService/Lib/HttpFilteringEngine
 	url = git@github.com:TechnikEmpire/HttpFilteringEngine.git
 	ignore = dirty
+[submodule "Contrib/CreateProcessAsUser"]
+	path = Contrib/CreateProcessAsUser
+	url = https://github.com/TechnikEmpire/CreateProcessAsUser.git

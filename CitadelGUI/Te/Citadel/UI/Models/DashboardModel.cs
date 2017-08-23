@@ -29,6 +29,8 @@ namespace Te.Citadel.UI.Models
 
         private string m_relaxedDuration = "0";
 
+        private DateTime m_lastSync = DateTime.Now;
+
         public DashboardModel()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
@@ -46,7 +48,7 @@ namespace Te.Citadel.UI.Models
                     };
 
                     ipcClient.WaitForConnection();
-                    Task.Delay(3000).Wait();
+                    await Task.Delay(3000);
                 }
             }
             catch(Exception e)
@@ -92,5 +94,27 @@ namespace Te.Citadel.UI.Models
                 m_relaxedDuration = value;
             }
         }
+
+        public string LastSyncStr
+        {
+            get
+            {
+                return string.Format("Last Updated: {0:f}", m_lastSync);
+            }
+        }
+
+        public DateTime LastSync
+        {
+            get
+            {
+                return m_lastSync;
+            }
+
+            set
+            {
+                m_lastSync = value;
+            }
+        }
+
     }
 }

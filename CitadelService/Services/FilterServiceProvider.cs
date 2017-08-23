@@ -15,6 +15,7 @@ using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
 using Microsoft.Win32;
+using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
 using NLog;
 using opennlp.tools.doccat;
@@ -30,10 +31,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Management;
 using System.Net;
-using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -102,27 +101,14 @@ namespace CitadelService.Services
                 {
                     m_currentStatusLock.EnterWriteLock();
 
-                    if(m_authRequiredFlag && value != FilterStatus.AwaitingCredentials)
-                    {
-                        // Don't let our status change at all if we're waiting for auth. This is critical.
-                        m_currentStatus = FilterStatus.AwaitingCredentials;
-                    }
-                    else
-                    {
-                        m_currentStatus = value;
-                    }
-
-                    if(value == FilterStatus.AwaitingCredentials)
-                    {
-                        m_authRequiredFlag = true;
-                    }
+                    m_currentStatus = value;
                 }
                 finally
                 {
                     m_currentStatusLock.ExitWriteLock();
                 }
 
-                m_ipcServer.NotifyStatus(value);
+                m_ipcServer.NotifyStatus(m_currentStatus);
             }
         }
 
@@ -139,8 +125,6 @@ namespace CitadelService.Services
             }
         }
 
-        private volatile bool m_authRequiredFlag = false;
-
         /// <summary>
         /// Our current filter status. 
         /// </summary>
@@ -155,7 +139,7 @@ namespace CitadelService.Services
         /// The number of IPC clients connected to this server. 
         /// </summary>
         private int m_connectedClients = 0;
-        
+
         #region FilteringEngineVars
 
         /// <summary>
@@ -212,11 +196,6 @@ namespace CitadelService.Services
         private BagOfTextTriggers m_textTriggers;
 
         /// <summary>
-        /// Used for synchronization when creating run at startup task. 
-        /// </summary>
-        private ReaderWriterLockSlim m_runAtStartupLock = new ReaderWriterLockSlim();
-
-        /// <summary>
         /// Timer used to query for filter list changes every X minutes, as well as application updates. 
         /// </summary>
         private Timer m_updateCheckTimer;
@@ -246,7 +225,22 @@ namespace CitadelService.Services
         /// <summary>
         /// App function config file. 
         /// </summary>
-        private AppConfigModel m_config;
+        private AppConfigModel m_userConfig;
+
+        /// <summary>
+        /// We split out this accessor to get all the code here unhooked from directly accessing the
+        /// local reference. We do this because reference checks and assignment are guaranteed atomic
+        /// on all .NET platforms. So, we used this to wein all the code off of direct access, so
+        /// they take a copy to the current reference atomically, and then can use it accordingly
+        /// (null checks etc).
+        /// </summary>
+        private AppConfigModel Config
+        {
+            get
+            {
+                return m_userConfig;
+            }
+        }
 
         /// <summary>
         /// Json deserialization/serialization settings for our config related data. 
@@ -339,7 +333,7 @@ namespace CitadelService.Services
                     bitVersionUri = "/update/winx86/update.xml";
                 }
 
-                var appUpdateInfoUrl = string.Format("{0}/{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
+                var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
 
                 m_logger.Info("Checking for application updates at {0}.", appUpdateInfoUrl);
 
@@ -354,13 +348,70 @@ namespace CitadelService.Services
                 Environment.Exit(-1);
             }
 
+            WebServiceUtil.Default.AuthTokenRejected += () =>
+            {
+                ReviveGuiForCurrentUser();                
+                m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
+            };
+
             try
             {
                 m_ipcServer = new IPCServer();
 
                 m_ipcServer.AttemptAuthentication = (args) =>
                 {
-                    ChallengeUserAuthenticity(args.Username, args.Password);
+                    try
+                    {
+                        if(!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username) && args.Password != null && args.Password.Length > 0)
+                        {
+                            byte[] unencrypedPwordBytes = null;
+                            try
+                            {
+                                unencrypedPwordBytes = args.Password.SecureStringBytes();
+
+                                var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
+
+                                switch(authResult)
+                                {
+                                    case AuthenticationResult.Success:
+                                    {
+                                        Status = FilterStatus.Running;
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
+
+                                        // Probe server for updates now.
+                                        ProbeMasterForApplicationUpdates();
+                                        OnUpdateTimerElapsed(null);
+                                    }
+                                    break;
+
+                                    case AuthenticationResult.Failure:
+                                    {
+                                        ReviveGuiForCurrentUser();                                        
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                                    }
+                                    break;
+
+                                    case AuthenticationResult.ConnectionFailed:
+                                    {
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
+                                    }
+                                    break;
+                                }
+                            }
+                            finally
+                            {
+                                if(unencrypedPwordBytes != null && unencrypedPwordBytes.Length > 0)
+                                {
+                                    Array.Clear(unencrypedPwordBytes, 0, unencrypedPwordBytes.Length);
+                                    unencrypedPwordBytes = null;
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
                 };
 
                 m_ipcServer.ClientAcceptedPendingUpdate = () =>
@@ -374,7 +425,7 @@ namespace CitadelService.Services
                             m_lastFetchedUpdate.DownloadUpdate().Wait();
 
                             m_ipcServer.NotifyUpdating();
-                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();                            
+                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();
                             Task.Delay(200).Wait();
 
                             m_logger.Info("Shutting down to update.");
@@ -398,7 +449,6 @@ namespace CitadelService.Services
                             m_appcastUpdaterLock.ExitWriteLock();
                         }
                     }
-                    
                 };
 
                 m_ipcServer.DeactivationRequested = (args) =>
@@ -407,9 +457,10 @@ namespace CitadelService.Services
 
                     try
                     {
-                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest).Result;
+                        HttpStatusCode responseCode;
+                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest, out responseCode);
 
-                        args.Granted = response != null;
+                        args.Granted = responseCode == HttpStatusCode.OK || responseCode == HttpStatusCode.NoContent;
 
                         if(args.Granted)
                         {
@@ -456,9 +507,10 @@ namespace CitadelService.Services
 
                     // When a client connects, synchronize our data. Presently, we just want to
                     // update them with relaxed policy NFO, if any.
-                    if(m_config != null && m_config.BypassesPermitted > 0)
+                    var cfg = Config;
+                    if(cfg != null && cfg.BypassesPermitted > 0)
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted - m_config.BypassesUsed, m_config.BypassDuration);
+                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
                     }
                     else
                     {
@@ -466,6 +518,11 @@ namespace CitadelService.Services
                     }
 
                     m_ipcServer.NotifyStatus(Status);
+
+                    if(m_ipcServer.WaitingForAuth)
+                    {   
+                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                    }
                 };
 
                 m_ipcServer.ClientDisconnected = () =>
@@ -477,7 +534,7 @@ namespace CitadelService.Services
             {
                 // This is a critical error. We cannot recover from this.
                 m_logger.Error("Critical error - Could not start IPC server.");
-                LoggerUtil.RecursivelyLogException(m_logger, ipce);                
+                LoggerUtil.RecursivelyLogException(m_logger, ipce);
 
                 Environment.Exit(-1);
             }
@@ -543,8 +600,8 @@ namespace CitadelService.Services
             m_logger.Info("Session ending.");
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
-            ProcessProtection.Unprotect();
-            
+            CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
+
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }
 
@@ -567,8 +624,8 @@ namespace CitadelService.Services
             }
 
             // Create the threshold count timer and start it with the configured timespan.
-            m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, m_config.ThresholdTriggerPeriod, Timeout.InfiniteTimeSpan);
-
+            var cfg = Config;
+            m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
 
             // Create the enforcement timer, but don't start it.
             m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
@@ -582,15 +639,19 @@ namespace CitadelService.Services
         /// </returns>
         private bool UpdateListData()
         {
-            var currentRemoteListsHashReq = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck);
-            currentRemoteListsHashReq.Wait();
-            var rHashBytes = currentRemoteListsHashReq.Result;
+            HttpStatusCode code;
+            var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck, out code);
 
-            if(rHashBytes != null)
+            var listDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
+
+            if(code == HttpStatusCode.OK && rHashBytes != null)
             {
-                var rhash = Encoding.UTF8.GetString(rHashBytes);
+                // Notify all clients that we just successfully made contact with the server.
+                // We don't set the status here, because we'd have to store it and set it
+                // back, so we just directly issue this msg.
+                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
 
-                var listDataFilePath = AppDomain.CurrentDomain.BaseDirectory + "a.dat";
+                var rhash = Encoding.UTF8.GetString(rHashBytes);
 
                 bool needsUpdate = false;
 
@@ -618,15 +679,24 @@ namespace CitadelService.Services
                     }
                 }
 
+                if(!needsUpdate)
+                {
+                    // We got a response from our server. We have the right data. Just check and see
+                    // if we don't have a current user CFG. If we don't, then return true to force
+                    // a reload of the config and list data from the local FS.
+                    var cfg = Config;
+                    if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
+                    {
+                        return true;
+                    }
+                }
+
                 if(needsUpdate)
                 {
-                    m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
-                    var filterListDataReq = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataRequest);
-                    filterListDataReq.Wait();
-
-                    var filterDataZipBytes = filterListDataReq.Result;
-
-                    if(filterDataZipBytes != null && filterDataZipBytes.Length > 0)
+                    m_logger.Info("Updating filtering rules, rules missing or integrity violation.");                    
+                    var filterDataZipBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataRequest, out code);
+                    
+                    if(code == HttpStatusCode.OK && filterDataZipBytes != null && filterDataZipBytes.Length > 0)
                     {
                         File.WriteAllBytes(listDataFilePath, filterDataZipBytes);
                     }
@@ -639,13 +709,25 @@ namespace CitadelService.Services
 
                 return needsUpdate;
             }
+            else
+            {
+
+                // We didn't get any response from our server. Check if the list exists
+                // and is healthy, and make sure it's loaded ONLY if we don't already have
+                // a CFG loaded (meaning we have yet to load any data at all).
+                var cfg = Config;
+                if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
+                {
+                    return true;
+                }
+            }
 
             return false;
         }
 
         private void ProbeMasterForApplicationUpdates()
-        {   
-            Status = FilterStatus.Synchronizing;
+        {
+            bool hadError = false;
 
             try
             {
@@ -662,12 +744,19 @@ namespace CitadelService.Services
             catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
+                hadError = true;
             }
             finally
             {
                 m_appcastUpdaterLock.ExitWriteLock();
+            }
 
-                Status = FilterStatus.Running;
+            if(!hadError)
+            {
+                // Notify all clients that we just successfully made contact with the server.
+                // We don't set the status here, because we'd have to store it and set it
+                // back, so we just directly issue this msg.
+                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
             }
         }
 
@@ -714,9 +803,9 @@ namespace CitadelService.Services
                 }
             }
 
-            m_filterCollection = new FilterDbCollection(AppDomain.CurrentDomain.BaseDirectory + "rules.db", true, true);
+            m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
 
-            m_textTriggers = new BagOfTextTriggers(AppDomain.CurrentDomain.BaseDirectory + "t.dat", true, true);
+            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);
 
             // Get Microsoft root authorities. We need this in order to permit Windows Update and
             // such in the event that it is forced through the filter.
@@ -736,22 +825,13 @@ namespace CitadelService.Services
                     foreach(var cert in localStore.Certificates)
                     {
                         caFileBuilder.AppendLine(cert.ExportToPem());
-
-                        /* XXX TODO - Instead of only trusting microsoft CA's, let's trust all machine-local CA's.
-                         * It's not unreasonable to expect the user and OS to handle these properly.
-                        if(cert.Subject.IndexOf("Microsoft") != -1 && cert.Subject.IndexOf("Root") != -1)
-                        {
-                            m_logger.Info("Adding cert: {0}.", cert.Subject);
-                            caFileBuilder.AppendLine(cert.ExportToPem());
-                        }
-                        */
                     }
                     localStore.Close();
                 }
             }
 
             // Dump the text to the local file system.
-            var localCaBundleCertPath = AppDomain.CurrentDomain.BaseDirectory + "ca-cert.pem";
+            var localCaBundleCertPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ca-cert.pem");
             File.WriteAllText(localCaBundleCertPath, caFileBuilder.ToString());
 
             // Set firewall CB.
@@ -770,6 +850,18 @@ namespace CitadelService.Services
             m_filteringEngine.OnInfo += EngineOnInfo;
             m_filteringEngine.OnWarning += EngineOnWarning;
             m_filteringEngine.OnError += EngineOnError;
+
+            // Start filtering, always.
+            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            {
+                m_filterEngineStartupBgWorker = new BackgroundWorker();
+                m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
+                {
+                    StartFiltering();
+                });
+
+                m_filterEngineStartupBgWorker.RunWorkerAsync();
+            }
 
             // Now establish trust with FireFox. XXX TODO - This can actually be done elsewhere. We
             // used to have to do this after the engine started up to wait for it to write the CA to
@@ -896,8 +988,6 @@ namespace CitadelService.Services
 
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
-            ChallengeUserAuthenticity();
         }
 
         /// <summary>
@@ -922,6 +1012,7 @@ namespace CitadelService.Services
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
+
             try
             {
                 if(Environment.ExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
@@ -970,129 +1061,8 @@ namespace CitadelService.Services
                 return;
             }
 
-            if(WebServiceUtil.Default.HasStoredCredentials)
-            {   
-                ProbeMasterForApplicationUpdates();
-            }
-            else
-            {
-                m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
-            }
-        }
-
-        /// <summary>
-        /// Checks to see if we can authenticate with the service provider, or if we have a
-        /// previously saved result of an authentication request.
-        /// </summary>
-        /// <returns>
-        /// True if a connection was established with the service provider, or if we discovered a
-        /// previously saved, validated authentication request. False otherwise.
-        /// </returns>
-        private void ChallengeUserAuthenticity(string userName = null, SecureString password = null)
-        {
-            try
-            {
-                if(!string.IsNullOrEmpty(userName) && !string.IsNullOrWhiteSpace(userName) && password != null && password.Length > 0)
-                {
-                    byte[] unencrypedPwordBytes = null;
-                    try
-                    {
-                        unencrypedPwordBytes = password.SecureStringBytes();
-
-                        var res = WebServiceUtil.Default.Authenticate(userName, unencrypedPwordBytes);
-
-                        PostAuthenticationResultToClients(res);
-                    }
-                    finally
-                    {
-                        if(unencrypedPwordBytes != null && unencrypedPwordBytes.Length > 0)
-                        {
-                            Array.Clear(unencrypedPwordBytes, 0, unencrypedPwordBytes.Length);
-                            unencrypedPwordBytes = null;
-                        }
-                    }
-                }
-
-                if(!WebServiceUtil.Default.IsSessionExpired)
-                {
-                    PostAuthenticationResultToClients(AuthenticationResult.Success);
-                    return;
-                }
-
-                // Check if we have a stored session, and if not try and reload one.
-                if(!WebServiceUtil.Default.HasStoredCredentials)
-                {
-                    if(!WebServiceUtil.Default.LoadFromSave())
-                    {
-                        m_logger.Info("Failed to load saved instance of athenticated user.");
-                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
-                        return;
-                    }
-
-                    // If we loaded, check again.
-                    if(!WebServiceUtil.Default.HasStoredCredentials)
-                    {
-                        m_logger.Info("Authenticated does not have stored credentials. Redirecting user to login.");
-                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
-                        return;
-                    }
-                }
-
-                var authTaskResult = WebServiceUtil.Default.ReAuthenticate();
-
-                PostAuthenticationResultToClients(authTaskResult);
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
-        private void PostAuthenticationResultToClients(AuthenticationResult authResult)
-        {
-            // As long as we didn't explicitly fail authentication or reauthentication, ensure that
-            // the filter runs/is running.
-            if(authResult != AuthenticationResult.Failure)
-            {
-                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
-                {
-                    m_filterEngineStartupBgWorker = new BackgroundWorker();
-                    m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
-                    {
-                        StartFiltering();
-                    });
-
-                    m_filterEngineStartupBgWorker.RunWorkerAsync();
-                }
-            }
-
-            switch(authResult)
-            {
-                case AuthenticationResult.Success:
-                {
-                    Status = FilterStatus.Running;
-                    m_authRequiredFlag = false;
-                    m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
-                }
-                break;
-
-                case AuthenticationResult.Failure:
-                {
-                    Status = FilterStatus.AwaitingCredentials;
-                    m_authRequiredFlag = true;
-                    m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
-
-                    // Auth failed for this user. Shut down the filter.
-                    StopFiltering();
-                }
-                break;
-
-                case AuthenticationResult.ConnectionFailed:
-                {
-                    m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
-                }
-                break;
-            }
+            ProbeMasterForApplicationUpdates();
+            OnUpdateTimerElapsed(null);
         }
 
         /// <summary>
@@ -1104,21 +1074,27 @@ namespace CitadelService.Services
         /// </remarks>
         private void EstablishTrustWithFirefox()
         {
-            // Get the default FireFox profiles path.
-            string defaultFirefoxProfilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            defaultFirefoxProfilesPath += @"\Mozilla\Firefox\Profiles";
+            // This path will be DRIVE:\USER_PATH\Public\Desktop
+            var usersBasePath = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory));
+            usersBasePath = usersBasePath.Parent;
+            usersBasePath = usersBasePath.Parent;
 
-            if(!Directory.Exists(defaultFirefoxProfilesPath))
+            var ffProfileDirs = new List<string>();
+
+            var userDirs = Directory.GetDirectories(usersBasePath.FullName);
+
+            foreach(var userDir in userDirs)
+            {
+                if(Directory.Exists(Path.Combine(userDir, @"AppData\Roaming\Mozilla\Firefox\Profiles")))
+                {
+                    ffProfileDirs.Add(Path.Combine(userDir, @"AppData\Roaming\Mozilla\Firefox\Profiles"));
+                }
+            }
+
+            if(ffProfileDirs.Count <= 0)
             {
                 return;
             }
-
-            // Figure out if firefox is running. If later it is and we kill it, store the path to
-            // firefox.exe so we can restart the process after we're done.
-            string firefoxExePath = string.Empty;
-            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;
-
-            var prefsFiles = Directory.GetFiles(defaultFirefoxProfilesPath, "prefs.js", SearchOption.AllDirectories);
 
             var valuesThatNeedToBeSet = new Dictionary<string, string>();
 
@@ -1156,51 +1132,61 @@ namespace CitadelService.Services
                 }
             }
 
-            foreach(var prefFile in prefsFiles)
+            foreach(var ffProfDir in ffProfileDirs)
             {
-                var userFile = Path.GetDirectoryName(prefFile) + Path.DirectorySeparatorChar + "user.js";
+                var prefsFiles = Directory.GetFiles(ffProfDir, "prefs.js", SearchOption.AllDirectories);
 
-                string[] fileText = new string[0];
-
-                if(File.Exists(userFile))
+                foreach(var prefFile in prefsFiles)
                 {
-                    fileText = File.ReadAllLines(prefFile);
-                }
+                    var userFile = Path.Combine(Path.GetDirectoryName(prefFile), "user.js");
 
-                var notFound = new Dictionary<string, string>();
+                    string[] fileText = new string[0];
 
-                foreach(var kvp in valuesThatNeedToBeSet)
-                {
-                    var entryIndex = Array.FindIndex(fileText, l => l.StartsWith(kvp.Key));
-
-                    if(entryIndex != -1)
+                    if(File.Exists(userFile))
                     {
-                        if(!fileText[entryIndex].EndsWith(kvp.Value))
+                        fileText = File.ReadAllLines(prefFile);
+                    }
+
+                    var notFound = new Dictionary<string, string>();
+
+                    foreach(var kvp in valuesThatNeedToBeSet)
+                    {
+                        var entryIndex = Array.FindIndex(fileText, l => l.StartsWith(kvp.Key));
+
+                        if(entryIndex != -1)
                         {
-                            fileText[entryIndex] = kvp.Key + kvp.Value;
-                            m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                            if(!fileText[entryIndex].EndsWith(kvp.Value))
+                            {
+                                fileText[entryIndex] = kvp.Key + kvp.Value;
+                                m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                            }
+                            else
+                            {
+                                m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                            }
                         }
                         else
                         {
-                            m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                            notFound.Add(kvp.Key, kvp.Value);
                         }
                     }
-                    else
+
+                    var fileTextList = new List<string>(fileText);
+
+                    foreach(var nfk in notFound)
                     {
-                        notFound.Add(kvp.Key, kvp.Value);
+                        m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
+                        fileTextList.Add(nfk.Key + nfk.Value);
                     }
+
+                    File.WriteAllLines(userFile, fileTextList);
                 }
-
-                var fileTextList = new List<string>(fileText);
-
-                foreach(var nfk in notFound)
-                {
-                    m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
-                    fileTextList.Add(nfk.Key + nfk.Value);
-                }
-
-                File.WriteAllLines(userFile, fileTextList);
             }
+
+            // Figure out if firefox is running. If later it is and we kill it, store the path to
+            // firefox.exe so we can restart the process after we're done.
+            string firefoxExePath = string.Empty;
+            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;
 
             // Always kill firefox.
             if(firefoxIsRunning)
@@ -1224,12 +1210,7 @@ namespace CitadelService.Services
             if(firefoxIsRunning && StringExtensions.Valid(firefoxExePath))
             {
                 // Start the process and abandon our handle.
-                using(var p = new Process())
-                {
-                    p.StartInfo.FileName = firefoxExePath;
-                    p.StartInfo.UseShellExecute = false;
-                    p.Start();
-                }
+                ProcessExtensions.StartProcessAsCurrentUser(firefoxExePath);
             }
         }
 
@@ -1270,11 +1251,13 @@ namespace CitadelService.Services
         {
             bool internetShutOff = false;
 
-            if(m_config.UseThreshold)
+            var cfg = Config;
+
+            if(cfg != null && cfg.UseThreshold)
             {
                 var currentTicks = Interlocked.Increment(ref m_thresholdTicks);
 
-                if(currentTicks >= m_config.ThresholdLimit)
+                if(currentTicks >= cfg.ThresholdLimit)
                 {
                     internetShutOff = true;
 
@@ -1287,8 +1270,8 @@ namespace CitadelService.Services
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
-                    
-                    this.m_thresholdEnforcementTimer.Change(m_config.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
+
+                    this.m_thresholdEnforcementTimer.Change(cfg.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
                 }
             }
 
@@ -1304,7 +1287,7 @@ namespace CitadelService.Services
 
             if(internetShutOff)
             {
-                var restoreDate = DateTime.Now.AddTicks(m_config.ThresholdTimeoutPeriod.Ticks);
+                var restoreDate = DateTime.Now.AddTicks(cfg != null ? cfg.ThresholdTimeoutPeriod.Ticks : TimeSpan.FromMinutes(1).Ticks);
 
                 var cooldownPeriod = (restoreDate - DateTime.Now);
 
@@ -1393,20 +1376,6 @@ namespace CitadelService.Services
 
                     return false;
                 }
-
-                /* I don't think we need this at all anymore. Besides,
-                 * many windows assemblies are not signed from what
-                 * explorer is telling me.
-                var cert = X509Certificate.CreateFromSignedFile(appAbsolutePath);
-                if(cert != null)
-                {
-                    var cert2 = new X509Certificate2(cert.Handle);
-
-                    if(cert2.Verify())
-                    {
-                    }
-                }
-                */
             }
 
             try
@@ -1416,7 +1385,7 @@ namespace CitadelService.Services
                 if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
                 {
                     // Just filter anything accessing port 80 and 443.
-                    m_logger.Info("1Filtering application: {0}", appAbsolutePath);
+                    m_logger.Debug("1Filtering application: {0}", appAbsolutePath);
                     return true;
                 }
 
@@ -1431,7 +1400,7 @@ namespace CitadelService.Services
                     }
 
                     // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                    m_logger.Info("2Filtering application: {0}", appAbsolutePath);
+                    m_logger.Debug("2Filtering application: {0}", appAbsolutePath);
                     return true;
                 }
 
@@ -1440,7 +1409,7 @@ namespace CitadelService.Services
                     if(m_blacklistedApplications.Contains(appName))
                     {
                         // Blacklist is in effect and this app is blacklisted. So, force it through.
-                        m_logger.Info("3Filtering application: {0}", appAbsolutePath);
+                        m_logger.Debug("3Filtering application: {0}", appAbsolutePath);
                         return true;
                     }
 
@@ -1448,10 +1417,10 @@ namespace CitadelService.Services
                     return false;
                 }
 
-                // This app was not hit by either an enforced whitelist or blacklist. So, by default we
-                // will filter everything. We should never get here, but just in case.
+                // This app was not hit by either an enforced whitelist or blacklist. So, by default
+                // we will filter everything. We should never get here, but just in case.
 
-                m_logger.Info("4Filtering application: {0}", appAbsolutePath);
+                m_logger.Debug("4Filtering application: {0}", appAbsolutePath);
                 return true;
             }
             catch(Exception e)
@@ -1470,6 +1439,13 @@ namespace CitadelService.Services
         {
             nextAction = Engine.ProxyNextAction.AllowAndIgnoreContent;
             customBlockResponseData = null;
+
+            // Don't allow filtering if our user has been denied access and they
+            // have not logged back in.
+            if(m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            {
+                return;
+            }
 
             bool readLocked = false;
 
@@ -1623,6 +1599,13 @@ namespace CitadelService.Services
         {
             shouldBlock = false;
             customBlockResponseData = null;
+
+            // Don't allow filtering if our user has been denied access and they
+            // have not logged back in.
+            if(m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            {
+                return;
+            }
 
             m_logger.Info("Entering {0}", nameof(OnHttpMessageEnd));
 
@@ -1803,7 +1786,8 @@ namespace CitadelService.Services
 
                         short matchedCategory = -1;
                         string trigger = null;
-                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, m_config != null ? m_config.MaxTextTriggerScanningSize : -1))
+                        var cfg = Config;
+                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
@@ -1889,7 +1873,8 @@ namespace CitadelService.Services
                             {
                                 if(categoryNumber.CategoryId > 0 && m_categoryIndex.GetIsCategoryEnabled(categoryNumber.CategoryId))
                                 {
-                                    var threshold = m_config != null ? m_config.NlpThreshold : 0.9f;
+                                    var cfg = Config;
+                                    var threshold = cfg != null ? cfg.NlpThreshold : 0.9f;
 
                                     if(classificationResult.BestCategoryScore < threshold)
                                     {
@@ -1939,7 +1924,9 @@ namespace CitadelService.Services
             // Reset count to zero.
             Interlocked.Exchange(ref m_thresholdTicks, 0);
 
-            this.m_thresholdCountTimer.Change(m_config.ThresholdTriggerPeriod, Timeout.InfiniteTimeSpan);
+            var cfg = Config;
+
+            this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
         }
 
         /// <summary>
@@ -1974,11 +1961,14 @@ namespace CitadelService.Services
         /// This is always null. Ignore it. 
         /// </param>
         private void OnUpdateTimerElapsed(object state)
-        {
+        {   
+            if(m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            {
+                return;
+            }
+
             try
             {
-                Status = FilterStatus.Synchronizing;
-
                 m_logger.Info("Checking for filter list updates.");
 
                 m_updateRwLock.EnterWriteLock();
@@ -2010,9 +2000,10 @@ namespace CitadelService.Services
                 }
                 else
                 {
-                    if(m_config != null)
+                    var cfg = Config;
+                    if(cfg != null)
                     {
-                        this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                        this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
                     }
                     else
                     {
@@ -2021,19 +2012,6 @@ namespace CitadelService.Services
                 }
 
                 m_updateRwLock.ExitWriteLock();
-
-                // Handled, so give the user back their normal UI.
-                Status = FilterStatus.Running;
-            }
-
-            try
-            {
-                // Challenge user authenticity
-                ChallengeUserAuthenticity();
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
 
@@ -2058,12 +2036,6 @@ namespace CitadelService.Services
 
                     // Start the engine right away, to ensure the atomic bool IsRunning is set.
                     m_filteringEngine.Start();
-
-                    // Make sure our lists are up to date and try to update the app, etc etc. Just
-                    // call our update timer complete handler manually.
-                    OnUpdateTimerElapsed(null);
-
-                    ReloadFilteringRules();
                 }
             }
             catch(Exception e)
@@ -2082,7 +2054,7 @@ namespace CitadelService.Services
                 m_filteringRwLock.EnterWriteLock();
 
                 // Load our configuration file and load configured lists, etc.
-                var configDataFilePath = AppDomain.CurrentDomain.BaseDirectory + "a.dat";
+                var configDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
 
                 if(File.Exists(configDataFilePath))
                 {
@@ -2114,7 +2086,7 @@ namespace CitadelService.Services
                             // Deserialize config
                             try
                             {
-                                m_config = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson, m_configSerializerSettings);
+                                m_userConfig = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson, m_configSerializerSettings);
                             }
                             catch(Exception deserializationError)
                             {
@@ -2123,17 +2095,17 @@ namespace CitadelService.Services
                                 return;
                             }
 
-                            if(m_config.UpdateFrequency.Minutes <= 0 || m_config.UpdateFrequency == Timeout.InfiniteTimeSpan)
+                            if(m_userConfig.UpdateFrequency.Minutes <= 0 || m_userConfig.UpdateFrequency == Timeout.InfiniteTimeSpan)
                             {
                                 // Just to ensure that we enforce a minimum value here.
-                                m_config.UpdateFrequency = TimeSpan.FromMinutes(5);
+                                m_userConfig.UpdateFrequency = TimeSpan.FromMinutes(5);
                             }
 
                             // Enforce DNS if present.
                             TryEnfornceDns();
 
                             // Setup blacklist or whitelisted apps.
-                            foreach(var appName in m_config.BlacklistedApplications)
+                            foreach(var appName in m_userConfig.BlacklistedApplications)
                             {
                                 if(StringExtensions.Valid(appName))
                                 {
@@ -2141,7 +2113,7 @@ namespace CitadelService.Services
                                 }
                             }
 
-                            foreach(var appName in m_config.WhitelistedApplications)
+                            foreach(var appName in m_userConfig.WhitelistedApplications)
                             {
                                 if(StringExtensions.Valid(appName))
                                 {
@@ -2150,23 +2122,23 @@ namespace CitadelService.Services
                             }
 
                             // Setup blocking threshold, anti-tamper mechamisms etc.
-                            if(m_config.UseThreshold)
+                            if(m_userConfig.UseThreshold)
                             {
                                 // Setup the threshold timers and related data members.
                                 InitThresholdData();
                             }
 
-                            if(m_config.CannotTerminate)
+                            if(m_userConfig.CannotTerminate)
                             {
                                 // Turn on process protection if requested.
-                                ProcessProtection.Protect();
+                                CriticalKernelProcessUtility.SetMyProcessAsKernelCritical();
                             }
 
                             // XXX FIXME Update our dashboard view model if there are bypasses
                             // configured. Force this up to the UI thread because it's a UI model.
-                            if(m_config.BypassesPermitted > 0)
+                            if(m_userConfig.BypassesPermitted > 0)
                             {
-                                m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted, m_config.BypassDuration);
+                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration);
                             }
                             else
                             {
@@ -2203,12 +2175,12 @@ namespace CitadelService.Services
                             }
                             catch { }
 
-                            m_filterCollection = new FilterDbCollection(AppDomain.CurrentDomain.BaseDirectory + "rules.db", true, true);
+                            m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
                             m_categoryIndex.SetAll(false);
 
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                             // be an in-memory DB or not.
-                            m_textTriggers = new BagOfTextTriggers(AppDomain.CurrentDomain.BaseDirectory + "t.dat", true, true);
+                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);
 
                             // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();
@@ -2225,7 +2197,7 @@ namespace CitadelService.Services
                             }
 
                             // Load all configured NLP models.
-                            foreach(var nlpEntry in m_config.ConfiguredNlpModels)
+                            foreach(var nlpEntry in m_userConfig.ConfiguredNlpModels)
                             {
                                 var modelEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(nlpEntry.RelativeModelPath)).FirstOrDefault();
                                 if(modelEntry != null)
@@ -2244,7 +2216,7 @@ namespace CitadelService.Services
                             uint totalTriggersLoaded = 0;
 
                             // Load all configured list files.
-                            foreach(var listModel in m_config.ConfiguredLists)
+                            foreach(var listModel in m_userConfig.ConfiguredLists)
                             {
                                 var listEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(listModel.RelativeListPath)).FirstOrDefault();
                                 if(listEntry != null)
@@ -2381,10 +2353,10 @@ namespace CitadelService.Services
                     }
                 }
 
-                if(m_config != null)
+                if(m_userConfig != null)
                 {
                     // Put the new update frequence into effect.
-                    this.m_updateCheckTimer.Change(m_config.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                    this.m_updateCheckTimer.Change(m_userConfig.UpdateFrequency, Timeout.InfiniteTimeSpan);
                 }
             }
             catch(Exception e)
@@ -2417,7 +2389,8 @@ namespace CitadelService.Services
                 }
             }
 
-            m_relaxedPolicyExpiryTimer.Change(m_config.BypassDuration, Timeout.InfiniteTimeSpan);
+            var cfg = Config;
+            m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
             DecrementRelaxedPolicy();
         }
@@ -2426,11 +2399,13 @@ namespace CitadelService.Services
         {
             bool allUsesExhausted = false;
 
-            if(m_config != null)
-            {
-                m_config.BypassesUsed++;
+            var cfg = Config;
 
-                allUsesExhausted = m_config.BypassesPermitted - m_config.BypassesUsed <= 0;
+            if(cfg != null)
+            {
+                cfg.BypassesUsed++;
+
+                allUsesExhausted = cfg.BypassesPermitted - cfg.BypassesUsed <= 0;
 
                 if(allUsesExhausted)
                 {
@@ -2438,7 +2413,7 @@ namespace CitadelService.Services
                 }
                 else
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted - m_config.BypassesUsed, m_config.BypassDuration);
+                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
                 }
             }
             else
@@ -2525,10 +2500,12 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            if(m_config != null)
+            var cfg = Config;
+
+            if(cfg != null)
             {
-                m_config.BypassesUsed = 0;
-                m_ipcServer.NotifyRelaxedPolicyChange(m_config.BypassesPermitted, m_config.BypassDuration);
+                cfg.BypassesUsed = 0;
+                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration);
             }
 
             // Disable the reset timer.
@@ -2550,15 +2527,18 @@ namespace CitadelService.Services
                 {
                     IPAddress primaryDns = null;
                     IPAddress secondaryDns = null;
+
+                    var cfg = Config;
+
                     // Check if any DNS servers are defined, and if so, set them.
-                    if(StringExtensions.Valid(m_config.PrimaryDns))
+                    if(cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
                     {
-                        IPAddress.TryParse(m_config.PrimaryDns.Trim(), out primaryDns);
+                        IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
                     }
 
-                    if(StringExtensions.Valid(m_config.SecondaryDns))
+                    if(cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
                     {
-                        IPAddress.TryParse(m_config.SecondaryDns.Trim(), out secondaryDns);
+                        IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
                     }
 
                     if(primaryDns != null || secondaryDns != null)
@@ -2752,7 +2732,7 @@ namespace CitadelService.Services
                     try
                     {
                         // Pull our critical status.
-                        ProcessProtection.Unprotect();
+                        CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
                     }
                     catch(Exception e)
                     {
@@ -2787,7 +2767,8 @@ namespace CitadelService.Services
 
                         try
                         {
-                            if(m_config != null && m_config.BlockInternet)
+                            var cfg = Config;
+                            if(cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user
                                 // can't browse the web without us. Only do this of course if configured.
@@ -2813,6 +2794,50 @@ namespace CitadelService.Services
                     // Flag that clean shutdown was completed already.
                     m_cleanShutdownComplete = true;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Attempts to determine which neighbour application is the GUI and then, if it is not
+        /// running already as a user process, start the GUI. This should be used in situations like
+        /// when we need to ask the user to authenticate.
+        /// </summary>
+        private void ReviveGuiForCurrentUser()
+        {
+            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
+            
+            try
+            {
+                // Get all exe files in the same dir as this service executable.
+                foreach(var exe in allFilesWhereIam)
+                {
+                    try
+                    {
+                        m_logger.Info("Checking exe : {0}", exe);
+                        // Try to get the exe file metadata.
+                        var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
+
+                        // If our description notes that it's a GUI...
+                        if(fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
+                        {
+                            // We don't care if this is already running. If it truly is our GUI
+                            // and we have not suffered some elabourate ruse, then our GUI will
+                            // handle single instance per user properly anyway.
+                            m_logger.Info("Starting external GUI executable : {0}", exe);
+                            ProcessExtensions.StartProcessAsCurrentUser(exe);
+                            return;
+                        }
+                    }
+                    catch (Exception le)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, le);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error enumerating all files.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
     }

@@ -18,9 +18,7 @@ namespace Te.Citadel.UI.Models
     internal class LoginModel : ObservableObject
     {
         private volatile bool m_currentlyAuthenticating = false;
-
-        private string m_serviceProvider;
-
+        
         private string m_errorMessage;
 
         private string m_userName;
@@ -32,19 +30,6 @@ namespace Te.Citadel.UI.Models
             get
             {
                 return m_currentlyAuthenticating;
-            }
-        }
-
-        public string ServiceProvider
-        {
-            get
-            {
-                return m_serviceProvider;
-            }
-
-            set
-            {
-                m_serviceProvider = value;
             }
         }
 
@@ -101,30 +86,6 @@ namespace Te.Citadel.UI.Models
                 return false;
             }
 
-            // Check to see if the service provider string represents a HTTP or HTTPS URI. If not,
-            // then it's not valid.
-            if(!StringExtensions.Valid(ServiceProvider))
-            {
-                return false;
-            }
-
-            Uri result;
-            if(!Uri.TryCreate(ServiceProvider, UriKind.Absolute, out result))
-            {
-                return false;
-            }
-
-            // Enforce that we're encrypting when not in debug.
-#if !CITADEL_DEBUG
-                if(!result.Scheme.OIEquals(Uri.UriSchemeHttps))
-#else
-            if(!result.Scheme.OIEquals(Uri.UriSchemeHttp) && !result.Scheme.OIEquals(Uri.UriSchemeHttps))
-#endif
-                if(!result.Scheme.OIEquals(Uri.UriSchemeHttp) && !result.Scheme.OIEquals(Uri.UriSchemeHttps))
-                {
-                    return false;
-                }
-
             // Ensure some sort of username has been supplied.
             if(!StringExtensions.Valid(UserName))
             {
@@ -140,7 +101,7 @@ namespace Te.Citadel.UI.Models
             return true;
         }
 
-        public async void Authenticate()
+        public async Task Authenticate()
         {
             ErrorMessage = string.Empty;
 
@@ -175,7 +136,6 @@ namespace Te.Citadel.UI.Models
         public LoginModel()
         {
             // Set the default service provider to the app-global value.
-            m_serviceProvider = WebServiceUtil.Default.ServiceProviderApiAuthPath;
             m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();

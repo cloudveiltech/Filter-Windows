@@ -21,9 +21,7 @@
   <PropertyGroup>
     <StartupObject>Te.Citadel.CitadelMain</StartupObject>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug x86|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug x86\</OutputPath>
@@ -356,7 +354,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <None Include="app.manifest" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>

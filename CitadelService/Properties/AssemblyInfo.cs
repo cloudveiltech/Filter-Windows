@@ -1,4 +1,11 @@
-﻿using System.Reflection;
+﻿/*
+* Copyright © 2017 Jesse Nicholson  
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -8,9 +15,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("CitadelService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Technik Empire")]
 [assembly: AssemblyProduct("CitadelService")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright © 2017 Jesse Nicholson, Licensed under the Mozilla Public License V2.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -26,15 +26,16 @@ namespace Citadel.IPC.Messages
         Running,
 
         /// <summary>
-        /// Status indicates that the filter is awaiting client authentication.
-        /// </summary>
-        AwaitingCredentials,
-
-        /// <summary>
         /// Status indicates that the server is in the process of fetching data from the remote
         /// upstream provider.
         /// </summary>
         Synchronizing,
+
+        /// <summary>
+        /// Status indicates that the server has successfully synchronized its data with the remote
+        /// upstream provider.
+        /// </summary>
+        Synchronized,
 
         /// <summary>
         /// Means that the filter has disabled all internet, because block action threshold detection

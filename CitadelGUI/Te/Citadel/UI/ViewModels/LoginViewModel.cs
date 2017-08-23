@@ -43,12 +43,13 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(m_authenticateCommand == null)
                 {
-                    m_authenticateCommand = new RelayCommand((Action)(() =>
+                    m_authenticateCommand = new RelayCommand((Action)(async () =>
                     {
                         try
-                        {   
-                            m_model.Authenticate();
-                            
+                        {
+                            RequestViewChange(typeof(ProgressWait)); 
+                            await m_model.Authenticate();
+
                         }
                         catch(Exception e)
                         {
@@ -58,28 +59,6 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_authenticateCommand;
-            }
-        }
-
-        /// <summary>
-        /// Binding path for the service provider input field.
-        /// </summary>
-        public string ServiceProvider
-        {
-            get
-            {
-                return m_model.ServiceProvider;
-            }
-
-            set
-            {
-                if(value != null && !value.OIEquals(m_model.ServiceProvider))
-                {
-                    m_authenticateCommand.RaiseCanExecuteChanged();
-
-                    m_model.ServiceProvider = value;
-                    RaisePropertyChanged(nameof(ServiceProvider));
-                }
             }
         }
 

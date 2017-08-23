@@ -48,38 +48,7 @@
                                        Foreground="{StaticResource AccentColorBrush2}"
                                        Kind="User" />
 
-        <IconPacks:PackIconFontAwesome Width="46"
-                                       Height="46"
-                                       Margin="374,111,0,0"
-                                       Foreground="Gray"
-                                       Kind="Plug" />
-
-        <!--  Service provider address. Expected to be a URI before relevant commands will be executable.  -->
-        <TextBlock Width="220"
-                   Margin="10,46,486,0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
-                   Text="Service Provider Address"
-                   TextWrapping="Wrap"
-                   Visibility="Hidden" />
-
-        <TextBox Width="220"
-                 Height="23"
-                 Margin="10,70,486,0"
-                 HorizontalAlignment="Center"
-                 VerticalAlignment="Top"
-                 AcceptsReturn="False"
-                 AcceptsTab="False"
-                 TabIndex="1"
-                 Text="{Binding Path=ServiceProvider,
-                                Mode=TwoWay,
-                                UpdateSourceTrigger=PropertyChanged}"
-                 TextWrapping="Wrap"
-                 Visibility="Hidden" />
+        <IconPacks:PackIconFontAwesome Width="46" Height="46" Margin="374,111,0,0" Foreground="Gray" Kind="Plug" />
 
         <!--  User name for authentication purposes. Expected to have a length greater than 0 and not be whitespace before relevant commands will be executable.  -->
         <TextBlock Width="220"

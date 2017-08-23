@@ -158,23 +158,25 @@
     <Compile Include="Data\Serialization\SafeFloatConverter.cs" />
     <Compile Include="Data\Serialization\SafeIntConverter.cs" />
     <Compile Include="Extensions\NameValueCollectionExtensions.cs" />
+    <Compile Include="Extensions\RegistryExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Extensions\WebHeaderExtensions.cs" />
     <Compile Include="Extensions\X509Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BaseProtectiveService.cs" />
-    <Compile Include="Util\ExitCodes.cs" />
-    <Compile Include="Util\FastHtmlTextExtractor.cs" />
+    <Compile Include="Util\Process\ExitCodes.cs" />
+    <Compile Include="Util\Http\FastHtmlTextExtractor.cs" />
     <Compile Include="Util\FingerPrint.cs" />
+    <Compile Include="..\Contrib\CreateProcessAsUser\ProcessExtensions\ProcessExtensions.cs">
+      <Link>Util\Process\ProcessExtensions.cs</Link>
+    </Compile>
     <Compile Include="Util\GuidUtility.cs" />
-    <Compile Include="Util\HttpUtils.cs" />
-    <Compile Include="Util\LoggerUtil.cs" />
-    <Compile Include="Util\ProcessExecution.cs" />
-    <Compile Include="Util\ProcessProtection.cs" />
+    <Compile Include="Util\Http\HttpUtils.cs" />
+    <Compile Include="Util\Logging\LoggerUtil.cs" />
+    <Compile Include="Util\Process\CriticalKernelProcessUtility.cs" />
+    <Compile Include="Util\Security\AccessControl.cs" />
     <Compile Include="Util\Update\AppcastUpdater.cs" />
     <Compile Include="Util\Update\ApplicationUpdate.cs" />
-    <Compile Include="Util\WebServiceUtil.cs" />
-    <Compile Include="Util\WFPUtility.cs" />
+    <Compile Include="Util\Net\WFPUtility.cs" />
     <Compile Include="WinAPI\SFC.cs" />
     <Compile Include="WinAPI\WindowHelpers.cs" />
     <Compile Include="WinAPI\WindowMessages.cs" />
