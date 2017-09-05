@@ -51,7 +51,7 @@ namespace Citadel.IPC.Messages
     /// will throw.
     /// </summary>
     [Serializable]
-    public class FilterStatusMessage : ServerOnlyMessage
+    public class FilterStatusMessage : BaseMessage
     {
         /// <summary>
         /// The status of the filter. 

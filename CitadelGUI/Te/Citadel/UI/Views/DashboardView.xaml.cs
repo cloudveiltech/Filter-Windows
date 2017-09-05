@@ -35,7 +35,7 @@ namespace Te.Citadel.UI.Views
                 }
 
                 // Add the item to view.
-                dataCtx.BlockEvents.Add(new DashboardViewModel.ViewableBlockedRequests(category, fullRequest));
+                dataCtx.BlockEvents.Add(new ViewableBlockedRequests(category, fullRequest));
             }
             catch(Exception e)
             {
@@ -53,67 +53,6 @@ namespace Te.Citadel.UI.Views
         public void HideDisabledInternetMessage()
         {
             m_disabledInternetGrid.Visibility = Visibility.Hidden;
-        }
-
-        private async void OnRequestReviewBlockActionClicked(object sender, RoutedEventArgs e)
-        {
-            // XXX TODO - Having this code in here is sloppy. Clean this up.
-
-            try
-            {
-                var selectedBlockEvent = (DashboardViewModel.ViewableBlockedRequests)m_blockEventsDataGrid.SelectedItem;
-
-                if(selectedBlockEvent != null)
-                {
-#if UNBLOCK_REQUESTS_IN_BROWSER
-
-                    // XXX TODO - FIXME - WEB SERVICE UTIL SHOULDN'T BE EVERYWHERE
-                    /*
-                    // Try to send the device name as well. Helps distinguish between clients under
-                    // the same account.
-                    string deviceName = string.Empty;
-
-                    try
-                    {
-                        deviceName = Environment.MachineName;
-                    }
-                    catch
-                    {
-                        deviceName = "Unknown";
-                    }
-
-                    var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-                    reportPath = string.Format(
-                        @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}",
-                        reportPath,
-                        Uri.EscapeDataString(selectedBlockEvent.CategoryName),
-                        Uri.EscapeDataString(WebServiceUtil.Default.Username),
-                        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)),
-                        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(selectedBlockEvent.FullRequest))
-                        );
-
-                    System.Diagnostics.Process.Start(reportPath);
-
-                    */
-#else
-                    var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("category={0}&full_request={1}", selectedBlockEvent.CategoryName, Uri.EscapeDataString(selectedBlockEvent.FullRequest)));
-                    var result = await WebServiceUtil.SendResource("/capi/reportreview.php", formData, false);
-
-                    if(result)
-                    {
-                        await DisplayDialogToUser("Success", "Thank you for your feedback. Your review request was successfully received.");
-                    }
-                    else
-                    {
-                        await DisplayDialogToUser("Error", "We were unable to receive your feedback. Please check your internet connection and if this issue persists, contact support.");
-                    }
-#endif
-                }
-            }
-            catch(Exception err)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, err);
-            }
         }
 
         private void OnHyperlinkClicked(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)

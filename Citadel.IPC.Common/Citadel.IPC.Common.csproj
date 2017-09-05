@@ -53,6 +53,7 @@
     <Compile Include="IPC\IPCServer.cs" />
     <Compile Include="IPC\Messages\AuthenticationMessage.cs" />
     <Compile Include="IPC\Messages\BaseMessage.cs" />
+    <Compile Include="IPC\Messages\BlockActionReviewRequestMessage.cs" />
     <Compile Include="IPC\Messages\ClientOnlyMessage.cs" />
     <Compile Include="IPC\Messages\ClientToClientMessage.cs" />
     <Compile Include="IPC\Messages\ClientUpdateResponseMessage.cs" />

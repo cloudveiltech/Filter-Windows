@@ -21,32 +21,35 @@ using Te.Citadel.UI.Views;
 using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.ViewModels
-{
+{ 
+
+    /// <summary>
+    /// Class for displaying block event information in a DataGrid.
+    /// </summary>
+    public class ViewableBlockedRequests : ObservableObject
+    {
+        public string CategoryName
+        {
+            get;
+            private set;
+        }
+
+        public string FullRequest
+        {
+            get;
+            private set;
+        }
+
+        public ViewableBlockedRequests(string category, string fullRequest)
+        {
+            this.CategoryName = category;
+            this.FullRequest = fullRequest;
+        }
+    }
+
     public class DashboardViewModel : BaseCitadelViewModel
     {
-        /// <summary>
-        /// Class for displaying block event information in a DataGrid.
-        /// </summary>
-        public class ViewableBlockedRequests : ObservableObject
-        {
-            public string CategoryName
-            {
-                get;
-                private set;
-            }
-
-            public string FullRequest
-            {
-                get;
-                private set;
-            }
-
-            public ViewableBlockedRequests(string category, string fullRequest)
-            {
-                this.CategoryName = category;
-                this.FullRequest = fullRequest;
-            }
-        }
+        
 
         /// <summary>
         /// The model.
@@ -71,6 +74,11 @@ namespace Te.Citadel.UI.ViewModels
         /// Private data member for the public DeactivateCommand property.
         /// </summary>
         private RelayCommand m_deactivationCommand;
+
+        /// <summary>
+        /// Private data member for the public RequestBlockActionReviewCommand property.
+        /// </summary>
+        private RelayCommand<ViewableBlockedRequests> m_requestBlockActionReviewCommand;
 
         /// <summary>
         /// Private data member for the public ViewLogsCommand property.
@@ -130,6 +138,48 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_deactivationCommand;
+            }
+        }
+
+        /// <summary>
+        /// Command to request the review of a logged block action.
+        /// </summary>
+        public RelayCommand<ViewableBlockedRequests> RequestBlockActionReviewCommand
+        {
+            get
+            {
+                if(m_deactivationCommand == null)
+                {
+                    
+                    m_requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequests>((Action<ViewableBlockedRequests>)((args) =>
+                    {
+                        string category = args.CategoryName;
+                        string fullUrl = args.FullRequest;
+
+                        try
+                        {
+                            Task.Run(() =>
+                            {
+                                using(var ipcClient = new IPCClient())
+                                {
+                                    ipcClient.ConnectedToServer = () =>
+                                    {
+                                        ipcClient.RequestBlockActionReview(category, fullUrl);
+                                    };
+
+                                    ipcClient.WaitForConnection();
+                                    Task.Delay(3000).Wait();
+                                }
+                            });
+                        }
+                        catch(Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                        }
+                    }));
+                }
+
+                return m_requestBlockActionReviewCommand;
             }
         }
 

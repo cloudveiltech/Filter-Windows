@@ -190,6 +190,12 @@ namespace Citadel.IPC
         public ServerGenericParameterlessHandler ClientAcceptedPendingUpdate;
 
         /// <summary>
+        /// Delegate to be called when a client has submitted a block action for
+        /// review.
+        /// </summary>
+        public BlockActionReportHandler ClientRequestsBlockActionReview;
+
+        /// <summary>
         /// Our logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -363,6 +369,26 @@ namespace Citadel.IPC
                     {
                         m_logger.Debug("Client has accepted update.");
                         ClientAcceptedPendingUpdate?.Invoke();
+                    }                    
+                }
+            }
+            else if(msgRealType == typeof(Messages.BlockActionReviewRequestMessage))
+            {
+                m_logger.Debug("Client message is {0}", nameof(Messages.BlockActionReviewRequestMessage));
+
+                var cast = (Messages.BlockActionReviewRequestMessage)message;
+
+                if(cast != null)
+                {
+                    Uri output;
+                    if(Uri.TryCreate(cast.FullRequestUrl, UriKind.Absolute, out output))
+                    {
+                        // Here we'll just recycle the block action message and handler.
+                        ClientRequestsBlockActionReview?.Invoke(new NotifyBlockActionMessage(BlockType.OtherContentClassification, output, string.Empty, cast.CategoryName));
+                    }
+                    else
+                    {
+                        m_logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
                     }                    
                 }
             }

@@ -52,6 +52,8 @@ namespace Te.Citadel
             installProc.WaitForExit();
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
+ 
+            Environment.Exit(0);
 
             base.Dispose();
         }

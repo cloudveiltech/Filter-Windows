@@ -9,11 +9,14 @@ using Citadel.Core.Extensions;
 using Citadel.Core.WinAPI;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Update;
+using Citadel.Core.Windows.WinAPI;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
+using HttpFe.Common;
+using HttpFe.Managed;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
@@ -40,7 +43,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
-using Te.HttpFilteringEngine;
 using WindowsFirewallHelper;
 
 namespace CitadelService.Services
@@ -158,15 +160,15 @@ namespace CitadelService.Services
 
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 
-        private Engine m_filteringEngine;
+        private HttpFilteringEngine m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
 
-        private Engine.FirewallCheckHandler m_firewallCheckCb;
+        private FirewallCheckHandler m_firewallCheckCb;
 
-        private Engine.HttpMessageBeginHandler m_httpMessageBeginCb;
+        private HttpMessageBeginHandler m_httpMessageBeginCb;
 
-        private Engine.HttpMessageEndHandler m_httpMessageEndCb;
+        private HttpMessageEndHandler m_httpMessageEndCb;
 
         private string m_blockedHtmlPage;
 
@@ -335,8 +337,6 @@ namespace CitadelService.Services
 
                 var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
 
-                m_logger.Info("Checking for application updates at {0}.", appUpdateInfoUrl);
-
                 m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
             }
             catch(Exception e)
@@ -498,6 +498,52 @@ namespace CitadelService.Services
                             OnRelaxedPolicyRequested();
                         }
                         break;
+                    }
+                };
+
+                m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
+                {
+                    var curAuthToken = WebServiceUtil.Default.AuthToken;
+
+                    if(curAuthToken != null && curAuthToken.Length > 0)
+                    {   
+                        string deviceName = string.Empty;
+
+                        try
+                        {
+                            deviceName = Environment.MachineName;
+                        }
+                        catch
+                        {
+                            deviceName = "Unknown";
+                        }
+
+                        try
+                        {
+                            var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
+                            reportPath = string.Format(
+                                @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}",
+                                reportPath,
+                                Uri.EscapeDataString(blockActionMsg.Category),
+                                Uri.EscapeDataString(curAuthToken),
+                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)),
+                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockActionMsg.Resource.ToString()))
+                                );
+
+                            //m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
+                            //m_logger.Info("With args: {0}", reportPath);
+
+                            var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
+                            var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
+                            ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
+
+                            //var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+                            //ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
+                        }
+                        catch(Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                        }
                     }
                 };
 
@@ -844,7 +890,7 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new Engine(m_firewallCheckCb, m_httpMessageBeginCb, m_httpMessageEndCb, localCaBundleCertPath, 0, 0, (uint)Environment.ProcessorCount);
+            m_filteringEngine = new HttpFilteringEngine(m_firewallCheckCb, m_httpMessageBeginCb, m_httpMessageEndCb, localCaBundleCertPath, 0, 0, (uint)Environment.ProcessorCount);
 
             // Setup general info, warning and error events.
             m_filteringEngine.OnInfo += EngineOnInfo;
@@ -1063,6 +1109,8 @@ namespace CitadelService.Services
 
             ProbeMasterForApplicationUpdates();
             OnUpdateTimerElapsed(null);
+
+            Status = FilterStatus.Running;
         }
 
         /// <summary>
@@ -1324,7 +1372,7 @@ namespace CitadelService.Services
         /// through the filtering engine, false otherwise.
         /// </returns>
         private bool OnAppFirewallCheck(string appAbsolutePath)
-        {
+        {   
             // XXX TODO - The engine shouldn't even tell us about SYSTEM processes and just silently
             // let them through.
             if(appAbsolutePath.OIEquals("SYSTEM"))
@@ -1435,9 +1483,9 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out Engine.ProxyNextAction nextAction, out byte[] customBlockResponseData)
+        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out ProxyNextAction nextAction, out byte[] customBlockResponseData)
         {
-            nextAction = Engine.ProxyNextAction.AllowAndIgnoreContent;
+            nextAction = ProxyNextAction.AllowAndIgnoreContent;
             customBlockResponseData = null;
 
             // Don't allow filtering if our user has been denied access and they
@@ -1495,7 +1543,7 @@ namespace CitadelService.Services
                             m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
-                        nextAction = Engine.ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                         return;
                     }
 
@@ -1514,7 +1562,7 @@ namespace CitadelService.Services
                             m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
-                        nextAction = Engine.ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                         return;
                     }
 
@@ -1523,7 +1571,7 @@ namespace CitadelService.Services
                     if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
-                        nextAction = Engine.ProxyNextAction.DropConnection;
+                        nextAction = ProxyNextAction.DropConnection;
                         customBlockResponseData = GetBlockedResponse(httpVersion, true);
                         return;
                     }
@@ -1533,7 +1581,7 @@ namespace CitadelService.Services
                     if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
-                        nextAction = Engine.ProxyNextAction.DropConnection;
+                        nextAction = ProxyNextAction.DropConnection;
                         customBlockResponseData = GetBlockedResponse(httpVersion, true);
                         return;
                     }
@@ -1550,7 +1598,7 @@ namespace CitadelService.Services
                     var isJson = contentType.IndexOf("json") != -1;
                     if(isHtml || isJson)
                     {
-                        nextAction = Engine.ProxyNextAction.AllowButRequestContentInspection;
+                        nextAction = ProxyNextAction.AllowButRequestContentInspection;
                         customBlockResponseData = null;
                         return;
                     }
@@ -2723,6 +2771,10 @@ namespace CitadelService.Services
         /// </param>
         private void DoCleanShutdown(bool installSafeguards)
         {
+            // No matter what, ensure that all GUI instances for all users are
+            // immediately shut down, because we, the service, are shutting down.
+            KillAllGuis();
+
             lock(m_cleanShutdownLock)
             {
                 if(!m_cleanShutdownComplete)
@@ -2808,6 +2860,54 @@ namespace CitadelService.Services
             
             try
             {
+                string guiExePath;
+                if(TryGetGuiFullPath(out guiExePath))
+                {
+                    m_logger.Info("Starting external GUI executable : {0}", guiExePath);
+                    ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
+                    return;
+                }               
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error enumerating all files.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+        }
+
+        private void KillAllGuis()
+        {
+            try
+            {
+                string guiExePath;
+                if(TryGetGuiFullPath(out guiExePath))
+                {
+                    foreach(var proc in Process.GetProcesses())
+                    {
+                        try
+                        {
+                            if(proc.MainModule.FileName.OIEquals(guiExePath))
+                            {
+                                proc.Kill();
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+        }
+
+        private bool TryGetGuiFullPath(out string fullGuiExePath)
+        {
+            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
+
+            try
+            {
                 // Get all exe files in the same dir as this service executable.
                 foreach(var exe in allFilesWhereIam)
                 {
@@ -2820,15 +2920,11 @@ namespace CitadelService.Services
                         // If our description notes that it's a GUI...
                         if(fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
                         {
-                            // We don't care if this is already running. If it truly is our GUI
-                            // and we have not suffered some elabourate ruse, then our GUI will
-                            // handle single instance per user properly anyway.
-                            m_logger.Info("Starting external GUI executable : {0}", exe);
-                            ProcessExtensions.StartProcessAsCurrentUser(exe);
-                            return;
+                            fullGuiExePath = exe;
+                            return true;
                         }
                     }
-                    catch (Exception le)
+                    catch(Exception le)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, le);
                     }
@@ -2836,9 +2932,12 @@ namespace CitadelService.Services
             }
             catch(Exception e)
             {
-                m_logger.Error("Error enumerating all files.");
+                m_logger.Error("Error enumerating sibling files.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
+
+            fullGuiExePath = string.Empty;
+            return false;
         }
     }
 }

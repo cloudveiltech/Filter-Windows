@@ -177,6 +177,7 @@
     <Compile Include="Util\Update\AppcastUpdater.cs" />
     <Compile Include="Util\Update\ApplicationUpdate.cs" />
     <Compile Include="Util\Net\WFPUtility.cs" />
+    <Compile Include="WinAPI\AppAssociationHelper.cs" />
     <Compile Include="WinAPI\SFC.cs" />
     <Compile Include="WinAPI\WindowHelpers.cs" />
     <Compile Include="WinAPI\WindowMessages.cs" />

@@ -74,6 +74,14 @@ namespace Te.Citadel
         private Object m_cleanShutdownLock = new object();
 
         /// <summary>
+        /// Used to force-query the server whenever we're told to go into
+        /// a synchronize-wait state.
+        /// </summary>
+        private Timer m_synchronizingTimer;
+
+        private object m_synchronizingTimerLockObj = new object();
+
+        /// <summary>
         /// Logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -461,6 +469,25 @@ namespace Te.Citadel
                         {   
                             // Update our timestamps for last sync.
                             OnViewChangeRequest(typeof(ProgressWait));
+
+                            lock(m_synchronizingTimerLockObj)
+                            {
+                                if(m_synchronizingTimer != null)
+                                {
+                                    m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                                    m_synchronizingTimer.Dispose();
+                                }
+
+                                m_synchronizingTimer = new Timer((state) =>
+                                {
+                                    m_ipcClient.RequestStatusRefresh();
+                                    m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                                    m_synchronizingTimer.Dispose();
+                                });
+
+                                m_synchronizingTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+                            }
+                            
                         }
                         break;
 

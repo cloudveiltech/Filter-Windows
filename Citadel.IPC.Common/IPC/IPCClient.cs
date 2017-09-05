@@ -239,6 +239,31 @@ namespace Citadel.IPC
         }
 
         /// <summary>
+        /// Sends an IPC message to the server notifying that the client has requested a block action
+        /// to be reviewed.
+        /// </summary>
+        /// <param name="category">
+        /// The category of the rule that caused the block action.
+        /// </param>
+        /// <param name="fullRequestUrl">
+        /// The full URL that was blocked by the rule.
+        /// </param>
+        public void RequestBlockActionReview(string category, string fullRequestUrl)
+        {
+            var msg = new BlockActionReviewRequestMessage(category, fullRequestUrl);
+            PushMessage(msg);
+        }
+
+        /// <summary>
+        /// Requests the current status from the IPC server.
+        /// </summary>
+        public void RequestStatusRefresh()
+        {
+            var msg = new FilterStatusMessage(FilterStatus.Query);
+            PushMessage(msg);
+        }
+
+        /// <summary>
         /// Sends credentials to the server to attempt authentication. 
         /// </summary>
         /// <param name="username">

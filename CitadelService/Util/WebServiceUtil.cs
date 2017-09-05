@@ -81,7 +81,7 @@ namespace Citadel.Core.Windows.Util
         /// <summary>
         /// Holds the auth token returned from the last successful auth request. 
         /// </summary>
-		private string AuthToken
+		public string AuthToken
         {
             get
             {
