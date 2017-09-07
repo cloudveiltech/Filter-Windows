@@ -60,6 +60,7 @@ namespace CitadelService.Services
             catch(Exception e)
             {
                 // Critical failure.
+                LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
 
@@ -77,6 +78,11 @@ namespace CitadelService.Services
             // Called on a shutdown event.
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
             return true;
+        }
+
+        public void OnSessionChanged()
+        {
+            ReviveGuiForCurrentUser(true);
         }
 
         #endregion Windows Service API
@@ -572,8 +578,14 @@ namespace CitadelService.Services
                 };
 
                 m_ipcServer.ClientDisconnected = () =>
-                {
+                {   
                     ConnectedClients--;
+
+                    // All GUI clients are gone and no one logged in. Shut it down.
+                    if(ConnectedClients <= 0 && m_ipcServer.WaitingForAuth)
+                    {
+                        Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                    }
                 };
             }
             catch(Exception ipce)
@@ -1111,6 +1123,8 @@ namespace CitadelService.Services
             OnUpdateTimerElapsed(null);
 
             Status = FilterStatus.Running;
+
+            ReviveGuiForCurrentUser(true);
         }
 
         /// <summary>
@@ -2854,7 +2868,7 @@ namespace CitadelService.Services
         /// running already as a user process, start the GUI. This should be used in situations like
         /// when we need to ask the user to authenticate.
         /// </summary>
-        private void ReviveGuiForCurrentUser()
+        private void ReviveGuiForCurrentUser(bool runInTray = false)
         {
             var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
             
@@ -2864,7 +2878,19 @@ namespace CitadelService.Services
                 if(TryGetGuiFullPath(out guiExePath))
                 {
                     m_logger.Info("Starting external GUI executable : {0}", guiExePath);
-                    ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
+
+                    if(runInTray)
+                    {
+                        var sanitizedArgs = "\"" + Regex.Replace("/StartMinimized", @"(\\+)$", @"$1$1") + "\"";
+                        var sanitizedPath = "\"" + Regex.Replace(guiExePath, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
+                        ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
+                    }
+                    else
+                    {
+                        ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
+                    }
+
+                    
                     return;
                 }               
             }

@@ -40,6 +40,9 @@ namespace CitadelService
                             hostCtl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                             fsp.Shutdown();
                         });
+
+                        // When someone logs on, start up a GUI for them.
+                        s.WhenSessionChanged((fsp, hostCtl) => fsp.OnSessionChanged());
                     });
 
                     x.EnableShutdown();

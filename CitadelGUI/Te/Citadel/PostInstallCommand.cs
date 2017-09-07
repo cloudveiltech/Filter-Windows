@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+* Copyright © 2017 Jesse Nicholson
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,8 +19,7 @@ namespace Te.Citadel
     // XXX TODO There are some steps you need to take for the post-install exec to work correctly
     // when making a 64 bit MSI installer. You need to modify the 64 bit MSI as described at the
     // following locations:
-    // http://stackoverflow.com/questions/10275106/badimageformatexception-x64-issue/10281533#10281533
-    // http://stackoverflow.com/questions/5475820/system-badimageformatexception-when-installing-program-from-vs2010-installer-pro/6797989#6797989
+    // http://stackoverflow.com/questions/10275106/badimageformatexception-x64-issue/10281533#10281533 http://stackoverflow.com/questions/5475820/system-badimageformatexception-when-installing-program-from-vs2010-installer-pro/6797989#6797989
     //
     // Just in case. Steps are: First, ensure you have Orca installed. Run Orca and open your
     // project's MSI folder Select the Binary table Double click the cell [Binary Data] for the
@@ -24,7 +30,7 @@ namespace Te.Citadel
     public partial class PostInstallCommand : System.Configuration.Install.Installer
     {
         public PostInstallCommand()
-        {   
+        {
             InitializeComponent();
         }
 
@@ -33,7 +39,7 @@ namespace Te.Citadel
             base.Commit(savedState);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
-            
+
             var filterServiceAssemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FilterServiceProvider.exe");
 
             var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
@@ -52,7 +58,7 @@ namespace Te.Citadel
             installProc.WaitForExit();
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
- 
+
             Environment.Exit(0);
 
             base.Dispose();
@@ -97,7 +103,7 @@ namespace Te.Citadel
             }
             catch
             {
-                return false;   
+                return false;
             }
         }
     }

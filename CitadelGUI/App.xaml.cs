@@ -131,44 +131,7 @@ namespace Te.Citadel
         /// </summary>
         private IPCClient m_ipcClient;
 
-        #endregion Views
-
-        /// <summary>
-        /// Makes this app run at startup for the current user.
-        /// </summary>
-        public void ConfigureStartupTask(bool delete)
-        {
-            try
-            {
-                m_runAtStartupLock.EnterWriteLock();
-
-                using(var rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-                {
-                    if(delete)
-                    {
-                        rk.DeleteValue(Process.GetCurrentProcess().ProcessName, false);
-                    }
-                    else
-                    {
-                        rk.SetValue(Process.GetCurrentProcess().ProcessName, Assembly.GetEntryAssembly().Location);
-
-                        // Make sure that our task isn't disabled elsewhere.                        
-                        using(var drk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run", true))
-                        {
-                            drk.DeleteValue(Process.GetCurrentProcess().ProcessName, false);
-                        }
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-            finally
-            {
-                m_runAtStartupLock.ExitWriteLock();
-            }
-        }        
+        #endregion Views 
 
         /// <summary>
         /// Default ctor. 
@@ -258,10 +221,6 @@ namespace Te.Citadel
             
             // Hook app exiting function. This must be done on this main app thread.            
             this.Exit += OnApplicationExiting;
-
-            // Make sure we run on startup.
-            ConfigureStartupTask(true);
-            ConfigureStartupTask(false);
 
             // Do stuff that must be done on the UI thread first. Here we HAVE to set our initial
             // view state BEFORE we initialize IPC. If we change it after, then we're going to get
@@ -591,6 +550,12 @@ namespace Te.Citadel
                 // Don't actually let the window close, just hide it.
                 e.Cancel = true;
 
+                if(m_mainWindow.CurrentView.Content == m_viewLogin)
+                {
+                    Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
+                    return;
+                }
+
                 // When the main window closes, go to tray and show notification.
                 MinimizeToTray(true);
             });
@@ -678,15 +643,7 @@ namespace Te.Citadel
 
             try
             {
-                if(e.ApplicationExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
-                {
-                    DoCleanShutdown(false);
-                }
-                else
-                {
-                    // Unless explicitly told not to, always use safeguards.
-                    DoCleanShutdown(true);
-                }
+                DoCleanShutdown();
 
                 if(e.ApplicationExitCode == (int)ExitCodes.ShutdownForUpdate)
                 {
@@ -1035,29 +992,13 @@ namespace Te.Citadel
         }
 
         // XXX FIXME
-        private void DoCleanShutdown(bool ensureRunAtStartup)
+        private void DoCleanShutdown()
         {
             lock(m_cleanShutdownLock)
             {
                 if(!m_cleanShutdownComplete)
                 {
                     m_ipcClient.Dispose();
-
-                    // Always delete our startup task...
-                    ConfigureStartupTask(true);
-
-                    if(ensureRunAtStartup)
-                    {
-                        try
-                        {   
-                            // ... then re-create it if necessary.
-                            ConfigureStartupTask(false);
-                        }
-                        catch(Exception e)
-                        {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
-                        }
-                    }
 
                     try
                     {
