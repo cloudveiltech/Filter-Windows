@@ -24,7 +24,7 @@ namespace Te.Citadel
     public partial class PostInstallCommand : System.Configuration.Install.Installer
     {
         public PostInstallCommand()
-        {
+        {   
             InitializeComponent();
         }
 
