@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using NLog;
 using System;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,8 @@ namespace Citadel.Core.Windows.Util.Update
     {
         private Uri m_appcastLocationUri;
 
+        private Logger m_logger;
+
         /// <summary>
         /// Constructs a new AppcastUpdater with the given URI, a URI to an appcast this class will
         /// use to search for updates.
@@ -37,6 +40,8 @@ namespace Citadel.Core.Windows.Util.Update
         public AppcastUpdater(Uri appcastLocation)
         {
             m_appcastLocationUri = appcastLocation;
+
+            m_logger = LoggerUtil.GetAppWideLogger();
         }
 
         /// <summary>
@@ -92,11 +97,13 @@ namespace Citadel.Core.Windows.Util.Update
             {
                 // Failed to load. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
+                LoggerUtil.RecursivelyLogException(m_logger, we);
             }
             catch(Exception e)
             {
                 // Other unknown failure. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
 
             return bestAvailableUpdate;
