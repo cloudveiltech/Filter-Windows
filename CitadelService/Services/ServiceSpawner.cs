@@ -298,23 +298,34 @@ namespace CitadelService.Services
 
             foreach(var entry in reffed)
             {
-                var loaded = Assembly.Load(entry);
-
-                if(collected.ContainsKey(loaded.FullName))
+                try
                 {
-                    continue;
-                }
+                    var loaded = Assembly.Load(entry);
 
-                collected.Add(loaded.FullName, loaded);
-
-                var subRes = RecursivelyGetReferencedAssemblies(loaded, collected);
-
-                foreach(var subEntry in subRes)
-                {
-                    if(!collected.ContainsKey(subEntry.FullName))
+                    if(collected.ContainsKey(loaded.FullName))
                     {
-                        collected.Add(subEntry.FullName, subEntry);
+                        continue;
                     }
+
+                    collected.Add(loaded.FullName, loaded);
+
+                    var subRes = RecursivelyGetReferencedAssemblies(loaded, collected);
+
+                    foreach(var subEntry in subRes)
+                    {
+                        if(!collected.ContainsKey(subEntry.FullName))
+                        {
+                            collected.Add(subEntry.FullName, subEntry);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Rather than discriminate against which DLL's we load here, we'll just do
+                    // this gross try/catch. That way, mixed managed assemblies or assemblies that
+                    // have custom resolution processes for their dependencies will just fail
+                    // and we'll ignore them. We only really want standard libraries and
+                    // common citadel libs so this is fine for our use.
                 }
             }
 

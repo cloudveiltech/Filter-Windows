@@ -796,6 +796,11 @@ namespace CitadelService.Services
                 if(m_lastFetchedUpdate != null)
                 {
                     m_logger.Info("Found update. Asking clients to accept update.");
+
+                    ReviveGuiForCurrentUser();
+
+                    Task.Delay(500).Wait();
+
                     m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString()));
                 }
             }
