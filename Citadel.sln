@@ -14,6 +14,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citadel.IPC.Common", "Citad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CitadelService", "CitadelService\CitadelService.csproj", "{EE522E2C-F9FB-41D9-913F-2FEA9A374078}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup x86", "Installers\Setup\Setup\Setup x86.vdproj", "{3B3F2FC9-A10E-420D-AEE9-3E9E801622C8}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup x64", "Installers\Setup x64\Setup\Setup x64.vdproj", "{9CBB2B24-121F-43E5-8EC2-D8CDB818DD78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +40,14 @@ Global
 		{EE522E2C-F9FB-41D9-913F-2FEA9A374078}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE522E2C-F9FB-41D9-913F-2FEA9A374078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE522E2C-F9FB-41D9-913F-2FEA9A374078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B3F2FC9-A10E-420D-AEE9-3E9E801622C8}.Debug|Any CPU.ActiveCfg = Debug
+		{3B3F2FC9-A10E-420D-AEE9-3E9E801622C8}.Debug|Any CPU.Build.0 = Debug
+		{3B3F2FC9-A10E-420D-AEE9-3E9E801622C8}.Release|Any CPU.ActiveCfg = Release
+		{3B3F2FC9-A10E-420D-AEE9-3E9E801622C8}.Release|Any CPU.Build.0 = Release
+		{9CBB2B24-121F-43E5-8EC2-D8CDB818DD78}.Debug|Any CPU.ActiveCfg = Debug
+		{9CBB2B24-121F-43E5-8EC2-D8CDB818DD78}.Debug|Any CPU.Build.0 = Debug
+		{9CBB2B24-121F-43E5-8EC2-D8CDB818DD78}.Release|Any CPU.ActiveCfg = Release
+		{9CBB2B24-121F-43E5-8EC2-D8CDB818DD78}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

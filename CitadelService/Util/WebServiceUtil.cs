@@ -256,14 +256,8 @@ namespace Citadel.Core.Windows.Util
             var hasInternet = GetHasInternetServiceAsync();
             if(hasInternet == false)
             {
+                m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
                 return AuthenticationResult.ConnectionFailed;
-            }
-
-            string fakeFingerPrint = string.Empty;
-            using(var sec = new SHA1CryptoServiceProvider())
-            {
-                byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes("bosogaa"));
-                fakeFingerPrint = BitConverter.ToString(bt).Replace("-", "");
             }
 
             // Will be set if we get any sort of web exception.
@@ -334,6 +328,7 @@ namespace Citadel.Core.Windows.Util
                     {
                         if(code > 399 && code < 499)
                         {
+                            m_logger.Info("Authentication failed with code: {0}.", code);
                             AuthToken = string.Empty;
                             return AuthenticationResult.Failure;
                         }
@@ -345,7 +340,8 @@ namespace Citadel.Core.Windows.Util
                 // XXX TODO - Is this sufficient?
                 if(e.Status == WebExceptionStatus.Timeout)
                 {
-                    connectionFailure = false;
+                    m_logger.Info("Authentication failed due to timeout.");
+                    connectionFailure = true;
                 }
 
                 try
@@ -360,6 +356,7 @@ namespace Citadel.Core.Windows.Util
                         if(code > 399 && code < 499)
                         {
                             AuthToken = string.Empty;
+                            m_logger.Info("Authentication failed with code: {0}.", code);
                             return AuthenticationResult.Failure;
                         }
 
@@ -371,7 +368,10 @@ namespace Citadel.Core.Windows.Util
                         }
                     }
                 }
-                catch { }
+                catch(Exception iex)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, iex);
+                }
 
                 // Log the exception.
                 m_logger.Error(e.Message);
@@ -386,6 +386,7 @@ namespace Citadel.Core.Windows.Util
                     e = e.InnerException;
                 }
 
+                m_logger.Info("Authentication failed due to a failure to process the request and response.");
                 AuthToken = string.Empty;
                 return AuthenticationResult.Failure;
             }
@@ -404,8 +405,14 @@ namespace Citadel.Core.Windows.Util
                 }
             }
 
+            m_logger.Info("Authentication failed due to a complete failure to process the request and response.");
+
             // If we had success, we should/would have returned by now.
-            AuthToken = string.Empty;
+            if(!connectionFailure)
+            {
+                AuthToken = string.Empty;
+            }
+
             return connectionFailure ? AuthenticationResult.ConnectionFailed : AuthenticationResult.Failure;
         }
 
