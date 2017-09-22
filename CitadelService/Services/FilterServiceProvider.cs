@@ -8,6 +8,7 @@
 using Citadel.Core.Extensions;
 using Citadel.Core.WinAPI;
 using Citadel.Core.Windows.Util;
+using Citadel.Core.Windows.Util.Net;
 using Citadel.Core.Windows.Util.Update;
 using Citadel.Core.Windows.WinAPI;
 using Citadel.IPC;
@@ -319,6 +320,15 @@ namespace CitadelService.Services
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
+
+            NetworkStatus.Default.ConnectionStateChanged += () =>
+            {
+                // Bit of a hack here to ensure that we immediately purge
+                if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+                {
+                    TryEnfornceDns();
+                }
+            };
         }
 
         private void OnStartup()
@@ -2060,7 +2070,7 @@ namespace CitadelService.Services
             finally
             {
                 // Enable the timer again.
-                if(!WebServiceUtil.GetHasInternetServiceAsync())
+                if(!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
                 {
                     // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
                     this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
@@ -2592,25 +2602,10 @@ namespace CitadelService.Services
             {
                 try
                 {
-                    IPAddress primaryDns = null;
-                    IPAddress secondaryDns = null;
 
-                    var cfg = Config;
-
-                    // Check if any DNS servers are defined, and if so, set them.
-                    if(cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+                    if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
                     {
-                        IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
-                    }
-
-                    if(cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
-                    {
-                        IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
-                    }
-
-                    if(primaryDns != null || secondaryDns != null)
-                    {
-                        var setDnsForNic = new Action<string, IPAddress, IPAddress>((nicName, pDns, sDns) =>
+                        var setDnsForNicToDhcp = new Action<string>((nicName) =>
                         {
                             using(var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
                             {
@@ -2618,53 +2613,7 @@ namespace CitadelService.Services
                                 {
                                     foreach(var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
                                     {
-                                        using(var newDNS = managementObject.GetMethodParameters("SetDNSServerSearchOrder"))
-                                        {
-                                            List<string> dnsServers = new List<string>();
-                                            var existingDns = (string[])newDNS["DNSServerSearchOrder"];
-                                            if(existingDns != null && existingDns.Length > 0)
-                                            {
-                                                dnsServers = new List<string>(existingDns);
-                                            }
-
-                                            bool changed = false;
-
-                                            if(pDns != null)
-                                            {
-                                                if(!dnsServers.Contains(pDns.ToString()))
-                                                {
-                                                    dnsServers.Insert(0, pDns.ToString());
-                                                    changed = true;
-                                                }
-                                            }
-                                            if(sDns != null)
-                                            {
-                                                if(!dnsServers.Contains(sDns.ToString()))
-                                                {
-                                                    changed = true;
-
-                                                    if(dnsServers.Count > 0)
-                                                    {
-                                                        dnsServers.Insert(1, sDns.ToString());
-                                                    }
-                                                    else
-                                                    {
-                                                        dnsServers.Add(sDns.ToString());
-                                                    }
-                                                }
-                                            }
-
-                                            if(changed)
-                                            {
-                                                m_logger.Info("Setting DNS for adapter {1} to {0}.", nicName, string.Join(",", dnsServers.ToArray()));
-                                                newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
-                                                managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
-                                            }
-                                            else
-                                            {
-                                                m_logger.Info("No change in DNS settings.");
-                                            }
-                                        }
+                                        managementObject.InvokeMethod("SetDNSServerSearchOrder", null, null);
                                     }
                                 }
                             }
@@ -2674,20 +2623,108 @@ namespace CitadelService.Services
 
                         foreach(var iface in ifaces)
                         {
-                            bool needsUpdate = false;
+                            setDnsForNicToDhcp(iface.Description);
+                        }
+                    }
+                    else
+                    {
+                        IPAddress primaryDns = null;
+                        IPAddress secondaryDns = null;
 
-                            if(primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
-                            {
-                                needsUpdate = true;
-                            }
-                            if(secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
-                            {
-                                needsUpdate = true;
-                            }
+                        var cfg = Config;
 
-                            if(needsUpdate)
+                        // Check if any DNS servers are defined, and if so, set them.
+                        if(cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+                        {
+                            IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
+                        }
+
+                        if(cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
+                        {
+                            IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
+                        }
+
+                        if(primaryDns != null || secondaryDns != null)
+                        {
+                            var setDnsForNic = new Action<string, IPAddress, IPAddress>((nicName, pDns, sDns) =>
                             {
-                                setDnsForNic(iface.Description, primaryDns, secondaryDns);
+                                using(var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+                                {
+                                    using(var networkConfigs = networkConfigMng.GetInstances())
+                                    {
+                                        foreach(var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
+                                        {
+                                            using(var newDNS = managementObject.GetMethodParameters("SetDNSServerSearchOrder"))
+                                            {
+                                                List<string> dnsServers = new List<string>();
+                                                var existingDns = (string[])newDNS["DNSServerSearchOrder"];
+                                                if(existingDns != null && existingDns.Length > 0)
+                                                {
+                                                    dnsServers = new List<string>(existingDns);
+                                                }
+
+                                                bool changed = false;
+
+                                                if(pDns != null)
+                                                {
+                                                    if(!dnsServers.Contains(pDns.ToString()))
+                                                    {
+                                                        dnsServers.Insert(0, pDns.ToString());
+                                                        changed = true;
+                                                    }
+                                                }
+                                                if(sDns != null)
+                                                {
+                                                    if(!dnsServers.Contains(sDns.ToString()))
+                                                    {
+                                                        changed = true;
+
+                                                        if(dnsServers.Count > 0)
+                                                        {
+                                                            dnsServers.Insert(1, sDns.ToString());
+                                                        }
+                                                        else
+                                                        {
+                                                            dnsServers.Add(sDns.ToString());
+                                                        }
+                                                    }
+                                                }
+
+                                                if(changed)
+                                                {
+                                                    m_logger.Info("Setting DNS for adapter {1} to {0}.", nicName, string.Join(",", dnsServers.ToArray()));
+                                                    newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
+                                                    managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
+                                                }
+                                                else
+                                                {
+                                                    m_logger.Info("No change in DNS settings.");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+
+                            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+
+                            foreach(var iface in ifaces)
+                            {
+                                bool needsUpdate = false;
+
+                                if(primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
+                                {
+                                    needsUpdate = true;
+                                }
+                                if(secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
+                                {
+                                    needsUpdate = true;
+                                }
+
+                                if(needsUpdate)
+                                {
+                                    setDnsForNic(iface.Description, primaryDns, secondaryDns);
+                                }
                             }
                         }
                     }

@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Windows.Util;
+using Citadel.Core.Windows.Util.Net;
 using GalaSoft.MvvmLight;
 using System;
 using System.Net;
@@ -18,44 +19,20 @@ namespace Te.Citadel.UI.Models
     internal class MainWindowModel : ObservableObject
     {
         private volatile bool m_internetIsConnected = false;
-
-        private Timer m_timer;
-
+        
         public MainWindowModel()
         {
-            // Start out with a 5 second delay for the first check.
-            m_timer = new Timer(new TimerCallback(OnUpdateTimer), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+            InitInetMonitoring();
         }
 
-        private void OnUpdateTimer(object state)
+        private void InitInetMonitoring()
         {
-            m_timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            this.InternetIsConnected = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
 
-            bool hasInternet = false;
-            try
+            NetworkStatus.Default.ConnectionStateChanged += () =>
             {
-                // We'll ping google's public DNS servers to avoid getting flagged as some sort of bot.
-                Ping googleDnsPing = new Ping();
-                byte[] buffer = new byte[32];
-                PingReply reply = googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions()).Result;
-                hasInternet = (reply.Status == IPStatus.Success);
-            }
-            catch {
-                hasInternet = false;
-            }
-
-            this.InternetIsConnected = hasInternet;
-
-            if(hasInternet == false)
-            {
-                // If we're disconnected, we're going to check every 10 seconds if we're connected.
-                // if we're connected, we'll set it a little higher.
-                m_timer.Change(TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
-            }
-            else
-            {
-                m_timer.Change(TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
-            }
+                this.InternetIsConnected = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            };
         }
 
         public bool InternetIsConnected

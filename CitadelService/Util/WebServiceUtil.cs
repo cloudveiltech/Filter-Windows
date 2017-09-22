@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util.Net;
 using Microsoft.Win32;
 using NLog;
 using System;
@@ -211,27 +212,6 @@ namespace Citadel.Core.Windows.Util
             m_logger = LoggerUtil.GetAppWideLogger();
         }
 
-        /// <summary>
-        /// Checks for internet connectivity by pinging google's pub DNS in an asynchronous fashion. 
-        /// </summary>
-        /// <returns>
-        /// True if a response to the ping was received, false otherwise. 
-        /// </returns>
-        public static bool GetHasInternetServiceAsync()
-        {
-            try
-            {
-                // We'll ping google's public DNS servers to avoid getting flagged as some sort of bot.
-                Ping googleDnsPing = new Ping();
-                byte[] buffer = new byte[32];
-                PingReply reply = googleDnsPing.SendPingAsync(IPAddress.Parse("8.8.4.4"), 1000, buffer, new PingOptions()).Result;
-                return (reply.Status == IPStatus.Success);
-            }
-            catch { }
-
-            return false;
-        }
-
         public AuthenticationResult Authenticate(string username, byte[] unencryptedPassword)
         {
             m_logger.Error(nameof(Authenticate));
@@ -253,7 +233,7 @@ namespace Citadel.Core.Windows.Util
             //
 
             // Don't bother if we don't have internet.
-            var hasInternet = GetHasInternetServiceAsync();
+            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
             if(hasInternet == false)
             {
                 m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
