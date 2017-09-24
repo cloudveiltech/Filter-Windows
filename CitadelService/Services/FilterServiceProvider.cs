@@ -801,7 +801,7 @@ namespace CitadelService.Services
             {
                 m_appcastUpdaterLock.EnterWriteLock();
 
-                m_lastFetchedUpdate = m_updater.CheckForUpdate().Result;
+                m_lastFetchedUpdate = m_updater.CheckForUpdate(m_userConfig != null ? m_userConfig.UpdateChannel : string.Empty).Result;
 
                 if(m_lastFetchedUpdate != null)
                 {
@@ -1133,8 +1133,7 @@ namespace CitadelService.Services
                 Environment.Exit(-1);
                 return;
             }
-
-            ProbeMasterForApplicationUpdates();
+            
             OnUpdateTimerElapsed(null);
 
             Status = FilterStatus.Running;

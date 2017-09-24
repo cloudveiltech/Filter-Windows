@@ -224,6 +224,15 @@ namespace CitadelService.Data.Models
             set;
         } = -1;
 
+        /// <summary>
+        /// The update channel to use when searching for application updates.
+        /// </summary>
+        public string UpdateChannel
+        {
+            get;
+            set;
+        } = string.Empty;
+
         public AppConfigModel()
         {
             

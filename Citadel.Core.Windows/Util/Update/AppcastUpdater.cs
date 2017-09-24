@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Extensions;
 using NLog;
 using System;
 using System.IO;
@@ -48,11 +49,15 @@ namespace Citadel.Core.Windows.Util.Update
         /// Checks for application updates broadcasted by the appcast URI provided when this object
         /// was constructed.
         /// </summary>
+        /// <param name="myUpdateChannel">
+        /// An optional update channel. Will only look for updates where the channel of the update
+        /// matches this value in a case-insensitive fashion.
+        /// </param>
         /// <returns>
         /// Returns an ApplicationUpdate if an update that supersedes the executing assembly version
         /// could be found. Returns null otherwise.
         /// </returns>
-        public async Task<ApplicationUpdate> CheckForUpdate()
+        public async Task<ApplicationUpdate> CheckForUpdate(string myUpdateChannel = null)
         {
             var thisVersion = Assembly.GetEntryAssembly().GetName().Version;
             var bestVersion = thisVersion;
@@ -76,7 +81,14 @@ namespace Citadel.Core.Windows.Util.Update
                         {
                             var sparkleVersion = enclosure.AttributeExtensions.Where(x => x.Key.Name == "version").FirstOrDefault().Value;
                             var sparkleOs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "os").FirstOrDefault().Value;
+                            var updateChannel = enclosure.AttributeExtensions.Where(x => x.Key.Name == "channel").FirstOrDefault().Value;
                             var sparkleInstallerArgs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "installerArguments").FirstOrDefault().Value;
+
+                            if(StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
+                            {
+                                m_logger.Info("Skipping app update in channel {0} because it doesn't match required channel {1}.", updateChannel, myUpdateChannel);
+                                continue;
+                            }
 
                             Uri url = enclosure.Uri;
                             long length = enclosure.Length;
@@ -84,8 +96,12 @@ namespace Citadel.Core.Windows.Util.Update
 
                             var thisUpdateVersion = Version.Parse(sparkleVersion);
 
+                            m_logger.Info("App version {0} detected in update channel. Checking if superior.", sparkleVersion);
+
                             if(thisUpdateVersion > bestVersion)
                             {
+                                m_logger.Info("Available app update with version {0} is superior to current best version {1}.", bestVersion.ToString());
+
                                 bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs);
                                 bestVersion = thisUpdateVersion;
                             }
