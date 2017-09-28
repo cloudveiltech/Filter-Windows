@@ -256,7 +256,3 @@ BuildBot/
 
 # Ignore tests
 Tests/
-
-# Ignore incomplete things
-RegistryExtensions.cs
-AccessControl.cs
