@@ -16,8 +16,7 @@ using Citadel.IPC.Messages;
 using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
-using HttpFe.Common;
-using HttpFe.Managed;
+using HttpFilteringEngine.Managed;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
@@ -167,16 +166,10 @@ namespace CitadelService.Services
 
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 
-        private HttpFilteringEngine m_filteringEngine;
+        private AbstractEngine m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
-
-        private FirewallCheckHandler m_firewallCheckCb;
-
-        private HttpMessageBeginHandler m_httpMessageBeginCb;
-
-        private HttpMessageEndHandler m_httpMessageEndCb;
-
+        
         private string m_blockedHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
@@ -907,22 +900,21 @@ namespace CitadelService.Services
             var localCaBundleCertPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ca-cert.pem");
             File.WriteAllText(localCaBundleCertPath, caFileBuilder.ToString());
 
-            // Set firewall CB.
-            m_firewallCheckCb = OnAppFirewallCheck;
-
-            m_httpMessageBeginCb = OnHttpMessageBegin;
-
-            m_httpMessageEndCb = OnHttpMessageEnd;
-
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new HttpFilteringEngine(m_firewallCheckCb, m_httpMessageBeginCb, m_httpMessageEndCb, localCaBundleCertPath, 0, 0, (uint)Environment.ProcessorCount);
+            m_filteringEngine = AbstractEngine.Create(localCaBundleCertPath, 0, 0);
 
-            // Setup general info, warning and error events.
-            m_filteringEngine.OnInfo += EngineOnInfo;
-            m_filteringEngine.OnWarning += EngineOnWarning;
-            m_filteringEngine.OnError += EngineOnError;
+            // Setup general info, warning and error events.            
+            m_filteringEngine.OnInfo = EngineOnInfo;
+            m_filteringEngine.OnWarning = EngineOnWarning;
+            m_filteringEngine.OnError = EngineOnError;
+
+            // Setup firewall check, inspection callbacks
+            m_filteringEngine.FirewallCheckCallback = OnAppFirewallCheck;
+            m_filteringEngine.HttpMessageBeginCallback = OnHttpMessageBegin;
+            m_filteringEngine.HttpMessageEndCallback = OnHttpMessageEnd;
+
 
             // Start filtering, always.
             if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
@@ -1511,10 +1503,9 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out ProxyNextAction nextAction, out byte[] customBlockResponseData)
+        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out ProxyNextAction nextAction, ResponseWriter customResponseWriter)
         {
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
-            customBlockResponseData = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1600,7 +1591,7 @@ namespace CitadelService.Services
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customBlockResponseData = GetBlockedResponse(httpVersion, true);
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
                         return;
                     }
 
@@ -1610,7 +1601,7 @@ namespace CitadelService.Services
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customBlockResponseData = GetBlockedResponse(httpVersion, true);
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
                         return;
                     }
                 }
@@ -1626,8 +1617,7 @@ namespace CitadelService.Services
                     var isJson = contentType.IndexOf("json") != -1;
                     if(isHtml || isJson)
                     {
-                        nextAction = ProxyNextAction.AllowButRequestContentInspection;
-                        customBlockResponseData = null;
+                        nextAction = ProxyNextAction.AllowButRequestContentInspection;                        
                         return;
                     }
                 }
@@ -1671,10 +1661,9 @@ namespace CitadelService.Services
         /// </param>
         /// <param name="customBlockResponseData">
         /// </param>
-        private void OnHttpMessageEnd(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out bool shouldBlock, out byte[] customBlockResponseData)
+        private void OnHttpMessageEnd(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out bool shouldBlock, ResponseWriter customResponseWriter)
         {
             shouldBlock = false;
-            customBlockResponseData = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1745,7 +1734,7 @@ namespace CitadelService.Services
                     if(contentClassResult > 0)
                     {
                         shouldBlock = true;
-                        customBlockResponseData = GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1);
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1));
                         OnRequestBlocked(contentClassResult, blockType, requestUri);
                         m_logger.Info("Response blocked by content classification.");
                     }
@@ -2850,6 +2839,7 @@ namespace CitadelService.Services
                     {
                         // Shut down engine.
                         StopFiltering();
+                        m_filteringEngine.Dispose();
                     }
                     catch(Exception e)
                     {
