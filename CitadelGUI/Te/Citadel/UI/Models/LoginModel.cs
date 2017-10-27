@@ -6,7 +6,6 @@
 */
 
 using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using GalaSoft.MvvmLight;
 using System;
@@ -18,7 +17,7 @@ namespace Te.Citadel.UI.Models
     internal class LoginModel : ObservableObject
     {
         private volatile bool m_currentlyAuthenticating = false;
-        
+
         private string m_errorMessage;
 
         private string m_userName;
@@ -110,15 +109,15 @@ namespace Te.Citadel.UI.Models
             try
             {
                 await Task.Run(() =>
-                {   
+                {
                     using(var ipcClient = new IPCClient())
-                    {                        
+                    {
                         ipcClient.ConnectedToServer = () =>
-                        {                            
+                        {
                             ipcClient.AttemptAuthentication(m_userName, m_userPassword);
                         };
 
-                        ipcClient.WaitForConnection();                        
+                        ipcClient.WaitForConnection();
                         Task.Delay(3000).Wait();
                     }
                 });
