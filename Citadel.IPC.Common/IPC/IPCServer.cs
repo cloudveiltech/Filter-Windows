@@ -142,6 +142,8 @@ namespace Citadel.IPC
     /// </summary>
     public delegate void ServerGenericParameterlessHandler();
 
+    public delegate void RequestConfigUpdateHandler(RequestConfigUpdateMessage message);
+
     /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
@@ -152,6 +154,8 @@ namespace Citadel.IPC
         /// Actual named pipe server wrapper. 
         /// </summary>
         private NamedPipeServer<BaseMessage> m_server;
+
+        private IPCMessageTracker m_ipcQueue;
 
         /// <summary>
         /// Delegate to be called when a client requests a relaxed policy. 
@@ -196,6 +200,12 @@ namespace Citadel.IPC
         public BlockActionReportHandler ClientRequestsBlockActionReview;
 
         /// <summary>
+        /// Delegate to be called when a client is requesting a configuration/ruleset update.
+        /// </summary>
+        public RequestConfigUpdateHandler RequestConfigUpdate;
+
+        
+        /// <summary>
         /// Our logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -231,6 +241,8 @@ namespace Citadel.IPC
             m_server.Error += M_server_Error;
 
             m_server.Start();
+
+            m_ipcQueue = new IPCMessageTracker();
 
             m_logger.Info("IPC Server started.");
         }
@@ -390,6 +402,17 @@ namespace Citadel.IPC
                     {
                         m_logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
                     }                    
+                }
+            }
+            else if(msgRealType == typeof(Messages.RequestConfigUpdateMessage))
+            {
+                m_logger.Debug("Client message is {0}", nameof(Messages.RequestConfigUpdateMessage));
+
+                var cast = (Messages.RequestConfigUpdateMessage)message;
+
+                if(cast != null)
+                {
+                    RequestConfigUpdate?.Invoke(cast);
                 }
             }
             else

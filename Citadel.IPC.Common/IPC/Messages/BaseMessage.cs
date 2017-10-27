@@ -17,6 +17,21 @@ namespace Citadel.IPC.Messages
     [Serializable]
     public class BaseMessage
     {
-        
+        /// <summary>
+        /// This is an ID to identify a message.
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// This is the ID to which this message is a reply.
+        /// 
+        /// If null, this is not a reply.
+        /// </summary>
+        public Guid ReplyToId { get; set; }
+
+        public BaseMessage()
+        {
+            Id = Guid.NewGuid();
+        }
     }
 }

@@ -698,7 +698,7 @@ namespace CitadelService.Services
         /// <returns>
         /// True if new list data was downloaded, false otherwise. 
         /// </returns>
-        private bool UpdateListData()
+        private UpdateResult UpdateListData()
         {
             HttpStatusCode code;
             var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck, out code);
