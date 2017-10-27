@@ -97,6 +97,17 @@ namespace Citadel.IPC
         /// </summary>
         private readonly Logger m_logger;
 
+        /// <summary>
+        /// All message handlers get added to this IPC client as it will stick around and handle all the incoming messages.
+        /// </summary>
+        public static IPCClient Default { get; set; }
+
+        public static IPCClient InitDefault()
+        {
+            Default = new IPCClient(true);
+            return Default;
+        }
+
         public IPCClient(bool autoReconnect = false)
         {
             m_logger = LoggerUtil.GetAppWideLogger();
@@ -144,6 +155,11 @@ namespace Citadel.IPC
             // This is so gross, but unfortuantely we can't just switch on a type.
             // We can come up with a nice mapping system so we can do a switch,
             // but this can wait.
+
+            if(Default.m_ipcQueue.HandleMessage(message))
+            {
+                return;
+            }
 
             if(m_ipcQueue.HandleMessage(message))
             {
@@ -357,7 +373,14 @@ namespace Citadel.IPC
             
             if(replyHandler != null)
             {
-                m_ipcQueue.AddMessage(msg, replyHandler);
+                if (Default != null)
+                {
+                    Default.m_ipcQueue.AddMessage(msg, replyHandler);
+                }
+                else
+                {
+                    m_ipcQueue.AddMessage(msg, replyHandler);
+                }
             }
         }
 

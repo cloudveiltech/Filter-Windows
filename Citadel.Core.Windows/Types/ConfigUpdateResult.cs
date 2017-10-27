@@ -11,6 +11,7 @@ namespace Citadel.Core.Windows.Types
     {
         Updated,
         UpToDate,
-        NoInternet
+        NoInternet,
+        ErrorOccurred
     }
 }

@@ -7,6 +7,7 @@
 
 using Citadel.Core.Extensions;
 using Citadel.Core.WinAPI;
+using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Net;
 using Citadel.Core.Windows.Util.Update;
@@ -698,7 +699,7 @@ namespace CitadelService.Services
         /// <returns>
         /// True if new list data was downloaded, false otherwise. 
         /// </returns>
-        private UpdateResult UpdateListData()
+        private ConfigUpdateResult UpdateListData()
         {
             HttpStatusCode code;
             var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck, out code);
@@ -748,7 +749,7 @@ namespace CitadelService.Services
                     var cfg = Config;
                     if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
                     {
-                        return true;
+                        return ConfigUpdateResult.Updated;
                     }
                 }
 
@@ -768,7 +769,7 @@ namespace CitadelService.Services
                     }
                 }
 
-                return needsUpdate;
+                return needsUpdate ? ConfigUpdateResult.Updated : ConfigUpdateResult.UpToDate;
             }
             else
             {
@@ -779,11 +780,11 @@ namespace CitadelService.Services
                 var cfg = Config;
                 if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
                 {
-                    return true;
+                    return ConfigUpdateResult.NoInternet;
                 }
             }
 
-            return false;
+            return ConfigUpdateResult.UpToDate;
         }
 
         private void ProbeMasterForApplicationUpdates()
@@ -2018,19 +2019,9 @@ namespace CitadelService.Services
             this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
-        /// <summary>
-        /// Called every X minutes by the update timer. We check for new lists, and hot-swap the
-        /// rules if we have found new ones. We also check for program updates.
-        /// </summary>
-        /// <param name="state">
-        /// This is always null. Ignore it. 
-        /// </param>
-        private void OnUpdateTimerElapsed(object state)
-        {   
-            if(m_ipcServer != null && m_ipcServer.WaitingForAuth)
-            {
-                return;
-            }
+        public ConfigUpdateResult UpdateAndWriteList()
+        {
+            ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
 
             try
             {
@@ -2038,7 +2029,8 @@ namespace CitadelService.Services
 
                 m_updateRwLock.EnterWriteLock();
 
-                bool gotUpdatedFilterLists = UpdateListData();
+                result = UpdateListData();
+                bool gotUpdatedFilterLists = result == ConfigUpdateResult.Updated ? true : false;
 
                 if(gotUpdatedFilterLists)
                 {
@@ -2078,6 +2070,25 @@ namespace CitadelService.Services
 
                 m_updateRwLock.ExitWriteLock();
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Called every X minutes by the update timer. We check for new lists, and hot-swap the
+        /// rules if we have found new ones. We also check for program updates.
+        /// </summary>
+        /// <param name="state">
+        /// This is always null. Ignore it. 
+        /// </param>
+        private void OnUpdateTimerElapsed(object state)
+        {
+            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            {
+                return;
+            }
+
+
         }
 
         /// <summary>

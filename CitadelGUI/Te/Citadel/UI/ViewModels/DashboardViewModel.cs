@@ -183,6 +183,29 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private RelayCommand m_requestUpdateCommand;
+        public RelayCommand RequestUpdateCommand
+        {
+            get
+            {
+                if(m_requestUpdateCommand == null)
+                {
+                    m_requestUpdateCommand = new RelayCommand(() =>
+                    {
+                        using (IPCClient client = new IPCClient())
+                        {
+                            client.RequestConfigUpdate((message) =>
+                            {
+                                m_logger.Info("We got a config update message back.");
+                            });
+                        }
+                    });
+                }
+
+                return m_requestUpdateCommand;
+            }
+        }
+
         public RelayCommand ViewLogsCommand
         {
             get

@@ -332,6 +332,16 @@
                         Text="Review Logs"
                         TextWrapping="Wrap" />
 
+                    <Button
+                        x:Name="requestUpdate"
+                        Content="Update Configuration"
+                        HorizontalAlignment="Left"
+                        Margin="144,263,0,0"
+                        VerticalAlignment="Top"
+                        Width="136"
+                        Style="{StaticResource AccentedSquareButtonStyle}"
+                        Command="{Binding RequestUpdateCommand}"/>
+
                     <!--  View log directory button.  -->
                     <Button
                         Width="136"
@@ -341,7 +351,7 @@
                         Command="{Binding ViewLogsCommand}"
                         Content="View Log Files"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
-
+                    
                     <!--  Request deactivation button.  -->
                     <Button
                         Width="136"
