@@ -273,6 +273,7 @@ namespace Citadel.Core.Windows.Util
                 // XXX TODO - This is naughty, because we're putting our password into a string, so
                 // it will linger in memory. However, it appears that the provided API doesn't give
                 // us any choice.
+                // KF NOTE: Why System.String is insecure. https://stackoverflow.com/questions/1166952/net-secure-memory-structures
                 var encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + Encoding.UTF8.GetString(unencryptedPassword)));
                 authRequest.Headers.Add("Authorization", "Basic " + encoded);
 
