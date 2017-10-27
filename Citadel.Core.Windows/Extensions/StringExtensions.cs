@@ -8,6 +8,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 namespace Citadel.Core.Extensions
 {
@@ -93,35 +94,66 @@ namespace Citadel.Core.Extensions
             }
         }
 
-        public static byte[] SecureStringBytes(this SecureString str)
+        /// <summary>
+        /// Returns a byte array with encoding.
+        /// </summary>
+        /// <param name="str">Secure string to get encoded byte array from.</param>
+        /// <param name="encoding">encoding to encode byte array with. Defaults to UTF-8.</param>
+        /// <returns></returns>
+        public static byte[] SecureStringBytes(this SecureString str, Encoding encoding = null)
         {
-            IntPtr bstrThis = IntPtr.Zero;
-            byte[] managed = new byte[0];
+            IntPtr bstr = IntPtr.Zero;
+            int strLength = str.Length;
+
+            char[] arr = new char[str.Length];
+            byte[] managed = null;
+
+            encoding = encoding ?? Encoding.UTF8;
+
             try
             {
-                bstrThis = Marshal.SecureStringToBSTR(str);
+                bstr = Marshal.SecureStringToBSTR(str);
 
-                if(bstrThis != IntPtr.Zero)
+                if (bstr != IntPtr.Zero)
                 {
-                    int thisLen = Marshal.ReadInt32(bstrThis, -4);
-
-                    managed = new byte[thisLen];
-
-                    for(var i = 0; i < thisLen; ++i)
+                    for (int i = 0; i < str.Length; i++)
                     {
-                        managed[i] = Marshal.ReadByte(bstrThis, i * 2);
+                        // Secure strings are composed of chars (which are 16 bits), so read in all data. We'll convert these to bytes next.
+                        arr[i] = Convert.ToChar((ushort)Marshal.ReadInt16(bstr, i * 2));
+
+                        // Check for null char to fix #81.
+                        // Issue was that SecureString's length was not accurate and so it appended garbage to the password, causing login to fail.
+                        if (arr[i] == 0)
+                        {
+                            strLength = i;
+                            break;
+                        }
                     }
                 }
+
+                managed = encoding.GetBytes(arr);
+
+                // Zero and release intermediate array immediately.
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    arr[i] = Convert.ToChar(0);
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
+
             }
             finally
             {
-                // Always free the secure string byte array.
-                if(bstrThis != IntPtr.Zero)
+                if (arr != null)
                 {
-                    Marshal.ZeroFreeBSTR(bstrThis);
+                    GCHandle arrHandle = GCHandle.Alloc(arr);
+                    arrHandle.Free();
+                }
+
+                if (bstr != IntPtr.Zero)
+                {
+                    Marshal.ZeroFreeBSTR(bstr);
                 }
             }
 
@@ -143,3 +175,4 @@ namespace Citadel.Core.Extensions
         }
     }
 }
+ 
