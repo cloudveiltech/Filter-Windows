@@ -72,7 +72,7 @@ namespace Citadel.Core.Windows.Util
             { ServiceResource.DeactivationRequest, "/api/v2/me/deactivate" },
             { ServiceResource.UserTerms, "/api/v2/me/terms" },
             { ServiceResource.GetToken, "/api/v2/user/gettoken" },
-            { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" }
+            { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
         };
 
         private object m_authenticationLock = new object();
@@ -428,6 +428,97 @@ namespace Citadel.Core.Windows.Util
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
             return request;
+        }
+
+        public UriInfo LookupUri(Uri uri, bool noLogging = false)
+        {
+            HttpStatusCode code;
+            UriInfo uriInfo = null;
+            string url = uri.ToString();
+
+            try
+            {
+                HttpWebRequest request = GetApiBaseRequest("/api/uri/lookup/existing");
+                request.Method = "GET";
+
+                string uriInfoText = null;
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                {
+                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        uriInfoText = reader.ReadToEnd();
+
+                        try
+                        {
+                            uriInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<UriInfo>(uriInfoText);
+                        }
+                        catch
+                        {
+                            uriInfo = null;
+                        }
+                    }
+                }
+
+                return uriInfo;
+            }
+            catch (WebException e)
+            {
+                // KF - Set this to 0 for default. 0's a pretty good indicator of no internet.
+                code = 0;
+
+                try
+                {
+                    using (WebResponse response = e.Response)
+                    {
+                        HttpWebResponse httpResponse = (HttpWebResponse)response;
+                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+
+                        int intCode = (int)httpResponse.StatusCode;
+
+                        code = (HttpStatusCode)intCode;
+
+                        // Auth failure means re-log EXCEPT when requesting deactivation.
+                        if (intCode > 399 && intCode < 499)
+                        {
+                            AuthToken = string.Empty;
+                            m_logger.Info("Client error occurred while trying to lookup site.");
+                            //AuthTokenRejected?.Invoke();
+                        }
+
+                        using (Stream data = response.GetResponseStream())
+                        using (var reader = new StreamReader(data))
+                        {
+                            string text = reader.ReadToEnd();
+                            m_logger.Error(text);
+                        }
+                    }
+                }
+                catch { }
+
+                if (noLogging == false)
+                {
+                    m_logger.Error(e.Message);
+                    m_logger.Error(e.StackTrace);
+                }
+            }
+            catch (Exception e)
+            {
+                // XXX TODO - Good default?
+                code = 0;
+
+                if (noLogging == false)
+                {
+                    while (e != null)
+                    {
+                        m_logger.Error(e.Message);
+                        m_logger.Error(e.StackTrace);
+                        e = e.InnerException;
+                    }
+                }
+            }
+
+            return uriInfo;
         }
 
         /// <summary>

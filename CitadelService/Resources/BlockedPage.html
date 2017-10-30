@@ -50,12 +50,15 @@
 </head>
 
 <body id="home">
-
     <div id="wrapper">
-        <div id="center">
-            <h1>Content Blocked</h1>
-            <p>This content has been blocked based on current settings.</p>
+        <h1>Content Blocked</h1>
+        <!-- This block page does not use angular; it's just that the angular templating works well for find and replace. -->
+        <p><span id="url_text">{{url_text}}</span> was blocked because was in one or more of the following categories</p>
+        <div id="generated_category_list">
+            {{generated_category_list}}
         </div>
+
+        <a>Request an Unblock</a>
     </div>
 
     <script>

@@ -1604,11 +1604,14 @@ namespace CitadelService.Services
                     }
 
                     filters = m_filterCollection.GetFiltersForDomain(requestUri.Host).Result;
-
+                    
                     if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
+
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+
                         customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
                         return;
                     }
