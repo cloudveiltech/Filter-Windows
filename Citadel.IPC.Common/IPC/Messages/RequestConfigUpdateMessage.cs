@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Citadel.IPC.Messages
 {
+    [Serializable]
     public class RequestConfigUpdateMessage : BaseMessage
     {
         // Empty class, all we needed was a separate type for messages.

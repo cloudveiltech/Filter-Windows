@@ -389,7 +389,7 @@ namespace CitadelService.Services
                                         m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
 
                                         // Probe server for updates now.
-                                        ProbeMasterForApplicationUpdates();
+                                        ProbeMasterForApplicationUpdates(false);
                                         OnUpdateTimerElapsed(null);
                                     }
                                     break;
@@ -591,6 +591,14 @@ namespace CitadelService.Services
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                     }
                 };
+
+                m_ipcServer.RequestConfigUpdate = (msg) =>
+                {
+                    var result = this.UpdateAndWriteList(true);
+                    var reply = new NotifyConfigUpdateMessage(result);
+
+                    m_ipcServer.NotifyConfigurationUpdate(result, msg.Id);
+                };
             }
             catch(Exception ipce)
             {
@@ -787,9 +795,10 @@ namespace CitadelService.Services
             return ConfigUpdateResult.UpToDate;
         }
 
-        private void ProbeMasterForApplicationUpdates()
+        private bool ProbeMasterForApplicationUpdates(bool isSyncButton)
         {
             bool hadError = false;
+            bool isAvailable = false;
 
             try
             {
@@ -797,7 +806,7 @@ namespace CitadelService.Services
 
                 m_lastFetchedUpdate = m_updater.CheckForUpdate(m_userConfig != null ? m_userConfig.UpdateChannel : string.Empty).Result;
 
-                if(m_lastFetchedUpdate != null)
+                if (m_lastFetchedUpdate != null && !isSyncButton)
                 {
                     m_logger.Info("Found update. Asking clients to accept update.");
 
@@ -806,6 +815,12 @@ namespace CitadelService.Services
                     Task.Delay(500).Wait();
 
                     m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString()));
+                    isAvailable = true;
+                }
+                else if (m_lastFetchedUpdate != null && isSyncButton)
+                {
+                    m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString()));
+                    isAvailable = true;
                 }
             }
             catch(Exception e)
@@ -825,6 +840,8 @@ namespace CitadelService.Services
                 // back, so we just directly issue this msg.
                 m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
             }
+
+            return isAvailable;
         }
 
         /// <summary>
@@ -1283,7 +1300,7 @@ namespace CitadelService.Services
             }
         }
 
-        #region EngineCallbacks
+#region EngineCallbacks
 
         private void EngineOnInfo(string message)
         {
@@ -1976,7 +1993,7 @@ namespace CitadelService.Services
             return 0;
         }
 
-        #endregion EngineCallbacks
+#endregion EngineCallbacks
 
         /// <summary>
         /// Called by the threshold trigger timer whenever it's set time has passed. Here we'll reset
@@ -2019,7 +2036,7 @@ namespace CitadelService.Services
             this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
-        public ConfigUpdateResult UpdateAndWriteList()
+        public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
         {
             ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
 
@@ -2041,7 +2058,9 @@ namespace CitadelService.Services
                 m_logger.Info("Checking for application updates.");
 
                 // Check for app updates.
-                ProbeMasterForApplicationUpdates();
+                bool available = ProbeMasterForApplicationUpdates(isSyncButton);
+
+                result |= available ? ConfigUpdateResult.AppUpdateAvailable : 0;
             }
             catch(Exception e)
             {
@@ -2088,7 +2107,7 @@ namespace CitadelService.Services
                 return;
             }
 
-
+            this.UpdateAndWriteList(false);
         }
 
         /// <summary>

@@ -533,8 +533,8 @@ namespace Citadel.Core.Windows.Util
             }
             catch(WebException e)
             {
-                // XXX TODO - Good default?
-                code = HttpStatusCode.InternalServerError;
+                // KF - Set this to 0 for default. 0's a pretty good indicator of no internet.
+                code = 0;
 
                 try
                 {

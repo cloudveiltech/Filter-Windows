@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using GalaSoft.MvvmLight;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
@@ -183,22 +185,165 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private bool m_updateRequestInProgress = false;
+        public bool UpdateRequestInProgress
+        {
+            get { return m_updateRequestInProgress; }
+            set
+            {
+                m_updateRequestInProgress = value;
+                RaisePropertyChanged(nameof(UpdateRequestInProgress));
+            }
+        }
+
+        private bool m_upToDate = false;
+        public bool UpToDate
+        {
+            get { return m_upToDate; }
+            set
+            {
+                m_upToDate = value;
+                RaisePropertyChanged(nameof(UpToDate));
+            }
+        }
+
+        private bool m_errorOccurred = false;
+        public bool ErrorOccurred
+        {
+            get { return m_errorOccurred; }
+            set
+            {
+                m_errorOccurred = value;
+                RaisePropertyChanged(nameof(ErrorOccurred));
+            }
+        }
+
+        private string m_updateText = "Sync";
+        public string UpdateText
+        {
+            get { return m_updateText; }
+            set
+            {
+                m_updateText = value;
+                RaisePropertyChanged(nameof(UpdateText));
+            }
+        }
+
+        private string m_errorText = "";
+        public string ErrorText
+        {
+            get { return m_errorText; }
+            set
+            {
+                m_errorText = value;
+                RaisePropertyChanged(nameof(ErrorText));
+            }
+        }
+
+        private bool m_isUpdateButtonEnabled = true;
+        public bool IsUpdateButtonEnabled
+        {
+            get { return m_isUpdateButtonEnabled; }
+            set
+            {
+                m_isUpdateButtonEnabled = value;
+                RaisePropertyChanged(nameof(IsUpdateButtonEnabled));
+            }
+        }
+
         private RelayCommand m_requestUpdateCommand;
         public RelayCommand RequestUpdateCommand
         {
             get
             {
-                if(m_requestUpdateCommand == null)
+                if (m_requestUpdateCommand == null)
                 {
                     m_requestUpdateCommand = new RelayCommand(() =>
                     {
-                        using (IPCClient client = new IPCClient())
+                        UpdateRequestInProgress = true;
+                        ErrorOccurred = false;
+                        ErrorText = "";
+
+                        Task.Run(() =>
                         {
-                            client.RequestConfigUpdate((message) =>
+                            using (IPCClient client = new IPCClient())
                             {
-                                m_logger.Info("We got a config update message back.");
-                            });
-                        }
+                                client.ConnectedToServer = () =>
+                                {
+                                    client.RequestConfigUpdate((message) =>
+                                    {
+                                        m_logger.Info("We got a config update message back.");
+                                        UpdateRequestInProgress = false;
+
+                                        if (message.UpdateResult.HasFlag(ConfigUpdateResult.AppUpdateAvailable))
+                                        {
+                                            UpToDate = true;
+                                            UpdateText = "New Version";
+                                        }
+                                        else
+                                        {
+                                            switch (message.UpdateResult)
+                                            {
+                                                case ConfigUpdateResult.UpToDate:
+                                                    UpToDate = true;
+                                                    IsUpdateButtonEnabled = false;
+                                                    UpdateText = "Up to date";
+                                                    break;
+
+                                                case ConfigUpdateResult.Updated:
+                                                    UpToDate = true;
+                                                    IsUpdateButtonEnabled = false;
+                                                    UpdateText = "Updated";
+                                                    break;
+
+                                                case ConfigUpdateResult.NoInternet:
+                                                    IsUpdateButtonEnabled = true;
+                                                    UpToDate = false;
+                                                    ErrorOccurred = true;
+                                                    UpdateText = "Try Again";
+                                                    ErrorText = "No internet";
+                                                    break;
+
+                                                case ConfigUpdateResult.ErrorOccurred:
+                                                    IsUpdateButtonEnabled = true;
+                                                    UpToDate = false;
+                                                    ErrorOccurred = true;
+                                                    UpdateText = "Try Again";
+                                                    ErrorText = "Error occurred";
+                                                    break;
+
+                                                default:
+                                                    UpToDate = false;
+                                                    ErrorOccurred = true;
+                                                    UpdateText = "Try Again";
+                                                    ErrorText = "Unrecognized";
+                                                    break;
+                                            }
+
+                                            var timer = new System.Timers.Timer(30000);
+                                            timer.Elapsed += (sender, e) =>
+                                            {
+                                                IsUpdateButtonEnabled = true;
+                                                UpToDate = false;
+                                                ErrorOccurred = false;
+                                                UpdateText = "Sync";
+                                                ErrorText = "";
+
+                                                timer.Dispose();
+                                            };
+                                            timer.Enabled = true;
+
+                                        }
+
+
+                                        // TODO: Add code to display on dashboard view model.
+                                    });
+                                };
+
+                                client.WaitForConnection();
+                                Task.Delay(3000).Wait(); // FIXME Surely there's a good way to detect when our work is over with IPCClients
+                            }
+                        });
                     });
                 }
 

@@ -9,9 +9,11 @@ namespace Citadel.Core.Windows.Types
     [Serializable]
     public enum ConfigUpdateResult
     {
-        Updated,
-        UpToDate,
-        NoInternet,
-        ErrorOccurred
+        Updated = 1,
+        UpToDate = 2,
+        NoInternet = 3,
+        ErrorOccurred = 4,
+
+        AppUpdateAvailable = 1 << 8
     }
 }

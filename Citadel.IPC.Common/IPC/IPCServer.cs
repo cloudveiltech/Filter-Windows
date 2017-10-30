@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using NamedPipeWrapper;
@@ -520,6 +521,13 @@ namespace Citadel.IPC
         public void NotifyUpdating()
         {
             var msg = new ServerUpdateNotificationMessage();
+            PushMessage(msg);
+        }
+
+        public void NotifyConfigurationUpdate(ConfigUpdateResult result, Guid replyToId)
+        {
+            var msg = new NotifyConfigUpdateMessage(result);
+            msg.ReplyToId = replyToId;
             PushMessage(msg);
         }
 
