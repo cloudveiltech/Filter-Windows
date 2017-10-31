@@ -156,6 +156,7 @@ namespace Citadel.IPC
         /// </summary>
         private NamedPipeServer<BaseMessage> m_server;
 
+        // XXX FIXME Currently not used in IPCServer.
         private IPCMessageTracker m_ipcQueue;
 
         /// <summary>

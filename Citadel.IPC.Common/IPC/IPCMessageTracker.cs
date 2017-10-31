@@ -4,8 +4,16 @@ using System.Collections.Generic;
 
 namespace Citadel.IPC
 {
+    /// <summary>
+    /// Used by IPCClient to track messages which are expecting replies.
+    /// </summary>
     public class IPCMessageTracker
     {
+        /// <summary>
+        /// The internal wrapper for a message.
+        /// 
+        /// BaseMessage contains all the information needed to track the replies from the server (assuming the server has the correct info filled out)
+        /// </summary>
         private class IPCMessageData
         {
             public BaseMessage Message { get; set; }
@@ -21,6 +29,11 @@ namespace Citadel.IPC
             m_lock = new object();
         }
 
+        /// <summary>
+        /// Adds a message and a handler to the tracker to wait until HandleMessage is called with a reply.
+        /// </summary>
+        /// <param name="message">The message which was sent to the server</param>
+        /// <param name="handler">The handler for the reply message.</param>
         public void AddMessage(BaseMessage message, GenericReplyHandler handler)
         {
             lock (m_lock)
@@ -29,6 +42,13 @@ namespace Citadel.IPC
             }
         }
 
+        /// <summary>
+        /// Called by IPCClient.OnServerMessage() before any of its own handlers handle the message.
+        /// 
+        /// If this function returns true, OnServerMessage() does not handle the message.
+        /// </summary>
+        /// <param name="message">The reply message from the IPC server</param>
+        /// <returns>true if handled, false if not</returns>
         public bool HandleMessage(BaseMessage message)
         {
             try
