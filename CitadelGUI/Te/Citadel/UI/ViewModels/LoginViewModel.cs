@@ -25,7 +25,7 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// The model.
         /// </summary>
-        private LoginModel m_model = new LoginModel();
+        private LoginModel m_model = new LoginModel(this);
 
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
@@ -70,6 +70,12 @@ namespace Te.Citadel.UI.ViewModels
             get
             {
                 return m_model.ErrorMessage;
+            }
+
+            set
+            {
+                m_model.ErrorMessage = value;
+                RaisePropertyChanged(nameof(ErrorMessage));
             }
         }
 

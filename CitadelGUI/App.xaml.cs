@@ -38,6 +38,8 @@ namespace Te.Citadel
     /// </summary>
     public partial class CitadelApp : Application
     {
+        public static string LastAuthMessage { get; set; }
+
         private class ServiceRunner : BaseProtectiveService
         {
             public ServiceRunner() : base("FilterServiceProvider", true)
@@ -247,9 +249,20 @@ namespace Te.Citadel
                         case AuthenticationAction.Required:
                         case AuthenticationAction.InvalidInput:
                         {
-                            // User needs to log in.
-                            BringAppToFocus();
+                                var authMessage = authenticationFailureResult.AuthenticationResult.AuthenticationMessage;
+
+                                if (authMessage != null)
+                                {
+                                    // Display authMessage here.
+                                    // FIXME This is not the right way to do this, but to fix this, we need some IPC restructuring, which is on another branch.
+                                    // TODO Restructure IPC to get rid of this global.
+                                    CitadelApp.LastAuthMessage = authMessage;
+                                }
+
+                                // User needs to log in.
+                                BringAppToFocus();
                             OnViewChangeRequest(typeof(LoginView));
+                                
                         }
                         break;
 

@@ -13,6 +13,7 @@ using System;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Models
 {
@@ -23,6 +24,8 @@ namespace Te.Citadel.UI.Models
         private string m_errorMessage;
 
         private string m_userName;
+
+        private LoginViewModel m_loginViewModel;
 
         private SecureString m_userPassword;
 
@@ -44,6 +47,7 @@ namespace Te.Citadel.UI.Models
             set
             {
                 m_errorMessage = value;
+                m_loginViewModel.RaisePropertyChanged(nameof(ErrorMessage));
             }
         }
 
@@ -119,22 +123,17 @@ namespace Te.Citadel.UI.Models
                             ipcClient.AttemptAuthentication(m_userName, m_userPassword);
                         };
 
-                        ipcClient.WaitForConnection();
-                        Task.Delay(3000).Wait();
-
-                        AuthenticationMessage msg = ipcClient. GetAuthMessage();
-
-                        if(msg != null && msg.AuthenticationResult != null)
+                        ipcClient.AuthenticationResultReceived = (msg) =>
                         {
-                            if (!string.IsNullOrWhiteSpace(msg.AuthenticationResult.AuthenticationMessage))
+                            if (msg.AuthenticationResult.AuthenticationMessage != null)
                             {
                                 ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
-                                
                             }
-                        }
+                        };
 
-                        MessageBox.Show(ErrorMessage);
-
+                        ipcClient.WaitForConnection();
+                        Task.Delay(3000).Wait();
+                        ErrorMessage = CitadelApp.LastAuthMessage;
 
                     }
                 });
@@ -149,12 +148,11 @@ namespace Te.Citadel.UI.Models
             }
         }
 
-        public LoginModel()
+        public LoginModel(LoginViewModel viewModel)
         {
-            // Set the default service provider to the app-global value.
-            m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();
+            m_loginViewModel = viewModel;
         }
     }
 }
