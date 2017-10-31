@@ -168,6 +168,14 @@ namespace Citadel.Core.Windows.Util
             }
         }
 
+        public string LookupUriApiPath
+        {
+            get
+            {
+                return "https://manage.cloudveil.org";
+            }
+        }
+
         public string ServiceProviderApiPath
         {
             get
@@ -406,9 +414,10 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// The configured request. 
         /// </returns>
-        private HttpWebRequest GetApiBaseRequest(string route)
+        private HttpWebRequest GetApiBaseRequest(string route, string baseRoute = null)
         {
-            var requestString = ServiceProviderApiPath + route;
+            baseRoute = baseRoute == null ? ServiceProviderApiPath : baseRoute;
+            var requestString = baseRoute + route;
             var requestRoute = new Uri(requestString);
 
             // Create a new request. We don't want auto redirect, we don't want the subsystem trying
@@ -438,9 +447,9 @@ namespace Citadel.Core.Windows.Util
 
             try
             {
-                HttpWebRequest request = GetApiBaseRequest("/api/uri/lookup/existing");
+                HttpWebRequest request = GetApiBaseRequest(string.Format("/api/uri/lookup/existing?uri={0}", Uri.EscapeDataString(url)), LookupUriApiPath);
                 request.Method = "GET";
-
+                
                 string uriInfoText = null;
 
                 using (var response = (HttpWebResponse)request.GetResponse())

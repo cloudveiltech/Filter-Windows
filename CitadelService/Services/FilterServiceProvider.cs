@@ -1612,7 +1612,7 @@ namespace CitadelService.Services
 
                         UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
 
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true, requestUri, matchCategory, uriInfo));
                         return;
                     }
 
@@ -1622,7 +1622,10 @@ namespace CitadelService.Services
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
+
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true, requestUri, matchCategory, uriInfo));
                         return;
                     }
                 }
@@ -1755,7 +1758,10 @@ namespace CitadelService.Services
                     if(contentClassResult > 0)
                     {
                         shouldBlock = true;
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1));
+
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+                        
+                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1, requestUri, 0, uriInfo, blockType));
                         OnRequestBlocked(contentClassResult, blockType, requestUri);
                         m_logger.Info("Response blocked by content classification.");
                     }
@@ -1787,8 +1793,69 @@ namespace CitadelService.Services
             return false;
         }
 
-        private byte[] GetBlockedResponse(string httpVersion = "1.1", bool noContent = false)
+        private string findCategoryFromUriInfo(int matchingCategory, UriInfo info)
         {
+            var results = info.results.Where(r => r.category_status == 0);
+            foreach(var result in results)
+            {
+                if(result.category_id == matchingCategory && result.category_status == 0)
+                {
+                    return result.category;
+                }
+            }
+
+            if (results.Count() > 0)
+            {
+                m_logger.Info("Couldn't find a URI result whose category matched ours. Returning first one in list.");
+                return results.First().category;
+            }
+
+            return matchingCategory.ToString() + " filter rule mismatch error";
+        }
+
+        private byte[] GetBlockedResponse(string httpVersion, bool noContent, Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        {
+            string blockPageTemplate = m_blockedHtmlPage;
+            string urlText = requestUri.ToString();
+
+            // url_text, and matching_category
+            string url_text = urlText == null ? "" : urlText, matching_category = "";
+            if (info != null && matchingCategory > 0)
+            {
+                matching_category = findCategoryFromUriInfo(matchingCategory, info);
+            }
+            else
+            {
+                switch(blockType)
+                {
+                    case BlockType.None:
+                        matching_category = "unknown reason";
+                        break;
+
+                    case BlockType.ImageClassification:
+                        matching_category = "naughty image";
+                        break;
+
+                    case BlockType.Url:
+                        matching_category = "bad url";
+                        break;
+
+                    case BlockType.TextClassification:
+                    case BlockType.TextTrigger:
+                        matching_category = "improper text";
+                        break;
+
+                    case BlockType.OtherContentClassification:
+                    default:
+                        matching_category = "other content classification";
+                        break;
+                }
+            }
+
+            blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
+            blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
+
+            // TODO Should be hasContent?
             switch(noContent)
             {
                 default:
@@ -1799,7 +1866,7 @@ namespace CitadelService.Services
 
                 case true:
                 {
-                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 20O OK\r\nDate: {1}\r\nExpires: {2}\r\nContent-Type: text/html\r\nContent-Length: {3}\r\n\r\n{4}\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime, m_blockedHtmlPage.Length, m_blockedHtmlPage));
+                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 200 OK\r\nDate: {1}\r\nExpires: {2}\r\nContent-Type: text/html\r\nContent-Length: {3}\r\n\r\n{4}\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime, blockPageTemplate.Length, blockPageTemplate));
                 }
             }
         }

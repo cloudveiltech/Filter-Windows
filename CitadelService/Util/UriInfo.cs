@@ -3,6 +3,10 @@
 namespace Citadel.Core.Windows.Util
 {
     // XXX TODO This is icky. There should be a way for Newtonsoft.Json to convert to PascalCase from snake_case.
+
+    /// <summary>
+    /// A C# POCO class for the results array objects from https://manage.cloudveil.org/api/uri/lookup/existing?uri=...
+    /// </summary>
     public class UriResult
     {
         public int id { get; set; }
@@ -22,6 +26,9 @@ namespace Citadel.Core.Windows.Util
         public string source_name { get; set; }
     }
 
+    /// <summary>
+    /// A C# POCO class for the JSON returned from https://manage.cloudveil.org/api/uri/lookup/existing?uri=...
+    /// </summary>
     public class UriInfo
     {
         public int existing { get; set; }

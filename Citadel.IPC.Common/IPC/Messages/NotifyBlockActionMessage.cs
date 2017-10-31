@@ -38,7 +38,12 @@ namespace Citadel.IPC.Messages
         /// <summary>
         /// Means that some other form of content classification has caused the block action.
         /// </summary>
-        OtherContentClassification
+        OtherContentClassification,
+
+        /// <summary>
+        /// Placeholder for default conditions (such as first initialization of variables)
+        /// </summary>
+        None
     }
 
     /// <summary>
