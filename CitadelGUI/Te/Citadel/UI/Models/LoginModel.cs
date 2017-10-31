@@ -7,10 +7,12 @@
 
 using Citadel.Core.Extensions;
 using Citadel.IPC;
+using Citadel.IPC.Messages;
 using GalaSoft.MvvmLight;
 using System;
 using System.Security;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Te.Citadel.UI.Models
 {
@@ -119,6 +121,21 @@ namespace Te.Citadel.UI.Models
 
                         ipcClient.WaitForConnection();
                         Task.Delay(3000).Wait();
+
+                        AuthenticationMessage msg = ipcClient. GetAuthMessage();
+
+                        if(msg != null && msg.AuthenticationResult != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(msg.AuthenticationResult.AuthenticationMessage))
+                            {
+                                ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                                
+                            }
+                        }
+
+                        MessageBox.Show(ErrorMessage);
+
+
                     }
                 });
             }

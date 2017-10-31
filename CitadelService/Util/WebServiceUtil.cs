@@ -32,27 +32,6 @@ namespace Citadel.Core.Windows.Util
         RevokeToken
     };
 
-    /// <summary>
-    /// Enumeration for summarizing the result of an authentication request. 
-    /// </summary>
-    internal enum AuthenticationResult
-    {
-        /// <summary>
-        /// Indicates that the auth request was a failure. 
-        /// </summary>
-        Failure,
-
-        /// <summary>
-        /// Indicates that the auth request was a success. 
-        /// </summary>
-        Success,
-
-        /// <summary>
-        /// Indicates that, during the auth request, a connection using the provided URI could not be established.
-        /// </summary>
-        ConnectionFailed
-    }
-
     public delegate void GenericWebServiceUtilDelegate();
 
     /// <summary>
@@ -212,9 +191,11 @@ namespace Citadel.Core.Windows.Util
             m_logger = LoggerUtil.GetAppWideLogger();
         }
 
-        public AuthenticationResult Authenticate(string username, byte[] unencryptedPassword)
+        public AuthenticationResultObject Authenticate(string username, byte[] unencryptedPassword)
         {
             m_logger.Error(nameof(Authenticate));
+
+            AuthenticationResultObject ret = new AuthenticationResultObject();
 
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(username));
@@ -237,7 +218,9 @@ namespace Citadel.Core.Windows.Util
             if(hasInternet == false)
             {
                 m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
-                return AuthenticationResult.ConnectionFailed;
+                ret.AuthenticationResult = AuthenticationResult.ConnectionFailed;
+                ret.AuthenticationMessage = "Aborting authentication attempt because no internet connection could be detected.";
+                return ret;
             }
 
             // Will be set if we get any sort of web exception.
@@ -302,7 +285,8 @@ namespace Citadel.Core.Windows.Util
 
                         response.Close();
                         authRequest.Abort();
-                        return AuthenticationResult.Success;
+                        ret.AuthenticationResult = AuthenticationResult.Success;
+                        return ret;
                     }
                     else
                     {
@@ -310,7 +294,8 @@ namespace Citadel.Core.Windows.Util
                         {
                             m_logger.Info("Authentication failed with code: {0}.", code);
                             AuthToken = string.Empty;
-                            return AuthenticationResult.Failure;
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
+                            return ret;
                         }
                     }
                 }
@@ -331,21 +316,28 @@ namespace Citadel.Core.Windows.Util
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
                         m_logger.Error("Error code: {0}", httpResponse.StatusCode);
 
+                        string errorText = string.Empty;
+
+                        using (Stream data = response.GetResponseStream())
+                        using (var reader = new StreamReader(data))
+                        {
+                            errorText = reader.ReadToEnd();
+                            m_logger.Error("Stream errorText: " + errorText);
+                        }
+
                         int code = (int)httpResponse.StatusCode;
 
                         if(code > 399 && code < 499)
                         {
                             AuthToken = string.Empty;
                             m_logger.Info("Authentication failed with code: {0}.", code);
-                            return AuthenticationResult.Failure;
+                            m_logger.Info("Athentication failure text: {0}", errorText);
+                            ret.AuthenticationMessage = errorText;
+                            ret.AuthenticationResult =  AuthenticationResult.Failure;
+                            return ret;
                         }
 
-                        using(Stream data = response.GetResponseStream())
-                        using(var reader = new StreamReader(data))
-                        {
-                            string text = reader.ReadToEnd();
-                            m_logger.Error(text);
-                        }
+
                     }
                 }
                 catch(Exception iex)
@@ -368,7 +360,8 @@ namespace Citadel.Core.Windows.Util
 
                 m_logger.Info("Authentication failed due to a failure to process the request and response.");
                 AuthToken = string.Empty;
-                return AuthenticationResult.Failure;
+                ret.AuthenticationResult = AuthenticationResult.Failure;
+                return ret;
             }
             finally
             {
@@ -393,7 +386,9 @@ namespace Citadel.Core.Windows.Util
                 AuthToken = string.Empty;
             }
 
-            return connectionFailure ? AuthenticationResult.ConnectionFailed : AuthenticationResult.Failure;
+            ret.AuthenticationResult = connectionFailure ? AuthenticationResult.ConnectionFailed : AuthenticationResult.Failure;
+            return ret;
+
         }
 
         /// <summary>
@@ -464,13 +459,15 @@ namespace Citadel.Core.Windows.Util
 
                 var accessToken = AuthToken;
 
+                m_logger.Info("RequestResource1: accessToken=" + accessToken);
+
                 if(StringExtensions.Valid(accessToken))
                 {
                     request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
                 }
                 else
                 {
-                    m_logger.Info("Authorization failed.");
+                    m_logger.Info("RequestResource1: Authorization failed.");
                     AuthTokenRejected?.Invoke();
                     code = HttpStatusCode.Unauthorized;
                     return null;
@@ -550,7 +547,7 @@ namespace Citadel.Core.Windows.Util
                         if(intCode > 399 && intCode < 499 && resource != ServiceResource.DeactivationRequest)
                         {
                             AuthToken = string.Empty;
-                            m_logger.Info("Authorization failed.");
+                            m_logger.Info("RequestResource2: Authorization failed.");
                             AuthTokenRejected?.Invoke();
                         }
 
@@ -635,7 +632,7 @@ namespace Citadel.Core.Windows.Util
                 }
                 else
                 {
-                    m_logger.Info("Authorization failed.");
+                    m_logger.Info("SendResource1: Authorization failed.");
                     AuthTokenRejected?.Invoke();
                     code = HttpStatusCode.Unauthorized;
                     return false;
@@ -701,7 +698,7 @@ namespace Citadel.Core.Windows.Util
                         if(intCode > 399 && intCode < 499)
                         {
                             AuthToken = string.Empty;
-                            m_logger.Info("Authorization failed.");
+                            m_logger.Info("SendResource2: Authorization failed.");
                             AuthTokenRejected?.Invoke();
                         }
 

@@ -239,10 +239,9 @@ namespace Te.Citadel
             {
                 // XXX FIXME
                 m_ipcClient = new IPCClient(true);
-                m_ipcClient.AuthenticationResultReceived = (args) =>
+                m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
                 {
-                    m_logger.Info("Auth response from server is: {0}", args.ToString());
-                    switch(args)
+                    switch(authenticationFailureResult.Action)
                     {
                         case AuthenticationAction.Denied:
                         case AuthenticationAction.Required:

@@ -44,9 +44,11 @@ namespace Citadel.IPC
 
     public delegate void StateChangeHandler(StateChangeEventArgs args);
 
-    public delegate void AuthenticationResultHandler(AuthenticationAction result);
+    public delegate void AuthenticationResultHandler(AuthenticationMessage result);
 
     public delegate void DeactivationRequestResultHandler(bool granted);
+
+    public delegate AuthenticationMessage GetAuthMessage();
 
     public delegate void BlockActionReportHandler(NotifyBlockActionMessage msg);
 
@@ -68,6 +70,8 @@ namespace Citadel.IPC
         public StateChangeHandler StateChanged;
 
         public AuthenticationResultHandler AuthenticationResultReceived;
+
+        private AuthenticationMessage AuthMessage;
 
         public DeactivationRequestResultHandler DeactivationResultReceived;
 
@@ -113,6 +117,11 @@ namespace Citadel.IPC
             m_client.WaitForConnection();
         }
 
+        public AuthenticationMessage GetAuthMessage()
+        {
+            return AuthMessage;
+        }
+
         private void M_client_Error(Exception exception)
         {   
             LoggerUtil.RecursivelyLogException(m_logger, exception);
@@ -138,13 +147,14 @@ namespace Citadel.IPC
 
             var msgRealType = message.GetType();
 
-            if(msgRealType == typeof(Messages.AuthenticationMessage))
+            if(msgRealType == typeof(AuthenticationMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.AuthenticationMessage));
-                var cast = (Messages.AuthenticationMessage)message;
+                AuthMessage = (AuthenticationMessage)message;
+                m_logger.Debug("Server message is {0}", nameof(AuthenticationMessage));
+                var cast = (AuthenticationMessage)message;
                 if(cast != null)
                 {   
-                    AuthenticationResultReceived?.Invoke(cast.Action);
+                    AuthenticationResultReceived?.Invoke(cast);
                 }
             }
             else if(msgRealType == typeof(Messages.DeactivationMessage))
