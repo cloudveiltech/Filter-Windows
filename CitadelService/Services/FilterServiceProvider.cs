@@ -1816,9 +1816,32 @@ namespace CitadelService.Services
         private byte[] GetBlockedResponse(string httpVersion, bool noContent, Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
         {
             string blockPageTemplate = m_blockedHtmlPage;
+
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // IMO this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
             string urlText = requestUri.ToString();
 
-            // url_text, and matching_category
+            string deviceName;
+
+            try
+            {
+                deviceName = Environment.MachineName;
+            }
+            catch
+            {
+                deviceName = "Unknown";
+            }
+
+            string blockedRequestBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(urlText));
+
+            string unblockRequest = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
+            string username = WebServiceUtil.Default.UserEmail ?? "DNS";
+
+            string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
+            unblockRequest += "?" + query;
+
+            // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
             if (info != null && matchingCategory > 0)
             {
@@ -1837,7 +1860,7 @@ namespace CitadelService.Services
                         break;
 
                     case BlockType.Url:
-                        matching_category = "bad url";
+                        matching_category = "bad webpage";
                         break;
 
                     case BlockType.TextClassification:
@@ -1853,7 +1876,9 @@ namespace CitadelService.Services
             }
 
             blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
+            blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
+            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
 
             // TODO Should be hasContent?
             switch(noContent)

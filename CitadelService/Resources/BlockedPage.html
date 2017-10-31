@@ -53,12 +53,14 @@
     <div id="wrapper">
         <h1>Content Blocked</h1>
         <!-- This block page does not use angular; it's just that the angular templating works well for find and replace. -->
-        <p><span id="url_text">{{url_text}}</span> was blocked because it was in the following category:</p>
+
+        <!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
+        <p><a href="{{url_text}}">{{friendly_url_text}}</a> was blocked because it was in the following category:</p>
         <div id="generated_category_list">
             {{matching_category}}
         </div>
 
-        <a>Request an Unblock</a>
+        <a href="{{unblock_request}}">Request an Unblock</a>
     </div>
 
     <script>
