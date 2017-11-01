@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
@@ -322,6 +323,13 @@ namespace Citadel.Core.Windows.Util
                         using (var reader = new StreamReader(data))
                         {
                             errorText = reader.ReadToEnd();
+                            
+                            // GS Just cleans up the punctuation at the end of string
+                            string excpList = "$@*!.";
+                            var chRemoved = errorText
+                                .Select(ch => excpList.Contains(ch) ? (char?)null : ch);
+                            errorText = string.Concat(chRemoved.ToArray()) + "!";
+
                             m_logger.Error("Stream errorText: " + errorText);
                         }
 

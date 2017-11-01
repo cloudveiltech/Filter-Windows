@@ -249,8 +249,7 @@ namespace Te.Citadel
                         {
                             // User needs to log in.
                             BringAppToFocus();
-                            OnViewChangeRequest(typeof(LoginView));
-                                
+                            OnViewChangeRequest(typeof(LoginView));      
                         }
                         break;
 

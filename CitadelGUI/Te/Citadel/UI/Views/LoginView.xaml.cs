@@ -33,5 +33,10 @@ namespace Te.Citadel.UI.Views
                 MessageBox.Show("Enter Key Pressed ");
             }
         }
+
+        private void SecureInputBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }
