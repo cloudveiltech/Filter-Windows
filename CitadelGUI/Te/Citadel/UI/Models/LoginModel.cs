@@ -114,6 +114,9 @@ namespace Te.Citadel.UI.Models
 
             try
             {
+                // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
+                m_loginViewModel.ErrorMessage = "";
+
                 await Task.Run(() =>
                 {
                     using(var ipcClient = new IPCClient())
@@ -128,20 +131,6 @@ namespace Te.Citadel.UI.Models
                             if (msg.AuthenticationResult.AuthenticationMessage != null)
                             {
                                 m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
-                            }
-                            else
-                            {
-                                switch(msg.AuthenticationResult.AuthenticationResult)
-                                {
-                                    case AuthenticationResult.ConnectionFailed:
-                                    case AuthenticationResult.Failure:
-                                    default:
-                                        break;
-
-                                    case AuthenticationResult.Success:
-                                        m_loginViewModel.ErrorMessage = "";
-                                        break;
-                                }
                             }
                         };
 
