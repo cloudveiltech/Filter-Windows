@@ -111,15 +111,16 @@
         <!--  Error messages.  -->
         <TextBlock Width="220"
                    Height="40"
-                   Margin="248,327,248,0"
+                   Margin="248,335,248,0"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
                    FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
+                   FontSize="18"
+                   FontWeight="Light"
+                   Foreground="Red"
                    Text="{Binding Path=ErrorMessage,
                                   Mode=OneWay}"
+                   TextAlignment="Center"
                    TextWrapping="Wrap" />
     </Grid>
 </local:BaseView>
