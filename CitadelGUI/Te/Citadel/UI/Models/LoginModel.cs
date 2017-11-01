@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using GalaSoft.MvvmLight;
@@ -47,7 +48,6 @@ namespace Te.Citadel.UI.Models
             set
             {
                 m_errorMessage = value;
-                m_loginViewModel.RaisePropertyChanged(nameof(ErrorMessage));
             }
         }
 
@@ -127,14 +127,26 @@ namespace Te.Citadel.UI.Models
                         {
                             if (msg.AuthenticationResult.AuthenticationMessage != null)
                             {
-                                ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                                m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                            }
+                            else
+                            {
+                                switch(msg.AuthenticationResult.AuthenticationResult)
+                                {
+                                    case AuthenticationResult.ConnectionFailed:
+                                    case AuthenticationResult.Failure:
+                                    default:
+                                        break;
+
+                                    case AuthenticationResult.Success:
+                                        m_loginViewModel.ErrorMessage = "";
+                                        break;
+                                }
                             }
                         };
 
                         ipcClient.WaitForConnection();
                         Task.Delay(3000).Wait();
-                        ErrorMessage = CitadelApp.LastAuthMessage;
-
                     }
                 });
             }

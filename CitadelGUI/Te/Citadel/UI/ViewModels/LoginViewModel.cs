@@ -25,12 +25,20 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// The model.
         /// </summary>
-        private LoginModel m_model = new LoginModel(this);
+        private LoginModel m_model = null;
 
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
         /// </summary>
         private RelayCommand m_authenticateCommand;
+
+        public LoginViewModel()
+        {
+            // We have to pass the LoginViewModel into our LoginModel so that changes to the LoginModel can RaisePropertyChanged() on the view model.
+            // TODO It would be cleaner to not have two layers of properties like this. Maybe change LoginModel into more of a "function container"
+            // and make it do all variable edits directly to LoginViewModel.
+            m_model = new LoginModel(this);
+        }
 
         /// <summary>
         /// Command to run an authentication request for the credentials given in the view.
