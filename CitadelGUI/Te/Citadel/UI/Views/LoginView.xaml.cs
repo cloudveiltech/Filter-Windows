@@ -18,7 +18,6 @@ namespace Te.Citadel.UI.Views
             InitializeComponent();
         }
 
-
         private Keys m_keyCode;
 
         private void Form1_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -27,14 +26,6 @@ namespace Te.Citadel.UI.Views
         }
 
         private void True(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (this.m_keyCode == Keys.Enter)
-            {
-                MessageBox.Show("Enter Key Pressed ");
-            }
-        }
-
-        private void SecureInputBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }

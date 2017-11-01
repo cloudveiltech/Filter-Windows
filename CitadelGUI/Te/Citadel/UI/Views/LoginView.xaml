@@ -104,6 +104,7 @@
                 Margin="363,289,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
+                IsDefault="True"
                 Command="{Binding AuthenticateCommand}"
                 Content="Sign In"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
