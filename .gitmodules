@@ -1,3 +1,4 @@
 [submodule "Contrib/CreateProcessAsUser"]
 	path = Contrib/CreateProcessAsUser
 	url = https://github.com/TechnikEmpire/CreateProcessAsUser.git
+	ignore = dirty

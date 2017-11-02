@@ -13,10 +13,12 @@ using Citadel.Core.Windows.Util.Update;
 using Citadel.Core.Windows.WinAPI;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
+using CitadelCore.Logging;
+using CitadelCore.Net.Proxy;
+using CitadelCore.Windows.Net.Proxy;
 using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
-using HttpFilteringEngine.Managed;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
@@ -166,11 +168,11 @@ namespace CitadelService.Services
 
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 
-        private AbstractEngine m_filteringEngine;
+        private ProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
-        private string m_blockedHtmlPage;
+        private byte[] m_blockedHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
 
@@ -860,7 +862,7 @@ namespace CitadelService.Services
                 {
                     using(TextReader tsr = new StreamReader(resourceStream))
                     {
-                        m_blockedHtmlPage = tsr.ReadToEnd();
+                        m_blockedHtmlPage = Encoding.UTF8.GetBytes(tsr.ReadToEnd());
                     }
                 }
                 else
@@ -903,18 +905,12 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = AbstractEngine.Create(localCaBundleCertPath, 0, 0);
+            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd);
 
-            // Setup general info, warning and error events.            
-            m_filteringEngine.OnInfo = EngineOnInfo;
-            m_filteringEngine.OnWarning = EngineOnWarning;
-            m_filteringEngine.OnError = EngineOnError;
-
-            // Setup firewall check, inspection callbacks
-            m_filteringEngine.FirewallCheckCallback = OnAppFirewallCheck;
-            m_filteringEngine.HttpMessageBeginCallback = OnHttpMessageBegin;
-            m_filteringEngine.HttpMessageEndCallback = OnHttpMessageEnd;
-
+            // Setup general info, warning and error events.
+            LoggerProxy.Default.OnInfo += EngineOnInfo;
+            LoggerProxy.Default.OnWarning += EngineOnWarning;
+            LoggerProxy.Default.OnError += EngineOnError;
 
             // Start filtering, always.
             if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
@@ -1503,9 +1499,11 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out ProxyNextAction nextAction, ResponseWriter customResponseWriter)
+        private void OnHttpMessageBegin(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out ProxyNextAction nextAction, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
+            customBlockResponseContentType = null;
+            customBlockResponse = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1517,49 +1515,29 @@ namespace CitadelService.Services
             bool readLocked = false;
 
             try
-            {
-                // It should be fine, for our purposes, to just smash both response and request
-                // headers together. We're only interested, in all of our filtering code, in headers
-                // that are unique to requests or responses, so this should be fine.
-                var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
-
-                Uri requestUri = null;
-                string httpVersion = null;
-
-                if(!parsedHeaders.TryGetRequestUri(out requestUri))
-                {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing request URI.");
-                    return;
-                }
-
-                if(!parsedHeaders.TryGetHttpVersion(out httpVersion))
-                {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing http version declaration.");
-                    return;
-                }
+            {                
+                var parsedHeaders = ParseHeaders(headers);
 
                 if(m_filterCollection != null)
                 {
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
-                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUri.Host).Result;
+                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if(mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                         }
                         else
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
                         nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
@@ -1568,40 +1546,42 @@ namespace CitadelService.Services
 
                     filters = m_filterCollection.GetWhitelistFiltersForDomain().Result;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if(mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                         }
                         else
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
                         nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                         return;
                     }
 
-                    filters = m_filterCollection.GetFiltersForDomain(requestUri.Host).Result;
+                    filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
+                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
+                        customBlockResponseContentType = "text/html";
+                        customBlockResponse = m_blockedHtmlPage;
                         return;
                     }
 
                     filters = m_filterCollection.GetFiltersForDomain().Result;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
+                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true));
+                        customBlockResponseContentType = "text/html";
+                        customBlockResponse = m_blockedHtmlPage;
                         return;
                     }
                 }
@@ -1635,35 +1615,12 @@ namespace CitadelService.Services
             }
         }
 
-        /// <summary>
-        /// This callback is invoked whenever a http transaction has fully completed. The only time
-        /// we should ever be called here is when we've flagged a transaction to keep all content for
-        /// inspection. This could be a request or a response, it doesn't really matter.
-        /// </summary>
-        /// <param name="requestHeaders">
-        /// The headers for the request that this callback is being invoked for. 
-        /// </param>
-        /// <param name="requestPayload">
-        /// The payload of the request that this callback is being invoked for. May be empty. Either
-        /// this, or the response payload should NOT be empty.
-        /// </param>
-        /// <param name="responseHeaders">
-        /// The headers for the response that this callback is being invoked for. May be empty, as
-        /// this might be a request only.
-        /// </param>
-        /// <param name="responsePayload">
-        /// The payload of the response that this callback is being invoked for. May be empty. Either
-        /// this, or the request payload should NOT be empty. Either or both. If this array is not
-        /// empty, then you're being asked to filter a response payload.
-        /// </param>
-        /// <param name="shouldBlock">
-        /// An out param where we can specify if this content should be blocked or not. 
-        /// </param>
-        /// <param name="customBlockResponseData">
-        /// </param>
-        private void OnHttpMessageEnd(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out bool shouldBlock, ResponseWriter customResponseWriter)
+        
+        private void OnHttpMessageEnd(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out bool shouldBlock, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             shouldBlock = false;
+            customBlockResponseContentType = null;
+            customBlockResponse = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1674,22 +1631,11 @@ namespace CitadelService.Services
 
             m_logger.Info("Entering {0}", nameof(OnHttpMessageEnd));
 
-            bool requestIsNull = (requestPayload == null || requestPayload.Length == 0);
-            bool responseIsNull = (responsePayload == null || responsePayload.Length == 0);
-
-            if(requestIsNull && responseIsNull)
-            {
-                m_logger.Info("All payloads are null in {0}. Cannot inspect.", nameof(OnHttpMessageEnd));
-                return;
-            }
-
-            byte[] whichPayload = responseIsNull ? requestPayload : responsePayload;
-
             // The only thing we can really do in this callback, and the only thing we care to do, is
             // try to classify the content of the response payload, if there is any.
             try
             {
-                var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
+                var parsedHeaders = ParseHeaders(headers);
 
                 Uri requestUri = null;
 
@@ -1729,12 +1675,18 @@ namespace CitadelService.Services
                     httpVersion = httpVersion != null ? httpVersion : "1.1";
 
                     BlockType blockType;
-                    var contentClassResult = OnClassifyContent(whichPayload, contentType, out blockType);
+                    var contentClassResult = OnClassifyContent(body, contentType, out blockType);
 
                     if(contentClassResult > 0)
                     {
                         shouldBlock = true;
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1));
+
+                        if(contentType.IndexOf("html") != -1)
+                        {
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = m_blockedHtmlPage;
+                        }
+                        
                         OnRequestBlocked(contentClassResult, blockType, requestUri);
                         m_logger.Info("Response blocked by content classification.");
                     }
@@ -1764,23 +1716,6 @@ namespace CitadelService.Services
             }
 
             return false;
-        }
-
-        private byte[] GetBlockedResponse(string httpVersion = "1.1", bool noContent = false)
-        {
-            switch(noContent)
-            {
-                default:
-                case false:
-                {
-                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 204 No Content\r\nDate: {1}\r\nExpires: {2}\n\nContent-Length: 0\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime));
-                }
-
-                case true:
-                {
-                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 20O OK\r\nDate: {1}\r\nExpires: {2}\r\nContent-Type: text/html\r\nContent-Length: {3}\r\n\r\n{4}\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime, m_blockedHtmlPage.Length, m_blockedHtmlPage));
-                }
-            }
         }
 
         private NameValueCollection ParseHeaders(string headers)
@@ -2213,7 +2148,7 @@ namespace CitadelService.Services
                             // Recreate our filter collection and reset all categories to be disabled.
                             if(m_filterCollection != null)
                             {
-                                m_filterCollection.Dispose();
+                                
                             }
 
                             // Recreate our triggers container.
@@ -2838,8 +2773,7 @@ namespace CitadelService.Services
                     try
                     {
                         // Shut down engine.
-                        StopFiltering();
-                        m_filteringEngine.Dispose();
+                        StopFiltering();                        
                     }
                     catch(Exception e)
                     {
