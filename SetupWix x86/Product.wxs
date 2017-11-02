@@ -53,10 +53,10 @@
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="$(var.PlatformProgramFilesFolder)">
                 <Directory Id="INSTALLFOLDER" Name="CloudVeil">
-                    <Directory Id="x64" Name="x64">
+                    <Directory Id="x64Dir" Name="x64">
                         
                     </Directory>
-                    <Directory Id="x86" Name="x86">
+                    <Directory Id="x86Dir" Name="x86">
                         
                     </Directory>
                 </Directory>
@@ -73,7 +73,7 @@
 	</Fragment>
 
     <Fragment>
-        <ComponentGroup Id="x64Components" Directory="x64">
+        <ComponentGroup Id="x64Components" Directory="x64Dir">
             <Component Id="C__11F01C92F4EC4372B38108A3C971764B" Guid="{E2935396-B64E-ED4B-6A9C-814097657EEF}" Win64="yes">
                 <File Id="_11F01C92F4EC4372B38108A3C971764B" Name="WinDivert.dll" KeyPath="yes" ShortName="WINDIV~1.DLL" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)x64\WinDivert.dll" />
             </Component>
@@ -87,12 +87,12 @@
     </Fragment>
 
     <Fragment>
-        <ComponentGroup Id="x86Components" Directory="x86">
+        <ComponentGroup Id="x86Components" Directory="x86Dir">
             <Component Id="C__5352D93B36294E40AF84F9A6968167FD" Guid="{E88F97A5-E7AA-BD06-831D-DEECDB901024}" Win64="yes">
-                <File Id="_5352D93B36294E40AF84F9A6968167FD" Name="SQLite.Interop.dll" KeyPath="yes" ShortName="SQLITE~1.DLL" DiskId="1" Source="C:\git\CloudVeil-bin\File\_5352D93B36294E40AF84F9A6968167FD" />
+                <File Id="_5352D93B36294E40AF84F9A6968167FD" Name="SQLite.Interop.dll" KeyPath="yes" DiskId="1" Source="C:\git\CloudVeil-bin\File\_5352D93B36294E40AF84F9A6968167FD" />
             </Component>
             <Component Id="C__B012FE3798124C649F181C01D4DCDFA5" Guid="{DEE9EA06-5B3A-65EF-C9C2-D294935CC2ED}" Win64="yes">
-                <File Id="_B012FE3798124C649F181C01D4DCDFA5" Name="WinDivert.dll" KeyPath="yes" ShortName="WINDIV~2.DLL" DiskId="1" Source="C:\git\CloudVeil-bin\File\_B012FE3798124C649F181C01D4DCDFA5" />
+                <File Id="_B012FE3798124C649F181C01D4DCDFA5" Name="WinDivert.dll" KeyPath="yes" DiskId="1" Source="C:\git\CloudVeil-bin\File\_B012FE3798124C649F181C01D4DCDFA5" />
             </Component>
             <Component Id="C__39F406242823426BB4BBC846C4BE4A71" Guid="{2BEF883C-7A8B-423E-92CB-C893529670A4}" Win64="$(var.Win64)">
                 <File Id="_39F406242823426BB4BBC846C4BE4A71" Name="WinDivert64.sys" KeyPath="yes" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)x86\WinDivert64.sys" />
@@ -112,7 +112,7 @@
                 <File Id="CitadelCoreDll" Name="CitadelCore.dll" KeyPath="yes" Assembly=".net" AssemblyApplication="CitadelCoreDll" AssemblyManifest="CitadelCoreDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)CitadelCore.dll" />
             </Component>
             <Component Id="CitadelCoreWindows" Guid="{9D12F68C-24BA-450D-B28B-0FBB6F34D093}" Win64="$(var.Win64)">
-                <File Id="CitadelCoreWindows" Name="CitadelCore.Windows.dll" KeyPath="yes" Assembly=".net" AssemblyApplication="CitadelCoreWindowsDll" AssemblyManifest="CitadelCoreWindowsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)CitadelCore.Windows.dll" />
+                <File Id="CitadelCoreWindowsDll" Name="CitadelCore.Windows.dll" KeyPath="yes" Assembly=".net" AssemblyApplication="CitadelCoreWindowsDll" AssemblyManifest="CitadelCoreWindowsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)CitadelCore.Windows.dll" />
             </Component>
             <Component Id="C__071760F42F1B68802C5F28140A3C9507" Guid="{0F212D37-B972-64B3-24D1-9B6A558A61BC}" Win64="$(var.Win64)">
                 <File Id="_071760F42F1B68802C5F28140A3C9507" Name="IKVM.OpenJDK.Localedata.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="_071760F42F1B68802C5F28140A3C9507" AssemblyApplication="_071760F42F1B68802C5F28140A3C9507" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)IKVM.OpenJDK.Localedata.dll" />
@@ -364,7 +364,7 @@
                 <File Id="_9403A93C53217D0B48043327C0F7230B" Name="Interop.NetFwTypeLib.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="_9403A93C53217D0B48043327C0F7230B" AssemblyApplication="_9403A93C53217D0B48043327C0F7230B" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Interop.NetFwTypeLib.dll" />
             </Component>
             <Component Id="libuv" Guid="{961DF4D0-51CE-483C-8231-7B24C50C891E}" Win64="$(var.Win64)">
-                <File Id="libuvDll" Name="libuv.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="libuvDll" AssemblyApplication="libuvDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)libuv.dll" />
+                <File Id="libuvDll" Name="libuv.dll" KeyPath="yes" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)libuv.dll" />
             </Component>
             <!--<Component Id="C__940DE89D9CCC8AD96BBCC5ED93F3F5CC" Guid="{8F270B29-0B3E-49A3-9057-CFB1C629657F}" Win64="$(var.Win64)">
                 <File Id="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" Name="HttpFilteringEngineManaged.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" AssemblyApplication="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)HttpFilteringEngineManaged.dll" />
@@ -403,97 +403,232 @@
                 <File Id="_AB5FCDF3BC39857310449EB319DB4BD5" Name="Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="_AB5FCDF3BC39857310449EB319DB4BD5" AssemblyApplication="_AB5FCDF3BC39857310449EB319DB4BD5" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.CodeAnalysis.CSharp.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreDiagnosticsAbstractions" Guid="{0CDDEB12-9441-4FBB-BE43-E006D328EC55}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" Name="Microsoft.AspNetCore.Diagnostics.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Diagnostics.Abstractions.dll" />
+                <File Id="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" Name="Microsoft.AspNetCore.Diagnostics.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreDiagnosticsAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Diagnostics.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreDiagnostics" Guid="{790416D0-141B-438D-934F-3AD382D567E1}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreDiagnosticsDll" Name="Microsoft.AspNetCore.Diagnostics.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreDiagnosticsDll" AssemblyApplication="MicrosoftAspNetCoreDiagnosticsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Diagnostics.dll" />
+                <File Id="MicrosoftAspNetCoreDiagnosticsDll" Name="Microsoft.AspNetCore.Diagnostics.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreDiagnosticsDll" AssemblyApplication="MicrosoftAspNetCoreDiagnosticsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Diagnostics.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHostingAbstractions" Guid="{0BF23612-892F-4FE7-8E8D-A770AD4E24BC}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHostingAbstractionsDll" Name="Microsoft.AspNetCore.Hosting.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHostingAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHostingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.Abstractions.dll" />
+                <File Id="MicrosoftAspNetCoreHostingAbstractionsDll" Name="Microsoft.AspNetCore.Hosting.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHostingAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHostingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHosting" Guid="{05DC3422-C707-49A0-A8D0-C0B9CDAF2A08}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHostingDll" Name="Microsoft.AspNetCore.Hosting.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHostingDll" AssemblyApplication="MicrosoftAspNetCoreHostingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.dll" />
+                <File Id="MicrosoftAspNetCoreHostingDll" Name="Microsoft.AspNetCore.Hosting.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHostingDll" AssemblyApplication="MicrosoftAspNetCoreHostingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHostingServerAbstractions" Guid="{090BD2D9-CE3A-4BD3-B197-9C7527A93D9A}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHostingServerAbstractionsDll" Name="Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHostingServerAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHostingServerAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" />
+                <File Id="MicrosoftAspNetCoreHostingServerAbstractionsDll" Name="Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHostingServerAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHostingServerAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHttpAbstractions" Guid="{08AFCCCA-D721-47B4-9C34-3FC7E58C55BB}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHttpAbstractionsDll" Name="Microsoft.AspNetCore.Http.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHttpAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHttpAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Abstractions.dll" />
+                <File Id="MicrosoftAspNetCoreHttpAbstractionsDll" Name="Microsoft.AspNetCore.Http.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHttpAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreHttpAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHttp" Guid="{739F7188-8EFA-4CA8-90B1-040CCFC85084}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHttpDll" Name="Microsoft.AspNetCore.Http.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHttpDll" AssemblyApplication="MicrosoftAspNetCoreHttpDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.dll" />
+                <File Id="MicrosoftAspNetCoreHttpDll" Name="Microsoft.AspNetCore.Http.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHttpDll" AssemblyApplication="MicrosoftAspNetCoreHttpDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHttpExtensions" Guid="{E1B76B3E-BC49-445A-9B26-9AAB8FE2B2F8}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHttpExtensionsDll" Name="Microsoft.AspNetCore.Http.Extensions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHttpExtensionsDll" AssemblyApplication="MicrosoftAspNetCoreHttpExtensionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Extensions.dll" />
+                <File Id="MicrosoftAspNetCoreHttpExtensionsDll" Name="Microsoft.AspNetCore.Http.Extensions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHttpExtensionsDll" AssemblyApplication="MicrosoftAspNetCoreHttpExtensionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Extensions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreHttpFeatures" Guid="{7216FD49-138A-483C-9F1A-3FF3E9CED234}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreHttpFeaturesDll" Name="Microsoft.AspNetCore.Http.Features.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreHttpFeaturesDll" AssemblyApplication="MicrosoftAspNetCoreHttpFeaturesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Features.dll" />
+                <File Id="MicrosoftAspNetCoreHttpFeaturesDll" Name="Microsoft.AspNetCore.Http.Features.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreHttpFeaturesDll" AssemblyApplication="MicrosoftAspNetCoreHttpFeaturesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Http.Features.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreServerKestrelCore" Guid="{34ADADDB-A0AE-4B17-94FE-40E58E7E1B8D}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreServerKestrelCoreDll" Name="Microsoft.AspNetCore.Server.Kestrel.Core.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreServerKestrelCoreDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelCoreDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Core.dll" />
+                <File Id="MicrosoftAspNetCoreServerKestrelCoreDll" Name="Microsoft.AspNetCore.Server.Kestrel.Core.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreServerKestrelCoreDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelCoreDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Core.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreServerKestrel" Guid="{0DF09D9F-1C2F-40AE-91DB-2ADC5271E145}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreServerKestrelDll" Name="Microsoft.AspNetCore.Server.Kestrel.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreServerKestrelDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.dll" />
+                <File Id="MicrosoftAspNetCoreServerKestrelDll" Name="Microsoft.AspNetCore.Server.Kestrel.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreServerKestrelDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreServerKestrelTransportAbstractions" Guid="{3FB3E108-AFB3-4EE5-80F0-7A810210B8D9}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" />
+                <File Id="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelTransportAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreServerKestrelTransportLibuv" Guid="{898DCECC-81B8-4F9B-8263-5F781120839B}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" />
+                <File Id="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" AssemblyApplication="MicrosoftAspNetCoreServerKestrelTransportLibuvDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreWebSocketsProtocol" Guid="{12C2CC84-1F69-42DC-B470-0C7FB42BADE9}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreWebSocketsProtocolDll" Name="Microsoft.AspNetCore.WebSockets.Protocol.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreWebSocketsProtocolDll" AssemblyApplication="MicrosoftAspNetCoreWebSocketsProtocolDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebSockets.Protocol.dll" />
+                <File Id="MicrosoftAspNetCoreWebSocketsProtocolDll" Name="Microsoft.AspNetCore.WebSockets.Protocol.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreWebSocketsProtocolDll" AssemblyApplication="MicrosoftAspNetCoreWebSocketsProtocolDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebSockets.Protocol.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreWebSocketsServer" Guid="{AB5CF647-B4DE-479E-9B07-4AA8AC2D9B58}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreWebSocketsServerDll" Name="Microsoft.AspNetCore.WebSockets.Server.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreWebSocketsServerDll" AssemblyApplication="MicrosoftAspNetCoreWebSocketsServerDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebSockets.Server.dll" />
+                <File Id="MicrosoftAspNetCoreWebSocketsServerDll" Name="Microsoft.AspNetCore.WebSockets.Server.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreWebSocketsServerDll" AssemblyApplication="MicrosoftAspNetCoreWebSocketsServerDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebSockets.Server.dll" />
             </Component>
             <Component Id="MicrosoftAspNetCoreWebUtilities" Guid="{B5699C31-FB12-4F15-9C09-664A737C42FA}" Win64="$(var.Win64)">
-                <File Id="MicrosoftAspNetCoreWebUtilitiesDll" Name="Microsoft.AspNetCore.WebUtilities.dll" KeyPath="yes" AssemblyManifest="MicrosoftAspNetCoreWebUtilitiesDll" AssemblyApplication="MicrosoftAspNetCoreWebUtilitiesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebUtilities.dll" />
+                <File Id="MicrosoftAspNetCoreWebUtilitiesDll" Name="Microsoft.AspNetCore.WebUtilities.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftAspNetCoreWebUtilitiesDll" AssemblyApplication="MicrosoftAspNetCoreWebUtilitiesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.AspNetCore.WebUtilities.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsConfigurationAbstractions" Guid="{3494D7F7-964E-4CB1-8227-75398BE2D4C1}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsConfigurationAbstractionsDll" Name="Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsConfigurationAbstractionsDll" AssemblyApplication="MicrosoftExtensionsConfigurationAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.Abstractions.dll" />
+                <File Id="MicrosoftExtensionsConfigurationAbstractionsDll" Name="Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsConfigurationAbstractionsDll" AssemblyApplication="MicrosoftExtensionsConfigurationAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsConfiguration" Guid="{D5B9A573-4F93-4E1B-877E-B61EA673A803}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsConfigurationDll" Name="Microsoft.Extensions.Configuration.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsConfigurationDll" AssemblyApplication="MicrosoftExtensionsConfigurationDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.dll" />
+                <File Id="MicrosoftExtensionsConfigurationDll" Name="Microsoft.Extensions.Configuration.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsConfigurationDll" AssemblyApplication="MicrosoftExtensionsConfigurationDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsConfigurationEnvironmentVariables" Guid="{BFEE68F6-B6AD-4F7D-8763-1228EB951D47}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" Name="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" AssemblyApplication="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
+                <File Id="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" Name="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" AssemblyApplication="MicrosoftExtensionsConfigurationEnvironmentVariablesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsConfigurationFileExtensions" Guid="{249F259C-C515-4634-AE2D-8A1D29409F56}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsConfigurationFileExtensionsDll" Name="Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsConfigurationFileExtensionsDll" AssemblyApplication="MicrosoftExtensionsConfigurationFileExtensionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.FileExtensions.dll" />
+                <File Id="MicrosoftExtensionsConfigurationFileExtensionsDll" Name="Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsConfigurationFileExtensionsDll" AssemblyApplication="MicrosoftExtensionsConfigurationFileExtensionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Configuration.FileExtensions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsDependencyInjectionAbstractions" Guid="{8BEAF0A0-3EC5-42EF-8173-85F5EE6D8D6F}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsDependencyInjectionAbstractionsDll" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsDependencyInjectionAbstractionsDll" AssemblyApplication="MicrosoftExtensionsDependencyInjectionAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+                <File Id="MicrosoftExtensionsDependencyInjectionAbstractionsDll" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsDependencyInjectionAbstractionsDll" AssemblyApplication="MicrosoftExtensionsDependencyInjectionAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsDependencyInjection" Guid="{5661A7EB-5E7F-4393-8DE9-ADFE28A4B3FE}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsDependencyInjectionDll" Name="Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsDependencyInjectionDll" AssemblyApplication="MicrosoftExtensionsDependencyInjectionDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.DependencyInjection.dll" />
+                <File Id="MicrosoftExtensionsDependencyInjectionDll" Name="Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsDependencyInjectionDll" AssemblyApplication="MicrosoftExtensionsDependencyInjectionDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.DependencyInjection.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsFileProvidersAbstractions" Guid="{DAFED9A3-3D1A-40E7-ADB6-C504CDD0306F}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsFileProvidersAbstractionsDll" Name="Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsFileProvidersAbstractionsDll" AssemblyApplication="MicrosoftExtensionsFileProvidersAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileProviders.Abstractions.dll" />
+                <File Id="MicrosoftExtensionsFileProvidersAbstractionsDll" Name="Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsFileProvidersAbstractionsDll" AssemblyApplication="MicrosoftExtensionsFileProvidersAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileProviders.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsFileProvidersPhysical" Guid="{D50A352B-D199-4155-99E4-9DF584B48115}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsFileProvidersPhysicalDll" Name="Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsFileProvidersPhysicalDll" AssemblyApplication="MicrosoftExtensionsFileProvidersPhysicalDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileProviders.Physical.dll" />
+                <File Id="MicrosoftExtensionsFileProvidersPhysicalDll" Name="Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsFileProvidersPhysicalDll" AssemblyApplication="MicrosoftExtensionsFileProvidersPhysicalDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileProviders.Physical.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsFileSystemGlobbing" Guid="{2FF21B37-074D-4479-A6EE-203F9C564A4C}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsFileSystemGlobbingDll" Name="Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsFileSystemGlobbingDll" AssemblyApplication="MicrosoftExtensionsFileSystemGlobbingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileSystemGlobbing.dll" />
+                <File Id="MicrosoftExtensionsFileSystemGlobbingDll" Name="Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsFileSystemGlobbingDll" AssemblyApplication="MicrosoftExtensionsFileSystemGlobbingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.FileSystemGlobbing.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsHostingAbstractions" Guid="{07E03FF3-CD91-456B-891C-23CFD32DCC34}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsHostingAbstractionsDll" Name="Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsHostingAbstractionsDll" AssemblyApplication="MicrosoftExtensionsHostingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Hosting.Abstractions.dll" />
+                <File Id="MicrosoftExtensionsHostingAbstractionsDll" Name="Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsHostingAbstractionsDll" AssemblyApplication="MicrosoftExtensionsHostingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Hosting.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsLoggingAbstractions" Guid="{D2DE2317-3A05-4E05-8399-4867B2F8A948}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsLoggingAbstractionsDll" Name="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsLoggingAbstractionsDll" AssemblyApplication="MicrosoftExtensionsLoggingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Logging.Abstractions.dll" />
+                <File Id="MicrosoftExtensionsLoggingAbstractionsDll" Name="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsLoggingAbstractionsDll" AssemblyApplication="MicrosoftExtensionsLoggingAbstractionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Logging.Abstractions.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsLogging" Guid="{474A9CA6-B883-4A89-80AB-88CA633FE2CA}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsLoggingDll" Name="Microsoft.Extensions.Logging.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsLoggingDll" AssemblyApplication="MicrosoftExtensionsLoggingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Logging.dll" />
+                <File Id="MicrosoftExtensionsLoggingDll" Name="Microsoft.Extensions.Logging.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsLoggingDll" AssemblyApplication="MicrosoftExtensionsLoggingDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Logging.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsObjectPool" Guid="{D389423D-01D1-44AB-BD97-9BFDEA355FB2}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsObjectPoolDll" Name="Microsoft.Extensions.ObjectPool.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsObjectPoolDll" AssemblyApplication="MicrosoftExtensionsObjectPoolDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.ObjectPool.dll" />
+                <File Id="MicrosoftExtensionsObjectPoolDll" Name="Microsoft.Extensions.ObjectPool.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsObjectPoolDll" AssemblyApplication="MicrosoftExtensionsObjectPoolDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.ObjectPool.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsOptions" Guid="{14221D5D-01C1-487C-AD1E-EE0850935D87}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsOptionsDll" Name="Microsoft.Extensions.Options.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsOptionsDll" AssemblyApplication="MicrosoftExtensionsOptionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Options.dll" />
+                <File Id="MicrosoftExtensionsOptionsDll" Name="Microsoft.Extensions.Options.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsOptionsDll" AssemblyApplication="MicrosoftExtensionsOptionsDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Options.dll" />
             </Component>
             <Component Id="MicrosoftExtensionsPrimitives" Guid="{B264B17F-52B0-4425-8A8C-75726D4CFA3D}" Win64="$(var.Win64)">
-                <File Id="MicrosoftExtensionsPrimitivesDll" Name="Microsoft.Extensions.Primitives.dll" KeyPath="yes" AssemblyManifest="MicrosoftExtensionsPrimitivesDll" AssemblyApplication="MicrosoftExtensionsPrimitivesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Primitives.dll" />
+                <File Id="MicrosoftExtensionsPrimitivesDll" Name="Microsoft.Extensions.Primitives.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftExtensionsPrimitivesDll" AssemblyApplication="MicrosoftExtensionsPrimitivesDll" DiskId="1" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Extensions.Primitives.dll" />
+            </Component>
+            <Component Id="MicrosoftNetHttpHeadersdll" Guid="{C993340A-9BFC-439D-85C0-32879B7D68D4}" Win64="$(var.Win64)">
+                <File Id="MicrosoftNetHttpHeadersDll" Name="Microsoft.Net.Http.Headers.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftNetHttpHeadersDll" AssemblyApplication="MicrosoftNetHttpHeadersDll" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Net.Http.Headers.dll"/>
+            </Component>
+            <Component Id="MicrosoftPracticesServiceLocation" Guid="{08D47F64-5A00-49EE-BCAF-94F2141C35C7}" Win64="$(var.Win64)">
+                <File Id="MicrosoftPracticesServiceLocationDll" Name="Microsoft.Practices.ServiceLocation.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftPracticesServiceLocationDll" AssemblyApplication="MicrosoftPracticesServiceLocationDll"  Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Practices.ServiceLocation.dll"/>
+            </Component>
+            <Component Id="MicrosoftWin32Primitives" Guid="{A38B439E-9ADC-4B8B-9878-34EB26FF4023}" Win64="$(var.Win64)">
+                <File Id="MicrosoftWin32PrimitivesDll" Name="Microsoft.Win32.Primitives.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="MicrosoftWin32PrimitivesDll" AssemblyApplication="MicrosoftWin32PrimitivesDll" Source="$(var.CitadelGUI x86.TargetDir)Microsoft.Win32.Primitives.dll"/>
+            </Component>
+            <Component Id="netstandard" Guid="{CCF63B3B-4BCB-4082-A982-4ACDAB00A00D}" Win64="$(var.Win64)">
+                <File Id="netstandardDll" Name="netstandard.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="netstandardDll" AssemblyApplication="netstandardDll" Source="$(var.CitadelGUI x86.TargetDir)netstandard.dll"/>
+            </Component>
+            <Component Id="StreamExtended" Guid="{BD365CFC-7A6F-4C88-86D7-14B4C46BE364}" Win64="$(var.Win64)">
+                <File Id="StreamExtendedDll" Name="StreamExtended.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="StreamExtendedDll" AssemblyApplication="StreamExtendedDll" Source="$(var.CitadelGUI x86.TargetDir)StreamExtended.dll"/>
+            </Component>
+            <Component Id="SystemBuffers" Guid="{3F36349B-214B-45C7-97FB-B49138EC6EFB}" Win64="$(var.Win64)">
+                <File Id="SystemBuffersDll" Name="System.Buffers.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemBuffersDll" AssemblyApplication="SystemBuffersDll" Source="$(var.CitadelGUI x86.TargetDir)System.Buffers.dll"/>
+            </Component>
+            <Component Id="SystemComponentModelPrimitives" Guid="{0322F459-3C27-4EB4-B900-652DED0C143D}" Win64="$(var.Win64)">
+                <File Id="SystemComponentModelPrimitivesDll" Name="System.ComponentModel.Primitives.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemComponentModelPrimitivesDll" AssemblyApplication="SystemComponentModelPrimitivesDll" Source="$(var.CitadelGUI x86.TargetDir)System.ComponentModel.Primitives.dll"/>
+            </Component>
+            <Component Id="SystemComponentModelTypeConverter" Guid="{CB3A823C-2F2C-4E7C-A4CE-96730AEE4A6C}" Win64="$(var.Win64)">
+                <File Id="SystemComponentModelTypeConverterDll" Name="System.ComponentModel.TypeConverter.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemComponentModelTypeConverterDll" AssemblyApplication="SystemComponentModelTypeConverterDll" Source="$(var.CitadelGUI x86.TargetDir)System.ComponentModel.TypeConverter.dll"/>
+            </Component>
+            <Component Id="SystemDataCommon" Guid="{D2EF4562-6F67-4233-A090-8E8C48923A2C}" Win64="$(var.Win64)">
+                <File Id="SystemDataCommonDll" Name="System.Data.Common.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDataCommonDll" AssemblyApplication="SystemDataCommonDll" Source="$(var.CitadelGUI x86.TargetDir)System.Data.Common.dll"/>
+            </Component>
+            <Component Id="SystemDiagnosticsDiagnosticSource" Guid="{E8D19985-9C56-487E-B475-D2AB30A07DFD}" Win64="$(var.Win64)">
+                <File Id="SystemDiagnosticsDiagnosticSourceDll" Name="System.Diagnostics.DiagnosticSource.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDiagnosticsDiagnosticSourceDll" AssemblyApplication="SystemDiagnosticsDiagnosticSourceDll" Source="$(var.CitadelGUI x86.TargetDir)System.Diagnostics.DiagnosticSource.dll"/>
+            </Component>
+            <!--<Component Id="SystemDiagnosticsFileVersionInfo" Guid="{F35CAB28-FCA1-4F68-A211-47C97EB97266}" Win64="$(var.Win64)">
+                <File Id="SystemDiagnosticsFileVersionInfoDll" Name="System.Diagnostics.FileVersionInfo.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDiagnosticsFileVersionInfoDll" AssemblyApplication="SystemDiagnosticsFileVersionInfoDll" Source="$(var.CitadelGUI x86.TargetDir)System.Diagnostics.FileVersionInfo.dll"/>
+            </Component>-->
+            <Component Id="SystemDiagnosticsProcess" Guid="{36F59BC9-A188-425D-A72C-DAD14DFFBD98}" Win64="$(var.Win64)">
+                <File Id="SystemDiagnosticsProcessDll" Name="System.Diagnostics.Process.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDiagnosticsProcessDll" AssemblyApplication="SystemDiagnosticsProcessDll" Source="$(var.CitadelGUI x86.TargetDir)System.Diagnostics.Process.dll"/>
+            </Component>
+            <Component Id="SystemDiagnosticsTextWriterTraceListener" Guid="{07FF0DF8-4924-4915-A314-9F183198D1E1}" Win64="$(var.Win64)">
+                <File Id="SystemDiagnosticsTextWriterTraceListenerDll" Name="System.Diagnostics.TextWriterTraceListener.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDiagnosticsTextWriterTraceListenerDll" AssemblyApplication="SystemDiagnosticsTextWriterTraceListenerDll" Source="$(var.CitadelGUI x86.TargetDir)System.Diagnostics.TextWriterTraceListener.dll"/>
+            </Component>
+            <Component Id="SystemDiagnosticsTraceSource" Guid="{3136B0A9-7230-4EFF-87D3-F63FC07F1847}" Win64="$(var.Win64)">
+                <File Id="SystemDiagnosticsTraceSourceDll" Name="System.Diagnostics.TraceSource.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDiagnosticsTraceSourceDll" AssemblyApplication="SystemDiagnosticsTraceSourceDll" Source="$(var.CitadelGUI x86.TargetDir)System.Diagnostics.TraceSource.dll"/>
+            </Component>
+            <Component Id="SystemDrawingPrimitives" Guid="{7CE130DF-9215-422A-8780-64530E9D10E3}" Win64="$(var.Win64)">
+                <File Id="SystemDrawingPrimitivesDll" Name="System.Drawing.Primitives.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemDrawingPrimitivesDll" AssemblyApplication="SystemDrawingPrimitivesDll" Source="$(var.CitadelGUI x86.TargetDir)System.Drawing.Primitives.dll"/>
+            </Component>
+            <Component Id="SystemGlobalizationCalendars" Guid="{3B132C51-A8CB-498C-8AEB-6CE00857A6C9}" Win64="$(var.Win64)">
+                <File Id="SystemGlobalizationCalendarsDll" Name="System.Globalization.Calendars.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemGlobalizationCalendarsDll" AssemblyApplication="SystemGlobalizationCalendarsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Globalization.Calendars.dll"/>
+            </Component>
+            <Component Id="SystemGlobalizationExtensions" Guid="{37030AAD-217F-43F6-8A94-37743B5C96F1}" Win64="$(var.Win64)">
+                <File Id="SystemGlobalizationExtensionsDll" Name="System.Globalization.Extensions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemGlobalizationExtensionsDll" AssemblyApplication="SystemGlobalizationExtensionsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Globalization.Extensions.dll"/>
+            </Component>
+            <Component Id="SystemIOCompressionZipFile" Guid="{F748D30E-0816-4B8C-AF48-C6B627057DF3}" Win64="$(var.Win64)">
+                <File Id="SystemIOCompressionZipFileDll" Name="System.IO.Compression.ZipFile.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOCompressionZipFileDll" AssemblyApplication="SystemIOCompressionZipFileDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.Compression.ZipFile.dll"/>
+            </Component>
+            <Component Id="SystemIOFileSystemDriveInfo" Guid="{6A6200A6-47B1-4344-B1A5-742DC4641006}" Win64="$(var.Win64)">
+                <File Id="SystemIOFileSystemDriveInfoDll" Name="System.IO.FileSystem.DriveInfo.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOFileSystemDriveInfoDll" AssemblyApplication="SystemIOFileSystemDriveInfoDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.FileSystem.DriveInfo.dll"/>
+            </Component>
+            <Component Id="SystemIOFileSystemWatcher" Guid="{B85FD38A-7191-4D0D-892F-8835B4CF732F}" Win64="$(var.Win64)">
+                <File Id="SystemIOFileSystemWatcherDll" Name="System.IO.FileSystem.Watcher.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOFileSystemWatcherDll" AssemblyApplication="SystemIOFileSystemWatcherDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.FileSystem.Watcher.dll"/>
+            </Component>
+            <Component Id="SystemIOIsolatedStorage" Guid="{2288F3EB-2443-43DA-A729-DFE7CF03F21B}" Win64="$(var.Win64)">
+                <File Id="SystemIOIsolatedStorageDll" Name="System.IO.IsolatedStorage.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOIsolatedStorageDll" AssemblyApplication="SystemIOIsolatedStorageDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.IsolatedStorage.dll"/>
+            </Component>
+            <Component Id="SystemIOMemoryMappedFiles" Guid="{4926D0F7-DBFC-45AD-A49F-68B7EAB3097A}" Win64="$(var.Win64)">
+                <File Id="SystemIOMemoryMappedFilesDll" Name="System.IO.MemoryMappedFiles.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOMemoryMappedFilesDll" AssemblyApplication="SystemIOMemoryMappedFilesDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.MemoryMappedFiles.dll"/>
+            </Component>
+            <Component Id="SystemIOPipes" Guid="{C136B7E0-B652-43F7-8A1E-20F5F6934AF7}" Win64="$(var.Win64)">
+                <File Id="SystemIOPipesDll" Name="System.IO.Pipes.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOPipesDll" AssemblyApplication="SystemIOPipesDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.Pipes.dll"/>
+            </Component>
+            <Component Id="SystemIOUnmanagedMemoryStream" Guid="{C8E41908-7F70-4BED-A22E-6C5A3DD2FEEA}" Win64="$(var.Win64)">
+                <File Id="SystemIOUnmanagedMemoryStreamDll" Name="System.IO.UnmanagedMemoryStream.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemIOUnmanagedMemoryStreamDll" AssemblyApplication="SystemIOUnmanagedMemoryStreamDll" Source="$(var.CitadelGUI x86.TargetDir)System.IO.UnmanagedMemoryStream.dll"/>
+            </Component>
+            <Component Id="SystemNetNameResolution" Guid="{9F40FD82-5B4A-49A6-B968-E884A6BEEE70}" Win64="$(var.Win64)">
+                <File Id="SystemNetNameResolutionDll" Name="System.Net.NameResolution.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetNameResolutionDll" AssemblyApplication="SystemNetNameResolutionDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.NameResolution.dll"/>
+            </Component>
+            <Component Id="SystemNetPing" Guid="{AE1A7798-055D-4164-A322-28DF51AF72DD}" Win64="$(var.Win64)">
+                <File Id="SystemNetPingDll" Name="System.Net.Ping.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetPingDll" AssemblyApplication="SystemNetPingDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.Ping.dll"/>
+            </Component>
+            <!--<Component Id="SystemNetRequests" Guid="{B1F5C4E4-CDA7-4F2C-9E4F-8ADB4D07C3C3}" Win64="$(var.Win64)">
+                <File Id="SystemNetRequestsDll" Name="System.Net.Requests.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetRequestsDll" AssemblyApplication="SystemNetRequestsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.Requests.dll"/>
+            </Component>-->
+            <Component Id="SystemNetSockets" Guid="{4707520B-9938-4CAE-B858-EBBB828C1B95}" Win64="$(var.Win64)">
+                <File Id="SystemNetSocketsDll" Name="System.Net.Sockets.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetSocketsDll" AssemblyApplication="SystemNetSocketsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.Sockets.dll"/>
+            </Component>
+            <Component Id="SystemNetWebSocketsClient" Guid="{3C3ADC3C-7C0C-4390-AE1F-1EA8F2DDC25B}" Win64="$(var.Win64)">
+                <File Id="SystemNetWebSocketsClientDll" Name="System.Net.WebSockets.Client.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetWebSocketsClientDll" AssemblyApplication="SystemNetWebSocketsClientDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.WebSockets.Client.dll"/>
+            </Component>
+            <Component Id="SystemNetWebSockets" Guid="{4F5FD2CD-18C9-4700-868C-D46E9FC23040}" Win64="$(var.Win64)">
+                <File Id="SystemNetWebSocketsDll" Name="System.Net.WebSockets.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemNetWebSocketsDll" AssemblyApplication="SystemNetWebSocketsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Net.WebSockets.dll"/>
+            </Component>
+            <Component Id="SystemResourcesReader" Guid="{6CAA4B63-E4AA-4C46-BA7A-07870EB8192E}" Win64="$(var.Win64)">
+                <File Id="SystemResourcesReaderDll" Name="System.Resources.Reader.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemResourcesReaderDll" AssemblyApplication="SystemResourcesReaderDll" Source="$(var.CitadelGUI x86.TargetDir)System.Resources.Reader.dll"/>
+            </Component>
+            <Component Id="SystemResourcesWriter" Guid="{798DEF51-113C-4501-88E4-07C91197FF7B}" Win64="$(var.Win64)">
+                <File Id="SystemResourcesWriterDll" Name="System.Resources.Writer.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemResourcesWriterDll" AssemblyApplication="SystemResourcesWriterDll" Source="$(var.CitadelGUI x86.TargetDir)System.Resources.Writer.dll"/>
+            </Component>
+            <!--<Component Id="SystemResourcesResourceManager" Guid="{5781435A-794E-4B5D-A268-A9E67ABD409B}" Win64="$(var.Win64)">
+                <File Id="SystemResourcesResourceManagerDll" Name="System.Resources.ResourceManager.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemResourcesResourceManagerDll" AssemblyApplication="SystemResourcesResourceManagerDll" Source="$(var.CitadelGUI x86.TargetDir)System.Resources.ResourceManager.dll"/>
+            </Component>-->
+            <Component Id="SystemRuntimeCompilerServicesUnsafe" Guid="{41E5C771-48C9-4517-BB8B-0DF79DEC1946}" Win64="$(var.Win64)">
+                <File Id="SystemRuntimeCompilerServicesUnsafeDll" Name="System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemRuntimeCompilerServicesUnsafeDll" AssemblyApplication="SystemRuntimeCompilerServicesUnsafeDll" Source="$(var.CitadelGUI x86.TargetDir)System.Runtime.CompilerServices.Unsafe.dll"/>
+            </Component>
+            <Component Id="SystemRuntimeCompilerServicesVisualC" Guid="{9AFD8ADF-262E-4328-87A9-DACD70407615}" Win64="$(var.Win64)">
+                <File Id="SystemRuntimeCompilerServicesVisualCDll" Name="System.Runtime.CompilerServices.VisualC.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemRuntimeCompilerServicesVisualCDll" AssemblyApplication="SystemRuntimeCompilerServicesVisualCDll" Source="$(var.CitadelGUI x86.TargetDir)System.Runtime.CompilerServices.VisualC.dll"/>
+            </Component>
+            <Component Id="SystemRuntimeInteropServicesRuntimeInformation" Guid="{2B901861-1D30-4E5D-ACB2-4D23CAB1A608}" Win64="$(var.Win64)">
+                <File Id="SystemRuntimeInteropServicesRuntimeInformationDll" Name="System.Runtime.InteropServices.RuntimeInformation.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemRuntimeInteropServicesRuntimeInformationDll" AssemblyApplication="SystemRuntimeInteropServicesRuntimeInformationDll" Source="$(var.CitadelGUI x86.TargetDir)System.Runtime.InteropServices.RuntimeInformation.dll"/>
+            </Component>
+            <!--<Component Id="SystemRuntimeNumerics" Guid="{73385D8A-38EF-4C70-A6AC-C7B0C98B5F2D}" Win64="$(var.Win64)">
+                <File Id="SystemRuntimeNumericsDll" Name="System.Runtime.Numerics.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemRuntimeNumericsDll" AssemblyApplication="SystemRuntimeNumericsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Runtime.Numerics.dll"/>
+            </Component>-->
+            <Component Id="SystemRuntimeSerializationFormatters" Guid="{CFD45728-929B-467B-A8A5-8D9C15B040E0}" Win64="$(var.Win64)">
+                <File Id="SystemRuntimeSerializationFormattersDll" Name="System.Runtime.Serialization.Formatters.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemRuntimeSerializationFormattersDll" AssemblyApplication="SystemRuntimeSerializationFormattersDll" Source="$(var.CitadelGUI x86.TargetDir)System.Runtime.Serialization.Formatters.dll"/>
+            </Component>
+            <Component Id="SystemSecurityClaims" Guid="{DF82E1E2-4158-498A-9E97-E48E5EF4B0F9}" Win64="$(var.Win64)">
+                <File Id="SystemSecurityClaimsDll" Name="System.Security.Claims.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemSecurityClaimsDll" AssemblyApplication="SystemSecurityClaimsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Security.Claims.dll"/>
+            </Component>
+            <Component Id="SystemSecurityCryptographyCsp" Guid="{EADD2F9B-E989-4636-81C0-1BA4F700CA1E}" Win64="$(var.Win64)">
+                <File Id="SystemSecurityCryptographyCspDll" Name="System.Security.Cryptography.Csp.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemSecurityCryptographyCspDll" AssemblyApplication="SystemSecurityCryptographyCspDll" Source="$(var.CitadelGUI x86.TargetDir)System.Security.Cryptography.Csp.dll"/>
+            </Component>
+            <Component Id="SystemSecuritySecureString" Guid="{2DD26B3D-4F0E-4A0E-9E64-799FCF53627B}" Win64="$(var.Win64)">
+                <File Id="SystemSecuritySecureStringDll" Name="System.Security.SecureString.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemSecuritySecureStringDll" AssemblyApplication="SystemSecuritySecureStringDll" Source="$(var.CitadelGUI x86.TargetDir)System.Security.SecureString.dll"/>
+            </Component>
+            <Component Id="SystemTextEncodingsWeb" Guid="{AC04D566-7FFC-49B3-A2F3-DF4977F2FDCC}" Win64="$(var.Win64)">
+                <File Id="SystemTextEncodingsWebDll" Name="System.Text.Encodings.Web.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemTextEncodingsWebDll" AssemblyApplication="SystemTextEncodingsWebDll" Source="$(var.CitadelGUI x86.TargetDir)System.Text.Encodings.Web.dll"/>
+            </Component>
+            <Component Id="SystemThreadingOverlapped" Guid="{71F7D488-D1EE-48E4-8194-9CD43EE92306}" Win64="$(var.Win64)">
+                <File Id="SystemThreadingOverlappedDll" Name="System.Threading.Overlapped.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemThreadingOverlappedDll" AssemblyApplication="SystemThreadingOverlappedDll" Source="$(var.CitadelGUI x86.TargetDir)System.Threading.Overlapped.dll"/>
+            </Component>
+            <Component Id="SystemThreadingTasksExtensions" Guid="{F6CA0A08-B5C4-47BC-A469-D4120C9E972C}" Win64="$(var.Win64)">
+                <File Id="SystemThreadingTasksExtensionsDll" Name="System.Threading.Tasks.Extensions.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemThreadingTasksExtensionsDll" AssemblyApplication="SystemThreadingTasksExtensionsDll" Source="$(var.CitadelGUI x86.TargetDir)System.Threading.Tasks.Extensions.dll"/>
+            </Component>
+            <Component Id="SystemThreadingThreadPool" Guid="{4BFC5CCA-0556-41C1-A29C-D58D70E0C1FF}" Win64="$(var.Win64)">
+                <File Id="SystemThreadingThreadPoolDll" Name="System.Threading.ThreadPool.dll" KeyPath="yes" Assembly=".net" AssemblyManifest="SystemThreadingThreadPoolDll" AssemblyApplication="SystemThreadingThreadPoolDll" Source="$(var.CitadelGUI x86.TargetDir)System.Threading.ThreadPool.dll"/>
             </Component>
 
             <!--<Component Id="C__AF991B2D236A91D50FD47F12D4D75032" Guid="{1C97C37F-EE04-B9D0-69CF-EC6B1D45090C}" Win64="$(var.Win64)">

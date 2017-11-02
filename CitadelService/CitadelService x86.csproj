@@ -64,6 +64,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CitadelCore">
+      <HintPath>..\dependencies\CitadelCore.dll</HintPath>
+    </Reference>
+    <Reference Include="CitadelCore.Windows">
+      <HintPath>..\dependencies\CitadelCore.Windows.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />

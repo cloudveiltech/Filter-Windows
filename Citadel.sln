@@ -27,6 +27,14 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup x86", "Installers\Set
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetupWix x86", "SetupWix x86\SetupWix x86.wixproj", "{CEAFC80C-D111-491D-94A4-47668D596DA3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{31AE04FA-8282-4871-905F-5080D2CDAA3E}"
+	ProjectSection(SolutionItems) = preProject
+		dependencies\CitadelCore.dll = dependencies\CitadelCore.dll
+		dependencies\CitadelCore.pdb = dependencies\CitadelCore.pdb
+		dependencies\CitadelCore.Windows.dll = dependencies\CitadelCore.Windows.dll
+		dependencies\CitadelCore.Windows.pdb = dependencies\CitadelCore.Windows.pdb
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
