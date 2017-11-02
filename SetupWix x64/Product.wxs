@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product
+        Id="*"
+        Name="CloudVeil For Windows"
+        Language="1033"
+        Manufacturer="CloudVeil"
+        UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}"
+        Version="1.4.0">
+
+        <Package
+            Comments="Web Content Filter"
+            InstallerVersion="200"
+            Compressed="yes"
+            InstallScope="perMachine"
+            Keywords="Filter" Languages="1033" Manufacturer="CloudVeil"
+            />
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate />
+
+        <PropertyRef Id="WIX_IS_NETFRAMEWORK_462_OR_LATER_INSTALLED"/>
+        <Condition Message="This setup requires the .NET Framework 4.6.2 installed.">
+            <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_462_OR_LATER_INSTALLED]]>
+        </Condition>
+
+        <Feature Id="ProductFeature" Title="CloudVeil Installer" Level="1">
+            <ComponentGroupRef Id="ProductComponents"/>
+        </Feature>
+
+        <!--<DirectoryRef Id="ApplicationProgramsFolder">
+            <Component Id="ApplicationShortcut" Guid="*">
+                <Shortcut Id="startmenuCloudVeil" Name="CloudVeil for Windows"
+                       WorkingDirectory="INSTALLDIR" Target="[#CloudVeilExe]" Icon="CloudVeil.exe" IconIndex="0" />
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+                <RegistryValue Root="HKLM" Key="Software\CloudVeil" Name="heywhatareyoudoinghere" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+        </DirectoryRef>-->
+
+        <Icon Id="CloudVeil.exe" SourceFile="$(var.CitadelGUI x64.TargetPath)"/>
+    </Product>
+
+    <Fragment>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="CloudVeil">
+
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramMenuFolder">
+                <!--<Directory Id="ApplicationProgramsFolder" Name="Curriculum">
+
+                </Directory>-->
+            </Directory>
+
+            <Directory Id="DesktopFolder"/>
+        </Directory>
+
+    </Fragment>
+
+    <Fragment>
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <Component Id="C__61D19C679325CEE5FB0074013A5144E0" Guid="{62E3303E-8534-FE1B-6FC2-08DAF111B73B}" Win64="yes">
+                <File Id="CloudVeilExe" Name="CloudVeil.exe" KeyPath="yes" Assembly=".net" AssemblyManifest="CloudVeilExe" AssemblyApplication="CloudVeilExe" DiskId="1" Source="$(var.CitadelGUI x64.TargetPath)" />
+                <Shortcut Id="_067A623AF8A64435A28A4030FECE60A5" Directory="DesktopFolder" Name="CloudVeil For Windows" Icon="CloudVeil.exe" IconIndex="0" Show="normal" WorkingDirectory="TARGETDIR" Advertise="yes" />
+                <Shortcut Id="_FAE4B433658B45E0A04A156095DE923C" Directory="ProgramMenuFolder" Name="CloudVeil For Windows" Icon="CloudVeil.exe" IconIndex="0" Show="normal" WorkingDirectory="TARGETDIR" Advertise="yes" />
+            </Component>
+
+            <!--<Component Id="C__071760F42F1B68802C5F28140A3C9507" Guid="{0F212D37-B972-64B3-24D1-9B6A558A61BC}" Win64="yes">
+                <File Id="_071760F42F1B68802C5F28140A3C9507" Name="IKVM.OpenJDK.Localedata.dll" KeyPath="yes" ShortName="IKVMOP~1.DLL" Assembly=".net" AssemblyManifest="_071760F42F1B68802C5F28140A3C9507" AssemblyApplication="_071760F42F1B68802C5F28140A3C9507" DiskId="1" Source="SourceDir\File\_071760F42F1B68802C5F28140A3C9507" />
+            </Component>
+            <Component Id="C__08F64C59C583B42AB67E52E6A0D2AA12" Guid="{0055ED9F-001F-8803-8821-9839A807DA3E}" Win64="yes">
+                <File Id="_08F64C59C583B42AB67E52E6A0D2AA12" Name="DistillNET.dll" KeyPath="yes" ShortName="DISTIL~1.DLL" Assembly=".net" AssemblyManifest="_08F64C59C583B42AB67E52E6A0D2AA12" AssemblyApplication="_08F64C59C583B42AB67E52E6A0D2AA12" DiskId="1" Source="SourceDir\File\_08F64C59C583B42AB67E52E6A0D2AA12" />
+            </Component>
+            <Component Id="C__09AE8912051596A43318588F4722F366" Guid="{9F7DF1C3-A373-349D-59CC-4F0876F8716A}" Win64="yes">
+                <File Id="_09AE8912051596A43318588F4722F366" Name="IKVM.OpenJDK.XML.API.dll" KeyPath="yes" ShortName="IKVMOP~2.DLL" Assembly=".net" AssemblyManifest="_09AE8912051596A43318588F4722F366" AssemblyApplication="_09AE8912051596A43318588F4722F366" DiskId="1" Source="SourceDir\File\_09AE8912051596A43318588F4722F366" />
+            </Component>
+            <Component Id="C__0A4D177E59E6117B55B959E2366CA8D7" Guid="{6ABFACD0-07BB-3864-AB31-127DA81ACAD0}" Win64="yes">
+                <File Id="_0A4D177E59E6117B55B959E2366CA8D7" Name="IKVM.OpenJDK.Security.dll" KeyPath="yes" ShortName="IKVMOP~3.DLL" Assembly=".net" AssemblyManifest="_0A4D177E59E6117B55B959E2366CA8D7" AssemblyApplication="_0A4D177E59E6117B55B959E2366CA8D7" DiskId="1" Source="SourceDir\File\_0A4D177E59E6117B55B959E2366CA8D7" />
+            </Component>
+            <Component Id="C__0D74086AF6D2EC47CB6297233E1C4C97" Guid="{881677BA-3A89-46F4-1EFC-47A6354B067A}" Win64="yes">
+                <File Id="_0D74086AF6D2EC47CB6297233E1C4C97" Name="System.Linq.Parallel.dll" KeyPath="yes" ShortName="SYSTEM~1.DLL" Assembly=".net" AssemblyManifest="_0D74086AF6D2EC47CB6297233E1C4C97" AssemblyApplication="_0D74086AF6D2EC47CB6297233E1C4C97" DiskId="1" Source="SourceDir\File\_0D74086AF6D2EC47CB6297233E1C4C97" />
+            </Component>
+            <Component Id="C__0E386D6D52BF26DEB7A96EACA1A2E53D" Guid="{41074FB2-97DA-4AFA-CA85-185CBBEE2401}" Win64="yes">
+                <File Id="_0E386D6D52BF26DEB7A96EACA1A2E53D" Name="IKVM.OpenJDK.Core.dll" KeyPath="yes" ShortName="IKVMOP~4.DLL" Assembly=".net" AssemblyManifest="_0E386D6D52BF26DEB7A96EACA1A2E53D" AssemblyApplication="_0E386D6D52BF26DEB7A96EACA1A2E53D" DiskId="1" Source="SourceDir\File\_0E386D6D52BF26DEB7A96EACA1A2E53D" />
+            </Component>
+            <Component Id="C__0F5C2D8B918214A3D9DF6D92A120D807" Guid="{F991B723-B255-9D8B-19D8-6D7A52D01C43}" Win64="yes">
+                <File Id="_0F5C2D8B918214A3D9DF6D92A120D807" Name="System.Runtime.Extensions.dll" KeyPath="yes" ShortName="SYSTEM~2.DLL" Assembly=".net" AssemblyManifest="_0F5C2D8B918214A3D9DF6D92A120D807" AssemblyApplication="_0F5C2D8B918214A3D9DF6D92A120D807" DiskId="1" Source="SourceDir\File\_0F5C2D8B918214A3D9DF6D92A120D807" />
+            </Component>
+            <Component Id="C__101F0B4D640BC33C8E835163F048ED38" Guid="{41F05577-8CC9-B35E-6103-5A92146EB85E}" Win64="yes">
+                <File Id="_101F0B4D640BC33C8E835163F048ED38" Name="System.Reflection.Emit.dll" KeyPath="yes" ShortName="SYSTEM~3.DLL" Assembly=".net" AssemblyManifest="_101F0B4D640BC33C8E835163F048ED38" AssemblyApplication="_101F0B4D640BC33C8E835163F048ED38" DiskId="1" Source="SourceDir\File\_101F0B4D640BC33C8E835163F048ED38" />
+            </Component>
+            <Component Id="C__10CFE7F38AEE80B523A57A274CC09C77" Guid="{C02A81DE-6E4A-77A9-EEFE-9DB75CBC2010}" Win64="yes">
+                <File Id="_10CFE7F38AEE80B523A57A274CC09C77" Name="System.Diagnostics.Tracing.dll" KeyPath="yes" ShortName="SYSTEM~4.DLL" Assembly=".net" AssemblyManifest="_10CFE7F38AEE80B523A57A274CC09C77" AssemblyApplication="_10CFE7F38AEE80B523A57A274CC09C77" DiskId="1" Source="SourceDir\File\_10CFE7F38AEE80B523A57A274CC09C77" />
+            </Component>
+            <Component Id="C__125E27D58BA9AA6CEEAF49BAB26CC9DE" Guid="{492CD96F-D848-260F-9B7B-7F191545EF3D}" Win64="yes">
+                <File Id="_125E27D58BA9AA6CEEAF49BAB26CC9DE" Name="IKVM.OpenJDK.XML.Bind.dll" KeyPath="yes" ShortName="IKVMOP~5.DLL" Assembly=".net" AssemblyManifest="_125E27D58BA9AA6CEEAF49BAB26CC9DE" AssemblyApplication="_125E27D58BA9AA6CEEAF49BAB26CC9DE" DiskId="1" Source="SourceDir\File\_125E27D58BA9AA6CEEAF49BAB26CC9DE" />
+            </Component>
+            <Component Id="C__14BEA14455E904FAEB242BC8C0679308" Guid="{49A5215B-3317-9798-647A-DD93F1060A70}" Win64="yes">
+                <File Id="_14BEA14455E904FAEB242BC8C0679308" Name="IKVM.OpenJDK.Cldrdata.dll" KeyPath="yes" ShortName="IKVMOP~6.DLL" Assembly=".net" AssemblyManifest="_14BEA14455E904FAEB242BC8C0679308" AssemblyApplication="_14BEA14455E904FAEB242BC8C0679308" DiskId="1" Source="SourceDir\File\_14BEA14455E904FAEB242BC8C0679308" />
+            </Component>
+            <Component Id="C__192D170F80226ADE1BCF339C181E8285" Guid="{99FFFCBC-E941-CCE8-7657-C1F9D4938033}" Win64="yes">
+                <File Id="_192D170F80226ADE1BCF339C181E8285" Name="System.Runtime.InteropServices.WindowsRuntime.dll" KeyPath="yes" ShortName="SYSTEM~5.DLL" Assembly=".net" AssemblyManifest="_192D170F80226ADE1BCF339C181E8285" AssemblyApplication="_192D170F80226ADE1BCF339C181E8285" DiskId="1" Source="SourceDir\File\_192D170F80226ADE1BCF339C181E8285" />
+            </Component>
+            <Component Id="C__1C3A0934C3BF7F8ED5DC5C3859E55C4A" Guid="{D267C728-6637-7D64-7EE3-67AED72F5A0C}" Win64="yes">
+                <File Id="_1C3A0934C3BF7F8ED5DC5C3859E55C4A" Name="System.Reflection.Emit.ILGeneration.dll" KeyPath="yes" ShortName="SYSTEM~6.DLL" Assembly=".net" AssemblyManifest="_1C3A0934C3BF7F8ED5DC5C3859E55C4A" AssemblyApplication="_1C3A0934C3BF7F8ED5DC5C3859E55C4A" DiskId="1" Source="SourceDir\File\_1C3A0934C3BF7F8ED5DC5C3859E55C4A" />
+            </Component>
+            <Component Id="C__1C4198C0F1A5AB45001E137C11A60AF0" Guid="{732A9C9A-BE71-B0C8-738A-DBC26891D862}" Win64="yes">
+                <File Id="_1C4198C0F1A5AB45001E137C11A60AF0" Name="AngleSharp.dll" KeyPath="yes" ShortName="ANGLES~1.DLL" Assembly=".net" AssemblyManifest="_1C4198C0F1A5AB45001E137C11A60AF0" AssemblyApplication="_1C4198C0F1A5AB45001E137C11A60AF0" DiskId="1" Source="SourceDir\File\_1C4198C0F1A5AB45001E137C11A60AF0" />
+            </Component>
+            <Component Id="C__1DF6E2B333AAFBADC798234C8F68C3A7" Guid="{FBB1F459-341C-A529-C266-E9AD0CD6C5FA}" Win64="yes">
+                <File Id="_1DF6E2B333AAFBADC798234C8F68C3A7" Name="System.AppContext.dll" KeyPath="yes" ShortName="SYSTEM~7.DLL" Assembly=".net" AssemblyManifest="_1DF6E2B333AAFBADC798234C8F68C3A7" AssemblyApplication="_1DF6E2B333AAFBADC798234C8F68C3A7" DiskId="1" Source="SourceDir\File\_1DF6E2B333AAFBADC798234C8F68C3A7" />
+            </Component>
+            <Component Id="C__1ED5406D3E29C3DCFC34D612D6E8BC5A" Guid="{0055ED9F-001F-8803-8821-9839A807DA3E}" Win64="yes">
+                <File Id="_1ED5406D3E29C3DCFC34D612D6E8BC5A" Name="DistillNET.dll" KeyPath="yes" ShortName="DISTIL~2.DLL" Assembly=".net" AssemblyManifest="_1ED5406D3E29C3DCFC34D612D6E8BC5A" AssemblyApplication="_1ED5406D3E29C3DCFC34D612D6E8BC5A" DiskId="1" Source="SourceDir\File\_1ED5406D3E29C3DCFC34D612D6E8BC5A" />
+            </Component>
+            <Component Id="C__20902C74E020E4CB34673919CF45BD92" Guid="{E08CD4D2-8DD0-679C-5A1C-1F012C5BEF61}" Win64="yes">
+                <File Id="_20902C74E020E4CB34673919CF45BD92" Name="System.ServiceModel.NetTcp.dll" KeyPath="yes" ShortName="SYSTEM~8.DLL" Assembly=".net" AssemblyManifest="_20902C74E020E4CB34673919CF45BD92" AssemblyApplication="_20902C74E020E4CB34673919CF45BD92" DiskId="1" Source="SourceDir\File\_20902C74E020E4CB34673919CF45BD92" />
+            </Component>
+            <Component Id="C__20FF61A3B3E8E5A48972CCE1C7F090AF" Guid="{CCE8694E-BACA-F36D-CAB4-1E6574C9889D}" Win64="yes">
+                <File Id="_20FF61A3B3E8E5A48972CCE1C7F090AF" Name="System.Threading.dll" KeyPath="yes" ShortName="SYSTEM~9.DLL" Assembly=".net" AssemblyManifest="_20FF61A3B3E8E5A48972CCE1C7F090AF" AssemblyApplication="_20FF61A3B3E8E5A48972CCE1C7F090AF" DiskId="1" Source="SourceDir\File\_20FF61A3B3E8E5A48972CCE1C7F090AF" />
+            </Component>
+            <Component Id="C__2320905205F2E283816C814A5C28B89F" Guid="{AAE2450A-21DA-8218-8808-67B9D05CF430}" Win64="yes">
+                <File Id="_2320905205F2E283816C814A5C28B89F" Name="IKVM.OpenJDK.Text.dll" KeyPath="yes" ShortName="IKVMOP~7.DLL" Assembly=".net" AssemblyManifest="_2320905205F2E283816C814A5C28B89F" AssemblyApplication="_2320905205F2E283816C814A5C28B89F" DiskId="1" Source="SourceDir\File\_2320905205F2E283816C814A5C28B89F" />
+            </Component>
+            <Component Id="C__23D70202C42BAE1297A5FC1D6CAB754D" Guid="{EC92E149-8E91-4F57-8E0B-4BB47EDEFBB7}" Win64="yes">
+                <File Id="_23D70202C42BAE1297A5FC1D6CAB754D" Name="System.ServiceModel.Duplex.dll" KeyPath="yes" ShortName="SYSTE~10.DLL" Assembly=".net" AssemblyManifest="_23D70202C42BAE1297A5FC1D6CAB754D" AssemblyApplication="_23D70202C42BAE1297A5FC1D6CAB754D" DiskId="1" Source="SourceDir\File\_23D70202C42BAE1297A5FC1D6CAB754D" />
+            </Component>
+            <Component Id="C__25569244362DB1BE454E6D4F1C1259C4" Guid="{56D3EBB6-B488-FD9E-06AE-FDDC21C37593}" Win64="yes">
+                <File Id="_25569244362DB1BE454E6D4F1C1259C4" Name="Citadel.Core.Windows.dll" KeyPath="yes" ShortName="CITADE~1.DLL" Assembly=".net" AssemblyManifest="_25569244362DB1BE454E6D4F1C1259C4" AssemblyApplication="_25569244362DB1BE454E6D4F1C1259C4" DiskId="1" Source="SourceDir\File\_25569244362DB1BE454E6D4F1C1259C4" />
+            </Component>
+            <Component Id="C__257B4E3A9A6930C4CB61D6BC3917E8E0" Guid="{4F313C65-E079-B83D-B8D8-257EB7EEA757}" Win64="yes">
+                <File Id="_257B4E3A9A6930C4CB61D6BC3917E8E0" Name="System.Collections.Immutable.dll" KeyPath="yes" ShortName="SYSTE~11.DLL" Assembly=".net" AssemblyManifest="_257B4E3A9A6930C4CB61D6BC3917E8E0" AssemblyApplication="_257B4E3A9A6930C4CB61D6BC3917E8E0" DiskId="1" Source="SourceDir\File\_257B4E3A9A6930C4CB61D6BC3917E8E0" />
+            </Component>
+            <Component Id="C__27405E7419C51C9B2BDE3ACD765FE0FE" Guid="{BD803D64-A908-A035-9D8A-8B9A46670504}" Win64="yes">
+                <File Id="_27405E7419C51C9B2BDE3ACD765FE0FE" Name="System.Runtime.Numerics.dll" KeyPath="yes" ShortName="SYSTE~12.DLL" Assembly=".net" AssemblyManifest="_27405E7419C51C9B2BDE3ACD765FE0FE" AssemblyApplication="_27405E7419C51C9B2BDE3ACD765FE0FE" DiskId="1" Source="SourceDir\File\_27405E7419C51C9B2BDE3ACD765FE0FE" />
+            </Component>
+            <Component Id="C__276BA1BC706612BDBC74AC1C6AD86A26" Guid="{EA8AFDB3-7CC9-75C4-239F-3B854EFA1581}" Win64="yes">
+                <File Id="_276BA1BC706612BDBC74AC1C6AD86A26" Name="System.Security.Cryptography.Encoding.dll" KeyPath="yes" ShortName="SYSTE~13.DLL" Assembly=".net" AssemblyManifest="_276BA1BC706612BDBC74AC1C6AD86A26" AssemblyApplication="_276BA1BC706612BDBC74AC1C6AD86A26" DiskId="1" Source="SourceDir\File\_276BA1BC706612BDBC74AC1C6AD86A26" />
+            </Component>
+            <Component Id="C__27E35A2FD55FA953E2B6F67E6E83054C" Guid="{6C38ECE3-3246-2B21-3BCB-B7218202CF63}" Win64="yes">
+                <File Id="_27E35A2FD55FA953E2B6F67E6E83054C" Name="IKVM.OpenJDK.XML.Transform.dll" KeyPath="yes" ShortName="IKVMOP~8.DLL" Assembly=".net" AssemblyManifest="_27E35A2FD55FA953E2B6F67E6E83054C" AssemblyApplication="_27E35A2FD55FA953E2B6F67E6E83054C" DiskId="1" Source="SourceDir\File\_27E35A2FD55FA953E2B6F67E6E83054C" />
+            </Component>
+            <Component Id="C__28A772B054C4D19A3CCF9C7F582B3AE3" Guid="{16E2C2C8-3C4C-6BF5-CB0D-0838AE4FF0A7}" Win64="yes">
+                <File Id="_28A772B054C4D19A3CCF9C7F582B3AE3" Name="System.Threading.Tasks.dll" KeyPath="yes" ShortName="SYSTE~14.DLL" Assembly=".net" AssemblyManifest="_28A772B054C4D19A3CCF9C7F582B3AE3" AssemblyApplication="_28A772B054C4D19A3CCF9C7F582B3AE3" DiskId="1" Source="SourceDir\File\_28A772B054C4D19A3CCF9C7F582B3AE3" />
+            </Component>
+            <Component Id="C__28C921E2C8632B55EA6339E975F88B7A" Guid="{4EE20034-43CF-4253-6E0F-C5D84D37535B}" Win64="yes">
+                <File Id="_28C921E2C8632B55EA6339E975F88B7A" Name="System.Xml.XmlSerializer.dll" KeyPath="yes" ShortName="SYSTE~15.DLL" Assembly=".net" AssemblyManifest="_28C921E2C8632B55EA6339E975F88B7A" AssemblyApplication="_28C921E2C8632B55EA6339E975F88B7A" DiskId="1" Source="SourceDir\File\_28C921E2C8632B55EA6339E975F88B7A" />
+            </Component>
+            <Component Id="C__2A19143B531405994878F806728FAD35" Guid="{E3E45E37-E2B6-CFEF-F165-6148FED22297}" Win64="yes">
+                <File Id="_2A19143B531405994878F806728FAD35" Name="Newtonsoft.Json.dll" KeyPath="yes" ShortName="NEWTON~1.DLL" Assembly=".net" AssemblyManifest="_2A19143B531405994878F806728FAD35" AssemblyApplication="_2A19143B531405994878F806728FAD35" DiskId="1" Source="SourceDir\File\_2A19143B531405994878F806728FAD35" />
+            </Component>
+            <Component Id="C__2BEDF808540E547587DC22A1DE03F86F" Guid="{4C954A67-C243-4A28-4835-43BC2B72AFA0}" Win64="yes">
+                <File Id="_2BEDF808540E547587DC22A1DE03F86F" Name="System.Text.Encoding.Extensions.dll" KeyPath="yes" ShortName="SYSTE~16.DLL" Assembly=".net" AssemblyManifest="_2BEDF808540E547587DC22A1DE03F86F" AssemblyApplication="_2BEDF808540E547587DC22A1DE03F86F" DiskId="1" Source="SourceDir\File\_2BEDF808540E547587DC22A1DE03F86F" />
+            </Component>
+            <Component Id="C__321553506D0284A4E7C5D6260B9182BB" Guid="{4B0AFD33-E1E8-69A6-7B76-86529C6AF48F}" Win64="yes">
+                <File Id="_321553506D0284A4E7C5D6260B9182BB" Name="System.ServiceModel.Http.dll" KeyPath="yes" ShortName="SYSTE~17.DLL" Assembly=".net" AssemblyManifest="_321553506D0284A4E7C5D6260B9182BB" AssemblyApplication="_321553506D0284A4E7C5D6260B9182BB" DiskId="1" Source="SourceDir\File\_321553506D0284A4E7C5D6260B9182BB" />
+            </Component>
+            <Component Id="C__328A480D4E3AEBA4C99BBC1FBCAA8E66" Guid="{53685486-1DF8-54AF-C7DC-F5AFEB3BBB2A}" Win64="yes">
+                <File Id="_328A480D4E3AEBA4C99BBC1FBCAA8E66" Name="System.Data.SQLite.dll" KeyPath="yes" ShortName="SYSTE~18.DLL" Assembly=".net" AssemblyManifest="_328A480D4E3AEBA4C99BBC1FBCAA8E66" AssemblyApplication="_328A480D4E3AEBA4C99BBC1FBCAA8E66" DiskId="1" Source="SourceDir\File\_328A480D4E3AEBA4C99BBC1FBCAA8E66" />
+            </Component>
+            <Component Id="C__352BD549290DF7C95092D954FA2A1983" Guid="{5B77D52A-DB12-E71B-D48D-F1EEA531E0D0}" Win64="yes">
+                <File Id="_352BD549290DF7C95092D954FA2A1983" Name="GalaSoft.MvvmLight.dll" KeyPath="yes" ShortName="GALASO~1.DLL" Assembly=".net" AssemblyManifest="_352BD549290DF7C95092D954FA2A1983" AssemblyApplication="_352BD549290DF7C95092D954FA2A1983" DiskId="1" Source="SourceDir\File\_352BD549290DF7C95092D954FA2A1983" />
+            </Component>
+            <Component Id="C__36BC86651309CFDCF7E5EF3479807F67" Guid="{1970832E-D34C-D449-0E1B-04D2ADAA53CE}" Win64="yes">
+                <File Id="_36BC86651309CFDCF7E5EF3479807F67" Name="System.ObjectModel.dll" KeyPath="yes" ShortName="SYSTE~19.DLL" Assembly=".net" AssemblyManifest="_36BC86651309CFDCF7E5EF3479807F67" AssemblyApplication="_36BC86651309CFDCF7E5EF3479807F67" DiskId="1" Source="SourceDir\File\_36BC86651309CFDCF7E5EF3479807F67" />
+            </Component>
+            <Component Id="C__37579EB1FDD748C351C0485FF6F77B3B" Guid="{B5F224A8-BA19-584A-E5BB-67FFFAED0879}" Win64="yes">
+                <File Id="_37579EB1FDD748C351C0485FF6F77B3B" Name="IKVM.OpenJDK.Corba.dll" KeyPath="yes" ShortName="IKVMOP~9.DLL" Assembly=".net" AssemblyManifest="_37579EB1FDD748C351C0485FF6F77B3B" AssemblyApplication="_37579EB1FDD748C351C0485FF6F77B3B" DiskId="1" Source="SourceDir\File\_37579EB1FDD748C351C0485FF6F77B3B" />
+            </Component>
+            <Component Id="C__39F406242823426BB4BBC846C4BE4A71" Guid="{9B1EA0FD-2636-D67B-DA5A-7020CEAAA3A7}" Win64="yes">
+                <File Id="_39F406242823426BB4BBC846C4BE4A71" Name="WinDivert64.sys" KeyPath="yes" ShortName="WINDIV~1.SYS" DiskId="1" Source="SourceDir\File\_39F406242823426BB4BBC846C4BE4A71" />
+            </Component>
+            <Component Id="C__3A968F6BB3A30F5184282DAA7CEAF0CA" Guid="{83106940-777D-9417-A0ED-99333BE5ADDA}" Win64="yes">
+                <File Id="_3A968F6BB3A30F5184282DAA7CEAF0CA" Name="IKVM.OpenJDK.Beans.dll" KeyPath="yes" ShortName="IKVMO~10.DLL" Assembly=".net" AssemblyManifest="_3A968F6BB3A30F5184282DAA7CEAF0CA" AssemblyApplication="_3A968F6BB3A30F5184282DAA7CEAF0CA" DiskId="1" Source="SourceDir\File\_3A968F6BB3A30F5184282DAA7CEAF0CA" />
+            </Component>
+            <Component Id="C__3C1CD3BAB458EB2E809044EF17EFB31E" Guid="{F39B5D17-1ED0-7303-5ADC-E4F0C16C3B84}" Win64="yes">
+                <File Id="_3C1CD3BAB458EB2E809044EF17EFB31E" Name="IKVM.Runtime.JNI.dll" KeyPath="yes" ShortName="IKVMRU~1.DLL" Assembly=".net" AssemblyManifest="_3C1CD3BAB458EB2E809044EF17EFB31E" AssemblyApplication="_3C1CD3BAB458EB2E809044EF17EFB31E" DiskId="1" Source="SourceDir\File\_3C1CD3BAB458EB2E809044EF17EFB31E" />
+            </Component>
+            <Component Id="C__3EF27438740DBFEC9993F006D2CEE124" Guid="{575C19A4-558C-1ADA-6BDF-8BDF13429DD3}" Win64="yes">
+                <File Id="_3EF27438740DBFEC9993F006D2CEE124" Name="System.Net.Http.dll" KeyPath="yes" ShortName="SYSTE~20.DLL" Assembly=".net" AssemblyManifest="_3EF27438740DBFEC9993F006D2CEE124" AssemblyApplication="_3EF27438740DBFEC9993F006D2CEE124" DiskId="1" Source="SourceDir\File\_3EF27438740DBFEC9993F006D2CEE124" />
+            </Component>
+            <Component Id="C__403AA157DA910BD0E9F2B0056BEA37E8" Guid="{252F2FD7-4BB8-726B-7AD2-D47CAF842FC1}" Win64="yes">
+                <File Id="_403AA157DA910BD0E9F2B0056BEA37E8" Name="System.Reflection.Emit.Lightweight.dll" KeyPath="yes" ShortName="SYSTE~21.DLL" Assembly=".net" AssemblyManifest="_403AA157DA910BD0E9F2B0056BEA37E8" AssemblyApplication="_403AA157DA910BD0E9F2B0056BEA37E8" DiskId="1" Source="SourceDir\File\_403AA157DA910BD0E9F2B0056BEA37E8" />
+            </Component>
+            <Component Id="C__438697DAC0E5D175BDBA697578B696CE" Guid="{701D1020-250C-A62D-B6FD-8611140DAB3A}" Win64="yes">
+                <File Id="_438697DAC0E5D175BDBA697578B696CE" Name="System.IO.dll" KeyPath="yes" ShortName="SYSTE~22.DLL" Assembly=".net" AssemblyManifest="_438697DAC0E5D175BDBA697578B696CE" AssemblyApplication="_438697DAC0E5D175BDBA697578B696CE" DiskId="1" Source="SourceDir\File\_438697DAC0E5D175BDBA697578B696CE" />
+            </Component>
+            <Component Id="C__444EFE0ED1018AE6169A94B6F7E5EBC8" Guid="{25D63B71-596B-B7B5-230F-475163F32507}" Win64="yes">
+                <File Id="_444EFE0ED1018AE6169A94B6F7E5EBC8" Name="NamedPipeWrapper.dll" KeyPath="yes" ShortName="NAMEDP~1.DLL" Assembly=".net" AssemblyManifest="_444EFE0ED1018AE6169A94B6F7E5EBC8" AssemblyApplication="_444EFE0ED1018AE6169A94B6F7E5EBC8" DiskId="1" Source="SourceDir\File\_444EFE0ED1018AE6169A94B6F7E5EBC8" />
+            </Component>
+            <Component Id="C__4530612E60A6D7D9BFA5102B0A272C84" Guid="{7F34577B-2429-C52E-29AE-3104A1E171B4}" Win64="yes">
+                <File Id="_4530612E60A6D7D9BFA5102B0A272C84" Name="System.Diagnostics.Debug.dll" KeyPath="yes" ShortName="SYSTE~23.DLL" Assembly=".net" AssemblyManifest="_4530612E60A6D7D9BFA5102B0A272C84" AssemblyApplication="_4530612E60A6D7D9BFA5102B0A272C84" DiskId="1" Source="SourceDir\File\_4530612E60A6D7D9BFA5102B0A272C84" />
+            </Component>
+            <Component Id="C__4840D83FCDDF27961735E8704EF1F7B4" Guid="{8DBF850B-AD3D-AB78-353A-23C58CD20F8D}" Win64="yes">
+                <File Id="_4840D83FCDDF27961735E8704EF1F7B4" Name="EntityFramework.SqlServer.dll" KeyPath="yes" ShortName="ENTITY~1.DLL" Assembly=".net" AssemblyManifest="_4840D83FCDDF27961735E8704EF1F7B4" AssemblyApplication="_4840D83FCDDF27961735E8704EF1F7B4" DiskId="1" Source="SourceDir\File\_4840D83FCDDF27961735E8704EF1F7B4" />
+            </Component>
+            <Component Id="C__48CA387F652AB5F87F6128718784E9EA" Guid="{CEB1409B-9B2A-502B-CD28-EE625A6F5B07}" Win64="yes">
+                <File Id="_48CA387F652AB5F87F6128718784E9EA" Name="GalaSoft.MvvmLight.Extras.dll" KeyPath="yes" ShortName="GALASO~2.DLL" Assembly=".net" AssemblyManifest="_48CA387F652AB5F87F6128718784E9EA" AssemblyApplication="_48CA387F652AB5F87F6128718784E9EA" DiskId="1" Source="SourceDir\File\_48CA387F652AB5F87F6128718784E9EA" />
+            </Component>
+            <Component Id="C__4A82724129B44061B1A42793733303D7" Guid="{66A550FC-1D6C-6F28-F06C-A9946F3D33F5}" Win64="yes">
+                <File Id="_4A82724129B44061B1A42793733303D7" Name="appicon.ico" KeyPath="yes" ShortName="APPICON.ICO" DiskId="1" Source="SourceDir\File\_4A82724129B44061B1A42793733303D7" />
+            </Component>
+            <Component Id="C__4F9219EF38026833BECEB1FFA958C367" Guid="{65D20BA9-A291-39C7-302E-070F275BEDCF}" Win64="yes">
+                <File Id="_4F9219EF38026833BECEB1FFA958C367" Name="System.Diagnostics.Contracts.dll" KeyPath="yes" ShortName="SYSTE~24.DLL" Assembly=".net" AssemblyManifest="_4F9219EF38026833BECEB1FFA958C367" AssemblyApplication="_4F9219EF38026833BECEB1FFA958C367" DiskId="1" Source="SourceDir\File\_4F9219EF38026833BECEB1FFA958C367" />
+            </Component>
+            <Component Id="C__509504551B2E0B9CEB8EA5A4E835EF25" Guid="{D921B872-C643-7E75-75EB-0914D056054D}" Win64="yes">
+                <File Id="_509504551B2E0B9CEB8EA5A4E835EF25" Name="System.Runtime.Serialization.Primitives.dll" KeyPath="yes" ShortName="SYSTE~25.DLL" Assembly=".net" AssemblyManifest="_509504551B2E0B9CEB8EA5A4E835EF25" AssemblyApplication="_509504551B2E0B9CEB8EA5A4E835EF25" DiskId="1" Source="SourceDir\File\_509504551B2E0B9CEB8EA5A4E835EF25" />
+            </Component>
+            <Component Id="C__50E6722D24DA498493B852624B9B563B" Guid="{B14B24A9-5976-2AA8-37C7-740D40FB5E60}" Win64="yes">
+                <File Id="_50E6722D24DA498493B852624B9B563B" Name="WinDivert32.sys" KeyPath="yes" ShortName="WINDIV~2.SYS" DiskId="1" Source="SourceDir\File\_50E6722D24DA498493B852624B9B563B" />
+            </Component>
+            <Component Id="C__530C8DDF9F4EC1306EEADCCBA960C101" Guid="{6F84C111-EA9F-021E-3605-1C6B8D48370D}" Win64="yes">
+                <File Id="_530C8DDF9F4EC1306EEADCCBA960C101" Name="MahApps.Metro.IconPacks.FontAwesome.dll" KeyPath="yes" ShortName="MAHAPP~1.DLL" Assembly=".net" AssemblyManifest="_530C8DDF9F4EC1306EEADCCBA960C101" AssemblyApplication="_530C8DDF9F4EC1306EEADCCBA960C101" DiskId="1" Source="SourceDir\File\_530C8DDF9F4EC1306EEADCCBA960C101" />
+            </Component>
+            <Component Id="C__57E31DB7834DD76F178D9EBD68A49980" Guid="{838E433D-D171-7592-3A18-57A6C9DDEB87}" Win64="yes">
+                <File Id="_57E31DB7834DD76F178D9EBD68A49980" Name="System.ServiceModel.Primitives.dll" KeyPath="yes" ShortName="SYSTE~26.DLL" Assembly=".net" AssemblyManifest="_57E31DB7834DD76F178D9EBD68A49980" AssemblyApplication="_57E31DB7834DD76F178D9EBD68A49980" DiskId="1" Source="SourceDir\File\_57E31DB7834DD76F178D9EBD68A49980" />
+            </Component>
+            <Component Id="C__58618CD94CD617BBB4A5E8EF64516715" Guid="{49FE9566-D957-C9D4-93AA-934AF73251E7}" Win64="yes">
+                <File Id="_58618CD94CD617BBB4A5E8EF64516715" Name="System.Diagnostics.StackTrace.dll" KeyPath="yes" ShortName="SYSTE~27.DLL" Assembly=".net" AssemblyManifest="_58618CD94CD617BBB4A5E8EF64516715" AssemblyApplication="_58618CD94CD617BBB4A5E8EF64516715" DiskId="1" Source="SourceDir\File\_58618CD94CD617BBB4A5E8EF64516715" />
+            </Component>
+            <Component Id="C__58E66E559834A56838A2B8888D3B4AB2" Guid="{8F270B29-0B3E-49A3-9057-CFB1C629657F}" Win64="yes">
+                <File Id="_58E66E559834A56838A2B8888D3B4AB2" Name="HttpFilteringEngineManaged.dll" KeyPath="yes" ShortName="HTTPFI~2.DLL" Assembly=".net" AssemblyManifest="_58E66E559834A56838A2B8888D3B4AB2" AssemblyApplication="_58E66E559834A56838A2B8888D3B4AB2" DiskId="1" Source="SourceDir\File\_58E66E559834A56838A2B8888D3B4AB2" />
+            </Component>
+            <Component Id="C__59191679D2CB0B8E65A5DB833ECFB4AF" Guid="{863DAAA4-79B1-13B2-6FF0-A99CAB7FE48F}" Win64="yes">
+                <File Id="_59191679D2CB0B8E65A5DB833ECFB4AF" Name="System.Console.dll" KeyPath="yes" ShortName="SYSTE~28.DLL" Assembly=".net" AssemblyManifest="_59191679D2CB0B8E65A5DB833ECFB4AF" AssemblyApplication="_59191679D2CB0B8E65A5DB833ECFB4AF" DiskId="1" Source="SourceDir\File\_59191679D2CB0B8E65A5DB833ECFB4AF" />
+            </Component>
+            <Component Id="C__5DDF0CDBFA17482486120950358DAA9F" Guid="{7A0A6C30-95FE-A54A-1C9F-077F84D33985}" Win64="yes">
+                <File Id="_5DDF0CDBFA17482486120950358DAA9F" Name="MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" ShortName="MOZILL~1.RTF" DiskId="1" Source="SourceDir\File\_5DDF0CDBFA17482486120950358DAA9F" />
+            </Component>
+            <Component Id="C__5E16B5A47B66BB4AC49231DD1350B1E5" Guid="{BF7EE753-7537-B8CD-E367-79854F12D3A1}" Win64="yes">
+                <File Id="_5E16B5A47B66BB4AC49231DD1350B1E5" Name="System.Xml.XDocument.dll" KeyPath="yes" ShortName="SYSTE~29.DLL" Assembly=".net" AssemblyManifest="_5E16B5A47B66BB4AC49231DD1350B1E5" AssemblyApplication="_5E16B5A47B66BB4AC49231DD1350B1E5" DiskId="1" Source="SourceDir\File\_5E16B5A47B66BB4AC49231DD1350B1E5" />
+            </Component>
+            <Component Id="C__5FA790A59E8A0E36B965FB452BC37B94" Guid="{435189A0-3297-5EB2-8182-B41DADCE4425}" Win64="yes">
+                <File Id="_5FA790A59E8A0E36B965FB452BC37B94" Name="System.Runtime.dll" KeyPath="yes" ShortName="SYSTE~30.DLL" Assembly=".net" AssemblyManifest="_5FA790A59E8A0E36B965FB452BC37B94" AssemblyApplication="_5FA790A59E8A0E36B965FB452BC37B94" DiskId="1" Source="SourceDir\File\_5FA790A59E8A0E36B965FB452BC37B94" />
+            </Component>
+            <Component Id="C__60488FF6A7A102678F9B96FB926ADA2A" Guid="{9E66F033-C17B-C33D-A430-3BB113F52167}" Win64="yes">
+                <File Id="_60488FF6A7A102678F9B96FB926ADA2A" Name="System.Resources.ResourceManager.dll" KeyPath="yes" ShortName="SYSTE~31.DLL" Assembly=".net" AssemblyManifest="_60488FF6A7A102678F9B96FB926ADA2A" AssemblyApplication="_60488FF6A7A102678F9B96FB926ADA2A" DiskId="1" Source="SourceDir\File\_60488FF6A7A102678F9B96FB926ADA2A" />
+            </Component>
+            <Component Id="C__631F8E489052E5042FE2109F75655EBF" Guid="{AC910EC5-2879-7764-9237-15A616EB69EA}" Win64="yes">
+                <File Id="_631F8E489052E5042FE2109F75655EBF" Name="IKVM.OpenJDK.Management.dll" KeyPath="yes" ShortName="IKVMO~11.DLL" Assembly=".net" AssemblyManifest="_631F8E489052E5042FE2109F75655EBF" AssemblyApplication="_631F8E489052E5042FE2109F75655EBF" DiskId="1" Source="SourceDir\File\_631F8E489052E5042FE2109F75655EBF" />
+            </Component>
+            <Component Id="C__682D9CBA31B832B18A663203961BE402" Guid="{0AE76458-B328-3591-5040-45C57ED42977}" Win64="yes">
+                <File Id="_682D9CBA31B832B18A663203961BE402" Name="IKVM.OpenJDK.XML.WebServices.dll" KeyPath="yes" ShortName="IKVMO~12.DLL" Assembly=".net" AssemblyManifest="_682D9CBA31B832B18A663203961BE402" AssemblyApplication="_682D9CBA31B832B18A663203961BE402" DiskId="1" Source="SourceDir\File\_682D9CBA31B832B18A663203961BE402" />
+            </Component>
+            <Component Id="C__68A869A9F493291607E25EED38E92B68" Guid="{E4D5E272-F754-69EE-6B9B-AD39BC3D0EC0}" Win64="yes">
+                <File Id="_68A869A9F493291607E25EED38E92B68" Name="System.Threading.Tasks.Parallel.dll" KeyPath="yes" ShortName="SYSTE~32.DLL" Assembly=".net" AssemblyManifest="_68A869A9F493291607E25EED38E92B68" AssemblyApplication="_68A869A9F493291607E25EED38E92B68" DiskId="1" Source="SourceDir\File\_68A869A9F493291607E25EED38E92B68" />
+            </Component>
+            <Component Id="C__6E62D6AAD1AF40E590DEA7F7A298DFF3" Guid="{DADEB0CE-B514-55BA-22FC-195AE614474E}" Win64="yes">
+                <File Id="_6E62D6AAD1AF40E590DEA7F7A298DFF3" Name="IKVM.OpenJDK.Jdbc.dll" KeyPath="yes" ShortName="IKVMO~13.DLL" Assembly=".net" AssemblyManifest="_6E62D6AAD1AF40E590DEA7F7A298DFF3" AssemblyApplication="_6E62D6AAD1AF40E590DEA7F7A298DFF3" DiskId="1" Source="SourceDir\File\_6E62D6AAD1AF40E590DEA7F7A298DFF3" />
+            </Component>
+            <Component Id="C__7038BA62FB2781921170DB938EC2E615" Guid="{C25D261A-0571-888D-C6EF-2231D652E194}" Win64="yes">
+                <File Id="_7038BA62FB2781921170DB938EC2E615" Name="System.Net.Primitives.dll" KeyPath="yes" ShortName="SYSTE~33.DLL" Assembly=".net" AssemblyManifest="_7038BA62FB2781921170DB938EC2E615" AssemblyApplication="_7038BA62FB2781921170DB938EC2E615" DiskId="1" Source="SourceDir\File\_7038BA62FB2781921170DB938EC2E615" />
+            </Component>
+            <Component Id="C__7191BAA051AAFF960AADBF7DC8C4AA06" Guid="{435189A0-3297-5EB2-8182-B41DADCE4425}" Win64="yes">
+                <File Id="_7191BAA051AAFF960AADBF7DC8C4AA06" Name="System.Runtime.dll" KeyPath="yes" ShortName="SYSTE~34.DLL" Assembly=".net" AssemblyManifest="_7191BAA051AAFF960AADBF7DC8C4AA06" AssemblyApplication="_7191BAA051AAFF960AADBF7DC8C4AA06" DiskId="1" Source="SourceDir\File\_7191BAA051AAFF960AADBF7DC8C4AA06" />
+            </Component>
+            <Component Id="C__71B5580F72BA641BB2683AE596F3F298" Guid="{4C1DEBF1-DB34-F7B7-85F3-C6F04D712FB0}" Win64="yes">
+                <File Id="_71B5580F72BA641BB2683AE596F3F298" Name="System.IO.FileSystem.dll" KeyPath="yes" ShortName="SYSTE~35.DLL" Assembly=".net" AssemblyManifest="_71B5580F72BA641BB2683AE596F3F298" AssemblyApplication="_71B5580F72BA641BB2683AE596F3F298" DiskId="1" Source="SourceDir\File\_71B5580F72BA641BB2683AE596F3F298" />
+            </Component>
+            <Component Id="C__72AB245BADC3AD86A8660DEDE7F832AB" Guid="{CCE8694E-BACA-F36D-CAB4-1E6574C9889D}" Win64="yes">
+                <File Id="_72AB245BADC3AD86A8660DEDE7F832AB" Name="System.Threading.dll" KeyPath="yes" ShortName="SYSTE~36.DLL" Assembly=".net" AssemblyManifest="_72AB245BADC3AD86A8660DEDE7F832AB" AssemblyApplication="_72AB245BADC3AD86A8660DEDE7F832AB" DiskId="1" Source="SourceDir\File\_72AB245BADC3AD86A8660DEDE7F832AB" />
+            </Component>
+            <Component Id="C__74650F0675DE5D5A8206250BBE67DFB1" Guid="{D1680145-F44A-F4BB-3506-031D98ABD8CF}" Win64="yes">
+                <File Id="_74650F0675DE5D5A8206250BBE67DFB1" Name="System.Xml.XPath.XDocument.dll" KeyPath="yes" ShortName="SYSTE~37.DLL" Assembly=".net" AssemblyManifest="_74650F0675DE5D5A8206250BBE67DFB1" AssemblyApplication="_74650F0675DE5D5A8206250BBE67DFB1" DiskId="1" Source="SourceDir\File\_74650F0675DE5D5A8206250BBE67DFB1" />
+            </Component>
+            <Component Id="C__7531BB8C42F8BBE53D6C9F113FD6CA15" Guid="{120E326E-8A87-329C-964C-97436434AFD3}" Win64="yes">
+                <File Id="_7531BB8C42F8BBE53D6C9F113FD6CA15" Name="System.Runtime.InteropServices.dll" KeyPath="yes" ShortName="SYSTE~38.DLL" Assembly=".net" AssemblyManifest="_7531BB8C42F8BBE53D6C9F113FD6CA15" AssemblyApplication="_7531BB8C42F8BBE53D6C9F113FD6CA15" DiskId="1" Source="SourceDir\File\_7531BB8C42F8BBE53D6C9F113FD6CA15" />
+            </Component>
+            <Component Id="C__7796CB82A588F2B6C65FCFEFA3D0EF1D" Guid="{5D770C98-93F0-8831-42E4-243AFD2D1696}" Win64="yes">
+                <File Id="_7796CB82A588F2B6C65FCFEFA3D0EF1D" Name="OpenNLP.IKVM.dll" KeyPath="yes" ShortName="OPENNL~1.DLL" Assembly=".net" AssemblyManifest="_7796CB82A588F2B6C65FCFEFA3D0EF1D" AssemblyApplication="_7796CB82A588F2B6C65FCFEFA3D0EF1D" DiskId="1" Source="SourceDir\File\_7796CB82A588F2B6C65FCFEFA3D0EF1D" />
+            </Component>
+            <Component Id="C__7B59E53DB65856BF42EA709C596C901A" Guid="{BFF3ECC4-8475-C469-77ED-29DC2E147D56}" Win64="yes">
+                <File Id="_7B59E53DB65856BF42EA709C596C901A" Name="System.ComponentModel.Annotations.dll" KeyPath="yes" ShortName="SYSTE~39.DLL" Assembly=".net" AssemblyManifest="_7B59E53DB65856BF42EA709C596C901A" AssemblyApplication="_7B59E53DB65856BF42EA709C596C901A" DiskId="1" Source="SourceDir\File\_7B59E53DB65856BF42EA709C596C901A" />
+            </Component>
+            <Component Id="C__7B66D443336C0E940CBA64070AE355FD" Guid="{5D8768CB-8957-0954-EA07-A4A52A26A1D6}" Win64="yes">
+                <File Id="_7B66D443336C0E940CBA64070AE355FD" Name="System.Text.Encoding.CodePages.dll" KeyPath="yes" ShortName="SYSTE~40.DLL" Assembly=".net" AssemblyManifest="_7B66D443336C0E940CBA64070AE355FD" AssemblyApplication="_7B66D443336C0E940CBA64070AE355FD" DiskId="1" Source="SourceDir\File\_7B66D443336C0E940CBA64070AE355FD" />
+            </Component>
+            <Component Id="C__7BD3B865ADE1FE7524E6015AC02EBA21" Guid="{7FA58E48-B8AE-62D2-FD5E-901AD7B005EB}" Win64="yes">
+                <File Id="_7BD3B865ADE1FE7524E6015AC02EBA21" Name="IKVM.OpenJDK.Remoting.dll" KeyPath="yes" ShortName="IKVMO~14.DLL" Assembly=".net" AssemblyManifest="_7BD3B865ADE1FE7524E6015AC02EBA21" AssemblyApplication="_7BD3B865ADE1FE7524E6015AC02EBA21" DiskId="1" Source="SourceDir\File\_7BD3B865ADE1FE7524E6015AC02EBA21" />
+            </Component>
+            <Component Id="C__7C81497795656A8D99EA25BDFC20039E" Guid="{F21D5D0A-3E0C-C6A5-D329-0230647DB410}" Win64="yes">
+                <File Id="_7C81497795656A8D99EA25BDFC20039E" Name="System.Linq.dll" KeyPath="yes" ShortName="SYSTE~41.DLL" Assembly=".net" AssemblyManifest="_7C81497795656A8D99EA25BDFC20039E" AssemblyApplication="_7C81497795656A8D99EA25BDFC20039E" DiskId="1" Source="SourceDir\File\_7C81497795656A8D99EA25BDFC20039E" />
+            </Component>
+            <Component Id="C__7E84CD23CF9467F55C084505DEB26BB3" Guid="{7F34577B-2429-C52E-29AE-3104A1E171B4}" Win64="yes">
+                <File Id="_7E84CD23CF9467F55C084505DEB26BB3" Name="System.Diagnostics.Debug.dll" KeyPath="yes" ShortName="SYSTE~42.DLL" Assembly=".net" AssemblyManifest="_7E84CD23CF9467F55C084505DEB26BB3" AssemblyApplication="_7E84CD23CF9467F55C084505DEB26BB3" DiskId="1" Source="SourceDir\File\_7E84CD23CF9467F55C084505DEB26BB3" />
+            </Component>
+            <Component Id="C__7EF67DD9A6F28080B5E223C03104A5BA" Guid="{07DDA38B-49E6-08A0-B894-12C5BE7D9010}" Win64="yes">
+                <File Id="_7EF67DD9A6F28080B5E223C03104A5BA" Name="IKVM.OpenJDK.XML.XPath.dll" KeyPath="yes" ShortName="IKVMO~15.DLL" Assembly=".net" AssemblyManifest="_7EF67DD9A6F28080B5E223C03104A5BA" AssemblyApplication="_7EF67DD9A6F28080B5E223C03104A5BA" DiskId="1" Source="SourceDir\File\_7EF67DD9A6F28080B5E223C03104A5BA" />
+            </Component>
+            <Component Id="C__81CD9BC08FA12DF208A1C46E7CD727BD" Guid="{1698E543-E7A3-A85A-09EE-B0A00314C651}" Win64="yes">
+                <File Id="_81CD9BC08FA12DF208A1C46E7CD727BD" Name="WindowsFirewallHelper.dll" KeyPath="yes" ShortName="WINDOW~1.DLL" Assembly=".net" AssemblyManifest="_81CD9BC08FA12DF208A1C46E7CD727BD" AssemblyApplication="_81CD9BC08FA12DF208A1C46E7CD727BD" DiskId="1" Source="SourceDir\File\_81CD9BC08FA12DF208A1C46E7CD727BD" />
+            </Component>
+            <Component Id="C__82901B65BB016F33D9E4F2B52B502C2B" Guid="{1B677E7C-2303-B20C-CF70-AD5E86209BE6}" Win64="yes">
+                <File Id="_82901B65BB016F33D9E4F2B52B502C2B" Name="System.ComponentModel.EventBasedAsync.dll" KeyPath="yes" ShortName="SYSTE~43.DLL" Assembly=".net" AssemblyManifest="_82901B65BB016F33D9E4F2B52B502C2B" AssemblyApplication="_82901B65BB016F33D9E4F2B52B502C2B" DiskId="1" Source="SourceDir\File\_82901B65BB016F33D9E4F2B52B502C2B" />
+            </Component>
+            <Component Id="C__82E4C27C1455D10471B4F0D726399983" Guid="{D3EEF9A1-73CE-9070-AB07-77087316BB89}" Win64="yes">
+                <File Id="_82E4C27C1455D10471B4F0D726399983" Name="System.Data.SQLite.EF6.dll" KeyPath="yes" ShortName="SYSTE~44.DLL" Assembly=".net" AssemblyManifest="_82E4C27C1455D10471B4F0D726399983" AssemblyApplication="_82E4C27C1455D10471B4F0D726399983" DiskId="1" Source="SourceDir\File\_82E4C27C1455D10471B4F0D726399983" />
+            </Component>
+            <Component Id="C__8482B093C36410084445DBF8D0B7ECCC" Guid="{701D1020-250C-A62D-B6FD-8611140DAB3A}" Win64="yes">
+                <File Id="_8482B093C36410084445DBF8D0B7ECCC" Name="System.IO.dll" KeyPath="yes" ShortName="SYSTE~45.DLL" Assembly=".net" AssemblyManifest="_8482B093C36410084445DBF8D0B7ECCC" AssemblyApplication="_8482B093C36410084445DBF8D0B7ECCC" DiskId="1" Source="SourceDir\File\_8482B093C36410084445DBF8D0B7ECCC" />
+            </Component>
+            <Component Id="C__855D11FD80134D64A5D545DCD8896C50" Guid="{8896D4C1-0515-12EB-FAF3-5F6FEDED36BB}" Win64="yes">
+                <File Id="_855D11FD80134D64A5D545DCD8896C50" Name="NLog.config" KeyPath="yes" ShortName="NLOG~1.CON" DiskId="1" Source="SourceDir\File\_855D11FD80134D64A5D545DCD8896C50" />
+            </Component>
+            <Component Id="C__871B6DBDC4ACB2FC7EDA35344EF2FABE" Guid="{3F71B423-A50C-74E4-6A03-8A74D463AC17}" Win64="yes">
+                <File Id="_871B6DBDC4ACB2FC7EDA35344EF2FABE" Name="MahApps.Metro.IconPacks.dll" KeyPath="yes" ShortName="MAHAPP~2.DLL" Assembly=".net" AssemblyManifest="_871B6DBDC4ACB2FC7EDA35344EF2FABE" AssemblyApplication="_871B6DBDC4ACB2FC7EDA35344EF2FABE" DiskId="1" Source="SourceDir\File\_871B6DBDC4ACB2FC7EDA35344EF2FABE" />
+            </Component>
+            <Component Id="C__88A82F0435F8852F9835D843D8E2CE7F" Guid="{F5F04AAA-35A6-CDE7-9D4B-7E0CBFF9D34C}" Win64="yes">
+                <File Id="_88A82F0435F8852F9835D843D8E2CE7F" Name="System.Xml.XmlDocument.dll" KeyPath="yes" ShortName="SYSTE~46.DLL" Assembly=".net" AssemblyManifest="_88A82F0435F8852F9835D843D8E2CE7F" AssemblyApplication="_88A82F0435F8852F9835D843D8E2CE7F" DiskId="1" Source="SourceDir\File\_88A82F0435F8852F9835D843D8E2CE7F" />
+            </Component>
+            <Component Id="C__8A6B34FF16AD775DA977A44A415E4AE1" Guid="{E95156A3-C825-BBBE-9ADE-2346233915C7}" Win64="yes">
+                <File Id="_8A6B34FF16AD775DA977A44A415E4AE1" Name="GalaSoft.MvvmLight.Platform.dll" KeyPath="yes" ShortName="GALASO~3.DLL" Assembly=".net" AssemblyManifest="_8A6B34FF16AD775DA977A44A415E4AE1" AssemblyApplication="_8A6B34FF16AD775DA977A44A415E4AE1" DiskId="1" Source="SourceDir\File\_8A6B34FF16AD775DA977A44A415E4AE1" />
+            </Component>
+            <Component Id="C__8B2A2F4D985321515A7FD7E5225960B7" Guid="{161D228E-9500-8985-4055-CB7C8CCEBDAC}" Win64="yes">
+                <File Id="_8B2A2F4D985321515A7FD7E5225960B7" Name="System.Reflection.Extensions.dll" KeyPath="yes" ShortName="SYSTE~47.DLL" Assembly=".net" AssemblyManifest="_8B2A2F4D985321515A7FD7E5225960B7" AssemblyApplication="_8B2A2F4D985321515A7FD7E5225960B7" DiskId="1" Source="SourceDir\File\_8B2A2F4D985321515A7FD7E5225960B7" />
+            </Component>
+            <Component Id="C__8BCA5FFED4C262E8DBCA66C3BB3A5ECB" Guid="{4C954A67-C243-4A28-4835-43BC2B72AFA0}" Win64="yes">
+                <File Id="_8BCA5FFED4C262E8DBCA66C3BB3A5ECB" Name="System.Text.Encoding.Extensions.dll" KeyPath="yes" ShortName="SYSTE~48.DLL" Assembly=".net" AssemblyManifest="_8BCA5FFED4C262E8DBCA66C3BB3A5ECB" AssemblyApplication="_8BCA5FFED4C262E8DBCA66C3BB3A5ECB" DiskId="1" Source="SourceDir\File\_8BCA5FFED4C262E8DBCA66C3BB3A5ECB" />
+            </Component>
+            <Component Id="C__8C92D70F708FB3E7AB07B175A1CC3FE9" Guid="{49C31E9C-5B93-4AE7-8B07-ACB7953D1007}" Win64="yes">
+                <File Id="_8C92D70F708FB3E7AB07B175A1CC3FE9" Name="System.Net.WebHeaderCollection.dll" KeyPath="yes" ShortName="SYSTE~49.DLL" Assembly=".net" AssemblyManifest="_8C92D70F708FB3E7AB07B175A1CC3FE9" AssemblyApplication="_8C92D70F708FB3E7AB07B175A1CC3FE9" DiskId="1" Source="SourceDir\File\_8C92D70F708FB3E7AB07B175A1CC3FE9" />
+            </Component>
+            <Component Id="C__8CB6677172690F5944E6C2FAB948D73E" Guid="{F8C44D4F-F2F9-0632-46E3-E0DC34898DE0}" Win64="yes">
+                <File Id="_8CB6677172690F5944E6C2FAB948D73E" Name="IKVM.OpenJDK.Misc.dll" KeyPath="yes" ShortName="IKVMO~16.DLL" Assembly=".net" AssemblyManifest="_8CB6677172690F5944E6C2FAB948D73E" AssemblyApplication="_8CB6677172690F5944E6C2FAB948D73E" DiskId="1" Source="SourceDir\File\_8CB6677172690F5944E6C2FAB948D73E" />
+            </Component>
+            <Component Id="C__8D29B3FBDF18831D599F8C41AE74C7B3" Guid="{87E1A4D1-866E-743A-0D22-6FFA9A22FAC0}" Win64="yes">
+                <File Id="_8D29B3FBDF18831D599F8C41AE74C7B3" Name="System.Diagnostics.FileVersionInfo.dll" KeyPath="yes" ShortName="SYSTE~50.DLL" Assembly=".net" AssemblyManifest="_8D29B3FBDF18831D599F8C41AE74C7B3" AssemblyApplication="_8D29B3FBDF18831D599F8C41AE74C7B3" DiskId="1" Source="SourceDir\File\_8D29B3FBDF18831D599F8C41AE74C7B3" />
+            </Component>
+            <Component Id="C__907F75834CBBC510C735827436B59CB7" Guid="{25D63B71-596B-B7B5-230F-475163F32507}" Win64="yes">
+                <File Id="_907F75834CBBC510C735827436B59CB7" Name="NamedPipeWrapper.dll" KeyPath="yes" ShortName="NAMEDP~2.DLL" Assembly=".net" AssemblyManifest="_907F75834CBBC510C735827436B59CB7" AssemblyApplication="_907F75834CBBC510C735827436B59CB7" DiskId="1" Source="SourceDir\File\_907F75834CBBC510C735827436B59CB7" />
+            </Component>
+            <Component Id="C__9149ADA351317FEFB93FA99C1390182E" Guid="{EBF72C95-ADC6-9304-F3BA-249AAB90593B}" Win64="yes">
+                <File Id="_9149ADA351317FEFB93FA99C1390182E" Name="CommonServiceLocator.dll" KeyPath="yes" ShortName="COMMON~1.DLL" Assembly=".net" AssemblyManifest="_9149ADA351317FEFB93FA99C1390182E" AssemblyApplication="_9149ADA351317FEFB93FA99C1390182E" DiskId="1" Source="SourceDir\File\_9149ADA351317FEFB93FA99C1390182E" />
+            </Component>
+            <Component Id="C__916428D91652CBA551C667F59C476AED" Guid="{4F724B69-588B-0FE1-7769-E7EE19E591FB}" Win64="yes">
+                <File Id="_916428D91652CBA551C667F59C476AED" Name="System.Reflection.Metadata.dll" KeyPath="yes" ShortName="SYSTE~51.DLL" Assembly=".net" AssemblyManifest="_916428D91652CBA551C667F59C476AED" AssemblyApplication="_916428D91652CBA551C667F59C476AED" DiskId="1" Source="SourceDir\File\_916428D91652CBA551C667F59C476AED" />
+            </Component>
+            <Component Id="C__93185656649CB208445E76CB0B2A1F0C" Guid="{35D84BFB-FCCA-1286-9532-9368E8E57CD7}" Win64="yes">
+                <File Id="_93185656649CB208445E76CB0B2A1F0C" Name="Topshelf.dll" KeyPath="yes" ShortName="TOPSHELF.DLL" Assembly=".net" AssemblyManifest="_93185656649CB208445E76CB0B2A1F0C" AssemblyApplication="_93185656649CB208445E76CB0B2A1F0C" DiskId="1" Source="SourceDir\File\_93185656649CB208445E76CB0B2A1F0C" />
+            </Component>
+            <Component Id="C__9403A93C53217D0B48043327C0F7230B" Guid="{1C97C37F-EE04-B9D0-69CF-EC6B1D45090C}" Win64="yes">
+                <File Id="_9403A93C53217D0B48043327C0F7230B" Name="Interop.NetFwTypeLib.dll" KeyPath="yes" ShortName="INTERO~1.DLL" Assembly=".net" AssemblyManifest="_9403A93C53217D0B48043327C0F7230B" AssemblyApplication="_9403A93C53217D0B48043327C0F7230B" DiskId="1" Source="SourceDir\File\_9403A93C53217D0B48043327C0F7230B" />
+            </Component>
+            <Component Id="C__940DE89D9CCC8AD96BBCC5ED93F3F5CC" Guid="{8F270B29-0B3E-49A3-9057-CFB1C629657F}" Win64="yes">
+                <File Id="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" Name="HttpFilteringEngineManaged.dll" KeyPath="yes" ShortName="HTTPFI~4.DLL" Assembly=".net" AssemblyManifest="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" AssemblyApplication="_940DE89D9CCC8AD96BBCC5ED93F3F5CC" DiskId="1" Source="SourceDir\File\_940DE89D9CCC8AD96BBCC5ED93F3F5CC" />
+            </Component>
+            <Component Id="C__94A9226552F1AC883CA0B61B93AA920A" Guid="{B0687BD7-AD16-4315-64B9-33780DE63F27}" Win64="yes">
+                <File Id="_94A9226552F1AC883CA0B61B93AA920A" Name="System.Net.NetworkInformation.dll" KeyPath="yes" ShortName="SYSTE~52.DLL" Assembly=".net" AssemblyManifest="_94A9226552F1AC883CA0B61B93AA920A" AssemblyApplication="_94A9226552F1AC883CA0B61B93AA920A" DiskId="1" Source="SourceDir\File\_94A9226552F1AC883CA0B61B93AA920A" />
+            </Component>
+            <Component Id="C__956D0A9E6A67A283F8728894961BA2E2" Guid="{E2251E45-9DA8-A4B5-660C-DEB60EBE12D3}" Win64="yes">
+                <File Id="_956D0A9E6A67A283F8728894961BA2E2" Name="IKVM.OpenJDK.Tools.dll" KeyPath="yes" ShortName="IKVMO~17.DLL" Assembly=".net" AssemblyManifest="_956D0A9E6A67A283F8728894961BA2E2" AssemblyApplication="_956D0A9E6A67A283F8728894961BA2E2" DiskId="1" Source="SourceDir\File\_956D0A9E6A67A283F8728894961BA2E2" />
+            </Component>
+            <Component Id="C__95A2BF8B438944E75F9CEF32023EC006" Guid="{7AA0F89C-A1A5-C64F-9B87-D25D82E7E493}" Win64="yes">
+                <File Id="_95A2BF8B438944E75F9CEF32023EC006" Name="System.Threading.Thread.dll" KeyPath="yes" ShortName="SYSTE~53.DLL" Assembly=".net" AssemblyManifest="_95A2BF8B438944E75F9CEF32023EC006" AssemblyApplication="_95A2BF8B438944E75F9CEF32023EC006" DiskId="1" Source="SourceDir\File\_95A2BF8B438944E75F9CEF32023EC006" />
+            </Component>
+            <Component Id="C__96A280604669811ECAB950756F813ACB" Guid="{758AAA8E-9C10-42BB-A83B-5072F1D7E4FE}" Win64="yes">
+                <File Id="_96A280604669811ECAB950756F813ACB" Name="IKVM.AWT.WinForms.dll" KeyPath="yes" ShortName="IKVMAW~1.DLL" Assembly=".net" AssemblyManifest="_96A280604669811ECAB950756F813ACB" AssemblyApplication="_96A280604669811ECAB950756F813ACB" DiskId="1" Source="SourceDir\File\_96A280604669811ECAB950756F813ACB" />
+            </Component>
+            <Component Id="C__989898ECF11807591B436685F843D30E" Guid="{AA37A01D-D5EB-68DC-F9EE-C0DA7D00EFBD}" Win64="yes">
+                <File Id="_989898ECF11807591B436685F843D30E" Name="System.Globalization.dll" KeyPath="yes" ShortName="SYSTE~54.DLL" Assembly=".net" AssemblyManifest="_989898ECF11807591B436685F843D30E" AssemblyApplication="_989898ECF11807591B436685F843D30E" DiskId="1" Source="SourceDir\File\_989898ECF11807591B436685F843D30E" />
+            </Component>
+            <Component Id="C__9C9C13B79A76D562326D07CD83989B94" Guid="{76938301-5ADB-79F6-85DC-A8B842513B41}" Win64="yes">
+                <File Id="_9C9C13B79A76D562326D07CD83989B94" Name="System.Runtime.Handles.dll" KeyPath="yes" ShortName="SYSTE~55.DLL" Assembly=".net" AssemblyManifest="_9C9C13B79A76D562326D07CD83989B94" AssemblyApplication="_9C9C13B79A76D562326D07CD83989B94" DiskId="1" Source="SourceDir\File\_9C9C13B79A76D562326D07CD83989B94" />
+            </Component>
+            <Component Id="C__A0A132F2C00AA0188FDE3D4187E7C5B5" Guid="{87D22713-3186-2CA7-F0F2-DE78DDCEB513}" Win64="yes">
+                <File Id="_A0A132F2C00AA0188FDE3D4187E7C5B5" Name="MahApps.Metro.dll" KeyPath="yes" ShortName="MAHAPP~3.DLL" Assembly=".net" AssemblyManifest="_A0A132F2C00AA0188FDE3D4187E7C5B5" AssemblyApplication="_A0A132F2C00AA0188FDE3D4187E7C5B5" DiskId="1" Source="SourceDir\File\_A0A132F2C00AA0188FDE3D4187E7C5B5" />
+            </Component>
+            <Component Id="C__A5581C50559765F4709E97BE8E418EEC" Guid="{D7BB1FDD-B201-7A93-4E48-E7E40AA988FA}" Win64="yes">
+                <File Id="_A5581C50559765F4709E97BE8E418EEC" Name="FilterServiceProvider.exe" KeyPath="yes" ShortName="FILTER~1.EXE" Assembly=".net" AssemblyManifest="_A5581C50559765F4709E97BE8E418EEC" AssemblyApplication="_A5581C50559765F4709E97BE8E418EEC" DiskId="1" Source="SourceDir\File\_A5581C50559765F4709E97BE8E418EEC" />
+            </Component>
+            <Component Id="C__A8B174F9271A993E1381E8159F84BE51" Guid="{FCFB0A03-1AC5-9CB4-82B6-DBCFD6845952}" Win64="yes">
+                <File Id="_A8B174F9271A993E1381E8159F84BE51" Name="System.Reflection.dll" KeyPath="yes" ShortName="SYSTE~56.DLL" Assembly=".net" AssemblyManifest="_A8B174F9271A993E1381E8159F84BE51" AssemblyApplication="_A8B174F9271A993E1381E8159F84BE51" DiskId="1" Source="SourceDir\File\_A8B174F9271A993E1381E8159F84BE51" />
+            </Component>
+            <Component Id="C__AAB8C47A98E59E2E5BD86BA4C306F2CC" Guid="{2C1CA753-03E8-0451-41F4-8FA90F63FE25}" Win64="yes">
+                <File Id="_AAB8C47A98E59E2E5BD86BA4C306F2CC" Name="System.Text.Encoding.dll" KeyPath="yes" ShortName="SYSTE~57.DLL" Assembly=".net" AssemblyManifest="_AAB8C47A98E59E2E5BD86BA4C306F2CC" AssemblyApplication="_AAB8C47A98E59E2E5BD86BA4C306F2CC" DiskId="1" Source="SourceDir\File\_AAB8C47A98E59E2E5BD86BA4C306F2CC" />
+            </Component>
+            <Component Id="C__AB5FCDF3BC39857310449EB319DB4BD5" Guid="{2942559C-CEAB-ECFA-E9AB-EB6951A7A207}" Win64="yes">
+                <File Id="_AB5FCDF3BC39857310449EB319DB4BD5" Name="Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" ShortName="MICROS~1.DLL" Assembly=".net" AssemblyManifest="_AB5FCDF3BC39857310449EB319DB4BD5" AssemblyApplication="_AB5FCDF3BC39857310449EB319DB4BD5" DiskId="1" Source="SourceDir\File\_AB5FCDF3BC39857310449EB319DB4BD5" />
+            </Component>
+            <Component Id="C__AF991B2D236A91D50FD47F12D4D75032" Guid="{1C97C37F-EE04-B9D0-69CF-EC6B1D45090C}" Win64="yes">
+                <File Id="_AF991B2D236A91D50FD47F12D4D75032" Name="Interop.NetFwTypeLib.dll" KeyPath="yes" ShortName="INTERO~2.DLL" Assembly=".net" AssemblyManifest="_AF991B2D236A91D50FD47F12D4D75032" AssemblyApplication="_AF991B2D236A91D50FD47F12D4D75032" DiskId="1" Source="SourceDir\File\_AF991B2D236A91D50FD47F12D4D75032" />
+            </Component>
+            <Component Id="C__B3DB4CC4967B03446B40E242AEEDFBD4" Guid="{FCFB0A03-1AC5-9CB4-82B6-DBCFD6845952}" Win64="yes">
+                <File Id="_B3DB4CC4967B03446B40E242AEEDFBD4" Name="System.Reflection.dll" KeyPath="yes" ShortName="SYSTE~58.DLL" Assembly=".net" AssemblyManifest="_B3DB4CC4967B03446B40E242AEEDFBD4" AssemblyApplication="_B3DB4CC4967B03446B40E242AEEDFBD4" DiskId="1" Source="SourceDir\File\_B3DB4CC4967B03446B40E242AEEDFBD4" />
+            </Component>
+            <Component Id="C__B7EA541520E3BC45CB85BF1CD92A4E09" Guid="{1970832E-D34C-D449-0E1B-04D2ADAA53CE}" Win64="yes">
+                <File Id="_B7EA541520E3BC45CB85BF1CD92A4E09" Name="System.ObjectModel.dll" KeyPath="yes" ShortName="SYSTE~59.DLL" Assembly=".net" AssemblyManifest="_B7EA541520E3BC45CB85BF1CD92A4E09" AssemblyApplication="_B7EA541520E3BC45CB85BF1CD92A4E09" DiskId="1" Source="SourceDir\File\_B7EA541520E3BC45CB85BF1CD92A4E09" />
+            </Component>
+            <Component Id="C__BD4BD8F84198DF0988FF88CC82955EDF" Guid="{55E5E9C3-A422-C04F-E0B2-00CB94B4AE7E}" Win64="yes">
+                <File Id="_BD4BD8F84198DF0988FF88CC82955EDF" Name="System.Threading.Timer.dll" KeyPath="yes" ShortName="SYSTE~60.DLL" Assembly=".net" AssemblyManifest="_BD4BD8F84198DF0988FF88CC82955EDF" AssemblyApplication="_BD4BD8F84198DF0988FF88CC82955EDF" DiskId="1" Source="SourceDir\File\_BD4BD8F84198DF0988FF88CC82955EDF" />
+            </Component>
+            <Component Id="C__BD79DC72C544AA63DF6B8AC3BE5F3D8B" Guid="{0BAE9865-EBF9-3FFA-B55B-37BE4D4E17D5}" Win64="yes">
+                <File Id="_BD79DC72C544AA63DF6B8AC3BE5F3D8B" Name="Citadel.IPC.Common.dll" KeyPath="yes" ShortName="CITADE~2.DLL" Assembly=".net" AssemblyManifest="_BD79DC72C544AA63DF6B8AC3BE5F3D8B" AssemblyApplication="_BD79DC72C544AA63DF6B8AC3BE5F3D8B" DiskId="1" Source="SourceDir\File\_BD79DC72C544AA63DF6B8AC3BE5F3D8B" />
+            </Component>
+            <Component Id="C__BE90B5585BC34D6DC8DEDE2CA75C5FA9" Guid="{4F1BAF90-7DC7-9F6D-B26C-976DC7A2EC32}" Win64="yes">
+                <File Id="_BE90B5585BC34D6DC8DEDE2CA75C5FA9" Name="System.IO.FileSystem.Primitives.dll" KeyPath="yes" ShortName="SYSTE~61.DLL" Assembly=".net" AssemblyManifest="_BE90B5585BC34D6DC8DEDE2CA75C5FA9" AssemblyApplication="_BE90B5585BC34D6DC8DEDE2CA75C5FA9" DiskId="1" Source="SourceDir\File\_BE90B5585BC34D6DC8DEDE2CA75C5FA9" />
+            </Component>
+            <Component Id="C__BEE80B2D344F970DCEC99C66C7A9089A" Guid="{3164D263-A2D8-7521-6F93-AA977AC1A186}" Win64="yes">
+                <File Id="_BEE80B2D344F970DCEC99C66C7A9089A" Name="System.ValueTuple.dll" KeyPath="yes" ShortName="SYSTE~62.DLL" Assembly=".net" AssemblyManifest="_BEE80B2D344F970DCEC99C66C7A9089A" AssemblyApplication="_BEE80B2D344F970DCEC99C66C7A9089A" DiskId="1" Source="SourceDir\File\_BEE80B2D344F970DCEC99C66C7A9089A" />
+            </Component>
+            <Component Id="C__C1621A6176B9378398EE5287A6A93986" Guid="{67D6F10D-A2A0-CFE0-3857-B45BC16469A4}" Win64="yes">
+                <File Id="_C1621A6176B9378398EE5287A6A93986" Name="IKVM.OpenJDK.Nashorn.dll" KeyPath="yes" ShortName="IKVMO~18.DLL" Assembly=".net" AssemblyManifest="_C1621A6176B9378398EE5287A6A93986" AssemblyApplication="_C1621A6176B9378398EE5287A6A93986" DiskId="1" Source="SourceDir\File\_C1621A6176B9378398EE5287A6A93986" />
+            </Component>
+            <Component Id="C__C31F0BCC36AC5FD912047BE123BBCAD9" Guid="{AF11D7CA-485B-8BDB-99AC-07E6806BABB9}" Win64="yes">
+                <File Id="_C31F0BCC36AC5FD912047BE123BBCAD9" Name="System.Collections.Concurrent.dll" KeyPath="yes" ShortName="SYSTE~63.DLL" Assembly=".net" AssemblyManifest="_C31F0BCC36AC5FD912047BE123BBCAD9" AssemblyApplication="_C31F0BCC36AC5FD912047BE123BBCAD9" DiskId="1" Source="SourceDir\File\_C31F0BCC36AC5FD912047BE123BBCAD9" />
+            </Component>
+            <Component Id="C__C44DAC60EDEC91B2CC53533A680062A7" Guid="{91FB6FEF-D75C-811C-D312-FF00A0956EC7}" Win64="yes">
+                <File Id="_C44DAC60EDEC91B2CC53533A680062A7" Name="System.Runtime.Serialization.Json.dll" KeyPath="yes" ShortName="SYSTE~64.DLL" Assembly=".net" AssemblyManifest="_C44DAC60EDEC91B2CC53533A680062A7" AssemblyApplication="_C44DAC60EDEC91B2CC53533A680062A7" DiskId="1" Source="SourceDir\File\_C44DAC60EDEC91B2CC53533A680062A7" />
+            </Component>
+            <Component Id="C__C568E3667D09A229CD594CBE70D71DFD" Guid="{839BCA26-FAB6-58A2-148B-79DF85E33762}" Win64="yes">
+                <File Id="_C568E3667D09A229CD594CBE70D71DFD" Name="System.Security.Cryptography.Algorithms.dll" KeyPath="yes" ShortName="SYSTE~65.DLL" Assembly=".net" AssemblyManifest="_C568E3667D09A229CD594CBE70D71DFD" AssemblyApplication="_C568E3667D09A229CD594CBE70D71DFD" DiskId="1" Source="SourceDir\File\_C568E3667D09A229CD594CBE70D71DFD" />
+            </Component>
+            <Component Id="C__C5ABE30BDA8662EE3DE085EE24CB95FB" Guid="{C87E3A22-5CC5-92A7-E8E4-85B9CAB4EAF0}" Win64="yes">
+                <File Id="_C5ABE30BDA8662EE3DE085EE24CB95FB" Name="IKVM.OpenJDK.SwingAWT.dll" KeyPath="yes" ShortName="IKVMO~19.DLL" Assembly=".net" AssemblyManifest="_C5ABE30BDA8662EE3DE085EE24CB95FB" AssemblyApplication="_C5ABE30BDA8662EE3DE085EE24CB95FB" DiskId="1" Source="SourceDir\File\_C5ABE30BDA8662EE3DE085EE24CB95FB" />
+            </Component>
+            <Component Id="C__C7033B83C67962E50467CD0264A1660C" Guid="{AA37A01D-D5EB-68DC-F9EE-C0DA7D00EFBD}" Win64="yes">
+                <File Id="_C7033B83C67962E50467CD0264A1660C" Name="System.Globalization.dll" KeyPath="yes" ShortName="SYSTE~66.DLL" Assembly=".net" AssemblyManifest="_C7033B83C67962E50467CD0264A1660C" AssemblyApplication="_C7033B83C67962E50467CD0264A1660C" DiskId="1" Source="SourceDir\File\_C7033B83C67962E50467CD0264A1660C" />
+            </Component>
+            <Component Id="C__C8AF6C33065701C07996D97F71D6C1A8" Guid="{16E2C2C8-3C4C-6BF5-CB0D-0838AE4FF0A7}" Win64="yes">
+                <File Id="_C8AF6C33065701C07996D97F71D6C1A8" Name="System.Threading.Tasks.dll" KeyPath="yes" ShortName="SYSTE~67.DLL" Assembly=".net" AssemblyManifest="_C8AF6C33065701C07996D97F71D6C1A8" AssemblyApplication="_C8AF6C33065701C07996D97F71D6C1A8" DiskId="1" Source="SourceDir\File\_C8AF6C33065701C07996D97F71D6C1A8" />
+            </Component>
+            <Component Id="C__CA369F108A7BCD4C09E415A4E29CF869" Guid="{E0A8182A-7BCA-6A45-F851-E29BCFA2580B}" Win64="yes">
+                <File Id="_CA369F108A7BCD4C09E415A4E29CF869" Name="IKVM.OpenJDK.Charsets.dll" KeyPath="yes" ShortName="IKVMO~20.DLL" Assembly=".net" AssemblyManifest="_CA369F108A7BCD4C09E415A4E29CF869" AssemblyApplication="_CA369F108A7BCD4C09E415A4E29CF869" DiskId="1" Source="SourceDir\File\_CA369F108A7BCD4C09E415A4E29CF869" />
+            </Component>
+            <Component Id="C__CDE02659755F0168D45B8607AE97862C" Guid="{120E326E-8A87-329C-964C-97436434AFD3}" Win64="yes">
+                <File Id="_CDE02659755F0168D45B8607AE97862C" Name="System.Runtime.InteropServices.dll" KeyPath="yes" ShortName="SYSTE~68.DLL" Assembly=".net" AssemblyManifest="_CDE02659755F0168D45B8607AE97862C" AssemblyApplication="_CDE02659755F0168D45B8607AE97862C" DiskId="1" Source="SourceDir\File\_CDE02659755F0168D45B8607AE97862C" />
+            </Component>
+            <Component Id="C__D1BBED9C4855C1A7B5F3661EF65B2B83" Guid="{DDCDA06A-1430-CD85-6ED8-7A9FC5E2F130}" Win64="yes">
+                <File Id="_D1BBED9C4855C1A7B5F3661EF65B2B83" Name="EntityFramework.dll" KeyPath="yes" ShortName="ENTITY~2.DLL" Assembly=".net" AssemblyManifest="_D1BBED9C4855C1A7B5F3661EF65B2B83" AssemblyApplication="_D1BBED9C4855C1A7B5F3661EF65B2B83" DiskId="1" Source="SourceDir\File\_D1BBED9C4855C1A7B5F3661EF65B2B83" />
+            </Component>
+            <Component Id="C__D9BDE2A039A81260C960646719467047" Guid="{81E42F3B-1EE0-4DA1-65EE-4037ABB124FF}" Win64="yes">
+                <File Id="_D9BDE2A039A81260C960646719467047" Name="System.Security.Cryptography.X509Certificates.dll" KeyPath="yes" ShortName="SYSTE~69.DLL" Assembly=".net" AssemblyManifest="_D9BDE2A039A81260C960646719467047" AssemblyApplication="_D9BDE2A039A81260C960646719467047" DiskId="1" Source="SourceDir\File\_D9BDE2A039A81260C960646719467047" />
+            </Component>
+            <Component Id="C__DB03D9CF110B2DCB770A3AC128238EC8" Guid="{5D770C98-93F0-8831-42E4-243AFD2D1696}" Win64="yes">
+                <File Id="_DB03D9CF110B2DCB770A3AC128238EC8" Name="OpenNLP.IKVM.dll" KeyPath="yes" ShortName="OPENNL~2.DLL" Assembly=".net" AssemblyManifest="_DB03D9CF110B2DCB770A3AC128238EC8" AssemblyApplication="_DB03D9CF110B2DCB770A3AC128238EC8" DiskId="1" Source="SourceDir\File\_DB03D9CF110B2DCB770A3AC128238EC8" />
+            </Component>
+            <Component Id="C__DDF57B82F1DD8B2626DB30C38A337DC2" Guid="{C0EDA431-4D36-9FFB-60DC-E0D63A7CCDFD}" Win64="yes">
+                <File Id="_DDF57B82F1DD8B2626DB30C38A337DC2" Name="IKVM.OpenJDK.XML.Crypto.dll" KeyPath="yes" ShortName="IKVMO~21.DLL" Assembly=".net" AssemblyManifest="_DDF57B82F1DD8B2626DB30C38A337DC2" AssemblyApplication="_DDF57B82F1DD8B2626DB30C38A337DC2" DiskId="1" Source="SourceDir\File\_DDF57B82F1DD8B2626DB30C38A337DC2" />
+            </Component>
+            <Component Id="C__DED0083EED77001CD0736B4B5E2371DA" Guid="{F1E7ABA1-8130-EFD0-51D1-AF5FBF9B6663}" Win64="yes">
+                <File Id="_DED0083EED77001CD0736B4B5E2371DA" Name="System.Linq.Queryable.dll" KeyPath="yes" ShortName="SYSTE~70.DLL" Assembly=".net" AssemblyManifest="_DED0083EED77001CD0736B4B5E2371DA" AssemblyApplication="_DED0083EED77001CD0736B4B5E2371DA" DiskId="1" Source="SourceDir\File\_DED0083EED77001CD0736B4B5E2371DA" />
+            </Component>
+            <Component Id="C__DF08E120F93B1E9DF85F4305A3357156" Guid="{B04A244B-AFBE-64D1-BA81-B12B435CBA2C}" Win64="yes">
+                <File Id="_DF08E120F93B1E9DF85F4305A3357156" Name="IKVM.OpenJDK.Naming.dll" KeyPath="yes" ShortName="IKVMO~22.DLL" Assembly=".net" AssemblyManifest="_DF08E120F93B1E9DF85F4305A3357156" AssemblyApplication="_DF08E120F93B1E9DF85F4305A3357156" DiskId="1" Source="SourceDir\File\_DF08E120F93B1E9DF85F4305A3357156" />
+            </Component>
+            <Component Id="C__E0F53EB022B4A9B2275D4C7897865B58" Guid="{BA643979-4E49-1F7B-A888-1D71208F4C60}" Win64="yes">
+                <File Id="_E0F53EB022B4A9B2275D4C7897865B58" Name="IKVM.OpenJDK.Util.dll" KeyPath="yes" ShortName="IKVMO~23.DLL" Assembly=".net" AssemblyManifest="_E0F53EB022B4A9B2275D4C7897865B58" AssemblyApplication="_E0F53EB022B4A9B2275D4C7897865B58" DiskId="1" Source="SourceDir\File\_E0F53EB022B4A9B2275D4C7897865B58" />
+            </Component>
+            <Component Id="C__E1864E0738F0C17552E63198737EB609" Guid="{9675CFB8-93BF-7467-9D2F-915109BAB179}" Win64="yes">
+                <File Id="_E1864E0738F0C17552E63198737EB609" Name="System.Runtime.Serialization.Xml.dll" KeyPath="yes" ShortName="SYSTE~71.DLL" Assembly=".net" AssemblyManifest="_E1864E0738F0C17552E63198737EB609" AssemblyApplication="_E1864E0738F0C17552E63198737EB609" DiskId="1" Source="SourceDir\File\_E1864E0738F0C17552E63198737EB609" />
+            </Component>
+            <Component Id="C__E314504D37228DA31F85BA75CD16DA5E" Guid="{B6703D19-959D-1064-96F4-821F73C00B56}" Win64="yes">
+                <File Id="_E314504D37228DA31F85BA75CD16DA5E" Name="System.ServiceModel.Security.dll" KeyPath="yes" ShortName="SYSTE~72.DLL" Assembly=".net" AssemblyManifest="_E314504D37228DA31F85BA75CD16DA5E" AssemblyApplication="_E314504D37228DA31F85BA75CD16DA5E" DiskId="1" Source="SourceDir\File\_E314504D37228DA31F85BA75CD16DA5E" />
+            </Component>
+            <Component Id="C__E48F413E88FDAE683718830F71AB37F4" Guid="{E8F8F6FC-9A4A-9A8D-E23C-B5593ACBFE95}" Win64="yes">
+                <File Id="_E48F413E88FDAE683718830F71AB37F4" Name="System.Diagnostics.Tools.dll" KeyPath="yes" ShortName="SYSTE~73.DLL" Assembly=".net" AssemblyManifest="_E48F413E88FDAE683718830F71AB37F4" AssemblyApplication="_E48F413E88FDAE683718830F71AB37F4" DiskId="1" Source="SourceDir\File\_E48F413E88FDAE683718830F71AB37F4" />
+            </Component>
+            <Component Id="C__E4ED458C8F6B9760C3D8E1BA4A23EE9E" Guid="{C0B7101D-D8C3-9D4B-F9C4-A245C0C9AD06}" Win64="yes">
+                <File Id="_E4ED458C8F6B9760C3D8E1BA4A23EE9E" Name="System.Security.Principal.dll" KeyPath="yes" ShortName="SYSTE~74.DLL" Assembly=".net" AssemblyManifest="_E4ED458C8F6B9760C3D8E1BA4A23EE9E" AssemblyApplication="_E4ED458C8F6B9760C3D8E1BA4A23EE9E" DiskId="1" Source="SourceDir\File\_E4ED458C8F6B9760C3D8E1BA4A23EE9E" />
+            </Component>
+            <Component Id="C__E540D127DD45B8FEBFEBD92D6483506B" Guid="{82F136EC-4277-0B87-98DB-709A81331BE2}" Win64="yes">
+                <File Id="_E540D127DD45B8FEBFEBD92D6483506B" Name="IKVM.Runtime.dll" KeyPath="yes" ShortName="IKVMRU~2.DLL" Assembly=".net" AssemblyManifest="_E540D127DD45B8FEBFEBD92D6483506B" AssemblyApplication="_E540D127DD45B8FEBFEBD92D6483506B" DiskId="1" Source="SourceDir\File\_E540D127DD45B8FEBFEBD92D6483506B" />
+            </Component>
+            <Component Id="C__E5BD290E80109BB22EE2B4DE16220776" Guid="{6630F5F3-DAAC-D824-B3D3-A3CC1DF42AD5}" Win64="yes">
+                <File Id="_E5BD290E80109BB22EE2B4DE16220776" Name="System.Net.Requests.dll" KeyPath="yes" ShortName="SYSTE~75.DLL" Assembly=".net" AssemblyManifest="_E5BD290E80109BB22EE2B4DE16220776" AssemblyApplication="_E5BD290E80109BB22EE2B4DE16220776" DiskId="1" Source="SourceDir\File\_E5BD290E80109BB22EE2B4DE16220776" />
+            </Component>
+            <Component Id="C__E6415D9A88F450305589F18DE3908E0A" Guid="{F7FD3181-C5F7-E08C-67F8-2444840220A4}" Win64="yes">
+                <File Id="_E6415D9A88F450305589F18DE3908E0A" Name="System.Linq.Expressions.dll" KeyPath="yes" ShortName="SYSTE~76.DLL" Assembly=".net" AssemblyManifest="_E6415D9A88F450305589F18DE3908E0A" AssemblyApplication="_E6415D9A88F450305589F18DE3908E0A" DiskId="1" Source="SourceDir\File\_E6415D9A88F450305589F18DE3908E0A" />
+            </Component>
+            <Component Id="C__E659D3B140793789C080BE0399A54E90" Guid="{ECE01241-7217-8913-70B3-57AC3F9851D7}" Win64="yes">
+                <File Id="_E659D3B140793789C080BE0399A54E90" Name="System.Xml.ReaderWriter.dll" KeyPath="yes" ShortName="SYSTE~77.DLL" Assembly=".net" AssemblyManifest="_E659D3B140793789C080BE0399A54E90" AssemblyApplication="_E659D3B140793789C080BE0399A54E90" DiskId="1" Source="SourceDir\File\_E659D3B140793789C080BE0399A54E90" />
+            </Component>
+            <Component Id="C__E8BE3B83F29C08EC6C50B4E8107428F8" Guid="{79569FA3-60F7-79A4-701D-E7C6118A2F0B}" Win64="yes">
+                <File Id="_E8BE3B83F29C08EC6C50B4E8107428F8" Name="System.Data.SQLite.Linq.dll" KeyPath="yes" ShortName="SYSTE~78.DLL" Assembly=".net" AssemblyManifest="_E8BE3B83F29C08EC6C50B4E8107428F8" AssemblyApplication="_E8BE3B83F29C08EC6C50B4E8107428F8" DiskId="1" Source="SourceDir\File\_E8BE3B83F29C08EC6C50B4E8107428F8" />
+            </Component>
+            <Component Id="C__E919914010CDCF63558556F728F03945" Guid="{1C4EDE1B-F1D9-1CD6-8090-A0BCCD1C5823}" Win64="yes">
+                <File Id="_E919914010CDCF63558556F728F03945" Name="System.Reflection.Primitives.dll" KeyPath="yes" ShortName="SYSTE~79.DLL" Assembly=".net" AssemblyManifest="_E919914010CDCF63558556F728F03945" AssemblyApplication="_E919914010CDCF63558556F728F03945" DiskId="1" Source="SourceDir\File\_E919914010CDCF63558556F728F03945" />
+            </Component>
+            <Component Id="C__E97A38AE0E51CD577E66881759A12BCF" Guid="{CAA290C7-681A-1320-662D-F3E24E7A2C88}" Win64="yes">
+                <File Id="_E97A38AE0E51CD577E66881759A12BCF" Name="IKVM.OpenJDK.Media.dll" KeyPath="yes" ShortName="IKVMO~24.DLL" Assembly=".net" AssemblyManifest="_E97A38AE0E51CD577E66881759A12BCF" AssemblyApplication="_E97A38AE0E51CD577E66881759A12BCF" DiskId="1" Source="SourceDir\File\_E97A38AE0E51CD577E66881759A12BCF" />
+            </Component>
+            <Component Id="C__EC8F1F5D3AD3E0A4D429F3AC5B7B1588" Guid="{10B2165A-A1C9-3E50-10F4-C5AA488B0C7E}" Win64="yes">
+                <File Id="_EC8F1F5D3AD3E0A4D429F3AC5B7B1588" Name="System.Dynamic.Runtime.dll" KeyPath="yes" ShortName="SYSTE~80.DLL" Assembly=".net" AssemblyManifest="_EC8F1F5D3AD3E0A4D429F3AC5B7B1588" AssemblyApplication="_EC8F1F5D3AD3E0A4D429F3AC5B7B1588" DiskId="1" Source="SourceDir\File\_EC8F1F5D3AD3E0A4D429F3AC5B7B1588" />
+            </Component>
+            <Component Id="C__ECD56902F3D7D4D99B17674EF88A2650" Guid="{2F0B053F-17CF-3BAC-0C10-ACC932C78972}" Win64="yes">
+                <File Id="_ECD56902F3D7D4D99B17674EF88A2650" Name="System.Collections.dll" KeyPath="yes" ShortName="SYSTE~81.DLL" Assembly=".net" AssemblyManifest="_ECD56902F3D7D4D99B17674EF88A2650" AssemblyApplication="_ECD56902F3D7D4D99B17674EF88A2650" DiskId="1" Source="SourceDir\File\_ECD56902F3D7D4D99B17674EF88A2650" />
+            </Component>
+            <Component Id="C__EEC4032077801E8D5C84883628A4B43E" Guid="{A7BC623E-3C19-8BE9-50AD-CC6E700E738C}" Win64="yes">
+                <File Id="_EEC4032077801E8D5C84883628A4B43E" Name="System.Security.Cryptography.Primitives.dll" KeyPath="yes" ShortName="SYSTE~82.DLL" Assembly=".net" AssemblyManifest="_EEC4032077801E8D5C84883628A4B43E" AssemblyApplication="_EEC4032077801E8D5C84883628A4B43E" DiskId="1" Source="SourceDir\File\_EEC4032077801E8D5C84883628A4B43E" />
+            </Component>
+            <Component Id="C__EF20664C11F67925AE1167077A27ED58" Guid="{2F0B053F-17CF-3BAC-0C10-ACC932C78972}" Win64="yes">
+                <File Id="_EF20664C11F67925AE1167077A27ED58" Name="System.Collections.dll" KeyPath="yes" ShortName="SYSTE~83.DLL" Assembly=".net" AssemblyManifest="_EF20664C11F67925AE1167077A27ED58" AssemblyApplication="_EF20664C11F67925AE1167077A27ED58" DiskId="1" Source="SourceDir\File\_EF20664C11F67925AE1167077A27ED58" />
+            </Component>
+            <Component Id="C__EF64A2F962CE00E540E1015FBB344AF8" Guid="{88DD50D8-55DF-2931-BCC3-B8CEA2640268}" Win64="yes">
+                <File Id="_EF64A2F962CE00E540E1015FBB344AF8" Name="System.ComponentModel.dll" KeyPath="yes" ShortName="SYSTE~84.DLL" Assembly=".net" AssemblyManifest="_EF64A2F962CE00E540E1015FBB344AF8" AssemblyApplication="_EF64A2F962CE00E540E1015FBB344AF8" DiskId="1" Source="SourceDir\File\_EF64A2F962CE00E540E1015FBB344AF8" />
+            </Component>
+            <Component Id="C__F17B7A104C8C4B83EE4D248022DC16A9" Guid="{63D910EC-AC4E-54EE-336F-260D58EC4896}" Win64="yes">
+                <File Id="_F17B7A104C8C4B83EE4D248022DC16A9" Name="System.Xml.XPath.dll" KeyPath="yes" ShortName="SYSTE~85.DLL" Assembly=".net" AssemblyManifest="_F17B7A104C8C4B83EE4D248022DC16A9" AssemblyApplication="_F17B7A104C8C4B83EE4D248022DC16A9" DiskId="1" Source="SourceDir\File\_F17B7A104C8C4B83EE4D248022DC16A9" />
+            </Component>
+            <Component Id="C__F204267F995A2B24716122A2DC0CA48D" Guid="{F7FD3181-C5F7-E08C-67F8-2444840220A4}" Win64="yes">
+                <File Id="_F204267F995A2B24716122A2DC0CA48D" Name="System.Linq.Expressions.dll" KeyPath="yes" ShortName="SYSTE~86.DLL" Assembly=".net" AssemblyManifest="_F204267F995A2B24716122A2DC0CA48D" AssemblyApplication="_F204267F995A2B24716122A2DC0CA48D" DiskId="1" Source="SourceDir\File\_F204267F995A2B24716122A2DC0CA48D" />
+            </Component>
+            <Component Id="C__F2AED79347B5026B0DC86DF346CDFC15" Guid="{F8B05677-AB36-8238-B20A-37C0663757CA}" Win64="yes">
+                <File Id="_F2AED79347B5026B0DC86DF346CDFC15" Name="IKVM.OpenJDK.XML.Parse.dll" KeyPath="yes" ShortName="IKVMO~25.DLL" Assembly=".net" AssemblyManifest="_F2AED79347B5026B0DC86DF346CDFC15" AssemblyApplication="_F2AED79347B5026B0DC86DF346CDFC15" DiskId="1" Source="SourceDir\File\_F2AED79347B5026B0DC86DF346CDFC15" />
+            </Component>
+            <Component Id="C__F56530DE631A1FC10AABEEDFF1D18007" Guid="{F991B723-B255-9D8B-19D8-6D7A52D01C43}" Win64="yes">
+                <File Id="_F56530DE631A1FC10AABEEDFF1D18007" Name="System.Runtime.Extensions.dll" KeyPath="yes" ShortName="SYSTE~87.DLL" Assembly=".net" AssemblyManifest="_F56530DE631A1FC10AABEEDFF1D18007" AssemblyApplication="_F56530DE631A1FC10AABEEDFF1D18007" DiskId="1" Source="SourceDir\File\_F56530DE631A1FC10AABEEDFF1D18007" />
+            </Component>
+            <Component Id="C__F5BBD3B3E0894FE2E81F76F75E3493AF" Guid="{1698E543-E7A3-A85A-09EE-B0A00314C651}" Win64="yes">
+                <File Id="_F5BBD3B3E0894FE2E81F76F75E3493AF" Name="WindowsFirewallHelper.dll" KeyPath="yes" ShortName="WINDOW~2.DLL" Assembly=".net" AssemblyManifest="_F5BBD3B3E0894FE2E81F76F75E3493AF" AssemblyApplication="_F5BBD3B3E0894FE2E81F76F75E3493AF" DiskId="1" Source="SourceDir\File\_F5BBD3B3E0894FE2E81F76F75E3493AF" />
+            </Component>
+            <Component Id="C__F82D9FD9DA548B5B9441F13F74522602" Guid="{26C5EF65-442E-031E-1E2D-441454492CA7}" Win64="yes">
+                <File Id="_F82D9FD9DA548B5B9441F13F74522602" Name="Microsoft.CodeAnalysis.dll" KeyPath="yes" ShortName="MICROS~2.DLL" Assembly=".net" AssemblyManifest="_F82D9FD9DA548B5B9441F13F74522602" AssemblyApplication="_F82D9FD9DA548B5B9441F13F74522602" DiskId="1" Source="SourceDir\File\_F82D9FD9DA548B5B9441F13F74522602" />
+            </Component>
+            <Component Id="C__F851A45DBC4826A0C178ED032DFA9101" Guid="{AB8A1903-72F7-1C82-5479-E8651FC882AF}" Win64="yes">
+                <File Id="_F851A45DBC4826A0C178ED032DFA9101" Name="NLog.dll" KeyPath="yes" ShortName="NLOG.DLL" Assembly=".net" AssemblyManifest="_F851A45DBC4826A0C178ED032DFA9101" AssemblyApplication="_F851A45DBC4826A0C178ED032DFA9101" DiskId="1" Source="SourceDir\File\_F851A45DBC4826A0C178ED032DFA9101" />
+            </Component>
+            <Component Id="C__F9A7D78FACA5612F9C388647914EB1A2" Guid="{AA704B1B-AEC9-C03F-E53B-0F5C626E92FA}" Win64="yes">
+                <File Id="_F9A7D78FACA5612F9C388647914EB1A2" Name="System.Text.RegularExpressions.dll" KeyPath="yes" ShortName="SYSTE~88.DLL" Assembly=".net" AssemblyManifest="_F9A7D78FACA5612F9C388647914EB1A2" AssemblyApplication="_F9A7D78FACA5612F9C388647914EB1A2" DiskId="1" Source="SourceDir\File\_F9A7D78FACA5612F9C388647914EB1A2" />
+            </Component>
+            <Component Id="C__FCCC819DA7A183F12B18F96F444A55E4" Guid="{2C1CA753-03E8-0451-41F4-8FA90F63FE25}" Win64="yes">
+                <File Id="_FCCC819DA7A183F12B18F96F444A55E4" Name="System.Text.Encoding.dll" KeyPath="yes" ShortName="SYSTE~89.DLL" Assembly=".net" AssemblyManifest="_FCCC819DA7A183F12B18F96F444A55E4" AssemblyApplication="_FCCC819DA7A183F12B18F96F444A55E4" DiskId="1" Source="SourceDir\File\_FCCC819DA7A183F12B18F96F444A55E4" />
+            </Component>
+            <Component Id="C__FEB68B4C62E4A5C5CE54F1F683D55394" Guid="{0A14707F-39B1-9351-D228-FD5635C2C36E}" Win64="yes">
+                <File Id="_FEB68B4C62E4A5C5CE54F1F683D55394" Name="System.Windows.Interactivity.dll" KeyPath="yes" ShortName="SYSTE~90.DLL" Assembly=".net" AssemblyManifest="_FEB68B4C62E4A5C5CE54F1F683D55394" AssemblyApplication="_FEB68B4C62E4A5C5CE54F1F683D55394" DiskId="1" Source="SourceDir\File\_FEB68B4C62E4A5C5CE54F1F683D55394" />
+            </Component>
+            <Component Id="C__FF3DE3C1EA7B23FC8B52B1F6907F0FE8" Guid="{4CBD5511-211C-DB58-2AF9-0B3C9CA3557B}" Win64="yes">
+                <File Id="_FF3DE3C1EA7B23FC8B52B1F6907F0FE8" Name="System.IO.Compression.dll" KeyPath="yes" ShortName="SYSTE~91.DLL" Assembly=".net" AssemblyManifest="_FF3DE3C1EA7B23FC8B52B1F6907F0FE8" AssemblyApplication="_FF3DE3C1EA7B23FC8B52B1F6907F0FE8" DiskId="1" Source="SourceDir\File\_FF3DE3C1EA7B23FC8B52B1F6907F0FE8" />
+            </Component>
+            <Component Id="C__426CBAB8F24D73EDB97917C1FEDAEAB9" Guid="{AB8282AD-1478-DFE6-0013-C2C116BC2F80}" Win64="yes">
+                <File Id="_426CBAB8F24D73EDB97917C1FEDAEAB9" Name="CloudVeil.exe.config" KeyPath="yes" ShortName="CLOUDV~1.CON" DiskId="1" Source="SourceDir\File\_426CBAB8F24D73EDB97917C1FEDAEAB9" />
+            </Component>
+            <Component Id="C__CDFEB41C6F9111F28BF284964998E502" Guid="{BEA65F5E-6255-8E73-8C31-29D55F7B1394}" Win64="yes">
+                <File Id="_CDFEB41C6F9111F28BF284964998E502" Name="FilterServiceProvider.exe.config" KeyPath="yes" ShortName="FILTER~1.CON" DiskId="1" Source="SourceDir\File\_CDFEB41C6F9111F28BF284964998E502" />
+            </Component>
+            <Component Id="C__B768F8C314DF90720B46F5D6964C75DD" Guid="{D7BB1FDD-B201-7A93-4E48-E7E40AA988FA}" Win64="yes">
+                <File Id="_B768F8C314DF90720B46F5D6964C75DD" Name="FilterServiceProvider.exe" KeyPath="yes" ShortName="FILTER~2.EXE" Assembly=".net" AssemblyManifest="_B768F8C314DF90720B46F5D6964C75DD" AssemblyApplication="_B768F8C314DF90720B46F5D6964C75DD" DiskId="1" Source="SourceDir\File\_B768F8C314DF90720B46F5D6964C75DD" />
+            </Component>
+            <Component Id="C__B7743C5CCF385A047A26013B174A49D0" Guid="{56D3EBB6-B488-FD9E-06AE-FDDC21C37593}" Win64="yes">
+                <File Id="_B7743C5CCF385A047A26013B174A49D0" Name="Citadel.Core.Windows.dll" KeyPath="yes" ShortName="CITADE~3.DLL" Assembly=".net" AssemblyManifest="_B7743C5CCF385A047A26013B174A49D0" AssemblyApplication="_B7743C5CCF385A047A26013B174A49D0" DiskId="1" Source="SourceDir\File\_B7743C5CCF385A047A26013B174A49D0" />
+            </Component>
+            <Component Id="C__80B8B1A40B74E76BDAF2AEDD298D34D0" Guid="{0BAE9865-EBF9-3FFA-B55B-37BE4D4E17D5}" Win64="yes">
+                <File Id="_80B8B1A40B74E76BDAF2AEDD298D34D0" Name="Citadel.IPC.Common.dll" KeyPath="yes" ShortName="CITADE~4.DLL" Assembly=".net" AssemblyManifest="_80B8B1A40B74E76BDAF2AEDD298D34D0" AssemblyApplication="_80B8B1A40B74E76BDAF2AEDD298D34D0" DiskId="1" Source="SourceDir\File\_80B8B1A40B74E76BDAF2AEDD298D34D0" />
+            </Component>-->
+        </ComponentGroup>
+    </Fragment>
+</Wix>
