@@ -28,3 +28,6 @@ So, here's the hack to make it work:
  15. From the now-open file dialog, browse to and select `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtilLib.dll` and click "Open".
  16. Ensure that "Read binary from filename" is selected.
  17. Click OK, then click save or ctrl+s to save these changes to the MSI file. **This entire process is necessary in order for the MSI to execute the custom actions we use to start up the GUI and spawn the server when installation is complete.** Without doing this, the installer would fail with a bad format exception, because unmodified, it is unable to execute/launch a 64 bit process.
+ 
+ ### Optional
+ Probably should also manually include all `.pdb` files in release builds from now on. This way our existing logging system, which logs stacktraces on handled exceptions, will get to note the line numbers as well.
