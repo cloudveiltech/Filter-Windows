@@ -2148,7 +2148,7 @@ namespace CitadelService.Services
                             // Recreate our filter collection and reset all categories to be disabled.
                             if(m_filterCollection != null)
                             {
-                                
+                                m_filterCollection.Dispose();
                             }
 
                             // Recreate our triggers container.
