@@ -93,6 +93,9 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CitadelCore.Windows">
+      <Version>1.2.5</Version>
+    </PackageReference>
     <PackageReference Include="Com.TechnikEmpire.ApacheOpenNLP">
       <Version>1.7.2</Version>
     </PackageReference>

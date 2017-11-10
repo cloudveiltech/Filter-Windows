@@ -1511,15 +1511,42 @@ namespace CitadelService.Services
             {
                 return;
             }
-
+            
             bool readLocked = false;
 
             try
             {                
                 var parsedHeaders = ParseHeaders(headers);
 
+                string contentType = null;
+                bool isHtml = false;
+                bool isJson = false;
+                bool hasReferer = true;
+                
+                if((parsedHeaders["Referer"]) == null)
+                {
+                    hasReferer = false;
+                }
+
+                if((contentType = parsedHeaders["Content-Type"]) != null)
+                {
+                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageBegin));
+
+                    // This is the start of a response with a content type that we want to inspect.
+                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
+                    isHtml = contentType.IndexOf("html") != -1;
+                    isJson = contentType.IndexOf("json") != -1;
+                    if(isHtml || isJson)
+                    {
+                        nextAction = ProxyNextAction.AllowButRequestContentInspection;
+                        return;
+                    }
+                }
+
                 if(m_filterCollection != null)
                 {
+                    // Lets check whitelists first.
+
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
@@ -1563,14 +1590,28 @@ namespace CitadelService.Services
                         return;
                     }
 
+                    // Since we made it this far, lets check blacklists now.
+
                     filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
 
                     if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customBlockResponseContentType = "text/html";
-                        customBlockResponse = m_blockedHtmlPage;
+
+                        if(isHtml || hasReferer == false)
+                        {
+                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                            // if there is no referer (direct navigation).
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = m_blockedHtmlPage;
+                        }
+                        else
+                        {
+                            customBlockResponseContentType = string.Empty;
+                            customBlockResponse = null;
+                        }
+                        
                         return;
                     }
 
@@ -1580,24 +1621,20 @@ namespace CitadelService.Services
                     {
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
-                        customBlockResponseContentType = "text/html";
-                        customBlockResponse = m_blockedHtmlPage;
-                        return;
-                    }
-                }
 
-                string contentType = null;
-                if((contentType = parsedHeaders["Content-Type"]) != null)
-                {
-                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageBegin));
+                        if(isHtml || hasReferer == false)
+                        {
+                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                            // if there is no referer (direct navigation).
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = m_blockedHtmlPage;
+                        }
+                        else
+                        {
+                            customBlockResponseContentType = string.Empty;
+                            customBlockResponse = null;
+                        }
 
-                    // This is the start of a response with a content type that we want to inspect.
-                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
-                    var isHtml = contentType.IndexOf("html") != -1;
-                    var isJson = contentType.IndexOf("json") != -1;
-                    if(isHtml || isJson)
-                    {
-                        nextAction = ProxyNextAction.AllowButRequestContentInspection;                        
                         return;
                     }
                 }
@@ -1637,42 +1674,11 @@ namespace CitadelService.Services
             {
                 var parsedHeaders = ParseHeaders(headers);
 
-                Uri requestUri = null;
-
-                if(!parsedHeaders.TryGetRequestUri(out requestUri))
-                {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing request URI.");
-                    return;
-                }
-
                 string contentType = null;
-                string httpVersion = null;
 
                 if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
                     contentType = contentType.ToLower();
-
-                    foreach(string key in parsedHeaders)
-                    {
-                        string val = parsedHeaders[key];
-                        if(val == null || val == string.Empty)
-                        {
-                            var si = key.IndexOf(' ');
-                            if(si != -1)
-                            {
-                                var sub = key.Substring(0, si);
-
-                                if(sub.StartsWith("HTTP/"))
-                                {
-                                    httpVersion = sub.Substring(5);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    httpVersion = httpVersion != null ? httpVersion : "1.1";
 
                     BlockType blockType;
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType);
@@ -1687,7 +1693,7 @@ namespace CitadelService.Services
                             customBlockResponse = m_blockedHtmlPage;
                         }
                         
-                        OnRequestBlocked(contentClassResult, blockType, requestUri);
+                        OnRequestBlocked(contentClassResult, blockType, requestUrl);
                         m_logger.Info("Response blocked by content classification.");
                     }
                 }
