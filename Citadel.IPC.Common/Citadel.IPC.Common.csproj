@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IPC\IPCClient.cs" />
+    <Compile Include="IPC\IPCMessageTracker.cs" />
     <Compile Include="IPC\IPCServer.cs" />
     <Compile Include="IPC\Messages\AuthenticationMessage.cs" />
     <Compile Include="IPC\Messages\BaseMessage.cs" />
@@ -47,7 +48,9 @@
     <Compile Include="IPC\Messages\DeactivationMessage.cs" />
     <Compile Include="IPC\Messages\FilterStatusMessage.cs" />
     <Compile Include="IPC\Messages\NotifyBlockActionMessage.cs" />
+    <Compile Include="IPC\Messages\NotifyConfigUpdateMessage.cs" />
     <Compile Include="IPC\Messages\RelaxedPolicyMessage.cs" />
+    <Compile Include="IPC\Messages\RequestConfigUpdateMessage.cs" />
     <Compile Include="IPC\Messages\ServerOnlyMessage.cs" />
     <Compile Include="IPC\Messages\ServerUpdateQueryMessage.cs" />
     <Compile Include="IPC\Messages\ServerUpdateNotificationMessage.cs" />

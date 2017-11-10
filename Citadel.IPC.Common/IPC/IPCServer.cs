@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using NamedPipeWrapper;
@@ -142,6 +143,8 @@ namespace Citadel.IPC
     /// </summary>
     public delegate void ServerGenericParameterlessHandler();
 
+    public delegate void RequestConfigUpdateHandler(RequestConfigUpdateMessage message);
+
     /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
@@ -152,6 +155,9 @@ namespace Citadel.IPC
         /// Actual named pipe server wrapper. 
         /// </summary>
         private NamedPipeServer<BaseMessage> m_server;
+
+        // XXX FIXME Currently not used in IPCServer.
+        private IPCMessageTracker m_ipcQueue;
 
         /// <summary>
         /// Delegate to be called when a client requests a relaxed policy. 
@@ -196,6 +202,12 @@ namespace Citadel.IPC
         public BlockActionReportHandler ClientRequestsBlockActionReview;
 
         /// <summary>
+        /// Delegate to be called when a client is requesting a configuration/ruleset update.
+        /// </summary>
+        public RequestConfigUpdateHandler RequestConfigUpdate;
+
+        
+        /// <summary>
         /// Our logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -231,6 +243,8 @@ namespace Citadel.IPC
             m_server.Error += M_server_Error;
 
             m_server.Start();
+
+            m_ipcQueue = new IPCMessageTracker();
 
             m_logger.Info("IPC Server started.");
         }
@@ -392,6 +406,17 @@ namespace Citadel.IPC
                     }                    
                 }
             }
+            else if(msgRealType == typeof(Messages.RequestConfigUpdateMessage))
+            {
+                m_logger.Debug("Client message is {0}", nameof(Messages.RequestConfigUpdateMessage));
+
+                var cast = (Messages.RequestConfigUpdateMessage)message;
+
+                if(cast != null)
+                {
+                    RequestConfigUpdate?.Invoke(cast);
+                }
+            }
             else
             {
                 // Unknown type.
@@ -497,6 +522,13 @@ namespace Citadel.IPC
         public void NotifyUpdating()
         {
             var msg = new ServerUpdateNotificationMessage();
+            PushMessage(msg);
+        }
+
+        public void NotifyConfigurationUpdate(ConfigUpdateResult result, Guid replyToId)
+        {
+            var msg = new NotifyConfigUpdateMessage(result);
+            msg.ReplyToId = replyToId;
             PushMessage(msg);
         }
 

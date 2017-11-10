@@ -56,10 +56,19 @@ namespace Citadel.IPC
 
     public delegate void ServerUpdateRequestHandler(ServerUpdateQueryMessage msg);
 
+    /// <summary>
+    /// A generic reply handler, called by IPC queue.
+    /// </summary>
+    /// <param name="msg"></param>
+    /// <returns></returns>
+    public delegate bool GenericReplyHandler(BaseMessage msg);
+
     public class IPCClient : IDisposable
     {
 
         private NamedPipeClient<BaseMessage> m_client;
+
+        private IPCMessageTracker m_ipcQueue;
 
         public ClientGenericParameterlessHandler ConnectedToServer;
 
@@ -88,6 +97,17 @@ namespace Citadel.IPC
         /// </summary>
         private readonly Logger m_logger;
 
+        /// <summary>
+        /// All message handlers get added to this IPC client as it will stick around and handle all the incoming messages.
+        /// </summary>
+        public static IPCClient Default { get; set; }
+
+        public static IPCClient InitDefault()
+        {
+            Default = new IPCClient(true);
+            return Default;
+        }
+
         public IPCClient(bool autoReconnect = false)
         {
             m_logger = LoggerUtil.GetAppWideLogger();
@@ -106,6 +126,8 @@ namespace Citadel.IPC
             m_client.Error += M_client_Error;
 
             m_client.Start();
+
+            m_ipcQueue = new IPCMessageTracker();
         }
 
         public void WaitForConnection()
@@ -133,6 +155,16 @@ namespace Citadel.IPC
             // This is so gross, but unfortuantely we can't just switch on a type.
             // We can come up with a nice mapping system so we can do a switch,
             // but this can wait.
+
+            if(Default.m_ipcQueue.HandleMessage(message))
+            {
+                return;
+            }
+
+            if(m_ipcQueue.HandleMessage(message))
+            {
+                return;
+            }
 
             m_logger.Debug("Got IPC message from server.");
 
@@ -312,7 +344,24 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        private void PushMessage(BaseMessage msg)
+        public void RequestConfigUpdate(Action<NotifyConfigUpdateMessage> replyHandler)
+        {
+            var msg = new RequestConfigUpdateMessage();
+            PushMessage(msg, (reply) =>
+            {
+                if (reply.GetType() == typeof(Messages.NotifyConfigUpdateMessage))
+                {
+                    replyHandler((Messages.NotifyConfigUpdateMessage)reply);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            });
+        }
+
+        private void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)
         {
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
@@ -321,6 +370,18 @@ namespace Citadel.IPC
             }
 
             m_client.PushMessage(msg);
+            
+            if(replyHandler != null)
+            {
+                if (Default != null)
+                {
+                    Default.m_ipcQueue.AddMessage(msg, replyHandler);
+                }
+                else
+                {
+                    m_ipcQueue.AddMessage(msg, replyHandler);
+                }
+            }
         }
 
         #region IDisposable Support

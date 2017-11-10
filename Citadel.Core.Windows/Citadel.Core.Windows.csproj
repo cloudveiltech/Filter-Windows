@@ -58,6 +58,7 @@
     <Compile Include="Extensions\X509Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BaseProtectiveService.cs" />
+    <Compile Include="Types\ConfigUpdateResult.cs" />
     <Compile Include="Util\Net\NetworkListUtil.cs" />
     <Compile Include="Util\Process\ExitCodes.cs" />
     <Compile Include="Util\Http\FastHtmlTextExtractor.cs" />

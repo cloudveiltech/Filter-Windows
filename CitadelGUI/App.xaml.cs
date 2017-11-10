@@ -246,7 +246,7 @@ namespace Te.Citadel
             try
             {
                 // XXX FIXME
-                m_ipcClient = new IPCClient(true);
+                m_ipcClient = IPCClient.InitDefault();
                 m_ipcClient.AuthenticationResultReceived = (args) =>
                 {
                     m_logger.Info("Auth response from server is: {0}", args.ToString());

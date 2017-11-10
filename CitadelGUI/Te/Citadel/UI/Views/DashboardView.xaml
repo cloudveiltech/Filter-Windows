@@ -14,6 +14,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Te.Citadel.UI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     Width="716"
     Height="386"
     d:DesignHeight="386"
@@ -331,6 +332,44 @@
                         Foreground="Black"
                         Text="Review Logs"
                         TextWrapping="Wrap" />
+
+                    <Button
+                        x:Name="requestUpdate"
+                        Content="{Binding UpdateText}"
+                        IsEnabled="{Binding IsUpdateButtonEnabled}"
+                        HorizontalAlignment="Left"
+                        Margin="144,263,0,0"
+                        VerticalAlignment="Top"
+                        Width="136"
+                        Style="{StaticResource AccentedSquareButtonStyle}"
+                        Command="{Binding RequestUpdateCommand}"/>
+
+                    <Controls:ProgressRing
+                        x:Name="requestUpdateProgress"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Visibility="{Binding Path=UpdateRequestInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+                    
+                    <IconPacks:PackIconFontAwesome 
+                        Kind="Check"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Foreground="#CC119EDA"
+                        Visibility="{Binding Path=UpToDate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+
+                    <IconPacks:PackIconFontAwesome
+                        Kind="Times"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Foreground="Red"
+                        Visibility="{Binding Path=ErrorOccurred, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+
+                    <Label
+                        Content="{Binding ErrorText}"
+                        Height="28" Margin="322,263,296,56"/>
 
                     <!--  View log directory button.  -->
                     <Button
