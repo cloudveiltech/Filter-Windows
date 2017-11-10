@@ -1617,12 +1617,14 @@ namespace CitadelService.Services
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
+                        UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
                         if(isHtml || hasReferer == false)
                         {
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = m_blockedHtmlPage;
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
                         }
                         else
                         {
@@ -1640,12 +1642,14 @@ namespace CitadelService.Services
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
                         if(isHtml || hasReferer == false)
                         {
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = m_blockedHtmlPage;
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, uriInfo);
                         }
                         else
                         {
@@ -1705,10 +1709,12 @@ namespace CitadelService.Services
                     {
                         shouldBlock = true;
 
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = m_blockedHtmlPage;
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, 0, uriInfo, blockType);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1740,6 +1746,97 @@ namespace CitadelService.Services
             }
 
             return false;
+        }
+
+        
+        private string findCategoryFromUriInfo(int matchingCategory, UriInfo info)
+        {
+            var results = info.results.Where(r => r.category_status == 0);
+            foreach(var result in results)
+            {
+                if(result.category_id == matchingCategory && result.category_status == 0)
+                {
+                    return result.category;
+                }
+            }
+
+            if (results.Count() > 0)
+            {
+                m_logger.Info("Couldn't find a URI result whose category matched ours. Returning first one in list.");
+                return results.First().category;
+            }
+
+            return matchingCategory.ToString() + " filter rule mismatch error";
+        }
+
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        {
+            string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
+
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // IMO this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
+            string urlText = requestUri.ToString();
+
+            string deviceName;
+
+            try
+            {
+                deviceName = Environment.MachineName;
+            }
+            catch
+            {
+                deviceName = "Unknown";
+            }
+
+            string blockedRequestBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(urlText));
+
+            string unblockRequest = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
+            string username = WebServiceUtil.Default.UserEmail ?? "DNS";
+
+            string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
+            unblockRequest += "?" + query;
+
+            // Get category or block type.
+            string url_text = urlText == null ? "" : urlText, matching_category = "";
+            if (info != null && matchingCategory > 0)
+            {
+                matching_category = findCategoryFromUriInfo(matchingCategory, info);
+            }
+            else
+            {
+                switch (blockType)
+                {
+                    case BlockType.None:
+                        matching_category = "unknown reason";
+                        break;
+
+                    case BlockType.ImageClassification:
+                        matching_category = "naughty image";
+                        break;
+
+                    case BlockType.Url:
+                        matching_category = "bad webpage";
+                        break;
+
+                    case BlockType.TextClassification:
+                    case BlockType.TextTrigger:
+                        matching_category = "improper text";
+                        break;
+
+                    case BlockType.OtherContentClassification:
+                    default:
+                        matching_category = "other content classification";
+                        break;
+                }
+            }
+
+            blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
+            blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+            blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
+            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
+
+            return Encoding.UTF8.GetBytes(blockPageTemplate);
         }
 
         private NameValueCollection ParseHeaders(string headers)
