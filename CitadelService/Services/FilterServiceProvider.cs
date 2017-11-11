@@ -383,7 +383,7 @@ namespace CitadelService.Services
 
                                 var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
 
-                                switch(authResult)
+                                switch(authResult.AuthenticationResult)
                                 {
                                     case AuthenticationResult.Success:
                                     {
@@ -399,7 +399,7 @@ namespace CitadelService.Services
                                     case AuthenticationResult.Failure:
                                     {
                                         ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                     }
                                     break;
 

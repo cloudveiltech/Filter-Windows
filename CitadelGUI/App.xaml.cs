@@ -247,10 +247,9 @@ namespace Te.Citadel
             {
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
-                m_ipcClient.AuthenticationResultReceived = (args) =>
+                m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
                 {
-                    m_logger.Info("Auth response from server is: {0}", args.ToString());
-                    switch(args)
+                    switch(authenticationFailureResult.Action)
                     {
                         case AuthenticationAction.Denied:
                         case AuthenticationAction.Required:
@@ -258,7 +257,7 @@ namespace Te.Citadel
                         {
                             // User needs to log in.
                             BringAppToFocus();
-                            OnViewChangeRequest(typeof(LoginView));
+                            OnViewChangeRequest(typeof(LoginView));      
                         }
                         break;
 
