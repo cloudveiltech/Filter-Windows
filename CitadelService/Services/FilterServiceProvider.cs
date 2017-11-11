@@ -1548,23 +1548,23 @@ namespace CitadelService.Services
 
                 if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
-                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageBegin));
-
                     // This is the start of a response with a content type that we want to inspect.
                     // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
                     isHtml = contentType.IndexOf("html") != -1;
                     isJson = contentType.IndexOf("json") != -1;
                     if(isHtml || isJson)
                     {
-                        nextAction = ProxyNextAction.AllowButRequestContentInspection;
-                        return;
+                        // Let's only inspect responses, not user-sent payloads (request data).
+                        if(msgDirection == MessageDirection.Response)
+                        {
+                            nextAction = ProxyNextAction.AllowButRequestContentInspection;
+                        }
                     }
                 }
 
                 if(m_filterCollection != null)
                 {
                     // Lets check whitelists first.
-
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
@@ -1687,9 +1687,7 @@ namespace CitadelService.Services
             {
                 return;
             }
-
-            m_logger.Info("Entering {0}", nameof(OnHttpMessageEnd));
-
+            
             // The only thing we can really do in this callback, and the only thing we care to do, is
             // try to classify the content of the response payload, if there is any.
             try
