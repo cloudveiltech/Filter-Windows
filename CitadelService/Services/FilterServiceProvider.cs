@@ -1067,6 +1067,19 @@ namespace CitadelService.Services
 
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+            // Set up our network availability checks so we can run captive portal detection on a changed network.
+            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
+        }
+
+        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        {
+            m_logger.Info("Network change detected, running captive portal detection.");
+            if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            {
+                // XXX TODO Implement captive portal scanning
+                // We'll probably need to add code for our own checks. Need to do some thorough testing on captive portals.
+            }
         }
 
         /// <summary>
