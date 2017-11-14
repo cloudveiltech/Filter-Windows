@@ -47,6 +47,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
 using WindowsFirewallHelper;
+using NativeWifi;
+using CitadelService.Util;
 
 namespace CitadelService.Services
 {
@@ -1110,6 +1112,7 @@ namespace CitadelService.Services
             if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
                 m_logger.Info("Captive portal detected.");
+                CaptivePortalHelper.Default.OnCaptivePortalDetected();
 
                 m_ipcServer.SendCaptivePortalState(true);
                 TryEnfornceDns();
@@ -1126,7 +1129,7 @@ namespace CitadelService.Services
             {
                 m_logger.Info("Unencumbered internet access.");
 
-                // We still want to check for captive portal because it's not immediately detected after 
+                // We still want to check for captive portal because it's not immediately detected after an address change. Run for 5 seconds.
                 Timer checkCaptivePortalState = null;
 
                 Int32 timerState = 0;
@@ -1164,19 +1167,22 @@ namespace CitadelService.Services
             if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
                 m_ipcServer.SendCaptivePortalState(true);
-                TryEnfornceDns();
+                CaptivePortalHelper.Default.OnCaptivePortalDetected();
+
+                TryEnfornceDns(); // Remove our DNS settings for those captive portals that have their own DNS servers.
 
                 Timer checkCaptivePortalLiftedTimer = null;
                 checkCaptivePortalLiftedTimer = new Timer((_notused) =>
                 {
                     // Switch our DNS back.
-                    checkCaptivePortalLifted(checkCaptivePortalLiftedTimer, state);
+                    checkCaptivePortalLifted(checkCaptivePortalLiftedTimer);
                 });
 
                 timer.Dispose();
             }
         }
 
+        
         private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
         {
             DetectCaptivePortal();
@@ -2770,9 +2776,25 @@ namespace CitadelService.Services
                 try
                 {
 
-                    if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+                    if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal || CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
                     {
-                        if(string.IsNullOrEmpty(m_userConfig.PrimaryDns) && string.IsNullOrEmpty(m_userConfig.SecondaryDns))
+                        IPAddress primaryDns = null;
+                        IPAddress secondaryDns = null;
+
+                        var cfg = Config;
+
+                        // Check if any DNS servers are defined, and if so, set them.
+                        if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+                        {
+                            IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
+                        }
+
+                        if (cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
+                        {
+                            IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
+                        }
+
+                        if (primaryDns == null && secondaryDns == null)
                         {
                             // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
                             return;
