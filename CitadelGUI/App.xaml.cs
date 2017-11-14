@@ -498,6 +498,7 @@ namespace Te.Citadel
                     }
                 };
 
+#if CAPTIVE_PORTAL_GUI_ENABLED
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
                     if (msg.IsCaptivePortalDetected && !m_captivePortalShownToUser)
@@ -523,6 +524,8 @@ namespace Te.Citadel
                         m_captivePortalShownToUser = false;
                     }
                 };
+#endif
+
             }
             catch(Exception ipce)
             {
@@ -780,11 +783,13 @@ namespace Te.Citadel
             );
         }
 
+#if CAPTIVE_PORTAL_GUI_ENABLED
         public void DisplayCaptivePortalToolTip()
         {
             m_trayIcon.BalloonTipClicked += captivePortalToolTipClicked;
             m_trayIcon.ShowBalloonTip(6000, "Captive Portal Detected", "This network requires logon information. Click here to continue.", System.Windows.Forms.ToolTipIcon.Info);
         }
+#endif
 
         private void captivePortalToolTipClicked(object sender, EventArgs e)
         {

@@ -317,14 +317,14 @@ namespace CitadelService.Services
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
 
-            NetworkStatus.Default.ConnectionStateChanged += () =>
+            /*NetworkStatus.Default.ConnectionStateChanged += () =>
             {
                 // Bit of a hack here to ensure that we immediately purge
                 if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
                 {
                     TryEnfornceDns();
                 }
-            };
+            };*/
         }
 
         private void OnStartup()
@@ -576,6 +576,8 @@ namespace CitadelService.Services
                     }
 
                     m_ipcServer.NotifyStatus(Status);
+
+                    DetectCaptivePortal();
 
                     if(m_ipcServer.WaitingForAuth)
                     {   
@@ -1074,51 +1076,110 @@ namespace CitadelService.Services
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
             // Set up our network availability checks so we can run captive portal detection on a changed network.
-            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
+            NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
+
+            // Run on startup so we can get the network state right away.
+            DetectCaptivePortal();
         }
 
-        private async void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        /// <summary>
+        /// Detects whether we are on a captive portal and issues result to all clients.
+        /// Also runs TryEnforceDns().
+        /// </summary>
+        private void DetectCaptivePortal()
         {
-            m_logger.Info("Network change detected, running captive portal detection.");
+            m_logger.Info("Network address change detection, running captive portal detection.");
 
-            // XXX FIXME: This is not correct logic, putting this in here so we can more easily test our GUI components.
-            if (e.IsAvailable)
-            {
-                m_ipcServer.SendCaptivePortalState(false);
-            }
-            else
-            {
-                ReviveGuiForCurrentUser(true);
-                await Task.Delay(500); // Give our GUI time to start up if it needs to.
-
-                m_ipcServer.SendCaptivePortalState(true);
-            }
-
-            return;
-            // END TEST
-
-            if(!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
+            if (!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
             {
                 // No point in checking further if no internet available.
+                try
+                {
+                    IPHostEntry entry = Dns.GetHostEntry("cloudveil.org");
+                }
+                catch (Exception ex)
+                {
+                    m_logger.Info("No internet detected.");
+                    return;
+                }
+
+                m_ipcServer.SendCaptivePortalState(false);
                 return;
             }
 
             if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
+                m_logger.Info("Captive portal detected.");
+
                 m_ipcServer.SendCaptivePortalState(true);
+                TryEnfornceDns();
 
                 // This timer runs for as long as our captive portal has control over the user's internet connection.
                 Timer checkCaptivePortalState = null;
 
                 checkCaptivePortalState = new Timer((state) =>
                 {
-                    if (!NetworkStatus.Default.BehindIPv4CaptivePortal && !NetworkStatus.Default.BehindIPv6CaptivePortal)
-                    {
-                        m_ipcServer.SendCaptivePortalState(false);
-                        checkCaptivePortalState.Dispose();
-                    }
+                    checkCaptivePortalLifted(checkCaptivePortalState);
                 }, null, 0, 250);
             }
+            else if (NetworkStatus.Default.HasUnencumberedInternetAccess)
+            {
+                m_logger.Info("Unencumbered internet access.");
+
+                // We still want to check for captive portal because it's not immediately detected after 
+                Timer checkCaptivePortalState = null;
+
+                Int32 timerState = 0;
+                checkCaptivePortalState = new Timer((state) =>
+                {
+                    checkCaptivePortal(checkCaptivePortalState);
+
+                    timerState++;
+
+                    if(timerState >= 5)
+                    {
+                        checkCaptivePortalState.Dispose();
+                    }
+                }, null, 0, 1000);
+                
+                TryEnfornceDns();
+            }
+        }
+
+        private void checkCaptivePortalLifted(Timer timer)
+        {
+            if (!NetworkStatus.Default.BehindIPv4CaptivePortal && !NetworkStatus.Default.BehindIPv6CaptivePortal)
+            {
+                m_logger.Info("Captive portal has been lifted.");
+
+                m_ipcServer.SendCaptivePortalState(false);
+                TryEnfornceDns();
+
+                timer.Dispose();
+            }
+        }
+
+        private void checkCaptivePortal(Timer timer)
+        {
+            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            {
+                m_ipcServer.SendCaptivePortalState(true);
+                TryEnfornceDns();
+
+                Timer checkCaptivePortalLiftedTimer = null;
+                checkCaptivePortalLiftedTimer = new Timer((_notused) =>
+                {
+                    // Switch our DNS back.
+                    checkCaptivePortalLifted(checkCaptivePortalLiftedTimer, state);
+                });
+
+                timer.Dispose();
+            }
+        }
+
+        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
+        {
+            DetectCaptivePortal();
         }
 
         /// <summary>
@@ -2711,6 +2772,12 @@ namespace CitadelService.Services
 
                     if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
                     {
+                        if(string.IsNullOrEmpty(m_userConfig.PrimaryDns) && string.IsNullOrEmpty(m_userConfig.SecondaryDns))
+                        {
+                            // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
+                            return;
+                        }
+
                         var setDnsForNicToDhcp = new Action<string>((nicName) =>
                         {
                             using(var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
@@ -2719,7 +2786,19 @@ namespace CitadelService.Services
                                 {
                                     foreach(var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
                                     {
-                                        managementObject.InvokeMethod("SetDNSServerSearchOrder", null, null);
+                                        ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
+                                        inParams["DNSServerSearchOrder"] = new string[0];
+                                        ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
+                                        UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
+
+                                        if (ret != 0)
+                                        {
+                                            m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
+                                        }
+                                        else
+                                        {
+                                            m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
+                                        }
                                     }
                                 }
                             }
@@ -2798,7 +2877,7 @@ namespace CitadelService.Services
 
                                                 if(changed)
                                                 {
-                                                    m_logger.Info("Setting DNS for adapter {1} to {0}.", nicName, string.Join(",", dnsServers.ToArray()));
+                                                    m_logger.Info("Setting DNS for adapter {0} to {1}.", nicName, string.Join(",", dnsServers.ToArray()));
                                                     newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
                                                     managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
                                                 }

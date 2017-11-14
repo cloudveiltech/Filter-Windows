@@ -59,7 +59,7 @@
                                                ToolTip="Internet Connected" />
             </StackPanel>
 
-            <Button
+            <!--<Button
                 Command="{Binding OpenGuestNetwork}"
                 Visibility="{Binding Path=IsCaptivePortalActive, Converter={StaticResource BooleanToVisibilityConverter}}"
                 >
@@ -73,11 +73,11 @@
                                                Kind="Wifi"
                                                ToolTip="Possible Guest Network" />
                 </StackPanel>
-            </Button>
+            </Button>-->
         </MetroControls:WindowCommands>
     </local:BaseWindow.RightWindowCommands>
 
-    <MetroControls:MetroWindow.Flyouts>
+    <!--<MetroControls:MetroWindow.Flyouts>
         <MetroControls:FlyoutsControl>
             <MetroControls:Flyout IsOpen="{Binding ShowGuestNetwork}" Header="Guest Network" Position="Right" Width="250">
                 <MetroControls:Flyout.DataContext>
@@ -103,24 +103,9 @@
                 </Grid>
             </MetroControls:Flyout>
         </MetroControls:FlyoutsControl>
-    </MetroControls:MetroWindow.Flyouts>
+    </MetroControls:MetroWindow.Flyouts>-->
     
     <Grid>
         <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
-        <!--<DockPanel>
-            <StatusBar DockPanel.Dock="Bottom">
-                <StatusBar.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Label Grid.Column="0" Content="Experiment" />
-                        </Grid>
-                    </ItemsPanelTemplate>
-                </StatusBar.ItemsPanel>
-            </StatusBar>
-        </DockPanel>-->
     </Grid>
 </local:BaseWindow>
