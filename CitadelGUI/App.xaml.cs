@@ -508,6 +508,8 @@ namespace Te.Citadel
                             {
                                 BringAppToFocus();
                             }
+
+                            ((MainWindowViewModel)m_mainWindow.DataContext).ShowIsGuestNetwork = true;
                         }
                         else
                         {

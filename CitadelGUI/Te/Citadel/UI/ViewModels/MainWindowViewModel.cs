@@ -5,6 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using GalaSoft.MvvmLight.Command;
+using System;
 using Te.Citadel.UI.Models;
 
 namespace Te.Citadel.UI.ViewModels
@@ -18,6 +20,62 @@ namespace Te.Citadel.UI.ViewModels
             get
             {
                 return m_model.InternetIsConnected;
+            }
+        }
+
+        private bool m_showGuestNetwork;
+
+        /// <summary>
+        /// Bound to IsOpen on the guest network flyout.
+        /// </summary>
+        public bool ShowIsGuestNetwork
+        {
+            get
+            {
+                return m_showGuestNetwork;
+            }
+
+            set
+            {
+                m_showGuestNetwork = value;
+                RaisePropertyChanged(nameof(ShowIsGuestNetwork));
+            }
+        }
+
+        private bool m_isCaptivePortalActive;
+
+        /// <summary>
+        /// If this is true, we show guest network window command.
+        /// </summary>
+        public bool IsCaptivePortalActive
+        {
+            get
+            {
+                return m_isCaptivePortalActive;
+            }
+
+            set
+            {
+                m_isCaptivePortalActive = value;
+                RaisePropertyChanged(nameof(IsCaptivePortalActive));
+            }
+        }
+
+        private RelayCommand m_openGuestNetwork;
+        
+        public RelayCommand OpenGuestNetwork
+        {
+            get
+            {
+                if(m_openGuestNetwork == null)
+                {
+                    m_openGuestNetwork = new RelayCommand((Action)(() =>
+                    {
+                        ShowIsGuestNetwork = true;
+                    }));
+                }
+
+                return m_openGuestNetwork;
             }
         }
 

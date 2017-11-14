@@ -1082,7 +1082,7 @@ namespace CitadelService.Services
             m_logger.Info("Network change detected, running captive portal detection.");
 
             // XXX FIXME: This is not correct logic, putting this in here so we can more easily test our GUI components.
-            /*if (e.IsAvailable)
+            if (e.IsAvailable)
             {
                 m_ipcServer.SendCaptivePortalState(false);
             }
@@ -1094,7 +1094,7 @@ namespace CitadelService.Services
                 m_ipcServer.SendCaptivePortalState(true);
             }
 
-            return;*/
+            return;
             // END TEST
 
             if(!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
