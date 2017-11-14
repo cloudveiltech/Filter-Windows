@@ -104,6 +104,9 @@
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
+    <Compile Include="Te\Citadel\UI\Views\CaptivePortalView.xaml.cs">
+      <DependentUpon>CaptivePortalView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
     </Compile>
@@ -112,6 +115,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Te\Citadel\UI\Controls\SecureInputBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\CaptivePortalView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

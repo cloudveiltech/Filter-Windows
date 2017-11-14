@@ -36,13 +36,13 @@
 
     <local:BaseWindow.RightWindowCommands>
         <MetroControls:WindowCommands>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
                 <Label Content="Internet " />
                 <!--  Internet Disconnected Status Icon.  -->
                 <IconPacks:PackIconFontAwesome Width="20"
                                                Height="20"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Top"
+                                               VerticalAlignment="Center"
                                                Foreground="Black"
                                                Kind="ExclamationCircle"
                                                Style="{StaticResource InternetDisconnectedIconStyle}"
@@ -52,7 +52,7 @@
                 <IconPacks:PackIconFontAwesome Width="20"
                                                Height="20"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Top"
+                                               VerticalAlignment="Center"
                                                Foreground="Black"
                                                Kind="CheckCircle"
                                                Style="{StaticResource InternetConnectedIconStyle}"
@@ -61,6 +61,31 @@
         </MetroControls:WindowCommands>
     </local:BaseWindow.RightWindowCommands>
 
+    <MetroControls:MetroWindow.Flyouts>
+        <MetroControls:FlyoutsControl>
+            <MetroControls:Flyout IsOpen="True" Header="Guest Network" Position="Right" Width="250">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="48"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
+                               Margin="8"
+                               TextWrapping="Wrap">
+                        <Run Text="It looks like you're on a network that requires logon information."/>
+                    </TextBlock>
+
+                    <Button Content="Help Me Connect" Grid.Row="1" Margin="8" Style="{DynamicResource SquareButtonStyle}"/>
+                </Grid>
+            </MetroControls:Flyout>
+        </MetroControls:FlyoutsControl>
+    </MetroControls:MetroWindow.Flyouts>
+    
     <Grid>
         <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
     </Grid>

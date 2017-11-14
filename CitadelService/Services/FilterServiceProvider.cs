@@ -1108,7 +1108,9 @@ namespace CitadelService.Services
                 m_ipcServer.SendCaptivePortalState(true);
 
                 // This timer runs for as long as our captive portal has control over the user's internet connection.
-                Timer checkCaptivePortalState = new Timer((state) =>
+                Timer checkCaptivePortalState = null;
+
+                checkCaptivePortalState = new Timer((state) =>
                 {
                     if (!NetworkStatus.Default.BehindIPv4CaptivePortal && !NetworkStatus.Default.BehindIPv6CaptivePortal)
                     {
