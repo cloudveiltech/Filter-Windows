@@ -131,6 +131,12 @@ namespace Te.Citadel
         /// </summary>
         private IPCClient m_ipcClient;
 
+        /// <summary>
+        /// Tracks whether the captive portal tool tip has been displayed for the given network.
+        /// Will be set back to false when captive portal detection goes back to false.
+        /// </summary>
+        private bool m_captivePortalShownToUser;
+
         #endregion Views 
 
         /// <summary>
@@ -491,6 +497,30 @@ namespace Te.Citadel
                         break;
                     }
                 };
+
+                m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
+                {
+                    if (msg.IsCaptivePortalDetected && !m_captivePortalShownToUser)
+                    {
+                        if (m_mainWindow.Visibility == Visibility.Visible)
+                        {
+                            if (!m_mainWindow.IsVisible)
+                            {
+                                BringAppToFocus();
+                            }
+                        }
+                        else
+                        {
+                            DisplayCaptivePortalToolTip();
+                        }
+
+                        m_captivePortalShownToUser = true;
+                    }
+                    else if(!msg.IsCaptivePortalDetected)
+                    {
+                        m_captivePortalShownToUser = false;
+                    }
+                };
             }
             catch(Exception ipce)
             {
@@ -713,6 +743,13 @@ namespace Te.Citadel
                 {
                     BringAppToFocus();
                 };
+
+            m_trayIcon.BalloonTipClosed += delegate (object sender, EventArgs args)
+            {
+                // Windows 10 looks like it likes to hide tray icon when a user clicks on a tool tip.
+                // Force it to stay visible.
+                m_trayIcon.Visible = true;
+            };
         }
 
         /// <summary>
@@ -739,6 +776,19 @@ namespace Te.Citadel
                     }
                 }
             );
+        }
+
+        public void DisplayCaptivePortalToolTip()
+        {
+            m_trayIcon.BalloonTipClicked += captivePortalToolTipClicked;
+            m_trayIcon.ShowBalloonTip(6000, "Captive Portal Detected", "This network requires logon information. Click here to continue.", System.Windows.Forms.ToolTipIcon.Info);
+        }
+
+        private void captivePortalToolTipClicked(object sender, EventArgs e)
+        {
+            m_trayIcon.BalloonTipClicked -= captivePortalToolTipClicked;
+
+            System.Diagnostics.Process.Start("http://connectivitycheck.cloudveil.org");
         }
 
         /// <summary>

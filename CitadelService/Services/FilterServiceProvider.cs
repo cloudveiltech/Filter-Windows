@@ -601,6 +601,11 @@ namespace CitadelService.Services
 
                     m_ipcServer.NotifyConfigurationUpdate(result, msg.Id);
                 };
+
+                m_ipcServer.RequestCaptivePortalDetection = (msg) =>
+                {
+                    m_ipcServer.SendCaptivePortalState(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal);
+                };
             }
             catch(Exception ipce)
             {
@@ -1072,13 +1077,45 @@ namespace CitadelService.Services
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
         }
 
-        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        private async void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
             m_logger.Info("Network change detected, running captive portal detection.");
-            if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+
+            // XXX FIXME: This is not correct logic, putting this in here so we can more easily test our GUI components.
+            /*if (e.IsAvailable)
             {
-                // XXX TODO Implement captive portal scanning
-                // We'll probably need to add code for our own checks. Need to do some thorough testing on captive portals.
+                m_ipcServer.SendCaptivePortalState(false);
+            }
+            else
+            {
+                ReviveGuiForCurrentUser(true);
+                await Task.Delay(500); // Give our GUI time to start up if it needs to.
+
+                m_ipcServer.SendCaptivePortalState(true);
+            }
+
+            return;*/
+            // END TEST
+
+            if(!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
+            {
+                // No point in checking further if no internet available.
+                return;
+            }
+
+            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            {
+                m_ipcServer.SendCaptivePortalState(true);
+
+                // This timer runs for as long as our captive portal has control over the user's internet connection.
+                Timer checkCaptivePortalState = new Timer((state) =>
+                {
+                    if (!NetworkStatus.Default.BehindIPv4CaptivePortal && !NetworkStatus.Default.BehindIPv6CaptivePortal)
+                    {
+                        m_ipcServer.SendCaptivePortalState(false);
+                        checkCaptivePortalState.Dispose();
+                    }
+                }, null, 0, 250);
             }
         }
 

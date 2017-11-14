@@ -58,6 +58,8 @@ namespace Citadel.IPC
 
     public delegate void ServerUpdateRequestHandler(ServerUpdateQueryMessage msg);
 
+    public delegate void CaptivePortalDetectionHandler(CaptivePortalDetectionMessage msg);
+    
     /// <summary>
     /// A generic reply handler, called by IPC queue.
     /// </summary>
@@ -93,6 +95,8 @@ namespace Citadel.IPC
         public ClientToClientMessageHandler ClientToClientCommandReceived;
 
         public ServerUpdateRequestHandler ServerAppUpdateRequestReceived;
+
+        public CaptivePortalDetectionHandler CaptivePortalDetectionReceived;
 
         public ClientGenericParameterlessHandler ServerUpdateStarting;
 
@@ -263,6 +267,15 @@ namespace Citadel.IPC
                 if(cast != null)
                 {
                     ServerUpdateStarting?.Invoke();
+                }
+            }
+            else if(msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
+                var cast = (Messages.CaptivePortalDetectionMessage)message;
+                if(cast != null)
+                {
+                    CaptivePortalDetectionReceived?.Invoke(cast);
                 }
             }
             else
