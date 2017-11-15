@@ -1109,7 +1109,7 @@ namespace CitadelService.Services
                 return;
             }
 
-            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            if (checkCaptivePortalState())
             {
                 m_logger.Info("Captive portal detected.");
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
@@ -1123,35 +1123,60 @@ namespace CitadelService.Services
                 checkCaptivePortalState = new Timer((state) =>
                 {
                     checkCaptivePortalLifted(checkCaptivePortalState);
-                }, null, 0, 250);
+                }, null, 0, 1000);
             }
-            else if (NetworkStatus.Default.HasUnencumberedInternetAccess)
+            else
             {
                 m_logger.Info("Unencumbered internet access.");
-
-                // We still want to check for captive portal because it's not immediately detected after an address change. Run for 5 seconds.
-                Timer checkCaptivePortalState = null;
-
-                Int32 timerState = 0;
-                checkCaptivePortalState = new Timer((state) =>
-                {
-                    checkCaptivePortal(checkCaptivePortalState);
-
-                    timerState++;
-
-                    if(timerState >= 5)
-                    {
-                        checkCaptivePortalState.Dispose();
-                    }
-                }, null, 0, 1000);
-                
                 TryEnfornceDns();
             }
         }
 
+        /// <summary>
+        /// Checks msftncsi.com for connectivity.
+        /// </summary>
+        /// <remarks>
+        /// Windows 7 captive portal detection isn't perfect. Somehow in my testing, it got disabled on my test network.
+        /// 
+        /// Granted, a restart may fix it, but we're not going to ask our customers to do that in order to get their computer working on a captive portal.
+        /// </remarks>
+        /// <returns>true if captive portal.</returns>
+        private bool checkCaptivePortalState()
+        {
+            WebClient client = new WebClient();
+            string captivePortalCheck = null;
+            try
+            {
+                captivePortalCheck = client.DownloadString("http://www.msftncsi.com/ncsi.txt");
+
+                if(captivePortalCheck != "Microsoft NCSI")
+                {
+                    return true;
+                }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response == null)
+                {
+                    m_logger.Info("Detected DNS, but URL did not return response.");
+                    return true;
+                }
+
+                m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                return false;
+            }
+
+            return false;
+        }
+
         private void checkCaptivePortalLifted(Timer timer)
         {
-            if (!NetworkStatus.Default.BehindIPv4CaptivePortal && !NetworkStatus.Default.BehindIPv6CaptivePortal)
+            if (!checkCaptivePortalState())
             {
                 m_logger.Info("Captive portal has been lifted.");
 
@@ -1164,8 +1189,11 @@ namespace CitadelService.Services
 
         private void checkCaptivePortal(Timer timer)
         {
-            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            m_logger.Info("Checking captive portal");
+            if (checkCaptivePortalState())
             {
+                m_logger.Info("Captive portal detected.");
+
                 m_ipcServer.SendCaptivePortalState(true);
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
 
