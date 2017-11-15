@@ -35,7 +35,7 @@ namespace Te.Citadel
         }
 
         public override void Commit(IDictionary savedState)
-        {
+        {   
             base.Commit(savedState);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
