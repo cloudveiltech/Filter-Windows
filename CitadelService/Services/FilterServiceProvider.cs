@@ -2018,8 +2018,11 @@ namespace CitadelService.Services
 
                         if(isHtml)
                         {
-                            var ext = new FastHtmlTextExtractor();
-                            dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
+                            // This doesn't work anymore because google has started sending bad stuff directly
+                            // embedded inside HTML responses, instead of sending JSON a separate response.
+                            // So, we need to let the triggers engine just chew through the entire raw HTML.
+                            // var ext = new FastHtmlTextExtractor();
+                            // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
                         short matchedCategory = -1;
