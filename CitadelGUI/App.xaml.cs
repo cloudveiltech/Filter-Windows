@@ -148,7 +148,6 @@ namespace Te.Citadel
 
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
-
             // Here we need to check 2 things. First, we need to check to make sure
             // that our filter service is running. Second, and if the first condition
             // proves to be false, we need to check if we are running as an admin.
@@ -193,14 +192,23 @@ namespace Te.Citadel
 
                 if(needRestartAsAdmin)
                 {
-                    // Restart program and run as admin
-                    ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
-                    updaterStartupInfo.FileName = "cmd.exe";
-                    updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
-                    updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    updaterStartupInfo.Verb = "runas";
-                    updaterStartupInfo.CreateNoWindow = true;
-                    Process.Start(updaterStartupInfo);
+                    m_logger.Info("Restarting as admin.");
+
+                    try
+                    {
+                        // Restart program and run as admin
+                        ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
+                        updaterStartupInfo.FileName = "cmd.exe";
+                        updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
+                        updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        updaterStartupInfo.Verb = "runas";
+                        updaterStartupInfo.CreateNoWindow = true;
+                        Process.Start(updaterStartupInfo);
+                    }
+                    catch(Exception se)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, se);
+                    }
 
                     Environment.Exit(-1);
                     return;
@@ -239,10 +247,9 @@ namespace Te.Citadel
             {
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
-                m_ipcClient.AuthenticationResultReceived = (args) =>
+                m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
                 {
-                    m_logger.Info("Auth response from server is: {0}", args.ToString());
-                    switch(args)
+                    switch(authenticationFailureResult.Action)
                     {
                         case AuthenticationAction.Denied:
                         case AuthenticationAction.Required:
@@ -250,7 +257,7 @@ namespace Te.Citadel
                         {
                             // User needs to log in.
                             BringAppToFocus();
-                            OnViewChangeRequest(typeof(LoginView));
+                            OnViewChangeRequest(typeof(LoginView));      
                         }
                         break;
 

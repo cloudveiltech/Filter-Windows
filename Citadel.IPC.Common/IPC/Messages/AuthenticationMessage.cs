@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util;
 using System;
 using System.Security;
 
@@ -84,6 +85,17 @@ namespace Citadel.IPC.Messages
         }
 
         /// <summary>
+        /// The authentication result from the web server.
+        /// 
+        /// This property may sometimes be null, for instance when the service is passing an AuthenticationAction.Required without a failed login first.
+        /// </summary>
+        public AuthenticationResultObject AuthenticationResult
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// The username to use. This should only be populated whenever the client is constructing
         /// this message with the action specified to Requested, since the client is requesitng that
         /// the server attempt authentication with the given credentials.
@@ -126,6 +138,23 @@ namespace Citadel.IPC.Messages
             Action = action;
             Username = username != null ? username : string.Empty;
             Password = password != null ? password.SecureStringBytes() : new byte[0];
+        }
+
+        /// <summary>
+        /// Constructs a new AuthenticationMessage instance. Used by the IPC server to return more detailed information about the 
+        /// </summary>
+        /// <param name="action">
+        /// The action directive of this message.
+        /// </param>
+        /// <param name="authenticationResult">
+        /// The authentication result returned by the web server to the service.
+        /// </param>
+        public AuthenticationMessage(AuthenticationAction action, AuthenticationResultObject authenticationResult)
+        {
+            Action = action;
+            Username = string.Empty;
+            Password = new byte[0];
+            AuthenticationResult = authenticationResult;
         }
     }
 }

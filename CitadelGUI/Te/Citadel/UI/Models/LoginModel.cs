@@ -6,11 +6,15 @@
 */
 
 using Citadel.Core.Extensions;
+using Citadel.Core.Windows.Util;
 using Citadel.IPC;
+using Citadel.IPC.Messages;
 using GalaSoft.MvvmLight;
 using System;
 using System.Security;
 using System.Threading.Tasks;
+using System.Windows;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Models
 {
@@ -21,6 +25,8 @@ namespace Te.Citadel.UI.Models
         private string m_errorMessage;
 
         private string m_userName;
+
+        private LoginViewModel m_loginViewModel;
 
         private SecureString m_userPassword;
 
@@ -108,6 +114,9 @@ namespace Te.Citadel.UI.Models
 
             try
             {
+                // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
+                m_loginViewModel.ErrorMessage = "";
+
                 await Task.Run(() =>
                 {
                     using(var ipcClient = new IPCClient())
@@ -115,6 +124,14 @@ namespace Te.Citadel.UI.Models
                         ipcClient.ConnectedToServer = () =>
                         {
                             ipcClient.AttemptAuthentication(m_userName, m_userPassword);
+                        };
+
+                        ipcClient.AuthenticationResultReceived = (msg) =>
+                        {
+                            if (msg.AuthenticationResult.AuthenticationMessage != null)
+                            {
+                                m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                            }
                         };
 
                         ipcClient.WaitForConnection();
@@ -132,12 +149,11 @@ namespace Te.Citadel.UI.Models
             }
         }
 
-        public LoginModel()
+        public LoginModel(LoginViewModel viewModel)
         {
-            // Set the default service provider to the app-global value.
-            m_errorMessage = string.Empty;
             UserName = string.Empty;
             UserPassword = new SecureString();
+            m_loginViewModel = viewModel;
         }
     }
 }

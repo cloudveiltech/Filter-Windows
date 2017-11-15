@@ -156,6 +156,7 @@ namespace Citadel.IPC
         /// </summary>
         private NamedPipeServer<BaseMessage> m_server;
 
+        // XXX FIXME Currently not used in IPCServer.
         private IPCMessageTracker m_ipcQueue;
 
         /// <summary>
@@ -483,9 +484,10 @@ namespace Citadel.IPC
         /// <param name="action">
         /// The authentication command which reflects the current auth state. 
         /// </param>
-        public void NotifyAuthenticationStatus(AuthenticationAction action)
+        public void NotifyAuthenticationStatus(AuthenticationAction action, AuthenticationResultObject authenticationResult = null)
         {
-            switch(m_waitingForAuth)
+            // KF - I edited this function to take two arguments instead of one and then refactored all the code that calls it to pass in an AuthenticationResultObject
+            switch (m_waitingForAuth)
             {
                 case true:
                 {
@@ -498,9 +500,17 @@ namespace Citadel.IPC
                     m_waitingForAuth = action == AuthenticationAction.Required;
                 }
                 break;
-            }         
+            }
 
-            var msg = new AuthenticationMessage(action);
+
+            var authResult = new AuthenticationResultObject();
+
+            if(authenticationResult != null)
+            {
+                authResult = authenticationResult;
+            }
+
+            var msg = new AuthenticationMessage(action, authResult); // KF - Also added a constructor to AuthenticationMessage);
             PushMessage(msg);
         }
 

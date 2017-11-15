@@ -18,7 +18,7 @@
                 Height="386"
                 d:DesignHeight="386"
                 d:DesignWidth="716"
-                mc:Ignorable="d">
+                mc:Ignorable="d" PreviewKeyDown="True">
 
     <!--  Set data context to LoginViewModel.  -->
     <UserControl.DataContext>
@@ -104,6 +104,7 @@
                 Margin="363,289,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
+                IsDefault="True"
                 Command="{Binding AuthenticateCommand}"
                 Content="Sign In"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
@@ -111,15 +112,16 @@
         <!--  Error messages.  -->
         <TextBlock Width="220"
                    Height="40"
-                   Margin="248,327,248,0"
+                   Margin="248,335,248,0"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
                    FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
+                   FontSize="18"
+                   FontWeight="Light"
+                   Foreground="Red"
                    Text="{Binding Path=ErrorMessage,
                                   Mode=OneWay}"
+                   TextAlignment="Center"
                    TextWrapping="Wrap" />
     </Grid>
 </local:BaseView>

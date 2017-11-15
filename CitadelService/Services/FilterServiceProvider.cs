@@ -14,10 +14,12 @@ using Citadel.Core.Windows.Util.Update;
 using Citadel.Core.Windows.WinAPI;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
+using CitadelCore.Logging;
+using CitadelCore.Net.Proxy;
+using CitadelCore.Windows.Net.Proxy;
 using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
-using HttpFilteringEngine.Managed;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
@@ -167,11 +169,11 @@ namespace CitadelService.Services
 
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 
-        private AbstractEngine m_filteringEngine;
+        private ProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
-        private string m_blockedHtmlPage;
+        private byte[] m_blockedHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
 
@@ -381,7 +383,7 @@ namespace CitadelService.Services
 
                                 var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
 
-                                switch(authResult)
+                                switch(authResult.AuthenticationResult)
                                 {
                                     case AuthenticationResult.Success:
                                     {
@@ -397,7 +399,7 @@ namespace CitadelService.Services
                                     case AuthenticationResult.Failure:
                                     {
                                         ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                     }
                                     break;
 
@@ -878,7 +880,7 @@ namespace CitadelService.Services
                 {
                     using(TextReader tsr = new StreamReader(resourceStream))
                     {
-                        m_blockedHtmlPage = tsr.ReadToEnd();
+                        m_blockedHtmlPage = Encoding.UTF8.GetBytes(tsr.ReadToEnd());
                     }
                 }
                 else
@@ -921,18 +923,12 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = AbstractEngine.Create(localCaBundleCertPath, 0, 0);
+            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd);
 
-            // Setup general info, warning and error events.            
-            m_filteringEngine.OnInfo = EngineOnInfo;
-            m_filteringEngine.OnWarning = EngineOnWarning;
-            m_filteringEngine.OnError = EngineOnError;
-
-            // Setup firewall check, inspection callbacks
-            m_filteringEngine.FirewallCheckCallback = OnAppFirewallCheck;
-            m_filteringEngine.HttpMessageBeginCallback = OnHttpMessageBegin;
-            m_filteringEngine.HttpMessageEndCallback = OnHttpMessageEnd;
-
+            // Setup general info, warning and error events.
+            LoggerProxy.Default.OnInfo += EngineOnInfo;
+            LoggerProxy.Default.OnWarning += EngineOnWarning;
+            LoggerProxy.Default.OnError += EngineOnError;
 
             // Start filtering, always.
             if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
@@ -1521,9 +1517,11 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnHttpMessageBegin(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out ProxyNextAction nextAction, ResponseWriter customResponseWriter)
+        private void OnHttpMessageBegin(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out ProxyNextAction nextAction, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
+            customBlockResponseContentType = null;
+            customBlockResponse = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1531,53 +1529,60 @@ namespace CitadelService.Services
             {
                 return;
             }
-
+            
             bool readLocked = false;
 
             try
-            {
-                // It should be fine, for our purposes, to just smash both response and request
-                // headers together. We're only interested, in all of our filtering code, in headers
-                // that are unique to requests or responses, so this should be fine.
-                var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
+            {                
+                var parsedHeaders = ParseHeaders(headers);
 
-                Uri requestUri = null;
-                string httpVersion = null;
-
-                if(!parsedHeaders.TryGetRequestUri(out requestUri))
+                string contentType = null;
+                bool isHtml = false;
+                bool isJson = false;
+                bool hasReferer = true;
+                
+                if((parsedHeaders["Referer"]) == null)
                 {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing request URI.");
-                    return;
+                    hasReferer = false;
                 }
 
-                if(!parsedHeaders.TryGetHttpVersion(out httpVersion))
+                if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing http version declaration.");
-                    return;
+                    // This is the start of a response with a content type that we want to inspect.
+                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
+                    isHtml = contentType.IndexOf("html") != -1;
+                    isJson = contentType.IndexOf("json") != -1;
+                    if(isHtml || isJson)
+                    {
+                        // Let's only inspect responses, not user-sent payloads (request data).
+                        if(msgDirection == MessageDirection.Response)
+                        {
+                            nextAction = ProxyNextAction.AllowButRequestContentInspection;
+                        }
+                    }
                 }
 
                 if(m_filterCollection != null)
                 {
+                    // Lets check whitelists first.
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
-                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUri.Host).Result;
+                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if(mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                         }
                         else
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
                         nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
@@ -1586,62 +1591,72 @@ namespace CitadelService.Services
 
                     filters = m_filterCollection.GetWhitelistFiltersForDomain().Result;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
                         var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if(mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                         }
                         else
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUri.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
                         nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                         return;
                     }
 
-                    filters = m_filterCollection.GetFiltersForDomain(requestUri.Host).Result;
-                    
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    // Since we made it this far, lets check blacklists now.
+
+                    filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
+
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
+                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+                        UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
 
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true, requestUri, matchCategory, uriInfo));
+                        if(isHtml || hasReferer == false)
+                        {
+                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                            // if there is no referer (direct navigation).
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                        }
+                        else
+                        {
+                            customBlockResponseContentType = string.Empty;
+                            customBlockResponse = null;
+                        }
+                        
                         return;
                     }
 
                     filters = m_filterCollection.GetFiltersForDomain().Result;
 
-                    if(CheckIfFiltersApply(filters, requestUri, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUri, matchingFilter.OriginalRule);
+                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
 
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, true, requestUri, matchCategory, uriInfo));
-                        return;
-                    }
-                }
+                        if(isHtml || hasReferer == false)
+                        {
+                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                            // if there is no referer (direct navigation).
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, uriInfo);
+                        }
+                        else
+                        {
+                            customBlockResponseContentType = string.Empty;
+                            customBlockResponse = null;
+                        }
 
-                string contentType = null;
-                if((contentType = parsedHeaders["Content-Type"]) != null)
-                {
-                    m_logger.Info("Got content type {0} in {1}", contentType, nameof(OnHttpMessageBegin));
-
-                    // This is the start of a response with a content type that we want to inspect.
-                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
-                    var isHtml = contentType.IndexOf("html") != -1;
-                    var isJson = contentType.IndexOf("json") != -1;
-                    if(isHtml || isJson)
-                    {
-                        nextAction = ProxyNextAction.AllowButRequestContentInspection;                        
                         return;
                     }
                 }
@@ -1659,35 +1674,12 @@ namespace CitadelService.Services
             }
         }
 
-        /// <summary>
-        /// This callback is invoked whenever a http transaction has fully completed. The only time
-        /// we should ever be called here is when we've flagged a transaction to keep all content for
-        /// inspection. This could be a request or a response, it doesn't really matter.
-        /// </summary>
-        /// <param name="requestHeaders">
-        /// The headers for the request that this callback is being invoked for. 
-        /// </param>
-        /// <param name="requestPayload">
-        /// The payload of the request that this callback is being invoked for. May be empty. Either
-        /// this, or the response payload should NOT be empty.
-        /// </param>
-        /// <param name="responseHeaders">
-        /// The headers for the response that this callback is being invoked for. May be empty, as
-        /// this might be a request only.
-        /// </param>
-        /// <param name="responsePayload">
-        /// The payload of the response that this callback is being invoked for. May be empty. Either
-        /// this, or the request payload should NOT be empty. Either or both. If this array is not
-        /// empty, then you're being asked to filter a response payload.
-        /// </param>
-        /// <param name="shouldBlock">
-        /// An out param where we can specify if this content should be blocked or not. 
-        /// </param>
-        /// <param name="customBlockResponseData">
-        /// </param>
-        private void OnHttpMessageEnd(string requestHeaders, byte[] requestPayload, string responseHeaders, byte[] responsePayload, out bool shouldBlock, ResponseWriter customResponseWriter)
+        
+        private void OnHttpMessageEnd(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out bool shouldBlock, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             shouldBlock = false;
+            customBlockResponseContentType = null;
+            customBlockResponse = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -1695,74 +1687,35 @@ namespace CitadelService.Services
             {
                 return;
             }
-
-            m_logger.Info("Entering {0}", nameof(OnHttpMessageEnd));
-
-            bool requestIsNull = (requestPayload == null || requestPayload.Length == 0);
-            bool responseIsNull = (responsePayload == null || responsePayload.Length == 0);
-
-            if(requestIsNull && responseIsNull)
-            {
-                m_logger.Info("All payloads are null in {0}. Cannot inspect.", nameof(OnHttpMessageEnd));
-                return;
-            }
-
-            byte[] whichPayload = responseIsNull ? requestPayload : responsePayload;
-
+            
             // The only thing we can really do in this callback, and the only thing we care to do, is
             // try to classify the content of the response payload, if there is any.
             try
             {
-                var parsedHeaders = ParseHeaders(requestHeaders + "\r\n" + responseHeaders);
-
-                Uri requestUri = null;
-
-                if(!parsedHeaders.TryGetRequestUri(out requestUri))
-                {
-                    // Don't bother logging this. This is just google chrome being stupid with URI's for new tabs.
-                    //m_logger.Error("Malformed headers in OnHttpMessageBegin. Missing request URI.");
-                    return;
-                }
+                var parsedHeaders = ParseHeaders(headers);
 
                 string contentType = null;
-                string httpVersion = null;
 
                 if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
                     contentType = contentType.ToLower();
 
-                    foreach(string key in parsedHeaders)
-                    {
-                        string val = parsedHeaders[key];
-                        if(val == null || val == string.Empty)
-                        {
-                            var si = key.IndexOf(' ');
-                            if(si != -1)
-                            {
-                                var sub = key.Substring(0, si);
-
-                                if(sub.StartsWith("HTTP/"))
-                                {
-                                    httpVersion = sub.Substring(5);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    httpVersion = httpVersion != null ? httpVersion : "1.1";
-
                     BlockType blockType;
-                    var contentClassResult = OnClassifyContent(whichPayload, contentType, out blockType);
+                    var contentClassResult = OnClassifyContent(body, contentType, out blockType);
 
                     if(contentClassResult > 0)
                     {
                         shouldBlock = true;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUri, true);
+                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
+                        if(contentType.IndexOf("html") != -1)
+                        {
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, 0, uriInfo, blockType);
+                        }
                         
-                        customResponseWriter?.Invoke(GetBlockedResponse(httpVersion, contentType.IndexOf("html") == -1, requestUri, 0, uriInfo, blockType));
-                        OnRequestBlocked(contentClassResult, blockType, requestUri);
+                        OnRequestBlocked(contentClassResult, blockType, requestUrl);
                         m_logger.Info("Response blocked by content classification.");
                     }
                 }
@@ -1793,6 +1746,7 @@ namespace CitadelService.Services
             return false;
         }
 
+        
         private string findCategoryFromUriInfo(int matchingCategory, UriInfo info)
         {
             var results = info.results.Where(r => r.category_status == 0);
@@ -1813,9 +1767,9 @@ namespace CitadelService.Services
             return matchingCategory.ToString() + " filter rule mismatch error";
         }
 
-        private byte[] GetBlockedResponse(string httpVersion, bool noContent, Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
         {
-            string blockPageTemplate = m_blockedHtmlPage;
+            string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
             // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
             // IMO this looks slightly more friendly to a user than the entire URI.
@@ -1849,7 +1803,7 @@ namespace CitadelService.Services
             }
             else
             {
-                switch(blockType)
+                switch (blockType)
                 {
                     case BlockType.None:
                         matching_category = "unknown reason";
@@ -1880,20 +1834,7 @@ namespace CitadelService.Services
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
 
-            // TODO Should be hasContent?
-            switch(noContent)
-            {
-                default:
-                case false:
-                {
-                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 204 No Content\r\nDate: {1}\r\nExpires: {2}\n\nContent-Length: 0\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime));
-                }
-
-                case true:
-                {
-                    return Encoding.UTF8.GetBytes(string.Format("HTTP/{0} 200 OK\r\nDate: {1}\r\nExpires: {2}\r\nContent-Type: text/html\r\nContent-Length: {3}\r\n\r\n{4}\r\n\r\n", httpVersion, DateTime.UtcNow.ToString("r"), s_EpochHttpDateTime, blockPageTemplate.Length, blockPageTemplate));
-                }
-            }
+            return Encoding.UTF8.GetBytes(blockPageTemplate);
         }
 
         private NameValueCollection ParseHeaders(string headers)
@@ -1958,8 +1899,11 @@ namespace CitadelService.Services
 
                         if(isHtml)
                         {
-                            var ext = new FastHtmlTextExtractor();
-                            dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
+                            // This doesn't work anymore because google has started sending bad stuff directly
+                            // embedded inside HTML responses, instead of sending JSON a separate response.
+                            // So, we need to let the triggers engine just chew through the entire raw HTML.
+                            // var ext = new FastHtmlTextExtractor();
+                            // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
                         short matchedCategory = -1;
@@ -2963,8 +2907,7 @@ namespace CitadelService.Services
                     try
                     {
                         // Shut down engine.
-                        StopFiltering();
-                        m_filteringEngine.Dispose();
+                        StopFiltering();                        
                     }
                     catch(Exception e)
                     {

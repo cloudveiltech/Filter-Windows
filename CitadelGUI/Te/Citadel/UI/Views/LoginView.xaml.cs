@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using System.Windows.Forms;
 namespace Te.Citadel.UI.Views
 {
     /// <summary>
@@ -15,6 +16,18 @@ namespace Te.Citadel.UI.Views
         public LoginView()
         {
             InitializeComponent();
+        }
+
+        private Keys m_keyCode;
+
+        private void Form1_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            this.m_keyCode = e.KeyCode;
+        }
+
+        private void True(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+
         }
     }
 }
