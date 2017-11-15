@@ -25,9 +25,6 @@ namespace Te.Citadel.UI.ViewModels
 
         private bool m_showGuestNetwork;
 
-        /// <summary>
-        /// Bound to IsOpen on the guest network flyout.
-        /// </summary>
         public bool ShowIsGuestNetwork
         {
             get

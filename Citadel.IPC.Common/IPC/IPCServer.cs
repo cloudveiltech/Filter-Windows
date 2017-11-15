@@ -564,9 +564,9 @@ namespace Citadel.IPC
         /// Send captive portal state back to the client.
         /// </summary>
         /// <param name="captivePortalState"></param>
-        public void SendCaptivePortalState(bool captivePortalState)
+        public void SendCaptivePortalState(bool captivePortalState, bool isCaptivePortalActive)
         {
-            var msg = new CaptivePortalDetectionMessage(captivePortalState);
+            var msg = new CaptivePortalDetectionMessage(captivePortalState, isCaptivePortalActive);
             PushMessage(msg);
         }
 

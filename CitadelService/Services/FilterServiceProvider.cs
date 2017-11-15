@@ -608,7 +608,7 @@ namespace CitadelService.Services
 
                 m_ipcServer.RequestCaptivePortalDetection = (msg) =>
                 {
-                    m_ipcServer.SendCaptivePortalState(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal);
+                    DetectCaptivePortal();
                 };
             }
             catch(Exception ipce)
@@ -1105,31 +1105,43 @@ namespace CitadelService.Services
                     return;
                 }
 
-                m_ipcServer.SendCaptivePortalState(false);
+                m_ipcServer.SendCaptivePortalState(false, false);
                 return;
             }
 
-            if (checkCaptivePortalState())
+            Task.Delay(3000).ContinueWith((task) =>
             {
-                m_logger.Info("Captive portal detected.");
-                CaptivePortalHelper.Default.OnCaptivePortalDetected();
-
-                m_ipcServer.SendCaptivePortalState(true);
-                TryEnfornceDns();
-
-                // This timer runs for as long as our captive portal has control over the user's internet connection.
-                Timer checkCaptivePortalState = null;
-
-                checkCaptivePortalState = new Timer((state) =>
+                if (checkCaptivePortalState())
                 {
-                    checkCaptivePortalLifted(checkCaptivePortalState);
-                }, null, 0, 1000);
-            }
-            else
-            {
-                m_logger.Info("Unencumbered internet access.");
-                TryEnfornceDns();
-            }
+                    m_logger.Info("Captive portal detected.");
+                    CaptivePortalHelper.Default.OnCaptivePortalDetected();
+
+                    m_ipcServer.SendCaptivePortalState(true, true);
+                    TryEnfornceDns();
+
+                    // This timer runs for as long as our captive portal has control over the user's internet connection.
+                    Timer checkCaptivePortalState = null;
+
+                    checkCaptivePortalState = new Timer((state) =>
+                    {
+                        checkCaptivePortalLifted(checkCaptivePortalState);
+                    }, null, 0, 1000);
+                }
+                else
+                {
+                    if (CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
+                    {
+                        m_ipcServer.SendCaptivePortalState(true, false);
+                    }
+                    else
+                    {
+                        m_ipcServer.SendCaptivePortalState(false, false);
+                    }
+
+                    m_logger.Info("Unencumbered internet access.");
+                    TryEnfornceDns();
+                }
+            });
         }
 
         /// <summary>
@@ -1143,35 +1155,48 @@ namespace CitadelService.Services
         /// <returns>true if captive portal.</returns>
         private bool checkCaptivePortalState()
         {
-            WebClient client = new WebClient();
-            string captivePortalCheck = null;
-            try
+            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
-                captivePortalCheck = client.DownloadString("http://www.msftncsi.com/ncsi.txt");
-
-                if(captivePortalCheck != "Microsoft NCSI")
-                {
-                    return true;
-                }
-            }
-            catch (WebException ex)
-            {
-                if (ex.Response == null)
-                {
-                    m_logger.Info("Detected DNS, but URL did not return response.");
-                    return true;
-                }
-
-                m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
                 return true;
             }
-            catch (Exception ex)
+
+            // If Windows version is less than 2008 or 7, do our manual captive portal checks.
+            // For now we'll assume that Windows 8 and 10 captive portal checks are pretty good.
+            if(Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major <= 6 && Environment.OSVersion.Version.Minor <= 1)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                WebClient client = new WebClient();
+                string captivePortalCheck = null;
+                try
+                {
+                    captivePortalCheck = client.DownloadString("http://www.msftncsi.com/ncsi.txt");
+
+                    if (captivePortalCheck != "Microsoft NCSI")
+                    {
+                        return true;
+                    }
+                }
+                catch (WebException ex)
+                {
+                    if (ex.Response == null)
+                    {
+                        m_logger.Info("Detected DNS, but URL did not return response.");
+                        return true;
+                    }
+
+                    m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    return false;
+                }
+
                 return false;
             }
 
             return false;
+            
         }
 
         private void checkCaptivePortalLifted(Timer timer)
@@ -1180,7 +1205,7 @@ namespace CitadelService.Services
             {
                 m_logger.Info("Captive portal has been lifted.");
 
-                m_ipcServer.SendCaptivePortalState(false);
+                m_ipcServer.SendCaptivePortalState(CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal(), false);
                 TryEnfornceDns();
 
                 timer.Dispose();
@@ -1194,7 +1219,7 @@ namespace CitadelService.Services
             {
                 m_logger.Info("Captive portal detected.");
 
-                m_ipcServer.SendCaptivePortalState(true);
+                m_ipcServer.SendCaptivePortalState(true, true);
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
 
                 TryEnfornceDns(); // Remove our DNS settings for those captive portals that have their own DNS servers.

@@ -498,6 +498,16 @@ namespace Te.Citadel
                     }
                 };
 
+                m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
+                {
+
+                    // C# doesn't like cross-thread GUI variable access, so run this on window thread.
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        ((MainWindowViewModel)m_mainWindow.DataContext).ShowIsGuestNetwork = msg.IsCaptivePortalDetected;
+                    });
+                };
+
 #if CAPTIVE_PORTAL_GUI_ENABLED
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {

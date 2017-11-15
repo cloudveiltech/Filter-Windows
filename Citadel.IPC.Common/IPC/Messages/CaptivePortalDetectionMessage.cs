@@ -13,11 +13,19 @@ namespace Citadel.IPC.Messages
     [Serializable]
     public class CaptivePortalDetectionMessage : BaseMessage
     {
-        public CaptivePortalDetectionMessage(bool isCaptivePortalDetected)
+        public CaptivePortalDetectionMessage(bool isCaptivePortalDetected, bool isCaptivePortalActive)
         {
             IsCaptivePortalDetected = isCaptivePortalDetected;
         }
 
+        /// <summary>
+        /// This is true whenever the filter thinks we're on a captive portal network.
+        /// </summary>
         public bool IsCaptivePortalDetected { get; set; }
+
+        /// <summary>
+        /// This is true when the captive portal page is actively blocking us.
+        /// </summary>
+        public bool IsCaptivePortalActive { get; set; }
     }
 }
