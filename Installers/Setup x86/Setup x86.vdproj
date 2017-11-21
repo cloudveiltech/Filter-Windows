@@ -228,7 +228,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.7.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.8.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_B5A0B65E2A4D47A3AB04F6282687850B"
@@ -311,15 +311,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{59E7E87F-0174-4FB4-BBF1-B56B5606DC95}"
-        "PackageCode" = "8:{3C6B67BA-EB31-4BC6-8940-8586973E67F9}"
+        "ProductCode" = "8:{1C809641-315B-471D-B759-E6A1A88BD52C}"
+        "PackageCode" = "8:{E037EEF2-E425-4F5B-99A6-DB9D995B4922}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.8"
+        "ProductVersion" = "8:1.6.9"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
