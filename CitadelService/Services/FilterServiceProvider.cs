@@ -235,6 +235,12 @@ namespace CitadelService.Services
         private AppConfigModel m_userConfig;
 
         /// <summary>
+        /// Use this if something at startup is depending on the configuration being loaded.
+        /// Note that this event handler does not get called after Config is not null (unless a new version is found).
+        /// </summary>
+        public event EventHandler OnConfigLoaded;
+
+        /// <summary>
         /// We split out this accessor to get all the code here unhooked from directly accessing the
         /// local reference. We do this because reference checks and assignment are guaranteed atomic
         /// on all .NET platforms. So, we used this to wein all the code off of direct access, so
@@ -1081,7 +1087,15 @@ namespace CitadelService.Services
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
 
             // Run on startup so we can get the network state right away.
-            DetectCaptivePortal();
+            try
+            {
+                DetectCaptivePortal();
+            }
+            catch (Exception ex)
+            {
+                m_logger.Error("DetectCaptivePortal failed with an exception.");
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
         }
 
         /// <summary>
@@ -1097,16 +1111,17 @@ namespace CitadelService.Services
                 // No point in checking further if no internet available.
                 try
                 {
-                    IPHostEntry entry = Dns.GetHostEntry("cloudveil.org");
+                    IPHostEntry entry = Dns.GetHostEntry("connectivitycheck.cloudveil.org");
                 }
                 catch (Exception ex)
                 {
                     m_logger.Info("No internet detected.");
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+
                     return;
                 }
 
-                m_ipcServer.SendCaptivePortalState(false, false);
-                return;
+                // Did we get here? This probably means we have internet access, but captive portal may be blocking.
             }
 
             Task.Delay(3000).ContinueWith((task) =>
@@ -1117,7 +1132,7 @@ namespace CitadelService.Services
                     CaptivePortalHelper.Default.OnCaptivePortalDetected();
 
                     m_ipcServer.SendCaptivePortalState(true, true);
-                    TryEnfornceDns();
+                    TryEnfornceDns(isCaptivePortal: true);
 
                     // This timer runs for as long as our captive portal has control over the user's internet connection.
                     Timer checkCaptivePortalState = null;
@@ -1139,7 +1154,7 @@ namespace CitadelService.Services
                     }
 
                     m_logger.Info("Unencumbered internet access.");
-                    TryEnfornceDns();
+                    TryEnfornceDns(isCaptivePortal: false);
                 }
             });
         }
@@ -1160,38 +1175,34 @@ namespace CitadelService.Services
                 return true;
             }
 
-            // If Windows version is less than 2008 or 7, do our manual captive portal checks.
-            // For now we'll assume that Windows 8 and 10 captive portal checks are pretty good.
-            if(Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major <= 6 && Environment.OSVersion.Version.Minor <= 1)
+            // "Oh, you want to depend on Windows captive portal detection? Haha nope!" -- Boingo Wi-FI
+            // Some captive portals indeed let msftncsi.com through and thoroughly break windows captive portal detection.
+            // BWI airport wifi is one of them.
+            WebClient client = new WebClient();
+            string captivePortalCheck = null;
+            try
             {
-                WebClient client = new WebClient();
-                string captivePortalCheck = null;
-                try
-                {
-                    captivePortalCheck = client.DownloadString("http://www.msftncsi.com/ncsi.txt");
+                captivePortalCheck = client.DownloadString("http://connectivitycheck.cloudveil.org/ncsi.txt");
 
-                    if (captivePortalCheck != "Microsoft NCSI")
-                    {
-                        return true;
-                    }
-                }
-                catch (WebException ex)
+                if (captivePortalCheck != "CloudVeil NCSI")
                 {
-                    if (ex.Response == null)
-                    {
-                        m_logger.Info("Detected DNS, but URL did not return response.");
-                        return true;
-                    }
-
-                    m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
                     return true;
                 }
-                catch (Exception ex)
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response == null)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
-                    return false;
+                    m_logger.Info("Detected DNS, but URL did not return response.");
+                    return true;
                 }
 
+                m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
                 return false;
             }
 
@@ -1206,7 +1217,7 @@ namespace CitadelService.Services
                 m_logger.Info("Captive portal has been lifted.");
 
                 m_ipcServer.SendCaptivePortalState(CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal(), false);
-                TryEnfornceDns();
+                TryEnfornceDns(isCaptivePortal: false);
 
                 timer.Dispose();
             }
@@ -1222,7 +1233,7 @@ namespace CitadelService.Services
                 m_ipcServer.SendCaptivePortalState(true, true);
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
 
-                TryEnfornceDns(); // Remove our DNS settings for those captive portals that have their own DNS servers.
+                TryEnfornceDns(isCaptivePortal: true); // Remove our DNS settings for those captive portals that have their own DNS servers.
 
                 Timer checkCaptivePortalLiftedTimer = null;
                 checkCaptivePortalLiftedTimer = new Timer((_notused) =>
@@ -1238,6 +1249,11 @@ namespace CitadelService.Services
         
         private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
         {
+            if (Config == null)
+            {
+                UpdateAndWriteList(false);
+            }
+
             DetectCaptivePortal();
         }
 
@@ -2351,6 +2367,19 @@ namespace CitadelService.Services
         }
 
         /// <summary>
+        /// Helper function that calls OnConfigLoaded event after configuration is loaded.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="settings"></param>
+        private void LoadConfigFromJson(string json, JsonSerializerSettings settings)
+        {
+            m_userConfig = JsonConvert.DeserializeObject<AppConfigModel>(json, settings);
+
+            m_logger.Info("Invoking OnConfigLoaded(). Number of handlers {0}", OnConfigLoaded.GetInvocationList().Count()); // KF-DEBUG
+            OnConfigLoaded?.Invoke(this, new EventArgs());
+        }
+
+        /// <summary>
         /// Queries the service provider for updated filtering rules. 
         /// </summary>
         private void ReloadFilteringRules()
@@ -2392,9 +2421,10 @@ namespace CitadelService.Services
                             // Deserialize config
                             try
                             {
-                                m_userConfig = JsonConvert.DeserializeObject<AppConfigModel>(cfgJson, m_configSerializerSettings);
+                                LoadConfigFromJson(cfgJson, m_configSerializerSettings);
+                                m_logger.Info("Configuration loaded from JSON.");
                             }
-                            catch(Exception deserializationError)
+                            catch (Exception deserializationError)
                             {
                                 m_logger.Error("Failed to deserialize JSON config.");
                                 LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
@@ -2408,7 +2438,7 @@ namespace CitadelService.Services
                             }
 
                             // Enforce DNS if present.
-                            TryEnfornceDns();
+                            TryEnfornceDns(isCaptivePortal: checkCaptivePortalState());
 
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_userConfig.BlacklistedApplications)
@@ -2818,6 +2848,81 @@ namespace CitadelService.Services
             m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
+        // FIXME: This function is not ever getting called.
+        private void SetDnsToDhcp()
+        {
+            m_logger.Info("SetDnsToDhcp");
+
+            // Is configuration loaded?
+            IPAddress primaryDns = null;
+            IPAddress secondaryDns = null;
+
+            var cfg = Config;
+
+            // Check if any DNS servers are defined, and if so, set them.
+            if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+            {
+                IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
+            }
+
+            if (cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
+            {
+                IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
+            }
+
+            if (primaryDns == null && secondaryDns == null)
+            {
+                // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
+                m_logger.Info("Primary and Secondary DNS servers are both null.");
+
+                return;
+            }
+
+            var setDnsForNicToDhcp = new Action<string>((nicName) =>
+            {
+                using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+                {
+                    using (var networkConfigs = networkConfigMng.GetInstances())
+                    {
+                        foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
+                        {
+                            ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
+                            inParams["DNSServerSearchOrder"] = new string[0];
+                            ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
+                            UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
+
+                            if (ret != 0)
+                            {
+                                m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
+                            }
+                            else
+                            {
+                                m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
+                            }
+                        }
+                    }
+                }
+            });
+
+            var allIfaces = NetworkInterface.GetAllNetworkInterfaces();
+            foreach(var iface in allIfaces)
+            {
+                m_logger.Info("iface {0} is {1}", iface.Description, iface.OperationalStatus.ToString());
+            }
+
+            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+
+            foreach (var iface in ifaces)
+            {
+                setDnsForNicToDhcp(iface.Description);
+            }
+        }
+
+        private void TryEnforceDnsTimerWrapper(object state)
+        {
+            TryEnfornceDns(null, checkCaptivePortalState());
+        }
+
         /// <summary>
         /// Attempts to read DNS configuration data from the application configuration and then set
         /// those DNS settings on all available non-tunnel adapters.
@@ -2825,68 +2930,34 @@ namespace CitadelService.Services
         /// <param name="state">
         /// State object for timer. Always null, unused. 
         /// </param>
-        private void TryEnfornceDns(object state = null)
+        private void TryEnfornceDns(object state = null, bool isCaptivePortal = false)
         {
             lock(m_dnsEnforcementLock)
             {
                 try
                 {
 
-                    if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal || CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
+                    if(isCaptivePortal || CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
                     {
-                        IPAddress primaryDns = null;
-                        IPAddress secondaryDns = null;
+                        m_logger.Info("TryEnforceDns found captive portal."); // KF-DEBUG
 
-                        var cfg = Config;
-
-                        // Check if any DNS servers are defined, and if so, set them.
-                        if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+                        if (Config == null)
                         {
-                            IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
-                        }
+                            EventHandler fn = null;
 
-                        if (cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
-                        {
-                            IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
-                        }
-
-                        if (primaryDns == null && secondaryDns == null)
-                        {
-                            // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
-                            return;
-                        }
-
-                        var setDnsForNicToDhcp = new Action<string>((nicName) =>
-                        {
-                            using(var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+                            fn = (sender, e) =>
                             {
-                                using(var networkConfigs = networkConfigMng.GetInstances())
-                                {
-                                    foreach(var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
-                                    {
-                                        ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
-                                        inParams["DNSServerSearchOrder"] = new string[0];
-                                        ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
-                                        UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
+                                //OnConfigLoaded Not getting called ever.
+                                m_logger.Info("OnConfigLoaded has been invoked."); // KF-DEBUG
+                                this.SetDnsToDhcp();
+                                this.OnConfigLoaded -= fn;
+                            };
 
-                                        if (ret != 0)
-                                        {
-                                            m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
-                                        }
-                                        else
-                                        {
-                                            m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
-
-                        foreach(var iface in ifaces)
+                            this.OnConfigLoaded += fn;
+                        }
+                        else
                         {
-                            setDnsForNicToDhcp(iface.Description);
+                            this.SetDnsToDhcp();
                         }
                     }
                     else
@@ -2999,7 +3070,7 @@ namespace CitadelService.Services
 
                 if(m_dnsEnforcementTimer == null)
                 {
-                    m_dnsEnforcementTimer = new Timer(TryEnfornceDns, null, Timeout.Infinite, Timeout.Infinite);
+                    m_dnsEnforcementTimer = new Timer(TryEnforceDnsTimerWrapper, null, Timeout.Infinite, Timeout.Infinite);
                 }
                 else
                 {
