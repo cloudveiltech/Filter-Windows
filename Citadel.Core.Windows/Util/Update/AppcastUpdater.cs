@@ -102,7 +102,7 @@ namespace Citadel.Core.Windows.Util.Update
                             {
                                 m_logger.Info("Available app update with version {0} is superior to current best version {1}.", bestVersion.ToString());
 
-                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs);
+                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
                                 bestVersion = thisUpdateVersion;
                             }
                         }
