@@ -1124,43 +1124,45 @@ namespace CitadelService.Services
                 // Did we get here? This probably means we have internet access, but captive portal may be blocking.
             }
 
-            Task.Delay(3000).ContinueWith((task) =>
+            CaptivePortalDetected ret = checkCaptivePortalState();
+            if (ret == CaptivePortalDetected.NoResponseReturned)
             {
-                if (checkCaptivePortalState())
+                Task.Delay(1000).ContinueWith((task) => DetectCaptivePortal());
+            }
+            else if (ret == CaptivePortalDetected.Yes)
+            {
+                m_logger.Info("Captive portal detected.");
+                CaptivePortalHelper.Default.OnCaptivePortalDetected();
+
+                m_ipcServer.SendCaptivePortalState(true, true);
+                TryEnfornceDns(isCaptivePortal: true);
+
+                // This timer runs for as long as our captive portal has control over the user's internet connection.
+                Timer checkCaptivePortalState = null;
+
+                checkCaptivePortalState = new Timer((state) =>
                 {
-                    m_logger.Info("Captive portal detected.");
-                    CaptivePortalHelper.Default.OnCaptivePortalDetected();
-
-                    m_ipcServer.SendCaptivePortalState(true, true);
-                    TryEnfornceDns(isCaptivePortal: true);
-
-                    // This timer runs for as long as our captive portal has control over the user's internet connection.
-                    Timer checkCaptivePortalState = null;
-
-                    checkCaptivePortalState = new Timer((state) =>
-                    {
-                        checkCaptivePortalLifted(checkCaptivePortalState);
-                    }, null, 0, 1000);
+                    checkCaptivePortalLifted(checkCaptivePortalState);
+                }, null, 0, 1000);
+            }
+            else
+            {
+                if (CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
+                {
+                    m_ipcServer.SendCaptivePortalState(true, false);
                 }
                 else
                 {
-                    if (CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
-                    {
-                        m_ipcServer.SendCaptivePortalState(true, false);
-                    }
-                    else
-                    {
-                        m_ipcServer.SendCaptivePortalState(false, false);
-                    }
-
-                    m_logger.Info("Unencumbered internet access.");
-                    TryEnfornceDns(isCaptivePortal: false);
+                    m_ipcServer.SendCaptivePortalState(false, false);
                 }
-            });
+
+                m_logger.Info("Unencumbered internet access.");
+                TryEnfornceDns(isCaptivePortal: false);
+            }
         }
 
         /// <summary>
-        /// Checks msftncsi.com for connectivity.
+        /// Checks http://connectivitycheck.cloudveil.org for connectivity.
         /// </summary>
         /// <remarks>
         /// Windows 7 captive portal detection isn't perfect. Somehow in my testing, it got disabled on my test network.
@@ -1168,11 +1170,11 @@ namespace CitadelService.Services
         /// Granted, a restart may fix it, but we're not going to ask our customers to do that in order to get their computer working on a captive portal.
         /// </remarks>
         /// <returns>true if captive portal.</returns>
-        private bool checkCaptivePortalState()
+        private CaptivePortalDetected checkCaptivePortalState()
         {
             if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
-                return true;
+                return CaptivePortalDetected.Yes;
             }
 
             // "Oh, you want to depend on Windows captive portal detection? Haha nope!" -- Boingo Wi-FI
@@ -1184,35 +1186,34 @@ namespace CitadelService.Services
             {
                 captivePortalCheck = client.DownloadString("http://connectivitycheck.cloudveil.org/ncsi.txt");
 
-                if (captivePortalCheck != "CloudVeil NCSI")
+                if (captivePortalCheck.Trim(' ', '\r', '\n', '\t') != "CloudVeil NCSI")
                 {
-                    return true;
+                    return CaptivePortalDetected.No;
                 }
             }
             catch (WebException ex)
             {
                 if (ex.Response == null)
                 {
-                    m_logger.Info("Detected DNS, but URL did not return response.");
-                    return true;
+                    return CaptivePortalDetected.NoResponseReturned;
                 }
 
                 m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
-                return true;
+                return CaptivePortalDetected.Yes;
             }
             catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
-                return false;
+                return CaptivePortalDetected.No;
             }
 
-            return false;
+            return CaptivePortalDetected.No;
             
         }
 
         private void checkCaptivePortalLifted(Timer timer)
         {
-            if (!checkCaptivePortalState())
+            if (checkCaptivePortalState() == CaptivePortalDetected.Yes)
             {
                 m_logger.Info("Captive portal has been lifted.");
 
@@ -1225,8 +1226,7 @@ namespace CitadelService.Services
 
         private void checkCaptivePortal(Timer timer)
         {
-            m_logger.Info("Checking captive portal");
-            if (checkCaptivePortalState())
+            if (checkCaptivePortalState() == CaptivePortalDetected.Yes)
             {
                 m_logger.Info("Captive portal detected.");
 
@@ -2374,8 +2374,6 @@ namespace CitadelService.Services
         private void LoadConfigFromJson(string json, JsonSerializerSettings settings)
         {
             m_userConfig = JsonConvert.DeserializeObject<AppConfigModel>(json, settings);
-
-            m_logger.Info("Invoking OnConfigLoaded(). Number of handlers {0}", OnConfigLoaded.GetInvocationList().Count()); // KF-DEBUG
             OnConfigLoaded?.Invoke(this, new EventArgs());
         }
 
@@ -2438,7 +2436,7 @@ namespace CitadelService.Services
                             }
 
                             // Enforce DNS if present.
-                            TryEnfornceDns(isCaptivePortal: checkCaptivePortalState());
+                            TryEnfornceDns(isCaptivePortal: checkCaptivePortalState() == CaptivePortalDetected.Yes);
 
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_userConfig.BlacklistedApplications)
@@ -2920,7 +2918,7 @@ namespace CitadelService.Services
 
         private void TryEnforceDnsTimerWrapper(object state)
         {
-            TryEnfornceDns(null, checkCaptivePortalState());
+            TryEnfornceDns(null, isCaptivePortal: CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal() || checkCaptivePortalState() == CaptivePortalDetected.Yes);
         }
 
         /// <summary>
@@ -2939,16 +2937,12 @@ namespace CitadelService.Services
 
                     if(isCaptivePortal || CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal())
                     {
-                        m_logger.Info("TryEnforceDns found captive portal."); // KF-DEBUG
-
                         if (Config == null)
                         {
                             EventHandler fn = null;
 
                             fn = (sender, e) =>
                             {
-                                //OnConfigLoaded Not getting called ever.
-                                m_logger.Info("OnConfigLoaded has been invoked."); // KF-DEBUG
                                 this.SetDnsToDhcp();
                                 this.OnConfigLoaded -= fn;
                             };

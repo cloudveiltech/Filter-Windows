@@ -9,6 +9,27 @@ using System.Threading.Tasks;
 
 namespace CitadelService.Util
 {
+    /// <summary>
+    /// Tri-state detection enum for checkCaptivePortalState()
+    /// </summary>
+    public enum CaptivePortalDetected
+    {
+        /// <summary>
+        /// Equivalent to (bool)false
+        /// </summary>
+        No,
+
+        /// <summary>
+        /// Equivalent to (bool)true
+        /// </summary>
+        Yes,
+
+        /// <summary>
+        /// This is returned when windows has detected a network address change but no response has been returned from connectivitycheck.cloudveil.org
+        /// </summary>
+        NoResponseReturned
+    }
+
     public class CaptivePortalHelper
     {
         private static CaptivePortalHelper s_instance;
