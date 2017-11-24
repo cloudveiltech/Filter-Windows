@@ -24,7 +24,6 @@ namespace InstallGuard
         protected override void OnBeforeUninstall(IDictionary savedState)
         {
             base.OnBeforeUninstall(savedState);
-
             
             var installDir = Path.GetDirectoryName(typeof(UninstallCommand).Assembly.Location);
 
