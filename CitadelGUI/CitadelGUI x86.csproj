@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
