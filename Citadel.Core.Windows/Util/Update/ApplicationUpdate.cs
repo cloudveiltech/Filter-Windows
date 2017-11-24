@@ -95,6 +95,7 @@ namespace Citadel.Core.Windows.Util.Update
             DownloadLink = downloadLink;
             Kind = kind;
             UpdaterArguments = updaterArguments != null ? updaterArguments : string.Empty;
+            IsRestartRequired = isRestartRequired;
 
             var targetDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             targetDir = Path.Combine(targetDir, Process.GetCurrentProcess().ProcessName);

@@ -72,7 +72,7 @@ namespace Citadel.Core.Windows.Util.Update
 
 #if USE_LOCAL_UPDATE_XML
                     string appInfoPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"update.xml");
-                    if(File.Exists(appInfoPath))
+                    if(!File.Exists(appInfoPath))
                     {
                         appInfo = await cli.GetStringAsync(m_appcastLocationUri);
                     }
