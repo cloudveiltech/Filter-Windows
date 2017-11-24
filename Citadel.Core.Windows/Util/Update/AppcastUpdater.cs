@@ -68,8 +68,27 @@ namespace Citadel.Core.Windows.Util.Update
             {
                 using(var cli = new HttpClient())
                 {
+                    string appInfo = null;
 
-                    var appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+#if USE_LOCAL_UPDATE_XML
+                    string appInfoPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"update.xml");
+                    if(File.Exists(appInfoPath))
+                    {
+                        appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+                    }
+                    else
+                    {
+                        using (var stream = new FileStream(appInfoPath, FileMode.Open))
+                        {
+                            using (var reader = new StreamReader(stream))
+                            {
+                                appInfo = await reader.ReadToEndAsync();
+                            }
+                        }
+                    }
+#else
+                    appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+#endif
 
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
