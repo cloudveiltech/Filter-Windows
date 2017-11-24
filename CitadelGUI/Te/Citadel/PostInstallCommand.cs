@@ -11,11 +11,24 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 
 namespace Te.Citadel
 {
+    public enum ShutdownFlags
+    {
+        SHUTDOWN_FORCE_OTHERS = 0x1,
+        SHUTDOWN_FORCE_SELF = 0x2,
+        SHUTDOWN_RESTART = 0x4,
+        SHUTDOWN_NOREBOOT = 0x10,
+        SHUTDOWN_GRACE_OVERRIDE = 0x20,
+        SHUTDOWN_INSTALL_UPDATES = 0x40,
+        SHUTDOWN_RESTARTAPPS = 0x80,
+        SHUTDOWN_HYBRID = 0x200
+    }
+
     // XXX TODO There are some steps you need to take for the post-install exec to work correctly
     // when making a 64 bit MSI installer. You need to modify the 64 bit MSI as described at the
     // following locations:
@@ -61,6 +74,11 @@ namespace Te.Citadel
 
             var installProc = Process.Start(installStartInfo);
             installProc.WaitForExit();
+
+            if(!this.Context.IsParameterTrue("norestart"))
+            {
+                InitiateShutdown(null, null, 0, (uint)(ShutdownFlags.SHUTDOWN_FORCE_OTHERS | ShutdownFlags.SHUTDOWN_RESTART | ShutdownFlags.SHUTDOWN_RESTARTAPPS), 0);
+            }
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
 
@@ -111,5 +129,13 @@ namespace Te.Citadel
                 return false;
             }
         }
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        static extern UInt32 InitiateShutdown(
+            string lpMachineName,
+            string lpMessage,
+            UInt32 dwGracePeriod,
+            UInt32 dwShutdownFlags,
+            UInt32 dwReason);
     }
 }

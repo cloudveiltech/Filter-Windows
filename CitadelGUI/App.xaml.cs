@@ -282,6 +282,11 @@ namespace Te.Citadel
                     BringAppToFocus();
 
                     var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
+                    
+                    if(args.IsRestartRequired)
+                    {
+                        updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
+                    }
 
                     await Current.Dispatcher.BeginInvoke(
                         System.Windows.Threading.DispatcherPriority.Normal,

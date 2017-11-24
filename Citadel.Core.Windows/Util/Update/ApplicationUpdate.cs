@@ -79,7 +79,13 @@ namespace Citadel.Core.Windows.Util.Update
             private set;
         }
 
-        public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments)
+        public bool IsRestartRequired
+        {
+            get;
+            private set;
+        }
+
+        public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments, bool isRestartRequired)
         {
             DatePublished = datePublished;
             Title = title = title != null ? title : string.Empty;
