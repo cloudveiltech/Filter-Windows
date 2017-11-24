@@ -64,13 +64,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B5A0B65E2A4D47A3AB04F6282687850B"
+        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+        "OwnerKey" = "8:_B5A0B65E2A4D47A3AB04F6282687850B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -254,7 +254,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.11.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.8.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_B5A0B65E2A4D47A3AB04F6282687850B"
@@ -288,11 +288,6 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_F2A1C12D9CF7474E8D9C0D5085B01B98"
-                    {
-                    "Name" = "8:InstallGuard.exe"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"
@@ -368,15 +363,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{59ACBD28-EE0B-491B-9D28-639599FEF254}"
-        "PackageCode" = "8:{EE1935CE-8E05-477C-8B08-B73362F060D6}"
+        "ProductCode" = "8:{E2CD37E1-1E8A-4371-AEA9-12DD57EA2B1B}"
+        "PackageCode" = "8:{8FAA08A6-967E-4A59-8F90-3DB7716C196B}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.11"
+        "ProductVersion" = "8:1.6.12"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
@@ -1163,20 +1158,6 @@
                     "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
                     "UsePlugInResources" = "11:FALSE"
                     }
-                    "_11BF783A2B78F910FA8DCFD427809656.620CD2DC407F43B9916732C473EF22AC"
-                    {
-                    "Name" = "8:_11BF783A2B78F910FA8DCFD427809656.620CD2DC407F43B9916732C473EF22AC"
-                    "DisplayName" = "8:"
-                    "Description" = "8:"
-                    "Type" = "3:2"
-                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_00BEA9713D8F926AF674FE0710E9A011.620CD2DC407F43B9916732C473EF22AC"
-                    "Attributes" = "3:0"
-                    "Setting" = "3:2"
-                    "Value" = "8:_00BEA9713D8F926AF674FE0710E9A011.620CD2DC407F43B9916732C473EF22AC"
-                    "DefaultValue" = "8:_00BEA9713D8F926AF674FE0710E9A011.620CD2DC407F43B9916732C473EF22AC"
-                    "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
-                    "UsePlugInResources" = "11:FALSE"
-                    }
                     "_12F6CBC42811A8E53AF729D5B4A276BF.620CD2DC407F43B9916732C473EF22AC"
                     {
                     "Name" = "8:_12F6CBC42811A8E53AF729D5B4A276BF.620CD2DC407F43B9916732C473EF22AC"
@@ -1695,20 +1676,6 @@
                     "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
                     "UsePlugInResources" = "11:FALSE"
                     }
-                    "_3A6F3F17B5355CF730EAEE8E5B072AB1.620CD2DC407F43B9916732C473EF22AC"
-                    {
-                    "Name" = "8:_3A6F3F17B5355CF730EAEE8E5B072AB1.620CD2DC407F43B9916732C473EF22AC"
-                    "DisplayName" = "8:"
-                    "Description" = "8:"
-                    "Type" = "3:2"
-                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_C92B50C16A0922217FD48D26C47C0DC5.620CD2DC407F43B9916732C473EF22AC"
-                    "Attributes" = "3:0"
-                    "Setting" = "3:2"
-                    "Value" = "8:_C92B50C16A0922217FD48D26C47C0DC5.620CD2DC407F43B9916732C473EF22AC"
-                    "DefaultValue" = "8:_C92B50C16A0922217FD48D26C47C0DC5.620CD2DC407F43B9916732C473EF22AC"
-                    "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
-                    "UsePlugInResources" = "11:FALSE"
-                    }
                     "_3B7B2DD3DCC701F81BF07745C324CE35.620CD2DC407F43B9916732C473EF22AC"
                     {
                     "Name" = "8:_3B7B2DD3DCC701F81BF07745C324CE35.620CD2DC407F43B9916732C473EF22AC"
@@ -1734,6 +1701,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_C7AF51B5372145398F16E3FE5C85C420.620CD2DC407F43B9916732C473EF22AC"
                     "DefaultValue" = "8:_C7AF51B5372145398F16E3FE5C85C420.620CD2DC407F43B9916732C473EF22AC"
+                    "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_3C808FDAFDC67DA98D6C9544972309B0.620CD2DC407F43B9916732C473EF22AC"
+                    {
+                    "Name" = "8:_3C808FDAFDC67DA98D6C9544972309B0.620CD2DC407F43B9916732C473EF22AC"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
+                    "DefaultValue" = "8:_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
                     "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
                     "UsePlugInResources" = "11:FALSE"
                     }
