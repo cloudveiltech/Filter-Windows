@@ -51,8 +51,20 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C76928219DA049F58E9E2F3BE7D714E8"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -161,6 +173,20 @@
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_C79CA67105B64FC1B5DDFBEA728663AD"
+            {
+            "Name" = "8:InstallGuard.exe"
+            "Condition" = "8:"
+            "Object" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_4A5C95EC_6595_489B_850E_4A76B92B605B"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -255,6 +281,32 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                }
+            "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_6BE4D3AE6CCE4AC2B510830AB27607ED"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -311,15 +363,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{1C809641-315B-471D-B759-E6A1A88BD52C}"
-        "PackageCode" = "8:{E037EEF2-E425-4F5B-99A6-DB9D995B4922}"
+        "ProductCode" = "8:{E2CD37E1-1E8A-4371-AEA9-12DD57EA2B1B}"
+        "PackageCode" = "8:{8FAA08A6-967E-4A59-8F90-3DB7716C196B}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.9"
+        "ProductVersion" = "8:1.6.12"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
@@ -1649,6 +1701,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_C7AF51B5372145398F16E3FE5C85C420.620CD2DC407F43B9916732C473EF22AC"
                     "DefaultValue" = "8:_C7AF51B5372145398F16E3FE5C85C420.620CD2DC407F43B9916732C473EF22AC"
+                    "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_3C808FDAFDC67DA98D6C9544972309B0.620CD2DC407F43B9916732C473EF22AC"
+                    {
+                    "Name" = "8:_3C808FDAFDC67DA98D6C9544972309B0.620CD2DC407F43B9916732C473EF22AC"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
+                    "DefaultValue" = "8:_FB62DFC838CF4D59A6CE2320AF6E76D5.620CD2DC407F43B9916732C473EF22AC"
                     "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
                     "UsePlugInResources" = "11:FALSE"
                     }

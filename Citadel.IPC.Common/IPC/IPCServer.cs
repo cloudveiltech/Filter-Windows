@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson
+* Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -146,6 +146,12 @@ namespace Citadel.IPC
     public delegate void RequestConfigUpdateHandler(RequestConfigUpdateMessage message);
 
     /// <summary>
+    /// Handler for requesting a captive portal detection.
+    /// </summary>
+    /// <param name="message"></param>
+    public delegate void RequestCaptivePortalDetectionHandler(CaptivePortalDetectionMessage message);
+
+    /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
     /// </summary>
@@ -206,7 +212,11 @@ namespace Citadel.IPC
         /// </summary>
         public RequestConfigUpdateHandler RequestConfigUpdate;
 
-        
+        /// <summary>
+        /// Delegate to be called when a client is requesting a captive portal state.
+        /// </summary>
+        public RequestCaptivePortalDetectionHandler RequestCaptivePortalDetection;
+
         /// <summary>
         /// Our logger. 
         /// </summary>
@@ -417,6 +427,15 @@ namespace Citadel.IPC
                     RequestConfigUpdate?.Invoke(cast);
                 }
             }
+            else if (msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
+                var cast = (Messages.CaptivePortalDetectionMessage)message;
+                if (cast != null)
+                {
+                    RequestCaptivePortalDetection?.Invoke(cast);
+                }
+            }
             else
             {
                 // Unknown type.
@@ -540,6 +559,17 @@ namespace Citadel.IPC
             msg.ReplyToId = replyToId;
             PushMessage(msg);
         }
+
+        /// <summary>
+        /// Send captive portal state back to the client.
+        /// </summary>
+        /// <param name="captivePortalState"></param>
+        public void SendCaptivePortalState(bool captivePortalState, bool isCaptivePortalActive)
+        {
+            var msg = new CaptivePortalDetectionMessage(captivePortalState, isCaptivePortalActive);
+            PushMessage(msg);
+        }
+
 
         private void PushMessage(BaseMessage msg)
         {

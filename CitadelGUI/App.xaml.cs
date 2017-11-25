@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson
+* Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -130,6 +130,12 @@ namespace Te.Citadel
         /// Used to communicate with the filtering back end service. 
         /// </summary>
         private IPCClient m_ipcClient;
+
+        /// <summary>
+        /// Tracks whether the captive portal tool tip has been displayed for the given network.
+        /// Will be set back to false when captive portal detection goes back to false.
+        /// </summary>
+        private bool m_captivePortalShownToUser;
 
         #endregion Views 
 
@@ -276,6 +282,11 @@ namespace Te.Citadel
                     BringAppToFocus();
 
                     var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
+                    
+                    if(args.IsRestartRequired)
+                    {
+                        updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
+                    }
 
                     await Current.Dispatcher.BeginInvoke(
                         System.Windows.Threading.DispatcherPriority.Normal,
@@ -491,6 +502,45 @@ namespace Te.Citadel
                         break;
                     }
                 };
+
+                m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
+                {
+
+                    // C# doesn't like cross-thread GUI variable access, so run this on window thread.
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        ((MainWindowViewModel)m_mainWindow.DataContext).ShowIsGuestNetwork = msg.IsCaptivePortalDetected;
+                    });
+                };
+
+#if CAPTIVE_PORTAL_GUI_ENABLED
+                m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
+                {
+                    if (msg.IsCaptivePortalDetected && !m_captivePortalShownToUser)
+                    {
+                        if (m_mainWindow.Visibility == Visibility.Visible)
+                        {
+                            if (!m_mainWindow.IsVisible)
+                            {
+                                BringAppToFocus();
+                            }
+
+                            ((MainWindowViewModel)m_mainWindow.DataContext).ShowIsGuestNetwork = true;
+                        }
+                        else
+                        {
+                            DisplayCaptivePortalToolTip();
+                        }
+
+                        m_captivePortalShownToUser = true;
+                    }
+                    else if(!msg.IsCaptivePortalDetected)
+                    {
+                        m_captivePortalShownToUser = false;
+                    }
+                };
+#endif
+
             }
             catch(Exception ipce)
             {
@@ -713,6 +763,13 @@ namespace Te.Citadel
                 {
                     BringAppToFocus();
                 };
+
+            m_trayIcon.BalloonTipClosed += delegate (object sender, EventArgs args)
+            {
+                // Windows 10 looks like it likes to hide tray icon when a user clicks on a tool tip.
+                // Force it to stay visible.
+                m_trayIcon.Visible = true;
+            };
         }
 
         /// <summary>
@@ -739,6 +796,21 @@ namespace Te.Citadel
                     }
                 }
             );
+        }
+
+#if CAPTIVE_PORTAL_GUI_ENABLED
+        public void DisplayCaptivePortalToolTip()
+        {
+            m_trayIcon.BalloonTipClicked += captivePortalToolTipClicked;
+            m_trayIcon.ShowBalloonTip(6000, "Captive Portal Detected", "This network requires logon information. Click here to continue.", System.Windows.Forms.ToolTipIcon.Info);
+        }
+#endif
+
+        private void captivePortalToolTipClicked(object sender, EventArgs e)
+        {
+            m_trayIcon.BalloonTipClicked -= captivePortalToolTipClicked;
+
+            System.Diagnostics.Process.Start("http://connectivitycheck.cloudveil.org");
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citadel.Core.Windows", "Citadel.Core.Windows\Citadel.Core.Windows.csproj", "{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}"
 EndProject
@@ -42,6 +42,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup x86", "Installers\Set
 		{647E9DE9-7DF6-474B-ADFF-09DF4410686E} = {647E9DE9-7DF6-474B-ADFF-09DF4410686E}
 		{61A1BDF1-6A28-4383-ACA6-74510A1F0E76} = {61A1BDF1-6A28-4383-ACA6-74510A1F0E76}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallGuard", "InstallGuard\InstallGuard.csproj", "{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,6 +125,14 @@ Global
 		{3B62E508-D570-4AFF-8103-7D1D5DAFA80D}.Debug|x86.ActiveCfg = Debug
 		{3B62E508-D570-4AFF-8103-7D1D5DAFA80D}.Release|Any CPU.ActiveCfg = Release
 		{3B62E508-D570-4AFF-8103-7D1D5DAFA80D}.Release|x86.ActiveCfg = Release
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Debug|x86.Build.0 = Debug|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Release|x86.ActiveCfg = Release|Any CPU
+		{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

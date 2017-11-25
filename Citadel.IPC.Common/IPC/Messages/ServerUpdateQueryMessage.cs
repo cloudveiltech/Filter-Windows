@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson
+* Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -54,6 +54,12 @@ namespace Citadel.IPC.Messages
             private set;
         }
 
+        public bool IsRestartRequired
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Constructs a new ServerUpdateQueryMessage instance. 
         /// </summary>
@@ -69,12 +75,13 @@ namespace Citadel.IPC.Messages
         /// <param name="newVersionString">
         /// The application version post-update, if accepted. 
         /// </param>
-        public ServerUpdateQueryMessage(string title, string htmlBody, string currentVersionString, string newVersionString)
+        public ServerUpdateQueryMessage(string title, string htmlBody, string currentVersionString, string newVersionString, bool isRestartRequired)
         {
             Title = title;
             HtmlBody = htmlBody;
             CurrentVersionString = currentVersionString;
             NewVersionString = newVersionString;
+            IsRestartRequired = isRestartRequired;
         }
     }
 }

@@ -28,6 +28,16 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="GuestNetworkIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowIsGuestNetwork, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ShowIsGuestNetwork, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </local:BaseWindow.Resources>
 
     <local:BaseWindow.DataContext>
@@ -36,14 +46,14 @@
 
     <local:BaseWindow.RightWindowCommands>
         <MetroControls:WindowCommands>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Internet " />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                <Label Content="Internet " Foreground="White" />
                 <!--  Internet Disconnected Status Icon.  -->
                 <IconPacks:PackIconFontAwesome Width="20"
                                                Height="20"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Top"
-                                               Foreground="Black"
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
                                                Kind="ExclamationCircle"
                                                Style="{StaticResource InternetDisconnectedIconStyle}"
                                                ToolTip="No Internet Connection" />
@@ -52,15 +62,71 @@
                 <IconPacks:PackIconFontAwesome Width="20"
                                                Height="20"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Top"
-                                               Foreground="Black"
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
                                                Kind="CheckCircle"
                                                Style="{StaticResource InternetConnectedIconStyle}"
                                                ToolTip="Internet Connected" />
             </StackPanel>
+
+            <IconPacks:PackIconFontAwesome Width="20"
+                                           Height="20"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="White"
+                                           Kind="Wifi"
+                                           Margin="4,0,4,0"
+                                           ToolTip="Guest Network Mode"
+                                           Style="{StaticResource GuestNetworkIconStyle}"/>
+            
+            <!---->
+
+            <!--<Button
+                Command="{Binding OpenGuestNetwork}"
+                Visibility="{Binding Path=IsCaptivePortalActive, Converter={StaticResource BooleanToVisibilityConverter}}"
+                >
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Label Content="Guest Network "/>
+                    <IconPacks:PackIconFontAwesome Width="20"
+                                               Height="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
+                                               Kind="Wifi"
+                                               ToolTip="Possible Guest Network" />
+                </StackPanel>
+            </Button>-->
         </MetroControls:WindowCommands>
     </local:BaseWindow.RightWindowCommands>
 
+    <!--<MetroControls:MetroWindow.Flyouts>
+        <MetroControls:FlyoutsControl>
+            <MetroControls:Flyout IsOpen="{Binding ShowGuestNetwork}" Header="Guest Network" Position="Right" Width="250">
+                <MetroControls:Flyout.DataContext>
+                    <CitadelViewModels:CaptivePortalViewModel/>
+                </MetroControls:Flyout.DataContext>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="48"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
+                               Margin="8"
+                               TextWrapping="Wrap">
+                        <Run Text="It looks like you're on a network that requires logon information."/>
+                    </TextBlock>
+
+                    <Button Command="{Binding HelpMeConnect}" Content="Help Me Connect" Grid.Row="1" Margin="8" Style="{DynamicResource SquareButtonStyle}"/>
+                </Grid>
+            </MetroControls:Flyout>
+        </MetroControls:FlyoutsControl>
+    </MetroControls:MetroWindow.Flyouts>-->
+    
     <Grid>
         <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
     </Grid>

@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -68,8 +68,27 @@ namespace Citadel.Core.Windows.Util.Update
             {
                 using(var cli = new HttpClient())
                 {
+                    string appInfo = null;
 
-                    var appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+#if USE_LOCAL_UPDATE_XML
+                    string appInfoPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"update.xml");
+                    if(!File.Exists(appInfoPath))
+                    {
+                        appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+                    }
+                    else
+                    {
+                        using (var stream = new FileStream(appInfoPath, FileMode.Open))
+                        {
+                            using (var reader = new StreamReader(stream))
+                            {
+                                appInfo = await reader.ReadToEndAsync();
+                            }
+                        }
+                    }
+#else
+                    appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+#endif
 
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
@@ -102,7 +121,7 @@ namespace Citadel.Core.Windows.Util.Update
                             {
                                 m_logger.Info("Available app update with version {0} is superior to current best version {1}.", bestVersion.ToString());
 
-                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs);
+                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
                                 bestVersion = thisUpdateVersion;
                             }
                         }

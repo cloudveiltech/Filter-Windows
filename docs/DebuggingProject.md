@@ -19,7 +19,7 @@ After you've got the x86 platform created, you can go ahead and follow these ins
 7. Open another VS2015 in administrator mode.
 8. Open up Citadel-Windows project
 9. Repeat step 6, except this time for "FilterServiceProvider.exe"
-10. voila, you have a debug environment for FilterServiceProvider and CitadelGUI.
+10. Go to CitadelGUI properties, then Build Events, and change Post-build event command line to `xcopy /Y /C "$(ProjectDir)..\CitadelService\$(OutDir)*.*" "$(TargetDir)"`
+11. voila, you have a debug environment for FilterServiceProvider and CitadelGUI.
 
-
-The reason we've got to use x86 is because of a driver issue in x64.
+The reason we use x86 is because of a driver issue in x64. This causes any attempt of debugging the applications to fail.

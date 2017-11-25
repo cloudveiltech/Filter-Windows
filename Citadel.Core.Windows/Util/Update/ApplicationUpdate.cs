@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -79,7 +79,13 @@ namespace Citadel.Core.Windows.Util.Update
             private set;
         }
 
-        public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments)
+        public bool IsRestartRequired
+        {
+            get;
+            private set;
+        }
+
+        public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments, bool isRestartRequired)
         {
             DatePublished = datePublished;
             Title = title = title != null ? title : string.Empty;
@@ -89,6 +95,7 @@ namespace Citadel.Core.Windows.Util.Update
             DownloadLink = downloadLink;
             Kind = kind;
             UpdaterArguments = updaterArguments != null ? updaterArguments : string.Empty;
+            IsRestartRequired = isRestartRequired;
 
             var targetDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             targetDir = Path.Combine(targetDir, Process.GetCurrentProcess().ProcessName);

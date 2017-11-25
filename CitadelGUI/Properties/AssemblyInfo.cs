@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2017 Jesse Nicholson  
+* Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,7 +16,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Technik Empire")]
 [assembly: AssemblyProduct("CloudVeil GUI")]
-[assembly: AssemblyCopyright("Copyright © 2017 Jesse Nicholson, Licensed under the Mozilla Public License V2.0")]
+[assembly: AssemblyCopyright("Copyright © 2017 Cloudveil Technology Inc., Licensed under the Mozilla Public License V2.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -49,5 +49,5 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers by using the '*'
 // as shown below: [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.9.0")]
-[assembly: AssemblyFileVersion("1.6.9.0")]
+[assembly: AssemblyVersion("1.6.12.0")]
+[assembly: AssemblyFileVersion("1.6.12.0")]

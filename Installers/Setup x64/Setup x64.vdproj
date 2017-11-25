@@ -39,6 +39,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D1E4110BDD56467B98704EAA895D317A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D68FE9A50DDA4B0AA6419AB06DA3E96E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -53,6 +59,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_52BFD0D4DC0E420EAD6B352477546362"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_D1E4110BDD56467B98704EAA895D317A"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -133,6 +145,20 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_1170978E7D9A4546A2F1DF38B38BB7C0"
+            {
+            "Name" = "8:InstallGuard.exe"
+            "Condition" = "8:"
+            "Object" = "8:_D1E4110BDD56467B98704EAA895D317A"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_BD17E305_5523_4A83_88DB_AD862932DD00"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
             "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_233AA46C2E4643829D83E4721FB89465"
             {
             "Name" = "8:CloudVeil.exe"
@@ -224,11 +250,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D1E4110BDD56467B98704EAA895D317A"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                }
+            "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_3685F68A891D4FCB8FF64FB262E967B2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F4B66C76261A43028EC13AABA25DA095"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.8.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.12.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_F4B66C76261A43028EC13AABA25DA095"
@@ -311,15 +363,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{EF52C3E6-F0D2-4AD3-9E60-AB0D61B034E6}"
-        "PackageCode" = "8:{3788F0AF-E066-47F0-8D74-1FD4ACA4EDF2}"
+        "ProductCode" = "8:{9F89D727-6FAE-4373-BE2B-C0F1E766A93E}"
+        "PackageCode" = "8:{464ADADC-6BF8-40A0-962F-5E54C132F5AC}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.9"
+        "ProductVersion" = "8:1.6.12"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
@@ -3120,6 +3172,20 @@
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
+                    "_CB4556C82B47E4E717A2ECBEF0422B4B.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_CB4556C82B47E4E717A2ECBEF0422B4B.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_951B9380582DF1E7083BB146B5B972DE.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_951B9380582DF1E7083BB146B5B972DE.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_951B9380582DF1E7083BB146B5B972DE.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
                     "_D0BACDC33326F091ADF63CE059BFE1F8.0862028596DF4668AB1D736D2B40424F"
                     {
                     "Name" = "8:_D0BACDC33326F091ADF63CE059BFE1F8.0862028596DF4668AB1D736D2B40424F"
@@ -3271,6 +3337,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_3A68CC4A547B4A2BBD68333F59F4F0F5.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_3A68CC4A547B4A2BBD68333F59F4F0F5.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_DD868092A7F59771E11BD6904D50961D.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_DD868092A7F59771E11BD6904D50961D.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_0486756ACBA2850EE9D54DEA4841C1EE.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_0486756ACBA2850EE9D54DEA4841C1EE.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_0486756ACBA2850EE9D54DEA4841C1EE.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
