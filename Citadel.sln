@@ -45,6 +45,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup x86", "Installers\Set
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallGuard", "InstallGuard\InstallGuard.csproj", "{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignInstallers", "SignInstallers\SignInstallers.csproj", "{FD9BC219-8244-432A-AA15-8001C5E64D76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
