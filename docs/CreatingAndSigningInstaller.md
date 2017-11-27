@@ -105,11 +105,12 @@ Follow the next instructions to sign the installer.
 
 ## Signing installers
 
+### Method 1 - SignInstallers project.
+After building both the x86 and x64 installers, right click SignInstallers and click build.
+
+### Method 2 - Manually
 1. Open "Developer Command Prompt for VS 2017" `Start Menu > Visual Studio 2017`
 2. Go to wherever the installer was built with `cd` on the command prompt. (i.e. `cd C:\git\Citadel-Windows\Installers\Setup x64\bin\Release`)
-Open "Developer Command Prompt for VS 2017" which can be found in "Start Menu > Visual Studio 2017" (or by searching)
-
-Navigate to wherever the installer was built with the `cd` command on the command prompt.
 
 With the certificate USB drive plugged in, all you should need to do is run
 ```
@@ -132,3 +133,18 @@ You should get something like
 ```
 Successfully verified: CloudVeil-1.6.12-x64.msi
 ```
+
+# Other misc stuff
+
+```
+WARNING: File 'WinDivert64.sys' targeting 'x64' is not compatible with the project's target platform 'x86'
+WARNING: File 'WinDivert64.sys' targeting 'x64' is not compatible with the project's target platform 'x86'
+```
+
+When you get this error try:
+
+1. Make sure that you are on Release|x86 build
+2. Rebuild CitadelGUI x86
+3. Rebuild SetupPayload86
+
+That should take care of that problem.
