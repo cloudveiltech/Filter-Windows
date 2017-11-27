@@ -1,7 +1,7 @@
 
 This documentation will cover building installers + signing them
 
-**THIS IS NOT COMPLETE**
+This document assumes you have Visual Studio 2017 installed.
 
 # Setup build environment
 
