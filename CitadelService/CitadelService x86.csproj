@@ -95,6 +95,9 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CitadelCore">
+      <Version>1.3.8</Version>
+    </PackageReference>
     <PackageReference Include="CitadelCore.Windows">
       <Version>1.3.2</Version>
     </PackageReference>

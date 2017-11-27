@@ -34,9 +34,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>signtool sign /a $(SolutionDir)Installers\Setup x86\Release\Setup-x86.msi
-signtool sign /a $(SolutionDir)Installers\Setup x64\Release\Setup-x64.msi</PostBuildEvent>
+    <PostBuildEvent>"C:/Program Files (x86)/Windows Kits/10/bin/10.0.16299.0/x86/signtool.exesigntool.exe" sign /a "$(SolutionDir)Installers\Setup x86\Release\Setup-x86.msi"
+"C:/Program Files (x86)/Windows Kits/10/bin/10.0.16299.0/x86/signtool.exe" sign /a "$(SolutionDir)Installers\Setup x64\Release\Setup-x64.msi"</PostBuildEvent>
   </PropertyGroup>
 </Project>
