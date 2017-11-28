@@ -1,7 +1,7 @@
 
 This documentation will cover building installers + signing them
 
-This document assumes you have Visual Studio 2017 installed.
+This document assumes you have Visual Studio 2017 installed. You will also need Orca, which you can get in the Windows SDK (sorry, yes, they make you download the entire thing)
 
 # Setup build environment
 
@@ -88,8 +88,19 @@ On the top bar you'll see options for 'Debug' or 'Release' and 'Any CPU' or 'x86
 3. Open SetupPayload64 and scroll down to `System.Net.Http.dll` @TechnikEmpire correct me if we don't need a separate step for SetupPayloa64
 4. If there are two entries for `System.Net.Http.dll`, check SourcePath in the properties box (right-click, select properties)
 5. If SourcePath does not contain `CloudVeilGUI` delete that entry. There should only be one `System.Net.Http.dll`
-6. Right-click Setup x64 and click Rebuild.
+6. Go into Detected Dependencies (folder under SetupPayload64) and make sure all DLL's are excluded (right click, hit exclude) There should be a little red circle indicating whether the DLL is excluded.
+7. Right-click Setup x64 and click Rebuild.
 
+### x64 Orca instructions
+These steps are very important and must be done before signing the installer, otherwise you'll end up needing to sign the installer again.
+
+ 1. Open Orca, drop the new `.msi` file in to it to open it.
+ 2. Find the "Binary" table.
+ 3. In the "Binary" table, find the "InstallUtil" property and double click the "Data" cell to edit it.
+ 4. From the now-open file dialog, browse to and select `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtilLib.dll` and click "Open".
+ 5. Ensure that "Read binary from filename" is selected.
+ 6. Click OK, then click save or ctrl+s to save these changes to the MSI file. **This entire process is necessary in order for the MSI to execute the custom actions we use to start up the GUI and spawn the server when installation is complete.** Without doing this, the installer would fail with a bad format exception, because unmodified, it is unable to execute/launch a 64 bit process.
+ 
 ### x86 Installer
 
 1. Change configuration options to 'Release' and 'x86'
