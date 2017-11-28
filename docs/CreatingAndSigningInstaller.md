@@ -85,37 +85,19 @@ On the top bar you'll see options for 'Debug' or 'Release' and 'Any CPU' or 'x86
 
 1. Change configuration options to 'Release' and 'Any CPU'
 2. Right-click CitadelGUI x64 and click Build.
-3. Right-click Setup x64 and click Rebuild.
-
-### x86 Installer
-
-1. Change configuration options to 'Release' and 'x86'
-2. Right-click CitadelGUI x86 and click Build.
-3. Right-click Setup x86 and click Rebuild.
-
-## Old instructions
-### x64 Installer
-
-1. Change configuration options to 'Release' and 'Any CPU'
-2. Right-click CitadelGUI x64 and click Build.
 3. Open SetupPayload64 and scroll down to `System.Net.Http.dll` @TechnikEmpire correct me if we don't need a separate step for SetupPayloa64
 4. If there are two entries for `System.Net.Http.dll`, check SourcePath in the properties box (right-click, select properties)
-5. If SourcePath does not contain CloudVeilGUI There should only be one `System.Net.Http.dll`
-6. Right-click SetupPayload64 and click Build..
-7. Right-click Setup x64 and click Build.
+5. If SourcePath does not contain `CloudVeilGUI` delete that entry. There should only be one `System.Net.Http.dll`
+6. Right-click Setup x64 and click Rebuild.
 
 ### x86 Installer
 
 1. Change configuration options to 'Release' and 'x86'
 2. Right-click CitadelGUI x86 and click Build.
-3. Open SetupPayload86 and scroll down to `System.Net.Http.dll`
-4. If there are two entries for `System.Net.Http.dll`, right click one and look at SourcePath
-5. If SourcePath is `...\Installers\...`, delete that reference. There should only be one `System.Net.Http.dll`
-6. Right-click SetupPayload86 and click Build..
-7. Right-click Setup x86 and click Build.
-
-When in doubt, start using Rebuild instead of Build. Also, try not building SetupPayload projects before Setup projects.
-Once those are built, you can go to the Installers/Setup x*/bin\Release directory to find the msi file.
+3. Open SetupPayload86 and scroll down to `System.Net.Http.dll` @TechnikEmpire correct me if we don't need a separate step for SetupPayloa64
+4. If there are two entries for `System.Net.Http.dll`, check SourcePath in the properties box (right-click, select properties)
+5. If SourcePath does not contain `CloudVeilGUI` delete that entry. There should only be one `System.Net.Http.dll`
+6. Right-click Setup x86 and click Rebuild.
 
 Follow the next instructions to sign the installer.
 
