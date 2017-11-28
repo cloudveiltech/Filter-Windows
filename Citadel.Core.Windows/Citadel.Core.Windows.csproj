@@ -89,6 +89,7 @@
     <Compile Include="Util\Http\HttpUtils.cs" />
     <Compile Include="Util\Logging\LoggerUtil.cs" />
     <Compile Include="Util\Process\CriticalKernelProcessUtility.cs" />
+    <Compile Include="Util\RegistryUtils.cs" />
     <Compile Include="Util\Update\AppcastUpdater.cs" />
     <Compile Include="Util\Update\ApplicationUpdate.cs" />
     <Compile Include="Util\Net\WFPUtility.cs" />

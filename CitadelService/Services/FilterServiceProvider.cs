@@ -523,7 +523,7 @@ namespace CitadelService.Services
 
                 m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
                 {
-                    var curAuthToken = WebServiceUtil.Default.AuthToken;
+                    var curAuthToken = RegistryUtils.AuthToken;
 
                     if(curAuthToken != null && curAuthToken.Length > 0)
                     {   
@@ -1978,7 +1978,7 @@ namespace CitadelService.Services
             string blockedRequestBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(urlText));
 
             string unblockRequest = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-            string username = WebServiceUtil.Default.UserEmail ?? "DNS";
+            string username = RegistryUtils.UserEmail ?? "DNS";
 
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;

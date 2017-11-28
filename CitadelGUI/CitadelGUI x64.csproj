@@ -103,6 +103,7 @@
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
     <Compile Include="Te\Citadel\UI\Views\CaptivePortalView.xaml.cs">
@@ -119,11 +120,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Controls\Sidebar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Te\Citadel\UI\Views\CaptivePortalView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Te\Citadel\UI\Views\DashboardView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\HistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -149,6 +158,9 @@
     <Compile Include="Te\Citadel\UI\Models\LoginModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\BaseCitadelViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\LoginViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\Views\HistoryView.xaml.cs">
+      <DependentUpon>HistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\ProgressWait.xaml.cs">
       <DependentUpon>ProgressWait.xaml</DependentUpon>
     </Compile>

@@ -5,9 +5,11 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Configuration.Install;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -50,6 +52,9 @@ namespace Te.Citadel
         public override void Uninstall(IDictionary savedState)
         {
             base.Uninstall(savedState);
+
+            // Purge registration token.
+            deleteRegistryKey();
         }
 
         public override void Commit(IDictionary savedState)
@@ -127,6 +132,24 @@ namespace Te.Citadel
             catch
             {
                 return false;
+            }
+        }
+
+        private void deleteRegistryKey()
+        {
+            var applicationNiceName = "FilterServiceProvider";
+
+            // Open the LOCAL_MACHINE\Software sub key for read/write.
+            using (RegistryKey softwareKey = Registry.LocalMachine.OpenSubKey("Software", true))
+            {
+                try
+                {
+                    softwareKey.DeleteSubKeyTree(applicationNiceName);
+                }
+                catch(Exception ex)
+                {
+                    throw new InstallException("Could not delete FilterServiceProvider key because of " + ex.GetType().Name + ": " + ex.Message);
+                }
             }
         }
 

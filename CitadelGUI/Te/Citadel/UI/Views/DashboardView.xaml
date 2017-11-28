@@ -15,23 +15,69 @@
     xmlns:local="clr-namespace:Te.Citadel.UI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-    Width="716"
-    Height="386"
-    d:DesignHeight="386"
-    d:DesignWidth="716"
     mc:Ignorable="d">
 
     <local:BaseView.DataContext>
         <CitadelViewModels:DashboardViewModel />
     </local:BaseView.DataContext>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <Controls:MetroAnimatedSingleRowTabControl>
+        <Grid Grid.Column="0" Background="{StaticResource FlatButtonBackgroundBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <ToggleButton Style="{StaticResource MetroFlatToggleButton}" Grid.ColumnSpan="1" Grid.Row="0" x:Name="historyButton"
+                          Click="Click_SidebarButton" CommandParameter="history">
+                <TextBlock>
+                    <IconPacks:PackIconFontAwesome Width="16" Height="16" Kind="History" />
+                    <Label Content="History"/>
+                </TextBlock>
+            </ToggleButton>
+
+            <ToggleButton x:Name="settingsButton"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Grid.Row="1"
+                          Click="Click_SidebarButton"
+                          CommandParameter="settings">
+                <TextBlock>
+                    <IconPacks:PackIconFontAwesome Width="16" Height="16" Kind="Cog"/>
+                    <Label Content="Settings"/>
+                </TextBlock>
+            </ToggleButton>
+
+            <ToggleButton x:Name="troubleshootingButton"
+                          Content="Troubleshooting"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Grid.Row="2"
+                          Click="Click_SidebarButton" CommandParameter="troubleshooting"/>
+
+            <ToggleButton x:Name="advancedButton"
+                          Content="Advanced"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Click="Click_SidebarButton" CommandParameter="advanced"
+                          Grid.Row="3" />
+        </Grid>
+
+        <Controls:TransitioningContentControl Grid.Column="1" x:Name="CurrentView" x:FieldModifier="internal" />
+
+        <!--
+        <Controls:MetroAnimatedSingleRowTabControl Grid.Column="1">
 
             <TabItem Header="History">
                 <Grid>
 
-                    <!--  This style on the grid will force the cells in the DataGrid to truncate their text.  -->
+                    <!-  This style on the grid will force the cells in the DataGrid to truncate their text. -
                     <Grid.Resources>
                         <Style x:Key="TextBlockStyleKey" TargetType="{x:Type TextBlock}">
                             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -64,7 +110,7 @@
                         CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
                         Content="Request Review">
                         <Button.Style>
-                            <!--  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
+                            <!-  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -
                             <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
                                 <Setter Property="IsEnabled" Value="True" />
                                 <Style.Triggers>
@@ -137,7 +183,7 @@
                         <Run />
                     </TextBlock>
 
-                    <!--  Shows the last time that we synced with the server that gives us filtering data.  -->
+                    <!-  Shows the last time that we synced with the server that gives us filtering data.  -
                     <TextBlock
                         Width="333"
                         Height="30"
@@ -371,7 +417,7 @@
                         Content="{Binding ErrorText}"
                         Height="28" Margin="322,263,296,56"/>
 
-                    <!--  View log directory button.  -->
+                    <!-  View log directory button.  -
                     <Button
                         Width="136"
                         Margin="144,294,0,0"
@@ -381,7 +427,7 @@
                         Content="View Log Files"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
-                    <!--  Request deactivation button.  -->
+                    <!-  Request deactivation button.  -
                     <Button
                         Width="136"
                         Margin="553,294,0,0"
@@ -420,6 +466,6 @@
                 </Grid>
             </TabItem>
 
-        </Controls:MetroAnimatedSingleRowTabControl>
+        </Controls:MetroAnimatedSingleRowTabControl>-->
     </Grid>
 </local:BaseView>

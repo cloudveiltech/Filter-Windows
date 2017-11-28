@@ -15,28 +15,23 @@
                 xmlns:local="clr-namespace:Te.Citadel.UI.Views"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:mvvmlight="clr-namespace:GalaSoft.MvvmLight;assembly=GalaSoft.MvvmLight"
-                Width="716"
-                Height="386"
-                d:DesignHeight="386"
-                d:DesignWidth="716"
                 mc:Ignorable="d">
     <Grid>
-
-        <!--  Infinitely looping Metro style progress ring.  -->
-        <MetroControls:ProgressRing HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!--  Infinitely looping Metro style progress ring.  -->
+            <MetroControls:ProgressRing
                                     Foreground="{DynamicResource AccentColorBrush}" />
 
-        <!--  Simple wait message. TODO - Decoupled way to set this via view change command.  -->
-        <Label Width="258"
-               Margin="229,277,229,0"
+            <!--  Simple wait message. TODO - Decoupled way to set this via view change command.  -->
+            <Label Width="258"
                HorizontalAlignment="Center"
-               VerticalAlignment="Top"
                HorizontalContentAlignment="Center"
                Content="Please Wait"
                FontFamily="Segoe UI"
                FontSize="22"
                FontWeight="UltraLight"
                Foreground="Black" />
+        </StackPanel>
+        
     </Grid>
 </local:BaseView>
