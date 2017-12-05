@@ -5,9 +5,11 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Configuration.Install;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -50,6 +52,9 @@ namespace Te.Citadel
         public override void Uninstall(IDictionary savedState)
         {
             base.Uninstall(savedState);
+
+            // Purge registration token.
+            deleteRegistryKey();
         }
 
         public override void Commit(IDictionary savedState)
@@ -75,8 +80,13 @@ namespace Te.Citadel
             var installProc = Process.Start(installStartInfo);
             installProc.WaitForExit();
 
-            if(!this.Context.IsParameterTrue("norestart"))
+            string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
+
+            // 'norestart' not defined in Context.Parameters, so we can't use Context.IsParameterTrue.
+            // This file gets defined by the filter service before shutting down.
+            if (File.Exists(restartFlagPath))
             {
+                File.Delete(restartFlagPath);
                 InitiateShutdown(null, null, 0, (uint)(ShutdownFlags.SHUTDOWN_FORCE_OTHERS | ShutdownFlags.SHUTDOWN_RESTART | ShutdownFlags.SHUTDOWN_RESTARTAPPS), 0);
             }
 
@@ -127,6 +137,24 @@ namespace Te.Citadel
             catch
             {
                 return false;
+            }
+        }
+
+        private void deleteRegistryKey()
+        {
+            var applicationNiceName = "FilterServiceProvider";
+
+            // Open the LOCAL_MACHINE\Software sub key for read/write.
+            using (RegistryKey softwareKey = Registry.LocalMachine.OpenSubKey("Software", true))
+            {
+                try
+                {
+                    softwareKey.DeleteSubKeyTree(applicationNiceName);
+                }
+                catch(Exception ex)
+                {
+                    throw new InstallException("Could not delete FilterServiceProvider key because of " + ex.GetType().Name + ": " + ex.Message);
+                }
             }
         }
 

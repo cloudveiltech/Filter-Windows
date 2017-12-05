@@ -455,6 +455,15 @@ namespace CitadelService.Services
                                 m_appcastUpdaterLock.ExitWriteLock();
                             }
 
+                            if(m_lastFetchedUpdate.IsRestartRequired)
+                            {
+                                string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
+                                using (StreamWriter writer = File.CreateText(restartFlagPath))
+                                {
+                                    writer.Write("# This file left intentionally blank (tee-hee)\n");
+                                }
+                            }
+
                             Environment.Exit((int)ExitCodes.ShutdownForUpdate);
                         }
                     }
