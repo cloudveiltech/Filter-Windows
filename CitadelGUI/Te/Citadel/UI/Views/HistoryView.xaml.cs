@@ -19,7 +19,11 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for HistoryView.xaml
     /// </summary>
+<<<<<<< Updated upstream
     public partial class HistoryView : Window
+=======
+    public partial class HistoryView : BaseView
+>>>>>>> Stashed changes
     {
         public HistoryView()
         {

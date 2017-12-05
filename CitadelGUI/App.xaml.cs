@@ -351,7 +351,7 @@ namespace Te.Citadel
                         {
                             if(m_viewDashboard != null)
                             {
-                                m_viewDashboard.AppendBlockActionEvent(args.Category, args.Resource.ToString());
+                                //m_viewDashboard.AppendBlockActionEvent(args.Category, args.Resource.ToString());
                             }
                         }
                     );
