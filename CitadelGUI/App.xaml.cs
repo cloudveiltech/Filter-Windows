@@ -146,6 +146,13 @@ namespace Te.Citadel
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
+            string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+            appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
+
+            m_logger.Info("CitadelGUI Version: {0}", appVerStr);
+
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
 
