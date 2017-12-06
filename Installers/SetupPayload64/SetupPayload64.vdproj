@@ -1336,13 +1336,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
+        "OwnerKey" = "8:_FDA28938341845008A82CE6C5CC78608"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_FDA28938341845008A82CE6C5CC78608"
+        "OwnerKey" = "8:_FD1AD3B6A959440DB8D217548E05ED75"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1564,6 +1564,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8B5D3525B7D040A99A5644A3FF3BEA68"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_88ADEB1E864642BFB6DE375DF3269978"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1771,6 +1777,12 @@
         "OwnerKey" = "8:_044095645FF94485B99FB2D23F8B6FEF"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_81F745121006405BA208BB4B80254F8A"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -1859,6 +1871,11 @@
             "AssemblyAsmDisplayName" = "8:System.Text.Encoding.CodePages, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_005650EAA3444889AF217887FB6671DA"
+                    {
+                    "Name" = "8:System.Text.Encoding.CodePages.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Text.Encoding.CodePages.dll"
             "TargetName" = "8:"
@@ -1885,6 +1902,11 @@
             "AssemblyAsmDisplayName" = "8:System.Reflection.Extensions, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_012C3A7AC09843B099665E1903431F64"
+                    {
+                    "Name" = "8:System.Reflection.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Reflection.Extensions.dll"
             "TargetName" = "8:"
@@ -1931,6 +1953,11 @@
             "AssemblyAsmDisplayName" = "8:System.Collections.Immutable, Version=1.2.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_0228A903E0C240CCAC8BBFE311FEF3E0"
+                    {
+                    "Name" = "8:System.Collections.Immutable.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Collections.Immutable.dll"
             "TargetName" = "8:"
@@ -1957,6 +1984,11 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_044095645FF94485B99FB2D23F8B6FEF"
+                    {
+                    "Name" = "8:MahApps.Metro.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\MahApps.Metro.dll"
             "TargetName" = "8:"
@@ -1983,6 +2015,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Hosting.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_080CFE35D3364DE4A8BBD428E1A3CF94"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Hosting.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Hosting.Abstractions.dll"
             "TargetName" = "8:"
@@ -2009,6 +2046,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.FileSystem.Watcher, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_09285B982F8D476A8110314A06EDBA27"
+                    {
+                    "Name" = "8:System.IO.FileSystem.Watcher.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.FileSystem.Watcher.dll"
             "TargetName" = "8:"
@@ -2035,6 +2077,11 @@
             "AssemblyAsmDisplayName" = "8:System.ComponentModel.EventBasedAsync, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_0A1AC087B2C6484E8D4D93D2571C68B9"
+                    {
+                    "Name" = "8:System.ComponentModel.EventBasedAsync.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ComponentModel.EventBasedAsync.dll"
             "TargetName" = "8:"
@@ -2061,6 +2108,11 @@
             "AssemblyAsmDisplayName" = "8:System.Collections.Concurrent, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_0D5F396225D849CA90AFB47DEBD4CDFC"
+                    {
+                    "Name" = "8:System.Collections.Concurrent.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Collections.Concurrent.dll"
             "TargetName" = "8:"
@@ -2087,6 +2139,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_0EF3C7E914674FAB8B9EA1697ED6F750"
+                    {
+                    "Name" = "8:System.IO.Compression.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.Compression.dll"
             "TargetName" = "8:"
@@ -2113,6 +2170,11 @@
             "AssemblyAsmDisplayName" = "8:Interop.NetFwTypeLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_116456FA461249C891C2F971CC5D4BD0"
+                    {
+                    "Name" = "8:Interop.NetFwTypeLib.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Interop.NetFwTypeLib.dll"
             "TargetName" = "8:"
@@ -2139,6 +2201,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Serialization.Formatters, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_123E6196C45E4CC39E3199C72C3E2D1E"
+                    {
+                    "Name" = "8:System.Runtime.Serialization.Formatters.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Serialization.Formatters.dll"
             "TargetName" = "8:"
@@ -2165,6 +2232,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.Parse, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_13D448C2139643F5A6918B01FA8CB5DF"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.Parse.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.Parse.dll"
             "TargetName" = "8:"
@@ -2211,6 +2283,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.Compression.ZipFile, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1519593E70F34F84B4E1582E8D1DA823"
+                    {
+                    "Name" = "8:System.IO.Compression.ZipFile.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.Compression.ZipFile.dll"
             "TargetName" = "8:"
@@ -2257,6 +2334,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Charsets, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_190CF557D39E4FD5A741CA40C94A7DC5"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Charsets.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Charsets.dll"
             "TargetName" = "8:"
@@ -2283,6 +2365,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.IsolatedStorage, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_19D7FDC51A5B49EE9357C46968382912"
+                    {
+                    "Name" = "8:System.IO.IsolatedStorage.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.IsolatedStorage.dll"
             "TargetName" = "8:"
@@ -2309,6 +2396,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Diagnostics.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1ACBA7DAEE174E6F9C9042DB37BDF406"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Diagnostics.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Diagnostics.Abstractions.dll"
             "TargetName" = "8:"
@@ -2335,6 +2427,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.DiagnosticSource, Version=4.0.2.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1B2F74B944FE4B49B559D206D3722AAA"
+                    {
+                    "Name" = "8:System.Diagnostics.DiagnosticSource.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.DiagnosticSource.dll"
             "TargetName" = "8:"
@@ -2361,6 +2458,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Cryptography.Algorithms, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1B60012C9D614D92A963F484F92FD7C3"
+                    {
+                    "Name" = "8:System.Security.Cryptography.Algorithms.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.Algorithms.dll"
             "TargetName" = "8:"
@@ -2387,6 +2489,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.Runtime.JNI, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1B862C84828D4704B974EF54CDC6F2F0"
+                    {
+                    "Name" = "8:IKVM.Runtime.JNI.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.Runtime.JNI.dll"
             "TargetName" = "8:"
@@ -2413,6 +2520,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.MemoryMappedFiles, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_1D2EAD169AF14283BF54CB4E555570E1"
+                    {
+                    "Name" = "8:System.IO.MemoryMappedFiles.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.MemoryMappedFiles.dll"
             "TargetName" = "8:"
@@ -2459,6 +2571,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.Pipes, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_20B4493781CB488B9C80246C7550054A"
+                    {
+                    "Name" = "8:System.IO.Pipes.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.Pipes.dll"
             "TargetName" = "8:"
@@ -2485,6 +2602,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Jdbc, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_210F8294099844DCBA0719148283D6E8"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Jdbc.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Jdbc.dll"
             "TargetName" = "8:"
@@ -2511,6 +2633,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.ReaderWriter, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_22000F129595402585060E27818B4723"
+                    {
+                    "Name" = "8:System.Xml.ReaderWriter.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.ReaderWriter.dll"
             "TargetName" = "8:"
@@ -2557,6 +2684,11 @@
             "AssemblyAsmDisplayName" = "8:System.ComponentModel.TypeConverter, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_26AA771AED23414D9F5E052E2AF87216"
+                    {
+                    "Name" = "8:System.ComponentModel.TypeConverter.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ComponentModel.TypeConverter.dll"
             "TargetName" = "8:"
@@ -2583,6 +2715,11 @@
             "AssemblyAsmDisplayName" = "8:System.AppContext, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_28504168FF24462C874CD410F496E19B"
+                    {
+                    "Name" = "8:System.AppContext.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.AppContext.dll"
             "TargetName" = "8:"
@@ -2609,6 +2746,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2978B21824E0497BACC1EC72EAC1E584"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll"
             "TargetName" = "8:"
@@ -2675,6 +2817,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Nashorn, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2BAC679FA2284860971D6C050FA4E76A"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Nashorn.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Nashorn.dll"
             "TargetName" = "8:"
@@ -2701,6 +2848,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.XmlDocument, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2BAC7308D6EF4B31904B41D864B04896"
+                    {
+                    "Name" = "8:System.Xml.XmlDocument.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.XmlDocument.dll"
             "TargetName" = "8:"
@@ -2727,6 +2879,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2D43964626C9462782ECB192CEB0EF40"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Logging.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Logging.dll"
             "TargetName" = "8:"
@@ -2753,6 +2910,11 @@
             "AssemblyAsmDisplayName" = "8:EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2D5946782776470DAE7A7B8F611D2C46"
+                    {
+                    "Name" = "8:EntityFramework.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\EntityFramework.dll"
             "TargetName" = "8:"
@@ -2779,6 +2941,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Handles, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2E330D29316E4AA5A82B239553F883AF"
+                    {
+                    "Name" = "8:System.Runtime.Handles.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Handles.dll"
             "TargetName" = "8:"
@@ -2805,6 +2972,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.InteropServices.RuntimeInformation, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_2F2BCB1EF94F42039AD05C9B6668F2B9"
+                    {
+                    "Name" = "8:System.Runtime.InteropServices.RuntimeInformation.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.InteropServices.RuntimeInformation.dll"
             "TargetName" = "8:"
@@ -2831,6 +3003,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.FileSystem, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_33CA01D3278844EC9664EA08F2999355"
+                    {
+                    "Name" = "8:System.IO.FileSystem.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.FileSystem.dll"
             "TargetName" = "8:"
@@ -2857,6 +3034,11 @@
             "AssemblyAsmDisplayName" = "8:System.Text.Encodings.Web, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_33E299532A554D8280746557DBA762D8"
+                    {
+                    "Name" = "8:System.Text.Encodings.Web.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Text.Encodings.Web.dll"
             "TargetName" = "8:"
@@ -2883,6 +3065,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Remoting, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_36716D06930941819F6E1EF2088B7861"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Remoting.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Remoting.dll"
             "TargetName" = "8:"
@@ -2909,6 +3096,11 @@
             "AssemblyAsmDisplayName" = "8:CitadelCore, Version=1.3.8.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_37D33886C7AD4143A6D40ACDB689FC17"
+                    {
+                    "Name" = "8:CitadelCore.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\CitadelCore.dll"
             "TargetName" = "8:"
@@ -2935,6 +3127,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Serialization.Xml, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_37FF64E9BD3E46CF98CE35FE67095FC2"
+                    {
+                    "Name" = "8:System.Runtime.Serialization.Xml.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Serialization.Xml.dll"
             "TargetName" = "8:"
@@ -2961,6 +3158,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.Debug, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_3A68CC4A547B4A2BBD68333F59F4F0F5"
+                    {
+                    "Name" = "8:System.Diagnostics.Debug.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.Debug.dll"
             "TargetName" = "8:"
@@ -2987,6 +3189,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.ObjectPool, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_3C426575E45C42ECAFCFFE1C0D01ADDE"
+                    {
+                    "Name" = "8:Microsoft.Extensions.ObjectPool.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.ObjectPool.dll"
             "TargetName" = "8:"
@@ -3013,6 +3220,11 @@
             "AssemblyAsmDisplayName" = "8:System.Linq, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_3E9672043AA54AAFBD594B3F939D6156"
+                    {
+                    "Name" = "8:System.Linq.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Linq.dll"
             "TargetName" = "8:"
@@ -3039,6 +3251,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Security, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_40384720FEE043ECA975BD43593A3F50"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Security.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Security.dll"
             "TargetName" = "8:"
@@ -3065,6 +3282,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Management, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_408793932C71490182C1AA0A07D08EA0"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Management.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Management.dll"
             "TargetName" = "8:"
@@ -3091,6 +3313,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.FileSystem.DriveInfo, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_40CBB7A343154AB98F8C68A586DEF2AB"
+                    {
+                    "Name" = "8:System.IO.FileSystem.DriveInfo.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.FileSystem.DriveInfo.dll"
             "TargetName" = "8:"
@@ -3117,6 +3344,11 @@
             "AssemblyAsmDisplayName" = "8:StreamExtended, Version=1.0.81.0, Culture=neutral, PublicKeyToken=bbfa0f1d54f50043, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4176A4AF0FB340EFA7764F564E6CAEA4"
+                    {
+                    "Name" = "8:StreamExtended.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\StreamExtended.dll"
             "TargetName" = "8:"
@@ -3143,6 +3375,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Hosting.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4594D171850047EEB5734A7F8EE2C7B8"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Hosting.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Hosting.Abstractions.dll"
             "TargetName" = "8:"
@@ -3166,9 +3403,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.11.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.12.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
+                    "_4595D371A3474725B6AF74ABF2F3A814"
+                    {
+                    "Name" = "8:FilterServiceProvider.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\FilterServiceProvider.exe"
             "TargetName" = "8:"
@@ -3195,6 +3437,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.XmlSerializer, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_45DA1D528FED465BB257DFDEE7D8A399"
+                    {
+                    "Name" = "8:System.Xml.XmlSerializer.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.XmlSerializer.dll"
             "TargetName" = "8:"
@@ -3221,6 +3468,11 @@
             "AssemblyAsmDisplayName" = "8:System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_46CCCCAF92AD47DDA0522E91A32B9D6F"
+                    {
+                    "Name" = "8:System.Windows.Interactivity.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Windows.Interactivity.dll"
             "TargetName" = "8:"
@@ -3247,6 +3499,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.TraceSource, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_48C4D6B8BCAB47F79127C915D23C5B62"
+                    {
+                    "Name" = "8:System.Diagnostics.TraceSource.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.TraceSource.dll"
             "TargetName" = "8:"
@@ -3273,6 +3530,11 @@
             "AssemblyAsmDisplayName" = "8:System.Text.Encoding, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_49C285751B684C71AA66554491D58AFE"
+                    {
+                    "Name" = "8:System.Text.Encoding.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Text.Encoding.dll"
             "TargetName" = "8:"
@@ -3299,6 +3561,11 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight.Platform, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4A1186DB94314322AFCD6A49363E5885"
+                    {
+                    "Name" = "8:GalaSoft.MvvmLight.Platform.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\GalaSoft.MvvmLight.Platform.dll"
             "TargetName" = "8:"
@@ -3325,6 +3592,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.DependencyInjection, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4A43D49AE43245569437BAE81B15374B"
+                    {
+                    "Name" = "8:Microsoft.Extensions.DependencyInjection.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.DependencyInjection.dll"
             "TargetName" = "8:"
@@ -3351,6 +3623,11 @@
             "AssemblyAsmDisplayName" = "8:System.Collections, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4B67EA7F98F24F639097D4A54ED99F58"
+                    {
+                    "Name" = "8:System.Collections.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Collections.dll"
             "TargetName" = "8:"
@@ -3377,6 +3654,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Core, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4C1DEC9B3B0A45599A31D801EB69E151"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Core.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Core.dll"
             "TargetName" = "8:"
@@ -3403,6 +3685,11 @@
             "AssemblyAsmDisplayName" = "8:System.Linq.Parallel, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4D818C8EE4724E9CB1D210A573D168D4"
+                    {
+                    "Name" = "8:System.Linq.Parallel.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Linq.Parallel.dll"
             "TargetName" = "8:"
@@ -3426,9 +3713,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.11.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.12.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4F1C48D1BA9E4429A06F3EFC8042FFF7"
+                    {
+                    "Name" = "8:Citadel.IPC.Common.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Citadel.IPC.Common.dll"
             "TargetName" = "8:"
@@ -3455,6 +3747,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.Transform, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4FB2C7F2E91A45D7A13DDDCCD335FEDB"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.Transform.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.Transform.dll"
             "TargetName" = "8:"
@@ -3481,6 +3778,11 @@
             "AssemblyAsmDisplayName" = "8:NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_4FCB7EC5E7084431AB5575ED513927CD"
+                    {
+                    "Name" = "8:NLog.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\NLog.dll"
             "TargetName" = "8:"
@@ -3507,6 +3809,11 @@
             "AssemblyAsmDisplayName" = "8:NamedPipeWrapper, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_515728F69E1248288557ED04ED8A9443"
+                    {
+                    "Name" = "8:NamedPipeWrapper.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\NamedPipeWrapper.dll"
             "TargetName" = "8:"
@@ -3533,6 +3840,11 @@
             "AssemblyAsmDisplayName" = "8:System.Dynamic.Runtime, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_52CCE8A04FED4F76B0B29E2E0A36C39D"
+                    {
+                    "Name" = "8:System.Dynamic.Runtime.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Dynamic.Runtime.dll"
             "TargetName" = "8:"
@@ -3559,6 +3871,11 @@
             "AssemblyAsmDisplayName" = "8:EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_550723C201A94706A6EB2B8B19E3C3A8"
+                    {
+                    "Name" = "8:EntityFramework.SqlServer.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\EntityFramework.SqlServer.dll"
             "TargetName" = "8:"
@@ -3585,6 +3902,11 @@
             "AssemblyAsmDisplayName" = "8:System.Reflection.Metadata, Version=1.4.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_55FA81E6B2404248BD6EED2D19DF4938"
+                    {
+                    "Name" = "8:System.Reflection.Metadata.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Reflection.Metadata.dll"
             "TargetName" = "8:"
@@ -3611,6 +3933,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.API, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_57636C844DC7404787926E8B88D6C05A"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.API.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.API.dll"
             "TargetName" = "8:"
@@ -3637,6 +3964,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Configuration.FileExtensions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_5ADE1E5B92DB4BF4B3048DBAEB730CC9"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Configuration.FileExtensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Configuration.FileExtensions.dll"
             "TargetName" = "8:"
@@ -3663,6 +3995,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.FileProviders.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_5B4E0E7ACB0441A1936480A8320ECF87"
+                    {
+                    "Name" = "8:Microsoft.Extensions.FileProviders.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.FileProviders.Abstractions.dll"
             "TargetName" = "8:"
@@ -3689,6 +4026,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Configuration.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_5FE8814F879F44C2B083CB9BE0759338"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Configuration.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Configuration.Abstractions.dll"
             "TargetName" = "8:"
@@ -3715,6 +4057,11 @@
             "AssemblyAsmDisplayName" = "8:System.Linq.Expressions, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_60590C4A223D4868B085CD77714584D1"
+                    {
+                    "Name" = "8:System.Linq.Expressions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Linq.Expressions.dll"
             "TargetName" = "8:"
@@ -3741,6 +4088,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.FileSystemGlobbing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_61661A4D16724FCC93B291FD2A76E9DE"
+                    {
+                    "Name" = "8:Microsoft.Extensions.FileSystemGlobbing.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.FileSystemGlobbing.dll"
             "TargetName" = "8:"
@@ -3767,6 +4119,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.Process, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_62236F02AEDE43F2A978E2F6B4E381EB"
+                    {
+                    "Name" = "8:System.Diagnostics.Process.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.Process.dll"
             "TargetName" = "8:"
@@ -3793,6 +4150,11 @@
             "AssemblyAsmDisplayName" = "8:DistillNET, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_628512A66F554A059D7057ECABC9C865"
+                    {
+                    "Name" = "8:DistillNET.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\DistillNET.dll"
             "TargetName" = "8:"
@@ -3819,6 +4181,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Serialization.Json, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_63B088710C9D445A9E4E3806E24DAD57"
+                    {
+                    "Name" = "8:System.Runtime.Serialization.Json.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Serialization.Json.dll"
             "TargetName" = "8:"
@@ -3845,6 +4212,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Media, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_642141C11D594B71BEF485398FF1066A"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Media.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Media.dll"
             "TargetName" = "8:"
@@ -3871,6 +4243,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_656199758E544D4988AC1BEF94CF8CC9"
+                    {
+                    "Name" = "8:System.Runtime.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.dll"
             "TargetName" = "8:"
@@ -3897,6 +4274,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.SwingAWT, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_67DF35398F074D428CB47E5DAD55D329"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.SwingAWT.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.SwingAWT.dll"
             "TargetName" = "8:"
@@ -3923,6 +4305,11 @@
             "AssemblyAsmDisplayName" = "8:OpenNLP.IKVM, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_67E8E0F1B4194C90B8512C7015C7F02E"
+                    {
+                    "Name" = "8:OpenNLP.IKVM.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\OpenNLP.IKVM.dll"
             "TargetName" = "8:"
@@ -3969,6 +4356,11 @@
             "AssemblyAsmDisplayName" = "8:System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_68BA9DCDFDE94D4CB1DC39CA0B2AA5BC"
+                    {
+                    "Name" = "8:System.ValueTuple.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ValueTuple.dll"
             "TargetName" = "8:"
@@ -3995,6 +4387,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.UnmanagedMemoryStream, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6AAC594782964928976EE4FA422835D4"
+                    {
+                    "Name" = "8:System.IO.UnmanagedMemoryStream.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.UnmanagedMemoryStream.dll"
             "TargetName" = "8:"
@@ -4021,6 +4418,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6ACA556DAEBB45EEA79B16CFEB14D785"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Configuration.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Configuration.dll"
             "TargetName" = "8:"
@@ -4047,6 +4449,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Overlapped, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6B9E4C8F6119412F8F674ACA99CB0ECE"
+                    {
+                    "Name" = "8:System.Threading.Overlapped.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Overlapped.dll"
             "TargetName" = "8:"
@@ -4073,6 +4480,11 @@
             "AssemblyAsmDisplayName" = "8:System.Text.Encoding.Extensions, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6BBC983A445049B4A1C61EFDAD916346"
+                    {
+                    "Name" = "8:System.Text.Encoding.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Text.Encoding.Extensions.dll"
             "TargetName" = "8:"
@@ -4099,6 +4511,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Server.Kestrel, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6BC6BC16983F4FD8B7B45A9FA9F93B6C"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Server.Kestrel.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Server.Kestrel.dll"
             "TargetName" = "8:"
@@ -4125,6 +4542,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Cryptography.Csp, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6F06E0DA73644F29B4526AFEA68853C1"
+                    {
+                    "Name" = "8:System.Security.Cryptography.Csp.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.Csp.dll"
             "TargetName" = "8:"
@@ -4171,6 +4593,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Hosting.Server.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6F599242FC3D4502B9DBA225B41415D0"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Hosting.Server.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Hosting.Server.Abstractions.dll"
             "TargetName" = "8:"
@@ -4197,6 +4624,11 @@
             "AssemblyAsmDisplayName" = "8:Topshelf, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6F950A5F9AC344468DE7143319A60F83"
+                    {
+                    "Name" = "8:Topshelf.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Topshelf.dll"
             "TargetName" = "8:"
@@ -4223,6 +4655,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Claims, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_7170F269A0A2401DAE7B0E8BCBB1B26B"
+                    {
+                    "Name" = "8:System.Security.Claims.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Claims.dll"
             "TargetName" = "8:"
@@ -4249,6 +4686,11 @@
             "AssemblyAsmDisplayName" = "8:CitadelCore.Windows, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_73E88F3BC18946628C11912BD94AF041"
+                    {
+                    "Name" = "8:CitadelCore.Windows.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\CitadelCore.Windows.dll"
             "TargetName" = "8:"
@@ -4275,6 +4717,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Cryptography.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_76A53062720F402BBCFD294B6973EBE6"
+                    {
+                    "Name" = "8:System.Security.Cryptography.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.Primitives.dll"
             "TargetName" = "8:"
@@ -4301,6 +4748,11 @@
             "AssemblyAsmDisplayName" = "8:System.Collections.NonGeneric, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_76BC5B6ABA3B401A859E9C949BFAE324"
+                    {
+                    "Name" = "8:System.Collections.NonGeneric.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Collections.NonGeneric.dll"
             "TargetName" = "8:"
@@ -4327,6 +4779,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Cryptography.X509Certificates, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_78A167507D0742FBB4C54C8EA5C7970F"
+                    {
+                    "Name" = "8:System.Security.Cryptography.X509Certificates.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.X509Certificates.dll"
             "TargetName" = "8:"
@@ -4353,6 +4810,11 @@
             "AssemblyAsmDisplayName" = "8:System.ObjectModel, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_7AF9D93267934916884B06BEE637E7E9"
+                    {
+                    "Name" = "8:System.ObjectModel.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ObjectModel.dll"
             "TargetName" = "8:"
@@ -4379,6 +4841,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Configuration.EnvironmentVariables, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_7B5D266303C743D0AFDB914E02453944"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Configuration.EnvironmentVariables.dll"
             "TargetName" = "8:"
@@ -4405,6 +4872,11 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight.Extras, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_7E5F541604FC413D90576D8286D87D1F"
+                    {
+                    "Name" = "8:GalaSoft.MvvmLight.Extras.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\GalaSoft.MvvmLight.Extras.dll"
             "TargetName" = "8:"
@@ -4431,6 +4903,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Tasks.Parallel, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_7FC055FADCA14FDEA6C11ECFD972597C"
+                    {
+                    "Name" = "8:System.Threading.Tasks.Parallel.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Tasks.Parallel.dll"
             "TargetName" = "8:"
@@ -4457,6 +4934,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Server.Kestrel.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8112EB5E331B4A53BFD66197498CD7C5"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Server.Kestrel.Core.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Server.Kestrel.Core.dll"
             "TargetName" = "8:"
@@ -4483,6 +4965,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.Contracts, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_837C541A93DB4C65A1974D87AFE1652B"
+                    {
+                    "Name" = "8:System.Diagnostics.Contracts.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.Contracts.dll"
             "TargetName" = "8:"
@@ -4529,6 +5016,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Security, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_85AFEB9359F54BC0AF100DC429054FB3"
+                    {
+                    "Name" = "8:System.Net.Security.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Security.dll"
             "TargetName" = "8:"
@@ -4555,6 +5047,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Net.Http.Headers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_86718E93D3B54BF9A95C923BAAEB12FE"
+                    {
+                    "Name" = "8:Microsoft.Net.Http.Headers.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Net.Http.Headers.dll"
             "TargetName" = "8:"
@@ -4581,6 +5078,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.WebSockets.Protocol, Version=0.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_88ADEB1E864642BFB6DE375DF3269978"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.WebSockets.Protocol.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.WebSockets.Protocol.dll"
             "TargetName" = "8:"
@@ -4627,6 +5129,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Ping, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8AE413C4949E48B4A84A63AAA840AA80"
+                    {
+                    "Name" = "8:System.Net.Ping.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Ping.dll"
             "TargetName" = "8:"
@@ -4653,6 +5160,11 @@
             "AssemblyAsmDisplayName" = "8:netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8B5D3525B7D040A99A5644A3FF3BEA68"
+                    {
+                    "Name" = "8:netstandard.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\netstandard.dll"
             "TargetName" = "8:"
@@ -4679,6 +5191,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.Tools, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8B919A59C6F9445BAB898D0BAD83A2BA"
+                    {
+                    "Name" = "8:System.Diagnostics.Tools.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.Tools.dll"
             "TargetName" = "8:"
@@ -4705,6 +5222,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.WebSockets.Client, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8BEE603F730C45FA90AFE41822420D94"
+                    {
+                    "Name" = "8:System.Net.WebSockets.Client.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.WebSockets.Client.dll"
             "TargetName" = "8:"
@@ -4731,6 +5253,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.WebHeaderCollection, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8C307504B132427D9A9C0CD78B84D5E9"
+                    {
+                    "Name" = "8:System.Net.WebHeaderCollection.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.WebHeaderCollection.dll"
             "TargetName" = "8:"
@@ -4757,6 +5284,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8CD0C821CFFF4242ABDD8CCDAE58B21A"
+                    {
+                    "Name" = "8:System.IO.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.dll"
             "TargetName" = "8:"
@@ -4783,6 +5315,11 @@
             "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8EB4E996128340AFADC0FC0074D3A109"
+                    {
+                    "Name" = "8:Newtonsoft.Json.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Newtonsoft.Json.dll"
             "TargetName" = "8:"
@@ -4809,6 +5346,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.StackTrace, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8F27E7A9A6D743D894D12FE1992D6C01"
+                    {
+                    "Name" = "8:System.Diagnostics.StackTrace.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.StackTrace.dll"
             "TargetName" = "8:"
@@ -4835,6 +5377,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_8F4189235D6349B89761B8ABCBBCD63B"
+                    {
+                    "Name" = "8:System.Threading.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.dll"
             "TargetName" = "8:"
@@ -4861,6 +5408,11 @@
             "AssemblyAsmDisplayName" = "8:System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_90241FCD8F5A40BB93ED6566308E9338"
+                    {
+                    "Name" = "8:System.Buffers.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Buffers.dll"
             "TargetName" = "8:"
@@ -4887,6 +5439,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Primitives, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_945382633C6743D88E3E5EA5D74420E5"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Primitives.dll"
             "TargetName" = "8:"
@@ -4939,6 +5496,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.NameResolution, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9847F16B77D1490BB370085DA3300517"
+                    {
+                    "Name" = "8:System.Net.NameResolution.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.NameResolution.dll"
             "TargetName" = "8:"
@@ -4965,6 +5527,11 @@
             "AssemblyAsmDisplayName" = "8:WindowsFirewallHelper, Version=1.0.6403.13182, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9A80D6C75FBD4FA78F75F44E8318C638"
+                    {
+                    "Name" = "8:WindowsFirewallHelper.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\WindowsFirewallHelper.dll"
             "TargetName" = "8:"
@@ -4991,6 +5558,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Principal, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9AD3FC28446146C2916A27087D967800"
+                    {
+                    "Name" = "8:System.Security.Principal.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Principal.dll"
             "TargetName" = "8:"
@@ -5057,6 +5629,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.ThreadPool, Version=4.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9CB675949113490D81C62136A03AD516"
+                    {
+                    "Name" = "8:System.Threading.ThreadPool.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.ThreadPool.dll"
             "TargetName" = "8:"
@@ -5083,6 +5660,11 @@
             "AssemblyAsmDisplayName" = "8:System.Resources.Writer, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9D6B28A0BD74472B8A138E9A0BA25D66"
+                    {
+                    "Name" = "8:System.Resources.Writer.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Resources.Writer.dll"
             "TargetName" = "8:"
@@ -5109,6 +5691,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.InteropServices, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9D97227342764542A7AC1F32663F4BDB"
+                    {
+                    "Name" = "8:System.Runtime.InteropServices.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.InteropServices.dll"
             "TargetName" = "8:"
@@ -5135,6 +5722,11 @@
             "AssemblyAsmDisplayName" = "8:System.Drawing.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_9DE2D0919DD24F96A264E260070B4D80"
+                    {
+                    "Name" = "8:System.Drawing.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Drawing.Primitives.dll"
             "TargetName" = "8:"
@@ -5161,6 +5753,11 @@
             "AssemblyAsmDisplayName" = "8:System.ComponentModel, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A1B6977C49104CB4B0F5CF076B28D809"
+                    {
+                    "Name" = "8:System.ComponentModel.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ComponentModel.dll"
             "TargetName" = "8:"
@@ -5187,6 +5784,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A332AC8CD5C74F4FB090D98D34DD24E4"
+                    {
+                    "Name" = "8:Microsoft.Practices.ServiceLocation.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Practices.ServiceLocation.dll"
             "TargetName" = "8:"
@@ -5213,6 +5815,11 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro.IconPacks.FontAwesome, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A48FB7FFF6504283AC13FDED520888C2"
+                    {
+                    "Name" = "8:MahApps.Metro.IconPacks.FontAwesome.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\MahApps.Metro.IconPacks.FontAwesome.dll"
             "TargetName" = "8:"
@@ -5259,6 +5866,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.WebUtilities, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A64F7A20E14149B78C39236A3291B6CA"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.WebUtilities.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.WebUtilities.dll"
             "TargetName" = "8:"
@@ -5285,6 +5897,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Requests, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A7BA97427FE345C8B7C8C9C8CA511866"
+                    {
+                    "Name" = "8:System.Net.Requests.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Requests.dll"
             "TargetName" = "8:"
@@ -5311,6 +5928,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.CodeAnalysis, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_A92B3032430448728C60E4A80E1C434F"
+                    {
+                    "Name" = "8:Microsoft.CodeAnalysis.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.CodeAnalysis.dll"
             "TargetName" = "8:"
@@ -5357,6 +5979,11 @@
             "AssemblyAsmDisplayName" = "8:System.IO.FileSystem.Primitives, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_AA0F3E404E72485C88961331EA659F4F"
+                    {
+                    "Name" = "8:System.IO.FileSystem.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.IO.FileSystem.Primitives.dll"
             "TargetName" = "8:"
@@ -5383,6 +6010,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.AWT.WinForms, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_AADD36F6B97F403495AEC87429288C87"
+                    {
+                    "Name" = "8:IKVM.AWT.WinForms.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.AWT.WinForms.dll"
             "TargetName" = "8:"
@@ -5409,6 +6041,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.FileVersionInfo, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_ACBB7A53E4154411A8736DB66962315C"
+                    {
+                    "Name" = "8:System.Diagnostics.FileVersionInfo.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.FileVersionInfo.dll"
             "TargetName" = "8:"
@@ -5435,6 +6072,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Numerics, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B041E1DF6BFB4FEDAEB6500A53D13B80"
+                    {
+                    "Name" = "8:System.Runtime.Numerics.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Numerics.dll"
             "TargetName" = "8:"
@@ -5461,6 +6103,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Localedata, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B145E5EB173145D699545451BD2BAD93"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Localedata.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Localedata.dll"
             "TargetName" = "8:"
@@ -5487,6 +6134,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Serialization.Primitives, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B2B29EF66E2E48BBA25F63503604BFDA"
+                    {
+                    "Name" = "8:System.Runtime.Serialization.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Serialization.Primitives.dll"
             "TargetName" = "8:"
@@ -5513,6 +6165,11 @@
             "AssemblyAsmDisplayName" = "8:System.Reflection, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B612261DD2904222937DD7CB42C1BBF4"
+                    {
+                    "Name" = "8:System.Reflection.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Reflection.dll"
             "TargetName" = "8:"
@@ -5579,6 +6236,11 @@
             "AssemblyAsmDisplayName" = "8:System.Data.SQLite.Linq, Version=1.0.105.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B7A2430A4108446FA281E9A5D55C66C9"
+                    {
+                    "Name" = "8:System.Data.SQLite.Linq.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Data.SQLite.Linq.dll"
             "TargetName" = "8:"
@@ -5605,6 +6267,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Sockets, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_B84152AFA3964F5483A6FE802A6FFA16"
+                    {
+                    "Name" = "8:System.Net.Sockets.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Sockets.dll"
             "TargetName" = "8:"
@@ -5631,6 +6298,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BB0C410EA3634DD68D85B0767B63190E"
+                    {
+                    "Name" = "8:System.Net.Http.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Http.dll"
             "TargetName" = "8:"
@@ -5657,6 +6329,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.SecureString, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BBA1C78A56904FFA9DF829057AB8A175"
+                    {
+                    "Name" = "8:System.Security.SecureString.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.SecureString.dll"
             "TargetName" = "8:"
@@ -5683,6 +6360,11 @@
             "AssemblyAsmDisplayName" = "8:System.ComponentModel.Primitives, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BBC7B27A5D404945B6742EE0582F6138"
+                    {
+                    "Name" = "8:System.ComponentModel.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.ComponentModel.Primitives.dll"
             "TargetName" = "8:"
@@ -5709,6 +6391,11 @@
             "AssemblyAsmDisplayName" = "8:System.Data.Common, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BD0A8546124B4044A1D2EEA6B1F8BCDA"
+                    {
+                    "Name" = "8:System.Data.Common.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Data.Common.dll"
             "TargetName" = "8:"
@@ -5735,6 +6422,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.XPath, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BDE3C4BC08C0400DA977BD2CB958DF2D"
+                    {
+                    "Name" = "8:System.Xml.XPath.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.XPath.dll"
             "TargetName" = "8:"
@@ -5761,6 +6453,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.CodeAnalysis.CSharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BE201112BEA142F6AEC9074CDB62C3C1"
+                    {
+                    "Name" = "8:Microsoft.CodeAnalysis.CSharp.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.CodeAnalysis.CSharp.dll"
             "TargetName" = "8:"
@@ -5787,6 +6484,11 @@
             "AssemblyAsmDisplayName" = "8:System.Linq.Queryable, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BF148E404A8D4D8083722042818AEA74"
+                    {
+                    "Name" = "8:System.Linq.Queryable.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Linq.Queryable.dll"
             "TargetName" = "8:"
@@ -5813,6 +6515,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.TextWriterTraceListener, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_BFC09597D8AC44718688C85286B899ED"
+                    {
+                    "Name" = "8:System.Diagnostics.TextWriterTraceListener.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.TextWriterTraceListener.dll"
             "TargetName" = "8:"
@@ -5839,6 +6546,11 @@
             "AssemblyAsmDisplayName" = "8:System.Security.Cryptography.Encoding, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C11BA76A172D42338C91F4F2639B98D5"
+                    {
+                    "Name" = "8:System.Security.Cryptography.Encoding.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.Encoding.dll"
             "TargetName" = "8:"
@@ -5865,6 +6577,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.WebServices, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C258DCC2A97441CC8D4CE99B30CCFE30"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.WebServices.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.WebServices.dll"
             "TargetName" = "8:"
@@ -5891,6 +6608,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Beans, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C2B6ECF719F84B17BE42A75B4AFC85FC"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Beans.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Beans.dll"
             "TargetName" = "8:"
@@ -5917,6 +6639,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Logging.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C30DC62295394EAD816A84875FBC2873"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Logging.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Logging.Abstractions.dll"
             "TargetName" = "8:"
@@ -5943,6 +6670,11 @@
             "AssemblyAsmDisplayName" = "8:BouncyCastle.Crypto, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C62E48F788494642B370A278E8CCEBC6"
+                    {
+                    "Name" = "8:BouncyCastle.Crypto.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\BouncyCastle.Crypto.dll"
             "TargetName" = "8:"
@@ -5969,6 +6701,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Misc, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C74366375A7448EABFE460BBBC5E142A"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Misc.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Misc.dll"
             "TargetName" = "8:"
@@ -5995,6 +6732,11 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro.IconPacks, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C811F6031F4F4E85AF359FC32537E2DA"
+                    {
+                    "Name" = "8:MahApps.Metro.IconPacks.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\MahApps.Metro.IconPacks.dll"
             "TargetName" = "8:"
@@ -6021,6 +6763,11 @@
             "AssemblyAsmDisplayName" = "8:System.Resources.Reader, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C92648B9A23F4010ADAA53569F762EB5"
+                    {
+                    "Name" = "8:System.Resources.Reader.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Resources.Reader.dll"
             "TargetName" = "8:"
@@ -6047,6 +6794,11 @@
             "AssemblyAsmDisplayName" = "8:System.Data.SQLite, Version=1.0.105.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C9780F17C780456393F538124A79D1E9"
+                    {
+                    "Name" = "8:System.Data.SQLite.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Data.SQLite.dll"
             "TargetName" = "8:"
@@ -6073,6 +6825,11 @@
             "AssemblyAsmDisplayName" = "8:System.Globalization.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_CC19F10621AD435AA9F6ACD8A0FD5A89"
+                    {
+                    "Name" = "8:System.Globalization.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Globalization.Extensions.dll"
             "TargetName" = "8:"
@@ -6099,6 +6856,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_CCC356277B5C40F68B1889671B91659C"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll"
             "TargetName" = "8:"
@@ -6145,6 +6907,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Thread, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_CD8ECC90935D492FB1234D28FA99AC38"
+                    {
+                    "Name" = "8:System.Threading.Thread.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Thread.dll"
             "TargetName" = "8:"
@@ -6171,6 +6938,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.Runtime, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_CFA5745E6EEB4CD7A5170E2B8AA28D94"
+                    {
+                    "Name" = "8:IKVM.Runtime.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.Runtime.dll"
             "TargetName" = "8:"
@@ -6197,6 +6969,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.XDocument, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D1ADCB0D1B8243218A9C4E45BC47DB74"
+                    {
+                    "Name" = "8:System.Xml.XDocument.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.XDocument.dll"
             "TargetName" = "8:"
@@ -6223,6 +7000,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.Bind, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D31E1D294B5D4340BD3E59D1E766383D"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.Bind.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.Bind.dll"
             "TargetName" = "8:"
@@ -6249,6 +7031,11 @@
             "AssemblyAsmDisplayName" = "8:System.Data.SQLite.EF6, Version=1.0.105.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D4981DDE206D4274A86E2C7B2BB28886"
+                    {
+                    "Name" = "8:System.Data.SQLite.EF6.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Data.SQLite.EF6.dll"
             "TargetName" = "8:"
@@ -6275,6 +7062,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D577403143D64F80985907BC0009AE4D"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Http.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Http.dll"
             "TargetName" = "8:"
@@ -6301,6 +7093,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.Extensions, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D6635C186E7340FFB7ED7C89CF131887"
+                    {
+                    "Name" = "8:System.Runtime.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.Extensions.dll"
             "TargetName" = "8:"
@@ -6327,6 +7124,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.Options, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D6FA39374843425EAC70A0ADB346FD06"
+                    {
+                    "Name" = "8:Microsoft.Extensions.Options.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.Options.dll"
             "TargetName" = "8:"
@@ -6353,6 +7155,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Tools, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D8510077E8014D0B95EABA90EA8C06A0"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Tools.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Tools.dll"
             "TargetName" = "8:"
@@ -6379,6 +7186,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.FileProviders.Physical, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D92BDDE4F7B448C1A5754A94F1EF5B29"
+                    {
+                    "Name" = "8:Microsoft.Extensions.FileProviders.Physical.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.FileProviders.Physical.dll"
             "TargetName" = "8:"
@@ -6405,6 +7217,11 @@
             "AssemblyAsmDisplayName" = "8:System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D97424EAC15B49D78EFB934A22725EE6"
+                    {
+                    "Name" = "8:System.Numerics.Vectors.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Numerics.Vectors.dll"
             "TargetName" = "8:"
@@ -6431,6 +7248,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.NetworkInformation, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_DE5AB00F37814DD282602B348B82D6F7"
+                    {
+                    "Name" = "8:System.Net.NetworkInformation.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.NetworkInformation.dll"
             "TargetName" = "8:"
@@ -6457,6 +7279,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.CompilerServices.VisualC, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_DFD392E157E349FCAF7CA222DB0B22C0"
+                    {
+                    "Name" = "8:System.Runtime.CompilerServices.VisualC.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.CompilerServices.VisualC.dll"
             "TargetName" = "8:"
@@ -6483,6 +7310,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Primitives, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E02D207D9D12451288342BFAE8A1306A"
+                    {
+                    "Name" = "8:System.Net.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.Primitives.dll"
             "TargetName" = "8:"
@@ -6509,6 +7341,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Http.Features, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E235B4539F034733A243A4A61574A59F"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Http.Features.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Http.Features.dll"
             "TargetName" = "8:"
@@ -6535,6 +7372,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Util, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E2C042031A57431A9205FC9FCB561C49"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Util.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Util.dll"
             "TargetName" = "8:"
@@ -6561,6 +7403,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Tasks.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E71196F15A0F41C5B8CDB9293AE2E85A"
+                    {
+                    "Name" = "8:System.Threading.Tasks.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Tasks.Extensions.dll"
             "TargetName" = "8:"
@@ -6587,6 +7434,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.XPath, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E71C20ACF4664261A7ECB8759C724614"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.XPath.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.XPath.dll"
             "TargetName" = "8:"
@@ -6613,6 +7465,11 @@
             "AssemblyAsmDisplayName" = "8:System.Diagnostics.Tracing, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E73A35FBFE1243B5920C8927DDB01A28"
+                    {
+                    "Name" = "8:System.Diagnostics.Tracing.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Diagnostics.Tracing.dll"
             "TargetName" = "8:"
@@ -6636,9 +7493,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.11.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.12.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
+                    "_E749BDE06CF0455CA7281BDB5F294DD9"
+                    {
+                    "Name" = "8:CloudVeil.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\CloudVeil.exe"
             "TargetName" = "8:"
@@ -6665,6 +7527,11 @@
             "AssemblyAsmDisplayName" = "8:System.Xml.XPath.XDocument, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EA2800A441764377A419CAC850DA6C70"
+                    {
+                    "Name" = "8:System.Xml.XPath.XDocument.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Xml.XPath.XDocument.dll"
             "TargetName" = "8:"
@@ -6691,6 +7558,11 @@
             "AssemblyAsmDisplayName" = "8:System.Globalization, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EA6E8D5AA87340F9846E25811D3BF5FF"
+                    {
+                    "Name" = "8:System.Globalization.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Globalization.dll"
             "TargetName" = "8:"
@@ -6717,6 +7589,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Win32.Primitives, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EBBC61F44B9E450C90A4A8E75DB13C46"
+                    {
+                    "Name" = "8:Microsoft.Win32.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Win32.Primitives.dll"
             "TargetName" = "8:"
@@ -6743,6 +7620,11 @@
             "AssemblyAsmDisplayName" = "8:System.Console, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EC111B969FFB41559304A3ED1A0AC68A"
+                    {
+                    "Name" = "8:System.Console.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Console.dll"
             "TargetName" = "8:"
@@ -6769,6 +7651,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Timer, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_ECACC1834E5D4EA2A70ECAFD5E258E0D"
+                    {
+                    "Name" = "8:System.Threading.Timer.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Timer.dll"
             "TargetName" = "8:"
@@ -6795,6 +7682,11 @@
             "AssemblyAsmDisplayName" = "8:System.Runtime.CompilerServices.Unsafe, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EDA1901041C04906ABD402D692B08655"
+                    {
+                    "Name" = "8:System.Runtime.CompilerServices.Unsafe.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.CompilerServices.Unsafe.dll"
             "TargetName" = "8:"
@@ -6821,6 +7713,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Http.Extensions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EEA0487AD2EF49679AEA3E192E5CA886"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Http.Extensions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Http.Extensions.dll"
             "TargetName" = "8:"
@@ -6847,6 +7744,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.WebSockets.Server, Version=0.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EEE590C7C9744FA0BD251078023BD7A3"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.WebSockets.Server.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.WebSockets.Server.dll"
             "TargetName" = "8:"
@@ -6873,6 +7775,11 @@
             "AssemblyAsmDisplayName" = "8:System.Globalization.Calendars, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_EFAAB04B86DF4F23BCD2E9EAE9AEC62B"
+                    {
+                    "Name" = "8:System.Globalization.Calendars.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Globalization.Calendars.dll"
             "TargetName" = "8:"
@@ -6899,6 +7806,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Hosting, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F03D36724EC64E80AE2DD3DE6078BA35"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Hosting.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Hosting.dll"
             "TargetName" = "8:"
@@ -6925,6 +7837,11 @@
             "AssemblyAsmDisplayName" = "8:System.Resources.ResourceManager, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F0A40B110F644A8888C7DB00D2A3A852"
+                    {
+                    "Name" = "8:System.Resources.ResourceManager.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Resources.ResourceManager.dll"
             "TargetName" = "8:"
@@ -6951,6 +7868,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Http.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F1383C9FA0964FB4B1CF1D67DFDD6C7D"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Http.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Http.Abstractions.dll"
             "TargetName" = "8:"
@@ -6977,6 +7899,11 @@
             "AssemblyAsmDisplayName" = "8:System.Threading.Tasks, Version=4.0.11.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F20F6B1CEF004190B46D8E9412699CE1"
+                    {
+                    "Name" = "8:System.Threading.Tasks.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Threading.Tasks.dll"
             "TargetName" = "8:"
@@ -7003,6 +7930,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Cldrdata, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F319F875992947DB96A70712D6CF39D4"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Cldrdata.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Cldrdata.dll"
             "TargetName" = "8:"
@@ -7049,6 +7981,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Diagnostics, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F42C988C532244AC947507F44012942F"
+                    {
+                    "Name" = "8:Microsoft.AspNetCore.Diagnostics.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Diagnostics.dll"
             "TargetName" = "8:"
@@ -7075,6 +8012,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Naming, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F4B1CF931C44450FB1E4876D3041921F"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Naming.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Naming.dll"
             "TargetName" = "8:"
@@ -7101,6 +8043,11 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Extensions.DependencyInjection.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F4BE9AFC67EE43FB86901D5D5E0E9385"
+                    {
+                    "Name" = "8:Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
             "TargetName" = "8:"
@@ -7127,6 +8074,11 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F4F9417963E348A5A139990D083BDA3D"
+                    {
+                    "Name" = "8:GalaSoft.MvvmLight.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\GalaSoft.MvvmLight.dll"
             "TargetName" = "8:"
@@ -7153,6 +8105,11 @@
             "AssemblyAsmDisplayName" = "8:System.Reflection.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F59FE5C7BCC74B4AA7300DDC924E0C5D"
+                    {
+                    "Name" = "8:System.Reflection.Primitives.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Reflection.Primitives.dll"
             "TargetName" = "8:"
@@ -7179,6 +8136,11 @@
             "AssemblyAsmDisplayName" = "8:System.Collections.Specialized, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F5A766A3402B4537A212A92CF8E54B87"
+                    {
+                    "Name" = "8:System.Collections.Specialized.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Collections.Specialized.dll"
             "TargetName" = "8:"
@@ -7205,6 +8167,11 @@
             "AssemblyAsmDisplayName" = "8:System.Net.WebSockets, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F5AB6FDCFD754398A3D486289509ECCA"
+                    {
+                    "Name" = "8:System.Net.WebSockets.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Net.WebSockets.dll"
             "TargetName" = "8:"
@@ -7251,6 +8218,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Text, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_FAEC8D5E7D7946D6B028D47DDEDA4E96"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Text.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Text.dll"
             "TargetName" = "8:"
@@ -7277,6 +8249,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.Corba, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_FC8986371CB34FDE85D9F41E61CF301E"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.Corba.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.Corba.dll"
             "TargetName" = "8:"
@@ -7300,9 +8277,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.11.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.12.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_FD1AD3B6A959440DB8D217548E05ED75"
+                    {
+                    "Name" = "8:Citadel.Core.Windows.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Citadel.Core.Windows.dll"
             "TargetName" = "8:"
@@ -7329,6 +8311,11 @@
             "AssemblyAsmDisplayName" = "8:IKVM.OpenJDK.XML.Crypto, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_FDA28938341845008A82CE6C5CC78608"
+                    {
+                    "Name" = "8:IKVM.OpenJDK.XML.Crypto.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\IKVM.OpenJDK.XML.Crypto.dll"
             "TargetName" = "8:"
@@ -7355,6 +8342,11 @@
             "AssemblyAsmDisplayName" = "8:System.Text.RegularExpressions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_FE101B43FBC3470C9AA856282BB5E8E1"
+                    {
+                    "Name" = "8:System.Text.RegularExpressions.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Text.RegularExpressions.dll"
             "TargetName" = "8:"
@@ -7437,7 +8429,7 @@
         "Module"
         {
         "ModuleSignature" = "8:CloudVeilPayload.0862028596DF4668AB1D736D2B40424F"
-        "Version" = "8:1.6.12.0"
+        "Version" = "8:1.6.13.0"
         "Title" = "8:SetupPayload64"
         "Subject" = "8:"
         "Author" = "8:CloudVeil Technologies Inc."
