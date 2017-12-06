@@ -70,6 +70,7 @@ namespace Te.Citadel.UI.ViewModels
         public DashboardViewModel()
         {
             BlockEvents = new ObservableCollection<ViewableBlockedRequests>();
+            DiagnosticsEntries = new ObservableCollection<DiagnosticsEntryViewModel>();
         }
 
         /// <summary>
@@ -427,6 +428,32 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private RelayCommand m_testFilterCommand;
+        public RelayCommand TestFilterCommand
+        {
+            get
+            {
+                if(m_testFilterCommand == null)
+                {
+                    m_testFilterCommand = new RelayCommand(() =>
+                    {
+                        FilterTesting test = new FilterTesting();
+                        test.OnFilterTestResult += Test_OnFilterTestResult;
+                        DiagnosticsEntries.Clear();
+                        testsPassed = 0;
+                        testsTotal = 0;
+
+                        Task.Run(() =>
+                        {
+                            test.TestFilter();
+                        });
+                    });
+                }
+
+                return m_testFilterCommand;
+            }
+        }
+
         private RelayCommand m_testSafeSearchCommand;
 
         public RelayCommand TestSafeSearchCommand
@@ -439,7 +466,7 @@ namespace Te.Citadel.UI.ViewModels
                     {
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
-                        DiagnosticsLog = "";
+                        DiagnosticsEntries.Clear();
                         testsPassed = 0;
                         testsTotal = 0;
 
@@ -462,30 +489,48 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         /// <param name="test"></param>
         /// <param name="passed"></param>
-        private void Test_OnFilterTestResult(FilterTest test, bool passed)
+        private void Test_OnFilterTestResult(DiagnosticsEntry entry)
         {
             // TODO: Build UI for this.
-            m_logger.Info("OnFilterTestResult {0} {1}", test.ToString(), passed);
-
-            if (test == FilterTest.AllTestsCompleted)
+            m_logger.Info("OnFilterTestResult {0} {1}", entry.Test.ToString(), entry.Passed);
+            if (entry.Exception != null)
             {
-                DiagnosticsLog += string.Format("{0}/{1} tests passed\r\n", testsPassed, testsTotal);
-            }
-            else if(test == FilterTest.ExceptionOccurred)
-            {
-                DiagnosticsLog += string.Format("Exception occurred during test\r\n");
-            }
-            else
-            {
-                DiagnosticsLog += string.Format("Test {0} {1}\r\n", test.ToString(), passed ? "Passed" : "Failed");
+                m_logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
             }
 
-            if (passed)
+            if(entry.Test == FilterTest.BlockingTest)
             {
-                testsPassed++;
+                CitadelApp.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    (CitadelApp.Current.MainWindow as Windows.MainWindow).ShowUserMessage("Test Details", entry.Details);
+                });
             }
 
-            testsTotal++;
+            if(entry.Test == FilterTest.AllTestsCompleted)
+            {
+                return;
+            }
+
+            CitadelApp.Current.Dispatcher.InvokeAsync(() =>
+            {
+                // FIXME: Don't do CitadelApp.Current.MainWindow as Windows.MainWindow, pass it instead.
+                DiagnosticsEntries.Add(new DiagnosticsEntryViewModel(CitadelApp.Current.MainWindow as Windows.MainWindow, entry));
+            });
+        }
+
+        private ObservableCollection<DiagnosticsEntryViewModel> m_diagnosticsEntries;
+        public ObservableCollection<DiagnosticsEntryViewModel> DiagnosticsEntries
+        {
+            get
+            {
+                return m_diagnosticsEntries;
+            }
+
+            set
+            {
+                m_diagnosticsEntries = value;
+                RaisePropertyChanged(nameof(DiagnosticsEntries));
+            }
         }
 
         private string m_diagnosticsLog;

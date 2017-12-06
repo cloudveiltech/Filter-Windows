@@ -1,5 +1,7 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight.Command;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 namespace Te.Citadel.Testing
 {
     public enum FilterTest {
+        BlockingTest = 1,
         GoogleSafeSearchTest,
         BingSafeSearchTest,
         YoutubeSafeSearchTest,
@@ -15,9 +18,34 @@ namespace Te.Citadel.Testing
         ExceptionOccurred
     }
 
-    public delegate void FilterTestResultHandler(FilterTest test, bool passed);
+    public class DiagnosticsEntry
+    {
+        public DiagnosticsEntry()
+        {
 
-    class FilterTesting
+        }
+
+        public DiagnosticsEntry(FilterTest test, bool passed, string details)
+        {
+            Test = test;
+            Passed = passed;
+            Details = details;
+        }
+
+        public FilterTest Test { get; set; }
+        public bool Passed { get; set; }
+        public string Details { get; set; }
+
+        public Exception Exception { get; set; }
+    }
+
+    public delegate void FilterTestResultHandler(DiagnosticsEntry entry);
+
+    /// <summary>
+    /// My reasoning behind putting this code in CloudVeil.exe is that testing of the filter should not be in the service which does the filtering,
+    /// but rather in an application external to the FilterServiceProvider.
+    /// </summary>
+    public class FilterTesting
     {
         /// <summary>
         /// Used by filter test to determine whether the filter is working or not.
@@ -30,10 +58,50 @@ namespace Te.Citadel.Testing
 
         public void TestFilter()
         {
-            // Load 5 known bad sites and see if they contain the magic string.
-            // redtube.com - porn
-            // 777.com - gambling
-            // bestgore.com
+            try
+            {
+                var webRequest = WebRequest.CreateHttp("http://777.com");
+
+                HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
+
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    string ret = reader.ReadToEnd();
+                    if (ret.Contains(filterMagicString))
+                    {
+                        OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, true, "Your filter is up and running!"));
+                    }
+                    else
+                    {
+                        OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Your filter did not block the test site. Please reboot to see if that fixes the problem."));
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response == null)
+                {
+                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "No response detected from test site. Check your internet connection and try again.")
+                    {
+                        Exception = ex
+                    });
+                }
+                else
+                {
+                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Unexpected error occurred. Check your internet connection and try again later.")
+                    {
+                        Exception = ex
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // FIXME: Any exception needs to get logged for transmission to the cloudveil server.
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Unexpected error occurred. " + ex.Message + ". Please contact support.")
+                {
+                    Exception = ex
+                });
+            }
         }
 
         private string getIpFromRequest(string url)
@@ -56,6 +124,17 @@ namespace Te.Citadel.Testing
 
         }
 
+        private bool doUrlIpsMatch(string url1, string url2, out string ip1, out string ip2)
+        {
+            string ip = this.getIpFromRequest("https://www.bing.com");
+            string strictIp = this.getIpFromRequest("https://strict.bing.com");
+
+            ip1 = ip;
+            ip2 = strictIp;
+
+            return ip == strictIp;
+        }
+
         public void TestDNS()
         {
             int testsPassed = 0;
@@ -63,55 +142,34 @@ namespace Te.Citadel.Testing
 
             try
             {
-                IPHostEntry entry = Dns.GetHostEntry("www.google.com");
-
-                WebClient client = new WebClient();
-
                 string ip = this.getIpFromRequest("https://www.google.com");
                 if (ip == GoogleSafeSearchIp)
                 {
-                    OnFilterTestResult?.Invoke(FilterTest.GoogleSafeSearchTest, true);
-                    testsPassed++;
+                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.GoogleSafeSearchTest, true, string.Format("IP {0} matches IP {1}", ip, GoogleSafeSearchIp)));
                 }
                 else
                 {
-                    OnFilterTestResult?.Invoke(FilterTest.GoogleSafeSearchTest, false);
-                    testsFailed++;
+                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.GoogleSafeSearchTest, false, string.Format("IP {0} does not match expected IP {1}", ip, GoogleSafeSearchIp)));
                 }
 
-                ip = this.getIpFromRequest("https://www.bing.com");
-                string strictIp = this.getIpFromRequest("https://strict.bing.com");
+                string ip1, ip2, details;
+                bool result;
 
-                if(ip == strictIp)
-                {
-                    OnFilterTestResult?.Invoke(FilterTest.BingSafeSearchTest, true);
-                    testsPassed++;
-                }
-                else
-                {
-                    OnFilterTestResult?.Invoke(FilterTest.BingSafeSearchTest, false);
-                    testsFailed++;
-                }
+                result = doUrlIpsMatch("https://www.bing.com", "https://strict.bing.com", out ip1, out ip2);
+                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
 
-                ip = this.getIpFromRequest("https://www.youtube.com");
-                strictIp = this.getIpFromRequest("https://restrict.youtube.com");
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BingSafeSearchTest, result, details));
 
-                if(ip == strictIp)
-                {
-                    OnFilterTestResult?.Invoke(FilterTest.YoutubeSafeSearchTest, true);
-                    testsPassed++;
-                }
-                else
-                {
-                    OnFilterTestResult?.Invoke(FilterTest.YoutubeSafeSearchTest, false);
-                    testsFailed++;
-                }
+                result = doUrlIpsMatch("https://www.youtube.com", "https://restrict.youtube.com", out ip1, out ip2);
+                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
 
-                OnFilterTestResult?.Invoke(FilterTest.AllTestsCompleted, true);
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BingSafeSearchTest, result, details));
+
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }
             catch(Exception ex)
             {
-                OnFilterTestResult?.Invoke(FilterTest.ExceptionOccurred, false);
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, "") { Exception = ex });
             }
         }
 
