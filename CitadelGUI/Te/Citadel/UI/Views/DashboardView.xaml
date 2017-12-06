@@ -420,6 +420,43 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="Diagnostics">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Filter"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Margin="8"
+                            />
+
+                    <Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Safe Search"
+                            Grid.Column="0"
+                            Grid.Row="1"
+                            Margin="8"
+                            Command="{Binding TestSafeSearchCommand}"
+                            />
+
+                    <TextBlock
+                        Text="{Binding DiagnosticsLog}"
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        Margin="8"
+                        />
+
+                </Grid>
+                
+            </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>
 </local:BaseView>

@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.Extensions;
+using Te.Citadel.Testing;
 using Te.Citadel.UI.Models;
 using Te.Citadel.UI.Views;
 using Te.Citadel.Util;
@@ -51,7 +52,6 @@ namespace Te.Citadel.UI.ViewModels
 
     public class DashboardViewModel : BaseCitadelViewModel
     {
-        
 
         /// <summary>
         /// The model.
@@ -424,6 +424,82 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_relinquishRelaxedPolicyCommand;
+            }
+        }
+
+        private RelayCommand m_testSafeSearchCommand;
+
+        public RelayCommand TestSafeSearchCommand
+        {
+            get
+            {
+                if(m_testSafeSearchCommand == null)
+                {
+                    m_testSafeSearchCommand = new RelayCommand(() =>
+                    {
+                        FilterTesting test = new FilterTesting();
+                        test.OnFilterTestResult += Test_OnFilterTestResult;
+                        DiagnosticsLog = "";
+                        testsPassed = 0;
+                        testsTotal = 0;
+
+                        Task.Run(() =>
+                        {
+                            test.TestDNS();
+                        });
+                    });
+                }
+
+                return m_testSafeSearchCommand;
+            }
+        }
+
+        private int testsPassed = 0;
+        private int testsTotal = 0;
+
+        /// <summary>
+        /// Used by filter test to propagate results back to the UI.
+        /// </summary>
+        /// <param name="test"></param>
+        /// <param name="passed"></param>
+        private void Test_OnFilterTestResult(FilterTest test, bool passed)
+        {
+            // TODO: Build UI for this.
+            m_logger.Info("OnFilterTestResult {0} {1}", test.ToString(), passed);
+
+            if (test == FilterTest.AllTestsCompleted)
+            {
+                DiagnosticsLog += string.Format("{0}/{1} tests passed\r\n", testsPassed, testsTotal);
+            }
+            else if(test == FilterTest.ExceptionOccurred)
+            {
+                DiagnosticsLog += string.Format("Exception occurred during test\r\n");
+            }
+            else
+            {
+                DiagnosticsLog += string.Format("Test {0} {1}\r\n", test.ToString(), passed ? "Passed" : "Failed");
+            }
+
+            if (passed)
+            {
+                testsPassed++;
+            }
+
+            testsTotal++;
+        }
+
+        private string m_diagnosticsLog;
+        public string DiagnosticsLog
+        {
+            get
+            {
+                return m_diagnosticsLog;
+            }
+
+            set
+            {
+                m_diagnosticsLog = value;
+                RaisePropertyChanged(nameof(DiagnosticsLog));
             }
         }
 

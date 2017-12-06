@@ -99,6 +99,7 @@
     <Compile Include="Te\Citadel\PostInstallCommand.Designer.cs">
       <DependentUpon>PostInstallCommand.cs</DependentUpon>
     </Compile>
+    <Compile Include="Te\Citadel\Testing\FilterTesting.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
