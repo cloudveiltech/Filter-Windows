@@ -450,6 +450,20 @@
                                 {
                                 }
                             }
+                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_DEB3390806D04B3F8D74377A81E09177"
+                            {
+                            "Name" = "8:FilterServiceProvider"
+                            "Condition" = "8:"
+                            "AlwaysCreate" = "11:TRUE"
+                            "DeleteAtUninstall" = "11:TRUE"
+                            "Transitive" = "11:FALSE"
+                                "Keys"
+                                {
+                                }
+                                "Values"
+                                {
+                                }
+                            }
                         }
                         "Values"
                         {
