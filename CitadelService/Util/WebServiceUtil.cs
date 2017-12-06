@@ -731,8 +731,18 @@ namespace Citadel.Core.Windows.Util
                     return null;
                 }
 
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                string version = System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("&identifier={0}&device_id={1}", FingerPrint.Value, Uri.EscapeDataString(deviceName)));
+                string postString = string.Format("&identifier={0}&device_id={1}", FingerPrint.Value, Uri.EscapeDataString(deviceName));
+
+                if(resource == ServiceResource.UserDataSumCheck)
+                {
+                    postString += string.Format("&app_version={0}", version);
+                }
+
+                var formData = System.Text.Encoding.UTF8.GetBytes(postString);
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 request.ContentLength = formData.Length;
