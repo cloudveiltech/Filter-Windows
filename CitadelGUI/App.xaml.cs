@@ -777,6 +777,29 @@ namespace Te.Citadel
                 // Force it to stay visible.
                 m_trayIcon.Visible = true;
             };
+
+            var menuItems = new List<System.Windows.Forms.MenuItem>();
+            menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
+            menuItems.Add(new System.Windows.Forms.MenuItem("Settings", TrayIcon_OpenSettings));
+            menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
+            
+            m_trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
+        }
+
+        private void TrayIcon_Open(object sender, EventArgs e)
+        {
+            BringAppToFocus();
+        }
+
+        private void TrayIcon_OpenSettings(object sender, EventArgs e)
+        {
+            BringAppToFocus();
+            m_viewDashboard.SwitchTab(1);
+        }
+
+        private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
+        {
+            OnRelaxedPolicyRequested(true);
         }
 
         /// <summary>
@@ -1016,16 +1039,29 @@ namespace Te.Citadel
             }
         }
 
+        private void OnRelaxedPolicyRequested()
+        {
+            OnRelaxedPolicyRequested(false);
+        }
+
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        private async void OnRelaxedPolicyRequested()
+        private async void OnRelaxedPolicyRequested(bool fromTray)
         {
             using(var ipcClient = new IPCClient())
             {
                 ipcClient.ConnectedToServer = () =>
                 {
                     ipcClient.RequestRelaxedPolicy();
+                };
+
+                ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)
+                {
+                    if (fromTray)
+                    {
+                        m_trayIcon.ShowBalloonTip(3000, "Relaxed Policy", string.Format("Relaxed policy granted. It will expire in {0} minutes.", (int)msg.PolicyInfo.RelaxDuration.TotalMinutes), System.Windows.Forms.ToolTipIcon.Info);
+                    }
                 };
 
                 ipcClient.WaitForConnection();
