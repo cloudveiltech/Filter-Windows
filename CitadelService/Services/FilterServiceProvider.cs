@@ -2533,7 +2533,8 @@ namespace CitadelService.Services
                             }
                             catch { }
 
-                            m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
+                            m_filterCollection = new FilterDbCollection();
+                            //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
                             m_categoryIndex.SetAll(false);
 
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
