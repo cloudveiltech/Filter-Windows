@@ -717,7 +717,9 @@ namespace Citadel.Core.Windows.Util
 
                 var accessToken = AuthToken;
 
-                m_logger.Info("RequestResource1: accessToken=" + accessToken);
+                //m_logger.Info("RequestResource1: accessToken=" + accessToken);
+                m_logger.Info("RequestResource: accessToken length={0}", accessToken == null ? "(null)" : accessToken.Length.ToString());
+                m_logger.Info("RequestResource: {0}", resource.ToString());
 
                 if(StringExtensions.Valid(accessToken))
                 {

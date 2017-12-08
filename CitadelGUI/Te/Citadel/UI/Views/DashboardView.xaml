@@ -458,11 +458,38 @@
                               ItemsSource="{Binding DiagnosticsEntries}"
                               VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn
+                                Width="24"
+                                Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Check"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding PassedVisibility}"
+                                                Foreground="#CC13EC08"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Times"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding FailedVisibility}"
+                                                Foreground="#CCFE090F"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn
                                 Width="100"
-                                Binding="{Binding PassedText, Mode=OneWay}"
-                                Header="Passed"/>
-
+                                Binding="{Binding PassedText}"
+                                Header="Passed" />
+                            
                             <DataGridTextColumn
                                 Width="150"
                                 Binding="{Binding TestText, Mode=OneWay}"

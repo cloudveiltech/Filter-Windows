@@ -152,7 +152,23 @@ namespace Te.Citadel.Testing
         private bool doUrlIpsMatch(string url1, string url2, out string ip1, out string ip2)
         {
             string ip = this.getIpFromRequest(url1);
-            string strictIp = this.getIpFromRequest(url2);
+            string strictIp = null;
+
+            Uri uri = new Uri(url2);
+            url2 = uri.Authority;
+
+            IPHostEntry strictIpEntry = Dns.GetHostEntry(url2);
+
+            if (strictIpEntry != null)
+            {
+                strictIp = strictIpEntry.AddressList[0].ToString();
+            }
+            else
+            {
+                ip1 = ip;
+                ip2 = null;
+                return false;
+            }
 
             ip1 = ip;
             ip2 = strictIp;
@@ -194,7 +210,7 @@ namespace Te.Citadel.Testing
             }
             catch(Exception ex)
             {
-                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, "") { Exception = ex });
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, ex.ToString()) { Exception = ex });
             }
         }
 
