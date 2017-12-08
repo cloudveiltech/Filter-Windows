@@ -85,7 +85,7 @@ namespace Te.Citadel.Testing
         {
             try
             {
-                var webRequest = WebRequest.CreateHttp("http://777.com");
+                var webRequest = WebRequest.CreateHttp("http://test.cloudveil.org");
 
                 HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
 
