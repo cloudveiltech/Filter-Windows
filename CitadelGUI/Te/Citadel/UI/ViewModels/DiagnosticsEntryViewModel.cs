@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Te.Citadel.Testing;
 using Te.Citadel.UI.Windows;
 
@@ -44,6 +45,22 @@ namespace Te.Citadel.UI.ViewModels
             get
             {
                 return Entry.Passed ? "Passed" : "Failed";
+            }
+        }
+
+        public Visibility PassedVisibility
+        {
+            get
+            {
+                return Entry.Passed ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility FailedVisibility
+        {
+            get
+            {
+                return Entry.Passed ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 

@@ -60,5 +60,10 @@ namespace Te.Citadel.UI.Views
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
+
+        public void SwitchTab(int tabIdx)
+        {
+            Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = tabIdx));
+        }
     }
 }

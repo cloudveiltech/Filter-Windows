@@ -38,5 +38,10 @@ namespace Te.Citadel.UI.Windows
                 LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), err);
             }
         }
+
+        public void SwitchDashboardViewTab(int tabIdx)
+        {
+            
+        }
     }
 }
