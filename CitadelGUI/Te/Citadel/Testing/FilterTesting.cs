@@ -42,8 +42,9 @@ namespace Te.Citadel.Testing
     public delegate void FilterTestResultHandler(DiagnosticsEntry entry);
 
     /// <summary>
-    /// My reasoning behind putting this code in CloudVeil.exe is that testing of the filter should not be in the service which does the filtering,
-    /// but rather in an application external to the FilterServiceProvider.
+    /// FilterServiceProvider.exe may not be running when we want to test the filter, so we put the filter test code into the GUI.
+    /// 
+    /// This class tests the filter and the computer's DNS settings for safe-search.
     /// </summary>
     public class FilterTesting
     {
@@ -55,6 +56,30 @@ namespace Te.Citadel.Testing
         public const string GoogleSafeSearchIp = "216.239.38.120";
 
         public event FilterTestResultHandler OnFilterTestResult;
+
+        /*public void TestInternet()
+        {
+            try
+            {
+                IPHostEntry ipEntry = Dns.GetHostEntry("connectivitycheck.cloudveil.org");
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            try
+            {
+                var webRequest = WebRequest.CreateHttp("http://connectivitycheck.cloudveil.org/ncsi.txt");]
+
+                HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
+
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+
+                }
+            }
+        }*/
 
         public void TestFilter()
         {
@@ -88,7 +113,7 @@ namespace Te.Citadel.Testing
                 }
                 else
                 {
-                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Unexpected error occurred. Check your internet connection and try again later.")
+                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Unexpected error occurred. " + ex.Message + ". Check your internet connection and try again later.")
                     {
                         Exception = ex
                     });
@@ -126,8 +151,24 @@ namespace Te.Citadel.Testing
 
         private bool doUrlIpsMatch(string url1, string url2, out string ip1, out string ip2)
         {
-            string ip = this.getIpFromRequest("https://www.bing.com");
-            string strictIp = this.getIpFromRequest("https://strict.bing.com");
+            string ip = this.getIpFromRequest(url1);
+            string strictIp = null;
+
+            Uri uri = new Uri(url2);
+            url2 = uri.Authority;
+
+            IPHostEntry strictIpEntry = Dns.GetHostEntry(url2);
+
+            if (strictIpEntry != null)
+            {
+                strictIp = strictIpEntry.AddressList[0].ToString();
+            }
+            else
+            {
+                ip1 = ip;
+                ip2 = null;
+                return false;
+            }
 
             ip1 = ip;
             ip2 = strictIp;
@@ -163,13 +204,13 @@ namespace Te.Citadel.Testing
                 result = doUrlIpsMatch("https://www.youtube.com", "https://restrict.youtube.com", out ip1, out ip2);
                 details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
 
-                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BingSafeSearchTest, result, details));
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.YoutubeSafeSearchTest, result, details));
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }
             catch(Exception ex)
             {
-                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, "") { Exception = ex });
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, ex.ToString()) { Exception = ex });
             }
         }
 

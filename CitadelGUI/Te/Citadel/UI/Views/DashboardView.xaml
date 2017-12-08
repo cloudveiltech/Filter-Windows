@@ -26,7 +26,7 @@
     </local:BaseView.DataContext>
     <Grid>
 
-        <Controls:MetroAnimatedSingleRowTabControl>
+        <Controls:MetroAnimatedSingleRowTabControl x:Name="tabControl">
 
             <TabItem Header="History">
                 <Grid>
@@ -423,7 +423,7 @@
             <TabItem Header="Diagnostics">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="36" />
+                        <RowDefinition Height="21" />
                         <RowDefinition Height="36" />
                         <RowDefinition Height="36" />
                         <RowDefinition Height="36" />
@@ -436,7 +436,7 @@
                     <Button Style="{StaticResource AccentedSquareButtonStyle}"
                             Content="Test Filter"
                             Grid.Column="0"
-                            Grid.Row="0"
+                            Grid.Row="1"
                             Margin="4"
                             Command="{Binding TestFilterCommand}"
                             />
@@ -444,25 +444,52 @@
                     <Button Style="{StaticResource AccentedSquareButtonStyle}"
                             Content="Test Safe Search"
                             Grid.Column="0"
-                            Grid.Row="1"
+                            Grid.Row="2"
                             Margin="4"
                             Command="{Binding TestSafeSearchCommand}"
                             />
 
                     <DataGrid Grid.Column="1"
-                              Grid.Row="0"
-                              Grid.RowSpan="5"
+                              Grid.Row="1"
+                              Grid.RowSpan="4"
                               Margin="8"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               ItemsSource="{Binding DiagnosticsEntries}"
                               VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn
+                                Width="24"
+                                Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Check"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding PassedVisibility}"
+                                                Foreground="#CC13EC08"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Times"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding FailedVisibility}"
+                                                Foreground="#CCFE090F"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn
                                 Width="100"
-                                Binding="{Binding PassedText, Mode=OneWay}"
-                                Header="Passed"/>
-
+                                Binding="{Binding PassedText}"
+                                Header="Passed" />
+                            
                             <DataGridTextColumn
                                 Width="150"
                                 Binding="{Binding TestText, Mode=OneWay}"
