@@ -765,6 +765,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_9793BDDD63FF4018AAD8423D946EF390"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1360,30 +1366,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_603ACD53734241D5ACC02B6048B91CE2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DAC9D6CC39624A82A021B046F82F8F81"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8FFC6F41CF674B4AAEF92D044E87E543"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9793BDDD63FF4018AAD8423D946EF390"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FDA28938341845008A82CE6C5CC78608"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1451,6 +1433,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_E2C042031A57431A9205FC9FCB561C49"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_DAC9D6CC39624A82A021B046F82F8F81"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1594,6 +1582,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_9793BDDD63FF4018AAD8423D946EF390"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8FFC6F41CF674B4AAEF92D044E87E543"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_8F27E7A9A6D743D894D12FE1992D6C01"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1655,6 +1655,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_642141C11D594B71BEF485398FF1066A"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_603ACD53734241D5ACC02B6048B91CE2"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1823,6 +1829,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_81F745121006405BA208BB4B80254F8A"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -5624,6 +5636,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_951B9380582DF1E7083BB146B5B972DE"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+                "ScatterAssemblies"
+                {
+                    "_951B9380582DF1E7083BB146B5B972DE"
+                    {
+                    "Name" = "8:System.Net.Http.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Net.Http.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9793BDDD63FF4018AAD8423D946EF390"
             {
             "AssemblyRegister" = "3:1"
@@ -8626,7 +8669,7 @@
         "Module"
         {
         "ModuleSignature" = "8:CloudVeilPayload.0862028596DF4668AB1D736D2B40424F"
-        "Version" = "8:1.6.14.0"
+        "Version" = "8:1.6.15.0"
         "Title" = "8:SetupPayload64"
         "Subject" = "8:"
         "Author" = "8:CloudVeil Technologies Inc."

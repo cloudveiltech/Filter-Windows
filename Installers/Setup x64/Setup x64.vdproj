@@ -58,12 +58,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D1E4110BDD56467B98704EAA895D317A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_52BFD0D4DC0E420EAD6B352477546362"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -289,11 +283,6 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_D1E4110BDD56467B98704EAA895D317A"
-                    {
-                    "Name" = "8:InstallGuard.exe"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"
@@ -317,7 +306,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.13.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.14.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_F4B66C76261A43028EC13AABA25DA095"
@@ -400,15 +389,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{9400DE46-6DD0-45A3-B689-9D2CC6A01FD1}"
-        "PackageCode" = "8:{556797DC-CF14-4B74-A5AA-334C8289E6E9}"
+        "ProductCode" = "8:{1B76745C-91CB-46AE-9C98-811FACD4F0B5}"
+        "PackageCode" = "8:{525F6638-C8D7-4B22-8928-A2CABE99E713}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.14"
+        "ProductVersion" = "8:1.6.15"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"

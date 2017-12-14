@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_00BEA9713D8F926AF674FE0710E9A011"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_01661A78E81544059D0EF7568F1951B0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1366,37 +1372,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A14CBFE90604474EA66B6D9B6CA16C29"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6C4AE007196B44C0B60FE94353DEFEA3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_18ADB409D6CF4360B2BBBD51B3985685"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_814918A385CB4A4C81943B8FEDFF6401"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9391778E8ECA43DCBE5E2685D59CFA59"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_3F1B221A7A6249ACAB13AF3BE0162787"
+        "OwnerKey" = "8:_9D9DF977CC7F4E7E87133DD63DEDD201"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1432,13 +1408,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E23CFF834E114D38A8185C469CB1D5F2"
+        "OwnerKey" = "8:_E25B7A9F75064FE6904AA3A2D1854626"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E072E139EA384022B04220DAD4EA2347"
+        "OwnerKey" = "8:_E23CFF834E114D38A8185C469CB1D5F2"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1451,12 +1427,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_D24C009CC01E4D5E94465B36D8BF0D96"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D22C30A44BFE48FAA667705372E6E3F9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1486,25 +1456,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C3237655BFC842499CC39C557DC7FEB5"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C3237655BFC842499CC39C557DC7FEB5"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BF96AD1B4B644C95B866A5DFE34DA745"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_BBCA78CC701C478D977F430B724472A6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1552,31 +1504,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A9C3381D45A643EDA87CE5BD76B159C6"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A74A4BD695F24F3AB321631E8F344E20"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A368CD272CB7462C9A99E497F501792F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A3391743662F444B878C95E8DF8B1C3C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9D9DF977CC7F4E7E87133DD63DEDD201"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1589,12 +1523,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_94635D6407D74ABB97975368AE78FB2C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_90227568FA99454589059712D601B033"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1702,12 +1630,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_44F61AD0682549DC8CD56BC018049A41"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_43EAB630741A42F4AE996108E4118EE6"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1715,12 +1637,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_411A073AD6FC472CA3A712F54A826FDE"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_405CD6F403BD48C58BD9FEE29A5D0B20"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1738,7 +1654,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_37273870CD3F448F94E12E6723A21370"
+        "OwnerKey" = "8:_3F1B221A7A6249ACAB13AF3BE0162787"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1769,18 +1685,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_1AE752308B5843B1A1C1ACAFE2EE8717"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_175930BF61404648AE4B613DE5E4B020"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_0DD536BD115348D9BC1D9E5A0C2C3D89"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1841,6 +1745,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_8804DD287AC64626AE93C9705153814E"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_00BEA9713D8F926AF674FE0710E9A011"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1959,6 +1869,37 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_00BEA9713D8F926AF674FE0710E9A011"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+                "ScatterAssemblies"
+                {
+                    "_00BEA9713D8F926AF674FE0710E9A011"
+                    {
+                    "Name" = "8:System.Net.Http.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Net.Http.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_46E6D2F2ABA84935950C5B6504FA20EF"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_01661A78E81544059D0EF7568F1951B0"
@@ -2473,11 +2414,6 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight.Platform, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_0DD536BD115348D9BC1D9E5A0C2C3D89"
-                    {
-                    "Name" = "8:GalaSoft.MvvmLight.Platform.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\GalaSoft.MvvmLight.Platform.dll"
             "TargetName" = "8:"
@@ -2625,7 +2561,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CitadelCore.Windows, Version=1.3.3.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:CitadelCore.Windows, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_13004E4988EB45418A4D6A5D3A74AA61"
@@ -2721,11 +2657,6 @@
             "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_175930BF61404648AE4B613DE5E4B020"
-                    {
-                    "Name" = "8:Newtonsoft.Json.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Newtonsoft.Json.dll"
             "TargetName" = "8:"
@@ -2752,11 +2683,6 @@
             "AssemblyAsmDisplayName" = "8:SQLitePCLRaw.provider.e_sqlite3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9c301db686d0bd12, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_18ADB409D6CF4360B2BBBD51B3985685"
-                    {
-                    "Name" = "8:SQLitePCLRaw.provider.e_sqlite3.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\SQLitePCLRaw.provider.e_sqlite3.dll"
             "TargetName" = "8:"
@@ -2814,11 +2740,6 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_1978EC9D741E4CF0B6846FBE73B2B9FA"
-                    {
-                    "Name" = "8:Microsoft.Data.Sqlite.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Microsoft.Data.Sqlite.dll"
             "TargetName" = "8:"
@@ -3565,11 +3486,6 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_37273870CD3F448F94E12E6723A21370"
-                    {
-                    "Name" = "8:Microsoft.Practices.ServiceLocation.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Microsoft.Practices.ServiceLocation.dll"
             "TargetName" = "8:"
@@ -3717,7 +3633,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.14.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.13.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_3F608FB4F7C548908F8F25149189A76D"
@@ -3782,11 +3698,6 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro.IconPacks, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_405CD6F403BD48C58BD9FEE29A5D0B20"
-                    {
-                    "Name" = "8:MahApps.Metro.IconPacks.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\MahApps.Metro.IconPacks.dll"
             "TargetName" = "8:"
@@ -3875,11 +3786,6 @@
             "AssemblyAsmDisplayName" = "8:Topshelf, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_44F61AD0682549DC8CD56BC018049A41"
-                    {
-                    "Name" = "8:Topshelf.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Topshelf.dll"
             "TargetName" = "8:"
@@ -4812,11 +4718,6 @@
             "AssemblyAsmDisplayName" = "8:SQLitePCLRaw.batteries_green, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_6C4AE007196B44C0B60FE94353DEFEA3"
-                    {
-                    "Name" = "8:SQLitePCLRaw.batteries_green.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\SQLitePCLRaw.batteries_green.dll"
             "TargetName" = "8:"
@@ -5246,11 +5147,6 @@
             "AssemblyAsmDisplayName" = "8:SQLitePCLRaw.core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1488e028ca7ab535, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_814918A385CB4A4C81943B8FEDFF6401"
-                    {
-                    "Name" = "8:SQLitePCLRaw.core.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\SQLitePCLRaw.core.dll"
             "TargetName" = "8:"
@@ -5700,11 +5596,6 @@
             "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.14.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_90227568FA99454589059712D601B033"
-                    {
-                    "Name" = "8:Citadel.IPC.Common.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Citadel.IPC.Common.dll"
             "TargetName" = "8:"
@@ -5731,11 +5622,6 @@
             "AssemblyAsmDisplayName" = "8:SQLitePCLRaw.batteries_v2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8226ea5df37bcae9, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_9391778E8ECA43DCBE5E2685D59CFA59"
-                    {
-                    "Name" = "8:SQLitePCLRaw.batteries_v2.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\SQLitePCLRaw.batteries_v2.dll"
             "TargetName" = "8:"
@@ -6154,11 +6040,6 @@
             "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.14.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
-                    "_A14CBFE90604474EA66B6D9B6CA16C29"
-                    {
-                    "Name" = "8:CloudVeil.exe"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\CloudVeil.exe"
             "TargetName" = "8:"
@@ -6216,11 +6097,6 @@
             "AssemblyAsmDisplayName" = "8:NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_A368CD272CB7462C9A99E497F501792F"
-                    {
-                    "Name" = "8:NLog.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\NLog.dll"
             "TargetName" = "8:"
@@ -6371,11 +6247,6 @@
             "AssemblyAsmDisplayName" = "8:NamedPipeWrapper, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_A9C3381D45A643EDA87CE5BD76B159C6"
-                    {
-                    "Name" = "8:NamedPipeWrapper.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\NamedPipeWrapper.dll"
             "TargetName" = "8:"
@@ -6752,11 +6623,6 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro.IconPacks.FontAwesome, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_BBCA78CC701C478D977F430B724472A6"
-                    {
-                    "Name" = "8:MahApps.Metro.IconPacks.FontAwesome.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\MahApps.Metro.IconPacks.FontAwesome.dll"
             "TargetName" = "8:"
@@ -6907,11 +6773,6 @@
             "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.14.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_C3237655BFC842499CC39C557DC7FEB5"
-                    {
-                    "Name" = "8:Citadel.Core.Windows.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\Citadel.Core.Windows.dll"
             "TargetName" = "8:"
@@ -7454,11 +7315,6 @@
             "AssemblyAsmDisplayName" = "8:System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_D22C30A44BFE48FAA667705372E6E3F9"
-                    {
-                    "Name" = "8:System.Windows.Interactivity.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\System.Windows.Interactivity.dll"
             "TargetName" = "8:"
@@ -7804,11 +7660,6 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight.Extras, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_DE4C2BAC143446D08E69EE9051F01D38"
-                    {
-                    "Name" = "8:GalaSoft.MvvmLight.Extras.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\GalaSoft.MvvmLight.Extras.dll"
             "TargetName" = "8:"
@@ -7866,11 +7717,6 @@
             "AssemblyAsmDisplayName" = "8:MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_E072E139EA384022B04220DAD4EA2347"
-                    {
-                    "Name" = "8:MahApps.Metro.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\MahApps.Metro.dll"
             "TargetName" = "8:"
@@ -7987,7 +7833,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:DistillNET, Version=1.4.4.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:DistillNET, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E25B7A9F75064FE6904AA3A2D1854626"
@@ -8196,11 +8042,6 @@
             "AssemblyAsmDisplayName" = "8:GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_E936E6D6AE6D496BAFF6746D3C4D3CA7"
-                    {
-                    "Name" = "8:GalaSoft.MvvmLight.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\GalaSoft.MvvmLight.dll"
             "TargetName" = "8:"
@@ -8695,7 +8536,7 @@
         "Module"
         {
         "ModuleSignature" = "8:CloudVeilPayload.620CD2DC407F43B9916732C473EF22AC"
-        "Version" = "8:1.6.14.0"
+        "Version" = "8:1.6.15.0"
         "Title" = "8:SetupPayload86"
         "Subject" = "8:"
         "Author" = "8:CloudVeil Technologies Inc."
