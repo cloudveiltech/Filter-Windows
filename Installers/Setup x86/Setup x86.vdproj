@@ -268,9 +268,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.13.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.15.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
+                    "_B5A0B65E2A4D47A3AB04F6282687850B"
+                    {
+                    "Name" = "8:CloudVeil.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\CloudVeil.exe"
             "TargetName" = "8:"
@@ -297,6 +302,11 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F2A1C12D9CF7474E8D9C0D5085B01B98"
+                    {
+                    "Name" = "8:InstallGuard.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"

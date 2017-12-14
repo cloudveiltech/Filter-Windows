@@ -58,13 +58,19 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F4B66C76261A43028EC13AABA25DA095"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_52BFD0D4DC0E420EAD6B352477546362"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F4B66C76261A43028EC13AABA25DA095"
+        "OwnerKey" = "8:_D1E4110BDD56467B98704EAA895D317A"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -283,6 +289,11 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D1E4110BDD56467B98704EAA895D317A"
+                    {
+                    "Name" = "8:InstallGuard.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"
@@ -306,7 +317,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.14.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.15.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_F4B66C76261A43028EC13AABA25DA095"
@@ -390,7 +401,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
         "ProductCode" = "8:{1B76745C-91CB-46AE-9C98-811FACD4F0B5}"
-        "PackageCode" = "8:{525F6638-C8D7-4B22-8928-A2CABE99E713}"
+        "PackageCode" = "8:{B0401EA8-75C6-4A7B-BAA0-0A636847EA0C}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1772,6 +1783,20 @@
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
+                    "_49D7C90F641AF32531A068A4FB212CB1.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_49D7C90F641AF32531A068A4FB212CB1.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_3220B068731349D8977E28BA54C6B73F.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_3220B068731349D8977E28BA54C6B73F.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_3220B068731349D8977E28BA54C6B73F.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
                     "_4A23173A167FD87717567FED50F2A7FE.0862028596DF4668AB1D736D2B40424F"
                     {
                     "Name" = "8:_4A23173A167FD87717567FED50F2A7FE.0862028596DF4668AB1D736D2B40424F"
@@ -1811,6 +1836,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_F0A40B110F644A8888C7DB00D2A3A852.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_F0A40B110F644A8888C7DB00D2A3A852.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_4FCB4FD750CF55BF328672C91CE11E15.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_4FCB4FD750CF55BF328672C91CE11E15.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_2AFB0E028E114E368607D645A082FD77.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_2AFB0E028E114E368607D645A082FD77.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_2AFB0E028E114E368607D645A082FD77.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
@@ -2220,6 +2259,20 @@
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
+                    "_7B639C90974A08035F31A71BFBAED6E0.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_7B639C90974A08035F31A71BFBAED6E0.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_8FFC6F41CF674B4AAEF92D044E87E543.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_8FFC6F41CF674B4AAEF92D044E87E543.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_8FFC6F41CF674B4AAEF92D044E87E543.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
                     "_7BE93DDF1FC989818081BCCA23671708.0862028596DF4668AB1D736D2B40424F"
                     {
                     "Name" = "8:_7BE93DDF1FC989818081BCCA23671708.0862028596DF4668AB1D736D2B40424F"
@@ -2318,6 +2371,20 @@
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
+                    "_8143EC6C1E38AF2BEF0A21766825FB90.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_8143EC6C1E38AF2BEF0A21766825FB90.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_16199032F8D14287A2D24D09F0AA20E4.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_16199032F8D14287A2D24D09F0AA20E4.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_16199032F8D14287A2D24D09F0AA20E4.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
                     "_833EAA171247A24B2F490754DADB864F.0862028596DF4668AB1D736D2B40424F"
                     {
                     "Name" = "8:_833EAA171247A24B2F490754DADB864F.0862028596DF4668AB1D736D2B40424F"
@@ -2343,6 +2410,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_642141C11D594B71BEF485398FF1066A.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_642141C11D594B71BEF485398FF1066A.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_8652413CE2104AE5D6674ADD7AAA4267.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_8652413CE2104AE5D6674ADD7AAA4267.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_DAC9D6CC39624A82A021B046F82F8F81.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_DAC9D6CC39624A82A021B046F82F8F81.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_DAC9D6CC39624A82A021B046F82F8F81.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
@@ -2595,6 +2676,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_BF148E404A8D4D8083722042818AEA74.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_BF148E404A8D4D8083722042818AEA74.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_998043724FAAD097B9BD489D29E18CB3.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_998043724FAAD097B9BD489D29E18CB3.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_9793BDDD63FF4018AAD8423D946EF390.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_9793BDDD63FF4018AAD8423D946EF390.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_9793BDDD63FF4018AAD8423D946EF390.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
@@ -2878,6 +2973,20 @@
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
+                    "_B617D783D38324A3595D1FD04B1B9E35.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_B617D783D38324A3595D1FD04B1B9E35.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_603ACD53734241D5ACC02B6048B91CE2.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_603ACD53734241D5ACC02B6048B91CE2.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_603ACD53734241D5ACC02B6048B91CE2.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
                     "_B6C9860C7B3AD206676F54E378D48B68.0862028596DF4668AB1D736D2B40424F"
                     {
                     "Name" = "8:_B6C9860C7B3AD206676F54E378D48B68.0862028596DF4668AB1D736D2B40424F"
@@ -2945,6 +3054,20 @@
                     "Setting" = "3:2"
                     "Value" = "8:_4595D371A3474725B6AF74ABF2F3A814.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_4595D371A3474725B6AF74ABF2F3A814.0862028596DF4668AB1D736D2B40424F"
+                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
+                    "UsePlugInResources" = "11:FALSE"
+                    }
+                    "_BAE5AABC0B2DE8ECDB81E7E3B0A9CFA3.0862028596DF4668AB1D736D2B40424F"
+                    {
+                    "Name" = "8:_BAE5AABC0B2DE8ECDB81E7E3B0A9CFA3.0862028596DF4668AB1D736D2B40424F"
+                    "DisplayName" = "8:"
+                    "Description" = "8:"
+                    "Type" = "3:2"
+                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_2A4EC446917943BB97C604531D99252D.0862028596DF4668AB1D736D2B40424F"
+                    "Attributes" = "3:0"
+                    "Setting" = "3:2"
+                    "Value" = "8:_2A4EC446917943BB97C604531D99252D.0862028596DF4668AB1D736D2B40424F"
+                    "DefaultValue" = "8:_2A4EC446917943BB97C604531D99252D.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }
@@ -3615,20 +3738,6 @@
                     "Setting" = "3:2"
                     "Value" = "8:_9DE2D0919DD24F96A264E260070B4D80.0862028596DF4668AB1D736D2B40424F"
                     "DefaultValue" = "8:_9DE2D0919DD24F96A264E260070B4D80.0862028596DF4668AB1D736D2B40424F"
-                    "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
-                    "UsePlugInResources" = "11:FALSE"
-                    }
-                    "_F55BA3A6A911B162150AD92CF866E144.0862028596DF4668AB1D736D2B40424F"
-                    {
-                    "Name" = "8:_F55BA3A6A911B162150AD92CF866E144.0862028596DF4668AB1D736D2B40424F"
-                    "DisplayName" = "8:"
-                    "Description" = "8:"
-                    "Type" = "3:2"
-                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_5FE8814F879F44C2B083CB9BE0759338.0862028596DF4668AB1D736D2B40424F"
-                    "Attributes" = "3:0"
-                    "Setting" = "3:2"
-                    "Value" = "8:_5FE8814F879F44C2B083CB9BE0759338.0862028596DF4668AB1D736D2B40424F"
-                    "DefaultValue" = "8:_5FE8814F879F44C2B083CB9BE0759338.0862028596DF4668AB1D736D2B40424F"
                     "ParentName" = "8:_BE7C8A748AB042DFB3B17E4D4E332955.0862028596DF4668AB1D736D2B40424F"
                     "UsePlugInResources" = "11:FALSE"
                     }

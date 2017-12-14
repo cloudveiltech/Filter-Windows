@@ -225,6 +225,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_2AFB0E028E114E368607D645A082FD77"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2B7522D137704C7D90D683C128D8D011"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -262,6 +268,12 @@
         "Entry"
         {
         "MsmKey" = "8:_2F2BCB1EF94F42039AD05C9B6668F2B9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3220B068731349D8977E28BA54C6B73F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -760,12 +772,6 @@
         "Entry"
         {
         "MsmKey" = "8:_945382633C6743D88E3E5EA5D74420E5"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1366,6 +1372,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_2AFB0E028E114E368607D645A082FD77"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FDA28938341845008A82CE6C5CC78608"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1829,12 +1841,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_81F745121006405BA208BB4B80254F8A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2932,6 +2938,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2AFB0E028E114E368607D645A082FD77"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Reflection.TypeExtensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_2AFB0E028E114E368607D645A082FD77"
+                    {
+                    "Name" = "8:System.Reflection.TypeExtensions.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Reflection.TypeExtensions.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B7522D137704C7D90D683C128D8D011"
             {
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.Practices.ServiceLocation.pdb"
@@ -3121,6 +3158,37 @@
                     }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.InteropServices.RuntimeInformation.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3220B068731349D8977E28BA54C6B73F"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:DNS, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_3220B068731349D8977E28BA54C6B73F"
+                    {
+                    "Name" = "8:DNS.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\DNS.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
@@ -3545,7 +3613,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.14.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.15.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_4595D371A3474725B6AF74ABF2F3A814"
@@ -3855,7 +3923,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.14.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.15.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_4F1C48D1BA9E4429A06F3EFC8042FFF7"
@@ -5634,37 +5702,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_951B9380582DF1E7083BB146B5B972DE"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
-                "ScatterAssemblies"
-                {
-                    "_951B9380582DF1E7083BB146B5B972DE"
-                    {
-                    "Name" = "8:System.Net.Http.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:System.Net.Http.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9793BDDD63FF4018AAD8423D946EF390"
@@ -7733,7 +7770,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.14.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.15.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_E749BDE06CF0455CA7281BDB5F294DD9"
@@ -8517,7 +8554,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.14.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.15.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_FD1AD3B6A959440DB8D217548E05ED75"
