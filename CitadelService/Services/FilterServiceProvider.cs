@@ -444,7 +444,7 @@ namespace CitadelService.Services
                     {
                         m_appcastUpdaterLock.EnterWriteLock();
 
-                        if(m_lastFetchedUpdate != null)
+                        if (m_lastFetchedUpdate != null)
                         {
                             m_lastFetchedUpdate.DownloadUpdate().Wait();
 
@@ -454,12 +454,12 @@ namespace CitadelService.Services
 
                             m_logger.Info("Shutting down to update.");
 
-                            if(m_appcastUpdaterLock.IsWriteLockHeld)
+                            if (m_appcastUpdaterLock.IsWriteLockHeld)
                             {
                                 m_appcastUpdaterLock.ExitWriteLock();
                             }
 
-                            if(m_lastFetchedUpdate.IsRestartRequired)
+                            if (m_lastFetchedUpdate.IsRestartRequired)
                             {
                                 string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
                                 using (StreamWriter writer = File.CreateText(restartFlagPath))

@@ -55,6 +55,18 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_B5A0B65E2A4D47A3AB04F6282687850B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -430,20 +442,6 @@
                             "Condition" = "8:"
                             "AlwaysCreate" = "11:FALSE"
                             "DeleteAtUninstall" = "11:FALSE"
-                            "Transitive" = "11:FALSE"
-                                "Keys"
-                                {
-                                }
-                                "Values"
-                                {
-                                }
-                            }
-                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_DEB3390806D04B3F8D74377A81E09177"
-                            {
-                            "Name" = "8:FilterServiceProvider"
-                            "Condition" = "8:"
-                            "AlwaysCreate" = "11:TRUE"
-                            "DeleteAtUninstall" = "11:TRUE"
                             "Transitive" = "11:FALSE"
                                 "Keys"
                                 {
