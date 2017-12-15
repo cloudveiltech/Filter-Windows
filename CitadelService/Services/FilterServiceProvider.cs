@@ -329,6 +329,31 @@ namespace CitadelService.Services
 
         private void OnStartup()
         {
+            // Load authtoken and email data from files.
+            try
+            {
+                string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
+                string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
+
+                if(File.Exists(authTokenPath))
+                {
+                    string authToken = File.ReadAllText(authTokenPath);
+                    WebServiceUtil.Default.AuthToken = authToken;
+                }
+
+                string emailPath = Path.Combine(appDataPath, "email.data");
+
+                if(File.Exists(emailPath))
+                {
+                    string email = File.ReadAllText(emailPath);
+                    WebServiceUtil.Default.UserEmail = email;
+                }
+            }
+            catch (Exception e)
+            {
+                m_logger.Warn("Could not load authtoken or email data. User may have to sign back in.");
+            }
+
             // Hook the shutdown/logoff event.
             SystemEvents.SessionEnding += OnAppSessionEnding;
 
@@ -466,6 +491,37 @@ namespace CitadelService.Services
                                 {
                                     writer.Write("# This file left intentionally blank (tee-hee)\n");
                                 }
+                            }
+
+                            // Save auth token when shutting down for update.
+                            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
+
+                            try
+                            {
+                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
+                                {
+                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
+
+                                    using (StreamWriter writer = File.CreateText(authTokenPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.AuthToken);
+                                    }
+                                }
+
+                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
+                                {
+                                    string emailPath = Path.Combine(appDataPath, "email.data");
+
+                                    using (StreamWriter writer = File.CreateText(emailPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.UserEmail);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                m_logger.Warn("Could not save authtoken or email before update.");
+                                LoggerUtil.RecursivelyLogException(m_logger, e);
                             }
 
                             Environment.Exit((int)ExitCodes.ShutdownForUpdate);
