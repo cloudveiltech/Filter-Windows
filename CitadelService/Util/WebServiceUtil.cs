@@ -243,10 +243,16 @@ namespace Citadel.Core.Windows.Util
                     }
                     else
                     {
-                        if(code > 399 && code < 499)
+                        if(code == 401 || code == 403)
                         {
                             m_logger.Info("Authentication failed with code: {0}.", code);
                             AuthToken = string.Empty;
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
+                            return ret;
+                        }
+                        else if(code > 399 && code < 499)
+                        {
+                            m_logger.Info("Authentication failed with code: {0}.", code);
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
@@ -287,13 +293,18 @@ namespace Citadel.Core.Windows.Util
 
                         int code = (int)httpResponse.StatusCode;
 
-                        if(code > 399 && code < 499)
+                        if (code == 401 || code == 403)
                         {
                             AuthToken = string.Empty;
+                            
+                        }
+
+                        if (code > 399 && code < 499)
+                        {
                             m_logger.Info("Authentication failed with code: {0}.", code);
                             m_logger.Info("Athentication failure text: {0}", errorText);
                             ret.AuthenticationMessage = errorText;
-                            ret.AuthenticationResult =  AuthenticationResult.Failure;
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
 
@@ -441,11 +452,15 @@ namespace Citadel.Core.Windows.Util
                         code = (HttpStatusCode)intCode;
 
                         // Auth failure means re-log EXCEPT when requesting deactivation.
-                        if (intCode > 399 && intCode < 499)
+                        if (intCode == 401 || intCode == 403)
                         {
                             AuthToken = string.Empty;
                             m_logger.Info("Client error occurred while trying to lookup site.");
                             //AuthTokenRejected?.Invoke();
+                        }
+                        else
+                        {
+                            m_logger.Info("Client error occurred while trying to lookup a site. {0}", intCode);
                         }
 
                         using (Stream data = response.GetResponseStream())
@@ -615,11 +630,15 @@ namespace Citadel.Core.Windows.Util
                         code = (HttpStatusCode)intCode;
 
                         // Auth failure means re-log EXCEPT when requesting deactivation.
-                        if(intCode > 399 && intCode < 499 && resource != ServiceResource.DeactivationRequest)
+                        if((intCode == 401 || intCode == 403) && resource != ServiceResource.DeactivationRequest)
                         {
                             AuthToken = string.Empty;
                             m_logger.Info("RequestResource2: Authorization failed.");
                             AuthTokenRejected?.Invoke();
+                        }
+                        else if(intCode > 399 && intCode <= 499 && resource != ServiceResource.DeactivationRequest)
+                        {
+                            m_logger.Info("Error occurred in RequestResource: {0}", intCode);
                         }
 
                         using(Stream data = response.GetResponseStream())
@@ -766,11 +785,15 @@ namespace Citadel.Core.Windows.Util
 
                         int intCode = (int)httpResponse.StatusCode;
 
-                        if(intCode > 399 && intCode < 499)
+                        if(intCode == 401 || intCode == 403)
                         {
                             AuthToken = string.Empty;
                             m_logger.Info("SendResource2: Authorization failed.");
                             AuthTokenRejected?.Invoke();
+                        }
+                        else if(intCode > 399 && intCode < 499)
+                        {
+                            m_logger.Info("SendResource2: Failed with client code {0}", intCode);
                         }
 
                         using(Stream data = response.GetResponseStream())
