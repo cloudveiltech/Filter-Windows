@@ -423,8 +423,42 @@ namespace Te.Citadel
 
             RegistryUtil registry = new RegistryUtil();
 
-            stateSaver.Add("__my_registry_auth_token", registry.AuthToken);
-            stateSaver.Add("__my_registry_user_email", registry.UserEmail);
+            string authTokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "authtoken.data");
+            string emailPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "email.data");
+
+            try
+            {
+                if(File.Exists(authTokenPath))
+                {
+                    File.Delete(authTokenPath);
+                }
+
+                using (StreamWriter writer = File.CreateText(authTokenPath))
+                {
+                    writer.Write(registry.AuthToken);
+                }
+            }
+            catch
+            {
+
+            }
+
+            try
+            {
+                if(File.Exists(emailPath))
+                {
+                    File.Delete(emailPath);
+                }
+                
+                using (StreamWriter writer = File.CreateText(emailPath))
+                {
+                    writer.Write(registry.UserEmail);
+                }
+            }
+            catch
+            {
+
+            }
         }
 
         public override void Commit(IDictionary savedState)

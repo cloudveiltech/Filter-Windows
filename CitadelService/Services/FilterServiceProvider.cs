@@ -330,30 +330,24 @@ namespace CitadelService.Services
         private void OnStartup()
         {
             // Load authtoken and email data from files.
-            try
+            if(WebServiceUtil.Default.AuthToken == null)
             {
-                string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
-                string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
-
-                if(File.Exists(authTokenPath))
+                HttpStatusCode status;
+                byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
+                if (tokenResponse != null && status == HttpStatusCode.OK)
                 {
-                    string authToken = File.ReadAllText(authTokenPath);
-                    WebServiceUtil.Default.AuthToken = authToken;
-                }
+                    try
+                    {
+                        string jsonText = Encoding.UTF8.GetString(tokenResponse);
+                        dynamic json JsonConvert.DeserializeObject(jsonText);
+                    }
+                    catch
+                    {
 
-                string emailPath = Path.Combine(appDataPath, "email.data");
-
-                if(File.Exists(emailPath))
-                {
-                    string email = File.ReadAllText(emailPath);
-                    WebServiceUtil.Default.UserEmail = email;
-                }
+                    }
+                } // else let them continue. They'll have to enter their password if this if isn't taken.
             }
-            catch (Exception e)
-            {
-                m_logger.Warn("Could not load authtoken or email data. User may have to sign back in.");
-            }
-
+            
             // Hook the shutdown/logoff event.
             SystemEvents.SessionEnding += OnAppSessionEnding;
 
