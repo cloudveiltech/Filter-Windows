@@ -339,7 +339,10 @@ namespace CitadelService.Services
                     try
                     {
                         string jsonText = Encoding.UTF8.GetString(tokenResponse);
-                        dynamic json JsonConvert.DeserializeObject(jsonText);
+                        dynamic jsonData = JsonConvert.DeserializeObject(jsonText);
+
+                        WebServiceUtil.Default.AuthToken = jsonData.authToken;
+                        WebServiceUtil.Default.UserEmail = jsonData.userEmail;
                     }
                     catch
                     {
