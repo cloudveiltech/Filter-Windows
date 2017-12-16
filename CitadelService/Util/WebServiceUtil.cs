@@ -526,7 +526,7 @@ namespace Citadel.Core.Windows.Util
                 {
                     request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
                 }
-                else
+                else if(resource != ServiceResource.RetrieveToken)
                 {
                     m_logger.Info("RequestResource1: Authorization failed.");
                     AuthTokenRejected?.Invoke();
