@@ -16,6 +16,14 @@ using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Windows
 {
+    public enum UpdateDialogResult
+    {
+        RemindLater,
+        UpdateNow,
+        SkipVersion,
+        FailedOpen
+    }
+
     public class BaseWindow : MetroWindow
     {
 
@@ -57,6 +65,47 @@ namespace Te.Citadel.UI.Windows
                 var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, mds);
 
                 return userQueryResult == MessageDialogResult.Affirmative;
+            }
+            finally
+            {
+                m_modalLock.ExitWriteLock();
+            }
+        }
+
+        public async Task<UpdateDialogResult> AskUserUpdateQuestion(string title, string question)
+        {
+            // Why does this work? Because there is only 1 UI thread,
+            // and if not, you've got big problems.
+            if (m_modalLock.IsWriteLockHeld)
+            {
+                return UpdateDialogResult.FailedOpen;
+            }
+
+            try
+            {
+                m_modalLock.EnterWriteLock();
+                MetroDialogSettings settings = new MetroDialogSettings();
+                settings.AffirmativeButtonText = "Yes";
+                settings.NegativeButtonText = "Remind Me Later";
+                settings.FirstAuxiliaryButtonText = "Skip This Version";
+                settings.DefaultButtonFocus = MessageDialogResult.Affirmative;
+                
+                var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, settings);
+
+                switch(userQueryResult)
+                {
+                    case MessageDialogResult.Affirmative:
+                        return UpdateDialogResult.UpdateNow;
+
+                    case MessageDialogResult.Negative:
+                        return UpdateDialogResult.RemindLater;
+
+                    case MessageDialogResult.FirstAuxiliary:
+                        return UpdateDialogResult.SkipVersion;
+
+                    default:
+                        return UpdateDialogResult.FailedOpen;
+                }
             }
             finally
             {
