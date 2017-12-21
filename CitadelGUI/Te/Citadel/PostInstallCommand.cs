@@ -421,6 +421,17 @@ namespace Te.Citadel
         {
             base.Install(stateSaver);
 
+            /*string[] interferingProcessNames =
+            new string[] {
+
+            };
+
+            Process[] processes = Process.GetProcesses();
+            foreach(var process in  processes)
+            {
+                
+            }
+
             RegistryUtil registry = new RegistryUtil();
 
             string authTokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "authtoken.data");
@@ -458,7 +469,7 @@ namespace Te.Citadel
             catch
             {
 
-            }
+            }*/
         }
 
         public override void Commit(IDictionary savedState)
