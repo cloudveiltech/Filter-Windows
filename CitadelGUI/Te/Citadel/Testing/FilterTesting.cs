@@ -15,7 +15,8 @@ namespace Te.Citadel.Testing
         BingSafeSearchTest,
         YoutubeSafeSearchTest,
         AllTestsCompleted,
-        ExceptionOccurred
+        ExceptionOccurred,
+        PixabaySafeSearchTest
     }
 
     public class DiagnosticsEntry
@@ -205,6 +206,11 @@ namespace Te.Citadel.Testing
                 details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.YoutubeSafeSearchTest, result, details));
+
+                result = doUrlIpsMatch("https://pixabay.com", "https://safesearch.pixabay.com", out ip1, out ip2);
+                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
+
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.PixabaySafeSearchTest, result, details));
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }

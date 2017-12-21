@@ -26,7 +26,6 @@
     </UserControl.DataContext>
 
     <Grid>
-
         <!--  Simple title/user call to action.  -->
         <Label Width="258"
                Margin="229,7,229,0"
@@ -110,9 +109,9 @@
                 Style="{StaticResource AccentedSquareButtonStyle}" />
 
         <!--  Error messages.  -->
-        <TextBlock Width="220"
-                   Height="40"
-                   Margin="248,335,248,0"
+        <TextBlock Width="420"
+                   Height="60"
+                   Margin="148,322,148,0"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
                    FontFamily="Segoe UI"

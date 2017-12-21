@@ -329,6 +329,28 @@ namespace CitadelService.Services
 
         private void OnStartup()
         {
+            // Load authtoken and email data from files.
+            if(WebServiceUtil.Default.AuthToken == null)
+            {
+                HttpStatusCode status;
+                byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
+                if (tokenResponse != null && status == HttpStatusCode.OK)
+                {
+                    try
+                    {
+                        string jsonText = Encoding.UTF8.GetString(tokenResponse);
+                        dynamic jsonData = JsonConvert.DeserializeObject(jsonText);
+
+                        WebServiceUtil.Default.AuthToken = jsonData.authToken;
+                        WebServiceUtil.Default.UserEmail = jsonData.userEmail;
+                    }
+                    catch
+                    {
+
+                    }
+                } // else let them continue. They'll have to enter their password if this if isn't taken.
+            }
+            
             // Hook the shutdown/logoff event.
             SystemEvents.SessionEnding += OnAppSessionEnding;
 
@@ -444,7 +466,7 @@ namespace CitadelService.Services
                     {
                         m_appcastUpdaterLock.EnterWriteLock();
 
-                        if(m_lastFetchedUpdate != null)
+                        if (m_lastFetchedUpdate != null)
                         {
                             m_lastFetchedUpdate.DownloadUpdate().Wait();
 
@@ -454,18 +476,49 @@ namespace CitadelService.Services
 
                             m_logger.Info("Shutting down to update.");
 
-                            if(m_appcastUpdaterLock.IsWriteLockHeld)
+                            if (m_appcastUpdaterLock.IsWriteLockHeld)
                             {
                                 m_appcastUpdaterLock.ExitWriteLock();
                             }
 
-                            if(m_lastFetchedUpdate.IsRestartRequired)
+                            if (m_lastFetchedUpdate.IsRestartRequired)
                             {
                                 string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
                                 using (StreamWriter writer = File.CreateText(restartFlagPath))
                                 {
                                     writer.Write("# This file left intentionally blank (tee-hee)\n");
                                 }
+                            }
+
+                            // Save auth token when shutting down for update.
+                            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
+
+                            try
+                            {
+                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
+                                {
+                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
+
+                                    using (StreamWriter writer = File.CreateText(authTokenPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.AuthToken);
+                                    }
+                                }
+
+                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
+                                {
+                                    string emailPath = Path.Combine(appDataPath, "email.data");
+
+                                    using (StreamWriter writer = File.CreateText(emailPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.UserEmail);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                m_logger.Warn("Could not save authtoken or email before update.");
+                                LoggerUtil.RecursivelyLogException(m_logger, e);
                             }
 
                             Environment.Exit((int)ExitCodes.ShutdownForUpdate);
