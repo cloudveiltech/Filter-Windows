@@ -24,7 +24,6 @@ using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
 using NLog;
-using opennlp.tools.doccat;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -35,7 +34,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Management;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -171,7 +169,9 @@ namespace CitadelService.Services
         /// </summary>
         private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
 
+#if WITH_NLP
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
+#endif
 
         private ProxyServer m_filteringEngine;
 
@@ -194,7 +194,7 @@ namespace CitadelService.Services
         /// </summary>
         private ConcurrentDictionary<string, MappedFilterListCategoryModel> m_generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
 
-        #endregion FilteringEngineVars
+#endregion FilteringEngineVars
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
@@ -1045,6 +1045,7 @@ namespace CitadelService.Services
             }
         }
 
+#if WITH_NLP
         /// <summary>
         /// Loads the given NLP model and list of categories from within the model that we'll
         /// consider enabled. That is to say, any classification result that yeilds a category found
@@ -1118,6 +1119,7 @@ namespace CitadelService.Services
                 m_doccatSlimLock.ExitWriteLock();
             }
         }
+#endif
 
         /// <summary>
         /// Runs initialization off the UI thread. 
@@ -2027,6 +2029,7 @@ namespace CitadelService.Services
                 m_filteringRwLock.ExitReadLock();
             }
 
+#if WITH_NLP
             try
             {
                 m_doccatSlimLock.EnterReadLock();
@@ -2122,6 +2125,7 @@ namespace CitadelService.Services
                 m_doccatSlimLock.ExitReadLock();
             }
 
+#endif
             // Default to zero. Means don't block this content.
             blockedBecause = BlockType.OtherContentClassification;
             return 0;
@@ -2433,6 +2437,7 @@ namespace CitadelService.Services
                             // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();
 
+#if WITH_NLP
                             // Now drop all existing NLP models.
                             try
                             {
@@ -2458,6 +2463,7 @@ namespace CitadelService.Services
                                     }
                                 }
                             }
+#endif
 
                             uint totalFilterRulesLoaded = 0;
                             uint totalFilterRulesFailed = 0;

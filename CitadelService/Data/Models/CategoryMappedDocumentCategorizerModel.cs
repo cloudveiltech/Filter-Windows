@@ -1,5 +1,4 @@
-﻿using opennlp.tools.doccat;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +7,7 @@ using System.Diagnostics;
 
 namespace CitadelService.Data.Models
 {
+#if WITH_NLP
     internal class CategoryMappedDocumentCategorizerModel
     {
         public class ClassificationResult
@@ -100,4 +100,5 @@ namespace CitadelService.Data.Models
             return new ClassificationResult(MappedCategories[internalBestCat], classResult.Max());
         }
     }
+#endif
 }
