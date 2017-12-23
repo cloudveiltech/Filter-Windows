@@ -32,12 +32,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CitadelCore">
-      <HintPath>..\dependencies\CitadelCore.dll</HintPath>
-    </Reference>
-    <Reference Include="CitadelCore.Windows">
-      <HintPath>..\dependencies\CitadelCore.Windows.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -96,17 +90,11 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CitadelCore">
-      <Version>1.3.8</Version>
-    </PackageReference>
     <PackageReference Include="CitadelCore.Windows">
-      <Version>1.3.3</Version>
-    </PackageReference>
-    <PackageReference Include="Com.TechnikEmpire.ApacheOpenNLP">
-      <Version>1.7.2</Version>
+      <Version>1.3.4</Version>
     </PackageReference>
     <PackageReference Include="DistillNET">
-      <Version>1.4.4</Version>
+      <Version>1.4.5</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>2.1.0</Version>
