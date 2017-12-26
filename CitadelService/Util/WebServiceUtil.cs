@@ -31,7 +31,8 @@ namespace Citadel.Core.Windows.Util
         UserTerms,
         GetToken,
         RevokeToken,
-        RetrieveToken
+        RetrieveToken,
+        BypassRequest
     };
 
     public delegate void GenericWebServiceUtilDelegate();
@@ -54,7 +55,8 @@ namespace Citadel.Core.Windows.Util
             { ServiceResource.UserTerms, "/api/v2/me/terms" },
             { ServiceResource.GetToken, "/api/v2/user/gettoken" },
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
-            { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" }
+            { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
+            { ServiceResource.BypassRequest, "/api/v2/me/bypass" }
         };
 
         private object m_authenticationLock = new object();

@@ -366,9 +366,9 @@ namespace Te.Citadel
                     Application.Current.Shutdown(ExitCodes.ShutdownForUpdate);
                 };
 
-                m_ipcClient.DeactivationResultReceived = (granted) =>
+                m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
-                    if(granted == true)
+                    if(deactivationCmd == DeactivationCommand.Granted)
                     {
                         if(CriticalKernelProcessUtility.IsMyProcessKernelCritical)
                         {
@@ -388,9 +388,16 @@ namespace Te.Citadel
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            if(m_mainWindow != null)
+                            if (m_mainWindow != null)
                             {
-                                m_mainWindow.ShowUserMessage("Request Received", "Your deactivation request has been received, but approval is still pending.");
+                                if (deactivationCmd == DeactivationCommand.Denied)
+                                {
+                                    m_mainWindow.ShowUserMessage("Request Received", "Your deactivation request has been received, but approval is still pending.");
+                                }
+                                else if (deactivationCmd == DeactivationCommand.NoResponse)
+                                {
+                                    m_mainWindow.ShowUserMessage("No Response Received", "Your deactivation request was not received. Check your internet connection and try again.");
+                                }
                             }
                         }
                     );

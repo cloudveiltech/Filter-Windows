@@ -546,7 +546,14 @@ namespace CitadelService.Services
                         HttpStatusCode responseCode;
                         var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest, out responseCode);
 
-                        args.Granted = responseCode == HttpStatusCode.OK || responseCode == HttpStatusCode.NoContent;
+                        if (response == null)
+                        {
+                            args.DeactivationCommand = DeactivationCommand.NoResponse;
+                        }
+                        else
+                        {
+                            args.DeactivationCommand = responseCode == HttpStatusCode.OK || responseCode == HttpStatusCode.NoContent ? DeactivationCommand.Granted : DeactivationCommand.Denied;
+                        }
 
                         if(args.Granted)
                         {
@@ -2617,33 +2624,110 @@ namespace CitadelService.Services
             }
         }
 
+        public class RelaxedPolicyResponseObject
+        {
+            public bool allowed { get; set; }
+            public string message { get; set; }
+        }
+
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
         private void OnRelaxedPolicyRequested()
         {
-            // Start the count down timer.
-            if(m_relaxedPolicyExpiryTimer == null)
-            {
-                m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
-            }
+            HttpStatusCode statusCode;
+            byte[] bypassResponse = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode);
 
-            // Disable every category that is a bypass category.
-            foreach(var entry in m_generatedCategoriesMap.Values)
+            bool useLocalBypassLogic = false;
+
+            bool grantBypass = false;
+            string bypassNotification = "";
+
+            if (bypassResponse != null)
             {
-                if(entry is MappedBypassListCategoryModel)
+                if(statusCode == HttpStatusCode.NotFound)
                 {
-                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                    // Fallback on local bypass logic if server does not support relaxed policy checks.
+                    useLocalBypassLogic = true;
+                }
+
+                string jsonString = Encoding.UTF8.GetString(bypassResponse);
+                m_logger.Info("Response received {0}: {1}", statusCode.ToString(), jsonString);
+
+                var bypassObject = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(jsonString);
+
+                if (bypassObject.allowed)
+                {
+                    grantBypass = true;
+                }
+                else
+                {
+                    grantBypass = false;
+                    bypassNotification = bypassObject.message;
                 }
             }
+            else
+            {
+                m_logger.Info("No response detected.");
 
-            var cfg = Config;
-            m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                useLocalBypassLogic = false;
+                grantBypass = false;
+            }
 
-            DecrementRelaxedPolicy();
+            if(useLocalBypassLogic)
+            {
+                m_logger.Info("Using local bypass logic since server does not yet support bypasses.");
+
+                // Start the count down timer.
+                if (m_relaxedPolicyExpiryTimer == null)
+                {
+                    m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
+                }
+
+                // Disable every category that is a bypass category.
+                foreach (var entry in m_generatedCategoriesMap.Values)
+                {
+                    if (entry is MappedBypassListCategoryModel)
+                    {
+                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                    }
+                }
+
+                var cfg = Config;
+                m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+                DecrementRelaxedPolicy_Local();
+            }
+            else
+            {
+                if (grantBypass)
+                {
+                    m_logger.Info("Relaxed policy granted.");
+
+                    // Start the count down timer.
+                    if (m_relaxedPolicyExpiryTimer == null)
+                    {
+                        m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
+                    }
+
+                    // Disable every category that is a bypass category.
+                    foreach (var entry in m_generatedCategoriesMap.Values)
+                    {
+                        if (entry is MappedBypassListCategoryModel)
+                        {
+                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                        }
+                    }
+
+                    var cfg = Config;
+                    m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+                    DecrementRelaxedPolicy_Local();
+                }
+            }
         }
 
-        private void DecrementRelaxedPolicy()
+        private void DecrementRelaxedPolicy_Local()
         {
             bool allUsesExhausted = false;
 
@@ -2714,7 +2798,7 @@ namespace CitadelService.Services
             // already been decremented, so don't bother.
             if(!relaxedInEffect)
             {
-                DecrementRelaxedPolicy();
+                DecrementRelaxedPolicy_Local();
             }
         }
 
