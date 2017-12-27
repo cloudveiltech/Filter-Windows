@@ -1631,6 +1631,7 @@ namespace CitadelService.Services
 
         private void OnHttpMessageBegin(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out ProxyNextAction nextAction, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
+
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
             customBlockResponseContentType = null;
             customBlockResponse = null;
@@ -1827,6 +1828,8 @@ namespace CitadelService.Services
 
                 if((contentType = parsedHeaders["Content-Type"]) != null)
                 {
+                    m_logger.Info("Running content classifier on Content-Type: {0}", parsedHeaders["Content-Type"]);
+
                     contentType = contentType.ToLower();
 
                     BlockType blockType;
@@ -1836,13 +1839,14 @@ namespace CitadelService.Services
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
                     m_logger.Info("OnClassifyContent Done for {1} @ {0}", stopwatch.ElapsedMilliseconds, requestUrl.ToString());
 
+                    m_logger.Info("Content classified as {0}", contentClassResult);
                     if(contentClassResult > 0)
                     {
                         shouldBlock = true;
 
                         UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
 
-                        if(contentType.IndexOf("html") != -1)
+                        if(contentType.IndexOf("html") != -1 || contentType.IndexOf("json") != -1)
                         {
                             customBlockResponseContentType = "text/html";
                             customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
@@ -2057,14 +2061,18 @@ namespace CitadelService.Services
                             // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
+                        m_logger.Info("Analyzing: {0}", dataToAnalyzeStr);
+
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
-                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
+                            m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
+
                             var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
-                            if(mappedCategory != null)
+                            if (mappedCategory != null)
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
@@ -2072,6 +2080,10 @@ namespace CitadelService.Services
                                 textTrigger = trigger;
                                 return mappedCategory.CategoryId;
                             }
+                        }
+                        else
+                        {
+                            m_logger.Info("Triggers not successfully run.");
                         }
                     }
                 }
@@ -2636,7 +2648,7 @@ namespace CitadelService.Services
 
                                                 // Load second as whitelist, but start off with the
                                                 // category disabled.
-                                                using(TextReader tr = new StreamReader(listEntry.Open()))
+                                                /*using(TextReader tr = new StreamReader(listEntry.Open()))
                                                 {
                                                     var bypassAsWhitelistRules = new List<string>();
                                                     string line = null;
@@ -2649,8 +2661,8 @@ namespace CitadelService.Services
                                                     totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
                                                     totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
 
-                                                    m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
-                                                }
+                                                    //m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
+                                                }*/
 
                                                 GC.Collect();
                                             }
@@ -2802,7 +2814,12 @@ namespace CitadelService.Services
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                        m_logger.Info("Setting entry {0} to false", entry.CategoryName);
+                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
+                        //m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                    } else
+                    {
+                        m_logger.Info("Entry is not bypassable {0}", entry.CategoryName);
                     }
                 }
 
@@ -2828,7 +2845,8 @@ namespace CitadelService.Services
                     {
                         if (entry is MappedBypassListCategoryModel)
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                            m_logger.Info("Setting entry {0} to false", entry.CategoryName);
+                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
                         }
                     }
 
