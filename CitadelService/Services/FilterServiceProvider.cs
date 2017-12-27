@@ -2022,7 +2022,7 @@ namespace CitadelService.Services
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
-                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
 
