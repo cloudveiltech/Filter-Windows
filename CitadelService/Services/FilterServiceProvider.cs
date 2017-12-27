@@ -544,9 +544,10 @@ namespace CitadelService.Services
                     try
                     {
                         HttpStatusCode responseCode;
-                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest, out responseCode);
+                        bool responseReceived;
+                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest, out responseCode, out responseReceived);
 
-                        if (response == null)
+                        if (!responseReceived)
                         {
                             args.DeactivationCommand = DeactivationCommand.NoResponse;
                         }

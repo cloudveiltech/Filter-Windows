@@ -75,6 +75,8 @@ namespace Citadel.IPC
             }
         }
 
+
+
         /// <summary>
         /// Did we successfully send the request and get any response back?
         /// </summary>
@@ -346,9 +348,11 @@ namespace Citadel.IPC
                 if(cast != null && cast.Command == DeactivationCommand.Requested)
                 {
                     var args = new DeactivationRequestEventArgs();
+                    
+                    // This fills args.DeactivationCommand.
                     DeactivationRequested?.Invoke(args);
 
-                    PushMessage(new DeactivationMessage(cast.Command));
+                    PushMessage(new DeactivationMessage(args.DeactivationCommand));
                 }
             }
             else if(msgRealType == typeof(Messages.RelaxedPolicyMessage))
