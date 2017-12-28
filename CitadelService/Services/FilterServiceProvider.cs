@@ -2633,26 +2633,6 @@ namespace CitadelService.Services
                                                 }
 
                                                 GC.Collect();
-
-                                                // Load second as whitelist, but start off with the
-                                                // category disabled.
-                                                /*using(TextReader tr = new StreamReader(listEntry.Open()))
-                                                {
-                                                    var bypassAsWhitelistRules = new List<string>();
-                                                    string line = null;
-                                                    while((line = tr.ReadLine()) != null)
-                                                    {
-                                                        bypassAsWhitelistRules.Add("@@" + line.Trim() + "\n");
-                                                    }
-
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRules(bypassAsWhitelistRules.ToArray(), bypassCategoryModel.CategoryIdAsWhitelist).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                    //m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
-                                                }*/
-
-                                                GC.Collect();
                                             }
                                         }
                                         break;
