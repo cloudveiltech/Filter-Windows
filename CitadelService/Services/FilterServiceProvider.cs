@@ -210,6 +210,11 @@ namespace CitadelService.Services
         private Timer m_updateCheckTimer;
 
         /// <summary>
+        /// Timer used to cleanup logs every 12 hours.
+        /// </summary>
+        private Timer m_cleanupLogsTimer;
+
+        /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
@@ -1166,6 +1171,9 @@ namespace CitadelService.Services
 
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+            // Run log cleanup and schedule for next run.
+            OnCleanupLogsElapsed(null);
 
             // Set up our network availability checks so we can run captive portal detection on a changed network.
             NetworkChange.NetworkAddressChanged += m_dnsEnforcement.OnNetworkChange;
@@ -2260,6 +2268,44 @@ namespace CitadelService.Services
             }
 
             this.UpdateAndWriteList(false);
+            this.CleanupLogs();
+        }
+
+        public const int LogCleanupIntervalInHours = 12;
+        public const int MaxLogAgeInDays = 2;
+
+        private void OnCleanupLogsElapsed(object state)
+        {
+            this.CleanupLogs();
+
+            if(m_cleanupLogsTimer == null)
+            {
+                m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+            }
+            else
+            {
+                m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        private void CleanupLogs()
+        {
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
+
+            if(Directory.Exists(directoryPath))
+            {
+                string[] files = Directory.GetFiles(directoryPath);
+                foreach(string filePath in files)
+                {
+                    FileInfo info = new FileInfo(filePath);
+
+                    DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
+                    if(expiryDate < DateTime.Now)
+                    {
+                        info.Delete();
+                    }
+                }
+            }
         }
 
         /// <summary>
