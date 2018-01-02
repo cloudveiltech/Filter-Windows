@@ -2289,7 +2289,7 @@ namespace CitadelService.Services
         }
 
         public const int LogCleanupIntervalInHours = 12;
-        public const int MaxLogAgeInDays = 2;
+        public const int MaxLogAgeInDays = 7;
 
         private void OnCleanupLogsElapsed(object state)
         {
