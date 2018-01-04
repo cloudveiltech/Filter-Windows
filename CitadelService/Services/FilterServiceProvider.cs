@@ -1829,7 +1829,9 @@ namespace CitadelService.Services
                     contentType = contentType.ToLower();
 
                     BlockType blockType;
-                    var contentClassResult = OnClassifyContent(body, contentType, out blockType);
+                    string textTrigger;
+                    string textCategory;
+                    var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
 
                     if(contentClassResult > 0)
                     {
@@ -1840,7 +1842,7 @@ namespace CitadelService.Services
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, 0, uriInfo, blockType);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1895,7 +1897,7 @@ namespace CitadelService.Services
             return matchingCategory.ToString() + " filter rule mismatch error";
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
@@ -1925,7 +1927,7 @@ namespace CitadelService.Services
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
-            if (info != null && matchingCategory > 0)
+            if (info != null && matchingCategory > 0 && blockType == BlockType.None)
             {
                 matching_category = findCategoryFromUriInfo(matchingCategory, info);
             }
@@ -1947,7 +1949,7 @@ namespace CitadelService.Services
 
                     case BlockType.TextClassification:
                     case BlockType.TextTrigger:
-                        matching_category = "improper text";
+                        matching_category = string.Format("offensive text: {0}", triggerCategory);
                         break;
 
                     case BlockType.OtherContentClassification:
@@ -2011,7 +2013,7 @@ namespace CitadelService.Services
         /// the content is not deemed to be part of any known category, which is a general indication
         /// to the engine that the content should not be blocked.
         /// </returns>
-        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause)
+        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
         {
             try
             {
@@ -2045,6 +2047,8 @@ namespace CitadelService.Services
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
+                                triggerCategory = mappedCategory.CategoryName;
+                                textTrigger = trigger;
                                 return mappedCategory.CategoryId;
                             }
                         }
@@ -2159,6 +2163,8 @@ namespace CitadelService.Services
 #endif
             // Default to zero. Means don't block this content.
             blockedBecause = BlockType.OtherContentClassification;
+            textTrigger = "";
+            triggerCategory = "";
             return 0;
         }
 
