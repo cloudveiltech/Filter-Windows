@@ -616,12 +616,8 @@ namespace Citadel.Core.Windows.Util
                                 // We do this just in case we get something like a 204. The idea here
                                 // is that if we return a non-null, the call was a success.
                                 var responseBody = memoryStream.ToArray();
-                                if (intCode == 204)
-                                {
-                                    return new byte[0];
-                                }
-                                else if (responseBody == null)
-                                {
+                                if(responseBody == null || intCode == 204)
+                                {                                    
                                     return null;
                                 }
 

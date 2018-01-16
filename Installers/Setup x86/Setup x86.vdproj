@@ -286,7 +286,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.17.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.19.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_B5A0B65E2A4D47A3AB04F6282687850B"
@@ -400,15 +400,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{58254FB8-B50B-4F85-972C-7EA1F431751A}"
-        "PackageCode" = "8:{779B336A-CD49-4407-B115-96610B2BD2BA}"
+        "ProductCode" = "8:{E72EEB46-682A-46A9-A3A8-F0BB0BB1AF0C}"
+        "PackageCode" = "8:{39F09895-9BA4-4427-9046-286E6105F949}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.17"
+        "ProductVersion" = "8:1.6.19"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
@@ -1875,20 +1875,6 @@
                     "Setting" = "3:2"
                     "Value" = "8:_F403DFA2BA214A33A9AACF07B0C4A82A.620CD2DC407F43B9916732C473EF22AC"
                     "DefaultValue" = "8:_F403DFA2BA214A33A9AACF07B0C4A82A.620CD2DC407F43B9916732C473EF22AC"
-                    "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
-                    "UsePlugInResources" = "11:FALSE"
-                    }
-                    "_517A9EF38F67747F987EA714475DC313.620CD2DC407F43B9916732C473EF22AC"
-                    {
-                    "Name" = "8:_517A9EF38F67747F987EA714475DC313.620CD2DC407F43B9916732C473EF22AC"
-                    "DisplayName" = "8:"
-                    "Description" = "8:"
-                    "Type" = "3:2"
-                    "ContextData" = "8:InstallToGAC=;IsolateToManifest=_554CEF6F3EE749E7AD153E33FFCFA842.620CD2DC407F43B9916732C473EF22AC"
-                    "Attributes" = "3:0"
-                    "Setting" = "3:2"
-                    "Value" = "8:_554CEF6F3EE749E7AD153E33FFCFA842.620CD2DC407F43B9916732C473EF22AC"
-                    "DefaultValue" = "8:_554CEF6F3EE749E7AD153E33FFCFA842.620CD2DC407F43B9916732C473EF22AC"
                     "ParentName" = "8:_46E6D2F2ABA84935950C5B6504FA20EF.620CD2DC407F43B9916732C473EF22AC"
                     "UsePlugInResources" = "11:FALSE"
                     }
