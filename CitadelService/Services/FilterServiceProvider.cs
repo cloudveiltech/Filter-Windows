@@ -29,7 +29,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -953,32 +952,12 @@ namespace CitadelService.Services
         }
 
         /// <summary>
-        /// Sets up the filtering engine, gets discovered installations of firefox to trust the
-        /// engine, sets up callbacks for classification and firewall checks, but does not start the engine.
+        /// Sets up the filtering engine, calls establish trust with firefox, sets up callbacks for
+        /// classification and firewall checks, but does not start the engine.
         /// </summary>
         private void InitEngine()
         {
             LogTime("Starting InitEngine()");
-
-            // Get our CA-Bundle resource and unpack it to the application directory.
-            var caCertPackURI = "CitadelService.Resources.ca-cert.pem";
-            StringBuilder caFileBuilder = new StringBuilder();
-            using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(caCertPackURI))
-            {
-                if(resourceStream != null && resourceStream.CanRead)
-                {
-                    using(TextReader tsr = new StreamReader(resourceStream))
-                    {
-                        caFileBuilder = new StringBuilder(tsr.ReadToEnd());
-                    }
-                }
-                else
-                {
-                    m_logger.Error("Cannot read from packed ca bundle resource.");
-                }
-            }
-
-            caFileBuilder.AppendLine();
 
             // Get our blocked HTML page
             var blockedPagePackURI = "CitadelService.Resources.BlockedPage.html";
@@ -1002,34 +981,7 @@ namespace CitadelService.Services
             m_filterCollection = new FilterDbCollection();
             //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
 
-            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);
-
-            // Get Microsoft root authorities. We need this in order to permit Windows Update and
-            // such in the event that it is forced through the filter.
-            var toTrust = new List<StoreName>() {
-                StoreName.Root,
-                StoreName.AuthRoot,
-                StoreName.CertificateAuthority,
-                StoreName.TrustedPublisher,
-                StoreName.TrustedPeople
-            };
-
-            foreach(var trust in toTrust)
-            {
-                using(X509Store localStore = new X509Store(trust, StoreLocation.LocalMachine))
-                {
-                    localStore.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-                    foreach(var cert in localStore.Certificates)
-                    {
-                        caFileBuilder.AppendLine(cert.ExportToPem());
-                    }
-                    localStore.Close();
-                }
-            }
-
-            // Dump the text to the local file system.
-            var localCaBundleCertPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ca-cert.pem");
-            File.WriteAllText(localCaBundleCertPath, caFileBuilder.ToString());
+            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);         
 
             LogTime("Loading filtering engine.");
 
@@ -2506,26 +2458,8 @@ namespace CitadelService.Services
                                 m_textTriggers.Dispose();
                             }
 
-                            // We need to force clearing of all connection pools, then force a
-                            // shutdown on the native side of our SQlite managed wrapper in order to
-                            // force connections to existing databases to be destroyed. This is
-                            // primarily a concern for in-memory databases, because without this
-                            // code, those in memory db's will persist so long as any connection is
-                            // left open to them.
-                            try
-                            {
-                                SQLiteConnection.ClearAllPools();
-                            }
-                            catch { }
-
-                            try
-                            {
-                                SQLiteConnection.Shutdown(true, true);
-                            }
-                            catch { }
-
                             m_filterCollection = new FilterDbCollection();
-                            //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
+                            
                             m_categoryIndex.SetAll(false);
 
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
