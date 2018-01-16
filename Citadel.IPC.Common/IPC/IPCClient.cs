@@ -46,7 +46,7 @@ namespace Citadel.IPC
 
     public delegate void AuthenticationResultHandler(AuthenticationMessage result);
 
-    public delegate void DeactivationRequestResultHandler(bool granted);
+    public delegate void DeactivationRequestResultHandler(DeactivationCommand args);
 
     public delegate AuthenticationMessage GetAuthMessage();
 
@@ -199,7 +199,7 @@ namespace Citadel.IPC
                 var cast = (Messages.DeactivationMessage)message;
                 if(cast != null)
                 {   
-                    DeactivationResultReceived?.Invoke(cast.Command == DeactivationCommand.Granted);
+                    DeactivationResultReceived?.Invoke(cast.Command);
                 }
             }
             else if(msgRealType == typeof(Messages.FilterStatusMessage))

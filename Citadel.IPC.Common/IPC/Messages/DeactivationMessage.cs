@@ -30,7 +30,12 @@ namespace Citadel.IPC.Messages
         /// Means that the server has accepted the request to shut down and deactive. Should
         /// be followed by a FilterStatusMessage indicating the shutdown type.
         /// </summary>
-        Granted
+        Granted,
+
+        /// <summary>
+        /// Means that no response was received from the server.
+        /// </summary>
+        NoResponse
     }
 
     /// <summary>

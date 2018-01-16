@@ -31,7 +31,8 @@ namespace Citadel.Core.Windows.Util
         UserTerms,
         GetToken,
         RevokeToken,
-        RetrieveToken
+        RetrieveToken,
+        BypassRequest
     };
 
     public delegate void GenericWebServiceUtilDelegate();
@@ -54,7 +55,8 @@ namespace Citadel.Core.Windows.Util
             { ServiceResource.UserTerms, "/api/v2/me/terms" },
             { ServiceResource.GetToken, "/api/v2/user/gettoken" },
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
-            { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" }
+            { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
+            { ServiceResource.BypassRequest, "/api/v2/me/bypass" }
         };
 
         private object m_authenticationLock = new object();
@@ -499,10 +501,27 @@ namespace Citadel.Core.Windows.Util
         }
 
         /// <summary>
+        /// Request a generic resource from the service server(s).
+        /// This does not include the responseReceived out variable in the parameter list.
+        /// </summary>
+        /// <param name="resource"></param>
+        /// <param name="code"></param>
+        /// <param name="noLogging"></param>
+        /// <returns></returns>
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, bool noLogging = false)
+        {
+            bool responseReceived = false;
+            return RequestResource(resource, out code, out responseReceived, noLogging);
+        }
+
+        /// <summary>
         /// Request a generic resource from the service server(s). 
         /// </summary>
         /// <param name="route">
         /// The API route to make the request to. 
+        /// </param>
+        /// <param name="responseReceived">
+        /// Gets set to false if no response was received, otherwise false.
         /// </param>
         /// <param name="noLogging">
         /// Whether or not to log errors. Since HttpWebRequest brilliant throws exceptions for
@@ -512,8 +531,10 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// A non-null byte array on success. Null byte array on failure. 
         /// </returns>
-        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, bool noLogging = false)
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, bool noLogging = false)
         {
+            responseReceived = true;
+
             try
             {
                 // Try to send the device name as well. Helps distinguish between clients under the
@@ -622,6 +643,11 @@ namespace Citadel.Core.Windows.Util
                 {
                     using(WebResponse response = e.Response)
                     {
+                        if(response == null)
+                        {
+                            responseReceived = false;
+                        }
+
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
                         m_logger.Error("Error code: {0}", httpResponse.StatusCode);
 

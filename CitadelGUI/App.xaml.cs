@@ -9,7 +9,6 @@ using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
-using Microsoft.Win32;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
@@ -42,14 +40,12 @@ namespace Te.Citadel
         {
             public ServiceRunner() : base("FilterServiceProvider", true)
             {
-
             }
 
             public override void Shutdown(ExitCodes code)
             {
-                // If our service has exited cleanly while we're running,
-                // lets assume that we should exit WITH safeguards.
-                // XXX TODO.
+                // If our service has exited cleanly while we're running, lets assume that we should
+                // exit WITH safeguards. XXX TODO.
                 Current.Dispatcher.BeginInvoke((Action)delegate ()
                 {
                     Application.Current.Shutdown(code);
@@ -74,8 +70,7 @@ namespace Te.Citadel
         private Object m_cleanShutdownLock = new object();
 
         /// <summary>
-        /// Used to force-query the server whenever we're told to go into
-        /// a synchronize-wait state.
+        /// Used to force-query the server whenever we're told to go into a synchronize-wait state. 
         /// </summary>
         private Timer m_synchronizingTimer;
 
@@ -132,12 +127,14 @@ namespace Te.Citadel
         private IPCClient m_ipcClient;
 
         /// <summary>
-        /// Tracks whether the captive portal tool tip has been displayed for the given network.
-        /// Will be set back to false when captive portal detection goes back to false.
+        /// Tracks whether the captive portal tool tip has been displayed for the given network. Will
+        /// be set back to false when captive portal detection goes back to false.
         /// </summary>
         private bool m_captivePortalShownToUser;
 
-        #endregion Views 
+        #endregion Views
+
+
 
         /// <summary>
         /// Default ctor. 
@@ -161,13 +158,12 @@ namespace Te.Citadel
 
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
-            // Here we need to check 2 things. First, we need to check to make sure
-            // that our filter service is running. Second, and if the first condition
-            // proves to be false, we need to check if we are running as an admin.
-            // If we are not admin, we need to schedule a restart of the app to
-            // force us to run as admin. If we are admin, then we will create
-            // an instance of the service starter class that will take care of
-            // forcing our service into existence.
+            // Here we need to check 2 things. First, we need to check to make sure that our filter
+            // service is running. Second, and if the first condition proves to be false, we need to
+            // check if we are running as an admin. If we are not admin, we need to schedule a
+            // restart of the app to force us to run as admin. If we are admin, then we will create
+            // an instance of the service starter class that will take care of forcing our service
+            // into existence.
             bool needRestartAsAdmin = false;
             bool mainServiceViable = true;
             try
@@ -178,10 +174,10 @@ namespace Te.Citadel
                 {
                     case ServiceControllerStatus.Stopped:
                     case ServiceControllerStatus.StopPending:
-                    {
-                        mainServiceViable = false;
-                    }
-                    break;
+                        {
+                            mainServiceViable = false;
+                        }
+                        break;
                 }
             }
             catch(Exception ae)
@@ -192,7 +188,7 @@ namespace Te.Citadel
             if(!mainServiceViable)
             {
                 var id = WindowsIdentity.GetCurrent();
-                
+
                 var principal = new WindowsPrincipal(id);
                 if(principal.IsInRole(WindowsBuiltInRole.Administrator))
                 {
@@ -228,19 +224,17 @@ namespace Te.Citadel
                 }
                 else
                 {
-                    // Just creating an instance of this will
-                    // do the job of forcing our service to start.
-                    // Letting it fly off into garbage collection land
-                    // should have no effect. The service is self-sustaining
-                    // after this point.
+                    // Just creating an instance of this will do the job of forcing our service to
+                    // start. Letting it fly off into garbage collection land should have no effect.
+                    // The service is self-sustaining after this point.
                     var provider = new ServiceRunner();
                 }
             }
 
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;
-            
-            // Hook app exiting function. This must be done on this main app thread.            
+
+            // Hook app exiting function. This must be done on this main app thread.
             this.Exit += OnApplicationExiting;
 
             // Do stuff that must be done on the UI thread first. Here we HAVE to set our initial
@@ -267,25 +261,56 @@ namespace Te.Citadel
                         case AuthenticationAction.Denied:
                         case AuthenticationAction.Required:
                         case AuthenticationAction.InvalidInput:
-                        {
-                            // User needs to log in.
-                            BringAppToFocus();
-                            OnViewChangeRequest(typeof(LoginView));      
-                        }
-                        break;
+                            {
+                                // User needs to log in.
+                                BringAppToFocus();
+                                OnViewChangeRequest(typeof(LoginView));
+                            }
+                            break;
 
                         case AuthenticationAction.Authenticated:
                         case AuthenticationAction.ErrorNoInternet:
-                        case AuthenticationAction.ErrorUnknown:                        
-                        {
-                            OnViewChangeRequest(typeof(DashboardView));
-                        }
-                        break;
+                        case AuthenticationAction.ErrorUnknown:
+                            {
+                                OnViewChangeRequest(typeof(DashboardView));
+                            }
+                            break;
                     }
                 };
 
                 m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
                 {
+                    string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+
+                    if(File.Exists(updateSettingsPath))
+                    {
+                        using(StreamReader reader = File.OpenText(updateSettingsPath))
+                        {
+                            string command = reader.ReadLine();
+
+                            string[] commandParts = command.Split(new char[] { ':' }, 2);
+
+                            if(commandParts[0] == "RemindLater")
+                            {
+                                DateTime remindLater;
+                                if(DateTime.TryParse(commandParts[1], out remindLater))
+                                {
+                                    if(DateTime.Now < remindLater)
+                                    {
+                                        return;
+                                    }
+                                }
+                            }
+                            else if(commandParts[0] == "SkipVersion")
+                            {
+                                if(commandParts[1] == args.NewVersionString)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
                     BringAppToFocus();
 
                     var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
@@ -302,8 +327,6 @@ namespace Te.Citadel
                        {
                            if (m_mainWindow != null)
                            {
-                               string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
-
                                var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
 
                                switch (result)
@@ -334,13 +357,15 @@ namespace Te.Citadel
                 };
 
                 m_ipcClient.ServerUpdateStarting = () =>
-                {   
+                {
                     Application.Current.Shutdown(ExitCodes.ShutdownForUpdate);
                 };
 
-                m_ipcClient.DeactivationResultReceived = (granted) =>
+                m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
-                    if(granted == true)
+                    m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
+
+                    if(deactivationCmd == DeactivationCommand.Granted)
                     {
                         if(CriticalKernelProcessUtility.IsMyProcessKernelCritical)
                         {
@@ -362,7 +387,37 @@ namespace Te.Citadel
                         {
                             if(m_mainWindow != null)
                             {
-                                m_mainWindow.ShowUserMessage("Request Received", "Your deactivation request has been received, but approval is still pending.");
+                                string message = null;
+                                string title = null;
+
+                                switch(deactivationCmd)
+                                {
+                                    case DeactivationCommand.Requested:
+                                    message = "Your deactivation request has been received, but approval is still pending.";
+                                    title = "Request Received";
+                                    break;
+
+                                    case DeactivationCommand.Denied:
+                                    // A little bit of tact will keep the mob and their pitchforks
+                                    // from slaughtering us.
+                                    message = "Your deactivation request has been received, but approval is still pending.";
+                                    title = "Request Received";
+                                    //message = "Your deactivation request has been denied.";
+                                    //title = "Request Denied";
+                                    break;
+
+                                    case DeactivationCommand.Granted:
+                                    message = "Your request was granted.";
+                                    title = "Request Granted";
+                                    break;
+
+                                    case DeactivationCommand.NoResponse:
+                                    message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
+                                    title = "No Response Received";
+                                    break;
+                                }
+
+                                m_mainWindow.ShowUserMessage(title, message);
                             }
                         }
                     );
@@ -396,10 +451,9 @@ namespace Te.Citadel
 
                 m_ipcClient.RelaxedPolicyExpired = () =>
                 {
-                    // We don't have to do anything here on our side,
-                    // but we may want to do something here in the future
-                    // if we modify how our UI shows relaxed policy timer
-                    // stuff. Like perhaps changing views etc.
+                    // We don't have to do anything here on our side, but we may want to do something
+                    // here in the future if we modify how our UI shows relaxed policy timer stuff.
+                    // Like perhaps changing views etc.
                 };
 
                 m_ipcClient.RelaxedPolicyInfoReceived = (args) =>
@@ -415,13 +469,11 @@ namespace Te.Citadel
                                 dashboardViewModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
                                 dashboardViewModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
 
-                                // Ensure we don't overlap this event multiple times by
-                                // decrementing first.
+                                // Ensure we don't overlap this event multiple times by decrementing first.
                                 dashboardViewModel.Model.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
                                 dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
-                                // Ensure we don't overlap this event multiple times by
-                                // decrementing first.
+                                // Ensure we don't overlap this event multiple times by decrementing first.
                                 dashboardViewModel.Model.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
                                 dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                             }
@@ -435,86 +487,85 @@ namespace Te.Citadel
                     switch(args.State)
                     {
                         case FilterStatus.CooldownPeriodEnforced:
-                        {
-                            // Add this blocked request to the dashboard.
-                            Current.Dispatcher.BeginInvoke(
-                                System.Windows.Threading.DispatcherPriority.Normal,
-                                (Action)delegate ()
-                                {
-                                    if(m_viewDashboard != null)
+                            {
+                                // Add this blocked request to the dashboard.
+                                Current.Dispatcher.BeginInvoke(
+                                    System.Windows.Threading.DispatcherPriority.Normal,
+                                    (Action)delegate ()
                                     {
-                                        m_viewDashboard.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
+                                        if(m_viewDashboard != null)
+                                        {
+                                            m_viewDashboard.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
+                                        }
                                     }
-                                }
-                            );
-                        }
-                        break;
+                                );
+                            }
+                            break;
 
                         case FilterStatus.Running:
-                        {
-                            OnViewChangeRequest(typeof(DashboardView));
+                            {
+                                OnViewChangeRequest(typeof(DashboardView));
 
-                            // Change UI state of dashboard to not show disabled message anymore. If
-                            // we're not already in a disabled state, this will have no effect.
-                            Current.Dispatcher.BeginInvoke(
-                                System.Windows.Threading.DispatcherPriority.Normal,
-                                (Action)delegate ()
-                                {
-                                    if(m_viewDashboard != null)
+                                // Change UI state of dashboard to not show disabled message anymore.
+                                // If we're not already in a disabled state, this will have no effect.
+                                Current.Dispatcher.BeginInvoke(
+                                    System.Windows.Threading.DispatcherPriority.Normal,
+                                    (Action)delegate ()
                                     {
-                                        m_viewDashboard.HideDisabledInternetMessage();
+                                        if(m_viewDashboard != null)
+                                        {
+                                            m_viewDashboard.HideDisabledInternetMessage();
+                                        }
                                     }
-                                }
-                            );
-                        }
-                        break;
+                                );
+                            }
+                            break;
 
                         case FilterStatus.Synchronizing:
-                        {   
-                            // Update our timestamps for last sync.
-                            OnViewChangeRequest(typeof(ProgressWait));
-
-                            lock(m_synchronizingTimerLockObj)
                             {
-                                if(m_synchronizingTimer != null)
+                                // Update our timestamps for last sync.
+                                OnViewChangeRequest(typeof(ProgressWait));
+
+                                lock(m_synchronizingTimerLockObj)
                                 {
-                                    m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-                                    m_synchronizingTimer.Dispose();
+                                    if(m_synchronizingTimer != null)
+                                    {
+                                        m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                                        m_synchronizingTimer.Dispose();
+                                    }
+
+                                    m_synchronizingTimer = new Timer((state) =>
+                                    {
+                                        m_ipcClient.RequestStatusRefresh();
+                                        m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                                        m_synchronizingTimer.Dispose();
+                                    });
+
+                                    m_synchronizingTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
                                 }
-
-                                m_synchronizingTimer = new Timer((state) =>
-                                {
-                                    m_ipcClient.RequestStatusRefresh();
-                                    m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-                                    m_synchronizingTimer.Dispose();
-                                });
-
-                                m_synchronizingTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
                             }
-                            
-                        }
-                        break;
+                            break;
 
                         case FilterStatus.Synchronized:
-                        {
-                            // Update our timestamps for last sync.
-                            OnViewChangeRequest(typeof(DashboardView));
+                            {
+                                // Update our timestamps for last sync.
+                                OnViewChangeRequest(typeof(DashboardView));
 
-                            // Change UI state of dashboard to not show disabled message anymore. If
-                            // we're not already in a disabled state, this will have no effect.
-                            Current.Dispatcher.BeginInvoke(
-                                System.Windows.Threading.DispatcherPriority.Normal,
-                                (Action)delegate ()
-                                {
-                                    if(m_viewDashboard != null && m_viewDashboard.DataContext != null)
+                                // Change UI state of dashboard to not show disabled message anymore.
+                                // If we're not already in a disabled state, this will have no effect.
+                                Current.Dispatcher.BeginInvoke(
+                                    System.Windows.Threading.DispatcherPriority.Normal,
+                                    (Action)delegate ()
                                     {
-                                        var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
-                                        dashboardViewModel.LastSync = DateTime.Now;
+                                        if(m_viewDashboard != null && m_viewDashboard.DataContext != null)
+                                        {
+                                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
+                                            dashboardViewModel.LastSync = DateTime.Now;
+                                        }
                                     }
-                                }
-                            );
-                        }
-                        break;
+                                );
+                            }
+                            break;
                     }
                 };
 
@@ -523,16 +574,15 @@ namespace Te.Citadel
                     switch(args.Command)
                     {
                         case ClientToClientCommand.ShowYourself:
-                        {
-                            BringAppToFocus();
-                        }
-                        break;
+                            {
+                                BringAppToFocus();
+                            }
+                            break;
                     }
                 };
 
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
-
                     // C# doesn't like cross-thread GUI variable access, so run this on window thread.
                     m_mainWindow.Dispatcher.InvokeAsync(() =>
                     {
@@ -567,7 +617,6 @@ namespace Te.Citadel
                     }
                 };
 #endif
-
             }
             catch(Exception ipce)
             {
@@ -607,8 +656,7 @@ namespace Te.Citadel
 
             Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
 
-            // Does this cause a hand up??
-            // m_ipcClient.Dispose();
+            // Does this cause a hand up?? m_ipcClient.Dispose();
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -712,7 +760,7 @@ namespace Te.Citadel
         /// Event args. 
         /// </param>
         private void OnApplicationExiting(object sender, ExitEventArgs e)
-        {   
+        {
             try
             {
                 m_logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
@@ -731,10 +779,9 @@ namespace Te.Citadel
 
                 if(e.ApplicationExitCode == (int)ExitCodes.ShutdownForUpdate)
                 {
-                    // Give us a nice long minute to restart.
-                    // If the user restarts us manually in the meantime who cares
-                    // we have a global mutex preventing multiple instance
-                    // and this scheduled startup will just not run.
+                    // Give us a nice long minute to restart. If the user restarts us manually in the
+                    // meantime who cares we have a global mutex preventing multiple instance and
+                    // this scheduled startup will just not run.
                     ScheduleAppRestart();
                 }
             }
@@ -802,7 +849,7 @@ namespace Te.Citadel
             menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
             menuItems.Add(new System.Windows.Forms.MenuItem("Settings", TrayIcon_OpenSettings));
             menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
-            
+
             m_trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
         }
 
@@ -884,22 +931,22 @@ namespace Te.Citadel
                         switch(viewType.Name)
                         {
                             case nameof(LoginView):
-                            {
-                                newView = m_viewLogin;
-                            }
-                            break;
+                                {
+                                    newView = m_viewLogin;
+                                }
+                                break;
 
                             case nameof(ProgressWait):
-                            {
-                                newView = m_viewProgressWait;
-                            }
-                            break;
+                                {
+                                    newView = m_viewProgressWait;
+                                }
+                                break;
 
                             case nameof(DashboardView):
-                            {
-                                newView = m_viewDashboard;
-                            }
-                            break;
+                                {
+                                    newView = m_viewDashboard;
+                                }
+                                break;
                         }
 
                         if(newView != null && current != newView)
@@ -929,136 +976,6 @@ namespace Te.Citadel
             m_mainWindow.ShowUserMessage(title, message);
         }
 
-        /// <summary>
-        /// Searches for FireFox installations and enables trust of the local certificate store. 
-        /// </summary>
-        /// <remarks>
-        /// If any profile is discovered that does not have the local CA cert store checking enabled
-        /// already, all instances of firefox will be killed and then restarted when calling this method.
-        /// </remarks>
-        private void EstablishTrustWithFirefox()
-        {
-            // Get the default FireFox profiles path.
-            string defaultFirefoxProfilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            defaultFirefoxProfilesPath += @"\Mozilla\Firefox\Profiles";
-
-            if(!Directory.Exists(defaultFirefoxProfilesPath))
-            {
-                return;
-            }
-
-            // Figure out if firefox is running. If later it is and we kill it, store the path to
-            // firefox.exe so we can restart the process after we're done.
-            string firefoxExePath = string.Empty;
-            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;
-
-            var prefsFiles = Directory.GetFiles(defaultFirefoxProfilesPath, "prefs.js", SearchOption.AllDirectories);
-
-            var valuesThatNeedToBeSet = new Dictionary<string, string>();
-
-            var firefoxUserCfgValuesUri = new Uri("pack://application:,,,/Resources/FireFoxUserCFG.txt");
-            var resourceStream = GetResourceStream(firefoxUserCfgValuesUri);
-
-            using(TextReader tsr = new StreamReader(resourceStream.Stream))
-            {
-                string cfgLine = null;
-                while((cfgLine = tsr.ReadLine()) != null)
-                {
-                    if(cfgLine.Length > 0)
-                    {
-                        var firstSpace = cfgLine.IndexOf(' ');
-
-                        if(firstSpace != -1)
-                        {
-                            var key = cfgLine.Substring(0, firstSpace);
-                            var value = cfgLine.Substring(firstSpace);
-
-                            if(!valuesThatNeedToBeSet.ContainsKey(key))
-                            {
-                                valuesThatNeedToBeSet.Add(key, value);
-                            }
-                        }
-                    }
-                }
-            }
-
-            foreach(var prefFile in prefsFiles)
-            {
-                var userFile = Path.GetDirectoryName(prefFile) + Path.DirectorySeparatorChar + "user.js";
-
-                string[] fileText = new string[0];
-
-                if(File.Exists(userFile))
-                {
-                    fileText = File.ReadAllLines(prefFile);
-                }
-
-                var notFound = new Dictionary<string, string>();
-
-                foreach(var kvp in valuesThatNeedToBeSet)
-                {
-                    var entryIndex = Array.FindIndex(fileText, l => l.StartsWith(kvp.Key));
-
-                    if(entryIndex != -1)
-                    {
-                        if(!fileText[entryIndex].EndsWith(kvp.Value))
-                        {
-                            fileText[entryIndex] = kvp.Key + kvp.Value;
-                            m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
-                        }
-                        else
-                        {
-                            m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
-                        }
-                    }
-                    else
-                    {
-                        notFound.Add(kvp.Key, kvp.Value);
-                    }
-                }
-
-                var fileTextList = new List<string>(fileText);
-
-                foreach(var nfk in notFound)
-                {
-                    m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
-                    fileTextList.Add(nfk.Key + nfk.Value);
-                }
-
-                File.WriteAllLines(userFile, fileTextList);
-            }
-
-            // Always kill firefox.
-            if(firefoxIsRunning)
-            {
-                // We need to kill firefox before editing the preferences, otherwise they'll just get overwritten.
-                foreach(var ff in Process.GetProcessesByName("firefox"))
-                {
-                    firefoxExePath = ff.MainModule.FileName;
-
-                    try
-                    {
-                        ff.Kill();
-                        ff.Dispose();
-                    }
-                    catch { }
-                }
-            }
-
-            // Means we force closed at least once instance of firefox. Relaunch it now to cause it
-            // to run restore.
-            if(firefoxIsRunning && StringExtensions.Valid(firefoxExePath))
-            {
-                // Start the process and abandon our handle.
-                using(var p = new Process())
-                {
-                    p.StartInfo.FileName = firefoxExePath;
-                    p.StartInfo.UseShellExecute = false;
-                    p.Start();
-                }
-            }
-        }
-
         private void OnRelaxedPolicyRequested()
         {
             OnRelaxedPolicyRequested(false);
@@ -1078,7 +995,7 @@ namespace Te.Citadel
 
                 ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)
                 {
-                    if (fromTray)
+                    if(fromTray)
                     {
                         m_trayIcon.ShowBalloonTip(3000, "Relaxed Policy", string.Format("Relaxed policy granted. It will expire in {0} minutes.", (int)msg.PolicyInfo.RelaxDuration.TotalMinutes), System.Windows.Forms.ToolTipIcon.Info);
                     }

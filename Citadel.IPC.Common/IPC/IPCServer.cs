@@ -52,6 +52,13 @@ namespace Citadel.IPC
     /// </param>
     public delegate void RelaxPolicyRequestHander(RelaxedPolicyEventArgs args);
 
+    public enum RequestState
+    {
+        NoResponse = 0,
+        Granted,
+        Denied
+    }
+
     /// <summary>
     /// Arguments for the DeactivationRequestHandler delegate. 
     /// </summary>
@@ -62,9 +69,22 @@ namespace Citadel.IPC
         /// </summary>
         public bool Granted
         {
+            get
+            {
+                return DeactivationCommand == DeactivationCommand.Granted;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Did we successfully send the request and get any response back?
+        /// </summary>
+        public DeactivationCommand DeactivationCommand
+        {
             get;
             set;
-        } = false;
+        }
 
         /// <summary>
         /// Constructs a new DeactivationRequestEventArgs instance. 
@@ -328,22 +348,11 @@ namespace Citadel.IPC
                 if(cast != null && cast.Command == DeactivationCommand.Requested)
                 {
                     var args = new DeactivationRequestEventArgs();
+                    
+                    // This fills args.DeactivationCommand.
                     DeactivationRequested?.Invoke(args);
 
-                    switch(args.Granted)
-                    {
-                        case true:
-                        {
-                            PushMessage(new DeactivationMessage(DeactivationCommand.Granted));
-                        }
-                        break;
-
-                        case false:
-                        {
-                            PushMessage(new DeactivationMessage(DeactivationCommand.Denied));
-                        }
-                        break;
-                    }
+                    PushMessage(new DeactivationMessage(args.DeactivationCommand));
                 }
             }
             else if(msgRealType == typeof(Messages.RelaxedPolicyMessage))
