@@ -11,16 +11,15 @@ namespace CitadelService.Data.Filtering
     {
         public BlockInfo(BlockType cause, Uri requestUri, string categoryNameString, string matchingRule)
         {
-            Cause = cause;
-            RequestUri = requestUri.ToString();
-            CategoryNameString = categoryNameString;
-            MatchingRule = matchingRule;
+            this.cause = cause.ToString();
+            this.request_uri = requestUri.ToString();
+            this.category_name_string = categoryNameString;
+            this.matching_rule = matchingRule;
         }
 
-
-        public BlockType Cause { get; set; }
-        public string RequestUri { get; set; }
-        public string CategoryNameString { get; set; }
-        public string MatchingRule { get; set; }
+        public string cause { get; set; }
+        public string request_uri { get; set; }
+        public string category_name_string { get; set; }
+        public string matching_rule { get; set; }
     }
 }
