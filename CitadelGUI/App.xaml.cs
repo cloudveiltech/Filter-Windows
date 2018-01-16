@@ -286,79 +286,51 @@ namespace Te.Citadel
 
                 m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
                 {
-                    string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
-
-                    if(File.Exists(updateSettingsPath))
-                    {
-                        using (StreamReader reader = File.OpenText(updateSettingsPath))
-                        {
-                            string command = reader.ReadLine();
-
-                            string[] commandParts = command.Split(new char[] { ':' }, 2);
-
-                            if (commandParts[0] == "RemindLater")
-                            {
-                                DateTime remindLater;
-                                if (DateTime.TryParse(commandParts[1], out remindLater))
-                                {
-                                    if (DateTime.Now < remindLater)
-                                    {
-                                        return;
-                                    }
-                                }
-                            }
-                            else if (commandParts[0] == "SkipVersion")
-                            {
-                                if (commandParts[1] == args.NewVersionString)
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
                     BringAppToFocus();
 
                     var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
-                    
-                    if(args.IsRestartRequired)
+
+                    if (args.IsRestartRequired)
                     {
                         updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
                     }
 
                     await Current.Dispatcher.BeginInvoke(
                         System.Windows.Threading.DispatcherPriority.Normal,
-                        (Action) async delegate ()
-                        {
-                            if(m_mainWindow != null)
-                            {   
-                                var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
 
-                                switch(result)
-                                {
-                                    case UpdateDialogResult.UpdateNow:
-                                        m_ipcClient.NotifyAcceptUpdateRequest();
-                                        m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                                        break;
+                        (Action)async delegate ()
+                       {
+                           if (m_mainWindow != null)
+                           {
+                               string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
 
-                                    case UpdateDialogResult.RemindLater:
-                                        using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                        {
-                                            writer.WriteLine("RemindLater:{0}", DateTime.Now.AddDays(1).ToString("o"));
-                                        }
+                               var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
 
-                                        break;
+                               switch (result)
+                               {
+                                   case UpdateDialogResult.UpdateNow:
+                                       m_ipcClient.NotifyAcceptUpdateRequest();
+                                       m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
+                                       break;
 
-                                    case UpdateDialogResult.SkipVersion:
-                                        using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                        {
-                                            writer.WriteLine("SkipVersion:{0}", args.NewVersionString);
-                                        }
+                                   case UpdateDialogResult.RemindLater:
+                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
+                                       {
+                                           writer.WriteLine("RemindLater:{0}", DateTime.Now.AddDays(1).ToString("o"));
+                                       }
 
-                                        break;
-                                }
-                            }
-                        });
+                                       break;
+
+                                   case UpdateDialogResult.SkipVersion:
+                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
+                                       {
+                                           writer.WriteLine("SkipVersion:{0}", args.NewVersionString);
+                                       }
+
+                                       break;
+                               }
+                           }
+                       });
                 };
 
                 m_ipcClient.ServerUpdateStarting = () =>

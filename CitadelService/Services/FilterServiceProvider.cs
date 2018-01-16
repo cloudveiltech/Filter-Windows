@@ -883,6 +883,37 @@ namespace CitadelService.Services
             bool hadError = false;
             bool isAvailable = false;
 
+            string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+
+            if (File.Exists(updateSettingsPath))
+            {
+                using (StreamReader reader = File.OpenText(updateSettingsPath))
+                {
+                    string command = reader.ReadLine();
+
+                    string[] commandParts = command.Split(new char[] { ':' }, 2);
+
+                    if (commandParts[0] == "RemindLater")
+                    {
+                        DateTime remindLater;
+                        if (DateTime.TryParse(commandParts[1], out remindLater))
+                        {
+                            if (DateTime.Now < remindLater)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else if (commandParts[0] == "SkipVersion")
+                    {
+                        if (commandParts[1] == args.NewVersionString)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
             try
             {
                 m_appcastUpdaterLock.EnterWriteLock();
