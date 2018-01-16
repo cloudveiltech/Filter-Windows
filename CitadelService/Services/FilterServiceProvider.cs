@@ -308,6 +308,7 @@ namespace CitadelService.Services
 
         private DnsEnforcement m_dnsEnforcement;
 
+        private Accountability m_accountability;
 
         /// <summary>
         /// Default ctor. 
@@ -401,6 +402,8 @@ namespace CitadelService.Services
                 {
 
                 };
+
+                m_accountability = new Accountability();
 
                 m_ipcServer = new IPCServer();
 
@@ -1471,6 +1474,7 @@ namespace CitadelService.Services
             }
 
             m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, matchingRule);
+            m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if(internetShutOff)
             {
