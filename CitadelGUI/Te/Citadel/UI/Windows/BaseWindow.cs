@@ -87,10 +87,10 @@ namespace Te.Citadel.UI.Windows
                 MetroDialogSettings settings = new MetroDialogSettings();
                 settings.AffirmativeButtonText = "Yes";
                 settings.NegativeButtonText = "Remind Me Later";
-                settings.FirstAuxiliaryButtonText = "Skip This Version";
+                //settings.FirstAuxiliaryButtonText = "Skip This Version";
                 settings.DefaultButtonFocus = MessageDialogResult.Affirmative;
                 
-                var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, settings);
+                var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, settings);
 
                 switch(userQueryResult)
                 {

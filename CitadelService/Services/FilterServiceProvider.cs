@@ -60,6 +60,7 @@ namespace CitadelService.Services
         {
             try
             {
+                LogTime("Starting FilterServiceProvider");
                 OnStartup();
             }
             catch(Exception e)
@@ -208,6 +209,11 @@ namespace CitadelService.Services
         /// Timer used to query for filter list changes every X minutes, as well as application updates. 
         /// </summary>
         private Timer m_updateCheckTimer;
+
+        /// <summary>
+        /// Timer used to cleanup logs every 12 hours.
+        /// </summary>
+        private Timer m_cleanupLogsTimer;
 
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
@@ -700,8 +706,12 @@ namespace CitadelService.Services
                 Environment.Exit(-1);
             }
 
+            LogTime("Done with OnStartup initialization.");
+
             // Before we do any network stuff, ensure we have windows firewall access.
             EnsureWindowsFirewallAccess();
+
+            LogTime("EnsureWindowsFirewallAccess() is done");
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
@@ -972,6 +982,8 @@ namespace CitadelService.Services
         /// </summary>
         private void InitEngine()
         {
+            LogTime("Starting InitEngine()");
+
             // Get our CA-Bundle resource and unpack it to the application directory.
             var caCertPackURI = "CitadelService.Resources.ca-cert.pem";
             StringBuilder caFileBuilder = new StringBuilder();
@@ -1009,6 +1021,8 @@ namespace CitadelService.Services
                 }
             }
 
+            LogTime("Now Loading FilterDbCollection()");
+
             m_filterCollection = new FilterDbCollection();
             //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
 
@@ -1040,6 +1054,8 @@ namespace CitadelService.Services
             // Dump the text to the local file system.
             var localCaBundleCertPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ca-cert.pem");
             File.WriteAllText(localCaBundleCertPath, caFileBuilder.ToString());
+
+            LogTime("Loading filtering engine.");
 
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
@@ -1075,6 +1091,8 @@ namespace CitadelService.Services
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ffe);
             }
+
+            LogTime("Trust established with firefox.");
         }
 
 #if WITH_NLP
@@ -1164,6 +1182,8 @@ namespace CitadelService.Services
         /// </param>
         private void DoBackgroundInit(object sender, DoWorkEventArgs e)
         {
+            LogTime("Starting DoBackgroundInit()");
+
             // Setup json serialization settings.
             m_configSerializerSettings = new JsonSerializerSettings();
             m_configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -1190,6 +1210,9 @@ namespace CitadelService.Services
 
             // Init update timer.
             m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+            // Run log cleanup and schedule for next run.
+            OnCleanupLogsElapsed(null);
 
             // Set up our network availability checks so we can run captive portal detection on a changed network.
             NetworkChange.NetworkAddressChanged += m_dnsEnforcement.OnNetworkChange;
@@ -1830,7 +1853,9 @@ namespace CitadelService.Services
                     contentType = contentType.ToLower();
 
                     BlockType blockType;
-                    var contentClassResult = OnClassifyContent(body, contentType, out blockType);
+                    string textTrigger;
+                    string textCategory;
+                    var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
 
                     if(contentClassResult > 0)
                     {
@@ -1841,7 +1866,7 @@ namespace CitadelService.Services
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, 0, uriInfo, blockType);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1896,7 +1921,7 @@ namespace CitadelService.Services
             return matchingCategory.ToString() + " filter rule mismatch error";
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
@@ -1926,7 +1951,7 @@ namespace CitadelService.Services
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
-            if (info != null && matchingCategory > 0)
+            if (info != null && matchingCategory > 0 && blockType == BlockType.None)
             {
                 matching_category = findCategoryFromUriInfo(matchingCategory, info);
             }
@@ -1948,7 +1973,7 @@ namespace CitadelService.Services
 
                     case BlockType.TextClassification:
                     case BlockType.TextTrigger:
-                        matching_category = "improper text";
+                        matching_category = string.Format("offensive text: {0}", triggerCategory);
                         break;
 
                     case BlockType.OtherContentClassification:
@@ -2012,7 +2037,7 @@ namespace CitadelService.Services
         /// the content is not deemed to be part of any known category, which is a general indication
         /// to the engine that the content should not be blocked.
         /// </returns>
-        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause)
+        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
         {
             try
             {
@@ -2046,6 +2071,8 @@ namespace CitadelService.Services
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
+                                triggerCategory = mappedCategory.CategoryName;
+                                textTrigger = trigger;
                                 return mappedCategory.CategoryId;
                             }
                         }
@@ -2160,6 +2187,8 @@ namespace CitadelService.Services
 #endif
             // Default to zero. Means don't block this content.
             blockedBecause = BlockType.OtherContentClassification;
+            textTrigger = "";
+            triggerCategory = "";
             return 0;
         }
 
@@ -2208,6 +2237,8 @@ namespace CitadelService.Services
 
         public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
         {
+            LogTime("UpdateAndWriteList");
+
             ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
 
             try
@@ -2284,6 +2315,69 @@ namespace CitadelService.Services
             }
 
             this.UpdateAndWriteList(false);
+            this.CleanupLogs();
+        }
+
+        public const int LogCleanupIntervalInHours = 12;
+        public const int MaxLogAgeInDays = 7;
+
+        private void OnCleanupLogsElapsed(object state)
+        {
+            this.CleanupLogs();
+
+            if(m_cleanupLogsTimer == null)
+            {
+                m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+            }
+            else
+            {
+                m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        Stopwatch m_logTimeStopwatch = null;
+        /// <summary>
+        /// Logs the amount of time that has passed since the last time this function was called.
+        /// </summary>
+        /// <param name="message"></param>
+        private void LogTime(string message)
+        {
+            string timeInfo = null;
+
+            if (m_logTimeStopwatch == null)
+            {
+                m_logTimeStopwatch = Stopwatch.StartNew();
+                timeInfo = "Initialized:";
+            }
+            else
+            {
+                long ms = m_logTimeStopwatch.ElapsedMilliseconds;
+                timeInfo = string.Format("{0}ms:", ms);
+
+                m_logTimeStopwatch.Restart();
+            }
+
+            m_logger.Info("TIME {0} {1}", timeInfo, message);
+        }
+
+        private void CleanupLogs()
+        {
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
+
+            if(Directory.Exists(directoryPath))
+            {
+                string[] files = Directory.GetFiles(directoryPath);
+                foreach(string filePath in files)
+                {
+                    FileInfo info = new FileInfo(filePath);
+
+                    DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
+                    if(expiryDate < DateTime.Now)
+                    {
+                        info.Delete();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -2331,6 +2425,8 @@ namespace CitadelService.Services
         /// </summary>
         private void ReloadFilteringRules()
         {
+            LogTime("ReloadFilteringRules()");
+
             try
             {
                 m_filteringRwLock.EnterWriteLock();
@@ -2501,6 +2597,8 @@ namespace CitadelService.Services
                             uint totalFilterRulesFailed = 0;
                             uint totalTriggersLoaded = 0;
 
+                            LogTime("Loading configured list files");
+
                             // Load all configured list files.
                             foreach(var listModel in m_userConfig.ConfiguredLists)
                             {
@@ -2635,6 +2733,8 @@ namespace CitadelService.Services
                             }
 
                             m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
+
+                            LogTime("Rules loaded.");
                         }
                     }
                 }
