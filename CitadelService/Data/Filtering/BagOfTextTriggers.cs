@@ -8,11 +8,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace CitadelService.Data.Filtering
 {
@@ -29,7 +30,7 @@ namespace CitadelService.Data.Filtering
         /// <summary>
         /// Our Sqlite connection.
         /// </summary>
-        private SQLiteConnection m_connection;
+        private SqliteConnection m_connection;
 
         /// <summary>
         /// Holds whether or not this instance has any triggers loaded.
@@ -71,14 +72,32 @@ namespace CitadelService.Data.Filtering
 
             if(useMemory)
             {
-                m_connection = new SQLiteConnection("FullUri=file::memory:?cache=shared;Version=3;");
+                var version = typeof(BagOfTextTriggers).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+                var rnd = new Random();
+                var rndNum = rnd.Next();
+                var generatedDbName = string.Format("{0} {1} - {2}", nameof(BagOfTextTriggers), version, rndNum);
+
+                // "Data Source = :memory:; Cache = shared;"
+                var cb = new SqliteConnectionStringBuilder();
+                cb.Mode = SqliteOpenMode.Memory;
+                cb.Cache = SqliteCacheMode.Shared;
+                cb.DataSource = generatedDbName;
+                m_connection = new SqliteConnection(cb.ToString());
+
+                //m_connection = new SqliteConnection("FullUri=file::memory:?cache=shared;Version=3;");
             }
             else
             {
-                m_connection = new SQLiteConnection(string.Format("Data Source={0};Version=3;", dbAbsolutePath));
+                var cb = new SqliteConnectionStringBuilder();
+                cb.Mode = SqliteOpenMode.ReadWriteCreate;
+                cb.Cache = SqliteCacheMode.Shared;
+                cb.DataSource = dbAbsolutePath;
+
+                m_connection = new SqliteConnection(cb.ToString());
+                //m_connection = new SqliteConnection(string.Format("Data Source={0};Version=3;", dbAbsolutePath));
             }
 
-            m_connection.Flags = SQLiteConnectionFlags.UseConnectionPool | SQLiteConnectionFlags.NoConvertSettings | SQLiteConnectionFlags.NoVerifyTypeAffinity;
+            //m_connection.Flags = SQLiteConnectionFlags.UseConnectionPool | SQLiteConnectionFlags.NoConvertSettings | SQLiteConnectionFlags.NoVerifyTypeAffinity;
             m_connection.Open();
 
             ConfigureDatabase();
@@ -190,8 +209,8 @@ namespace CitadelService.Data.Filtering
                 using(var cmd = m_connection.CreateCommand())
                 {
                     cmd.CommandText = "INSERT INTO TriggerIndex VALUES ($rigger, $categoryId)";
-                    var domainParam = new SQLiteParameter("$rigger", DbType.String);
-                    var categoryIdParam = new SQLiteParameter("$categoryId", DbType.Int16);
+                    var domainParam = new SqliteParameter("$rigger", DbType.String);
+                    var categoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
                     cmd.Parameters.Add(domainParam);
                     cmd.Parameters.Add(categoryIdParam);
 
@@ -234,7 +253,7 @@ namespace CitadelService.Data.Filtering
             {
                 cmd.CommandText = @"SELECT * from TriggerIndex where TriggerText = $trigger";
 
-                var domainSumParam = new SQLiteParameter("$trigger", System.Data.DbType.String);
+                var domainSumParam = new SqliteParameter("$trigger", System.Data.DbType.String);
                 domainSumParam.Value = input.ToLower();
                 cmd.Parameters.Add(domainSumParam);
 
@@ -305,14 +324,16 @@ namespace CitadelService.Data.Filtering
 
             var split = Split(input);
 
-            using(var myConn = new SQLiteConnection(m_connection))
+            using(var myConn = new SqliteConnection(m_connection.ConnectionString))
             {
+                myConn.Open();
+
                 using(var tsx = myConn.BeginTransaction())
                 using(var cmd = myConn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT * from TriggerIndex where TriggerText = $trigger";
 
-                    var domainSumParam = new SQLiteParameter("$trigger", System.Data.DbType.String);
+                    var domainSumParam = new SqliteParameter("$trigger", System.Data.DbType.String);
                     cmd.Parameters.Add(domainSumParam);
 
                     foreach(var s in split)
