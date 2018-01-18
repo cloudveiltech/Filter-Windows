@@ -9,6 +9,40 @@ using System;
 
 namespace Citadel.IPC.Messages
 {
+    [Serializable]
+    public enum RelaxedPolicyStatus
+    {
+        /// <summary>
+        /// Returned when all policies for the day are used up.
+        /// </summary>
+        AllUsed,
+
+        /// <summary>
+        /// Means that the user's click action caused the current relaxed policy to clear.
+        /// </summary>
+        Relinquished,
+
+        /// <summary>
+        /// Means that the relaxed policy is activated and no click action occurred.
+        /// </summary>
+        Activated,
+
+        /// <summary>
+        /// Means that the user's click action to request a relaxed policy was granted.
+        /// </summary>
+        Granted,
+
+        /// <summary>
+        /// Means that the relaxed policy was already relinquished.
+        /// </summary>
+        AlreadyRelinquished,
+
+        /// <summary>
+        /// Relaxed policy is currently deactivated and no click action occurred.
+        /// </summary>
+        Deactivated
+    }
+
     /// <summary>
     /// Enum of the different commands that a deactivation message can represent. 
     /// </summary>
@@ -67,6 +101,8 @@ namespace Citadel.IPC.Messages
             private set;
         } = 0;
 
+        public RelaxedPolicyStatus Status { get; private set; }
+        
         /// <summary>
         /// Constructs a new RelaxedPolicyInfo instance. 
         /// </summary>
@@ -76,10 +112,17 @@ namespace Citadel.IPC.Messages
         /// <param name="numberAvailableToday">
         /// The total number of relaxed policies available for the current day. 
         /// </param>
-        public RelaxedPolicyInfo(TimeSpan relaxDuration, int numberAvailableToday)
+        /// <param name="isActive">
+        /// Whether or not the relaxed policy is active.
+        /// </param>
+        /// <param name="command">
+        /// The command which caused this info to be sent.
+        /// </param>
+        public RelaxedPolicyInfo(TimeSpan relaxDuration, int numberAvailableToday, RelaxedPolicyStatus status)
         {
             RelaxDuration = relaxDuration;
             NumberAvailableToday = numberAvailableToday;
+            Status = status;
         }
     }
 

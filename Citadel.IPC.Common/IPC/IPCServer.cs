@@ -460,9 +460,16 @@ namespace Citadel.IPC
         /// <param name="policyDuration">
         /// The duration of the relaxed policies. 
         /// </param>
-        public void NotifyRelaxedPolicyChange(int numPoliciesAvailable, TimeSpan policyDuration)
+        /// <param name="isActive">
+        /// Whether or not the relaxed policy is currently active.
+        /// </param>
+        /// <param name="command">
+        /// The relaxed policy command which caused this notification to happen.
+        /// If == RelaxedPolicyCommand.Info, ignore.
+        /// </param>
+        public void NotifyRelaxedPolicyChange(int numPoliciesAvailable, TimeSpan policyDuration, RelaxedPolicyStatus status)
         {
-            var nfo = new RelaxedPolicyInfo(policyDuration, numPoliciesAvailable);
+            var nfo = new RelaxedPolicyInfo(policyDuration, numPoliciesAvailable, status);
             var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Info, nfo);
             PushMessage(msg);
         }

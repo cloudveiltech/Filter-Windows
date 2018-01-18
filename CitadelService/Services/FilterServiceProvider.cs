@@ -650,11 +650,11 @@ namespace CitadelService.Services
                     var cfg = Config;
                     if(cfg != null && cfg.BypassesPermitted > 0)
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
+                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
                     }
                     else
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                        m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
                     }
 
                     m_ipcServer.NotifyStatus(Status);
@@ -890,6 +890,30 @@ namespace CitadelService.Services
         {
             bool hadError = false;
             bool isAvailable = false;
+
+            string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+
+            if (File.Exists(updateSettingsPath))
+            {
+                using (StreamReader reader = File.OpenText(updateSettingsPath))
+                {
+                    string command = reader.ReadLine();
+
+                    string[] commandParts = command.Split(new char[] { ':' }, 2);
+
+                    if (commandParts[0] == "RemindLater")
+                    {
+                        DateTime remindLater;
+                        if (DateTime.TryParse(commandParts[1], out remindLater))
+                        {
+                            if (DateTime.Now < remindLater)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
 
             try
             {
@@ -2397,11 +2421,11 @@ namespace CitadelService.Services
                             // configured. Force this up to the UI thread because it's a UI model.
                             if(m_userConfig.BypassesPermitted > 0)
                             {
-                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration);
+                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration, getRelaxedPolicyStatus());
                             }
                             else
                             {
-                                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
                             }
 
                             // Recreate our filter collection and reset all categories to be disabled.
@@ -2748,16 +2772,16 @@ namespace CitadelService.Services
 
                 if(allUsesExhausted)
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
                 }
                 else
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
+                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Granted);
                 }
             }
             else
             {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
             }
 
             if(allUsesExhausted)
@@ -2776,36 +2800,56 @@ namespace CitadelService.Services
             }
         }
 
-        /// <summary>
-        /// Called when the user has manually requested to relinquish a relaxed policy. 
-        /// </summary>
-        private void OnRelinquishRelaxedPolicyRequested()
+        private RelaxedPolicyStatus getRelaxedPolicyStatus()
         {
             bool relaxedInEffect = false;
             // Determine if a relaxed policy is currently in effect.
-            foreach(var entry in m_generatedCategoriesMap.Values)
+            foreach (var entry in m_generatedCategoriesMap.Values)
             {
-                if(entry is MappedBypassListCategoryModel)
+                if (entry is MappedBypassListCategoryModel)
                 {
-                    if(m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                    if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
                     {
                         relaxedInEffect = true;
                     }
                 }
             }
 
+            if (relaxedInEffect)
+            {
+                return RelaxedPolicyStatus.Activated;
+            }
+            else
+            {
+                if (Config.BypassesPermitted - Config.BypassesUsed == 0)
+                {
+                    return RelaxedPolicyStatus.AllUsed;
+                }
+                else
+                {
+                    return RelaxedPolicyStatus.Deactivated;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when the user has manually requested to relinquish a relaxed policy. 
+        /// </summary>
+        private void OnRelinquishRelaxedPolicyRequested()
+        {
+            RelaxedPolicyStatus status = getRelaxedPolicyStatus();
+
             // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if(relaxedInEffect)
+            if(status == RelaxedPolicyStatus.Activated)
             {
                 OnRelaxedPolicyTimerExpired(null);
             }
 
-            // If a policy was not already in effect, then the user is choosing to relinquish a
-            // policy not yet used. So just eat it up. If this is not the case, then the policy has
-            // already been decremented, so don't bother.
-            if(!relaxedInEffect)
+            // We want to inform the user that there is no relaxed policy in effect currently for this installation.
+            if(status == RelaxedPolicyStatus.Deactivated)
             {
-                DecrementRelaxedPolicy_Local();
+                var cfg = Config;
+                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
             }
         }
 
@@ -2844,7 +2888,7 @@ namespace CitadelService.Services
             if(cfg != null)
             {
                 cfg.BypassesUsed = 0;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration);
+                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
             }
 
             // Disable the reset timer.
