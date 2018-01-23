@@ -29,6 +29,7 @@
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="InstallGuardDialog.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>

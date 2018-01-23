@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+        <UI Id="InstallGuardUI">
+            <TextStyle Id="TahomaNormal" FaceName="Tahoma" Size="8" />
+            <Dialog Id="InstallGuardDialog" Width="400" Height="300" Title="Install Guard">
+                <Control Id="explanationText" X="85" Y="100" NoWrap="no" RightAligned="no" Transparent="yes" Text="{TahomaNormal}In order to uninstall CloudVeil for Windows, open the CloudVeil app, go to 'Advanced', and request a deactivation." />
+                <Control Id="cancelButton" Type="PushButton" Text="[Cancel]" Height="40" Width="144" X="135" Y="245" Cancel="yes" Bitmap="no">
+                    <Publish Event="EndDialog" Value="Exit" />
+                </Control>
+            </Dialog>
+        </UI>
+	</Fragment>
+</Wix>
