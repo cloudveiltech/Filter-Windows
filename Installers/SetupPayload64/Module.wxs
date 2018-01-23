@@ -585,6 +585,12 @@
           <File Id="_FEB1922C_FFE1_F94D_843B_AF9EDD6393F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.core.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.core.dll" KeyPath="yes" />
         </Component>
         <!-- The 'InstallGuard' project output. -->
+        <Component Id="comp_4DF2BCC6_189C" Guid="CE192BB4-A8BC-41F4-9829-291107227FE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1DE9226C_55B1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_570282AB_9586" Guid="98B4F591-FB09-4C87-B453-A6A4B72F124E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_58E52A93_6301" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
         <Directory Id="InstallGuard.Binaries" />
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">

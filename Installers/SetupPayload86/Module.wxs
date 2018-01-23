@@ -579,6 +579,9 @@
           <File Id="_FF8C58A1_109B_9A44_A3AC_A9C190A5398F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.NonGeneric.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.NonGeneric.dll" KeyPath="yes" />
         </Component>
         <!-- The 'InstallGuard' project output. -->
+        <Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B9C72077_61E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
         <Directory Id="InstallGuard.Binaries" />
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
           <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">

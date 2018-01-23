@@ -47,7 +47,7 @@
         <File Id="_5EB6A0B5_4D2A_A347_AB04_F6282687850B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
       </Component>
       <Merge Id="Microsoft_VC110_CRT_x86.msm" SourceFile="External\msms\Microsoft_VC110_CRT_x86.msm" DiskId="1" Language="0" />
-      <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\bin\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
+      <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
       <Merge Id="Microsoft_VC140_CRT_x86.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x86.msm" DiskId="1" Language="0" />
     </Directory>
     <!-- The FileSystem group of the installation package. -->
