@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectOutput Name="InstallGuard" ProjectDirVar="$(var.InstallGuard.ProjectDir)" TargetDirVar="$(var.InstallGuard.TargetDir)" SharedFileId="_982DBAFD_6D93_40B5_890A_37B5F8CEB551">
+  <Binaries>
+    <DiskId>1</DiskId>
+    <Compressed />
+    <Hidden>no</Hidden>
+    <KeyPath>yes</KeyPath>
+    <ReadOnly>no</ReadOnly>
+    <System>no</System>
+    <Vital>yes</Vital>
+    <Permanent>no</Permanent>
+    <SharedDllRefCount>no</SharedDllRefCount>
+    <Transitive>no</Transitive>
+  </Binaries>
+</ProjectOutput>

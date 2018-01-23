@@ -903,6 +903,31 @@ namespace CitadelService.Services
             bool hadError = false;
             bool isAvailable = false;
 
+            string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+
+            string[] commandParts = null;
+            if (File.Exists(updateSettingsPath))
+            {
+                using (StreamReader reader = File.OpenText(updateSettingsPath))
+                {
+                    string command = reader.ReadLine();
+
+                    commandParts = command.Split(new char[] { ':' }, 2);
+
+                    if (commandParts[0] == "RemindLater")
+                    {
+                        DateTime remindLater;
+                        if (DateTime.TryParse(commandParts[1], out remindLater))
+                        {
+                            if (DateTime.Now < remindLater)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
             try
             {
                 m_appcastUpdaterLock.EnterWriteLock();
@@ -919,6 +944,14 @@ namespace CitadelService.Services
                 if (m_lastFetchedUpdate != null && !isSyncButton)
                 {
                     m_logger.Info("Found update. Asking clients to accept update.");
+
+                    if (commandParts != null && commandParts[0] == "SkipVersion")
+                    {
+                        if (commandParts[1] == m_lastFetchedUpdate.CurrentVersion.ToString())
+                        {
+                            return false;
+                        }
+                    }
 
                     ReviveGuiForCurrentUser();
 

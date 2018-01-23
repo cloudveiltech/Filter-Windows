@@ -315,41 +315,42 @@ namespace Te.Citadel
 
                     var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
 
-                    if(args.IsRestartRequired)
+                    if (args.IsRestartRequired)
                     {
                         updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
                     }
 
                     await Current.Dispatcher.BeginInvoke(
                         System.Windows.Threading.DispatcherPriority.Normal,
+
                         (Action)async delegate ()
                        {
-                           if(m_mainWindow != null)
+                           if (m_mainWindow != null)
                            {
                                var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
 
-                               switch(result)
+                               switch (result)
                                {
                                    case UpdateDialogResult.UpdateNow:
-                                   m_ipcClient.NotifyAcceptUpdateRequest();
-                                   m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                                   break;
+                                       m_ipcClient.NotifyAcceptUpdateRequest();
+                                       m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
+                                       break;
 
                                    case UpdateDialogResult.RemindLater:
-                                   using(StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                   {
-                                       writer.WriteLine("RemindLater:{0}", DateTime.Now.AddDays(1).ToString("o"));
-                                   }
+                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
+                                       {
+                                           writer.WriteLine("RemindLater:{0}", DateTime.Now.AddDays(1).ToString("o"));
+                                       }
 
-                                   break;
+                                       break;
 
                                    case UpdateDialogResult.SkipVersion:
-                                   using(StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                   {
-                                       writer.WriteLine("SkipVersion:{0}", args.NewVersionString);
-                                   }
+                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
+                                       {
+                                           writer.WriteLine("SkipVersion:{0}", args.NewVersionString);
+                                       }
 
-                                   break;
+                                       break;
                                }
                            }
                        });
