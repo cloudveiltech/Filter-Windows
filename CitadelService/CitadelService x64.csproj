@@ -89,7 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CitadelCore.Windows">
-      <Version>1.3.6</Version>
+      <Version>1.3.8</Version>
     </PackageReference>
     <PackageReference Include="DistillNET">
       <Version>1.4.5</Version>
@@ -125,7 +125,7 @@
       <Version>1.0.81</Version>
     </PackageReference>
     <PackageReference Include="WindowsFirewallHelper">
-      <Version>1.3.6543.29360</Version>
+      <Version>1.4.6592.8627</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
