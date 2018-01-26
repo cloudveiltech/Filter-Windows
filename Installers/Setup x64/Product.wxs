@@ -24,6 +24,11 @@
     <!-- The 'InstallGuard.exe' custom action. -->
     <CustomAction Id="_BD17E305_5523_4A83_88DB_AD862932DD00.Uninstall" Execute="deferred" BinaryKey="InstallUtil" DllEntry="ManagedInstall" Impersonate="no" />
     <CustomAction Id="_BD17E305_5523_4A83_88DB_AD862932DD00.Uninstall.SetProperty" Property="_BD17E305_5523_4A83_88DB_AD862932DD00.Uninstall" Value="/installtype=notransaction /action=uninstall /LogFile= &quot;[#_0B11E4D1_56DD_7B46_9870_4EAA895D317A]&quot; &quot;[VSDFxConfigFile]&quot;" />
+     
+      <!-- InstalledProgramDetection -->
+      <CustomAction Id="InstalledProgramDetection" Execute="deferred" BinaryKey="InstalledProgramDetectionDll" DllEntry="DetectInstalledConflicts" Impersonate="no" />
+      <Binary Id="InstalledProgramDetectionDll" SourceFile="..\..\InstalledProgramDetection\bin\Release\InstalledProgramDetection.dll" />
+      
     <!-- The support for managed custom actions. -->
     <Binary Id="InstallUtil" SourceFile="Resources\Binary\InstallUtil" />
     <Binary Id="InstallUtilConfig" SourceFile="Resources\Binary\InstallUtilConfig" />
