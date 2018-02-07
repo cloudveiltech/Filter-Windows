@@ -14,6 +14,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using CitadelService.Services;
+using NLog;
+using System.Diagnostics;
 
 namespace CitadelService.Data.Filtering
 {
@@ -48,6 +51,8 @@ namespace CitadelService.Data.Filtering
             }
         }
 
+        private Logger m_logger;
+
         /// <summary>
         /// Constructs a new BagOfTextTriggers.
         /// </summary>
@@ -61,8 +66,10 @@ namespace CitadelService.Data.Filtering
         /// <param name="useMemory">
         /// If true, the database will be created as a purely in-memory database.
         /// </param>
-        public BagOfTextTriggers(string dbAbsolutePath, bool overwrite = true, bool useMemory = false)
+        public BagOfTextTriggers(string dbAbsolutePath, bool overwrite = true, bool useMemory = false, Logger logger = null)
         {
+            m_logger = logger;
+
             if(!useMemory && overwrite && File.Exists(dbAbsolutePath))
             {
                 File.Delete(dbAbsolutePath);
@@ -322,11 +329,17 @@ namespace CitadelService.Data.Filtering
                 return false;
             }
 
-            var split = Split(input);
+            var stopwatch = Stopwatch.StartNew();
+            var split = Split(input); // THIS may be part of the performance issue
+            stopwatch.Stop();
+
+            m_logger.Info("Split time took {0}", stopwatch.ElapsedMilliseconds);
 
             using(var myConn = new SqliteConnection(m_connection.ConnectionString))
             {
                 myConn.Open();
+
+                int itr = 0;
 
                 using(var tsx = myConn.BeginTransaction())
                 using(var cmd = myConn.CreateCommand())
@@ -336,8 +349,34 @@ namespace CitadelService.Data.Filtering
                     var domainSumParam = new SqliteParameter("$trigger", System.Data.DbType.String);
                     cmd.Parameters.Add(domainSumParam);
 
+                    bool skippingTags = false;
+                    string[] newSplit = new string[split.Count];
+
                     foreach(var s in split)
                     {
+                        switch(s.ToLower())
+                        {
+                            case "<div":
+                            case "<span":
+                            case "<a":
+                            case "<img":
+                            case "<meta":
+                            case "<link":
+                            case "<li":
+                                skippingTags = true;
+                                break;
+
+                            case ">":
+                                skippingTags = false;
+                                break;
+                        }
+
+                        if(!skippingTags)
+                        {
+                            newSplit[itr] = s;
+                            itr++;
+                        }
+
                         cmd.Parameters[0].Value = s;
                         using(var reader = cmd.ExecuteReader())
                         {
@@ -362,18 +401,29 @@ namespace CitadelService.Data.Filtering
                     // No match yet. Do rebuild if user asked for it.
                     if(rebuildAndTestFragments)
                     {
-                        var len = split.Count;
+                        var len = itr; //newSplit.Length;
 
                         if(maxRebuildLen == -1 || maxRebuildLen > len)
                         {
                             maxRebuildLen = len;
                         }
 
+                        ulong __itrCount = 0;
+                        ulong __sqlItrCount = 0;
+
+                        if(m_logger != null)
+                        {
+                            m_logger.Info("Trigger scan length = {0}", len);
+                        }
+
                         for(var i = 0; i < len; ++i)
                         {
                             for(var j = i + 1; j < len && j - i <= maxRebuildLen; ++j)
                             {
-                                var sub = split.GetRange(i, j - i);
+                                __itrCount++;
+                                var sub = new ArraySegment<string>(newSplit, i, j - i);
+                                //var sub = split.GetRange(i, j - i);
+                                
                                 var subLen = (sub.Count - 1) + sub.Sum(xx => xx.Length);
                                 // Don't bother checking the string if it exceeds the limits of our
                                 // database column length. Currently it's char 255.
@@ -387,6 +437,8 @@ namespace CitadelService.Data.Filtering
 
                                 using(var reader = cmd.ExecuteReader())
                                 {
+                                    __sqlItrCount++;
+
                                     if(!reader.HasRows)
                                     {
                                         continue;
@@ -404,6 +456,11 @@ namespace CitadelService.Data.Filtering
                                     }
                                 }
                             }
+                        }
+
+                        if(m_logger != null)
+                        {
+                            m_logger.Info("Number of times iterated: {0}", __itrCount);
                         }
                     }
 
@@ -423,6 +480,7 @@ namespace CitadelService.Data.Filtering
             {
                 switch(input[i])
                 {
+                    case '<':
                     case 'a':
                     case 'b':
                     case 'c':
@@ -491,6 +549,12 @@ namespace CitadelService.Data.Filtering
                         sb.Append(char.ToLower(input[i]));
                     }
                     break;
+
+                    case '>':
+                        res.Add(sb.ToString());
+                        sb.Clear();
+                        res.Add(">");
+                        break;
 
                     default:
                     {

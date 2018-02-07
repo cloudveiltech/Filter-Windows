@@ -1014,7 +1014,7 @@ namespace CitadelService.Services
             m_filterCollection = new FilterDbCollection();
             //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
 
-            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);         
+            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);         
 
             LogTime("Loading filtering engine.");
 
@@ -1790,6 +1790,8 @@ namespace CitadelService.Services
         
         private void OnHttpMessageEnd(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out bool shouldBlock, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             shouldBlock = false;
             customBlockResponseContentType = null;
             customBlockResponse = null;
@@ -1806,6 +1808,7 @@ namespace CitadelService.Services
             try
             {
                 var parsedHeaders = ParseHeaders(headers);
+                m_logger.Info("Parsed Headers @ {0}", stopwatch.ElapsedMilliseconds);
 
                 string contentType = null;
 
@@ -1816,7 +1819,10 @@ namespace CitadelService.Services
                     BlockType blockType;
                     string textTrigger;
                     string textCategory;
+
+                    m_logger.Info("OnClassifyContent @ {0}", stopwatch.ElapsedMilliseconds);
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
+                    m_logger.Info("OnClassifyContent Done for {1} @ {0}", stopwatch.ElapsedMilliseconds, requestUrl.ToString());
 
                     if(contentClassResult > 0)
                     {
@@ -2000,10 +2006,13 @@ namespace CitadelService.Services
         /// </returns>
         private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
         {
+            Stopwatch stopwatch = null;
+
             try
             {
                 m_filteringRwLock.EnterReadLock();
 
+                stopwatch = Stopwatch.StartNew();
                 if(m_textTriggers != null && m_textTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
@@ -2039,6 +2048,9 @@ namespace CitadelService.Services
                         }
                     }
                 }
+                stopwatch.Stop();
+
+                m_logger.Info("Text triggers took {0}", stopwatch.ElapsedMilliseconds);
             }
             catch(Exception e)
             {
@@ -2503,7 +2515,7 @@ namespace CitadelService.Services
 
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                             // be an in-memory DB or not.
-                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);
+                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
 
                             // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();

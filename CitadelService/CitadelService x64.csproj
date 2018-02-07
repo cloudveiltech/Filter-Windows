@@ -58,7 +58,6 @@
     <Compile Include="Services\FilterServiceProvider.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
-    <Compile Include="Util\RelaxedPolicyEnforcement.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <Compile Include="Util\WebServiceUtil.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />
