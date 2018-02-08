@@ -1816,7 +1816,7 @@ namespace CitadelService.Services
                     BlockType blockType;
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType);
 
-                    if(contentClassResult > 0)
+                    if (contentClassResult > 0)
                     {
                         shouldBlock = true;
 
@@ -2022,11 +2022,13 @@ namespace CitadelService.Services
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
-                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
+                            m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
+
                             var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
-                            if(mappedCategory != null)
+                            if (mappedCategory != null)
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
@@ -2588,26 +2590,6 @@ namespace CitadelService.Services
                                                 }
 
                                                 GC.Collect();
-
-                                                // Load second as whitelist, but start off with the
-                                                // category disabled.
-                                                using(TextReader tr = new StreamReader(listEntry.Open()))
-                                                {
-                                                    var bypassAsWhitelistRules = new List<string>();
-                                                    string line = null;
-                                                    while((line = tr.ReadLine()) != null)
-                                                    {
-                                                        bypassAsWhitelistRules.Add("@@" + line.Trim() + "\n");
-                                                    }
-
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRules(bypassAsWhitelistRules.ToArray(), bypassCategoryModel.CategoryIdAsWhitelist).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                    m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
-                                                }
-
-                                                GC.Collect();
                                             }
                                         }
                                         break;
@@ -2757,7 +2739,8 @@ namespace CitadelService.Services
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
+                        //m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
                     }
                 }
 
@@ -2783,7 +2766,7 @@ namespace CitadelService.Services
                     {
                         if (entry is MappedBypassListCategoryModel)
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
                         }
                     }
 
