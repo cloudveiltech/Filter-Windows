@@ -1820,7 +1820,6 @@ namespace CitadelService.Services
                     string textTrigger;
                     string textCategory;
 
-                    m_logger.Info("OnClassifyContent @ {0}", stopwatch.ElapsedMilliseconds);
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
                     m_logger.Info("OnClassifyContent Done for {1} @ {0}", stopwatch.ElapsedMilliseconds, requestUrl.ToString());
 

@@ -169,6 +169,9 @@ namespace CitadelService.Data.Filtering
                 command.CommandText = "CREATE TABLE IF NOT EXISTS TriggerIndex (TriggerText VARCHAR(255), CategoryId INT16)";
                 await command.ExecuteNonQueryAsync();
 
+                command.CommandText = "CREATE TABLE IF NOT EXISTS FirstWordIndex (FirstWordText VARCHAR(255), IsWholeTrigger INT16, CategoryId INT16)";
+                await command.ExecuteNonQueryAsync();
+
                 tsx.Commit();
             }
         }
@@ -181,6 +184,9 @@ namespace CitadelService.Data.Filtering
             using(var command = m_connection.CreateCommand())
             {
                 command.CommandText = "CREATE INDEX IF NOT EXISTS trigger_index ON TriggerIndex (TriggerText)";
+                command.ExecuteNonQuery();
+
+                command.CommandText = "CREATE INDEX IF NOT EXISTS first_word_index ON FirstWordIndex (FirstWordText)";
                 command.ExecuteNonQuery();
             }
         }
@@ -213,24 +219,43 @@ namespace CitadelService.Data.Filtering
             int loaded = 0;
             using(var transaction = m_connection.BeginTransaction())
             {
-                using(var cmd = m_connection.CreateCommand())
+                using (var cmd = m_connection.CreateCommand())
+                using (var firstWordCommand = m_connection.CreateCommand())
                 {
+                    firstWordCommand.CommandText = "INSERT INTO FirstWordIndex VALUES ($firstWord, $isWholeTrigger, $categoryId)";
                     cmd.CommandText = "INSERT INTO TriggerIndex VALUES ($rigger, $categoryId)";
                     var domainParam = new SqliteParameter("$rigger", DbType.String);
                     var categoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
                     cmd.Parameters.Add(domainParam);
                     cmd.Parameters.Add(categoryIdParam);
 
+                    var firstWordParam = new SqliteParameter("$firstWord", DbType.String);
+                    var isWholeTriggerParam = new SqliteParameter("$isWholeTrigger", DbType.Int16);
+                    var firstWordCategoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
+                    firstWordCommand.Parameters.Add(firstWordParam);
+                    firstWordCommand.Parameters.Add(isWholeTriggerParam);
+                    firstWordCommand.Parameters.Add(firstWordCategoryIdParam);
+
                     string line = null;
-                    using(var sw = new StreamReader(inputStream))
+                    using (var sw = new StreamReader(inputStream))
                     {
-                        while((line = await sw.ReadLineAsync()) != null)
+                        while ((line = await sw.ReadLineAsync()) != null)
                         {
-                            if(line.Trim().Length > 0)
+                            string trimmedLine = line.Trim();
+                            if (trimmedLine.Length > 0)
                             {
-                                cmd.Parameters[0].Value = line.Trim();
+                                List<string> trimmedLineParts = Split(trimmedLine);
+
+                                cmd.Parameters[0].Value = trimmedLine;
                                 cmd.Parameters[1].Value = categoryId;
+
+                                firstWordCommand.Parameters[0].Value = trimmedLineParts.First();
+                                firstWordCommand.Parameters[1].Value = trimmedLineParts.Count == 1;
+                                firstWordCommand.Parameters[2].Value = categoryId;
+
                                 await cmd.ExecuteNonQueryAsync();
+                                await firstWordCommand.ExecuteNonQueryAsync();
+
                                 ++loaded;
                             }
                         }
@@ -330,10 +355,7 @@ namespace CitadelService.Data.Filtering
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var split = Split(input); // THIS may be part of the performance issue
-            stopwatch.Stop();
-
-            m_logger.Info("Split time took {0}", stopwatch.ElapsedMilliseconds);
+            var split = Split(input);
 
             using(var myConn = new SqliteConnection(m_connection.ConnectionString))
             {
@@ -341,45 +363,123 @@ namespace CitadelService.Data.Filtering
 
                 int itr = 0;
 
+                SqliteCommand triggerCommand = null;
+
                 using(var tsx = myConn.BeginTransaction())
                 using(var cmd = myConn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT * from TriggerIndex where TriggerText = $trigger";
+                    cmd.CommandText = @"SELECT * from FirstWordIndex where FirstWordText = $trigger";
 
                     var domainSumParam = new SqliteParameter("$trigger", System.Data.DbType.String);
                     cmd.Parameters.Add(domainSumParam);
 
                     bool skippingTags = false;
-                    string[] newSplit = new string[split.Count];
+                    bool skippingScript = false;
+                    bool quoteReached = false;
+                    bool collectingImportantAttributes = false;
+                    bool isClosingTag = false;
 
-                    foreach(var s in split)
+                    List<string> newSplit = new List<string>();
+                    List<List<string>> wordLists = new List<List<string>>();
+
+                    List<List<string>> listsToRemove = new List<List<string>>(maxRebuildLen);
+
+                    foreach (var s in split)
                     {
+                        
+                        // Completely skip closing tags.
+                        if (s.Length > 2 && s[0] == '<' && s[1] == '/' && s[s.Length - 1] == '>')
+                        {
+                            isClosingTag = true;
+                        }
+
+                        // We require some more complex determinations for opening tags as they may have important
+                        // text inside them.
+                        if (s.Length >= 2 && s[0] == '<' && s[1] != '/' && s.Length > 1 && s.Length < 10)
+                        {
+                            skippingTags = true;
+                        }
+
                         switch(s.ToLower())
                         {
-                            case "<div":
-                            case "<span":
-                            case "<a":
-                            case "<img":
-                            case "<meta":
-                            case "<link":
-                            case "<li":
-                                skippingTags = true;
+                            case "<script":
+                            case "<style":
+                                skippingScript = true;
+                                break;
+
+                            case "</script>":
+                            case "</style>":
+                                skippingScript = false;
                                 break;
 
                             case ">":
                                 skippingTags = false;
                                 break;
+
+                            case "alt":
+                            case "title":
+                            case "href":
+                                collectingImportantAttributes = true;
+                                break;
+
+                            case "\"":
+                            case "\'":
+                                quoteReached = !quoteReached;
+                                if(!quoteReached)
+                                {
+                                    collectingImportantAttributes = false;
+                                }
+
+                                break;
+                                
                         }
 
-                        if(!skippingTags)
+                        if(isClosingTag)
                         {
-                            newSplit[itr] = s;
+                            isClosingTag = false;
+                            continue;
+                        }
+
+                        if(collectingImportantAttributes)
+                        {
+                            newSplit.Add(s);
                             itr++;
+                        }
+                        else if (!skippingTags && !skippingScript && s != ">")
+                        {
+                            newSplit.Add(s);
+                            itr++;
+                        }
+
+                        if(skippingTags && !collectingImportantAttributes)
+                        {
+                            continue;
+                        }
+
+                        listsToRemove.Clear();
+
+                        // Check word lists.
+                        foreach (var list in wordLists)
+                        {
+                            if (list.Count >= maxRebuildLen)
+                            {
+                                listsToRemove.Add(list);
+                            }
+                            else
+                            {
+                                list.Add(s);
+                            }
+                        }
+
+                        foreach(var l in listsToRemove)
+                        {
+                            wordLists.Remove(l);
                         }
 
                         cmd.Parameters[0].Value = s;
                         using(var reader = cmd.ExecuteReader())
                         {
+
                             if(!reader.HasRows)
                             {
                                 continue;
@@ -387,47 +487,98 @@ namespace CitadelService.Data.Filtering
 
                             while(reader.Read())
                             {
-                                var thisCat = reader.GetInt16(1);
-                                if(categoryAppliesCb(thisCat))
+                                var isWholeTrigger = reader.GetInt16(1);
+
+                                if (isWholeTrigger > 0)
                                 {
-                                    firstMatchCategory = thisCat;
-                                    matchedTrigger = s;
-                                    return true;
+                                    var thisCat = reader.GetInt16(2);
+                                    if (categoryAppliesCb(thisCat))
+                                    {
+                                        firstMatchCategory = thisCat;
+                                        matchedTrigger = s;
+                                        return true;
+                                    }
                                 }
+                                else
+                                {
+                                    // Check word lists.
+                                    foreach (var list in wordLists)
+                                    {
+                                        if (triggerCommand == null)
+                                        {
+                                            triggerCommand = myConn.CreateCommand();
+                                            triggerCommand.CommandText = "SELECT * FROM TriggerIndex WHERE TriggerText = $trigger";
+                                            var wholeTriggerDomainSumParam = new SqliteParameter("$trigger", System.Data.DbType.String);
+                                            wholeTriggerDomainSumParam.Value = input.ToLower();
+                                            triggerCommand.Parameters.Add(wholeTriggerDomainSumParam);
+                                        }
+
+                                        triggerCommand.Parameters[0].Value = string.Join(" ", list);
+                                        using (var triggerReader = triggerCommand.ExecuteReader())
+                                        {
+                                            while (triggerReader.Read())
+                                            {
+                                                var thisCat = triggerReader.GetInt16(1);
+                                                if (categoryAppliesCb(thisCat))
+                                                {
+                                                    firstMatchCategory = thisCat;
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    var newList = new List<string>(maxRebuildLen);
+                                    newList.Add(s);
+                                    wordLists.Add(newList);
+
+                                    break;
+                                }
+                                
                             }
                         }
                     }
 
-                    // No match yet. Do rebuild if user asked for it.
-                    if(rebuildAndTestFragments)
+                    /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
                     {
-                        var len = itr; //newSplit.Length;
+                        using (StreamWriter writer = new StreamWriter(debugStream))
+                        {
+                            writer.WriteLine("REQUEST {0}", DateTime.Now);
+                            writer.WriteLine(string.Join(" ", newSplit.Take(itr)));
+                            writer.WriteLine("ENDREQUEST");
+                        }
+                    }*/
 
-                        if(maxRebuildLen == -1 || maxRebuildLen > len)
+                    // No match yet. Do rebuild if user asked for it.
+                    /*if (rebuildAndTestFragments)
+                    {
+                        var len = newSplit.Count;
+
+                        if (maxRebuildLen == -1 || maxRebuildLen > len)
                         {
                             maxRebuildLen = len;
                         }
 
-                        ulong __itrCount = 0;
+                        
                         ulong __sqlItrCount = 0;
 
-                        if(m_logger != null)
+                        if (m_logger != null)
                         {
                             m_logger.Info("Trigger scan length = {0}", len);
                         }
 
-                        for(var i = 0; i < len; ++i)
+                        for (var i = 0; i < len; ++i)
                         {
-                            for(var j = i + 1; j < len && j - i <= maxRebuildLen; ++j)
+                            for (var j = i + 1; j < len && j - i <= maxRebuildLen; ++j)
                             {
                                 __itrCount++;
-                                var sub = new ArraySegment<string>(newSplit, i, j - i);
-                                //var sub = split.GetRange(i, j - i);
-                                
+                                //var sub = new ArraySegment<string>(newSplit, i, j - i);
+                                var sub = newSplit.GetRange(i, j - i);
+
                                 var subLen = (sub.Count - 1) + sub.Sum(xx => xx.Length);
                                 // Don't bother checking the string if it exceeds the limits of our
                                 // database column length. Currently it's char 255.
-                                if(subLen >= byte.MaxValue)
+                                if (subLen >= byte.MaxValue)
                                 {
                                     break;
                                 }
@@ -435,19 +586,19 @@ namespace CitadelService.Data.Filtering
                                 var joined = string.Join(" ", sub);
                                 cmd.Parameters[0].Value = joined;
 
-                                using(var reader = cmd.ExecuteReader())
+                                using (var reader = cmd.ExecuteReader())
                                 {
                                     __sqlItrCount++;
 
-                                    if(!reader.HasRows)
+                                    if (!reader.HasRows)
                                     {
                                         continue;
                                     }
 
-                                    while(reader.Read())
+                                    while (reader.Read())
                                     {
                                         var thisCat = reader.GetInt16(1);
-                                        if(categoryAppliesCb(thisCat))
+                                        if (categoryAppliesCb(thisCat))
                                         {
                                             firstMatchCategory = thisCat;
                                             matchedTrigger = joined;
@@ -458,11 +609,11 @@ namespace CitadelService.Data.Filtering
                             }
                         }
 
-                        if(m_logger != null)
+                        if (m_logger != null)
                         {
                             m_logger.Info("Number of times iterated: {0}", __itrCount);
                         }
-                    }
+                    }*/
 
                     tsx.Commit();
                 }
@@ -481,6 +632,26 @@ namespace CitadelService.Data.Filtering
                 switch(input[i])
                 {
                     case '<':
+                        if(sb.Length > 0)
+                        {
+                            res.Add(sb.ToString());
+                            sb.Clear();
+                        }
+
+                        sb.Append('<');
+
+                        if(input[i + 1] == '/')
+                        {
+                            while(input[i] != '>')
+                            {
+                                i++;
+                                sb.Append(input[i]);
+                            }
+
+
+                        }
+                        break;
+
                     case 'a':
                     case 'b':
                     case 'c':
@@ -554,6 +725,13 @@ namespace CitadelService.Data.Filtering
                         res.Add(sb.ToString());
                         sb.Clear();
                         res.Add(">");
+                        break;
+
+                    case '"':
+                    case '\'':
+                        res.Add(sb.ToString());
+                        sb.Clear();
+                        res.Add(new string(input[i], 1));
                         break;
 
                     default:
