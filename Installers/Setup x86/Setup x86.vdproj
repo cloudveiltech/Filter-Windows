@@ -64,13 +64,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C76928219DA049F58E9E2F3BE7D714E8"
+        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+        "OwnerKey" = "8:_C76928219DA049F58E9E2F3BE7D714E8"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -289,11 +289,6 @@
             "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.20.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
-                    "_B5A0B65E2A4D47A3AB04F6282687850B"
-                    {
-                    "Name" = "8:CloudVeil.exe"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x86\\CloudVeil.exe"
             "TargetName" = "8:"
@@ -320,11 +315,6 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_F2A1C12D9CF7474E8D9C0D5085B01B98"
-                    {
-                    "Name" = "8:InstallGuard.exe"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"
@@ -400,15 +390,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{578719C6-7836-4372-AFED-5FD3A88D1782}"
-        "PackageCode" = "8:{BCD65993-7CF3-4D85-BDF9-21393AA4D3D2}"
+        "ProductCode" = "8:{84FE0B44-1FAF-4E50-8663-64CB5EDF98B7}"
+        "PackageCode" = "8:{5C1CDB7A-3F1B-4E3A-9CA0-9A77715FFA74}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.20"
+        "ProductVersion" = "8:1.6.22"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"
