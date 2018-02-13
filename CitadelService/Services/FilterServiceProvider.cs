@@ -1512,6 +1512,33 @@ namespace CitadelService.Services
         }
 
         /// <summary>
+        /// A little helper function for finding a path in a whitelist/blacklist.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="appAbsolutePath"></param>
+        /// <param name="appName"></param>
+        /// <returns></returns>
+        private bool isAppInList(HashSet<string> list, string appAbsolutePath, string appName)
+        {
+            if (list.Contains(appName))
+            {
+                // Whitelist is in effect and this app is whitelisted. So, don't force it through.
+                return true;
+            }
+
+            // Support for whitelisted apps like Android Studio\bin\jre\java.exe
+            foreach (string app in m_whitelistedApplications)
+            {
+                if (app.Contains(Path.DirectorySeparatorChar) && appAbsolutePath.EndsWith(app))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Called whenever the Engine want's to check if the application at the supplied absolute
         /// path should have its traffic forced through itself or not.
         /// </summary>
@@ -1590,29 +1617,32 @@ namespace CitadelService.Services
 
                 var appName = Path.GetFileName(appAbsolutePath);
 
-                if(m_whitelistedApplications.Count > 0)
+                if (m_whitelistedApplications.Count > 0)
                 {
-                    if(m_whitelistedApplications.Contains(appName))
+                    bool inList = isAppInList(m_whitelistedApplications, appAbsolutePath, appName);
+
+                    if(inList)
                     {
-                        // Whitelist is in effect and this app is whitelisted. So, don't force it through.
                         return false;
                     }
-
-                    // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                    m_logger.Debug("2Filtering application: {0}", appAbsolutePath);
-                    return true;
+                    else
+                    {
+                        // Whitelist is in effect, and this app is not whitelisted, so force it through.
+                        m_logger.Debug("2Filtering application: {0}", appAbsolutePath);
+                        return true;
+                    }
                 }
 
                 if(m_blacklistedApplications.Count > 0)
                 {
-                    if(m_blacklistedApplications.Contains(appName))
+                    bool inList = isAppInList(m_blacklistedApplications, appAbsolutePath, appName);
+
+                    if(inList)
                     {
-                        // Blacklist is in effect and this app is blacklisted. So, force it through.
                         m_logger.Debug("3Filtering application: {0}", appAbsolutePath);
                         return true;
                     }
 
-                    // Blacklist in effect but this app is not on the blacklist. Don't force it through.
                     return false;
                 }
 
