@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignInstallers", "SignInsta
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InstalledProgramDetection", "InstalledProgramDetection\InstalledProgramDetection.vcxproj", "{3C3E15D2-400C-4C31-BB8F-F1D1F6A102D3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InstalledProgramDetection", "InstalledProgramDetection\InstalledProgramDetection.vcxproj", "{3C3E15D2-400C-4C31-BB8F-F1D1F6A102D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
