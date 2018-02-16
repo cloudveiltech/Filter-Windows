@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
+    <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+    <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
+    <CustomAction Id="DIRCA_NEWRETARGETABLEPROPERTY1" Property="NEWRETARGETABLEPROPERTY1" Value="[TARGETDIR]" Execute="firstSequence" />
+    <!-- The directory tree of the installation package. -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramMenuFolder" Name="Program Menu">
+        <Component Id="com_dirProgramMenuFolder" Guid="10BC5CE4-32BD-4CE8-85A2-6A4264343516" Transitive="no">
+          <RemoveFolder Id="_E3E03A75_EC55_4AA7_B6C3_9329504754CE" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirProgramMenuFolder" Type="string" Value="Program Menu directory" KeyPath="yes" />
+          <Shortcut Id="_4A6DB1AA_F22F_F74C_AF30_BC7C9FD28C1A" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+            <Icon Id="_BC7C9FD28C1A" SourceFile="..\..\CitadelGUI\appicon.ico" />
+          </Shortcut>
+        </Component>
+      </Directory>
+      <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+        <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
+          <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
+        </Component>
+        <Component Id="com_021E656C_E165_694B_B3E1_1432A1FB7368" Guid="AAC296E3-A177-4C59-B886-05173BB85BA4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_021E656C_E165_694B_B3E1_1432A1FB7368" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Buffers.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_02A72916_2F0D_164F_9C36_1F8A728DAA1A" Guid="25BB3F73-54BE-41AB-A63B-062518BDAF90" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_02A72916_2F0D_164F_9C36_1F8A728DAA1A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Core.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Server.Kestrel.Core.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_03864851_3B85_A442_A68A_7E641F8A73A6" Guid="3C9ECF1F-E0F6-43C0-8C82-71FEAEFF9DF5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_03864851_3B85_A442_A68A_7E641F8A73A6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Cryptography.Csp.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Cryptography.Csp.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_038944D9_951D_514E_862B_8204BD4E9DDD" Guid="CF96E77A-08C0-4E65-B66F-B4EC4C238C2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_038944D9_951D_514E_862B_8204BD4E9DDD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.Tracing.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.Tracing.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_04B29B1D_E636_6845_9E63_81F200BDBF31" Guid="DAD564C2-3752-4436-8729-D7628758A84A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_04B29B1D_E636_6845_9E63_81F200BDBF31" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="ManagedWifi.dll" Source="..\..\CitadelGUI\bin\Release x86\ManagedWifi.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_06DEDCE7_806D_0744_BBCD_4BC2D6BFE664" Guid="50410C58-2977-4D44-95A1-620135B62297" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_06DEDCE7_806D_0744_BBCD_4BC2D6BFE664" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="FilterServiceProvider.exe" Source="..\..\CitadelGUI\bin\Release x86\FilterServiceProvider.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="com_079A2A0C_412C_7F4D_B70C_F5615875038E" Guid="E1E117CD-C36F-4042-8925-D947B81FC551" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_079A2A0C_412C_7F4D_B70C_F5615875038E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Tasks.Parallel.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Tasks.Parallel.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_088BB3F0_CB6D_9042_A313_320E06507C3E" Guid="B9E3F688-6587-4FA8-9987-9BAC47CE9979" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_088BB3F0_CB6D_9042_A313_320E06507C3E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Requests.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Requests.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_090300B0_FB9B_634B_BC54_1E24E84D78C2" Guid="9D487B94-87B9-4559-9B4D-F03C37E47DAF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_090300B0_FB9B_634B_BC54_1E24E84D78C2" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Sockets.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Sockets.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_093F9034_0434_E94B_A7B2_1EDD528ECED4" Guid="C7EFB8F6-6F39-460F-BF8A-9189C54D86CD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_093F9034_0434_E94B_A7B2_1EDD528ECED4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Reflection.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Reflection.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0BFC8FC8_AA7A_A14E_BE6F_7F2B43DDE0B0" Guid="1240F866-D3CD-449B-B9A4-2553F9CDAD3A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0BFC8FC8_AA7A_A14E_BE6F_7F2B43DDE0B0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.Pipes.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.Pipes.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0C038B97_C7CB_EA44_AF8C_74D6C176D15C" Guid="1436E710-A9AB-4C4C-8010-D0888EC9DF73" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0C038B97_C7CB_EA44_AF8C_74D6C176D15C" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.Platform.dll" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.Platform.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0C351605_F22C_ED45_BB37_499DDBD390A0" Guid="C14EE823-35F4-40E6-BA8F-35DE10111E6E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0C351605_F22C_ED45_BB37_499DDBD390A0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.WebSockets.Protocol.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.WebSockets.Protocol.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0C9776AA_2C82_D44F_AE27_A74BC05A8BCF" Guid="345E0444-0826-4DAA-A417-D40B1F4DE8AC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0C9776AA_2C82_D44F_AE27_A74BC05A8BCF" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CitadelCore.Windows.pdb" Source="..\..\CitadelGUI\bin\Release x86\CitadelCore.Windows.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0D5D4350_7A13_C943_BD24_F9EDD221A8FC" Guid="2D859D91-7C66-4C2D-BA63-EE60A4DB1EE8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0D5D4350_7A13_C943_BD24_F9EDD221A8FC" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.TraceSource.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.TraceSource.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_0EB3E2E8_63C1_0046_990E_ABB1D2844BF4" Guid="4A5C126A-6A56-47F5-9E64-4CB843568481" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0EB3E2E8_63C1_0046_990E_ABB1D2844BF4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.CompilerServices.VisualC.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.CompilerServices.VisualC.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_144B129A_A801_A940_AD94_EDC10458F511" Guid="68AFD010-A804-4BCD-8CDC-0B1184C650A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_144B129A_A801_A940_AD94_EDC10458F511" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ValueTuple.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_1526C8DF_CD0F_844D_9F04_081BEAF78940" Guid="B9769C48-D1E4-4DBB-AFD2-49279EF93029" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1526C8DF_CD0F_844D_9F04_081BEAF78940" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_153A3007_DA06_EF46_B25F_AD2F492F06C0" Guid="A10B5273-9DD0-4950-B784-F64CEEBAD983" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_153A3007_DA06_EF46_B25F_AD2F492F06C0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Interop.NetFwTypeLib.dll" Source="..\..\CitadelGUI\bin\Release x86\Interop.NetFwTypeLib.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_15C1D11B_926A_2140_9251_F49B82F386F9" Guid="3D75C3AC-C48A-48F0-9513-389AC63C9E5D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_15C1D11B_926A_2140_9251_F49B82F386F9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Reflection.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Reflection.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_15FE1E0D_B565_1846_8D7D_0F114639C3F3" Guid="1AF208A9-AA1C-4C9F-AF74-7F5C38A3943E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_15FE1E0D_B565_1846_8D7D_0F114639C3F3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="DistillNET.dll" Source="..\..\CitadelGUI\bin\Release x86\DistillNET.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_16C3E961_81E0_F446_A8FA_83E1D0D0383B" Guid="A45C240E-BF2B-4D20-AB66-5C615F34E859" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_16C3E961_81E0_F446_A8FA_83E1D0D0383B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_17159194_A40C_3149_A0DD_F2DC94B83B61" Guid="A9074B1F-11C4-42F3-B75D-DCE162B8B773" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_17159194_A40C_3149_A0DD_F2DC94B83B61" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Practices.ServiceLocation.pdb" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Practices.ServiceLocation.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_17B17586_853E_864F_A9C9_EC3941B74160" Guid="B9D03C3A-6BA5-44DA-9187-078F310A150D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_17B17586_853E_864F_A9C9_EC3941B74160" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.InteropServices.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.InteropServices.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_183CDBD7_2699_E845_88DD_CE839035ED6B" Guid="223B6471-E9E5-4CEE-BF26-E2A5F053CEDF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_183CDBD7_2699_E845_88DD_CE839035ED6B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.NameResolution.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.NameResolution.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_18FB6AD9_5316_9340_A261_6C573F66C8E2" Guid="6C1A8231-FF50-4F20-9EA3-1EC476DCD4C2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_18FB6AD9_5316_9340_A261_6C573F66C8E2" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="NLog.config" Source="..\..\CitadelGUI\bin\Release x86\NLog.config" KeyPath="yes" />
+        </Component>
+        <Component Id="com_19AF0836_4E46_164E_830A_457C676059AB" Guid="F42F2E33-95EE-4C31-B016-35CA42FEFF46" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_19AF0836_4E46_164E_830A_457C676059AB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Tasks.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Tasks.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_1B01F856_AA2F_4941_87F9_3D829BCDFC02" Guid="C63B053D-8C72-40FD-BA3B-486C606D701C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1B01F856_AA2F_4941_87F9_3D829BCDFC02" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.AppContext.dll" Source="..\..\CitadelGUI\bin\Release x86\System.AppContext.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_1B5696B3_AC47_4B46_B39E_A3DDBD202C30" Guid="0C80DE8E-3DFB-4653-930E-070EE9C637B0" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1B5696B3_AC47_4B46_B39E_A3DDBD202C30" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.dll" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_1F6C9BC4_FEB3_6F4F_B847_7D40CCC1412E" Guid="0DD11309-4945-4D8D-A930-492DD230CCBD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1F6C9BC4_FEB3_6F4F_B847_7D40CCC1412E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Linq.Parallel.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Linq.Parallel.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_205C84DE_3FA1_0B49_8D05_10062137C42E" Guid="562A24BC-A2A0-4FB9-A905-3000540C6D39" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_205C84DE_3FA1_0B49_8D05_10062137C42E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.ObjectPool.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.ObjectPool.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_2176F1DC_CF8F_1449_B4C2_593CF8EFA7EA" Guid="F73EC82F-B99E-44F7-A2C0-54E0C4CE54D3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2176F1DC_CF8F_1449_B4C2_593CF8EFA7EA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Cryptography.Algorithms.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Cryptography.Algorithms.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_21901BDF_6394_0241_A41A_0480FC638605" Guid="BF9283DE-50F3-48D7-9B68-6DD5BD64DB24" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_21901BDF_6394_0241_A41A_0480FC638605" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.XDocument.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.XDocument.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_26CD685C_E8C1_9647_9C4E_8638A84C898A" Guid="BA4B6A86-F82C-4F76-86C0-411A1D64BE3A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_26CD685C_E8C1_9647_9C4E_8638A84C898A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WindowsFirewallHelper.dll" Source="..\..\CitadelGUI\bin\Release x86\WindowsFirewallHelper.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_28CBBA5F_C519_F944_A8CF_DB2B71611A8B" Guid="840D59DF-8280-40D1-A22F-04D98BEC0513" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_28CBBA5F_C519_F944_A8CF_DB2B71611A8B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.Compression.ZipFile.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.Compression.ZipFile.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_2AD260C2_282A_1341_9C9E_8C3B63307144" Guid="A7C80DDB-D186-4F6E-9327-BD60F7B5B3E5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2AD260C2_282A_1341_9C9E_8C3B63307144" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="libuv.dll" Source="..\..\CitadelGUI\bin\Release x86\libuv.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_2C0A79A5_6FF4_A243_8CFA_6A7828459F3B" Guid="9B82E6EA-DF21-4521-8EC2-04B4F074F5B9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2C0A79A5_6FF4_A243_8CFA_6A7828459F3B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.XmlDocument.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.XmlDocument.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_2D21EC45_1282_FB44_B80C_25386D1349CE" Guid="B094E902-66A5-426F-B0FE-A7C62CC88691" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2D21EC45_1282_FB44_B80C_25386D1349CE" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Text.Encoding.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_2EAA14FF_E072_FA42_9F47_A8B41DCFA828" Guid="93F15AD5-91CB-4893-A962-0B352BED6D4F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2EAA14FF_E072_FA42_9F47_A8B41DCFA828" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CitadelGUI\bin\Release x86\BouncyCastle.Crypto.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_324A58D7_0023_964F_87B8_754FC836AA11" Guid="7F6E94BB-4911-4F89-B5A8-B6B845FF5838" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_324A58D7_0023_964F_87B8_754FC836AA11" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Linq.Expressions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Linq.Expressions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_368B92EE_F89D_0640_9BA3_AF9BEA210296" Guid="F1295A7C-07B7-4970-A40B-53DA5EE54473" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_368B92EE_F89D_0640_9BA3_AF9BEA210296" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.FileVersionInfo.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.FileVersionInfo.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_38D41C3C_4693_184A_9D87_373609AFD174" Guid="87459EEB-37E4-448C-AA79-C733121CAFB6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_38D41C3C_4693_184A_9D87_373609AFD174" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Serialization.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Serialization.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_393E5B23_E1A1_4C49_BB4A_7FAB40875CD0" Guid="ED9C1CCF-66F4-4699-B4AE-1CD72B4ED821" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_393E5B23_E1A1_4C49_BB4A_7FAB40875CD0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.dll" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_39BBE894_CC37_834F_A951_E685BEF9AE6F" Guid="CDF7026C-C01A-4900-8A08-06DB81E958D4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_39BBE894_CC37_834F_A951_E685BEF9AE6F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="StreamExtended.dll" Source="..\..\CitadelGUI\bin\Release x86\StreamExtended.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3ACFAC33_CBCA_C143_867B_BB40691BCA30" Guid="8DFB2126-709E-4741-AEE9-DFB6F9CB4248" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3ACFAC33_CBCA_C143_867B_BB40691BCA30" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.IconPacks.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3BA6C3C5_978B_7040_9EF6_A4FB300CF266" Guid="1BE1FCE2-7570-4E1C-8F3D-E2D8A85E4A78" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3BA6C3C5_978B_7040_9EF6_A4FB300CF266" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.Process.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.Process.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3C2487D8_CD0B_3148_B013_C0350FC3F743" Guid="0ADE9344-08D5-4D6B-AF4A-F094C5A0A850" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3C2487D8_CD0B_3148_B013_C0350FC3F743" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Configuration.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Configuration.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3C4FC5FA_311C_ED43_83F7_63E186FE1E11" Guid="F26EF895-29B2-4BA0-8C0B-8F6A2DD46B1D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3C4FC5FA_311C_ED43_83F7_63E186FE1E11" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3C8DDB14_3C62_CA4A_8520_E73CD329145D" Guid="899887C1-A479-4B13-89B1-9671ABC48B9E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3C8DDB14_3C62_CA4A_8520_E73CD329145D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3E146D21_0191_EB49_89F8_9EA266D2B53A" Guid="D6088280-2C8D-489D-A42A-A2301BB8E10B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3E146D21_0191_EB49_89F8_9EA266D2B53A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.Core.Windows.pdb" Source="..\..\CitadelGUI\bin\Release x86\Citadel.Core.Windows.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3E833BA7_98C9_8842_9893_4A06CB56416D" Guid="08D8B215-B62B-4DC3-94F5-AC6F5DA7D27D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3E833BA7_98C9_8842_9893_4A06CB56416D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Practices.ServiceLocation.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Practices.ServiceLocation.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_3F93F451_4F3F_B740_BFFC_02D65506F1EE" Guid="D9704C16-08E0-4E83-97E1-113596E54862" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3F93F451_4F3F_B740_BFFC_02D65506F1EE" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.Tools.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.Tools.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_437DC146_ADDF_5949_936A_E3E4F2CCFA78" Guid="FC2275FB-5A38-4FC0-9B29-E0FF7239C1A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_437DC146_ADDF_5949_936A_E3E4F2CCFA78" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ComponentModel.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ComponentModel.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_47573561_0B4F_8E4E_A483_5C82D1CD374B" Guid="4500E1EA-496E-4CEB-8F0E-3CF41AA4381F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_47573561_0B4F_8E4E_A483_5C82D1CD374B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Http.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Http.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4948DCC3_E870_4647_979F_1DEA104AB3E3" Guid="57F1E561-214A-4B8F-B2EC-9CCCA9CF8C3D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4948DCC3_E870_4647_979F_1DEA104AB3E3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4954E09E_9B09_974B_AB9F_CA1449EE1C80" Guid="D86BE28B-C4C6-4CBF-BB42-EEF649B4830A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4954E09E_9B09_974B_AB9F_CA1449EE1C80" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="NLog.dll" Source="..\..\CitadelGUI\bin\Release x86\NLog.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_49AFE48D_D3F5_8E46_855C_8C9B33F78BB1" Guid="9C191458-D7FB-44BC-9B4B-606FA32194A9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_49AFE48D_D3F5_8E46_855C_8C9B33F78BB1" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.NetworkInformation.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.NetworkInformation.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4A08EAAF_BB0C_5545_8A25_4F8FDBD64BAD" Guid="9FDB2D5A-357D-4BB3-BF13-0D1EC3168B17" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4A08EAAF_BB0C_5545_8A25_4F8FDBD64BAD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CitadelCore.Windows.dll" Source="..\..\CitadelGUI\bin\Release x86\CitadelCore.Windows.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4AF2AB0D_0C7E_2C49_8C63_D3AA2A648061" Guid="00A42353-6994-4629-BB5E-FA38A229AD88" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4AF2AB0D_0C7E_2C49_8C63_D3AA2A648061" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CitadelCore.dll" Source="..\..\CitadelGUI\bin\Release x86\CitadelCore.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4C74B736_D0C4_9148_A5F8_5AAA22FD0677" Guid="8B448AB9-D708-46E3-9C6A-A5BC33E71D65" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4C74B736_D0C4_9148_A5F8_5AAA22FD0677" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Numerics.Vectors.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Numerics.Vectors.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4CB9408F_F802_584E_A92F_A6E0C82F9A1C" Guid="99F90E30-06DC-4D01-A5E4-535F6F0E3CDF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4CB9408F_F802_584E_A92F_A6E0C82F9A1C" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4E225C31_6FB3_844F_B592_BA093526ACBC" Guid="AA7935DA-FBAD-4462-9407-12C6F7D43180" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4E225C31_6FB3_844F_B592_BA093526ACBC" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_4E9F3F3C_0286_A34E_BF63_AA2C2BA50A7B" Guid="68CDDE9E-8BAE-471C-869F-1642BD40D1DB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4E9F3F3C_0286_A34E_BF63_AA2C2BA50A7B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.Extras.dll" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.Extras.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_5068B8F6_E782_7941_B01F_D5CFACFE41AA" Guid="21BAB3AD-32B7-4DC7-8676-B889840AB643" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_5068B8F6_E782_7941_B01F_D5CFACFE41AA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="FilterServiceProvider.exe.config" Source="..\..\CitadelGUI\bin\Release x86\FilterServiceProvider.exe.config" KeyPath="yes" />
+        </Component>
+        <Component Id="com_528AA55E_B02D_C548_94F1_FAE6BB78606E" Guid="58318382-4E88-45D8-BB85-961AD0BA9367" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_528AA55E_B02D_C548_94F1_FAE6BB78606E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Data.Common.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Data.Common.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_572CEC4F_6750_4643_8AF0_EA3256817C3A" Guid="C26684D8-4B55-430E-83CC-E751797F2403" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_572CEC4F_6750_4643_8AF0_EA3256817C3A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.FileSystem.Watcher.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.FileSystem.Watcher.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_574D5EFA_5774_0B4C_AD1B_827785AF14F3" Guid="DA484751-8899-4D6C-BDD3-263146EFA4F9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_574D5EFA_5774_0B4C_AD1B_827785AF14F3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Console.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Console.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_583BD660_E30C_2D4E_946A_D48F51FBB085" Guid="EB8CCCCB-C6F6-455A-A17A-5F80C2B4E670" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_583BD660_E30C_2D4E_946A_D48F51FBB085" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encodings.Web.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Text.Encodings.Web.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_5DBDBF3B_8783_6845_9DBF_3A9E8CF010AA" Guid="98B6E51A-7E52-49CF-99F8-3655143F4DCB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_5DBDBF3B_8783_6845_9DBF_3A9E8CF010AA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Hosting.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Hosting.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_61B47247_A5DF_204D_9C61_F722252BAB19" Guid="F51B2610-32FA-49C9-B2DB-B7F6422B670B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_61B47247_A5DF_204D_9C61_F722252BAB19" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.Extras.pdb" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.Extras.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_61F7B0A6_4469_F840_A990_01F38526003D" Guid="02AE98E2-D8A6-4C00-B939-5FCEE5AB5634" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_61F7B0A6_4469_F840_A990_01F38526003D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Globalization.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Globalization.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_62709B3E_779A_5C4D_B78B_6650B18300C4" Guid="5C8D3886-B914-4AC4-B2C1-011372DC0B6C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_62709B3E_779A_5C4D_B78B_6650B18300C4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6614980D_A5BD_7F4D_BEE0_DB1CD5A56C9E" Guid="2AE89AC5-6F62-4EA8-9615-A7AACCCA30CD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6614980D_A5BD_7F4D_BEE0_DB1CD5A56C9E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Principal.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Principal.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_68B18F43_DA36_2842_B5E5_FBF802F91A19" Guid="3CAB9ADC-CD0C-476F-917C-EB5385A896E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_68B18F43_DA36_2842_B5E5_FBF802F91A19" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Ping.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Ping.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6992814E_359A_BD4A_95EA_7F04A5DD5DC3" Guid="B23D2A63-AE7F-4FDD-9DC8-67ADF1303832" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6992814E_359A_BD4A_95EA_7F04A5DD5DC3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Resources.Writer.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Resources.Writer.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6BE08966_80AD_E44F_A569_E3D10238DC47" Guid="12BF3F65-62CB-4156-9356-E029D14FD52B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6BE08966_80AD_E44F_A569_E3D10238DC47" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.IconPacks.pdb" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.IconPacks.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6C6B6C51_341E_BE47_AE12_3150235BA378" Guid="4DB922F9-14BB-4285-BCDF-3ABE34B72D85" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6C6B6C51_341E_BE47_AE12_3150235BA378" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Resources.Reader.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Resources.Reader.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6CA1618F_F36C_294D_BCAF_99C609654462" Guid="C63F03BD-37E7-400A-95B7-9EDD802B6D88" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6CA1618F_F36C_294D_BCAF_99C609654462" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Hosting.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6E52FC88_AD10_7B46_A99A_B47A4C6881EF" Guid="22874515-09AD-423A-A2F6-3CCB0AEE13A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6E52FC88_AD10_7B46_A99A_B47A4C6881EF" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Cryptography.X509Certificates.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Cryptography.X509Certificates.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_6ED725EA_43EC_1B44_8C61_66EC48AE656F" Guid="71BFD520-AF9C-4EBC-A6AD-1742856510E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_6ED725EA_43EC_1B44_8C61_66EC48AE656F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.WebSockets.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_70E4BDB8_F073_5E4C_8083_D5D562CD804C" Guid="628610B0-5027-4197-B32B-489F534B07E7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_70E4BDB8_F073_5E4C_8083_D5D562CD804C" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.ReaderWriter.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.ReaderWriter.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_71C28D4B_C050_9B40_932B_0204B4755CC4" Guid="73368CFD-BB3B-41B3-BF61-1F7308EED3DE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_71C28D4B_C050_9B40_932B_0204B4755CC4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CitadelCore.pdb" Source="..\..\CitadelGUI\bin\Release x86\CitadelCore.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_7527E1FB_3D57_1C40_AB4C_DD729B9F638D" Guid="82357BB3-6C6F-4992-A18D-105435E0AE8A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_7527E1FB_3D57_1C40_AB4C_DD729B9F638D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.IconPacks.FontAwesome.dll" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.IconPacks.FontAwesome.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_7542451F_D2C9_8A4C_A9A5_C529F7DBD1C7" Guid="48C97118-A79B-4F28-ACD4-EE44D00F844B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_7542451F_D2C9_8A4C_A9A5_C529F7DBD1C7" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="com_76E2DB50_0F54_2D47_9FE0_1647CF40E256" Guid="6E11A997-E101-4E60-9BCD-9F1F803F351A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_76E2DB50_0F54_2D47_9FE0_1647CF40E256" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Windows.Interactivity.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Windows.Interactivity.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_790AB129_A399_BB4C_AE50_5CAB166E19C0" Guid="CF0535AB-1F89-470C-AFD6-FCE3B16E9925" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_790AB129_A399_BB4C_AE50_5CAB166E19C0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.StackTrace.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.StackTrace.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_79758A7D_E071_3644_8782_FE126BA40C00" Guid="49B45A03-DB79-4953-AF21-521F88580012" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_79758A7D_E071_3644_8782_FE126BA40C00" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Diagnostics.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Diagnostics.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_799B090C_2F0C_6C48_9C4A_EFAE1E2DA16B" Guid="FAD645BC-ECD7-44F0-907E-85288AFF6D41" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_799B090C_2F0C_6C48_9C4A_EFAE1E2DA16B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.Compression.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.Compression.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_7B6C38F2_A294_C848_A2AA_5D1ECA671366" Guid="E0041E20-0250-4077-9784-B1B6A2502BBA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_7B6C38F2_A294_C848_A2AA_5D1ECA671366" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_7F118D3E_9D6C_8047_9BFF_D4949FE91435" Guid="C3BE2B7E-DB38-478B-BEEF-CF2FEF4AAA3F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_7F118D3E_9D6C_8047_9BFF_D4949FE91435" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_86A58668_3DA8_BC4C_81DA_1F4E79CBD0A9" Guid="B97B6C36-9E81-47B1-BCB0-3EFAADF5C004" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_86A58668_3DA8_BC4C_81DA_1F4E79CBD0A9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.FileSystem.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.FileSystem.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8759E88C_1687_5C4E_B4F2_5ECE3DEFBCDC" Guid="9C4BA054-12B2-425D-B81E-CFB22DD64F72" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8759E88C_1687_5C4E_B4F2_5ECE3DEFBCDC" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.provider.e_sqlite3.dll" Source="..\..\CitadelGUI\bin\Release x86\SQLitePCLRaw.provider.e_sqlite3.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_87AA44B1_3382_D741_8A68_6B7BF2128330" Guid="0054B5E3-60D0-4CF8-88E9-35473E015D9D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_87AA44B1_3382_D741_8A68_6B7BF2128330" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CitadelGUI\bin\Release x86\Topshelf.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_885D2684_8A2A_934D_9523_BB6FDE5882B8" Guid="DA2462FF-621C-41C6-B19A-A0E9C4A058EA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_885D2684_8A2A_934D_9523_BB6FDE5882B8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.pdb" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_88FE4F34_0B52_B845_A94B_A7DA324DEEC3" Guid="30B0B55F-487B-40D0-9E3E-775C8DE7C485" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_88FE4F34_0B52_B845_A94B_A7DA324DEEC3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Http.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Http.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8A3124ED_0B39_2843_B127_F23EEF5A5627" Guid="D45C18C4-A708-484B-8EFB-1C8A0A91CC4D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8A3124ED_0B39_2843_B127_F23EEF5A5627" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.ThreadPool.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.ThreadPool.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8A72EF5E_E26C_C046_A73B_9E2296682A44" Guid="274B0D18-8AED-4371-9233-944BFA788CB3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8A72EF5E_E26C_C046_A73B_9E2296682A44" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ComponentModel.EventBasedAsync.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ComponentModel.EventBasedAsync.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8B8D68DD_87A5_5B49_827C_808AC247A8E4" Guid="CD830FE6-553F-47FF-99DB-A2C398F1541E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8B8D68DD_87A5_5B49_827C_808AC247A8E4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Timer.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Timer.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8C2BD5C1_CD7F_5A48_8303_02DCB82061E0" Guid="399AFBBD-2296-49DA-8789-043F2E8BF067" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8C2BD5C1_CD7F_5A48_8303_02DCB82061E0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Overlapped.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Overlapped.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8E0303A0_5481_714A_A726_D84232A6932F" Guid="44A89F7F-A9C3-4497-BE01-EE44810C04CD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_8E0303A0_5481_714A_A726_D84232A6932F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.FileProviders.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_91C9ED93_8888_0D47_A104_85045D3B0326" Guid="DD3AF79F-96EE-4F0F-96BC-74DE404CEFE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_91C9ED93_8888_0D47_A104_85045D3B0326" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Newtonsoft.Json.dll" Source="..\..\CitadelGUI\bin\Release x86\Newtonsoft.Json.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_944CD6A1_C2B3_F441_8B56_DC59EFF34688" Guid="66BAB9CC-5996-48F0-B228-C22973F98BC6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_944CD6A1_C2B3_F441_8B56_DC59EFF34688" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.FileSystem.DriveInfo.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.FileSystem.DriveInfo.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_94BD3118_D656_5D47_A1C7_C7F92AFF44C5" Guid="F9E88AEF-0EBC-462E-9A2D-923CAD552D33" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_94BD3118_D656_5D47_A1C7_C7F92AFF44C5" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.WebSockets.Client.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_988155B6_DBD9_384A_BE74_91D8421FC1BA" Guid="A4EB99E7-E845-4278-A4FD-C7DC0C2A7A8E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_988155B6_DBD9_384A_BE74_91D8421FC1BA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.RegularExpressions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Text.RegularExpressions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_9B0EFC98_C747_8741_B7CE_0461E71D8FE8" Guid="E951A3ED-4459-4056-AE1E-40C652E55B98" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9B0EFC98_C747_8741_B7CE_0461E71D8FE8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Configuration.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_9CE78047_511D_3C41_AFE8_E65D6D865E1C" Guid="C8DF1082-7569-4DEF-AA90-27D0A7D478DE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9CE78047_511D_3C41_AFE8_E65D6D865E1C" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.Core.Windows.dll" Source="..\..\CitadelGUI\bin\Release x86\Citadel.Core.Windows.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_9D5506D1_278D_334A_ACEE_89EFAD5E2C08" Guid="E9C0382D-DF85-4A95-A390-0D82AD20E655" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9D5506D1_278D_334A_ACEE_89EFAD5E2C08" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MahApps.Metro.IconPacks.FontAwesome.pdb" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.IconPacks.FontAwesome.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_9E5C83C4_CCFC_7542_A1B6_D003EE96996D" Guid="43DA4F28-138F-47C1-8970-A8B9F3961B29" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9E5C83C4_CCFC_7542_A1B6_D003EE96996D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Win32.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Win32.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_9F157DE5_4C39_CC4F_8E29_15831064ED73" Guid="087AA7F7-FD48-49F9-A25C-EFE9CBB4DB1E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9F157DE5_4C39_CC4F_8E29_15831064ED73" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_A2B757DB_1019_934C_AA8A_E4B8B7CC4D90" Guid="3615F751-855A-4BC8-9527-A3FA73D405C8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A2B757DB_1019_934C_AA8A_E4B8B7CC4D90" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_A2C3F184_806F_834F_A04A_8AC638FA983B" Guid="814CF741-E84B-4A23-A8A9-457D071A8490" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A2C3F184_806F_834F_A04A_8AC638FA983B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.Concurrent.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.Concurrent.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_A536C698_D302_E14B_88ED_5C1B5793470F" Guid="A8AEE617-1429-4967-A19A-FB2D83AAB0C8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A536C698_D302_E14B_88ED_5C1B5793470F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.FileProviders.Physical.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_A607E860_BB8E_A544_A0BB_C2CBFAEEFFBB" Guid="52DB4670-49CB-453D-987E-F3FDDFB91593" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A607E860_BB8E_A544_A0BB_C2CBFAEEFFBB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_A6929DDC_FD54_4D40_AAA5_19DBF2A41AB8" Guid="D931106F-5903-4BD5-93E1-F3E91C116690" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A6929DDC_FD54_4D40_AAA5_19DBF2A41AB8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Options.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Options.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AA9F2F5F_7D61_1344_9227_8C075EA06E6A" Guid="DE56C32C-2AB5-4B59-A7E4-54EE5787B930" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AA9F2F5F_7D61_1344_9227_8C075EA06E6A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Globalization.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Globalization.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AAD63F1C_C511_7B4B_B8FC_32D60679B80F" Guid="616DB03F-79A4-47C1-A633-E99C3301642E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AAD63F1C_C511_7B4B_B8FC_32D60679B80F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.Security.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Security.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AC7DC942_20A1_264F_B327_0D9196FB9FD9" Guid="DBE3EBB6-C6BD-4FFC-8487-3C91726A5C77" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AC7DC942_20A1_264F_B327_0D9196FB9FD9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.Specialized.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.Specialized.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AC880F7A_19B9_5B48_BB14_7E871DCDBA1D" Guid="12A75EA4-D668-4DDF-9A62-1CC09FC1B5A6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AC880F7A_19B9_5B48_BB14_7E871DCDBA1D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CitadelGUI\bin\Release x86\SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AE18D135_3436_CD4B_9D27_B72327E251C6" Guid="1CA0CCCA-33FC-4E76-8C15-77203DD6E6EA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AE18D135_3436_CD4B_9D27_B72327E251C6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Serialization.Xml.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Serialization.Xml.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_AFD12506_6BCE_9344_86F4_6A14413CB321" Guid="B82D2141-C0EC-434D-9129-86667D2B094D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AFD12506_6BCE_9344_86F4_6A14413CB321" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="netstandard.dll" Source="..\..\CitadelGUI\bin\Release x86\netstandard.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B03E0945_97E8_EB43_8C45_F64C03CE5AB3" Guid="370088B8-BE8D-49D3-A6F5-CE11E7A710BD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B03E0945_97E8_EB43_8C45_F64C03CE5AB3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Cryptography.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Cryptography.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B157ED62_44AD_3147_800A_C408B434887B" Guid="D357731E-C5FD-412E-B431-FBB3E456B5AA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B157ED62_44AD_3147_800A_C408B434887B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B1C0E386_8F7B_0E41_ADEB_5CEBBE3076EB" Guid="C38041BA-5778-465B-9543-D8BE47B2F6FC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B1C0E386_8F7B_0E41_ADEB_5CEBBE3076EB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.WebSockets.Server.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.WebSockets.Server.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B23AC339_25FF_184A_A67A_5F7B9F8E94C4" Guid="0005F0B2-45CA-44DB-8A85-7C82EAA91F75" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B23AC339_25FF_184A_A67A_5F7B9F8E94C4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ObjectModel.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ObjectModel.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B241D996_8353_7648_9A67_97948D7789F9" Guid="724BFFE7-D59F-47F3-BE16-76B2C1102E1D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B241D996_8353_7648_9A67_97948D7789F9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Net.WebHeaderCollection.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebHeaderCollection.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B33455AF_A222_1049_A7BB_280358DC1808" Guid="156EE93F-BFF9-43F4-AFCC-9F33BA469559" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B33455AF_A222_1049_A7BB_280358DC1808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="NamedPipeWrapper.dll" Source="..\..\CitadelGUI\bin\Release x86\NamedPipeWrapper.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B3928C59_8D98_D643_B816_CBA309B7142E" Guid="5C5410ED-20A8-4A50-B0B2-23AC39D8590A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B3928C59_8D98_D643_B816_CBA309B7142E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Server.Kestrel.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Server.Kestrel.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B541271B_FC0F_0E4F_BF80_9B5BBF3A08BA" Guid="84EDD90F-8A99-45C0-9517-BF0E0E8342FC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B541271B_FC0F_0E4F_BF80_9B5BBF3A08BA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.XmlSerializer.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.XmlSerializer.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B58F05A0_CA86_D34A_B135_FB1CA777F1AA" Guid="4D189BC3-5B9D-47A5-851D-CBCCE611EA23" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B58F05A0_CA86_D34A_B135_FB1CA777F1AA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Linq.Queryable.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Linq.Queryable.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B5BB55A7_4A5F_B042_A5B4_CB888F704F10" Guid="6F27AE99-E0B5-4BA0-AFDC-8108F81DCDEC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B5BB55A7_4A5F_B042_A5B4_CB888F704F10" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Resources.ResourceManager.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Resources.ResourceManager.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B9402451_16AB_604D_B203_EF2F4B1AB0FB" Guid="E8E78DB9-AEB8-489C-A4D7-143D1D5C6366" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B9402451_16AB_604D_B203_EF2F4B1AB0FB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Configuration.FileExtensions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_B9BDC840_A5DC_684F_87F8_DA6237123D3B" Guid="5710FE0D-79BB-41D1-AA60-E77953AF3737" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B9BDC840_A5DC_684F_87F8_DA6237123D3B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ComponentModel.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ComponentModel.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BB75051E_FDC4_8D46_A7B5_2EA2B1C481DF" Guid="9F481DD1-F088-4873-B7B5-3797689AEADF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BB75051E_FDC4_8D46_A7B5_2EA2B1C481DF" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.InteropServices.RuntimeInformation.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.InteropServices.RuntimeInformation.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BC3A040B_B705_684A_8CE7_2C1859DA677B" Guid="A879DDD2-0C7F-4F81-A327-48E9E3ED2631" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BC3A040B_B705_684A_8CE7_2C1859DA677B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Http.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BDF04868_3BF2_A145_9E93_87C4A57A29C0" Guid="D13305A1-8A07-426C-9741-6F15B3546231" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BDF04868_3BF2_A145_9E93_87C4A57A29C0" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.MemoryMappedFiles.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.MemoryMappedFiles.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BE84576A_2FA5_994A_94EC_847546B667AA" Guid="23F1E396-87CC-4576-A963-9532747E2C7F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BE84576A_2FA5_994A_94EC_847546B667AA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.core.dll" Source="..\..\CitadelGUI\bin\Release x86\SQLitePCLRaw.core.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BF351903_E0C1_BF4B_875B_133CE831C847" Guid="EB9AAF37-6E8B-46A2-8EBE-0017A7860964" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BF351903_E0C1_BF4B_875B_133CE831C847" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.IsolatedStorage.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.IsolatedStorage.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_BFCD0B93_75F7_B549_849A_ED550B301E3C" Guid="0B194E23-4DEB-4B9B-A8D5-1D7488B9C0E5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BFCD0B93_75F7_B549_849A_ED550B301E3C" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Thread.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Thread.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C20E4FFE_F2A7_064F_B1E4_B47E1F9D8DB3" Guid="5192FE1D-3A24-4EC7-8284-BB401BB05E18" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C20E4FFE_F2A7_064F_B1E4_B47E1F9D8DB3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Claims.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Claims.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C4D687A3_279A_5944_B5C9_87E97B681EC2" Guid="622F7796-CA96-45B1-90F2-B1CB57045768" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C4D687A3_279A_5944_B5C9_87E97B681EC2" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Http.Features.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Http.Features.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C53492A2_A419_A549_A879_3DEC651853DC" Guid="0B6E3D17-83A9-4977-9FB8-52561B410FE0" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C53492A2_A419_A549_A879_3DEC651853DC" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.Immutable.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.Immutable.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C57C2265_CBE9_EA4B_8648_13A43AF94308" Guid="A127492A-A482-423A-8804-2ACA2F189F96" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C57C2265_CBE9_EA4B_8648_13A43AF94308" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.Platform.pdb" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.Platform.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C5F68CDD_8EE1_8C40_8954_5A50E8AE35A4" Guid="1CC52BA6-D6CE-4A98-B12E-701CDEB3C850" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C5F68CDD_8EE1_8C40_8954_5A50E8AE35A4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe.config" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe.config" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C81D44CD_09F8_6D4E_97EE_2F7FA2AAB263" Guid="D460C8DD-CF29-4BC3-A665-807B9220D1F1" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C81D44CD_09F8_6D4E_97EE_2F7FA2AAB263" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_C9985CB4_C15D_B148_8D03_27C46D822B46" Guid="EF5292DB-24D0-4616-A666-C72C9514ECB6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C9985CB4_C15D_B148_8D03_27C46D822B46" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.SecureString.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.SecureString.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_CB4960FD_F38E_0D41_8B66_73A8BA1F63B1" Guid="68C8239F-F178-4B93-B607-ADE87801CB17" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_CB4960FD_F38E_0D41_8B66_73A8BA1F63B1" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.Debug.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.Debug.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_CD6B9033_852E_9548_B45C_F9F32146F6D1" Guid="F6E439E1-0ABB-4B8A-8248-BA352CAFA868" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_CD6B9033_852E_9548_B45C_F9F32146F6D1" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Logging.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Logging.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_CECF527B_D071_E345_9E55_ED35A7AD87DD" Guid="8FAF9A0F-DBB7-4252-92A4-55F10EE7CAC2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_CECF527B_D071_E345_9E55_ED35A7AD87DD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.FileSystemGlobbing.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D04C539A_E5F1_F542_A1D2_0483C6A85D5D" Guid="5EFCF12D-13FB-46E2-8A5C-C6D37E2CB2EA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D04C539A_E5F1_F542_A1D2_0483C6A85D5D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Linq.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Linq.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D09507BB_65FD_CD40_BD9D_B6A4DDA38180" Guid="AF4E1716-06E7-47C9-A706-0A8F94696BB9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D09507BB_65FD_CD40_BD9D_B6A4DDA38180" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.XPath.XDocument.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.XPath.XDocument.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D28F80C4_547B_4E48_B8EA_81A1EDD49705" Guid="1E9936E8-4D82-49C4-984A-AF06D2559100" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D28F80C4_547B_4E48_B8EA_81A1EDD49705" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.DiagnosticSource.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.DiagnosticSource.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D44F96E2_5FEF_0E49_9A17_381037CD5275" Guid="60A94646-D558-420C-B567-1B287786D924" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D44F96E2_5FEF_0E49_9A17_381037CD5275" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Serialization.Formatters.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Serialization.Formatters.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D5F3DDF4_6594_CA4E_9BDC_CEED0C6A3874" Guid="02CF6F63-5C73-4CA9-B50E-5896023B1AEF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D5F3DDF4_6594_CA4E_9BDC_CEED0C6A3874" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.IPC.Common.dll" Source="..\..\CitadelGUI\bin\Release x86\Citadel.IPC.Common.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D8929CBA_D2EC_C140_A57F_D5C10A0D4A59" Guid="3ABF11D5-00ED-4C55-8F9C-0639EF2FD7B2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D8929CBA_D2EC_C140_A57F_D5C10A0D4A59" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Drawing.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Drawing.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D9278B3D_0E20_CC45_B60D_DEF83ED18EA1" Guid="5A721C56-9148-4E54-9D69-F92C11393748" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D9278B3D_0E20_CC45_B60D_DEF83ED18EA1" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Globalization.Calendars.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Globalization.Calendars.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D9CE3806_C5FC_4F40_896C_CDED69F925C5" Guid="364EFBBF-EFA5-421E-A2CA-253EB5CE185E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D9CE3806_C5FC_4F40_896C_CDED69F925C5" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Reflection.TypeExtensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_DB291078_FEFF_3F49_AA5F_8E899AF8747E" Guid="29DD3608-4521-4D96-B59F-B911225A6E5C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DB291078_FEFF_3F49_AA5F_8E899AF8747E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ComponentModel.TypeConverter.dll" Source="..\..\CitadelGUI\bin\Release x86\System.ComponentModel.TypeConverter.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_DCC5C279_76DB_0C48_B935_9278B00CAA81" Guid="BD13212D-69B5-4860-928A-A3BA183EAC64" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DCC5C279_76DB_0C48_B935_9278B00CAA81" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_DD29EFE5_E456_5D42_B185_17B5B4040519" Guid="842D3C08-8761-45AF-A394-D346D51D9756" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DD29EFE5_E456_5D42_B185_17B5B4040519" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Xml.XPath.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Xml.XPath.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_DD5DBA25_7022_8346_A8CF_7F8557727032" Guid="7458C20D-6271-4049-9114-C57F979DEDD7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DD5DBA25_7022_8346_A8CF_7F8557727032" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.IPC.Common.pdb" Source="..\..\CitadelGUI\bin\Release x86\Citadel.IPC.Common.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_DE7D920A_DC07_894C_82F7_A4907A8611C8" Guid="770B4818-3136-4760-8A8E-984FCE773DEA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DE7D920A_DC07_894C_82F7_A4907A8611C8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Diagnostics.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Diagnostics.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_E1BB7AA8_2D42_2A4A_8296_D8F98E7EF5EE" Guid="1BB3F837-DEDB-4E38-98C1-D2A299008839" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_E1BB7AA8_2D42_2A4A_8296_D8F98E7EF5EE" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.UnmanagedMemoryStream.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.UnmanagedMemoryStream.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_E5F8AD76_C68F_2F4C_AB8C_B0ECB1B5C97D" Guid="0571D2DE-6EEE-455A-B2A1-0509EB8D72D4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_E5F8AD76_C68F_2F4C_AB8C_B0ECB1B5C97D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_E8BC612D_336C_9E4A_B0F0_053002E658B9" Guid="695C7244-8FCA-4654-8A95-EBF37EE8FA40" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_E8BC612D_336C_9E4A_B0F0_053002E658B9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Reflection.Metadata.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Reflection.Metadata.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_EA684B19_3AD6_5249_8EB2_E355FE8B8FC2" Guid="50C41E5B-77A1-44B1-9392-A25D15124681" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EA684B19_3AD6_5249_8EB2_E355FE8B8FC2" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Handles.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Handles.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_EAF86069_AB4E_8648_8645_119AFC3A1C74" Guid="9AE5ECCC-27F0-4828-9774-9BDD6956D8A8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EAF86069_AB4E_8648_8645_119AFC3A1C74" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Tasks.Extensions.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Threading.Tasks.Extensions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_ED4F751E_9119_B648_9B66_199C23C0A0C9" Guid="10F53F74-1F46-422C-BD3E-057759DF53D6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_ED4F751E_9119_B648_9B66_199C23C0A0C9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="GalaSoft.MvvmLight.pdb" Source="..\..\CitadelGUI\bin\Release x86\GalaSoft.MvvmLight.pdb" KeyPath="yes" />
+        </Component>
+        <Component Id="com_ED76D0FC_F21F_574A_9BA5_DAC7A4657BF9" Guid="30EE4DBC-D98B-4EA1-BA68-87A0797B2C9C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_ED76D0FC_F21F_574A_9BA5_DAC7A4657BF9" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Security.Cryptography.Encoding.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Security.Cryptography.Encoding.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_EDC150C5_6AB0_6C43_92D9_9CF820455FE6" Guid="DFE58844-7CE3-4A0C-8575-1F85D0EDAD77" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EDC150C5_6AB0_6C43_92D9_9CF820455FE6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.Contracts.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.Contracts.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_EF21EA8B_BAFD_5A42_B22D_DC86C16DD150" Guid="1809F436-021A-46C7-80D7-7926B1233E1F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EF21EA8B_BAFD_5A42_B22D_DC86C16DD150" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.Hosting.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.Hosting.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F085BB52_6CA6_2740_88C9_66D4BA00A572" Guid="A3714BAD-D09C-4B30-8C2C-F2F4FD394827" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F085BB52_6CA6_2740_88C9_66D4BA00A572" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Reflection.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Reflection.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F33C7013_EF9E_984C_B0BA_5C8190890DDD" Guid="49EC82FE-0382-436D-9C7C-860A558C549D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F33C7013_EF9E_984C_B0BA_5C8190890DDD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Numerics.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Numerics.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F39AA6BE_A553_0A4D_9376_432E7B467CE3" Guid="E07C3B75-93BE-4758-9242-14B8380DD47C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F39AA6BE_A553_0A4D_9376_432E7B467CE3" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Dynamic.Runtime.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Dynamic.Runtime.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F3E57DEB_506B_F14E_8DD5_321E1EF752D4" Guid="814CBDD2-AA37-4A8F-8420-6A3D79C508E5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F3E57DEB_506B_F14E_8DD5_321E1EF752D4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="DNS.dll" Source="..\..\CitadelGUI\bin\Release x86\DNS.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F6651F5C_F6D7_944F_B1AB_9945E710061E" Guid="AC71B4D7-B4D6-43C3-8E6B-E157068F236E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F6651F5C_F6D7_944F_B1AB_9945E710061E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Text.Encoding.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F8BDFCAC_964D_0A45_835C_16EE4D6C260B" Guid="9A11A448-2DEB-43D0-B1E6-9BCD50661672" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F8BDFCAC_964D_0A45_835C_16EE4D6C260B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Net.Http.Headers.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Net.Http.Headers.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_F8D55980_2171_C84C_932C_325165BE0685" Guid="0FB578DD-F45C-4FD5-8E7E-707AB54B12FA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F8D55980_2171_C84C_932C_325165BE0685" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.Serialization.Json.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Runtime.Serialization.Json.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FAECC1E1_C8AF_5640_BF0C_1440D962FA39" Guid="DD127FB8-3134-45B3-8FBF-B2ED5E9313A6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FAECC1E1_C8AF_5640_BF0C_1440D962FA39" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.Logging.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FB3E1BE7_5511_CE4A_A45D_5F192136AC0E" Guid="5AF66772-AFF1-426C-AB34-EEC15962D420" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FB3E1BE7_5511_CE4A_A45D_5F192136AC0E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FBB21439_8E74_5F47_AE36_8649DB256FF4" Guid="3D3CEF0A-04EF-4795-8FF0-4435F12835CB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FBB21439_8E74_5F47_AE36_8649DB256FF4" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Extensions.DependencyInjection.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FC394C9E_6C9A_0D49_B527_5208152AD603" Guid="67E5AFEB-7C53-4EDA-A3F8-A0B8AC1B6ACE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FC394C9E_6C9A_0D49_B527_5208152AD603" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.IO.FileSystem.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\System.IO.FileSystem.Primitives.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FC59408D_35E6_634F_83DF_C699FC1F51AA" Guid="C12AC5BE-4C9C-43B9-9D3A-6EF7E88E3931" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FC59408D_35E6_634F_83DF_C699FC1F51AA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Diagnostics.TextWriterTraceListener.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Diagnostics.TextWriterTraceListener.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FC5A2AB0_C7CE_AF4E_8B3D_45380E851234" Guid="4C12C4D9-5512-4151-9241-23DD611290A3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FC5A2AB0_C7CE_AF4E_8B3D_45380E851234" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.batteries_green.dll" Source="..\..\CitadelGUI\bin\Release x86\SQLitePCLRaw.batteries_green.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FE4CBCAB_DE08_4843_8A6A_63DBDE76207F" Guid="186322E9-F898-40B1-8A4B-87604C49915B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FE4CBCAB_DE08_4843_8A6A_63DBDE76207F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.AspNetCore.WebUtilities.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.AspNetCore.WebUtilities.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_FF8C58A1_109B_9A44_A3AC_A9C190A5398F" Guid="39018F6A-C223-4D1E-977E-88584CFEAA3D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FF8C58A1_109B_9A44_A3AC_A9C190A5398F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.NonGeneric.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.NonGeneric.dll" KeyPath="yes" />
+        </Component>
+        <!-- The 'InstallGuard' project output. -->
+        <Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B9C72077_61E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_2D09051E_2D16" Guid="6053BB54-BF74-462E-A47B-E75E4A67575A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C616D885_312A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_9C0D5C71_A45A" Guid="C59C2369-D8C7-410F-9E5E-E0AFF60A0284" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_64635A4B_9AB4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_F4697AA8_AFB1" Guid="3E490ADE-258A-408A-B950-BFFAA7DE0371" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EFB26F07_B76F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_BC7C1623_A381" Guid="78F39F57-ECA0-415B-B729-98B81ED978A4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EC8AB8A2_5A09" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_3756EDF1_AF46" Guid="F44FCF70-0E7D-4E36-BB01-6244472E960E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_E48F3DFE_5597" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
+        </Component>
+        <Directory Id="InstallGuard.Binaries" />
+        <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
+          <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_05620AE3_DE01_7943_8FA3_2D2F1316643A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CitadelGUI\bin\Release x86\x86\WinDivert64.sys" KeyPath="yes" />
+          </Component>
+          <Component Id="com_718AED2B_984F_A94E_B378_099D87D01F2B" Guid="429DF4C4-B7CA-4AB4-822A-D63AA24CE06E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_718AED2B_984F_A94E_B378_099D87D01F2B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert.dll" Source="..\..\CitadelGUI\bin\Release x86\x86\WinDivert.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="com_D80DB20C_47B4_5B40_A955_E12F79C9C121" Guid="1CC59D42-8AAA-4C38-A943-F26F790FF2CE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_D80DB20C_47B4_5B40_A955_E12F79C9C121" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="e_sqlite3.dll" Source="..\..\CitadelGUI\bin\Release x86\x86\e_sqlite3.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="com_D9947A0C_D56A_F242_A11B_17D75BA3D672" Guid="9B86E71B-60AD-4155-ABBD-36CEBF45A9EF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_D9947A0C_D56A_F242_A11B_17D75BA3D672" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert32.sys" Source="..\..\CitadelGUI\bin\Release x86\x86\WinDivert32.sys" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop">
+        <Component Id="com_dirDesktopFolder" Guid="ECF8735E-6532-4704-BD49-264D8AC217A4" Transitive="no">
+          <RemoveFolder Id="_82A8D763_ED34_4973_869D_C9705AE674EE" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirDesktopFolder" Type="string" Value="Desktop directory" KeyPath="yes" />
+          <Shortcut Id="_0A497A29_03B8_754E_810F_1B5BF4D19870" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+            <Icon Id="_1B5BF4D19870" SourceFile="..\..\CitadelGUI\appicon.ico" />
+          </Shortcut>
+        </Component>
+      </Directory>
+    </Directory>
+    <!-- The reference to the component group of the 'InstallGuard' project output. -->
+    <ComponentGroupRef Id="InstallGuard.Binaries" />
+    <InstallExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
+    </InstallUISequence>
+    <AdminExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
+    </AdminExecuteSequence>
+    <AdminUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
+    </AdminUISequence>
+  </Module>
+</Wix>

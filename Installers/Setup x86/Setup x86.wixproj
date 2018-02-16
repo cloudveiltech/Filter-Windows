@@ -2,34 +2,33 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.11</ProductVersion>
-    <ProjectGuid>{918B3573-4D0C-41F9-BEAD-9D55371A3B15}</ProjectGuid>
+    <ProjectGuid>{27E6AA1A-E0A9-4F52-86C9-5CA6EF3FBEF1}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>Setup x64</OutputName>
+    <OutputName>Setup x86</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>Setup x64</Name>
+    <Name>Setup x86</Name>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants />
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>$(Configuration)\</OutputPath>
     <DefineConstants />
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants />
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="InstallGuardDialog.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
@@ -99,27 +98,27 @@
     </CreateItem>
   </Target>
   <Target Name="AfterBuild">
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
       <!-- Add bootstrapper items here -->
       <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
         <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
       <!-- Add bootstrapper items here -->
       <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
         <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' ">
+    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x86' ">
       <!-- Add bootstrapper items here -->
       <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
         <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <!--<GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />-->
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x86' " />
   </Target>
   <PropertyGroup>
     <PreBuildEvent>
