@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.6.21.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -585,13 +585,31 @@
           <File Id="_FEB1922C_FFE1_F94D_843B_AF9EDD6393F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="SQLitePCLRaw.core.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.core.dll" KeyPath="yes" />
         </Component>
         <!-- The 'InstallGuard' project output. -->
-        <Component Id="comp_4DF2BCC6_189C" Guid="CE192BB4-A8BC-41F4-9829-291107227FE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <!--<Component Id="comp_4DF2BCC6_189C" Guid="CE192BB4-A8BC-41F4-9829-291107227FE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_1DE9226C_55B1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_570282AB_9586" Guid="98B4F591-FB09-4C87-B453-A6A4B72F124E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_58E52A93_6301" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
         </Component>
-        <Directory Id="InstallGuard.Binaries" />
+        <Directory Id="InstallGuard.Binaries" />-->
+        <Component Id="comp_4DF15C30_5A3F" Guid="856D41BC-CF38-4A08-9F8A-529B2E168F24" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_FCB50D83_876D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Data.SQLite.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Data.SQLite.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_1FF65769_E395" Guid="AFCF7CE7-9576-4153-812E-6ADB247B1B09" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3A395AFE_AF9E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Data.SQLite.EF6.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Data.SQLite.EF6.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_B784A37F_31D4" Guid="6C44DF7B-3B0F-4CC7-9F26-8EECB5A52233" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_205833BB_6E78" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EntityFramework.dll" Source="..\..\CitadelGUI\bin\Release x64\EntityFramework.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_768F3FD6_EF56" Guid="3AB79EB4-184E-461E-9118-F1BA2A7F4B56" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_105BF3AF_62EF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Data.SQLite.Linq.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Data.SQLite.Linq.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_FB0C2D24_0C57" Guid="D8109DBB-A2EE-416A-9F3A-721AF966E4E4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EDACF2CB_F383" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_E19B3860_D166" Guid="281313FD-6262-4106-9E24-58AFE24BD8DC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_B8B90A66_C4C4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">
             <CreateFolder Directory="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" />
@@ -610,7 +628,7 @@
       </Directory>
     </Directory>
     <!-- The reference to the component group of the 'InstallGuard' project output. -->
-    <ComponentGroupRef Id="InstallGuard.Binaries" />
+    <!--<ComponentGroupRef Id="InstallGuard.Binaries" />-->
     <InstallExecuteSequence>
       <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
     </InstallExecuteSequence>

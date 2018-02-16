@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.6.21.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -581,6 +581,21 @@
         <!-- The 'InstallGuard' project output. -->
         <Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B9C72077_61E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_2D09051E_2D16" Guid="6053BB54-BF74-462E-A47B-E75E4A67575A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C616D885_312A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_9C0D5C71_A45A" Guid="C59C2369-D8C7-410F-9E5E-E0AFF60A0284" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_64635A4B_9AB4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_F4697AA8_AFB1" Guid="3E490ADE-258A-408A-B950-BFFAA7DE0371" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EFB26F07_B76F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_BC7C1623_A381" Guid="78F39F57-ECA0-415B-B729-98B81ED978A4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_EC8AB8A2_5A09" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_3756EDF1_AF46" Guid="F44FCF70-0E7D-4E36-BB01-6244472E960E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_E48F3DFE_5597" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Directory Id="InstallGuard.Binaries" />
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">

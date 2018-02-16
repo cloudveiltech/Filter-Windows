@@ -116,9 +116,9 @@
         <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " />
+    <!--<GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " />
     <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />-->
   </Target>
   <PropertyGroup>
     <PreBuildEvent>

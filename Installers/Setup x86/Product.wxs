@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="CloudVeil For Windows" Language="1033" Version="1.6.21" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
+  <Product Id="*" Name="CloudVeil For Windows" Language="1033" Version="1.7.0.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x86" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -15,35 +15,31 @@
     <Icon Id="_1FCD93CB6069" SourceFile="..\..\CitadelGUI\appicon.ico" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <CustomAction Id="CA_CreateConfig" BinaryKey="ADXDPCADLL" DllEntry="GetConfig" />
-    <!-- The 'CloudVeil.exe' custom action. -->
-    <CustomAction Id="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit" Execute="commit" BinaryKey="InstallUtil" DllEntry="ManagedInstall" Impersonate="no" />
-    <CustomAction Id="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit.SetProperty" Property="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit" Value="/installtype=notransaction /action=commit /LogFile= &quot;[#_5EB6A0B5_4D2A_A347_AB04_F6282687850B]&quot; &quot;[VSDFxConfigFile]&quot;" />
-    <!-- The 'CloudVeil.exe' custom action. -->
-    <CustomAction Id="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install" Execute="deferred" BinaryKey="InstallUtil" DllEntry="ManagedInstall" Impersonate="no" />
-    <CustomAction Id="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install.SetProperty" Property="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install" Value="/installtype=notransaction /action=install /LogFile= &quot;[#_5EB6A0B5_4D2A_A347_AB04_F6282687850B]&quot; &quot;[VSDFxConfigFile]&quot;" />
-    <!-- The 'InstallGuard.exe' custom action. -->
-    <CustomAction Id="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall" Execute="deferred" BinaryKey="InstallUtil" DllEntry="ManagedInstall" Impersonate="no" />
-    <CustomAction Id="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall.SetProperty" Property="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall" Value="/installtype=notransaction /action=uninstall /LogFile= &quot;[#_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98]&quot; &quot;[VSDFxConfigFile]&quot;" />
-    <!-- The support for managed custom actions. -->
-    <Binary Id="InstallUtil" SourceFile="Resources\Binary\InstallUtil" />
-    <Binary Id="InstallUtilConfig" SourceFile="Resources\Binary\InstallUtilConfig" />
-    <Binary Id="ADXDPCADLL" SourceFile="Resources\Binary\adxdpca.dll" />
+      <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" Impersonate="no"/>
+      <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
+
+      <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" Impersonate="no" />
+      <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no"
+                    Value="TargetDirectory=[TARGETDIR]"/>
+
+      <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\$(var.Configuration)\CustomInstallerActions.CA.dll" />
+     
     <!-- Initialize the 'TARGETDIR' directory property. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />
     <!-- The directory tree of the installation package. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramMenuFolder" Name="Program Menu" />
       <Directory Id="DesktopFolder" Name="Desktop" />
-      <Component Id="com_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98" Guid="6D7A992C-7C9D-4446-A6C3-C4957AE33237" Permanent="no" SharedDllRefCount="no" Transitive="no">
+      <!--<Component Id="com_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98" Guid="6D7A992C-7C9D-4446-A6C3-C4957AE33237" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
-      </Component>
+      </Component>-->
       <Component Id="com_2DD664B4_B604_1744_B2C5_1FCD93CB6069" Guid="96103AD0-1E9E-45D0-B8CE-85C399B36BFA" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_2DD664B4_B604_1744_B2C5_1FCD93CB6069" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
       </Component>
       <Component Id="com_46B30685_E331_4947_B24F_F6C77769D09A" Guid="73784EEB-B551-4390-BBC0-8FA20370C191" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_46B30685_E331_4947_B24F_F6C77769D09A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
       </Component>
-      <Component Id="com_5EB6A0B5_4D2A_A347_AB04_F6282687850B" Guid="E88A277E-747A-43B2-AB30-6A538E47778F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+      <Component Id="CloudVeilExe" Guid="E88A277E-747A-43B2-AB30-6A538E47778F" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_5EB6A0B5_4D2A_A347_AB04_F6282687850B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
       </Component>
       <Merge Id="Microsoft_VC110_CRT_x86.msm" SourceFile="External\msms\Microsoft_VC110_CRT_x86.msm" DiskId="1" Language="0" />
@@ -55,7 +51,7 @@
       <ComponentRef Id="com_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98" />
       <ComponentRef Id="com_2DD664B4_B604_1744_B2C5_1FCD93CB6069" />
       <ComponentRef Id="com_46B30685_E331_4947_B24F_F6C77769D09A" />
-      <ComponentRef Id="com_5EB6A0B5_4D2A_A347_AB04_F6282687850B" />
+      <ComponentRef Id="CloudVeilExe" />
     </ComponentGroup>
     <!-- The Registry group of the installation package. -->
     <ComponentGroup Id="RegistryGroup">
@@ -81,19 +77,22 @@
       <MergeRef Id="Microsoft_VC140_CRT_x86.msm" />
     </Feature>
     <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="1.6.21" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
-      <UpgradeVersion Maximum="1.6.21" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
+      <UpgradeVersion Minimum="1.7.0.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
+      <UpgradeVersion Maximum="1.7.0.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
     </Upgrade>
     <InstallExecuteSequence>
       <Custom Action="CA_CreateConfig" Sequence="1" />
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
       <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
-      <Custom Action="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit.SetProperty" After="StartServices"><![CDATA[$com_5EB6A0B5_4D2A_A347_AB04_F6282687850B>2]]></Custom>
-      <Custom Action="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit" After="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit.SetProperty"><![CDATA[$com_5EB6A0B5_4D2A_A347_AB04_F6282687850B>2]]></Custom>
-      <Custom Action="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install.SetProperty" After="_E0B8D4E0_AD0D_4138_B28C_8CC15892C090.Commit"><![CDATA[$com_5EB6A0B5_4D2A_A347_AB04_F6282687850B>2]]></Custom>
-      <Custom Action="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install" After="_3BE527D3_F484_438F_B35F_354FC99A48B0.Install.SetProperty"><![CDATA[$com_5EB6A0B5_4D2A_A347_AB04_F6282687850B>2]]></Custom>
-      <Custom Action="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall.SetProperty" After="MsiUnpublishAssemblies"><![CDATA[$com_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98=2]]></Custom>
-      <Custom Action="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall" After="_4A5C95EC_6595_489B_850E_4A76B92B605B.Uninstall.SetProperty"><![CDATA[$com_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98=2]]></Custom>
+        <!--
+        Are these conditions confusing?
+        Check out https://www.firegiant.com/wix/tutorial/com-expression-syntax-miscellanea/expression-syntax/#prefixes for documentation.
+        -->
+        <Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
+        <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
+
+        <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
+        <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
