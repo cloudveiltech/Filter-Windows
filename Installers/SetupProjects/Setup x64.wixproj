@@ -29,8 +29,9 @@
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="InstallationUi.wxs" />
     <Compile Include="InstallGuardDialog.wxs" />
-    <Compile Include="Product.wxs" />
+    <Compile Include="Product-x64.wxs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="XSLT\RegisterForCOM.xml" />

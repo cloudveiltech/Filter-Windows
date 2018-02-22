@@ -579,7 +579,7 @@
           <File Id="_FF8C58A1_109B_9A44_A3AC_A9C190A5398F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Collections.NonGeneric.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Collections.NonGeneric.dll" KeyPath="yes" />
         </Component>
         <!-- The 'InstallGuard' project output. -->
-        <Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <!--<Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B9C72077_61E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2D09051E_2D16" Guid="6053BB54-BF74-462E-A47B-E75E4A67575A" Permanent="no" SharedDllRefCount="no" Transitive="no">
@@ -596,6 +596,15 @@
         </Component>
         <Component Id="comp_3756EDF1_AF46" Guid="F44FCF70-0E7D-4E36-BB01-6244472E960E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_E48F3DFE_5597" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
+        </Component>-->
+        <Component Id="comp_BF0B15DA_F737" Guid="377C07F9-EBBC-408A-A7B5-19E09A6C2D5A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D2305AD3_63D7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_70DEDA6C_961F" Guid="29BF37BE-6290-4AF9-B2ED-E0E55E318A81" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_BF316986_7784" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_06B64796_7016" Guid="84A1C2BA-815C-4FF1-9042-78255CAB3768" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_CA667635_CC08" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Directory Id="InstallGuard.Binaries" />
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">

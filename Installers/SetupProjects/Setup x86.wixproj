@@ -29,7 +29,8 @@
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
+    <Compile Include="InstallationUi.wxs" />
+    <Compile Include="Product-x86.wxs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="XSLT\RegisterForCOM.xml" />
@@ -116,9 +117,6 @@
         <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x86' " />
   </Target>
   <PropertyGroup>
     <PreBuildEvent>

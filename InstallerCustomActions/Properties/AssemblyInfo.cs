@@ -7,15 +7,9 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("InstallerCustomActions")]
 [assembly: AssemblyDescription("")]
-<<<<<<< HEAD
-[assembly: AssemblyCompany("Windows User")]
+[assembly: AssemblyCompany("CloudVeil Technology, Inc.")]
 [assembly: AssemblyProduct("InstallerCustomActions")]
-[assembly: AssemblyCopyright("Copyright © Windows User 2018")]
-=======
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("InstallerCustomActions")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
->>>>>>> wix-migration
+[assembly: AssemblyCopyright("Copyright © CloudVeil Technology, Inc. 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -25,11 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-<<<<<<< HEAD
-[assembly: Guid("eb5cf70b-cd39-4494-9a67-e2d7b1161c61")]
-=======
 [assembly: Guid("2fd83d0e-949a-49a7-96a7-0d2cb278880a")]
->>>>>>> wix-migration
 
 // Version information for an assembly consists of the following four values:
 //
