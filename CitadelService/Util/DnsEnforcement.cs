@@ -47,8 +47,6 @@ namespace CitadelService.Util
         /// <param name="enableDnsFiltering">If true, this function enables DNS filtering with entries in the configuration.</param>
         public void TryEnforce(bool enableDnsFiltering = true)
         {
-            m_logger.Info("Running TryEnforce {0}", enableDnsFiltering);
-
             lock (m_dnsEnforcementLock)
             {
                 try
@@ -138,13 +136,8 @@ namespace CitadelService.Util
 
                                                 if (changed)
                                                 {
-                                                    m_logger.Info("Setting DNS for adapter {0} to {1}.", nicName, string.Join(",", dnsServers.ToArray()));
                                                     newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
                                                     managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
-                                                }
-                                                else
-                                                {
-                                                    m_logger.Info("No change in DNS settings.");
                                                 }
                                             }
                                         }
@@ -184,7 +177,7 @@ namespace CitadelService.Util
 
         private void SetDnsToDhcp()
         {
-            m_logger.Info("SetDnsToDhcp");
+            m_logger.Info("Setting DNS to DHCP.");
 
             // Is configuration loaded?
             IPAddress primaryDns = null;
@@ -237,12 +230,6 @@ namespace CitadelService.Util
                 }
             });
 
-            var allIfaces = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (var iface in allIfaces)
-            {
-                m_logger.Info("iface {0} is {1}", iface.Description, iface.OperationalStatus.ToString());
-            }
-
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
 
             foreach (var iface in ifaces)
@@ -259,10 +246,7 @@ namespace CitadelService.Util
         /// <returns></returns>
         public async Task<bool> IsBehindCaptivePortal()
         {
-            m_logger.Info("IsBehindCaptivePortal");
-
             bool active = await IsCaptivePortalActive();
-            m_logger.Info("IsBehindCaptivePortal = {0}", active);
 
             if (active)
             {
@@ -340,8 +324,6 @@ namespace CitadelService.Util
                 {
                     try
                     {
-                        m_logger.Info("Testing DNS server {0}", dnsServer);
-
                         DnsClient client = new DnsClient(dnsServer);
 
                         IList<IPAddress> ips = await client.Lookup("testdns.cloudveil.org");
@@ -359,6 +341,8 @@ namespace CitadelService.Util
                     catch (Exception ex)
                     {
                         failedDnsServers++;
+                        m_logger.Error($"Failed to contact DNS server {dnsServer}");
+                        LoggerUtil.RecursivelyLogException(m_logger, ex);
                     }
                 }
             }
@@ -474,8 +458,6 @@ namespace CitadelService.Util
 
         public async void Trigger()
         {
-            m_logger.Info("Running DNS trigger");
-
             try
             {
                 bool isDnsUp = await IsDnsUp();

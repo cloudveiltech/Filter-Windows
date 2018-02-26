@@ -58,6 +58,7 @@
     <Compile Include="Services\FilterServiceProvider.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
+    <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <Compile Include="Util\WebServiceUtil.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />
@@ -88,7 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.CitadelCore.Windows">
-      <Version>1.3.9</Version>
+      <Version>1.3.10</Version>
     </PackageReference>
     <PackageReference Include="DistillNET">
       <Version>1.4.5</Version>
@@ -135,6 +136,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BadCertPage.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

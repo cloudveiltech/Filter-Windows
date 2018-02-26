@@ -48,6 +48,7 @@ using NativeWifi;
 using CitadelService.Util;
 using DNS;
 using DNS.Client;
+using System.Net.Http;
 
 namespace CitadelService.Services
 {
@@ -178,6 +179,7 @@ namespace CitadelService.Services
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
         private byte[] m_blockedHtmlPage;
+        private byte[] m_badSslHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
 
@@ -1001,20 +1003,17 @@ namespace CitadelService.Services
             LogTime("Starting InitEngine()");
 
             // Get our blocked HTML page
-            var blockedPagePackURI = "CitadelService.Resources.BlockedPage.html";
-            using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(blockedPagePackURI))
+            m_blockedHtmlPage = ResourceStreams.Get("CitadelService.Resources.BlockedPage.html");
+            m_badSslHtmlPage = ResourceStreams.Get("CitadelService.Resources.BadCertPage.html");
+
+            if(m_blockedHtmlPage == null)
             {
-                if(resourceStream != null && resourceStream.CanRead)
-                {
-                    using(TextReader tsr = new StreamReader(resourceStream))
-                    {
-                        m_blockedHtmlPage = Encoding.UTF8.GetBytes(tsr.ReadToEnd());
-                    }
-                }
-                else
-                {
-                    m_logger.Error("Cannot read from packed block page file.");
-                }
+                m_logger.Error("Could not load packed HTML block page.");
+            }
+
+            if(m_badSslHtmlPage == null)
+            {
+                m_logger.Error("Could not load packed HTML bad SSL page.");
             }
 
             LogTime("Now Loading FilterDbCollection()");
@@ -1029,7 +1028,7 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd);
+            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // Setup general info, warning and error events.
             LoggerProxy.Default.OnInfo += EngineOnInfo;
@@ -1795,11 +1794,23 @@ namespace CitadelService.Services
             }
         }
 
-        
+        private void OnBadCertificate(Uri requestUrl, HttpRequestException requestException, out string customResponseContentType, out byte[] customResponse)
+        {
+            WebException webEx = (requestException.InnerException as WebException);
+            var response = webEx?.Response;
+
+            if(response != null)
+            {
+                // Figure out what's going on with the response.
+                m_logger.Info("Response returned from bad SSL.");
+            }
+
+            customResponseContentType = "text/html";
+            customResponse = getBadSslPageWithResolvedTemplates(requestUrl, Encoding.UTF8.GetString(m_badSslHtmlPage));
+        }
+
         private void OnHttpMessageEnd(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out bool shouldBlock, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
             shouldBlock = false;
             customBlockResponseContentType = null;
             customBlockResponse = null;
@@ -1831,7 +1842,7 @@ namespace CitadelService.Services
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
                     m_logger.Info("OnClassifyContent Done for {1} @ {0}", stopwatch.ElapsedMilliseconds, requestUrl.ToString());
 
-                    if(contentClassResult > 0)
+                    if (contentClassResult > 0)
                     {
                         shouldBlock = true;
 
@@ -1893,6 +1904,21 @@ namespace CitadelService.Services
             }
 
             return matchingCategory.ToString() + " filter rule mismatch error";
+        }
+
+        private byte[] getBadSslPageWithResolvedTemplates(Uri requestUri, string pageTemplate)
+        {
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // IMO this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
+            string urlText = requestUri.ToString();
+
+            urlText = urlText == null ? "" : urlText;
+
+            pageTemplate = pageTemplate.Replace("{{url_text}}", urlText);
+            pageTemplate = pageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+
+            return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
         private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
@@ -2040,11 +2066,13 @@ namespace CitadelService.Services
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
-                        if(m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, isHtml, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
+                            m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
+
                             var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
-                            if(mappedCategory != null)
+                            if (mappedCategory != null)
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
@@ -2613,26 +2641,6 @@ namespace CitadelService.Services
                                                 }
 
                                                 GC.Collect();
-
-                                                // Load second as whitelist, but start off with the
-                                                // category disabled.
-                                                using(TextReader tr = new StreamReader(listEntry.Open()))
-                                                {
-                                                    var bypassAsWhitelistRules = new List<string>();
-                                                    string line = null;
-                                                    while((line = tr.ReadLine()) != null)
-                                                    {
-                                                        bypassAsWhitelistRules.Add("@@" + line.Trim() + "\n");
-                                                    }
-
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRules(bypassAsWhitelistRules.ToArray(), bypassCategoryModel.CategoryIdAsWhitelist).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                    m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryIdAsWhitelist, false);
-                                                }
-
-                                                GC.Collect();
                                             }
                                         }
                                         break;
@@ -2782,7 +2790,8 @@ namespace CitadelService.Services
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
+                        //m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
                     }
                 }
 
@@ -2808,7 +2817,7 @@ namespace CitadelService.Services
                     {
                         if (entry is MappedBypassListCategoryModel)
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
+                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
                         }
                     }
 
