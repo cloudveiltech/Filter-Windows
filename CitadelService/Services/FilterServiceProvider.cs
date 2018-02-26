@@ -1827,7 +1827,6 @@ namespace CitadelService.Services
             try
             {
                 var parsedHeaders = ParseHeaders(headers);
-                m_logger.Info("Parsed Headers @ {0}", stopwatch.ElapsedMilliseconds);
 
                 string contentType = null;
 
@@ -1840,7 +1839,6 @@ namespace CitadelService.Services
                     string textCategory;
 
                     var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
-                    m_logger.Info("OnClassifyContent Done for {1} @ {0}", stopwatch.ElapsedMilliseconds, requestUrl.ToString());
 
                     if (contentClassResult > 0)
                     {
