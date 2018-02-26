@@ -648,27 +648,35 @@ namespace CitadelService.Services
 
                 m_ipcServer.ClientConnected = () =>
                 {
-                    ConnectedClients++;
-
-                    // When a client connects, synchronize our data. Presently, we just want to
-                    // update them with relaxed policy NFO, if any.
-                    var cfg = Config;
-                    if(cfg != null && cfg.BypassesPermitted > 0)
+                    try
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                        ConnectedClients++;
+
+                        // When a client connects, synchronize our data. Presently, we just want to
+                        // update them with relaxed policy NFO, if any.
+                        var cfg = Config;
+                        if (cfg != null && cfg.BypassesPermitted > 0)
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                        }
+                        else
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
+                        }
+
+                        m_ipcServer.NotifyStatus(Status);
+
+                        m_dnsEnforcement.Trigger();
+
+                        if (m_ipcServer.WaitingForAuth)
+                        {
+                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-                    }
-
-                    m_ipcServer.NotifyStatus(Status);
-
-                    m_dnsEnforcement.Trigger();
-
-                    if(m_ipcServer.WaitingForAuth)
-                    {   
-                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        m_logger.Warn("Error occurred while trying to connect to IPC server.");
+                        LoggerUtil.RecursivelyLogException(m_logger, ex);
                     }
                 };
 
@@ -2857,14 +2865,18 @@ namespace CitadelService.Services
         private RelaxedPolicyStatus getRelaxedPolicyStatus()
         {
             bool relaxedInEffect = false;
-            // Determine if a relaxed policy is currently in effect.
-            foreach (var entry in m_generatedCategoriesMap.Values)
+
+            if (m_generatedCategoriesMap != null)
             {
-                if (entry is MappedBypassListCategoryModel)
+                // Determine if a relaxed policy is currently in effect.
+                foreach (var entry in m_generatedCategoriesMap.Values)
                 {
-                    if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                    if (entry is MappedBypassListCategoryModel)
                     {
-                        relaxedInEffect = true;
+                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                        {
+                            relaxedInEffect = true;
+                        }
                     }
                 }
             }
@@ -2875,7 +2887,7 @@ namespace CitadelService.Services
             }
             else
             {
-                if (Config.BypassesPermitted - Config.BypassesUsed == 0)
+                if (Config != null && Config.BypassesPermitted - Config.BypassesUsed == 0)
                 {
                     return RelaxedPolicyStatus.AllUsed;
                 }
