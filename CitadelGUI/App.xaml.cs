@@ -981,6 +981,61 @@ namespace Te.Citadel
             OnRelaxedPolicyRequested(false);
         }
 
+        private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)
+        {
+            string title = "Relaxed Policy";
+            string message = "";
+
+            switch (msg.PolicyInfo.Status)
+            {
+                case RelaxedPolicyStatus.Activated:
+                    message = null;
+                    break;
+
+                case RelaxedPolicyStatus.Granted:
+                    message = "Relaxed Policy Granted";
+                    break;
+
+                case RelaxedPolicyStatus.AllUsed:
+                    message = "All of your relaxed policies are used up for today.";
+                    break;
+
+                case RelaxedPolicyStatus.AlreadyRelinquished:
+                    message = "Relaxed policy not currently active.";
+                    break;
+
+                case RelaxedPolicyStatus.Deactivated:
+                    message = null;
+                    break;
+
+                case RelaxedPolicyStatus.Relinquished:
+                    message = null;
+                    break;
+
+                default:
+                    message = null;
+                    break;
+            }
+
+            if (fromTray)
+            {
+                if (message != null)
+                {
+                    m_trayIcon.ShowBalloonTip(3000, title, message, System.Windows.Forms.ToolTipIcon.Info);
+                }
+            }
+            else
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    if (message != null)
+                    {
+                        m_mainWindow.ShowUserMessage(title, message, "OK");
+                    }
+                });
+            }
+        }
+
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
@@ -995,10 +1050,7 @@ namespace Te.Citadel
 
                 ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)
                 {
-                    if(fromTray)
-                    {
-                        m_trayIcon.ShowBalloonTip(3000, "Relaxed Policy", string.Format("Relaxed policy granted. It will expire in {0} minutes.", (int)msg.PolicyInfo.RelaxDuration.TotalMinutes), System.Windows.Forms.ToolTipIcon.Info);
-                    }
+                    ShowRelaxedPolicyMessage(msg, fromTray);
                 };
 
                 ipcClient.WaitForConnection();
@@ -1016,6 +1068,11 @@ namespace Te.Citadel
                 ipcClient.ConnectedToServer = () =>
                 {
                     ipcClient.RelinquishRelaxedPolicy();
+                };
+
+                ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)
+                {
+                    ShowRelaxedPolicyMessage(msg, false);
                 };
 
                 ipcClient.WaitForConnection();

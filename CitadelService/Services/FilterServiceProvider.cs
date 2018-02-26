@@ -48,6 +48,7 @@ using NativeWifi;
 using CitadelService.Util;
 using DNS;
 using DNS.Client;
+using System.Net.Http;
 
 namespace CitadelService.Services
 {
@@ -178,6 +179,7 @@ namespace CitadelService.Services
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
         private byte[] m_blockedHtmlPage;
+        private byte[] m_badSslHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
 
@@ -648,27 +650,35 @@ namespace CitadelService.Services
 
                 m_ipcServer.ClientConnected = () =>
                 {
-                    ConnectedClients++;
-
-                    // When a client connects, synchronize our data. Presently, we just want to
-                    // update them with relaxed policy NFO, if any.
-                    var cfg = Config;
-                    if(cfg != null && cfg.BypassesPermitted > 0)
+                    try
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
+                        ConnectedClients++;
+
+                        // When a client connects, synchronize our data. Presently, we just want to
+                        // update them with relaxed policy NFO, if any.
+                        var cfg = Config;
+                        if (cfg != null && cfg.BypassesPermitted > 0)
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                        }
+                        else
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
+                        }
+
+                        m_ipcServer.NotifyStatus(Status);
+
+                        m_dnsEnforcement.Trigger();
+
+                        if (m_ipcServer.WaitingForAuth)
+                        {
+                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
-                    }
-
-                    m_ipcServer.NotifyStatus(Status);
-
-                    m_dnsEnforcement.Trigger();
-
-                    if(m_ipcServer.WaitingForAuth)
-                    {   
-                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        m_logger.Warn("Error occurred while trying to connect to IPC server.");
+                        LoggerUtil.RecursivelyLogException(m_logger, ex);
                     }
                 };
 
@@ -993,20 +1003,17 @@ namespace CitadelService.Services
             LogTime("Starting InitEngine()");
 
             // Get our blocked HTML page
-            var blockedPagePackURI = "CitadelService.Resources.BlockedPage.html";
-            using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(blockedPagePackURI))
+            m_blockedHtmlPage = ResourceStreams.Get("CitadelService.Resources.BlockedPage.html");
+            m_badSslHtmlPage = ResourceStreams.Get("CitadelService.Resources.BadCertPage.html");
+
+            if(m_blockedHtmlPage == null)
             {
-                if(resourceStream != null && resourceStream.CanRead)
-                {
-                    using(TextReader tsr = new StreamReader(resourceStream))
-                    {
-                        m_blockedHtmlPage = Encoding.UTF8.GetBytes(tsr.ReadToEnd());
-                    }
-                }
-                else
-                {
-                    m_logger.Error("Cannot read from packed block page file.");
-                }
+                m_logger.Error("Could not load packed HTML block page.");
+            }
+
+            if(m_badSslHtmlPage == null)
+            {
+                m_logger.Error("Could not load packed HTML bad SSL page.");
             }
 
             LogTime("Now Loading FilterDbCollection()");
@@ -1014,14 +1021,14 @@ namespace CitadelService.Services
             m_filterCollection = new FilterDbCollection();
             //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
 
-            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);         
+            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);         
 
             LogTime("Loading filtering engine.");
 
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd);
+            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // Setup general info, warning and error events.
             LoggerProxy.Default.OnInfo += EngineOnInfo;
@@ -1787,7 +1794,21 @@ namespace CitadelService.Services
             }
         }
 
-        
+        private void OnBadCertificate(Uri requestUrl, HttpRequestException requestException, out string customResponseContentType, out byte[] customResponse)
+        {
+            WebException webEx = (requestException.InnerException as WebException);
+            var response = webEx?.Response;
+
+            if(response != null)
+            {
+                // Figure out what's going on with the response.
+                m_logger.Info("Response returned from bad SSL.");
+            }
+
+            customResponseContentType = "text/html";
+            customResponse = getBadSslPageWithResolvedTemplates(requestUrl, Encoding.UTF8.GetString(m_badSslHtmlPage));
+        }
+
         private void OnHttpMessageEnd(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out bool shouldBlock, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             shouldBlock = false;
@@ -1814,7 +1835,10 @@ namespace CitadelService.Services
                     contentType = contentType.ToLower();
 
                     BlockType blockType;
-                    var contentClassResult = OnClassifyContent(body, contentType, out blockType);
+                    string textTrigger;
+                    string textCategory;
+
+                    var contentClassResult = OnClassifyContent(body, contentType, out blockType, out textTrigger, out textCategory);
 
                     if (contentClassResult > 0)
                     {
@@ -1825,7 +1849,7 @@ namespace CitadelService.Services
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, 0, uriInfo, blockType);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1880,7 +1904,22 @@ namespace CitadelService.Services
             return matchingCategory.ToString() + " filter rule mismatch error";
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None)
+        private byte[] getBadSslPageWithResolvedTemplates(Uri requestUri, string pageTemplate)
+        {
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // IMO this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
+            string urlText = requestUri.ToString();
+
+            urlText = urlText == null ? "" : urlText;
+
+            pageTemplate = pageTemplate.Replace("{{url_text}}", urlText);
+            pageTemplate = pageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+
+            return Encoding.UTF8.GetBytes(pageTemplate);
+        }
+
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
@@ -1910,7 +1949,7 @@ namespace CitadelService.Services
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
-            if (info != null && matchingCategory > 0)
+            if (info != null && matchingCategory > 0 && blockType == BlockType.None)
             {
                 matching_category = findCategoryFromUriInfo(matchingCategory, info);
             }
@@ -1932,7 +1971,7 @@ namespace CitadelService.Services
 
                     case BlockType.TextClassification:
                     case BlockType.TextTrigger:
-                        matching_category = "improper text";
+                        matching_category = string.Format("offensive text: {0}", triggerCategory);
                         break;
 
                     case BlockType.OtherContentClassification:
@@ -1996,12 +2035,15 @@ namespace CitadelService.Services
         /// the content is not deemed to be part of any known category, which is a general indication
         /// to the engine that the content should not be blocked.
         /// </returns>
-        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause)
+        private short OnClassifyContent(byte[] data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
         {
+            Stopwatch stopwatch = null;
+
             try
             {
                 m_filteringRwLock.EnterReadLock();
 
+                stopwatch = Stopwatch.StartNew();
                 if(m_textTriggers != null && m_textTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
@@ -2032,11 +2074,16 @@ namespace CitadelService.Services
                             {
                                 m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
+                                triggerCategory = mappedCategory.CategoryName;
+                                textTrigger = trigger;
                                 return mappedCategory.CategoryId;
                             }
                         }
                     }
                 }
+                stopwatch.Stop();
+
+                m_logger.Info("Text triggers took {0}", stopwatch.ElapsedMilliseconds);
             }
             catch(Exception e)
             {
@@ -2146,6 +2193,8 @@ namespace CitadelService.Services
 #endif
             // Default to zero. Means don't block this content.
             blockedBecause = BlockType.OtherContentClassification;
+            textTrigger = "";
+            triggerCategory = "";
             return 0;
         }
 
@@ -2474,11 +2523,11 @@ namespace CitadelService.Services
                             // configured. Force this up to the UI thread because it's a UI model.
                             if(m_userConfig.BypassesPermitted > 0)
                             {
-                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration);
+                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration, getRelaxedPolicyStatus());
                             }
                             else
                             {
-                                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
                             }
 
                             // Recreate our filter collection and reset all categories to be disabled.
@@ -2499,7 +2548,7 @@ namespace CitadelService.Services
 
                             // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                             // be an in-memory DB or not.
-                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true);
+                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
 
                             // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();
@@ -2792,16 +2841,16 @@ namespace CitadelService.Services
 
                 if(allUsesExhausted)
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
                 }
                 else
                 {
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration);
+                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Granted);
                 }
             }
             else
             {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero);
+                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
             }
 
             if(allUsesExhausted)
@@ -2820,36 +2869,60 @@ namespace CitadelService.Services
             }
         }
 
+        private RelaxedPolicyStatus getRelaxedPolicyStatus()
+        {
+            bool relaxedInEffect = false;
+
+            if (m_generatedCategoriesMap != null)
+            {
+                // Determine if a relaxed policy is currently in effect.
+                foreach (var entry in m_generatedCategoriesMap.Values)
+                {
+                    if (entry is MappedBypassListCategoryModel)
+                    {
+                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                        {
+                            relaxedInEffect = true;
+                        }
+                    }
+                }
+            }
+
+            if (relaxedInEffect)
+            {
+                return RelaxedPolicyStatus.Activated;
+            }
+            else
+            {
+                if (Config != null && Config.BypassesPermitted - Config.BypassesUsed == 0)
+                {
+                    return RelaxedPolicyStatus.AllUsed;
+                }
+                else
+                {
+                    return RelaxedPolicyStatus.Deactivated;
+                }
+            }
+        }
+
         /// <summary>
         /// Called when the user has manually requested to relinquish a relaxed policy. 
         /// </summary>
         private void OnRelinquishRelaxedPolicyRequested()
         {
-            bool relaxedInEffect = false;
-            // Determine if a relaxed policy is currently in effect.
-            foreach(var entry in m_generatedCategoriesMap.Values)
-            {
-                if(entry is MappedBypassListCategoryModel)
-                {
-                    if(m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
-                    {
-                        relaxedInEffect = true;
-                    }
-                }
-            }
+            RelaxedPolicyStatus status = getRelaxedPolicyStatus();
 
             // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if(relaxedInEffect)
+            if(status == RelaxedPolicyStatus.Activated)
             {
                 OnRelaxedPolicyTimerExpired(null);
             }
 
-            // If a policy was not already in effect, then the user is choosing to relinquish a
-            // policy not yet used. So just eat it up. If this is not the case, then the policy has
-            // already been decremented, so don't bother.
-            if(!relaxedInEffect)
+            // We want to inform the user that there is no relaxed policy in effect currently for this installation.
+            if(status == RelaxedPolicyStatus.Deactivated)
             {
-                DecrementRelaxedPolicy_Local();
+                var cfg = Config;
+                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
             }
         }
 
@@ -2888,7 +2961,7 @@ namespace CitadelService.Services
             if(cfg != null)
             {
                 cfg.BypassesUsed = 0;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration);
+                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
             }
 
             // Disable the reset timer.
