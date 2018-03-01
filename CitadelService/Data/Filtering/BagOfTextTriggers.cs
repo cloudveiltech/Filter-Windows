@@ -522,6 +522,8 @@ namespace CitadelService.Data.Filtering
                                                 if (categoryAppliesCb(thisCat))
                                                 {
                                                     firstMatchCategory = thisCat;
+                                                    matchedTrigger = string.Join(" ", list);
+
                                                     return true;
                                                 }
                                             }
