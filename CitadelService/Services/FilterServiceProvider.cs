@@ -397,6 +397,7 @@ namespace CitadelService.Services
 
             try
             {
+                this.OnConfigLoaded += OnConfigLoaded_LoadRelaxedPolicy;
                 m_dnsEnforcement = new DnsEnforcement(this);
 
                 m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
@@ -654,8 +655,6 @@ namespace CitadelService.Services
                     {
                         ConnectedClients++;
 
-                        // When a client connects, synchronize our data. Presently, we just want to
-                        // update them with relaxed policy NFO, if any.
                         var cfg = Config;
                         if (cfg != null && cfg.BypassesPermitted > 0)
                         {
@@ -2727,6 +2726,18 @@ namespace CitadelService.Services
         {
             public bool allowed { get; set; }
             public string message { get; set; }
+            public int used { get; set; }
+            public int permitted { get; set; }
+        }
+
+        /// <summary>
+        /// Whenever the config is reloaded, sync the bypasses from the server.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnConfigLoaded_LoadRelaxedPolicy(object sender, EventArgs e)
+        {
+            this.UpdateNumberOfBypassesFromServer();
         }
 
         /// <summary>
@@ -2741,6 +2752,9 @@ namespace CitadelService.Services
 
             bool grantBypass = false;
             string bypassNotification = "";
+
+            int bypassesUsed = 0;
+            int bypassesPermitted = 0;
 
             if (bypassResponse != null)
             {
@@ -2764,6 +2778,9 @@ namespace CitadelService.Services
                     grantBypass = false;
                     bypassNotification = bypassObject.message;
                 }
+
+                bypassesUsed = bypassObject.used;
+                bypassesPermitted = bypassObject.permitted;
             }
             else
             {
@@ -2822,8 +2839,44 @@ namespace CitadelService.Services
                     var cfg = Config;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
-                    DecrementRelaxedPolicy_Local();
+                    DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
+                else
+                {
+                    var cfg = Config;
+                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), RelaxedPolicyStatus.AllUsed);
+                }
+            }
+        }
+
+        private void DecrementRelaxedPolicy(int bypassesUsed, int bypassesPermitted, TimeSpan bypassDuration)
+        {
+            bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
+            
+            if(allUsesExhausted)
+            {
+                m_logger.Info("All uses exhausted.");
+
+                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
+            }
+            else
+            {
+                m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
+            }
+
+            if(allUsesExhausted)
+            {
+                // Reset our bypasses at 8:15 UTC.
+                var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
+
+                var span = resetTime - DateTime.UtcNow;
+
+                if(m_relaxedPolicyResetTimer == null)
+                {
+                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
+                }
+
+                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -2947,6 +3000,36 @@ namespace CitadelService.Services
             m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
+        private bool UpdateNumberOfBypassesFromServer()
+        {
+            HttpStatusCode statusCode;
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("check_only", "1");
+
+            byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
+
+            if(response == null)
+            {
+                return false;
+            }
+
+            string responseString = Encoding.UTF8.GetString(response);
+
+            var bypassInfo = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(responseString);
+
+            m_logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
+            var cfg = Config;
+
+            if (cfg != null)
+            {
+                cfg.BypassesUsed = bypassInfo.used;
+                cfg.BypassesPermitted = bypassInfo.permitted;
+            }
+
+            m_ipcServer.NotifyRelaxedPolicyChange(bypassInfo.permitted - bypassInfo.used, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), getRelaxedPolicyStatus());
+            return true;
+        }
+
         /// <summary>
         /// Called whenever the relaxed policy reset timer has expired. This expiry refreshes the
         /// available relaxed policy requests to the configured value.
@@ -2956,14 +3039,18 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            var cfg = Config;
-
-            if(cfg != null)
+            /*if(!UpdateNumberOfBypassesFromServer())
             {
-                cfg.BypassesUsed = 0;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
-            }
+                var cfg = Config;
 
+                if (cfg != null)
+                {
+                    cfg.BypassesUsed = 0;
+                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
+                }
+            }*/
+
+            UpdateNumberOfBypassesFromServer();
             // Disable the reset timer.
             m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
