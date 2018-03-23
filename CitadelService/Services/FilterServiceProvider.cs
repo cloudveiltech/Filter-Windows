@@ -2806,7 +2806,6 @@ namespace CitadelService.Services
                     if (entry is MappedBypassListCategoryModel)
                     {
                         m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                        //m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
                     }
                 }
 
@@ -2838,7 +2837,7 @@ namespace CitadelService.Services
 
                     var cfg = Config;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
+                    
                     DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
                 else
@@ -2933,7 +2932,7 @@ namespace CitadelService.Services
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
                         {
                             relaxedInEffect = true;
                         }
@@ -2992,7 +2991,7 @@ namespace CitadelService.Services
             {
                 if(entry is MappedBypassListCategoryModel)
                 {
-                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, false);
+                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
                 }
             }
 
