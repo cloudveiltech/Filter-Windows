@@ -22,6 +22,7 @@ namespace CitadelService.Util
 
         public void AddBlockAction(BlockType cause, Uri requestUri, string categoryNameString, string matchingRule)
         {
+            LoggerUtil.GetAppWideLogger().Info($"Sending block action to server: cause={cause}, requestUri={requestUri}, categoryNameString={categoryNameString}, matchingRule={matchingRule}");
             BlockInfo blockInfo = new BlockInfo(cause, requestUri, categoryNameString, matchingRule);
 
             //ReportList.Add(blockInfo);
