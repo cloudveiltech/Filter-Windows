@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citadel.Core.Windows", "Citadel.Core.Windows\Citadel.Core.Windows.csproj", "{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}"
 EndProject
@@ -46,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallGuard", "InstallGuard\InstallGuard.csproj", "{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignInstallers", "SignInstallers\SignInstallers.csproj", "{FD9BC219-8244-432A-AA15-8001C5E64D76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterServiceTests", "FilterServiceTests\FilterServiceTests.csproj", "{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,6 +145,14 @@ Global
 		{FD9BC219-8244-432A-AA15-8001C5E64D76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FD9BC219-8244-432A-AA15-8001C5E64D76}.Release|x86.ActiveCfg = Release|Any CPU
 		{FD9BC219-8244-432A-AA15-8001C5E64D76}.Release|x86.Build.0 = Release|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Debug|x86.Build.0 = Debug|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|x86.ActiveCfg = Release|Any CPU
+		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

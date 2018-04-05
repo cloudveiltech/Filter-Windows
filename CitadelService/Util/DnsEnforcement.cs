@@ -18,9 +18,6 @@ namespace CitadelService.Util
     public delegate void CaptivePortalModeHandler(bool isCaptivePortal, bool isActive);
     public delegate void DnsEnforcementHandler(bool isEnforcementActive);
 
-    /// <summary>
-    /// This class should have a very specific purpose. It should take two 
-    /// </summary>
     internal class DnsEnforcement
     {
         /// <summary>
@@ -29,9 +26,9 @@ namespace CitadelService.Util
         /// </summary>
         private Timer m_dnsEnforcementTimer;
 
-        internal DnsEnforcement(Services.FilterServiceProvider provider)
+        internal DnsEnforcement(Services.FilterServiceProvider provider, NLog.Logger logger)
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            m_logger = logger;
             m_provider = provider;
         }
 
@@ -260,8 +257,6 @@ namespace CitadelService.Util
                 OnCaptivePortalMode?.Invoke(ret, active);
                 return ret;
             }
-
-            
         }
 
         private DateTime lastDnsCheck = DateTime.MinValue;
@@ -523,40 +518,5 @@ namespace CitadelService.Util
         {
             Trigger();
         }
-
-        /*private void checkCaptivePortalLifted(Timer timer)
-        {
-            if (checkCaptivePortalState() == CaptivePortalDetected.Yes)
-            {
-                m_logger.Info("Captive portal has been lifted.");
-
-                this.OnCaptivePortalMode?.Invoke(CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal(), false);
-                TryEnfornceDns(isCaptivePortal: false);
-
-                timer.Dispose();
-            }
-        }
-
-        private void checkCaptivePortal(Timer timer)
-        {
-            if (checkCaptivePortalState() == CaptivePortalDetected.Yes)
-            {
-                m_logger.Info("Captive portal detected.");
-
-                m_ipcServer.SendCaptivePortalState(true, true);
-                CaptivePortalHelper.Default.OnCaptivePortalDetected();
-
-                TryEnfornceDns(isCaptivePortal: true); // Remove our DNS settings for those captive portals that have their own DNS servers.
-
-                Timer checkCaptivePortalLiftedTimer = null;
-                checkCaptivePortalLiftedTimer = new Timer((_notused) =>
-                {
-                    // Switch our DNS back.
-                    checkCaptivePortalLifted(checkCaptivePortalLiftedTimer);
-                });
-
-                timer.Dispose();
-            }
-        }*/
     }
 }

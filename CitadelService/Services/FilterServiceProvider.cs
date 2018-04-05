@@ -398,7 +398,7 @@ namespace CitadelService.Services
             try
             {
                 this.OnConfigLoaded += OnConfigLoaded_LoadRelaxedPolicy;
-                m_dnsEnforcement = new DnsEnforcement(this);
+                m_dnsEnforcement = new DnsEnforcement(this, m_logger);
 
                 m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
                 {
@@ -1636,6 +1636,30 @@ namespace CitadelService.Services
             }
         }
 
+        /// <summary>
+        /// Builds up a host from hostParts and checks the bloom filter for each entry.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="hostParts"></param>
+        /// <param name="isWhitelist"></param>
+        /// <returns>true if any host is discovered in the collection.</returns>
+        private bool isHostInList(FilterDbCollection collection, string[] hostParts, bool isWhitelist)
+        {
+            int i = hostParts.Length > 1 ? hostParts.Length - 2 : hostParts.Length - 1;
+            for (; i >= 0; i--)
+            {
+                string checkHost = string.Join(".", new ArraySegment<string>(hostParts, i, hostParts.Length - i));
+                bool result = collection.PrefetchIsDomainInList(checkHost, true);
+
+                if (result)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void OnHttpMessageBegin(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out ProxyNextAction nextAction, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
@@ -1687,26 +1711,47 @@ namespace CitadelService.Services
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
-                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
+                    List<UrlFilter> filters;
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                    string host = requestUrl.Host;
+                    string[] hostParts = host.Split('.');
+
+                    // Check whitelists first.
+                    // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
+                    // example
+                    // request for vortex.data.microsoft.com/blah comes in.
+                    // we check for
+                    // microsoft.com
+                    // data.microsoft.com
+                    // vortex.data.microsoft.com
+                    // skip TLD if there is more than one part. This might have to be changed in the future,
+                    // but right now we aren't blacklisting whole TLDs.
+                    if (isHostInList(m_filterCollection, hostParts, true))
                     {
-                        var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+                        // domain might have filters, so we want to check for sure here.
 
-                        if(mappedCategory != null)
-                        {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
-                        }
-                        else
-                        {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
-                        }
+                        filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
 
-                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                        return;
-                    }
+                        if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                        {
+                            var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+
+                            if (mappedCategory != null)
+                            {
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            }
+                            else
+                            {
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            }
+
+                            nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                            return;
+                        }
+                    } // else domain has no whitelist filters, continue to next check.
+
 
                     filters = m_filterCollection.GetWhitelistFiltersForDomain().Result;
 
@@ -1729,29 +1774,32 @@ namespace CitadelService.Services
 
                     // Since we made it this far, lets check blacklists now.
 
-                    filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
-
-                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(isHostInList(m_filterCollection, hostParts, false))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
-                        nextAction = ProxyNextAction.DropConnection;
+                        filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
 
-                        UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                        {
+                            OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
+                            nextAction = ProxyNextAction.DropConnection;
 
-                        if(isHtml || hasReferer == false)
-                        {
-                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                            // if there is no referer (direct navigation).
-                            customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                            UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
+                            if (isHtml || hasReferer == false)
+                            {
+                                // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                                // if there is no referer (direct navigation).
+                                customBlockResponseContentType = "text/html";
+                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                            }
+                            else
+                            {
+                                customBlockResponseContentType = string.Empty;
+                                customBlockResponse = null;
+                            }
+
+                            return;
                         }
-                        else
-                        {
-                            customBlockResponseContentType = string.Empty;
-                            customBlockResponse = null;
-                        }
-                        
-                        return;
                     }
 
                     filters = m_filterCollection.GetFiltersForDomain().Result;
@@ -2063,6 +2111,7 @@ namespace CitadelService.Services
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
+
                         if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
@@ -2082,7 +2131,7 @@ namespace CitadelService.Services
                 }
                 stopwatch.Stop();
 
-                m_logger.Info("Text triggers took {0}", stopwatch.ElapsedMilliseconds);
+                //m_logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
             }
             catch(Exception e)
             {
@@ -2698,6 +2747,11 @@ namespace CitadelService.Services
                                     }
                                 }
                             }
+
+                            m_filterCollection.FinalizeForRead();
+                            m_filterCollection.InitializeBloomFilters();
+
+                            m_textTriggers.InitializeBloomFilters();
 
                             m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
 
