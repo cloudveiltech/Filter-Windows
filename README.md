@@ -1,2 +1,2 @@
-# Citadel-Windows
-HTTP/S Content Filter for Windows Vista and later.
+# Filter-Windows
+HTTP/S Content Filter for Windows 7 and newer.

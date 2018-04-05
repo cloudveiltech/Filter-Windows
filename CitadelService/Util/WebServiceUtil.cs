@@ -510,10 +510,10 @@ namespace Citadel.Core.Windows.Util
         /// <param name="code"></param>
         /// <param name="noLogging"></param>
         /// <returns></returns>
-        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, bool noLogging = false)
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, Dictionary<string, string> parameters = null, bool noLogging = false)
         {
             bool responseReceived = false;
-            return RequestResource(resource, out code, out responseReceived, noLogging);
+            return RequestResource(resource, out code, out responseReceived, parameters, noLogging);
         }
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// A non-null byte array on success. Null byte array on failure. 
         /// </returns>
-        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, bool noLogging = false)
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, Dictionary<string, string> parameters = null, bool noLogging = false)
         {
             responseReceived = true;
 
@@ -577,6 +577,14 @@ namespace Citadel.Core.Windows.Util
 
                 // Build out post data with username and identifier.
                 string postString = string.Format("&identifier={0}&device_id={1}", FingerPrint.Value, Uri.EscapeDataString(deviceName));
+
+                if(parameters != null)
+                {
+                    foreach(var parameter in parameters)
+                    {
+                        postString += $"&{parameter.Key}={parameter.Value}";
+                    }
+                }
 
                 if(resource == ServiceResource.UserDataSumCheck)
                 {

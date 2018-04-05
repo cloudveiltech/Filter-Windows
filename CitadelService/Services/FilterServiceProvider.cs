@@ -398,7 +398,8 @@ namespace CitadelService.Services
 
             try
             {
-                m_dnsEnforcement = new DnsEnforcement(this);
+                this.OnConfigLoaded += OnConfigLoaded_LoadRelaxedPolicy;
+                m_dnsEnforcement = new DnsEnforcement(this, m_logger);
 
                 m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
                 {
@@ -653,27 +654,33 @@ namespace CitadelService.Services
 
                 m_ipcServer.ClientConnected = () =>
                 {
-                    ConnectedClients++;
-
-                    // When a client connects, synchronize our data. Presently, we just want to
-                    // update them with relaxed policy NFO, if any.
-                    var cfg = Config;
-                    if(cfg != null && cfg.BypassesPermitted > 0)
+                    try
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                        ConnectedClients++;
+
+                        var cfg = Config;
+                        if (cfg != null && cfg.BypassesPermitted > 0)
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                        }
+                        else
+                        {
+                            m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
+                        }
+
+                        m_ipcServer.NotifyStatus(Status);
+
+                        m_dnsEnforcement.Trigger();
+
+                        if (m_ipcServer.WaitingForAuth)
+                        {
+                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-                    }
-
-                    m_ipcServer.NotifyStatus(Status);
-
-                    m_dnsEnforcement.Trigger();
-
-                    if(m_ipcServer.WaitingForAuth)
-                    {   
-                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        m_logger.Warn("Error occurred while trying to connect to IPC server.");
+                        LoggerUtil.RecursivelyLogException(m_logger, ex);
                     }
                 };
 
@@ -1663,6 +1670,30 @@ namespace CitadelService.Services
             }
         }
 
+        /// <summary>
+        /// Builds up a host from hostParts and checks the bloom filter for each entry.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="hostParts"></param>
+        /// <param name="isWhitelist"></param>
+        /// <returns>true if any host is discovered in the collection.</returns>
+        private bool isHostInList(FilterDbCollection collection, string[] hostParts, bool isWhitelist)
+        {
+            int i = hostParts.Length > 1 ? hostParts.Length - 2 : hostParts.Length - 1;
+            for (; i >= 0; i--)
+            {
+                string checkHost = string.Join(".", new ArraySegment<string>(hostParts, i, hostParts.Length - i));
+                bool result = collection.PrefetchIsDomainInList(checkHost, true);
+
+                if (result)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void OnHttpMessageBegin(Uri requestUrl, string headers, byte[] body, MessageType msgType, MessageDirection msgDirection, out ProxyNextAction nextAction, out string customBlockResponseContentType, out byte[] customBlockResponse)
         {
             nextAction = ProxyNextAction.AllowAndIgnoreContent;
@@ -1714,26 +1745,47 @@ namespace CitadelService.Services
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
-                    var filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
+                    List<UrlFilter> filters;
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                    string host = requestUrl.Host;
+                    string[] hostParts = host.Split('.');
+
+                    // Check whitelists first.
+                    // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
+                    // example
+                    // request for vortex.data.microsoft.com/blah comes in.
+                    // we check for
+                    // microsoft.com
+                    // data.microsoft.com
+                    // vortex.data.microsoft.com
+                    // skip TLD if there is more than one part. This might have to be changed in the future,
+                    // but right now we aren't blacklisting whole TLDs.
+                    if (isHostInList(m_filterCollection, hostParts, true))
                     {
-                        var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+                        // domain might have filters, so we want to check for sure here.
 
-                        if(mappedCategory != null)
-                        {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
-                        }
-                        else
-                        {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
-                        }
+                        filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
 
-                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                        return;
-                    }
+                        if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                        {
+                            var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+
+                            if (mappedCategory != null)
+                            {
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            }
+                            else
+                            {
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", requestUrl.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            }
+
+                            nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                            return;
+                        }
+                    } // else domain has no whitelist filters, continue to next check.
+
 
                     filters = m_filterCollection.GetWhitelistFiltersForDomain().Result;
 
@@ -1756,29 +1808,32 @@ namespace CitadelService.Services
 
                     // Since we made it this far, lets check blacklists now.
 
-                    filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
-
-                    if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                    if(isHostInList(m_filterCollection, hostParts, false))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
-                        nextAction = ProxyNextAction.DropConnection;
+                        filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
 
-                        UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
+                        {
+                            OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
+                            nextAction = ProxyNextAction.DropConnection;
 
-                        if(isHtml || hasReferer == false)
-                        {
-                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                            // if there is no referer (direct navigation).
-                            customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                            UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+
+                            if (isHtml || hasReferer == false)
+                            {
+                                // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                                // if there is no referer (direct navigation).
+                                customBlockResponseContentType = "text/html";
+                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                            }
+                            else
+                            {
+                                customBlockResponseContentType = string.Empty;
+                                customBlockResponse = null;
+                            }
+
+                            return;
                         }
-                        else
-                        {
-                            customBlockResponseContentType = string.Empty;
-                            customBlockResponse = null;
-                        }
-                        
-                        return;
                     }
 
                     filters = m_filterCollection.GetFiltersForDomain().Result;
@@ -2090,6 +2145,7 @@ namespace CitadelService.Services
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = Config;
+
                         if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
@@ -2109,7 +2165,7 @@ namespace CitadelService.Services
                 }
                 stopwatch.Stop();
 
-                m_logger.Info("Text triggers took {0}", stopwatch.ElapsedMilliseconds);
+                //m_logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
             }
             catch(Exception e)
             {
@@ -2726,6 +2782,11 @@ namespace CitadelService.Services
                                 }
                             }
 
+                            m_filterCollection.FinalizeForRead();
+                            m_filterCollection.InitializeBloomFilters();
+
+                            m_textTriggers.InitializeBloomFilters();
+
                             m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
 
                             LogTime("Rules loaded.");
@@ -2753,6 +2814,18 @@ namespace CitadelService.Services
         {
             public bool allowed { get; set; }
             public string message { get; set; }
+            public int used { get; set; }
+            public int permitted { get; set; }
+        }
+
+        /// <summary>
+        /// Whenever the config is reloaded, sync the bypasses from the server.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnConfigLoaded_LoadRelaxedPolicy(object sender, EventArgs e)
+        {
+            this.UpdateNumberOfBypassesFromServer();
         }
 
         /// <summary>
@@ -2767,6 +2840,9 @@ namespace CitadelService.Services
 
             bool grantBypass = false;
             string bypassNotification = "";
+
+            int bypassesUsed = 0;
+            int bypassesPermitted = 0;
 
             if (bypassResponse != null)
             {
@@ -2790,6 +2866,9 @@ namespace CitadelService.Services
                     grantBypass = false;
                     bypassNotification = bypassObject.message;
                 }
+
+                bypassesUsed = bypassObject.used;
+                bypassesPermitted = bypassObject.permitted;
             }
             else
             {
@@ -2815,7 +2894,6 @@ namespace CitadelService.Services
                     if (entry is MappedBypassListCategoryModel)
                     {
                         m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                        //m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, true);
                     }
                 }
 
@@ -2847,9 +2925,45 @@ namespace CitadelService.Services
 
                     var cfg = Config;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
-                    DecrementRelaxedPolicy_Local();
+                    
+                    DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
+                else
+                {
+                    var cfg = Config;
+                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), RelaxedPolicyStatus.AllUsed);
+                }
+            }
+        }
+
+        private void DecrementRelaxedPolicy(int bypassesUsed, int bypassesPermitted, TimeSpan bypassDuration)
+        {
+            bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
+            
+            if(allUsesExhausted)
+            {
+                m_logger.Info("All uses exhausted.");
+
+                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
+            }
+            else
+            {
+                m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
+            }
+
+            if(allUsesExhausted)
+            {
+                // Reset our bypasses at 8:15 UTC.
+                var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
+
+                var span = resetTime - DateTime.UtcNow;
+
+                if(m_relaxedPolicyResetTimer == null)
+                {
+                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
+                }
+
+                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -2898,14 +3012,18 @@ namespace CitadelService.Services
         private RelaxedPolicyStatus getRelaxedPolicyStatus()
         {
             bool relaxedInEffect = false;
-            // Determine if a relaxed policy is currently in effect.
-            foreach (var entry in m_generatedCategoriesMap.Values)
+
+            if (m_generatedCategoriesMap != null)
             {
-                if (entry is MappedBypassListCategoryModel)
+                // Determine if a relaxed policy is currently in effect.
+                foreach (var entry in m_generatedCategoriesMap.Values)
                 {
-                    if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist) == true)
+                    if (entry is MappedBypassListCategoryModel)
                     {
-                        relaxedInEffect = true;
+                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
+                        {
+                            relaxedInEffect = true;
+                        }
                     }
                 }
             }
@@ -2916,7 +3034,7 @@ namespace CitadelService.Services
             }
             else
             {
-                if (Config.BypassesPermitted - Config.BypassesUsed == 0)
+                if (Config != null && Config.BypassesPermitted - Config.BypassesUsed == 0)
                 {
                     return RelaxedPolicyStatus.AllUsed;
                 }
@@ -2961,12 +3079,42 @@ namespace CitadelService.Services
             {
                 if(entry is MappedBypassListCategoryModel)
                 {
-                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryIdAsWhitelist, false);
+                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
                 }
             }
 
             // Disable the expiry timer.
             m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        private bool UpdateNumberOfBypassesFromServer()
+        {
+            HttpStatusCode statusCode;
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("check_only", "1");
+
+            byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
+
+            if(response == null)
+            {
+                return false;
+            }
+
+            string responseString = Encoding.UTF8.GetString(response);
+
+            var bypassInfo = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(responseString);
+
+            m_logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
+            var cfg = Config;
+
+            if (cfg != null)
+            {
+                cfg.BypassesUsed = bypassInfo.used;
+                cfg.BypassesPermitted = bypassInfo.permitted;
+            }
+
+            m_ipcServer.NotifyRelaxedPolicyChange(bypassInfo.permitted - bypassInfo.used, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), getRelaxedPolicyStatus());
+            return true;
         }
 
         /// <summary>
@@ -2978,14 +3126,18 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            var cfg = Config;
-
-            if(cfg != null)
+            /*if(!UpdateNumberOfBypassesFromServer())
             {
-                cfg.BypassesUsed = 0;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
-            }
+                var cfg = Config;
 
+                if (cfg != null)
+                {
+                    cfg.BypassesUsed = 0;
+                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
+                }
+            }*/
+
+            UpdateNumberOfBypassesFromServer();
             // Disable the reset timer.
             m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
