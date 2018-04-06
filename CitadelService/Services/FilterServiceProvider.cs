@@ -1649,7 +1649,7 @@ namespace CitadelService.Services
             for (; i >= 0; i--)
             {
                 string checkHost = string.Join(".", new ArraySegment<string>(hostParts, i, hostParts.Length - i));
-                bool result = collection.PrefetchIsDomainInList(checkHost, true);
+                bool result = collection.PrefetchIsDomainInList(checkHost, isWhitelist);
 
                 if (result)
                 {
