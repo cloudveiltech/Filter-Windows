@@ -37,14 +37,12 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
 using WindowsFirewallHelper;
-using NativeWifi;
 using CitadelService.Util;
 using DNS;
 using DNS.Client;
@@ -1387,10 +1385,19 @@ namespace CitadelService.Services
             // Figure out if firefox is running. If later it is and we kill it, store the path to
             // firefox.exe so we can restart the process after we're done.
             string firefoxExePath = string.Empty;
-            bool firefoxIsRunning = Process.GetProcessesByName("firefox").Length > 0;
+            Process[] processes = Process.GetProcessesByName("firefox");
 
-            // Always kill firefox.
-            if(firefoxIsRunning)
+            bool firefoxIsRunning = false;
+            foreach(var process in processes)
+            {
+                if(!process.HasExited)
+                {
+                    firefoxIsRunning = true;
+                }
+            }
+
+            // Always kill firefox. Firefox may not be open, but we want to make sure it's killed anyway.
+            if(processes.Length > 0)
             {
                 // We need to kill firefox before editing the preferences, otherwise they'll just get overwritten.
                 foreach(var ff in Process.GetProcessesByName("firefox"))
