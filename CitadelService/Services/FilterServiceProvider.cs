@@ -2317,7 +2317,7 @@ namespace CitadelService.Services
                 result = UpdateListData();
                 bool gotUpdatedFilterLists = result == ConfigUpdateResult.Updated ? true : false;
 
-                if(gotUpdatedFilterLists)
+                if(gotUpdatedFilterLists || (result == ConfigUpdateResult.NoInternet && cfg == null))
                 {
                     // Got new data. Gotta reload.
                     ReloadFilteringRules();
