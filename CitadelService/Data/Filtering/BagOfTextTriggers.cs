@@ -229,7 +229,7 @@ namespace CitadelService.Data.Filtering
                 }
             }
 
-            FirstWordFilter = new BloomFilter<string>(firstWordCount);
+            FirstWordFilter = new BloomFilter<string>(firstWordCount == 0 ? 100 : firstWordCount);
 
             using (var cmd = m_connection.CreateCommand())
             {
@@ -258,7 +258,7 @@ namespace CitadelService.Data.Filtering
                 }
             }
 
-            TriggerFilter = new BloomFilter<string>(triggerCount);
+            TriggerFilter = new BloomFilter<string>(triggerCount == 0 ? 100 : triggerCount);
             
             using (var cmd = m_connection.CreateCommand())
             {
