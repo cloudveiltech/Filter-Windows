@@ -313,6 +313,7 @@ namespace CitadelService.Services
 
         private DnsEnforcement m_dnsEnforcement;
 
+        private TrustManager m_trustManager = new TrustManager();
 
         /// <summary>
         /// Default ctor. 
@@ -1050,11 +1051,22 @@ namespace CitadelService.Services
             // option to trust the local certificate store, we don't have to do that anymore.
             try
             {
-                EstablishTrustWithFirefox();
+                m_trustManager.EstablishTrustWithFirefox();
             }
             catch(Exception ffe)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ffe);
+            }
+
+            // Establish trust with git. We have to wait for the engine to write the CA to disk? Why can't we just export it on demand?
+            try
+            {
+                m_trustManager.EstablishTrustWithGit();
+            }
+            catch (Exception ex)
+            {
+                m_logger.Error("EstablishTrustWithGit failed.");
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
 
             LogTime("Trust established with firefox.");
@@ -1262,164 +1274,6 @@ namespace CitadelService.Services
             Status = FilterStatus.Running;
 
             ReviveGuiForCurrentUser(true);
-        }
-
-        /// <summary>
-        /// Searches for FireFox installations and enables trust of the local certificate store. 
-        /// </summary>
-        /// <remarks>
-        /// If any profile is discovered that does not have the local CA cert store checking enabled
-        /// already, all instances of firefox will be killed and then restarted when calling this method.
-        /// </remarks>
-        private void EstablishTrustWithFirefox()
-        {
-            // This path will be DRIVE:\USER_PATH\Public\Desktop
-            var usersBasePath = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory));
-            usersBasePath = usersBasePath.Parent;
-            usersBasePath = usersBasePath.Parent;
-
-            var ffProfileDirs = new List<string>();
-
-            var userDirs = Directory.GetDirectories(usersBasePath.FullName);
-
-            foreach(var userDir in userDirs)
-            {
-                if(Directory.Exists(Path.Combine(userDir, @"AppData\Roaming\Mozilla\Firefox\Profiles")))
-                {
-                    ffProfileDirs.Add(Path.Combine(userDir, @"AppData\Roaming\Mozilla\Firefox\Profiles"));
-                }
-            }
-
-            if(ffProfileDirs.Count <= 0)
-            {
-                return;
-            }
-
-            var valuesThatNeedToBeSet = new Dictionary<string, string>();
-
-            var firefoxUserCfgValuesUri = "CitadelService.Resources.FireFoxUserCFG.txt";
-            using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(firefoxUserCfgValuesUri))
-            {
-                if(resourceStream != null && resourceStream.CanRead)
-                {
-                    using(TextReader tsr = new StreamReader(resourceStream))
-                    {
-                        string cfgLine = null;
-                        while((cfgLine = tsr.ReadLine()) != null)
-                        {
-                            if(cfgLine.Length > 0)
-                            {
-                                var firstSpace = cfgLine.IndexOf(' ');
-
-                                if(firstSpace != -1)
-                                {
-                                    var key = cfgLine.Substring(0, firstSpace);
-                                    var value = cfgLine.Substring(firstSpace);
-
-                                    if(!valuesThatNeedToBeSet.ContainsKey(key))
-                                    {
-                                        valuesThatNeedToBeSet.Add(key, value);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    m_logger.Error("Cannot read from firefox cfg resource file.");
-                }
-            }
-
-            foreach(var ffProfDir in ffProfileDirs)
-            {
-                var prefsFiles = Directory.GetFiles(ffProfDir, "prefs.js", SearchOption.AllDirectories);
-
-                foreach(var prefFile in prefsFiles)
-                {
-                    var userFile = Path.Combine(Path.GetDirectoryName(prefFile), "user.js");
-
-                    string[] fileText = new string[0];
-
-                    if(File.Exists(userFile))
-                    {
-                        fileText = File.ReadAllLines(prefFile);
-                    }
-
-                    var notFound = new Dictionary<string, string>();
-
-                    foreach(var kvp in valuesThatNeedToBeSet)
-                    {
-                        var entryIndex = Array.FindIndex(fileText, l => l.StartsWith(kvp.Key));
-
-                        if(entryIndex != -1)
-                        {
-                            if(!fileText[entryIndex].EndsWith(kvp.Value))
-                            {
-                                fileText[entryIndex] = kvp.Key + kvp.Value;
-                                m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
-                            }
-                            else
-                            {
-                                m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
-                            }
-                        }
-                        else
-                        {
-                            notFound.Add(kvp.Key, kvp.Value);
-                        }
-                    }
-
-                    var fileTextList = new List<string>(fileText);
-
-                    foreach(var nfk in notFound)
-                    {
-                        m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
-                        fileTextList.Add(nfk.Key + nfk.Value);
-                    }
-
-                    File.WriteAllLines(userFile, fileTextList);
-                }
-            }
-
-            // Figure out if firefox is running. If later it is and we kill it, store the path to
-            // firefox.exe so we can restart the process after we're done.
-            string firefoxExePath = string.Empty;
-            Process[] processes = Process.GetProcessesByName("firefox");
-
-            bool firefoxIsRunning = false;
-            foreach(var process in processes)
-            {
-                if(!process.HasExited)
-                {
-                    firefoxIsRunning = true;
-                }
-            }
-
-            // Always kill firefox. Firefox may not be open, but we want to make sure it's killed anyway.
-            if(processes.Length > 0)
-            {
-                // We need to kill firefox before editing the preferences, otherwise they'll just get overwritten.
-                foreach(var ff in Process.GetProcessesByName("firefox"))
-                {
-                    firefoxExePath = ff.MainModule.FileName;
-
-                    try
-                    {
-                        ff.Kill();
-                        ff.Dispose();
-                    }
-                    catch { }
-                }
-            }
-
-            // Means we force closed at least once instance of firefox. Relaunch it now to cause it
-            // to run restore.
-            if(firefoxIsRunning && StringExtensions.Valid(firefoxExePath))
-            {
-                // Start the process and abandon our handle.
-                ProcessExtensions.StartProcessAsCurrentUser(firefoxExePath);
-            }
         }
 
 #region EngineCallbacks
