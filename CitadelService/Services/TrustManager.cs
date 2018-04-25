@@ -76,6 +76,7 @@ namespace CitadelService.Services
                 if(File.Exists(gitPath))
                 {
                     installedGits.Add(gitPath);
+                    m_logger.Info("Found git.exe at {0}", gitPath);
                 }
             }
 
@@ -107,10 +108,6 @@ namespace CitadelService.Services
                         bundleBuilder.Append(cert.ExportToPem());
                         bundleBuilder.Append("\r\n");
                     }
-                    else
-                    {
-                        m_logger.Info("Found cert {0}", cert.SubjectName.Decode(X500DistinguishedNameFlags.None));
-                    }
                 }
 
                 File.WriteAllText(cloudVeilCertificateBundlePath, bundleBuilder.ToString());
@@ -134,26 +131,15 @@ namespace CitadelService.Services
             // Next, loop through installed git.exe's and set their CA bundle to use the one we just created.
             foreach(string gitExe in installedGits)
             {
-                Process process = Process.Start(gitExe, $"config --global http.sslCAInfo \"{gitCompatibleBundlePath}\"");
-                waitFor.Add(process);
-            }
-
-            // Wait for the git processes to close before allowing the filter to continue.
-            int timeout = 500;
-            Stopwatch timeoutStopwatch = Stopwatch.StartNew();
-            while (timeoutStopwatch.ElapsedMilliseconds < timeout && waitFor.Count > 0)
-            {
-                for(int i = 0; i < waitFor.Count; i++)
+                string arguments = $"config --global http.sslCAInfo \"{gitCompatibleBundlePath}\"";
+                //ProcessExtensions.StartProcessAsCurrentUser(gitExe, arguments, Path.GetDirectoryName(gitExe), false);
+                Process process = Process.Start(new ProcessStartInfo(gitExe, arguments)
                 {
-                    waitFor[i].WaitForExit(10);
-                    
-                    if(waitFor[i].HasExited)
-                    {
-                        waitFor.RemoveAt(i);
-                        i--;
-                        continue;
-                    }
-                }
+
+                });
+
+                process.WaitForExit(1000);
+                m_logger.Info("Git ran with {0}", process.ExitCode);
             }
         }
 
