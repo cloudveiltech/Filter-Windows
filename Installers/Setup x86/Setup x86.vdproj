@@ -55,6 +55,12 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F2A1C12D9CF7474E8D9C0D5085B01B98"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -297,6 +303,11 @@
             "AssemblyAsmDisplayName" = "8:InstallGuard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_F2A1C12D9CF7474E8D9C0D5085B01B98"
+                    {
+                    "Name" = "8:InstallGuard.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\..\\InstallGuard\\bin\\Release\\InstallGuard.exe"
             "TargetName" = "8:"
@@ -372,15 +383,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CloudVeil For Windows"
-        "ProductCode" = "8:{D2814BF5-EA84-4D9F-BB8E-3D0AF8BAE013}"
-        "PackageCode" = "8:{EEF32570-FD67-4BCC-9123-3F626BAE2ACC}"
+        "ProductCode" = "8:{D28721DE-51D7-4CF1-8246-516904A0E52A}"
+        "PackageCode" = "8:{B04F8367-EABD-48DD-B3F5-7554BA594EDB}"
         "UpgradeCode" = "8:{57058EEC-162C-4D48-993E-4AE6095F66CA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.6.25"
+        "ProductVersion" = "8:1.6.26"
         "Manufacturer" = "8:CloudVeil"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://cloudveil.org"

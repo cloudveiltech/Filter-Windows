@@ -7209,7 +7209,7 @@
         "Module"
         {
         "ModuleSignature" = "8:CloudVeilPayload.620CD2DC407F43B9916732C473EF22AC"
-        "Version" = "8:1.6.25.0"
+        "Version" = "8:1.6.26.0"
         "Title" = "8:SetupPayload86"
         "Subject" = "8:"
         "Author" = "8:CloudVeil Technologies Inc."
