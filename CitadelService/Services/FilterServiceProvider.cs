@@ -58,13 +58,24 @@ namespace CitadelService.Services
         {
             try
             {
-                LogTime("Starting FilterServiceProvider");
-                OnStartup();
+                Thread thread = new Thread(OnStartup);
+                thread.Start();
+
+                //OnStartup();
             }
             catch(Exception e)
             {
                 // Critical failure.
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                try
+                {
+                    EventLog.CreateEventSource("FilterServiceProvider", "Application");
+                    EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred before logger was bootstrapped: {e.ToString()}");
+                } catch(Exception e2)
+                {
+                    File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
+                }
+
+                //LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
 
@@ -228,7 +239,7 @@ namespace CitadelService.Services
         /// <summary>
         /// Logger. 
         /// </summary>
-        private readonly Logger m_logger;
+        private Logger m_logger;
 
         /// <summary>
         /// This BackgroundWorker object handles initializing the application off the UI thread.
@@ -320,7 +331,27 @@ namespace CitadelService.Services
         /// </summary>
         public FilterServiceProvider()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
+        private void OnStartup()
+        {
+            // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
+            // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+            try
+            {
+                m_logger = LoggerUtil.GetAppWideLogger();
+            }
+            catch(Exception ex)
+            {
+                try
+                {
+                    EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred while initializing logger: {ex.ToString()}");
+                }
+                catch(Exception ex2)
+                {
+                    File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash. {ex.ToString()} \r\n{ex2.ToString()}");
+                }
+            }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -331,12 +362,9 @@ namespace CitadelService.Services
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
-        }
 
-        private void OnStartup()
-        {
             // Load authtoken and email data from files.
-            if(WebServiceUtil.Default.AuthToken == null)
+            if (WebServiceUtil.Default.AuthToken == null)
             {
                 HttpStatusCode status;
                 byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
