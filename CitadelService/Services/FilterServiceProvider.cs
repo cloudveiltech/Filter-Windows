@@ -1883,6 +1883,21 @@ namespace CitadelService.Services
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;
 
+            string relaxed_policy_message = "";
+
+            // Determine if URL is in the relaxed policy.
+            foreach (var entry in m_generatedCategoriesMap.Values)
+            {
+                if (entry is MappedBypassListCategoryModel)
+                {
+                    if(matchingCategory == entry.CategoryId)
+                    {
+                        relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
+                        break;
+                    }
+                }
+            }
+
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
             if (info != null && matchingCategory > 0 && blockType == BlockType.None)
@@ -1921,6 +1936,7 @@ namespace CitadelService.Services
             blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
+            blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
 
             return Encoding.UTF8.GetBytes(blockPageTemplate);
         }
