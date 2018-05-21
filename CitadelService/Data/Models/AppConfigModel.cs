@@ -18,7 +18,7 @@ namespace CitadelService.Data.Models
     /// should function. This includes which filtering lists to use, how to apply those filtering
     /// lists, which applications to filter, which protection mechanisms to employ, etc.
     /// </summary>
-    internal class AppConfigModel
+    public class AppConfigModel
     {
         /// <summary>
         /// List of all executable names that should have their net traffic forced through the

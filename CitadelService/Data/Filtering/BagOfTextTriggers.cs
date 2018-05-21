@@ -30,7 +30,7 @@ namespace CitadelService.Data.Filtering
     /// <remarks>
     /// This class is a super special snowflake that will unpredictably get triggered.
     /// </remarks>
-    internal class BagOfTextTriggers : IDisposable
+    public class BagOfTextTriggers : IDisposable
     {
         /// <summary>
         /// Our Sqlite connection.

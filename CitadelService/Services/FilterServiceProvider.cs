@@ -47,6 +47,7 @@ using CitadelService.Util;
 using DNS;
 using DNS.Client;
 using System.Net.Http;
+using CitadelService.Common.Configuration;
 
 namespace CitadelService.Services
 {
@@ -170,8 +171,6 @@ namespace CitadelService.Services
         /// </summary>
         private Regex m_whitespaceRegex;
 
-        private CategoryIndex m_categoryIndex = new CategoryIndex(short.MaxValue);
-
         private IPCServer m_ipcServer;
 
         /// <summary>
@@ -199,21 +198,11 @@ namespace CitadelService.Services
         /// </summary>
         private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Whenever we load filtering rules, we simply make up numbers for categories as we go
-        /// along. We use this object to store what strings we map to numbers.
-        /// </summary>
-        private ConcurrentDictionary<string, MappedFilterListCategoryModel> m_generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
-
 #endregion FilteringEngineVars
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
         private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
-
-        private FilterDbCollection m_filterCollection;
-
-        private BagOfTextTriggers m_textTriggers;
 
         /// <summary>
         /// Timer used to query for filter list changes every X minutes, as well as application updates. 
@@ -250,34 +239,7 @@ namespace CitadelService.Services
         /// <summary>
         /// App function config file. 
         /// </summary>
-        private AppConfigModel m_userConfig;
-
-        /// <summary>
-        /// Use this if something at startup is depending on the configuration being loaded.
-        /// Note that this event handler does not get called after Config is not null (unless a new version is found).
-        /// </summary>
-        public event EventHandler OnConfigLoaded;
-
-        /// <summary>
-        /// We split out this accessor to get all the code here unhooked from directly accessing the
-        /// local reference. We do this because reference checks and assignment are guaranteed atomic
-        /// on all .NET platforms. So, we used this to wein all the code off of direct access, so
-        /// they take a copy to the current reference atomically, and then can use it accordingly
-        /// (null checks etc).
-        /// </summary>
-        public AppConfigModel Config
-        {
-            get
-            {
-                return m_userConfig;
-            }
-        }
-
-        /// <summary>
-        /// Json deserialization/serialization settings for our config related data. 
-        /// </summary>
-        private JsonSerializerSettings m_configSerializerSettings;
-
+        IPolicyConfiguration m_policyConfiguration;
         /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
@@ -293,16 +255,6 @@ namespace CitadelService.Services
         /// for the internet lockout once the threshold has been hit.
         /// </summary>
         private Timer m_thresholdEnforcementTimer;
-
-        /// <summary>
-        /// Stores all, if any, applications that should be forced throught the filter. 
-        /// </summary>
-        private HashSet<string> m_blacklistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Stores all, if any, applications that should not be forced through the filter. 
-        /// </summary>
-        private HashSet<string> m_whitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// This timer is used to count down to the expiry time for relaxed policy use. 
@@ -424,8 +376,8 @@ namespace CitadelService.Services
 
             try
             {
-                this.OnConfigLoaded += OnConfigLoaded_LoadRelaxedPolicy;
-                m_dnsEnforcement = new DnsEnforcement(this, m_logger);
+                m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadRelaxedPolicy;
+                m_dnsEnforcement = new DnsEnforcement(m_policyConfiguration, m_logger);
 
                 m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
                 {
@@ -438,6 +390,12 @@ namespace CitadelService.Services
                 };
 
                 m_ipcServer = new IPCServer();
+
+                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
+
+                m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
+                m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
+                m_policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
 
                 m_ipcServer.AttemptAuthentication = (args) =>
                 {
@@ -682,7 +640,7 @@ namespace CitadelService.Services
                     {
                         ConnectedClients++;
 
-                        var cfg = Config;
+                        var cfg = m_policyConfiguration.Configuration;
                         if (cfg != null && cfg.BypassesPermitted > 0)
                         {
                             m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
@@ -721,6 +679,9 @@ namespace CitadelService.Services
 
                 m_ipcServer.RequestConfigUpdate = (msg) =>
                 {
+                    m_dnsEnforcement.InvalidateDnsResult();
+                    m_dnsEnforcement.Trigger();
+
                     var result = this.UpdateAndWriteList(true);
                     var reply = new NotifyConfigUpdateMessage(result);
 
@@ -757,6 +718,42 @@ namespace CitadelService.Services
 
             m_backgroundInitWorker.RunWorkerAsync();
         }
+
+        private void updateTimerFrequency(object sender, EventArgs e)
+        {
+            if (m_policyConfiguration.Configuration != null)
+            {
+                // Put the new update frequence into effect.
+                this.m_updateCheckTimer.Change(m_policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        #region Configuration event functions
+        private void reportRelaxedPolicy(object sender, EventArgs e)
+        {
+            var config = m_policyConfiguration.Configuration;
+
+            // XXX FIXME Update our dashboard view model if there are bypasses
+            // configured. Force this up to the UI thread because it's a UI model.
+            if (config.BypassesPermitted > 0)
+            {
+                m_ipcServer.NotifyRelaxedPolicyChange(config.BypassesPermitted, config.BypassDuration, getRelaxedPolicyStatus());
+            }
+            else
+            {
+                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
+            }
+        }
+
+        private void configureThreshold(object sender, EventArgs e)
+        {
+            if(m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
+            {
+                InitThresholdData();
+            }
+        }
+
+        #endregion
 
         private void EnsureWindowsFirewallAccess()
         {
@@ -830,105 +827,11 @@ namespace CitadelService.Services
             }
 
             // Create the threshold count timer and start it with the configured timespan.
-            var cfg = Config;
+            var cfg = m_policyConfiguration.Configuration;
             m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
 
             // Create the enforcement timer, but don't start it.
             m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
-        }
-
-        /// <summary>
-        /// Downloads, if necessary and able, a fresh copy of the filtering data for this user. 
-        /// </summary>
-        /// <returns>
-        /// True if new list data was downloaded, false otherwise. 
-        /// </returns>
-        private ConfigUpdateResult UpdateListData()
-        {
-            HttpStatusCode code;
-            var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck, out code);
-
-            var listDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
-
-            if(code == HttpStatusCode.OK && rHashBytes != null)
-            {
-                // Notify all clients that we just successfully made contact with the server.
-                // We don't set the status here, because we'd have to store it and set it
-                // back, so we just directly issue this msg.
-                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
-
-                var rhash = Encoding.UTF8.GetString(rHashBytes);
-
-                bool needsUpdate = false;
-
-                if(!File.Exists(listDataFilePath) || new FileInfo(listDataFilePath).Length == 0)
-                {
-                    needsUpdate = true;
-                }
-                else
-                {
-                    // We're going to hash our local version and compare. If they don't match, we're
-                    // going to update our lists.
-
-                    using(var fs = File.OpenRead(listDataFilePath))
-                    {
-                        using(SHA1 sec = new SHA1CryptoServiceProvider())
-                        {
-                            byte[] bt = sec.ComputeHash(fs);
-                            var lHash = BitConverter.ToString(bt).Replace("-", "");
-
-                            if(!lHash.OIEquals(rhash))
-                            {
-                                needsUpdate = true;
-                            }
-                        }
-                    }
-                }
-
-                if(!needsUpdate)
-                {
-                    // We got a response from our server. We have the right data. Just check and see
-                    // if we don't have a current user CFG. If we don't, then return true to force
-                    // a reload of the config and list data from the local FS.
-                    var cfg = Config;
-                    if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
-                    {
-                        return ConfigUpdateResult.Updated;
-                    }
-                }
-
-                if(needsUpdate)
-                {
-                    m_logger.Info("Updating filtering rules, rules missing or integrity violation.");                    
-                    var filterDataZipBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataRequest, out code);
-                    
-                    if(code == HttpStatusCode.OK && filterDataZipBytes != null && filterDataZipBytes.Length > 0)
-                    {
-                        File.WriteAllBytes(listDataFilePath, filterDataZipBytes);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Failed to download list data.");
-                        m_logger.Error("Failed to download list data.");
-                    }
-                }
-
-                return needsUpdate ? ConfigUpdateResult.Updated : ConfigUpdateResult.UpToDate;
-            }
-            else
-            {
-
-                // We didn't get any response from our server. Check if the list exists
-                // and is healthy, and make sure it's loaded ONLY if we don't already have
-                // a CFG loaded (meaning we have yet to load any data at all).
-                var cfg = Config;
-                if(cfg == null && File.Exists(listDataFilePath) && new FileInfo(listDataFilePath).Length >= 0)
-                {
-                    return ConfigUpdateResult.NoInternet;
-                }
-            }
-
-            return ConfigUpdateResult.UpToDate;
         }
 
         private bool ProbeMasterForApplicationUpdates(bool isSyncButton)
@@ -965,9 +868,10 @@ namespace CitadelService.Services
             {
                 m_appcastUpdaterLock.EnterWriteLock();
 
-                if (m_userConfig != null)
+                if (m_policyConfiguration.Configuration != null)
                 {
-                    m_lastFetchedUpdate = m_updater.CheckForUpdate(m_userConfig != null ? m_userConfig.UpdateChannel : string.Empty).Result;
+                    var config = m_policyConfiguration.Configuration;
+                    m_lastFetchedUpdate = m_updater.CheckForUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
                 }
                 else
                 {
@@ -1041,13 +945,6 @@ namespace CitadelService.Services
             {
                 m_logger.Error("Could not load packed HTML bad SSL page.");
             }
-
-            LogTime("Now Loading FilterDbCollection()");
-
-            m_filterCollection = new FilterDbCollection();
-            //m_filterCollection = new FilterDbCollection(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rules.db"), true, true);
-
-            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);         
 
             LogTime("Loading filtering engine.");
 
@@ -1188,10 +1085,6 @@ namespace CitadelService.Services
         private void DoBackgroundInit(object sender, DoWorkEventArgs e)
         {
             LogTime("Starting DoBackgroundInit()");
-
-            // Setup json serialization settings.
-            m_configSerializerSettings = new JsonSerializerSettings();
-            m_configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
             // Init the Engine in the background.
             try
@@ -1341,7 +1234,7 @@ namespace CitadelService.Services
         {
             bool internetShutOff = false;
 
-            var cfg = Config;
+            var cfg = m_policyConfiguration.Configuration;
 
             if(cfg != null && cfg.UseThreshold)
             {
@@ -1366,7 +1259,7 @@ namespace CitadelService.Services
             }
 
             string categoryNameString = "Unknown";
-            var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
+            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
 
             if(mappedCategory != null)
             {
@@ -1472,7 +1365,7 @@ namespace CitadelService.Services
             {
                 m_filteringRwLock.EnterReadLock();
 
-                if(m_blacklistedApplications.Count == 0 && m_whitelistedApplications.Count == 0)
+                if(m_policyConfiguration.BlacklistedApplications.Count == 0 && m_policyConfiguration.WhitelistedApplications.Count == 0)
                 {
                     // Just filter anything accessing port 80 and 443.
                     m_logger.Debug("1Filtering application: {0}", appAbsolutePath);
@@ -1481,9 +1374,9 @@ namespace CitadelService.Services
 
                 var appName = Path.GetFileName(appAbsolutePath);
 
-                if(m_whitelistedApplications.Count > 0)
+                if(m_policyConfiguration.WhitelistedApplications.Count > 0)
                 {
-                    if(m_whitelistedApplications.Contains(appName))
+                    if(m_policyConfiguration.WhitelistedApplications.Contains(appName))
                     {
                         // Whitelist is in effect and this app is whitelisted. So, don't force it through.
                         return false;
@@ -1494,9 +1387,9 @@ namespace CitadelService.Services
                     return true;
                 }
 
-                if(m_blacklistedApplications.Count > 0)
+                if(m_policyConfiguration.BlacklistedApplications.Count > 0)
                 {
-                    if(m_blacklistedApplications.Contains(appName))
+                    if(m_policyConfiguration.BlacklistedApplications.Contains(appName))
                     {
                         // Blacklist is in effect and this app is blacklisted. So, force it through.
                         m_logger.Debug("3Filtering application: {0}", appAbsolutePath);
@@ -1594,7 +1487,11 @@ namespace CitadelService.Services
                     }
                 }
 
-                if(m_filterCollection != null)
+                var filterCollection = m_policyConfiguration.FilterCollection;
+                var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
+                var categoryIndex = m_policyConfiguration.CategoryIndex;
+
+                if(filterCollection != null)
                 {
                     // Lets check whitelists first.
                     readLocked = true;
@@ -1617,15 +1514,15 @@ namespace CitadelService.Services
                     // vortex.data.microsoft.com
                     // skip TLD if there is more than one part. This might have to be changed in the future,
                     // but right now we aren't blacklisting whole TLDs.
-                    if (isHostInList(m_filterCollection, hostParts, true))
+                    if (isHostInList(filterCollection, hostParts, true))
                     {
                         // domain might have filters, so we want to check for sure here.
 
-                        filters = m_filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
+                        filters = filterCollection.GetWhitelistFiltersForDomain(requestUrl.Host).Result;
 
                         if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                         {
-                            var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+                            var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                             if (mappedCategory != null)
                             {
@@ -1641,12 +1538,11 @@ namespace CitadelService.Services
                         }
                     } // else domain has no whitelist filters, continue to next check.
 
-
-                    filters = m_filterCollection.GetWhitelistFiltersForDomain().Result;
+                    filters = filterCollection.GetWhitelistFiltersForDomain().Result;
 
                     if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
-                        var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
+                        var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if(mappedCategory != null)
                         {
@@ -1663,9 +1559,9 @@ namespace CitadelService.Services
 
                     // Since we made it this far, lets check blacklists now.
 
-                    if(isHostInList(m_filterCollection, hostParts, false))
+                    if(isHostInList(filterCollection, hostParts, false))
                     {
-                        filters = m_filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
+                        filters = filterCollection.GetFiltersForDomain(requestUrl.Host).Result;
 
                         if (CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                         {
@@ -1691,7 +1587,7 @@ namespace CitadelService.Services
                         }
                     }
 
-                    filters = m_filterCollection.GetFiltersForDomain().Result;
+                    filters = filterCollection.GetFiltersForDomain().Result;
 
                     if(CheckIfFiltersApply(filters, requestUrl, parsedHeaders, out matchingFilter, out matchCategory))
                     {
@@ -1808,7 +1704,7 @@ namespace CitadelService.Services
             for(int i = 0; i < len; ++i)
             {
                 Console.WriteLine(filters[i].IsException);
-                if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matched = filters[i];
                     matchedCategory = filters[i].CategoryId;
@@ -1886,7 +1782,7 @@ namespace CitadelService.Services
             string relaxed_policy_message = "";
 
             // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_generatedCategoriesMap.Values)
+            foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
             {
                 if (entry is MappedBypassListCategoryModel)
                 {
@@ -1996,7 +1892,7 @@ namespace CitadelService.Services
                 m_filteringRwLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
-                if(m_textTriggers != null && m_textTriggers.HasTriggers)
+                if(m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
@@ -2015,13 +1911,13 @@ namespace CitadelService.Services
 
                         short matchedCategory = -1;
                         string trigger = null;
-                        var cfg = Config;
+                        var cfg = m_policyConfiguration.Configuration;
 
-                        if (m_textTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_categoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
 
-                            var mappedCategory = m_generatedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
+                            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
                             if (mappedCategory != null)
                             {
@@ -2111,7 +2007,7 @@ namespace CitadelService.Services
                             {
                                 if(categoryNumber.CategoryId > 0 && m_categoryIndex.GetIsCategoryEnabled(categoryNumber.CategoryId))
                                 {
-                                    var cfg = Config;
+                                    var cfg = m_policyConfiguration.Configuration;
                                     var threshold = cfg != null ? cfg.NlpThreshold : 0.9f;
 
                                     if(classificationResult.BestCategoryScore < threshold)
@@ -2165,7 +2061,7 @@ namespace CitadelService.Services
             // Reset count to zero.
             Interlocked.Exchange(ref m_thresholdTicks, 0);
 
-            var cfg = Config;
+            var cfg = m_policyConfiguration.Configuration;
 
             this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
         }
@@ -2202,23 +2098,19 @@ namespace CitadelService.Services
 
             try
             {
-                if (isSyncButton)
-                {
-                    m_dnsEnforcement.InvalidateDnsResult();
-                    m_dnsEnforcement.Trigger();
-                }
-
                 m_logger.Info("Checking for filter list updates.");
 
                 m_updateRwLock.EnterWriteLock();
 
-                result = UpdateListData();
-                bool gotUpdatedFilterLists = result == ConfigUpdateResult.Updated ? true : false;
+                bool? configurationDownloaded = m_policyConfiguration.DownloadConfiguration();
 
-                if(gotUpdatedFilterLists || (result == ConfigUpdateResult.NoInternet && Config == null))
+                if(configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
                 {
                     // Got new data. Gotta reload.
-                    ReloadFilteringRules();
+                    m_policyConfiguration.LoadConfiguration();
+
+                    // Enforce DNS if present.
+                    m_dnsEnforcement.Trigger();
                 }
 
                 m_logger.Info("Checking for application updates.");
@@ -2242,7 +2134,7 @@ namespace CitadelService.Services
                 }
                 else
                 {
-                    var cfg = Config;
+                    var cfg = m_policyConfiguration.Configuration;
                     if(cfg != null)
                     {
                         this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
@@ -2368,319 +2260,6 @@ namespace CitadelService.Services
             }
         }
 
-        /// <summary>
-        /// Helper function that calls OnConfigLoaded event after configuration is loaded.
-        /// </summary>
-        /// <param name="json"></param>
-        /// <param name="settings"></param>
-        private void LoadConfigFromJson(string json, JsonSerializerSettings settings)
-        {
-            m_userConfig = JsonConvert.DeserializeObject<AppConfigModel>(json, settings);
-            OnConfigLoaded?.Invoke(this, new EventArgs());
-        }
-
-        /// <summary>
-        /// Queries the service provider for updated filtering rules. 
-        /// </summary>
-        private void ReloadFilteringRules()
-        {
-            LogTime("ReloadFilteringRules()");
-
-            try
-            {
-                m_filteringRwLock.EnterWriteLock();
-
-                // Load our configuration file and load configured lists, etc.
-                var configDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
-
-                if(File.Exists(configDataFilePath))
-                {
-                    using(var file = File.OpenRead(configDataFilePath))
-                    {
-                        using(var zip = new ZipArchive(file, ZipArchiveMode.Read))
-                        {
-                            // Find the configuration JSON file.
-                            string cfgJson = string.Empty;
-                            foreach(var entry in zip.Entries)
-                            {
-                                if(entry.Name.OIEquals("cfg.json"))
-                                {
-                                    using(var cfgStream = entry.Open())
-                                    using(TextReader tr = new StreamReader(cfgStream))
-                                    {
-                                        cfgJson = tr.ReadToEnd();
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(!StringExtensions.Valid(cfgJson))
-                            {
-                                m_logger.Error("Could not find valid JSON config for filter.");
-                                return;
-                            }
-
-                            // Deserialize config
-                            try
-                            {
-                                LoadConfigFromJson(cfgJson, m_configSerializerSettings);
-                                m_logger.Info("Configuration loaded from JSON.");
-                            }
-                            catch (Exception deserializationError)
-                            {
-                                m_logger.Error("Failed to deserialize JSON config.");
-                                LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
-                                return;
-                            }
-
-                            if(m_userConfig.UpdateFrequency.Minutes <= 0 || m_userConfig.UpdateFrequency == Timeout.InfiniteTimeSpan)
-                            {
-                                // Just to ensure that we enforce a minimum value here.
-                                m_userConfig.UpdateFrequency = TimeSpan.FromMinutes(5);
-                            }
-
-                            // Enforce DNS if present.
-                            m_dnsEnforcement.Trigger();
-
-                            // Setup blacklist or whitelisted apps.
-                            foreach(var appName in m_userConfig.BlacklistedApplications)
-                            {
-                                if(StringExtensions.Valid(appName))
-                                {
-                                    m_blacklistedApplications.Add(appName);
-                                }
-                            }
-
-                            foreach(var appName in m_userConfig.WhitelistedApplications)
-                            {
-                                if(StringExtensions.Valid(appName))
-                                {
-                                    m_whitelistedApplications.Add(appName);
-                                }
-                            }
-
-                            // Setup blocking threshold, anti-tamper mechamisms etc.
-                            if(m_userConfig.UseThreshold)
-                            {
-                                // Setup the threshold timers and related data members.
-                                InitThresholdData();
-                            }
-
-                            if(m_userConfig.CannotTerminate)
-                            {
-                                // Turn on process protection if requested.
-                                CriticalKernelProcessUtility.SetMyProcessAsKernelCritical();
-                            }
-
-                            // XXX FIXME Update our dashboard view model if there are bypasses
-                            // configured. Force this up to the UI thread because it's a UI model.
-                            if(m_userConfig.BypassesPermitted > 0)
-                            {
-                                m_ipcServer.NotifyRelaxedPolicyChange(m_userConfig.BypassesPermitted, m_userConfig.BypassDuration, getRelaxedPolicyStatus());
-                            }
-                            else
-                            {
-                                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-                            }
-
-                            // Recreate our filter collection and reset all categories to be disabled.
-                            if(m_filterCollection != null)
-                            {
-                                m_filterCollection.Dispose();
-                            }
-
-                            // Recreate our triggers container.
-                            if(m_textTriggers != null)
-                            {
-                                m_textTriggers.Dispose();
-                            }
-
-                            m_filterCollection = new FilterDbCollection();
-                            
-                            m_categoryIndex.SetAll(false);
-
-                            // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
-                            // be an in-memory DB or not.
-                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
-
-                            // Now clear all generated categories. These will be re-generated as needed.
-                            m_generatedCategoriesMap.Clear();
-
-#if WITH_NLP
-                            // Now drop all existing NLP models.
-                            try
-                            {
-                                m_doccatSlimLock.EnterWriteLock();
-                                m_documentClassifiers.Clear();
-                            }
-                            finally
-                            {
-                                m_doccatSlimLock.ExitWriteLock();
-                            }
-
-                            // Load all configured NLP models.
-                            foreach(var nlpEntry in m_userConfig.ConfiguredNlpModels)
-                            {
-                                var modelEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(nlpEntry.RelativeModelPath)).FirstOrDefault();
-                                if(modelEntry != null)
-                                {
-                                    using(var mStream = modelEntry.Open())
-                                    using(var ms = new MemoryStream())
-                                    {
-                                        mStream.CopyTo(ms);
-                                        LoadNlpModel(ms.ToArray(), nlpEntry);
-                                    }
-                                }
-                            }
-#endif
-
-                            uint totalFilterRulesLoaded = 0;
-                            uint totalFilterRulesFailed = 0;
-                            uint totalTriggersLoaded = 0;
-
-                            LogTime("Loading configured list files");
-
-                            // Load all configured list files.
-                            foreach(var listModel in m_userConfig.ConfiguredLists)
-                            {
-                                var listEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(listModel.RelativeListPath)).FirstOrDefault();
-                                if(listEntry != null)
-                                {
-                                    var thisListCategoryName = listModel.RelativeListPath.Substring(0, listModel.RelativeListPath.LastIndexOfAny(new[] { '/', '\\' }) + 1) + Path.GetFileNameWithoutExtension(listModel.RelativeListPath);
-
-                                    MappedFilterListCategoryModel categoryModel = null;
-
-                                    switch(listModel.ListType)
-                                    {
-                                        case PlainTextFilteringListType.Blacklist:
-                                        {
-                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                            {
-                                                using(var listStream = listEntry.Open())
-                                                {
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                    if(loadedFailedRes.Item1 > 0)
-                                                    {
-                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        break;
-
-                                        case PlainTextFilteringListType.BypassList:
-                                        {
-                                            MappedBypassListCategoryModel bypassCategoryModel = null;
-
-                                            // Must be loaded twice. Once as a blacklist, once as a whitelist.
-                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
-                                            {
-                                                // Load first as blacklist.
-                                                using(var listStream = listEntry.Open())
-                                                {
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                    if(loadedFailedRes.Item1 > 0)
-                                                    {
-                                                        m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
-                                                    }
-                                                }
-
-                                                GC.Collect();
-                                            }
-                                        }
-                                        break;
-
-                                        case PlainTextFilteringListType.TextTrigger:
-                                        {
-                                            // Always load triggers as blacklists.
-                                            if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                            {
-                                                using(var listStream = listEntry.Open())
-                                                {
-                                                    var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
-                                                    m_textTriggers.FinalizeForRead();
-
-                                                    totalTriggersLoaded += (uint)triggersLoaded;
-
-                                                    if(triggersLoaded > 0)
-                                                    {
-                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                    }
-                                                }
-                                            }
-
-                                            GC.Collect();
-                                        }
-                                        break;
-
-                                        case PlainTextFilteringListType.Whitelist:
-                                        {
-                                            using(TextReader tr = new StreamReader(listEntry.Open()))
-                                            {
-                                                if(TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                                {
-                                                    var whitelistRules = new List<string>();
-                                                    string line = null;
-                                                    while((line = tr.ReadLine()) != null)
-                                                    {
-                                                        whitelistRules.Add("@@" + line.Trim() + "\n");
-                                                    }
-
-                                                    using(var listStream = listEntry.Open())
-                                                    {
-                                                        var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
-                                                        totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                        totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                        if(loadedFailedRes.Item1 > 0)
-                                                        {
-                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            GC.Collect();
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-
-                            m_filterCollection.FinalizeForRead();
-                            m_filterCollection.InitializeBloomFilters();
-
-                            m_textTriggers.InitializeBloomFilters();
-
-                            m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
-
-                            LogTime("Rules loaded.");
-                        }
-                    }
-                }
-
-                if(m_userConfig != null)
-                {
-                    // Put the new update frequence into effect.
-                    this.m_updateCheckTimer.Change(m_userConfig.UpdateFrequency, Timeout.InfiniteTimeSpan);
-                }
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-            finally
-            {
-                m_filteringRwLock.ExitWriteLock();
-            }
-        }
-
         public class RelaxedPolicyResponseObject
         {
             public bool allowed { get; set; }
@@ -2760,15 +2339,15 @@ namespace CitadelService.Services
                 }
 
                 // Disable every category that is a bypass category.
-                foreach (var entry in m_generatedCategoriesMap.Values)
+                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
+                        m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
                     }
                 }
 
-                var cfg = Config;
+                var cfg = m_policyConfiguration.Configuration;
                 m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
                 DecrementRelaxedPolicy_Local();
@@ -2786,22 +2365,22 @@ namespace CitadelService.Services
                     }
 
                     // Disable every category that is a bypass category.
-                    foreach (var entry in m_generatedCategoriesMap.Values)
+                    foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
                     {
                         if (entry is MappedBypassListCategoryModel)
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
+                            m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
                         }
                     }
 
-                    var cfg = Config;
+                    var cfg = m_policyConfiguration.Configuration;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
                     
                     DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
                 else
                 {
-                    var cfg = Config;
+                    var cfg = m_policyConfiguration.Configuration;
                     m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), RelaxedPolicyStatus.AllUsed);
                 }
             }
@@ -2842,7 +2421,7 @@ namespace CitadelService.Services
         {
             bool allUsesExhausted = false;
 
-            var cfg = Config;
+            var cfg = m_policyConfiguration.Configuration;
 
             if(cfg != null)
             {
@@ -2884,14 +2463,14 @@ namespace CitadelService.Services
         {
             bool relaxedInEffect = false;
 
-            if (m_generatedCategoriesMap != null)
+            if (m_policyConfiguration.GeneratedCategoriesMap != null)
             {
                 // Determine if a relaxed policy is currently in effect.
-                foreach (var entry in m_generatedCategoriesMap.Values)
+                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
                 {
                     if (entry is MappedBypassListCategoryModel)
                     {
-                        if (m_categoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
+                        if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
                         {
                             relaxedInEffect = true;
                         }
@@ -2905,7 +2484,7 @@ namespace CitadelService.Services
             }
             else
             {
-                if (Config != null && Config.BypassesPermitted - Config.BypassesUsed == 0)
+                if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.BypassesPermitted - m_policyConfiguration.Configuration.BypassesUsed == 0)
                 {
                     return RelaxedPolicyStatus.AllUsed;
                 }
@@ -2932,7 +2511,7 @@ namespace CitadelService.Services
             // We want to inform the user that there is no relaxed policy in effect currently for this installation.
             if(status == RelaxedPolicyStatus.Deactivated)
             {
-                var cfg = Config;
+                var cfg = m_policyConfiguration.Configuration;
                 m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
             }
         }
@@ -2946,11 +2525,11 @@ namespace CitadelService.Services
         private void OnRelaxedPolicyTimerExpired(object state)
         {
             // Enable every category that is a bypass category.
-            foreach(var entry in m_generatedCategoriesMap.Values)
+            foreach(var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
             {
                 if(entry is MappedBypassListCategoryModel)
                 {
-                    m_categoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
+                    m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
                 }
             }
 
@@ -2976,7 +2555,7 @@ namespace CitadelService.Services
             var bypassInfo = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(responseString);
 
             m_logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
-            var cfg = Config;
+            var cfg = m_policyConfiguration.Configuration;
 
             if (cfg != null)
             {
@@ -2997,17 +2576,6 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            /*if(!UpdateNumberOfBypassesFromServer())
-            {
-                var cfg = Config;
-
-                if (cfg != null)
-                {
-                    cfg.BypassesUsed = 0;
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
-                }
-            }*/
-
             UpdateNumberOfBypassesFromServer();
             // Disable the reset timer.
             m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
@@ -3022,66 +2590,6 @@ namespace CitadelService.Services
             {
                 m_filteringEngine.Stop();
             }
-        }
-
-        /// <summary>
-        /// Attempts to fetch a FilterListEntry instance for the supplied category name, or create a
-        /// new one if one does not exist. Whether one is created, or an existing instance is
-        /// discovered, a valid, unique FilterListEntry for the supplied category shall be returned.
-        /// </summary>
-        /// <param name="categoryName">
-        /// The category name for which to fetch or generate a new FilterListEntry instance. 
-        /// </param>
-        /// <returns>
-        /// The unique FilterListEntry for the supplied category name, whether an existing instance
-        /// was found or a new one was created.
-        /// </returns>
-        /// <remarks>
-        /// This will always fail if more than 255 categories are created! 
-        /// </remarks>
-        private bool TryFetchOrCreateCategoryMap<T>(string categoryName, out T model) where T : MappedFilterListCategoryModel
-        {
-            m_logger.Info("CATEGORY {0}", categoryName);
-
-            MappedFilterListCategoryModel existingCategory = null;
-            if(!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
-            {
-                // We can't generate anymore categories. Sorry, but the rest get ignored.
-                if(m_generatedCategoriesMap.Count >= short.MaxValue)
-                {
-                    m_logger.Error("The maximum number of filtering categories has been exceeded.");
-                    model = null;
-                    return false;
-                }
-
-                if(typeof(T) == typeof(MappedBypassListCategoryModel))
-                {
-                    MappedFilterListCategoryModel secondCategory = null;
-
-                    if(TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", out secondCategory))
-                    {
-                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
-                        m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
-                        model = newModel;
-                        return true;
-                    }
-                    else
-                    {
-                        model = null;
-                        return false;
-                    }
-                }
-                else
-                {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName);
-                    m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
-                    model = newModel;
-                    return true;
-                }
-            }
-
-            model = existingCategory as T;
-            return true;
         }
 
         /// <summary>
@@ -3143,7 +2651,7 @@ namespace CitadelService.Services
 
                         try
                         {
-                            var cfg = Config;
+                            var cfg = m_policyConfiguration.Configuration;
                             if(cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user

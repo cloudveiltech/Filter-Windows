@@ -45,6 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Configuration\DefaultPolicyConfiguration.cs" />
+    <Compile Include="Common\Configuration\IListManager.cs" />
+    <Compile Include="Common\Configuration\IPolicyConfiguration.cs" />
     <Compile Include="Data\Filtering\BagOfTextTriggers.cs" />
     <Compile Include="Data\Filtering\CategoryIndex.cs" />
     <Compile Include="Data\Models\AppConfigModel.cs" />
