@@ -9,6 +9,8 @@ using Citadel.Core.Windows.Util;
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Views
@@ -23,36 +25,16 @@ namespace Te.Citadel.UI.Views
             InitializeComponent();
         }
 
-        public void AppendBlockActionEvent(string category, string fullRequest)
-        {
-            try
-            {
-                var dataCtx = (DashboardViewModel)this.DataContext;
-                // Keep number of items truncated to 50.
-                if(dataCtx.BlockEvents.Count > 50)
-                {
-                    dataCtx.BlockEvents.RemoveAt(0);
-                }
-
-                // Add the item to view.
-                dataCtx.BlockEvents.Add(new ViewableBlockedRequests(category, fullRequest));
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
         public void ShowDisabledInternetMessage(DateTime restoreTime)
         {
-            m_disabledInternetGrid.Visibility = Visibility.Visible;
+            /*m_disabledInternetGrid.Visibility = Visibility.Visible;
 
-            m_internetRestorationTimeLabel.Content = restoreTime.ToLongDateString() + " " + restoreTime.ToShortTimeString();
+            m_internetRestorationTimeLabel.Content = restoreTime.ToLongDateString() + " " + restoreTime.ToShortTimeString();*/
         }
 
         public void HideDisabledInternetMessage()
         {
-            m_disabledInternetGrid.Visibility = Visibility.Hidden;
+            /*m_disabledInternetGrid.Visibility = Visibility.Hidden;*/
         }
 
         private void OnHyperlinkClicked(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -61,9 +43,27 @@ namespace Te.Citadel.UI.Views
             e.Handled = true;
         }
 
-        public void SwitchTab(int tabIdx)
+        private void Click_SidebarButton(object sender, RoutedEventArgs e)
         {
-            Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = tabIdx));
+            Grid sidebar = (Grid)((ToggleButton)sender).Parent;
+            ToggleButton button = sender as ToggleButton;
+
+            foreach(var child in sidebar.Children)
+            {
+                if(child is ToggleButton && child != sender)
+                {
+                    ((ToggleButton)child).IsChecked = false;
+                }
+            }
+
+            var buttonParameter = button.CommandParameter as string;
+            
+            switch(buttonParameter)
+            {
+                case "history":
+                    this.CurrentView.Content = new HistoryView();
+                    break;
+            }
         }
     }
 }

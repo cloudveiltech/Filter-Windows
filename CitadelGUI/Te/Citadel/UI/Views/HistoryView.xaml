@@ -1,0 +1,94 @@
+﻿<local:BaseView
+    x:Class="Te.Citadel.UI.Views.HistoryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+    xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+    xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    mc:Ignorable="d">
+
+    <local:BaseView.DataContext>
+        <CitadelViewModels:HistoryViewModel />
+    </local:BaseView.DataContext>
+
+    <Grid>
+
+        <!--  This style on the grid will force the cells in the DataGrid to truncate their text. -->
+        <Grid.Resources>
+            <Style x:Key="TextBlockStyleKey" TargetType="{x:Type TextBlock}">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            </Style>
+        </Grid.Resources>
+
+        <TextBlock
+                    Width="690"
+                    Height="62"
+                    Margin="10,53,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontFamily="Segoe UI"
+                    FontSize="14"
+                    FontWeight="UltraLight"
+                    Foreground="Black"
+                    TextWrapping="Wrap">
+                    <Span
+                        FontFamily="MyriadPro-Regular"
+                        FontSize="14"
+                        Foreground="#FF231F20"><Run Text="Request review of a blocked url by selecting the item and then click Request Review." /></Span>
+        </TextBlock>
+
+        <Button
+                    Height="25"
+                    Margin="554,315,10,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Command="{Binding RequestBlockActionReviewCommand}"
+                    CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                    Content="Request Review">
+            <Button.Style>
+                <!-- This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
+                <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
+                    <Setter Property="IsEnabled" Value="True" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <DataGrid
+                    x:Name="m_blockEventsDataGrid"
+                    Grid.Row="0"
+                    Margin="10,121,10,43"
+                    x:FieldModifier="private"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    ItemsSource="{Binding BlockEvents, Mode=OneWay}"
+                    VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                            Width="150"
+                            Binding="{Binding CategoryName, Mode=OneWay}"
+                            Header="Category" />
+
+                <DataGridTextColumn
+                            Width="100*"
+                            Binding="{Binding FullRequest, Mode=OneWay}"
+                            Header="Request" />
+            </DataGrid.Columns>
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="0" />
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+        </DataGrid>
+    </Grid>
+</local:BaseView>

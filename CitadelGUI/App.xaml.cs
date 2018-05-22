@@ -433,7 +433,7 @@ namespace Te.Citadel
                         {
                             if(m_viewDashboard != null)
                             {
-                                m_viewDashboard.AppendBlockActionEvent(args.Category, args.Resource.ToString());
+                                //m_viewDashboard.AppendBlockActionEvent(args.Category, args.Resource.ToString());
                             }
                         }
                     );
@@ -861,7 +861,7 @@ namespace Te.Citadel
         private void TrayIcon_OpenSettings(object sender, EventArgs e)
         {
             BringAppToFocus();
-            m_viewDashboard.SwitchTab(1);
+            // TODO m_viewDashboard.SwitchTab(1);
         }
 
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
