@@ -30,7 +30,7 @@ namespace CitadelService.Data.Filtering
     /// <remarks>
     /// This class is a super special snowflake that will unpredictably get triggered.
     /// </remarks>
-    internal class BagOfTextTriggers : IDisposable
+    public class BagOfTextTriggers : IDisposable
     {
         /// <summary>
         /// Our Sqlite connection.
@@ -229,7 +229,7 @@ namespace CitadelService.Data.Filtering
                 }
             }
 
-            FirstWordFilter = new BloomFilter<string>(firstWordCount);
+            FirstWordFilter = new BloomFilter<string>(firstWordCount == 0 ? 100 : firstWordCount);
 
             using (var cmd = m_connection.CreateCommand())
             {
@@ -258,7 +258,7 @@ namespace CitadelService.Data.Filtering
                 }
             }
 
-            TriggerFilter = new BloomFilter<string>(triggerCount);
+            TriggerFilter = new BloomFilter<string>(triggerCount == 0 ? 100 : triggerCount);
             
             using (var cmd = m_connection.CreateCommand())
             {
@@ -429,9 +429,17 @@ namespace CitadelService.Data.Filtering
                 return false;
             }
 
+            bool textTriggerDebugging = false;
+            if(input.IndexOf("poke a girl") >= 0 )
+            {
+                textTriggerDebugging = true;
+            }
+
             var split = Split(input);
 
-            using(var myConn = new SqliteConnection(m_connection.ConnectionString))
+            /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
+            using (StreamWriter writer = new StreamWriter(debugStream))*/
+            using (var myConn = new SqliteConnection(m_connection.ConnectionString))
             {
                 myConn.Open();
 
@@ -439,8 +447,8 @@ namespace CitadelService.Data.Filtering
 
                 SqliteCommand triggerCommand = null;
 
-                using(var tsx = myConn.BeginTransaction())
-                using(var cmd = myConn.CreateCommand())
+                using (var tsx = myConn.BeginTransaction())
+                using (var cmd = myConn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT * from FirstWordIndex where FirstWordText = $trigger";
 
@@ -554,6 +562,7 @@ namespace CitadelService.Data.Filtering
                         foreach (var list in wordLists)
                         {
                             string triggerCandidate = string.Join(" ", list);
+
                             if (!TriggerFilter.Contains(triggerCandidate))
                             {
                                 continue;
@@ -626,82 +635,6 @@ namespace CitadelService.Data.Filtering
                             }
                         }
                     }
-
-                    /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
-                    {
-                        using (StreamWriter writer = new StreamWriter(debugStream))
-                        {
-                            writer.WriteLine("REQUEST {0}", DateTime.Now);
-                            writer.WriteLine(string.Join(" ", newSplit.Take(itr)));
-                            writer.WriteLine("ENDREQUEST");
-                        }
-                    }*/
-
-                    // No match yet. Do rebuild if user asked for it.
-                    /*if (rebuildAndTestFragments)
-                    {
-                        var len = newSplit.Count;
-
-                        if (maxRebuildLen == -1 || maxRebuildLen > len)
-                        {
-                            maxRebuildLen = len;
-                        }
-
-                        
-                        ulong __sqlItrCount = 0;
-
-                        if (m_logger != null)
-                        {
-                            m_logger.Info("Trigger scan length = {0}", len);
-                        }
-
-                        for (var i = 0; i < len; ++i)
-                        {
-                            for (var j = i + 1; j < len && j - i <= maxRebuildLen; ++j)
-                            {
-                                __itrCount++;
-                                //var sub = new ArraySegment<string>(newSplit, i, j - i);
-                                var sub = newSplit.GetRange(i, j - i);
-
-                                var subLen = (sub.Count - 1) + sub.Sum(xx => xx.Length);
-                                // Don't bother checking the string if it exceeds the limits of our
-                                // database column length. Currently it's char 255.
-                                if (subLen >= byte.MaxValue)
-                                {
-                                    break;
-                                }
-
-                                var joined = string.Join(" ", sub);
-                                cmd.Parameters[0].Value = joined;
-
-                                using (var reader = cmd.ExecuteReader())
-                                {
-                                    __sqlItrCount++;
-
-                                    if (!reader.HasRows)
-                                    {
-                                        continue;
-                                    }
-
-                                    while (reader.Read())
-                                    {
-                                        var thisCat = reader.GetInt16(1);
-                                        if (categoryAppliesCb(thisCat))
-                                        {
-                                            firstMatchCategory = thisCat;
-                                            matchedTrigger = joined;
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (m_logger != null)
-                        {
-                            m_logger.Info("Number of times iterated: {0}", __itrCount);
-                        }
-                    }*/
 
                     tsx.Commit();
                 }

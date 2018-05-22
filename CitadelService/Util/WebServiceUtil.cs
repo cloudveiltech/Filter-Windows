@@ -709,8 +709,6 @@ namespace Citadel.Core.Windows.Util
                 }
             }
 
-
-
             return null;
         }
 

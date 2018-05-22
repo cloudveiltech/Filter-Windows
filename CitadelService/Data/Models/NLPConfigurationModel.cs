@@ -24,7 +24,7 @@ namespace CitadelService.Data.Models
     /// the best category returned by the classification matches a category selected for use, then a
     /// block action should take place because this counts as positive match.
     /// </summary>
-    internal class NLPConfigurationModel
+    public class NLPConfigurationModel
     {
         /// <summary>
         /// The relative path to the Apache OpenNLP model file inside the parent zip container.

@@ -17,7 +17,7 @@ namespace CitadelService.Data.Models
     /// that they can be understood by both the filtering engine and the implementing client
     /// application.
     /// </summary>
-    internal class MappedFilterListCategoryModel
+    public class MappedFilterListCategoryModel
     {
         /// <summary>
         /// Gets the unique 8 bit unsigned integer that represents the category ID within the

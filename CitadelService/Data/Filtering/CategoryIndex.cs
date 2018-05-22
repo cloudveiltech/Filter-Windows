@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace CitadelService.Data.Filtering
 {
-    internal class CategoryIndex
+    public class CategoryIndex
     {
         private bool[] m_categoryIndex;
 

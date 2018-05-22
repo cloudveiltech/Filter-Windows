@@ -1,6 +1,7 @@
 ﻿using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Net;
+using CitadelService.Common.Configuration;
 using DNS.Client;
 using DNS.Protocol;
 using System;
@@ -26,15 +27,15 @@ namespace CitadelService.Util
         /// </summary>
         private Timer m_dnsEnforcementTimer;
 
-        internal DnsEnforcement(Services.FilterServiceProvider provider, NLog.Logger logger)
+        internal DnsEnforcement(IPolicyConfiguration configuration, NLog.Logger logger)
         {
             m_logger = logger;
-            m_provider = provider;
+            m_policyConfiguration = configuration;
         }
 
         private object m_dnsEnforcementLock = new object();
         private NLog.Logger m_logger;
-        private Services.FilterServiceProvider m_provider;
+        private IPolicyConfiguration m_policyConfiguration;
 
         #region DnsEnforcement.Enforce
 
@@ -50,17 +51,17 @@ namespace CitadelService.Util
                 {
                     if(!enableDnsFiltering)
                     {
-                        if (m_provider.Config == null)
+                        if (m_policyConfiguration.Configuration == null)
                         {
                             EventHandler fn = null;
 
                             fn = (sender, e) =>
                             {
                                 this.SetDnsToDhcp();
-                                m_provider.OnConfigLoaded -= fn;
+                                m_policyConfiguration.OnConfigurationLoaded -= fn;
                             };
 
-                            m_provider.OnConfigLoaded += fn;
+                            m_policyConfiguration.OnConfigurationLoaded += fn;
                         }
                         else
                         {
@@ -72,7 +73,7 @@ namespace CitadelService.Util
                         IPAddress primaryDns = null;
                         IPAddress secondaryDns = null;
 
-                        var cfg = m_provider.Config;
+                        var cfg = m_policyConfiguration.Configuration;
 
                         // Check if any DNS servers are defined, and if so, set them.
                         if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
@@ -180,7 +181,7 @@ namespace CitadelService.Util
             IPAddress primaryDns = null;
             IPAddress secondaryDns = null;
 
-            var cfg = m_provider.Config;
+            var cfg = m_policyConfiguration.Configuration;
 
             // Check if any DNS servers are defined, and if so, set them.
             if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
@@ -287,14 +288,14 @@ namespace CitadelService.Util
 
             bool ret = false;
 
-            if(m_provider.Config == null)
+            if(m_policyConfiguration.Configuration == null)
             {
                 // We can't really make a decision on enforcement here, but just return true anyway.
                 return true;
             }
 
-            string primaryDns = m_provider.Config.PrimaryDns;
-            string secondaryDns = m_provider.Config.SecondaryDns;
+            string primaryDns = m_policyConfiguration.Configuration.PrimaryDns;
+            string secondaryDns = m_policyConfiguration.Configuration.SecondaryDns;
 
             if (string.IsNullOrWhiteSpace(primaryDns) && string.IsNullOrWhiteSpace(secondaryDns))
             {
@@ -499,12 +500,22 @@ namespace CitadelService.Util
 
         public void OnNetworkChange(object sender, EventArgs e)
         {
-            if(m_provider.Config == null)
+            if (m_policyConfiguration.Configuration == null)
             {
-                m_provider.UpdateAndWriteList(false);
-            }
+                EventHandler fn = null;
 
-            Trigger();
+                fn = (_s, args) =>
+                {
+                    Trigger();
+                    m_policyConfiguration.OnConfigurationLoaded -= fn;
+                };
+
+                m_policyConfiguration.OnConfigurationLoaded += fn;
+            }
+            else
+            {
+                Trigger();
+            }
         }
 
         #endregion
