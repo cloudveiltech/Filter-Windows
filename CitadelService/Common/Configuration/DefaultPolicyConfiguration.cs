@@ -1,4 +1,6 @@
-﻿using Citadel.Core.Windows.Types;
+﻿#define LOCAL_POLICY_CONFIGURATION
+
+using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Extensions;
 
@@ -24,9 +26,28 @@ using System.Collections.Concurrent;
 
 namespace CitadelService.Common.Configuration
 {
-    internal class DefaultPolicyConfiguration : IPolicyConfiguration
+    /*
+     * Documenting our data file changes:
+     * There are now two calls that we expect on the API side.
+     * /my/config - this gets the configuration JSON for the currently authenticated user.
+     * /my/rules - this gets all the rules available for the filter as a zipped file.
+     * 
+     * The zipped file folder structure is:
+     * / - this is root, all rule folders are in root.
+     * /adult_rules - this is a rule file container
+     * /adult_rules/rules.txt - this is the actual meat of the rule data.
+     */
+
+    public class DefaultPolicyConfiguration : IPolicyConfiguration
     {
+#if LOCAL_POLICY_CONFIGURATION
+        private static string serverConfigFilePath;
+        private static string serverListDataFilePath;
+#endif
+
+        private static string configFilePath;
         private static string listDataFilePath;
+
         private static JsonSerializerSettings s_configSerializerSettings;
 
         public DefaultPolicyConfiguration(IPCServer server, NLog.Logger logger, ReaderWriterLockSlim filteringLock)
@@ -70,6 +91,14 @@ namespace CitadelService.Common.Configuration
 
         static DefaultPolicyConfiguration()
         {
+
+#if LOCAL_POLICY_CONFIGURATION
+            serverConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "cfg.json");
+            serverListDataFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "a.dat");
+#endif
+
+            // cfg.json and data path? TODO FIXME
+            configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cfg.json");
             listDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
 
             // Setup json serialization settings.
@@ -91,12 +120,46 @@ namespace CitadelService.Common.Configuration
 
         public event EventHandler OnConfigurationLoaded;
 
-        public bool? VerifyConfiguration()
+        private bool? verifyFile(ServiceResource sumCheck, string filePath)
         {
-            HttpStatusCode code;
-            var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataSumCheck, out code);
+#if LOCAL_POLICY_CONFIGURATION
+            if(!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+            {
+                return false;
+            }
 
-            if(code == HttpStatusCode.OK && rHashBytes != null)
+            string serverPath = sumCheck == ServiceResource.RuleDataSumCheck ? serverListDataFilePath : serverConfigFilePath;
+
+            string rHash = null;
+            using (var fs = File.OpenRead(serverPath))
+            {
+                using (SHA1 sec = new SHA1CryptoServiceProvider())
+                {
+                    byte[] bt = sec.ComputeHash(fs);
+                    rHash = BitConverter.ToString(bt).Replace("-", "");
+                }
+            }
+
+            using (var fs = File.OpenRead(filePath))
+            {
+                using (SHA1 sec = new SHA1CryptoServiceProvider())
+                {
+                    byte[] bt = sec.ComputeHash(fs);
+                    var lHash = BitConverter.ToString(bt).Replace("-", "");
+
+                    if (!lHash.OIEquals(rHash))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+#else
+            HttpStatusCode code;
+            var rHashBytes = WebServiceUtil.Default.RequestResource(sumCheck, out code);
+
+            if (code == HttpStatusCode.OK && rHashBytes != null)
             {
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
@@ -107,7 +170,7 @@ namespace CitadelService.Common.Configuration
 
                 bool needsUpdate = false;
 
-                if(!File.Exists(listDataFilePath) || new FileInfo(listDataFilePath).Length == 0)
+                if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
                 {
                     needsUpdate = true;
                 }
@@ -116,7 +179,7 @@ namespace CitadelService.Common.Configuration
                     // We're going to hash our local version and compare. If they don't match, we're
                     // going to update our lists.
 
-                    using (var fs = File.OpenRead(listDataFilePath))
+                    using (var fs = File.OpenRead(filePath))
                     {
                         using (SHA1 sec = new SHA1CryptoServiceProvider())
                         {
@@ -137,32 +200,50 @@ namespace CitadelService.Common.Configuration
             {
                 return null;
             }
+#endif
+        }
+
+        public bool? VerifyConfiguration()
+        {
+            return verifyFile(ServiceResource.UserConfigSumCheck, configFilePath);
         }
 
         public bool? DownloadConfiguration()
         {
+#if LOCAL_POLICY_CONFIGURATION
+            if(VerifyConfiguration() == true)
+            {
+                return false;
+            }
+
+            var configBytes = File.ReadAllBytes(serverConfigFilePath);
+
+            File.WriteAllBytes(configFilePath, configBytes);
+            return true;
+#else
             HttpStatusCode code;
 
             bool? isVerified = VerifyConfiguration();
-            if(isVerified == true)
+            if (isVerified == true)
             {
                 return false;
             }
 
             m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
-            var filterDataZipBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserDataRequest, out code);
+            var configBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserConfigRequest, out code);
 
-            if (code == HttpStatusCode.OK && filterDataZipBytes != null && filterDataZipBytes.Length > 0)
+            if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
             {
-                File.WriteAllBytes(listDataFilePath, filterDataZipBytes);
+                File.WriteAllBytes(listDataFilePath, configBytes);
                 return true;
             }
             else
             {
-                Debug.WriteLine("Failed to download list data.");
-                m_logger.Error("Failed to download list data.");
+                Debug.WriteLine("Failed to download configuration data.");
+                m_logger.Error("Failed to download configuration data.");
                 return null;
             }
+#endif
         }
 
         /// <summary>
@@ -176,77 +257,61 @@ namespace CitadelService.Common.Configuration
             OnConfigurationLoaded?.Invoke(this, new EventArgs());
         }
 
-        /// <summary>
-        /// Queries the service provider for updated filtering rules. 
-        /// </summary>
-        public bool LoadConfiguration()
+        public bool? DownloadLists()
+        {
+#if LOCAL_POLICY_CONFIGURATION
+            if (VerifyLists() == true)
+            {
+                return false;
+            }
+
+            var configBytes = File.ReadAllBytes(serverListDataFilePath);
+
+            File.WriteAllBytes(listDataFilePath, configBytes);
+            return true;
+#else
+            HttpStatusCode code;
+
+            bool? isVerified = VerifyLists();
+            if (isVerified == true)
+            {
+                return false;
+            }
+
+            m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
+            var configBytes = WebServiceUtil.Default.RequestResource(ServiceResource.RuleDataRequest, out code);
+
+            if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
+            {
+                File.WriteAllBytes(listDataFilePath, configBytes);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine("Failed to download list data.");
+                m_logger.Error("Failed to download list data.");
+                return null;
+            }
+#endif
+        }
+
+        public bool? VerifyLists()
+        {
+            return verifyFile(ServiceResource.RuleDataSumCheck, listDataFilePath);
+        }
+
+        public bool LoadLists()
         {
             try
             {
                 m_filteringRwLock.EnterWriteLock();
 
-                // Load our configuration file and load configured lists, etc.
-                var configDataFilePath = listDataFilePath;
-
-                if (File.Exists(configDataFilePath))
+                if (File.Exists(listDataFilePath))
                 {
-                    using (var file = File.OpenRead(configDataFilePath))
+                    using (var file = File.OpenRead(listDataFilePath))
                     {
                         using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
                         {
-                            // Find the configuration JSON file.
-                            string cfgJson = string.Empty;
-                            foreach (var entry in zip.Entries)
-                            {
-                                if (entry.Name.OIEquals("cfg.json"))
-                                {
-                                    using (var cfgStream = entry.Open())
-                                    using (TextReader tr = new StreamReader(cfgStream))
-                                    {
-                                        cfgJson = tr.ReadToEnd();
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (!StringExtensions.Valid(cfgJson))
-                            {
-                                m_logger.Error("Could not find valid JSON config for filter.");
-                                return false;
-                            }
-
-                            // Deserialize config
-                            try
-                            {
-                                LoadConfigFromJson(cfgJson, s_configSerializerSettings);
-                                m_logger.Info("Configuration loaded from JSON.");
-                            }
-                            catch (Exception deserializationError)
-                            {
-                                m_logger.Error("Failed to deserialize JSON config.");
-                                LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
-                                return false;
-                            }
-
-                            if (Configuration.UpdateFrequency.Minutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
-                            {
-                                // Just to ensure that we enforce a minimum value here.
-                                Configuration.UpdateFrequency = TimeSpan.FromMinutes(5);
-                            }
-
-                            loadAppList(m_blacklistedApplications, Configuration.BlacklistedApplications);
-                            loadAppList(m_whitelistedApplications, Configuration.WhitelistedApplications);
-
-                            if (Configuration.CannotTerminate)
-                            {
-                                // Turn on process protection if requested.
-                                CriticalKernelProcessUtility.SetMyProcessAsKernelCritical();
-                            }
-                            else
-                            {
-                                CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
-                            }
-
                             // Recreate our filter collection and reset all categories to be disabled.
                             if (m_filterCollection != null)
                             {
@@ -269,34 +334,6 @@ namespace CitadelService.Common.Configuration
 
                             // Now clear all generated categories. These will be re-generated as needed.
                             m_generatedCategoriesMap.Clear();
-
-#if WITH_NLP
-                            // Now drop all existing NLP models.
-                            try
-                            {
-                                m_doccatSlimLock.EnterWriteLock();
-                                m_documentClassifiers.Clear();
-                            }
-                            finally
-                            {
-                                m_doccatSlimLock.ExitWriteLock();
-                            }
-
-                            // Load all configured NLP models.
-                            foreach(var nlpEntry in m_userConfig.ConfiguredNlpModels)
-                            {
-                                var modelEntry = zip.Entries.Where(pp => pp.FullName.OIEquals(nlpEntry.RelativeModelPath)).FirstOrDefault();
-                                if(modelEntry != null)
-                                {
-                                    using(var mStream = modelEntry.Open())
-                                    using(var ms = new MemoryStream())
-                                    {
-                                        mStream.CopyTo(ms);
-                                        LoadNlpModel(ms.ToArray(), nlpEntry);
-                                    }
-                                }
-                            }
-#endif
 
                             uint totalFilterRulesLoaded = 0;
                             uint totalFilterRulesFailed = 0;
@@ -424,6 +461,80 @@ namespace CitadelService.Common.Configuration
                         }
                     }
                 }
+
+                return true;
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                return false;
+            }
+            finally
+            {
+                m_filteringRwLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Queries the service provider for updated filtering rules. 
+        /// </summary>
+        public bool LoadConfiguration()
+        {
+            try
+            {
+                m_filteringRwLock.EnterWriteLock();
+
+                // Load our configuration file and load configured lists, etc.
+
+                if(File.Exists(configFilePath))
+                {
+                    string cfgJson = string.Empty;
+
+                    using (var cfgStream = File.OpenRead(configFilePath))
+                    using (TextReader textReader = new StreamReader(cfgStream))
+                    {
+                        cfgJson = textReader.ReadToEnd();
+                    }
+
+                    if(!StringExtensions.Valid(cfgJson))
+                    {
+                        m_logger.Error("Could not find valid JSON config for filter.");
+                        return false;
+                    }
+
+                    try
+                    {
+                        LoadConfigFromJson(cfgJson, s_configSerializerSettings);
+                        m_logger.Info("Configuration loaded from JSON.");
+                    }
+                    catch(Exception deserializationError)
+                    {
+                        m_logger.Error("Failed to deserialize JSON config.");
+                        LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
+                        return false;
+                    }
+
+                    if (Configuration.UpdateFrequency.Minutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
+                    {
+                        // Just to ensure that we enforce a minimum value here.
+                        Configuration.UpdateFrequency = TimeSpan.FromMinutes(5);
+                    }
+
+                    loadAppList(m_blacklistedApplications, Configuration.BlacklistedApplications);
+                    loadAppList(m_whitelistedApplications, Configuration.WhitelistedApplications);
+
+                    if (Configuration.CannotTerminate)
+                    {
+                        // Turn on process protection if requested.
+                        CriticalKernelProcessUtility.SetMyProcessAsKernelCritical();
+                    }
+                    else
+                    {
+                        CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
+                    }
+
+                    // Don't do list loading in the same function as configuration loading, because those are now indeed two separate functions.
+                }
             }
             catch (Exception e)
             {
@@ -441,7 +552,7 @@ namespace CitadelService.Common.Configuration
         private void loadAppList(HashSet<string> myAppList, HashSet<string> appList)
         {
             myAppList.Clear();
-            foreach(var app in appList)
+            foreach (var app in appList)
             {
                 myAppList.Add(app);
             }

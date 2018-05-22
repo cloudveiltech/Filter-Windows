@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Configuration\DefaultPolicyConfiguration.cs" />
-    <Compile Include="Common\Configuration\IListManager.cs" />
+    <Compile Include="Common\Configuration\OldPolicyConfiguration.cs" />
     <Compile Include="Common\Configuration\IPolicyConfiguration.cs" />
     <Compile Include="Data\Filtering\BagOfTextTriggers.cs" />
     <Compile Include="Data\Filtering\BlockInfo.cs" />

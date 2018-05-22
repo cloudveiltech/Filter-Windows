@@ -30,6 +30,24 @@ namespace CitadelService.Common.Configuration
         /// <returns>null if no internet, true if configuration successfully verified. false if configuration needs reload.</returns>
         bool? VerifyConfiguration();
 
+        /// <summary>
+        /// This method should verify the lists downloaded to make sure they are the right lists and have not been tampered with.
+        /// </summary>
+        /// <returns>null if no internet, true if lists were successfully verified. false if lists need reload.</returns>
+        bool? VerifyLists();
+
+        /// <summary>
+        /// This method should download the lists that the authenticated user's policy requires.
+        /// </summary>
+        /// <returns>null if no internet, true if lists were successfully downloaded. false if lists were not needed</returns>
+        bool? DownloadLists();
+
+        /// <summary>
+        /// This method should load the required lists from the disk.
+        /// </summary>
+        /// <returns></returns>
+        bool LoadLists();
+
         event EventHandler OnConfigurationLoaded;
 
         AppConfigModel Configuration { get; set; }

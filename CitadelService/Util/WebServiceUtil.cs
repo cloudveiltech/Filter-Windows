@@ -25,6 +25,10 @@ namespace Citadel.Core.Windows.Util
 {
     internal enum ServiceResource
     {
+        UserConfigSumCheck,
+        UserConfigRequest,
+        RuleDataSumCheck,
+        RuleDataRequest,
         UserDataRequest,
         UserDataSumCheck,
         DeactivationRequest,
@@ -50,6 +54,10 @@ namespace Citadel.Core.Windows.Util
 
         private static readonly Dictionary<ServiceResource, string> m_namedResourceMap = new Dictionary<ServiceResource, string>
         {
+            { ServiceResource.UserConfigRequest, "/api/v2/me/config/get" },
+            { ServiceResource.UserConfigSumCheck, "/api/v2/me/config/check" },
+            { ServiceResource.RuleDataRequest, "/api/v2/rules/get" },
+            { ServiceResource.RuleDataSumCheck, "/api/v2/rules/check" },
             { ServiceResource.UserDataRequest, "/api/v2/me/data/get" },
             { ServiceResource.UserDataSumCheck, "/api/v2/me/data/check" },
             { ServiceResource.DeactivationRequest, "/api/v2/me/deactivate" },

@@ -2147,13 +2147,40 @@ namespace CitadelService.Services
 
                 bool? configurationDownloaded = m_policyConfiguration.DownloadConfiguration();
 
-                if(configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
+                if (configurationDownloaded == null)
+                {
+                    result = ConfigUpdateResult.NoInternet;
+                }
+                else if (configurationDownloaded == true)
+                {
+                    result = ConfigUpdateResult.Updated;
+                }
+                else
+                {
+                    result = ConfigUpdateResult.UpToDate;
+                }
+
+                bool doLoadLists = m_policyConfiguration.FilterCollection == null;
+
+                if(m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
                 {
                     // Got new data. Gotta reload.
-                    m_policyConfiguration.LoadConfiguration();
+                    bool configLoaded = m_policyConfiguration.LoadConfiguration();
+                    doLoadLists = true;
+
+                    result = ConfigUpdateResult.Updated;
 
                     // Enforce DNS if present.
                     m_dnsEnforcement.Trigger();
+                }
+
+                bool? listsDownloaded = m_policyConfiguration.DownloadLists();
+
+                doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && m_policyConfiguration.FilterCollection == null);
+
+                if(doLoadLists)
+                {
+                    m_policyConfiguration.LoadLists();
                 }
 
                 m_logger.Info("Checking for application updates.");
