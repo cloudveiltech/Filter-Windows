@@ -15,7 +15,7 @@ namespace CitadelService.Common.Configuration
         /// <summary>
         /// This method should download the authenticated user's configuration from the server.
         /// </summary>
-        /// <returns>false if configuration was not downloaded.</returns>
+        /// <returns>false if configuration was not downloaded. null if configuration endpoint was not accessible.</returns>
         bool? DownloadConfiguration();
 
         /// <summary>

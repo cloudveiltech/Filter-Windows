@@ -240,6 +240,7 @@ namespace CitadelService.Services
         /// App function config file. 
         /// </summary>
         IPolicyConfiguration m_policyConfiguration;
+
         /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
@@ -311,6 +312,17 @@ namespace CitadelService.Services
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);
+
+            try
+            {
+                m_ipcServer = new IPCServer();
+                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                return;
+            }
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -388,10 +400,6 @@ namespace CitadelService.Services
                 {
 
                 };
-
-                m_ipcServer = new IPCServer();
-
-                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
 
                 m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
                 m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
