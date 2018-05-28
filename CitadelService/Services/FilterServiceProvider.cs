@@ -49,6 +49,8 @@ using DNS.Client;
 using System.Net.Http;
 using CitadelService.Common.Configuration;
 
+using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
+
 namespace CitadelService.Services
 {
     internal class FilterServiceProvider
@@ -788,7 +790,7 @@ namespace CitadelService.Services
                 var inboundRule = FirewallManager.Instance.CreateApplicationRule(
                     FirewallProfiles.Domain | FirewallProfiles.Private | FirewallProfiles.Public,
                     thisProcessName,
-                    FirewallAction.Allow, thisAssembly.Location
+                    WindowsFirewallHelper.FirewallAction.Allow, thisAssembly.Location
                 );
                 inboundRule.Direction = FirewallDirection.Inbound;
 
@@ -797,7 +799,7 @@ namespace CitadelService.Services
                 var outboundRule = FirewallManager.Instance.CreateApplicationRule(
                     FirewallProfiles.Domain | FirewallProfiles.Private | FirewallProfiles.Public,
                     thisProcessName,
-                    FirewallAction.Allow, thisAssembly.Location
+                    WindowsFirewallHelper.FirewallAction.Allow, thisAssembly.Location
                 );
                 outboundRule.Direction = FirewallDirection.Outbound;
 
@@ -963,7 +965,8 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            m_filteringEngine = new WindowsProxyServer("Citadel Core", OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd);
 
             // Setup general info, warning and error events.
             LoggerProxy.Default.OnInfo += EngineOnInfo;
@@ -1346,24 +1349,24 @@ namespace CitadelService.Services
         /// True if the application at the specified absolute path should have its traffic forced
         /// through the filtering engine, false otherwise.
         /// </returns>
-        private bool OnAppFirewallCheck(string appAbsolutePath)
-        {   
+        private FirewallResponse OnAppFirewallCheck(FirewallRequest request)
+        {
             // XXX TODO - The engine shouldn't even tell us about SYSTEM processes and just silently
             // let them through.
-            if(appAbsolutePath.OIEquals("SYSTEM"))
+            if (request.BinaryAbsolutePath.OIEquals("SYSTEM"))
             {
-                return false;
+                return new FirewallResponse(FirewallAction.DontFilterApplication);
             }
 
             // Lets completely avoid piping anything from the operating system in the filter, with
             // the sole exception of Microsoft edge.
-            if((appAbsolutePath.IndexOf("MicrosoftEdge", StringComparison.OrdinalIgnoreCase) == -1) && appAbsolutePath.IndexOf(@"\Windows\", StringComparison.OrdinalIgnoreCase) != -1)
+            if((request.BinaryAbsolutePath.IndexOf("MicrosoftEdge", StringComparison.OrdinalIgnoreCase) == -1) && request.BinaryAbsolutePath.IndexOf(@"\Windows\", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 lock(s_foreverWhitelistedApplications)
                 {
-                    if(s_foreverWhitelistedApplications.Contains(appAbsolutePath))
+                    if(s_foreverWhitelistedApplications.Contains(request.BinaryAbsolutePath))
                     {
-                        return false;
+                        return new FirewallResponse(FirewallAction.DontFilterApplication);
                     }
                 }
 
@@ -1390,14 +1393,14 @@ namespace CitadelService.Services
 
                 // If the result is greater than zero, then this is a protected operating system file
                 // according to the operating system.
-                if(SFC.SfcIsFileProtected(IntPtr.Zero, appAbsolutePath) > 0)
+                if(SFC.SfcIsFileProtected(IntPtr.Zero, request.BinaryAbsolutePath) > 0)
                 {
                     lock(s_foreverWhitelistedApplications)
                     {
-                        s_foreverWhitelistedApplications.Add(appAbsolutePath);
+                        s_foreverWhitelistedApplications.Add(request.BinaryAbsolutePath);
                     }
 
-                    return false;
+                    return new FirewallResponse(FirewallAction.DontFilterApplication);
                 }
             }
 
@@ -1408,52 +1411,52 @@ namespace CitadelService.Services
                 if(m_policyConfiguration.BlacklistedApplications.Count == 0 && m_policyConfiguration.WhitelistedApplications.Count == 0)
                 {
                     // Just filter anything accessing port 80 and 443.
-                    m_logger.Debug("1Filtering application: {0}", appAbsolutePath);
-                    return true;
+                    m_logger.Debug("1Filtering application: {0}", request.BinaryAbsolutePath);
+                    return new FirewallResponse(FirewallAction.FilterApplication);
                 }
 
-                var appName = Path.GetFileName(appAbsolutePath);
+                var appName = Path.GetFileName(request.BinaryAbsolutePath);
 
                 if(m_policyConfiguration.WhitelistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_policyConfiguration.WhitelistedApplications, appAbsolutePath, appName);
+                    bool inList = isAppInList(m_policyConfiguration.WhitelistedApplications, request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {
-                        return false;
+                        return new FirewallResponse(FirewallAction.DontFilterApplication);
                     }
                     else
                     {
                         // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                        m_logger.Debug("2Filtering application: {0}", appAbsolutePath);
-                        return true;
+                        m_logger.Debug("2Filtering application: {0}", request.BinaryAbsolutePath);
+                        return new FirewallResponse(FirewallAction.FilterApplication);
                     }
                 }
 
                 if(m_policyConfiguration.BlacklistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_policyConfiguration.BlacklistedApplications, appAbsolutePath, appName);
+                    bool inList = isAppInList(m_policyConfiguration.BlacklistedApplications, request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {
-                        m_logger.Debug("3Filtering application: {0}", appAbsolutePath);
-                        return true;
+                        m_logger.Debug("3Filtering application: {0}", request.BinaryAbsolutePath);
+                        return new FirewallResponse(FirewallAction.BlockInternetForApplication);
                     }
 
-                    return false;
+                    return new FirewallResponse(FirewallAction.FilterApplication);
                 }
 
                 // This app was not hit by either an enforced whitelist or blacklist. So, by default
                 // we will filter everything. We should never get here, but just in case.
 
-                m_logger.Debug("4Filtering application: {0}", appAbsolutePath);
-                return true;
+                m_logger.Debug("4Filtering application: {0}", request.BinaryAbsolutePath);
+                return new FirewallResponse(FirewallAction.FilterApplication);
             }
             catch(Exception e)
             {
                 m_logger.Error("Error in {0}", nameof(OnAppFirewallCheck));
                 LoggerUtil.RecursivelyLogException(m_logger, e);
-                return false;
+                return new FirewallResponse(FirewallAction.DontFilterApplication);
             }
             finally
             {
