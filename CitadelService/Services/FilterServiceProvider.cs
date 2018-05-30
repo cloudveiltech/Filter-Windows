@@ -1054,7 +1054,16 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            m_filteringEngine = new WindowsProxyServer(new ProxyOptions()
+            {
+                BadCertificateCallback = OnBadCertificate,
+                FirewallCheckCallback = OnAppFirewallCheck,
+                MessageBeginCallback = OnHttpMessageBegin,
+                MessageEndCallback = OnHttpMessageEnd,
+                CertificateExemptions = new CertificateExemptions()
+            });
+
+            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // Setup general info, warning and error events.
             LoggerProxy.Default.OnInfo += EngineOnInfo;

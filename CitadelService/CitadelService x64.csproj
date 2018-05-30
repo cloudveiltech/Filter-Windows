@@ -58,6 +58,7 @@
     <Compile Include="Services\FilterServiceProvider.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
+    <Compile Include="Util\CertificateExemptions.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
@@ -90,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.CitadelCore.Windows">
-      <Version>1.3.14</Version>
+      <Version>2.0.2</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.DistillNET">
       <Version>1.4.6</Version>
