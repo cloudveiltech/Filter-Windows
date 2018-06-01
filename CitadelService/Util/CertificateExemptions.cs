@@ -9,108 +9,191 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using Citadel.Core.Windows.Util;
+using Microsoft.Data.Sqlite;
 
 namespace CitadelService.Util
 {
+    /// <summary>
+    /// This handler is for the filter provider system to hook into our certificate exemption system.
+    /// </summary>
+    /// <param name="request">The HttpWebRequest which caused this certificate exemption request.</param>
+    /// <param name="certificate">The X509Certificate which caused this exemption request.</param>
+    public delegate void AddExemptionRequestHandler(HttpWebRequest request, X509Certificate certificate);
+
     public class CertificateExemptions : ICertificateExemptions
     {
-        private string prepareDirectory()
+        private static string s_dbPath;
+
+        static CertificateExemptions()
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "exemption-requests");
+            s_dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "ssl-exemptions.db");
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
-            return path;
         }
 
-        static string Hash(string input)
+        public CertificateExemptions()
         {
-            using (SHA1Managed sha1 = new SHA1Managed())
-            {
-                var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(input));
-                var sb = new StringBuilder(hash.Length * 2);
+            m_logger = LoggerUtil.GetAppWideLogger();
 
-                foreach (byte b in hash)
+            try
+            {
+                SqliteConnection conn = openConnection(s_dbPath);
+
+                SqliteCommand command = conn.CreateCommand();
+
+                //                command.CommandText = "CREATE TABLE IF NOT EXISTS TriggerIndex (TriggerText VARCHAR(255), CategoryId INT16)";
+
+                command.CommandText = "CREATE TABLE IF NOT EXISTS cert_exemptions (Thumbprint VARCHAR(64), Host VARCHAR(1024), DateExempted VARCHAR(24), ExpireDate VARCHAR(24))";
+                command.ExecuteNonQuery();
+
+                command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS idx_thumbprint_host ON cert_exemptions (Thumbprint, Host)";
+                command.ExecuteNonQuery();
+
+                m_connection = conn;
+            } catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
+        }
+
+        private NLog.Logger m_logger;
+
+        private SqliteConnection m_connection;
+
+        private SqliteConnection openConnection(string dbPath)
+        {
+            SqliteConnectionStringBuilder cb = new SqliteConnectionStringBuilder();
+            cb.Cache = SqliteCacheMode.Shared;
+            cb.DataSource = dbPath;
+            cb.Mode = SqliteOpenMode.ReadWriteCreate;
+
+            SqliteConnection conn = new SqliteConnection(cb.ToString());
+            conn.Open();
+
+            return conn;
+        }
+
+        private bool isReaderRowCurrentlyExempted(SqliteDataReader reader)
+        {
+            // if DateExempted != NULL && (ExpireDate == NULL || ExpireDate > CurrentDate)
+            if (!reader.IsDBNull(2))
+            {
+                DateTime dateExempted;
+                if (!DateTime.TryParse(reader.GetString(2), out dateExempted))
                 {
-                    // can be "x2" if you want lowercase
-                    sb.Append(b.ToString("X2"));
+                    return false;
                 }
 
-                return sb.ToString();
+                if (!reader.IsDBNull(3))
+                {
+                    // ExpireDate == NULL
+                    return true;
+                }
+                else
+                {
+                    DateTime expireDate;
+                    if (!DateTime.TryParse(reader.GetString(3), out expireDate))
+                    {
+                        return false;
+                    }
+                    else if (DateTime.Now > expireDate)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                return false;
             }
         }
 
-        private string getCertPath(string host, X509Certificate certificate)
-        {
-            return Path.Combine(prepareDirectory(), $"{Hash(host)}-{certificate.GetCertHashString()}");
-        }
+        public event AddExemptionRequestHandler OnAddCertificateExemption;
 
         public void AddExemptionRequest(HttpWebRequest request, X509Certificate certificate)
         {
-            string path = prepareDirectory();
-            string certPath = getCertPath(request.Host, certificate);
-
-            if(File.Exists(certPath) && !IsExempted(request, certificate))
+            try
             {
-                File.Delete(certPath);
-            }
-
-            if(!File.Exists(certPath))
-            {
-                using (FileStream stream = File.Open(certPath, FileMode.Create))
-                using (StreamWriter writer = new StreamWriter(stream))
+                using (SqliteCommand command = m_connection.CreateCommand())
                 {
-                    writer.WriteLine($"{Convert.ToBase64String(Encoding.UTF8.GetBytes(request.Host))}|0");
+                    bool clearExemptionData = false;
+                    bool createExemptionData = false;
+
+                    SqliteParameter param0 = new SqliteParameter("$certHash", certificate.GetCertHashString());
+                    SqliteParameter param1 = new SqliteParameter("$host", request.Host);
+
+                    command.CommandText = $"SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
+                    command.Parameters.Add(param0);
+                    command.Parameters.Add(param1);
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            clearExemptionData = !isReaderRowCurrentlyExempted(reader);
+                        }
+                        else
+                        {
+                            createExemptionData = true;
+                        }
+                    }
+
+                    if (clearExemptionData)
+                    {
+                        command.CommandText = $"UPDATE cert_exemptions SET DateExempted = NULL, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
+                        command.ExecuteNonQuery();
+
+                        m_logger.Info("Attempting to add exemption 0");
+
+                        OnAddCertificateExemption?.Invoke(request, certificate);
+                    }
+                    else if (createExemptionData)
+                    {
+                        command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES (NULL, NULL, $certHash, $host)";
+                        command.ExecuteNonQuery();
+
+                        m_logger.Info("Attempting to add exemption createExemptionData");
+                        OnAddCertificateExemption?.Invoke(request, certificate);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
         }
 
         public bool IsExempted(HttpWebRequest request, X509Certificate certificate)
         {
-            string path = prepareDirectory();
-
-            string certPath = getCertPath(request.Host, certificate);
-
-            if (!File.Exists(certPath))
-            {
-                return false;
-            }
-
             try
             {
-                using (FileStream stream = File.OpenRead(certPath))
-                using (StreamReader reader = new StreamReader(stream))
+                using (SqliteCommand command = m_connection.CreateCommand())
                 {
-                    string exemptionText = reader.ReadToEnd();
+                    command.CommandText = "SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
+                    command.Parameters.Add(new SqliteParameter("$certHash", certificate.GetCertHashString()));
+                    command.Parameters.Add(new SqliteParameter("$host", request.Host));
 
-                    string[] parts = exemptionText.Split('|');
-
-                    string host = Encoding.UTF8.GetString(Convert.FromBase64String(parts[0]));
-                    int isExempted = 0;
-
-                    if(host != request.Host)
+                    using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        return false;
+                        if (reader.Read())
+                        {
+                            if (isReaderRowCurrentlyExempted(reader))
+                            {
+                                return true;
+                            }
+                        }
                     }
 
-                    if(!int.TryParse(parts[1], out isExempted))
-                    {
-                        return false;
-                    }
-
-                    return isExempted > 0;
+                    return false;
                 }
             }
             catch(Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
                 return false;
             }
-
-            return true;
         }
     }
 }

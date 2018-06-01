@@ -102,6 +102,23 @@ namespace Citadel.IPC
     /// </param>
     public delegate void DeactivationRequestHandler(DeactivationRequestEventArgs args);
 
+    public class CertificateExemptionEventArgs : EventArgs
+    {
+        public string Host { get; set; }
+        public string CertificateHash { get; set; }
+
+        public bool ExemptionGranted { get; set; }
+
+        public CertificateExemptionEventArgs(CertificateExemptionMessage msg)
+        {
+            Host = msg.Host;
+            CertificateHash = msg.CertificateHash;
+            ExemptionGranted = msg.ExemptionGranted;
+        }
+    }
+
+    public delegate void CertificateExemptionHandler(CertificateExemptionEventArgs args);
+
     /// <summary>
     /// Arguments for the AuthenticationRequestHandler delegate. 
     /// </summary>
@@ -237,6 +254,10 @@ namespace Citadel.IPC
         /// </summary>
         public RequestCaptivePortalDetectionHandler RequestCaptivePortalDetection;
 
+        /// <summary>
+        /// Delegate to be called when a client grants a certificate exemption.
+        /// </summary>
+        public CertificateExemptionHandler OnCertificateExemptionGranted;
         /// <summary>
         /// Our logger. 
         /// </summary>
@@ -573,6 +594,14 @@ namespace Citadel.IPC
         {
             var msg = new NotifyConfigUpdateMessage(result);
             msg.ReplyToId = replyToId;
+            PushMessage(msg);
+        }
+
+        public void NotifyAddCertificateExemption(string host, string certHash)
+        {
+            m_logger.Info("Sending certificate exemption");
+
+            var msg = new CertificateExemptionMessage(host, certHash, false);
             PushMessage(msg);
         }
 

@@ -326,6 +326,8 @@ namespace CitadelService.Services
 
         private TrustManager m_trustManager = new TrustManager();
 
+        private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
+
         /// <summary>
         /// Default ctor. 
         /// </summary>
@@ -1060,8 +1062,13 @@ namespace CitadelService.Services
                 FirewallCheckCallback = OnAppFirewallCheck,
                 MessageBeginCallback = OnHttpMessageBegin,
                 MessageEndCallback = OnHttpMessageEnd,
-                CertificateExemptions = new CertificateExemptions()
+                CertificateExemptions = m_certificateExemptions
             });
+
+            m_certificateExemptions.OnAddCertificateExemption += (request, certificate) =>
+            {
+                m_ipcServer.NotifyAddCertificateExemption(certificate.GetCertHashString(), request.Host);
+            };
 
             //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 

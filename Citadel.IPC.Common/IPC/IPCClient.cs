@@ -59,7 +59,9 @@ namespace Citadel.IPC
     public delegate void ServerUpdateRequestHandler(ServerUpdateQueryMessage msg);
 
     public delegate void CaptivePortalDetectionHandler(CaptivePortalDetectionMessage msg);
-    
+
+    public delegate void AddCertificateExemptionRequestHandler(CertificateExemptionMessage msg);
+
     /// <summary>
     /// A generic reply handler, called by IPC queue.
     /// </summary>
@@ -99,6 +101,8 @@ namespace Citadel.IPC
         public CaptivePortalDetectionHandler CaptivePortalDetectionReceived;
 
         public ClientGenericParameterlessHandler ServerUpdateStarting;
+
+        public AddCertificateExemptionRequestHandler AddCertificateExemptionRequest;
 
         /// <summary>
         /// Our logger.
@@ -278,6 +282,15 @@ namespace Citadel.IPC
                     CaptivePortalDetectionReceived?.Invoke(cast);
                 }
             }
+            else if(msgRealType == typeof(Messages.CertificateExemptionMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
+                var cast = (Messages.CertificateExemptionMessage)message;
+                if(cast != null)
+                {
+                    AddCertificateExemptionRequest?.Invoke(cast);
+                }
+            }
             else
             {
                 // Unknown type.
@@ -384,6 +397,12 @@ namespace Citadel.IPC
             });
         }
 
+        public void TrustCertificate(string host, string certificateHash)
+        {
+            var msg = new CertificateExemptionMessage(host, certificateHash, true);
+            PushMessage(msg);
+        }
+
         private void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)
         {
             var bf = new BinaryFormatter();
@@ -445,6 +464,7 @@ namespace Citadel.IPC
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
-#endregion
+
+        #endregion
     }
 }

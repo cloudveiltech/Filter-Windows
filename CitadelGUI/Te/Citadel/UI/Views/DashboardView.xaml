@@ -17,13 +17,11 @@
     xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     Width="716"
     Height="386"
-    d:DesignHeight="386"
-    d:DesignWidth="716"
     mc:Ignorable="d">
 
-    <local:BaseView.DataContext>
+    <UserControl.DataContext>
         <CitadelViewModels:DashboardViewModel />
-    </local:BaseView.DataContext>
+    </UserControl.DataContext>
     <Grid>
 
         <Controls:MetroAnimatedSingleRowTabControl x:Name="tabControl">
@@ -391,7 +389,15 @@
                         Content="Deactivate"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
-
+                    <Button
+                        Width="136"
+                        Margin="290,294,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding ViewSslExemptionsCommand}"
+                        Content="View Certificate Errors"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+                    
                     <Label
                         Width="258"
                         Margin="431,10,21,0"

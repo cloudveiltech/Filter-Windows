@@ -98,11 +98,29 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         private RelayCommand m_relinquishRelaxedPolicyCommand;
 
+        private RelayCommand m_viewSslExemptionsCommand;
+
         internal DashboardModel Model
         {
             get
             {
                 return m_model;
+            }
+        }
+
+        public RelayCommand ViewSslExemptionsCommand
+        {
+            get
+            {
+                if(m_viewSslExemptionsCommand == null)
+                {
+                    m_viewSslExemptionsCommand = new RelayCommand((Action)(() =>
+                    {
+                        ViewChangeRequest?.Invoke(typeof(SslExemptionsView));
+                    }));
+                }
+
+                return m_viewSslExemptionsCommand;
             }
         }
 

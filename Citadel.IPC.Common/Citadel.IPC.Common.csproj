@@ -61,6 +61,7 @@
     <Compile Include="IPC\Messages\BaseMessage.cs" />
     <Compile Include="IPC\Messages\BlockActionReviewRequestMessage.cs" />
     <Compile Include="IPC\Messages\CaptivePortalDetectionMessage.cs" />
+    <Compile Include="IPC\Messages\CertificateExemptionMessage.cs" />
     <Compile Include="IPC\Messages\ClientOnlyMessage.cs" />
     <Compile Include="IPC\Messages\ClientToClientMessage.cs" />
     <Compile Include="IPC\Messages\ClientUpdateResponseMessage.cs" />
