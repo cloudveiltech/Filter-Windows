@@ -123,12 +123,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1E20D0C42AE7498C939E64CEB39466E3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_1F62B0BB24584AFAA1E4D2222D5DC9D6"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -681,12 +675,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_951B9380582DF1E7083BB146B5B972DE"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_984323992CCA4461BD87E381BE9F78B8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1071,12 +1059,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_EAC6DDEDAD904D208C35317DC5611F8F"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_EC58DCDABD3B4D5AA90D020F00FAC869"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1217,12 +1199,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_F0C124D550A54888BE02441C747D2E2C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_EAC6DDEDAD904D208C35317DC5611F8F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1895,7 +1871,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.27.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.Core.Windows, Version=1.6.28.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_148CC296195E4DE4AF5E315B42903962"
@@ -2061,26 +2037,6 @@
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Runtime.InteropServices.dll"
             "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1E20D0C42AE7498C939E64CEB39466E3"
-            {
-            "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\MahApps.Metro.IconPacks.FontAwesome.pdb"
-            "TargetName" = "8:MahApps.Metro.IconPacks.FontAwesome.pdb"
             "Tag" = "8:"
             "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
             "Condition" = "8:"
@@ -2832,7 +2788,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.27.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Citadel.IPC.Common, Version=1.6.28.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_398F795140014139A8341D4A3631A382"
@@ -4841,32 +4797,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_951B9380582DF1E7083BB146B5B972DE"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
-                "ScatterAssemblies"
-                {
-                }
-            "SourcePath" = "8:System.Net.Http.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_984323992CCA4461BD87E381BE9F78B8"
             {
             "AssemblyRegister" = "3:1"
@@ -6499,7 +6429,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.27.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:CloudVeil, Version=1.6.28.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_E04DC48B2B174978938C41DBE2CDCD1B"
@@ -6757,37 +6687,6 @@
                     }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\System.Security.Cryptography.Csp.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EAC6DDEDAD904D208C35317DC5611F8F"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MahApps.Metro.IconPacks.FontAwesome, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_EAC6DDEDAD904D208C35317DC5611F8F"
-                    {
-                    "Name" = "8:MahApps.Metro.IconPacks.FontAwesome.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\MahApps.Metro.IconPacks.FontAwesome.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_BE7C8A748AB042DFB3B17E4D4E332955"
@@ -7221,7 +7120,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.27.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:FilterServiceProvider, Version=1.6.28.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_FD25275C822D42789F17D23041AB0BF2"
