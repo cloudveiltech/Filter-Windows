@@ -53,6 +53,9 @@ namespace Te.Citadel.UI.ViewModels
                     {
                         try
                         {
+
+                            SslCertificateExemptions.Remove(info);
+
                             Task.Run(() =>
                             {
                                 using (var ipcClient = new IPCClient())
@@ -80,9 +83,25 @@ namespace Te.Citadel.UI.ViewModels
 
         public SslExemptionsViewModel()
         {
-
+            SslCertificateExemptions = new ObservableCollection<SslExemptionInfo>();
         }
 
+        public void AddSslCertificateExemptionRequest(CertificateExemptionMessage msg)
+        {
+            foreach(var certExemption in SslCertificateExemptions)
+            {
+                if(certExemption.Host == msg.Host && certExemption.CertificateHash == msg.CertificateHash)
+                {
+                    return;
+                }
+            }
+
+            SslCertificateExemptions.Add(new SslExemptionInfo()
+            {
+                CertificateHash = msg.CertificateHash,
+                Host = msg.Host
+            });
+        }
         public void InitSslCertificateExemptions(Dictionary<string, CertificateExemptionMessage> certificateExemptionRequests)
         {
             SslCertificateExemptions = new ObservableCollection<SslExemptionInfo>();

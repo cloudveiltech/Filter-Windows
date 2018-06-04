@@ -466,6 +466,15 @@ namespace Citadel.IPC
                     RequestCaptivePortalDetection?.Invoke(cast);
                 }
             }
+            else if(msgRealType == typeof(Messages.CertificateExemptionMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
+                var cast = (Messages.CertificateExemptionMessage)message;
+                if(cast != null)
+                {
+                    this.OnCertificateExemptionGranted?.Invoke(new CertificateExemptionEventArgs(cast));
+                }
+            }
             else
             {
                 // Unknown type.
@@ -597,11 +606,11 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        public void NotifyAddCertificateExemption(string host, string certHash)
+        public void NotifyAddCertificateExemption(string host, string certHash, bool isTrusted)
         {
             m_logger.Info("Sending certificate exemption");
 
-            var msg = new CertificateExemptionMessage(host, certHash, false);
+            var msg = new CertificateExemptionMessage(host, certHash, isTrusted);
             PushMessage(msg);
         }
 

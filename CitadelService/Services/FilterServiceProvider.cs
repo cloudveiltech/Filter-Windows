@@ -733,6 +733,11 @@ namespace CitadelService.Services
                 {
                     m_dnsEnforcement.Trigger();
                 };
+
+                m_ipcServer.OnCertificateExemptionGranted = (msg) =>
+                {
+                    m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
+                };
             }
             catch(Exception ipce)
             {
@@ -1065,9 +1070,9 @@ namespace CitadelService.Services
                 CertificateExemptions = m_certificateExemptions
             });
 
-            m_certificateExemptions.OnAddCertificateExemption += (request, certificate) =>
+            m_certificateExemptions.OnAddCertificateExemption += (host, certHash, isTrusted) =>
             {
-                m_ipcServer.NotifyAddCertificateExemption(certificate.GetCertHashString(), request.Host);
+                m_ipcServer.NotifyAddCertificateExemption(host, certHash, isTrusted);
             };
 
             //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);

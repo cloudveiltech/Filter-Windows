@@ -294,6 +294,7 @@ namespace Citadel.IPC
             else
             {
                 // Unknown type.
+                m_logger.Info("Unknown type is {0}", msgRealType.Name);
             }
         }
 

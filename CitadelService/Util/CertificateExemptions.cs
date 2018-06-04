@@ -1,4 +1,11 @@
-﻿using CitadelCore.Net.Http;
+﻿/*
+* Copyright © 2018 Cloudveil Technology Inc.
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+using CitadelCore.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +25,7 @@ namespace CitadelService.Util
     /// </summary>
     /// <param name="request">The HttpWebRequest which caused this certificate exemption request.</param>
     /// <param name="certificate">The X509Certificate which caused this exemption request.</param>
-    public delegate void AddExemptionRequestHandler(HttpWebRequest request, X509Certificate certificate);
+    public delegate void AddExemptionRequestHandler(string host, string certHash, bool isTrusted);
 
     public class CertificateExemptions : ICertificateExemptions
     {
@@ -83,7 +90,7 @@ namespace CitadelService.Util
                     return false;
                 }
 
-                if (!reader.IsDBNull(3))
+                if (reader.IsDBNull(3))
                 {
                     // ExpireDate == NULL
                     return true;
@@ -112,6 +119,32 @@ namespace CitadelService.Util
         }
 
         public event AddExemptionRequestHandler OnAddCertificateExemption;
+
+        public void TrustCertificate(string host, string certHash)
+        {
+            try
+            {
+                using (SqliteCommand command = m_connection.CreateCommand())
+                {
+                    SqliteParameter dateString = new SqliteParameter("$dateString", DateTime.UtcNow.ToString("o"));
+                    SqliteParameter param0 = new SqliteParameter("$certHash", certHash);
+                    SqliteParameter param1 = new SqliteParameter("$host", host);
+
+                    command.CommandText = $"UPDATE cert_exemptions SET DateExempted = $dateString WHERE Thumbprint = $certHash AND Host = $host";
+                    command.Parameters.Add(dateString);
+                    command.Parameters.Add(param0);
+                    command.Parameters.Add(param1);
+
+                    command.ExecuteNonQuery();
+
+                    OnAddCertificateExemption?.Invoke(host, certHash, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
+        }
 
         public void AddExemptionRequest(HttpWebRequest request, X509Certificate certificate)
         {
@@ -145,17 +178,14 @@ namespace CitadelService.Util
                         command.CommandText = $"UPDATE cert_exemptions SET DateExempted = NULL, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
                         command.ExecuteNonQuery();
 
-                        m_logger.Info("Attempting to add exemption 0");
-
-                        OnAddCertificateExemption?.Invoke(request, certificate);
+                        OnAddCertificateExemption?.Invoke(request.Host, certificate.GetCertHashString(), false);
                     }
                     else if (createExemptionData)
                     {
                         command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES (NULL, NULL, $certHash, $host)";
                         command.ExecuteNonQuery();
 
-                        m_logger.Info("Attempting to add exemption createExemptionData");
-                        OnAddCertificateExemption?.Invoke(request, certificate);
+                        OnAddCertificateExemption?.Invoke(request.Host, certificate.GetCertHashString(), false);
                     }
                 }
             }

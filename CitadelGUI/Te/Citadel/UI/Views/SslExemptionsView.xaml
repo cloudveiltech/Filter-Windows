@@ -6,30 +6,30 @@
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
              xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
              mc:Ignorable="d" 
-             Width="386" Height="716">
-    <!--  Set data context to LoginViewModel.  -->
+             Width="716" Height="386">
+    <!--  Set data context to SslExemptionsViewModel.  -->
     <UserControl.DataContext>
         <CitadelViewModels:SslExemptionsViewModel />
     </UserControl.DataContext>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="64" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="120" />
             <ColumnDefinition Width="64" />
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="32" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="48" />
         </Grid.RowDefinitions>
 
         <DataGrid
             x:Name="m_sslExemptionsGrid"
+            Margin="8"
             Grid.Row="0"
             Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Margin="8"
+            Grid.ColumnSpan="3"
             x:FieldModifier="private"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
@@ -42,7 +42,7 @@
                                 Header="Host" />
 
                 <DataGridTextColumn
-                                Width="100*"
+                                Width="*"
                                 Binding="{Binding CertificateHash, Mode=OneWay}"
                                 Header="Certificate Hash" />
             </DataGrid.Columns>
@@ -65,10 +65,10 @@
             >
             <Button.Style>
                 <!--  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
-                <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
+                <Style BasedOn="{StaticResource AccentedSquareButtonStyle}" TargetType="Button">
                     <Setter Property="IsEnabled" Value="True" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ElementName=m_sslExemptionsGrid, Path=SelectedItem}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -77,12 +77,12 @@
         </Button>
 
         <Button
-            Grid.Column="2"
             Grid.Row="1"
-            Margin="8"
+            Grid.Column="2"
             Content="Back"
+            Margin="8"
             Command="{Binding BackToDashboardCommand}"
-            Style="{StaticResource AccentedSquareButtonStyle}"
+            Style="{StaticResource SquareButtonStyle}"
             />
     </Grid>
 </local:BaseView>

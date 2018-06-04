@@ -4,7 +4,21 @@
     * License, v. 2.0. If a copy of the MPL was not distributed with this
     * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-<local:BaseWindow x:Class="Te.Citadel.UI.Windows.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls" xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels" xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views" xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Te.Citadel.UI.Windows" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Title="" Width="724" Height="418" AllowsTransparency="False" BorderBrush="{DynamicResource AccentColorBrush}" GlowBrush="{DynamicResource AccentColorBrush}" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" mc:Ignorable="d">
+<local:BaseWindow
+    x:Class="Te.Citadel.UI.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+    xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+    xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views"
+    xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Te.Citadel.UI.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="" Width="724" Height="418" AllowsTransparency="False"
+    BorderBrush="{DynamicResource AccentColorBrush}" GlowBrush="{DynamicResource AccentColorBrush}"
+    ResizeMode="NoResize" WindowStartupLocation="CenterScreen" mc:Ignorable="d">
 
     <local:BaseWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -127,7 +141,5 @@
         </MetroControls:FlyoutsControl>
     </MetroControls:MetroWindow.Flyouts>-->
     
-    <Grid>
-        <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
-    </Grid>
+    <MetroControls:TransitioningContentControl Width="716" Height="386" x:Name="CurrentView" x:FieldModifier="internal" />
 </local:BaseWindow>

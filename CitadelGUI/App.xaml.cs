@@ -446,15 +446,23 @@ namespace Te.Citadel
 
                 m_ipcClient.AddCertificateExemptionRequest = (msg) =>
                 {
-                    var sslExemptionsModel = (SslExemptionsViewModel)m_sslExemptionsView.DataContext;
+                    Current.Dispatcher.BeginInvoke(
+                        System.Windows.Threading.DispatcherPriority.Normal,
+                        (Action)delegate ()
+                        {
+                            if (msg.ExemptionGranted)
+                            {
+                                this.OnNotifyUserRequest("Certificate Trusted", $"The certificate for {msg.Host} is now trusted.");
+                            }
+                            else
+                            {
+                                var sslExemptionsModel = (SslExemptionsViewModel)m_sslExemptionsView.DataContext;
 
-                    m_logger.Info("Adding certificate trust request to list. {0}", msg.Host);
+                                m_logger.Info("Adding certificate trust request to list. {0}", msg.Host);
 
-                    sslExemptionsModel.SslCertificateExemptions.Add(new SslExemptionInfo()
-                    {
-                        CertificateHash = msg.CertificateHash,
-                        Host = msg.Host
-                    });
+                                sslExemptionsModel.AddSslCertificateExemptionRequest(msg);
+                            }
+                        });
                 };
 
                 m_ipcClient.ConnectedToServer = () =>
