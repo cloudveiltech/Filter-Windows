@@ -1872,6 +1872,7 @@ namespace CitadelService.Services
 
             pageTemplate = pageTemplate.Replace("{{url_text}}", urlText);
             pageTemplate = pageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+            pageTemplate = pageTemplate.Replace("{{host}}", requestUri.Host);
 
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
