@@ -1693,14 +1693,19 @@ namespace CitadelService.Services
                             OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                             nextAction = ProxyNextAction.DropConnection;
 
-                            UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                            // Instead of going to an external API for information, we should do everything 
+                            // that we can locally.
+                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                            List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
+
+                            //UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
 
                             if (isHtml || hasReferer == false)
                             {
                                 // Only send HTML block page if we know this is a response of HTML we're blocking, or
                                 // if there is no referer (direct navigation).
                                 customBlockResponseContentType = "text/html";
-                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, resolvedCategories);
                             }
                             else
                             {
@@ -1719,14 +1724,15 @@ namespace CitadelService.Services
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                        List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
 
                         if(isHtml || hasReferer == false)
                         {
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, uriInfo);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, categories);
                         }
                         else
                         {
@@ -1801,12 +1807,12 @@ namespace CitadelService.Services
                     {
                         shouldBlock = true;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, categories, blockType, textCategory);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1828,7 +1834,6 @@ namespace CitadelService.Services
             var len = filters.Count;
             for(int i = 0; i < len; ++i)
             {
-                Console.WriteLine(filters[i].IsException);
                 if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matched = filters[i];
@@ -1840,9 +1845,51 @@ namespace CitadelService.Services
             return false;
         }
 
-        
+        /// <summary>
+        /// Use this function after you've determined that the filter should block a certain URI.
+        /// </summary>
+        /// <param name="filters"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        private List<int> GetAllCategoriesMatchingUrl(List<UrlFilter> filters, Uri request, NameValueCollection headers)
+        {
+            List<int> matchingCategories = new List<int>();
+
+            var len = filters.Count;
+            for(int i = 0; i < len; i++)
+            {
+                if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                {
+                    matchingCategories.Add(filters[i].CategoryId);
+                }
+            }
+
+            return matchingCategories;
+        }
+
+        private List<MappedFilterListCategoryModel> ResolveCategoriesFromIds(List<int> matchingCategories)
+        {
+            List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
+
+            int length = matchingCategories.Count;
+            var categoryValues = m_generatedCategoriesMap.Values;
+            foreach(var category in categoryValues)
+            {
+                for(int i = 0; i < length; i++)
+                {
+                    if (category.CategoryId == matchingCategories[i])
+                    {
+                        categories.Add(category);
+                    }
+                }
+            }
+
+            return categories;
+        }
+
         private string findCategoryFromUriInfo(int matchingCategory, UriInfo info)
         {
+            // If there's more than one category here that == 0, how are we to know which one is active?
             var results = info.results.Where(r => r.category_status == 0);
             foreach(var result in results)
             {
@@ -1877,7 +1924,7 @@ namespace CitadelService.Services
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
@@ -1906,10 +1953,21 @@ namespace CitadelService.Services
             unblockRequest += "?" + query;
 
             string relaxed_policy_message = "";
+            string matching_category = "";
+            string otherCategories = "";
 
             // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_generatedCategoriesMap.Values)
+            foreach (var entry in appliedCategories)
             {
+                if (matchingCategory == entry.CategoryId)
+                {
+                    matching_category = entry.ShortCategoryName;
+                }
+                else
+                {
+                    otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
+                }
+
                 if (entry is MappedBypassListCategoryModel)
                 {
                     if(matchingCategory == entry.CategoryId)
@@ -1921,13 +1979,15 @@ namespace CitadelService.Services
             }
 
             // Get category or block type.
-            string url_text = urlText == null ? "" : urlText, matching_category = "";
-            if (info != null && matchingCategory > 0 && blockType == BlockType.None)
+            string url_text = urlText == null ? "" : urlText;
+            if (matchingCategory > 0 && blockType == BlockType.None)
             {
-                matching_category = findCategoryFromUriInfo(matchingCategory, info);
+                // matching_category name already set.
             }
             else
             {
+                otherCategories = "";
+
                 switch (blockType)
                 {
                     case BlockType.None:
@@ -1957,6 +2017,7 @@ namespace CitadelService.Services
             blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
             blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
+            blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
             blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
 

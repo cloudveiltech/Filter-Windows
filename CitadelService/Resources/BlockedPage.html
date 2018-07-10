@@ -103,9 +103,15 @@ The line below is used by the filter tester to determine whether the filter is w
             line-height: 2.125rem;
         }
 
-        #generated_category_list {
+        p.category {
             font-weight: 700;
+            margin-bottom: 20px;
         }
+
+        p.category.other {
+            font-weight: 400;
+        }
+
     </style>
 </head>
 
@@ -116,9 +122,11 @@ The line below is used by the filter tester to determine whether the filter is w
 
         <!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
         <p><a href="{{url_text}}">{{friendly_url_text}}</a> was blocked because it was in the following category:</p>
-        <div id="generated_category_list">
+        <p class="category">
             {{matching_category}}
-        </div>
+        </p>
+
+        {{other_categories}}
 
         {{relaxed_policy_message}}
 
