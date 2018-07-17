@@ -229,6 +229,11 @@ namespace Te.Citadel
                 }
                 else
                 {
+                    if(File.Exists("debug-cloudveil"))
+                    {
+                        Debugger.Launch();
+                    }
+
                     // Just creating an instance of this will do the job of forcing our service to
                     // start. Letting it fly off into garbage collection land should have no effect.
                     // The service is self-sustaining after this point.

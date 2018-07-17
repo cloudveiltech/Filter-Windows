@@ -62,6 +62,8 @@ namespace Citadel.IPC
 
     public delegate void AddCertificateExemptionRequestHandler(CertificateExemptionMessage msg);
 
+    public delegate void DiagnosticsInfoHandler(DiagnosticsInfoMessage msg);
+
     /// <summary>
     /// A generic reply handler, called by IPC queue.
     /// </summary>
@@ -104,6 +106,8 @@ namespace Citadel.IPC
 
         public AddCertificateExemptionRequestHandler AddCertificateExemptionRequest;
 
+        public DiagnosticsInfoHandler OnDiagnosticsInfo;
+        
         /// <summary>
         /// Our logger.
         /// </summary>
@@ -291,6 +295,15 @@ namespace Citadel.IPC
                     AddCertificateExemptionRequest?.Invoke(cast);
                 }
             }
+            else if(msgRealType == typeof(Messages.DiagnosticsInfoMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsInfoMessage));
+                var cast = (Messages.DiagnosticsInfoMessage)message;
+                if(cast != null)
+                {
+                    OnDiagnosticsInfo?.Invoke(cast);
+                }
+            }
             else
             {
                 // Unknown type.
@@ -401,6 +414,13 @@ namespace Citadel.IPC
         public void TrustCertificate(string host, string certificateHash)
         {
             var msg = new CertificateExemptionMessage(host, certificateHash, true);
+            PushMessage(msg);
+        }
+
+        public void SendDiagnosticsEnable(bool enable)
+        {
+            var msg = new DiagnosticsMessage();
+            msg.EnableDiagnostics = enable;
             PushMessage(msg);
         }
 

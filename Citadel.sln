@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignInstallers", "SignInsta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterServiceTests", "FilterServiceTests\FilterServiceTests.csproj", "{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnosticsCollector", "DiagnosticsCollector\DiagnosticsCollector.csproj", "{57BBA90D-723B-4E24-9D55-C5EF92486D04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,14 @@ Global
 		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|Any CPU.Build.0 = Release|Any CPU
 		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|x86.ActiveCfg = Release|Any CPU
 		{359C129D-BE5B-4E93-94E1-D8E0D2B07C96}.Release|x86.Build.0 = Release|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Debug|x86.Build.0 = Debug|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Release|x86.ActiveCfg = Release|Any CPU
+		{57BBA90D-723B-4E24-9D55-C5EF92486D04}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -337,22 +337,40 @@ namespace CitadelService.Services
 
         private void OnStartup()
         {
+            if(File.Exists("debug-filterserviceprovider"))
+            {
+                Debugger.Launch();
+            }
+
             // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
-            // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+            bool consoleOutStatus = false;
+
             try
             {
+                // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+                // on service control manager.
                 m_logger = LoggerUtil.GetAppWideLogger();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 try
                 {
                     EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred while initializing logger: {ex.ToString()}");
                 }
-                catch(Exception ex2)
+                catch (Exception ex2)
                 {
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash. {ex.ToString()} \r\n{ex2.ToString()}");
                 }
+            }
+
+            try
+            {
+                Console.SetOut(new ConsoleLogWriter());
+                consoleOutStatus = true;
+            }
+            catch (Exception ex)
+            {
+
             }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -361,6 +379,11 @@ namespace CitadelService.Services
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);
+
+            if(!consoleOutStatus)
+            {
+                m_logger.Warn("Failed to link console output to file.");
+            }
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -737,6 +760,45 @@ namespace CitadelService.Services
                 m_ipcServer.OnCertificateExemptionGranted = (msg) =>
                 {
                     m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
+                };
+
+                m_ipcServer.OnDiagnosticsEnable = (msg) =>
+                {
+                    CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
+                };
+
+                // Hooks for CitadelCore diagnostics.
+                CitadelCore.Diagnostics.Collector.OnSessionReported += (webSession) =>
+                {
+                    m_logger.Info("OnSessionReported");
+
+                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
+                    {
+                        DiagnosticsType = DiagnosticsType.RequestSession,
+
+                        ClientRequestBody = webSession.ClientRequestBody,
+                        ClientRequestHeaders = webSession.ClientRequestHeaders,
+                        ClientRequestUri = webSession.ClientRequestUri,
+
+                        ServerRequestBody = webSession.ServerRequestBody,
+                        ServerRequestHeaders = webSession.ServerRequestHeaders,
+                        ServerRequestUri = webSession.ServerRequestUri,
+
+                        ServerResponseBody = webSession.ServerResponseBody,
+                        ServerResponseHeaders = webSession.ServerResponseHeaders,
+
+                        DateStarted = webSession.DateStarted,
+                        DateEnded = webSession.DateEnded
+                    });
+                };
+
+                CitadelCore.Diagnostics.Collector.OnBadSsl += (report) =>
+                {
+                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
+                    {
+                        Host = report.Host,
+                        RequestUri = report.RequestUri
+                    });
                 };
             }
             catch(Exception ipce)
@@ -1759,7 +1821,7 @@ namespace CitadelService.Services
 
         private void OnBadCertificate(Uri requestUrl, HttpRequestException requestException, out string customResponseContentType, out byte[] customResponse)
         {
-            WebException webEx = (requestException.InnerException as WebException);
+            WebException webEx = (requestException?.InnerException as WebException);
             var response = webEx?.Response;
 
             if(response != null)

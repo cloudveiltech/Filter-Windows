@@ -66,6 +66,7 @@
     <Compile Include="IPC\Messages\ClientToClientMessage.cs" />
     <Compile Include="IPC\Messages\ClientUpdateResponseMessage.cs" />
     <Compile Include="IPC\Messages\DeactivationMessage.cs" />
+    <Compile Include="IPC\Messages\DiagnosticsMessage.cs" />
     <Compile Include="IPC\Messages\FilterStatusMessage.cs" />
     <Compile Include="IPC\Messages\NotifyBlockActionMessage.cs" />
     <Compile Include="IPC\Messages\NotifyConfigUpdateMessage.cs" />
