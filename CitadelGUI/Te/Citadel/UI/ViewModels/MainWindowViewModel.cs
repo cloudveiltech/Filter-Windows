@@ -23,6 +23,36 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private bool m_isUserLoggedIn;
+        public bool IsUserLoggedIn
+        {
+            get
+            {
+                return m_isUserLoggedIn;
+            }
+
+            set
+            {
+                m_isUserLoggedIn = value;
+                RaisePropertyChanged(nameof(IsUserLoggedIn));
+            }
+        }
+
+        private string m_loggedInUser;
+        public string LoggedInUser
+        {
+            get
+            {
+                return m_loggedInUser;
+            }
+
+            set
+            {
+                m_loggedInUser = value;
+                RaisePropertyChanged(nameof(LoggedInUser));
+            }
+        }
+
         private bool m_showGuestNetwork;
 
         public bool ShowIsGuestNetwork

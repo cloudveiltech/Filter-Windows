@@ -274,6 +274,12 @@ namespace Te.Citadel
                             {
                                 // User needs to log in.
                                 BringAppToFocus();
+
+                                m_mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = false;
+                                });
+
                                 OnViewChangeRequest(typeof(LoginView));
                             }
                             break;
@@ -282,6 +288,14 @@ namespace Te.Citadel
                         case AuthenticationAction.ErrorNoInternet:
                         case AuthenticationAction.ErrorUnknown:
                             {
+                                m_logger.Info($"The logged in user is {authenticationFailureResult.Username}");
+
+                                m_mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).LoggedInUser = authenticationFailureResult.Username;
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = true;
+                                });
+
                                 OnViewChangeRequest(typeof(DashboardView));
                             }
                             break;

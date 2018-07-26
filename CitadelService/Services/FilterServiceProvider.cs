@@ -226,6 +226,12 @@ namespace CitadelService.Services
         private Timer m_cleanupLogsTimer;
 
         /// <summary>
+        /// Keep track of the last time we printed the username of the current user so we can output it
+        /// to the diagnostics log.
+        /// </summary>
+        private DateTime m_lastUsernamePrintTime = DateTime.MinValue;
+
+        /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
@@ -493,7 +499,7 @@ namespace CitadelService.Services
                                     case AuthenticationResult.Failure:
                                     {
                                         ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                     }
                                     break;
 
@@ -724,6 +730,10 @@ namespace CitadelService.Services
                         if (m_ipcServer.WaitingForAuth)
                         {
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                        }
+                        else
+                        {
+                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
                         }
                     }
                     catch(Exception ex)
@@ -2420,6 +2430,12 @@ namespace CitadelService.Services
 
             this.UpdateAndWriteList(false);
             this.CleanupLogs();
+
+            if(m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+            {
+                m_lastUsernamePrintTime = DateTime.Now;
+                m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
+            }
         }
 
         public const int LogCleanupIntervalInHours = 12;

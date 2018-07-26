@@ -566,7 +566,7 @@ namespace Citadel.IPC
         /// <param name="action">
         /// The authentication command which reflects the current auth state. 
         /// </param>
-        public void NotifyAuthenticationStatus(AuthenticationAction action, AuthenticationResultObject authenticationResult = null)
+        public void NotifyAuthenticationStatus(AuthenticationAction action, string username = null, AuthenticationResultObject authenticationResult = null)
         {
             // KF - I edited this function to take two arguments instead of one and then refactored all the code that calls it to pass in an AuthenticationResultObject
             switch (m_waitingForAuth)
@@ -592,7 +592,8 @@ namespace Citadel.IPC
                 authResult = authenticationResult;
             }
 
-            var msg = new AuthenticationMessage(action, authResult); // KF - Also added a constructor to AuthenticationMessage);
+            var msg = new AuthenticationMessage(action, authResult, username); // KF - Also added a constructor to AuthenticationMessage);
+
             PushMessage(msg);
         }
 
