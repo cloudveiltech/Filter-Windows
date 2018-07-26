@@ -89,7 +89,6 @@ namespace Citadel.Core.Windows.Util.Update
 #else
                     appInfo = await cli.GetStringAsync(m_appcastLocationUri);
 #endif
-
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
                     foreach(var item in feed.Items)
@@ -105,7 +104,7 @@ namespace Citadel.Core.Windows.Util.Update
 
                             if(StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
-                                m_logger.Info("Skipping app update in channel {0} because it doesn't match required channel {1}.", updateChannel, myUpdateChannel);
+                                m_logger.Info($"Skipping app update in channel {updateChannel} because it doesn't match required channel {myUpdateChannel}.", updateChannel, myUpdateChannel);
                                 continue;
                             }
 
@@ -115,11 +114,11 @@ namespace Citadel.Core.Windows.Util.Update
 
                             var thisUpdateVersion = Version.Parse(sparkleVersion);
 
-                            m_logger.Info("App version {0} detected in update channel. Checking if superior.", sparkleVersion);
+                            m_logger.Info($"App version {sparkleVersion} detected in update channel. Checking if superior.");
 
                             if(thisUpdateVersion > bestVersion)
                             {
-                                m_logger.Info("Available app update with version {0} is superior to current best version {1}.", bestVersion.ToString());
+                                m_logger.Info($"Available app update with version {thisUpdateVersion.ToString()} is superior to current best version {bestVersion.ToString()}.");
 
                                 bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
                                 bestVersion = thisUpdateVersion;
