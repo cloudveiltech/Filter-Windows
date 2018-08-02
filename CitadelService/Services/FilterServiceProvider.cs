@@ -226,6 +226,12 @@ namespace CitadelService.Services
         private Timer m_cleanupLogsTimer;
 
         /// <summary>
+        /// Keep track of the last time we printed the username of the current user so we can output it
+        /// to the diagnostics log.
+        /// </summary>
+        private DateTime m_lastUsernamePrintTime = DateTime.MinValue;
+
+        /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
@@ -337,22 +343,40 @@ namespace CitadelService.Services
 
         private void OnStartup()
         {
+            if(File.Exists("debug-filterserviceprovider"))
+            {
+                Debugger.Launch();
+            }
+
             // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
-            // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+            bool consoleOutStatus = false;
+
             try
             {
+                // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+                // on service control manager.
                 m_logger = LoggerUtil.GetAppWideLogger();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 try
                 {
                     EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred while initializing logger: {ex.ToString()}");
                 }
-                catch(Exception ex2)
+                catch (Exception ex2)
                 {
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash. {ex.ToString()} \r\n{ex2.ToString()}");
                 }
+            }
+
+            try
+            {
+                Console.SetOut(new ConsoleLogWriter());
+                consoleOutStatus = true;
+            }
+            catch (Exception ex)
+            {
+
             }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -361,6 +385,11 @@ namespace CitadelService.Services
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);
+
+            if(!consoleOutStatus)
+            {
+                m_logger.Warn("Failed to link console output to file.");
+            }
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -470,7 +499,7 @@ namespace CitadelService.Services
                                     case AuthenticationResult.Failure:
                                     {
                                         ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
+                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                     }
                                     break;
 
@@ -702,6 +731,10 @@ namespace CitadelService.Services
                         {
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
                         }
+                        else
+                        {
+                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -737,6 +770,45 @@ namespace CitadelService.Services
                 m_ipcServer.OnCertificateExemptionGranted = (msg) =>
                 {
                     m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
+                };
+
+                m_ipcServer.OnDiagnosticsEnable = (msg) =>
+                {
+                    CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
+                };
+
+                // Hooks for CitadelCore diagnostics.
+                CitadelCore.Diagnostics.Collector.OnSessionReported += (webSession) =>
+                {
+                    m_logger.Info("OnSessionReported");
+
+                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
+                    {
+                        DiagnosticsType = DiagnosticsType.RequestSession,
+
+                        ClientRequestBody = webSession.ClientRequestBody,
+                        ClientRequestHeaders = webSession.ClientRequestHeaders,
+                        ClientRequestUri = webSession.ClientRequestUri,
+
+                        ServerRequestBody = webSession.ServerRequestBody,
+                        ServerRequestHeaders = webSession.ServerRequestHeaders,
+                        ServerRequestUri = webSession.ServerRequestUri,
+
+                        ServerResponseBody = webSession.ServerResponseBody,
+                        ServerResponseHeaders = webSession.ServerResponseHeaders,
+
+                        DateStarted = webSession.DateStarted,
+                        DateEnded = webSession.DateEnded
+                    });
+                };
+
+                CitadelCore.Diagnostics.Collector.OnBadSsl += (report) =>
+                {
+                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
+                    {
+                        Host = report.Host,
+                        RequestUri = report.RequestUri
+                    });
                 };
             }
             catch(Exception ipce)
@@ -1693,14 +1765,19 @@ namespace CitadelService.Services
                             OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                             nextAction = ProxyNextAction.DropConnection;
 
-                            UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                            // Instead of going to an external API for information, we should do everything 
+                            // that we can locally.
+                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                            List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
+
+                            //UriInfo urlInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
 
                             if (isHtml || hasReferer == false)
                             {
                                 // Only send HTML block page if we know this is a response of HTML we're blocking, or
                                 // if there is no referer (direct navigation).
                                 customBlockResponseContentType = "text/html";
-                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, urlInfo);
+                                customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, resolvedCategories);
                             }
                             else
                             {
@@ -1719,14 +1796,15 @@ namespace CitadelService.Services
                         OnRequestBlocked(matchCategory, BlockType.Url, requestUrl, matchingFilter.OriginalRule);
                         nextAction = ProxyNextAction.DropConnection;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                        List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
 
                         if(isHtml || hasReferer == false)
                         {
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, uriInfo);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, matchCategory, categories);
                         }
                         else
                         {
@@ -1753,7 +1831,7 @@ namespace CitadelService.Services
 
         private void OnBadCertificate(Uri requestUrl, HttpRequestException requestException, out string customResponseContentType, out byte[] customResponse)
         {
-            WebException webEx = (requestException.InnerException as WebException);
+            WebException webEx = (requestException?.InnerException as WebException);
             var response = webEx?.Response;
 
             if(response != null)
@@ -1801,12 +1879,12 @@ namespace CitadelService.Services
                     {
                         shouldBlock = true;
 
-                        UriInfo uriInfo = WebServiceUtil.Default.LookupUri(requestUrl, true);
+                        List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
                         if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, uriInfo, blockType, textCategory);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(requestUrl, contentClassResult, categories, blockType, textCategory);
                         }
                         
                         OnRequestBlocked(contentClassResult, blockType, requestUrl);
@@ -1828,7 +1906,6 @@ namespace CitadelService.Services
             var len = filters.Count;
             for(int i = 0; i < len; ++i)
             {
-                Console.WriteLine(filters[i].IsException);
                 if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matched = filters[i];
@@ -1840,9 +1917,51 @@ namespace CitadelService.Services
             return false;
         }
 
-        
+        /// <summary>
+        /// Use this function after you've determined that the filter should block a certain URI.
+        /// </summary>
+        /// <param name="filters"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        private List<int> GetAllCategoriesMatchingUrl(List<UrlFilter> filters, Uri request, NameValueCollection headers)
+        {
+            List<int> matchingCategories = new List<int>();
+
+            var len = filters.Count;
+            for(int i = 0; i < len; i++)
+            {
+                if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                {
+                    matchingCategories.Add(filters[i].CategoryId);
+                }
+            }
+
+            return matchingCategories;
+        }
+
+        private List<MappedFilterListCategoryModel> ResolveCategoriesFromIds(List<int> matchingCategories)
+        {
+            List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
+
+            int length = matchingCategories.Count;
+            var categoryValues = m_generatedCategoriesMap.Values;
+            foreach(var category in categoryValues)
+            {
+                for(int i = 0; i < length; i++)
+                {
+                    if (category.CategoryId == matchingCategories[i])
+                    {
+                        categories.Add(category);
+                    }
+                }
+            }
+
+            return categories;
+        }
+
         private string findCategoryFromUriInfo(int matchingCategory, UriInfo info)
         {
+            // If there's more than one category here that == 0, how are we to know which one is active?
             var results = info.results.Where(r => r.category_status == 0);
             foreach(var result in results)
             {
@@ -1877,7 +1996,7 @@ namespace CitadelService.Services
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, UriInfo info, BlockType blockType = BlockType.None, string triggerCategory = "")
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
 
@@ -1906,10 +2025,21 @@ namespace CitadelService.Services
             unblockRequest += "?" + query;
 
             string relaxed_policy_message = "";
+            string matching_category = "";
+            string otherCategories = "";
 
             // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_generatedCategoriesMap.Values)
+            foreach (var entry in appliedCategories)
             {
+                if (matchingCategory == entry.CategoryId)
+                {
+                    matching_category = entry.ShortCategoryName;
+                }
+                else
+                {
+                    otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
+                }
+
                 if (entry is MappedBypassListCategoryModel)
                 {
                     if(matchingCategory == entry.CategoryId)
@@ -1921,13 +2051,15 @@ namespace CitadelService.Services
             }
 
             // Get category or block type.
-            string url_text = urlText == null ? "" : urlText, matching_category = "";
-            if (info != null && matchingCategory > 0 && blockType == BlockType.None)
+            string url_text = urlText == null ? "" : urlText;
+            if (matchingCategory > 0 && blockType == BlockType.None)
             {
-                matching_category = findCategoryFromUriInfo(matchingCategory, info);
+                // matching_category name already set.
             }
             else
             {
+                otherCategories = "";
+
                 switch (blockType)
                 {
                     case BlockType.None:
@@ -1957,6 +2089,7 @@ namespace CitadelService.Services
             blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
             blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
+            blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
             blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
 
@@ -2297,6 +2430,12 @@ namespace CitadelService.Services
 
             this.UpdateAndWriteList(false);
             this.CleanupLogs();
+
+            if(m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+            {
+                m_lastUsernamePrintTime = DateTime.Now;
+                m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
+            }
         }
 
         public const int LogCleanupIntervalInHours = 12;

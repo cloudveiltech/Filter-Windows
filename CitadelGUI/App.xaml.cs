@@ -229,6 +229,11 @@ namespace Te.Citadel
                 }
                 else
                 {
+                    if(File.Exists("debug-cloudveil"))
+                    {
+                        Debugger.Launch();
+                    }
+
                     // Just creating an instance of this will do the job of forcing our service to
                     // start. Letting it fly off into garbage collection land should have no effect.
                     // The service is self-sustaining after this point.
@@ -269,6 +274,12 @@ namespace Te.Citadel
                             {
                                 // User needs to log in.
                                 BringAppToFocus();
+
+                                m_mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = false;
+                                });
+
                                 OnViewChangeRequest(typeof(LoginView));
                             }
                             break;
@@ -277,6 +288,14 @@ namespace Te.Citadel
                         case AuthenticationAction.ErrorNoInternet:
                         case AuthenticationAction.ErrorUnknown:
                             {
+                                m_logger.Info($"The logged in user is {authenticationFailureResult.Username}");
+
+                                m_mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).LoggedInUser = authenticationFailureResult.Username;
+                                    ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = true;
+                                });
+
                                 OnViewChangeRequest(typeof(DashboardView));
                             }
                             break;

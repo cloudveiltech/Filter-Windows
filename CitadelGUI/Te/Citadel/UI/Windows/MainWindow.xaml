@@ -52,6 +52,16 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="UserIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsUserLoggedIn, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsUserLoggedIn, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </local:BaseWindow.Resources>
 
     <local:BaseWindow.DataContext>
@@ -61,6 +71,17 @@
     <local:BaseWindow.RightWindowCommands>
         <MetroControls:WindowCommands>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                <Label Content="{Binding LoggedInUser, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Foreground="White" />
+
+                <IconPacks:PackIconFontAwesome Width="20"
+                                               Height="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
+                                               Kind="User"
+                                               Style="{StaticResource UserIconStyle}"
+                                               ToolTip="User logged in" />
+
                 <Label Content="Internet " Foreground="White" />
                 <!--  Internet Disconnected Status Icon.  -->
                 <IconPacks:PackIconFontAwesome Width="20"

@@ -59,6 +59,8 @@
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
     <Compile Include="Util\CertificateExemptions.cs" />
+    <Compile Include="Util\ConsoleLog.cs" />
+    <Compile Include="Util\ConsoleLogWriter.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />

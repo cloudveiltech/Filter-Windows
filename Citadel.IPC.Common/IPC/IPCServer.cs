@@ -188,6 +188,8 @@ namespace Citadel.IPC
     /// <param name="message"></param>
     public delegate void RequestCaptivePortalDetectionHandler(CaptivePortalDetectionMessage message);
 
+    public delegate void DiagnosticsEnableHandler(DiagnosticsMessage message);
+
     /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
@@ -258,6 +260,12 @@ namespace Citadel.IPC
         /// Delegate to be called when a client grants a certificate exemption.
         /// </summary>
         public CertificateExemptionHandler OnCertificateExemptionGranted;
+
+        /// <summary>
+        /// Delegate to be called when a client enables diagnostics information.
+        /// </summary>
+        public DiagnosticsEnableHandler OnDiagnosticsEnable;
+
         /// <summary>
         /// Our logger. 
         /// </summary>
@@ -475,6 +483,15 @@ namespace Citadel.IPC
                     this.OnCertificateExemptionGranted?.Invoke(new CertificateExemptionEventArgs(cast));
                 }
             }
+            else if (msgRealType == typeof(Messages.DiagnosticsMessage))
+            {
+                m_logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsMessage));
+                var cast = (Messages.DiagnosticsMessage)message;
+                if (cast != null)
+                {
+                    this.OnDiagnosticsEnable?.Invoke(cast);
+                }
+            }
             else
             {
                 // Unknown type.
@@ -549,7 +566,7 @@ namespace Citadel.IPC
         /// <param name="action">
         /// The authentication command which reflects the current auth state. 
         /// </param>
-        public void NotifyAuthenticationStatus(AuthenticationAction action, AuthenticationResultObject authenticationResult = null)
+        public void NotifyAuthenticationStatus(AuthenticationAction action, string username = null, AuthenticationResultObject authenticationResult = null)
         {
             // KF - I edited this function to take two arguments instead of one and then refactored all the code that calls it to pass in an AuthenticationResultObject
             switch (m_waitingForAuth)
@@ -575,7 +592,8 @@ namespace Citadel.IPC
                 authResult = authenticationResult;
             }
 
-            var msg = new AuthenticationMessage(action, authResult); // KF - Also added a constructor to AuthenticationMessage);
+            var msg = new AuthenticationMessage(action, authResult, username); // KF - Also added a constructor to AuthenticationMessage);
+
             PushMessage(msg);
         }
 
@@ -624,6 +642,14 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
+        public void SendDiagnosticsInfo(DiagnosticsInfoV1 info)
+        {
+            var message = new DiagnosticsInfoMessage();
+            message.ObjectVersion = DiagnosticsVersion.V1;
+            message.Info = info;
+
+            PushMessage(message);
+        }
 
         private void PushMessage(BaseMessage msg)
         {
