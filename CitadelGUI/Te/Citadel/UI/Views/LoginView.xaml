@@ -16,8 +16,6 @@
                 xmlns:mvvmlight="clr-namespace:GalaSoft.MvvmLight;assembly=GalaSoft.MvvmLight"
                 Width="716"
                 Height="386"
-                d:DesignHeight="386"
-                d:DesignWidth="716"
                 mc:Ignorable="d" PreviewKeyDown="True">
 
     <!--  Set data context to LoginViewModel.  -->

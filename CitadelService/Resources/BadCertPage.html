@@ -112,9 +112,10 @@ The line below is used by the filter tester to determine whether the filter is w
     <div id="wrapper">
         <h1>SSL Certificate Error</h1>
         <p><a href="{{url_text}}">{{friendly_url_text}}</a> does not have a valid SSL certificate.</p>
-        <p>This could be due to any number of reasons. CloudVeil DNS filtering might be blocking the site. Another possibility is that the certificate is out of date or is self-signed.</p>
-        <h2>What can I do to fix it?</h2>
-        <p>Unfortunately, there's not a lot we can do for this at the moment. If you need access, you can request a deactivation or contact us at <a href="mailto:support@cloudveil.org">support@cloudveil.org</a> or <a href="tel:8887824962">(888) 782-4962</a> for assistance.</p>
+        <h2>What can I do to fix this?</h2>
+        <p>Open CloudVeil for Windows, go to 'Advanced' and click 'view certificate errors'. Then select the entry with host '{{host}}' and click 'trust certificate'</p>
+        <h2>Why did this happen?</h2>
+        <p>You tried to access a site that CloudVeil detected as not having a proper certificate. This might mean that the site is compromised. Proceed with caution.</p>
     </div>
 
     <script>

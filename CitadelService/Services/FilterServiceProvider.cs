@@ -58,13 +58,24 @@ namespace CitadelService.Services
         {
             try
             {
-                LogTime("Starting FilterServiceProvider");
-                OnStartup();
+                Thread thread = new Thread(OnStartup);
+                thread.Start();
+
+                //OnStartup();
             }
             catch(Exception e)
             {
                 // Critical failure.
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                try
+                {
+                    EventLog.CreateEventSource("FilterServiceProvider", "Application");
+                    EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred before logger was bootstrapped: {e.ToString()}");
+                } catch(Exception e2)
+                {
+                    File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
+                }
+
+                //LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
 
@@ -228,7 +239,7 @@ namespace CitadelService.Services
         /// <summary>
         /// Logger. 
         /// </summary>
-        private readonly Logger m_logger;
+        private Logger m_logger;
 
         /// <summary>
         /// This BackgroundWorker object handles initializing the application off the UI thread.
@@ -315,12 +326,34 @@ namespace CitadelService.Services
 
         private TrustManager m_trustManager = new TrustManager();
 
+        private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
+
         /// <summary>
         /// Default ctor. 
         /// </summary>
         public FilterServiceProvider()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
+        private void OnStartup()
+        {
+            // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
+            // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
+            try
+            {
+                m_logger = LoggerUtil.GetAppWideLogger();
+            }
+            catch(Exception ex)
+            {
+                try
+                {
+                    EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred while initializing logger: {ex.ToString()}");
+                }
+                catch(Exception ex2)
+                {
+                    File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash. {ex.ToString()} \r\n{ex2.ToString()}");
+                }
+            }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -331,12 +364,9 @@ namespace CitadelService.Services
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
-        }
 
-        private void OnStartup()
-        {
             // Load authtoken and email data from files.
-            if(WebServiceUtil.Default.AuthToken == null)
+            if (WebServiceUtil.Default.AuthToken == null)
             {
                 HttpStatusCode status;
                 byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
@@ -703,6 +733,11 @@ namespace CitadelService.Services
                 {
                     m_dnsEnforcement.Trigger();
                 };
+
+                m_ipcServer.OnCertificateExemptionGranted = (msg) =>
+                {
+                    m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
+                };
             }
             catch(Exception ipce)
             {
@@ -1026,7 +1061,21 @@ namespace CitadelService.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            m_filteringEngine = new WindowsProxyServer(new ProxyOptions()
+            {
+                BadCertificateCallback = OnBadCertificate,
+                FirewallCheckCallback = OnAppFirewallCheck,
+                MessageBeginCallback = OnHttpMessageBegin,
+                MessageEndCallback = OnHttpMessageEnd,
+                CertificateExemptions = m_certificateExemptions
+            });
+
+            m_certificateExemptions.OnAddCertificateExemption += (host, certHash, isTrusted) =>
+            {
+                m_ipcServer.NotifyAddCertificateExemption(host, certHash, isTrusted);
+            };
+
+            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // Setup general info, warning and error events.
             LoggerProxy.Default.OnInfo += EngineOnInfo;
@@ -1823,6 +1872,7 @@ namespace CitadelService.Services
 
             pageTemplate = pageTemplate.Replace("{{url_text}}", urlText);
             pageTemplate = pageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+            pageTemplate = pageTemplate.Replace("{{host}}", requestUri.Host);
 
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
@@ -1854,6 +1904,21 @@ namespace CitadelService.Services
 
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;
+
+            string relaxed_policy_message = "";
+
+            // Determine if URL is in the relaxed policy.
+            foreach (var entry in m_generatedCategoriesMap.Values)
+            {
+                if (entry is MappedBypassListCategoryModel)
+                {
+                    if(matchingCategory == entry.CategoryId)
+                    {
+                        relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
+                        break;
+                    }
+                }
+            }
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText, matching_category = "";
@@ -1893,6 +1958,7 @@ namespace CitadelService.Services
             blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
+            blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
 
             return Encoding.UTF8.GetBytes(blockPageTemplate);
         }
