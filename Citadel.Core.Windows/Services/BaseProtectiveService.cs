@@ -66,7 +66,11 @@ namespace Te.Citadel.Services
         /// <param name="isService">
         /// Whether or not the process we are protecting is a service. 
         /// </param>
-        public BaseProtectiveService(string processNameToObserve, bool isService)
+        /// <param name="ensureRunning">
+        /// Set to false if you don't want the constructor to ensure the service is already running.
+        /// I added this parameter so that we could make behavior of the FilterStarter more explicit.
+        /// </param>
+        public BaseProtectiveService(string processNameToObserve, bool isService, bool ensureRunning = true)
         {
             m_processToWatch = processNameToObserve;
             m_baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(BaseProtectiveService)).Location);
@@ -76,16 +80,23 @@ namespace Te.Citadel.Services
 
             m_isTargetService = isService;
 
-            EnsureAlreadyRunning();
+            if (ensureRunning)
+            {
+                EnsureAlreadyRunning();
+            }
         }
 
-        private void EnsureAlreadyRunning()
+        public void EnsureAlreadyRunning()
         {
+            Console.WriteLine($"EnsureAlreadyRunning {m_processToWatch}");
+
             foreach(var proc in Process.GetProcesses())
             {
-                if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase))
+                if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase) && !proc.HasExited)
                 {
                     // Found the process already alive. Return and do nothing.
+                    Console.WriteLine($"Process was alive {proc.HasExited}");
+
                     SetProcessHandle(proc);
                     return;
                 }
@@ -107,8 +118,16 @@ namespace Te.Citadel.Services
             }
 
             m_processHandle = proc;
-            m_processHandle.EnableRaisingEvents = true;
-            m_processHandle.Exited += OnProcExit;
+
+            try
+            {
+                m_processHandle.EnableRaisingEvents = true;
+                m_processHandle.Exited += OnProcExit;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error occurred while enabling event raising. {ex}");
+            }
         }
 
         private async void InfinitelyStartAwaitTarget()
