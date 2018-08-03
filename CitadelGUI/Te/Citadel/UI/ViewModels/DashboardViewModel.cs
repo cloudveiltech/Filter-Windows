@@ -472,6 +472,33 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private RelayCommand m_testDnsCommand;
+
+        public RelayCommand TestDnsCommand
+        {
+            get
+            {
+                if(m_testDnsCommand == null)
+                {
+                    m_testDnsCommand = new RelayCommand(() =>
+                    {
+                        FilterTesting test = new FilterTesting();
+                        test.OnFilterTestResult += Test_OnFilterTestResult;
+                        DiagnosticsEntries.Clear();
+                        testsPassed = 0;
+                        testsTotal = 0;
+
+                        Task.Run(() =>
+                        {
+                            test.TestDNS();
+                        });
+                    });
+                }
+
+                return m_testDnsCommand;
+            }
+        }
+
         private RelayCommand m_testSafeSearchCommand;
 
         public RelayCommand TestSafeSearchCommand
@@ -490,7 +517,7 @@ namespace Te.Citadel.UI.ViewModels
 
                         Task.Run(() =>
                         {
-                            test.TestDNS();
+                            test.TestDNSSafeSearch();
                         });
                     });
                 }
@@ -516,7 +543,7 @@ namespace Te.Citadel.UI.ViewModels
                 m_logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
             }
 
-            if(entry.Test == FilterTest.BlockingTest)
+            if(entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
             {
                 CitadelApp.Current.Dispatcher.InvokeAsync(() =>
                 {

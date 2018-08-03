@@ -1,14 +1,17 @@
 ﻿using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Net;
+using Citadel.IPC;
 using DNS.Client;
 using DNS.Protocol;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +20,7 @@ namespace CitadelService.Util
 {
     public delegate void CaptivePortalModeHandler(bool isCaptivePortal, bool isActive);
     public delegate void DnsEnforcementHandler(bool isEnforcementActive);
+    public delegate void DnsChangeEventHandler(bool flushSuccessful);
 
     internal class DnsEnforcement
     {
@@ -100,7 +104,7 @@ namespace CitadelService.Util
         /// 
         /// </summary>
         /// <param name="enableDnsFiltering">If true, this function enables DNS filtering with entries in the configuration.</param>
-        public void TryEnforce(bool enableDnsFiltering = true)
+        public void TryEnforce(bool sendDnsChangeEvents, bool enableDnsFiltering = true)
         {
             lock (m_dnsEnforcementLock)
             {
@@ -114,7 +118,7 @@ namespace CitadelService.Util
 
                             fn = (sender, e) =>
                             {
-                                this.SetDnsToDhcp();
+                                this.SetDnsToDhcp(sendDnsChangeEvents);
                                 m_provider.OnConfigLoaded -= fn;
                             };
 
@@ -122,7 +126,7 @@ namespace CitadelService.Util
                         }
                         else
                         {
-                            SetDnsToDhcp();
+                            SetDnsToDhcp(sendDnsChangeEvents);
                         }
                     }
                     else
@@ -146,6 +150,7 @@ namespace CitadelService.Util
                         if (primaryDns != null || secondaryDns != null)
                         {
                             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+                            bool ranUpdate = false;
 
                             foreach (var iface in ifaces)
                             {
@@ -162,8 +167,14 @@ namespace CitadelService.Util
 
                                 if (needsUpdate)
                                 {
+                                    ranUpdate = true;
                                     setDnsForNic(iface.Description, primaryDns, secondaryDns);
                                 }
+                            }
+
+                            if(ranUpdate)
+                            {
+                                OnDnsChanging(sendDnsChangeEvents);
                             }
 
                             lastPrimary = primaryDns;
@@ -172,7 +183,7 @@ namespace CitadelService.Util
                         else
                         {
                             // Neither primary nor secondary DNS are set. Clear them for our users.
-                            SetDnsToDhcp();
+                            SetDnsToDhcp(sendDnsChangeEvents);
                             lastPrimary = null;
                             lastSecondary = null;
                         }
@@ -185,7 +196,77 @@ namespace CitadelService.Util
             }
         }
 
-        private void SetDnsToDhcp()
+        private bool isDnsServerChanged(IPAddress ip, IPAddress last)
+        {
+            if(ip == null && last == null)
+            {
+                return false;
+            }
+
+            if((ip == null && last != null) || (ip != null && last == null))
+            {
+                return true;
+            }
+
+            if(!ip.Equals(last))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool areDnsServersChanging(IPAddress primary, IPAddress secondary)
+        {
+            bool primaryChanged = isDnsServerChanged(primary, lastPrimary);
+            bool secondaryChanged = isDnsServerChanged(secondary, lastSecondary);
+
+            return primaryChanged || secondaryChanged;
+        }
+
+        public event DnsChangeEventHandler DnsChanged;
+
+        private void OnDnsChanging(bool sendDnsChangeEvents)
+        {
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo("ipconfig", "/flushdns");
+            process.Start();
+            process.Exited += (sender, e) =>
+            {
+                if (sendDnsChangeEvents)
+                {
+                    DnsChanged?.Invoke(process.ExitCode == 0);
+                }
+            };
+        }
+
+        private void setDnsForNicToDhcp(string nicName)
+        {
+            using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+            {
+                using (var networkConfigs = networkConfigMng.GetInstances())
+                {
+                    foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
+                    {
+                        ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
+                        inParams["DNSServerSearchOrder"] = new string[0];
+                        ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
+                        UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
+
+                        if (ret != 0)
+                        {
+                            m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
+                        }
+                        else
+                        {
+                            m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SetDnsToDhcp(bool sendDnsChangeEvents)
         {
             m_logger.Info("Setting DNS to DHCP.");
 
@@ -214,31 +295,10 @@ namespace CitadelService.Util
                 return;
             }
 
-            var setDnsForNicToDhcp = new Action<string>((nicName) =>
+            if(areDnsServersChanging(primaryDns, secondaryDns))
             {
-                using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
-                {
-                    using (var networkConfigs = networkConfigMng.GetInstances())
-                    {
-                        foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
-                        {
-                            ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
-                            inParams["DNSServerSearchOrder"] = new string[0];
-                            ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
-                            UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
-
-                            if (ret != 0)
-                            {
-                                m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
-                            }
-                            else
-                            {
-                                m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
-                            }
-                        }
-                    }
-                }
-            });
+                OnDnsChanging(sendDnsChangeEvents);
+            }
 
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
 
@@ -464,7 +524,7 @@ namespace CitadelService.Util
 
         private bool isBehindCaptivePortal = false;
 
-        public async void Trigger()
+        public async void Trigger(bool sendDnsChangeEvents = false)
         {
             try
             {
@@ -474,14 +534,14 @@ namespace CitadelService.Util
                 {
                     m_logger.Info("DNS is down.");
 
-                    TryEnforce(enableDnsFiltering: false);
+                    TryEnforce(sendDnsChangeEvents, enableDnsFiltering: false);
                     return;
                 }
 
                 bool isCaptivePortal = await IsBehindCaptivePortal();
 
                 isBehindCaptivePortal = isCaptivePortal;
-                TryEnforce(enableDnsFiltering: !isCaptivePortal && isDnsUp);
+                TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
             {

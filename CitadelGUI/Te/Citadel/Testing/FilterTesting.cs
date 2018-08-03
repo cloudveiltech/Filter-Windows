@@ -16,7 +16,8 @@ namespace Te.Citadel.Testing
         YoutubeSafeSearchTest,
         AllTestsCompleted,
         ExceptionOccurred,
-        PixabaySafeSearchTest
+        PixabaySafeSearchTest,
+        DnsFilterTest
     }
 
     public class DiagnosticsEntry
@@ -179,6 +180,24 @@ namespace Te.Citadel.Testing
         }
 
         public void TestDNS()
+        {
+            try
+            {
+                string ip1, ip2, details;
+                bool result;
+
+                result = doUrlIpsMatch("https://testdns.cloudveil.org", "https://block.cloudveil.org", out ip1, out ip2);
+                details = result ? "DNS filtering is currently active on your computer." : "DNS filtering is not currently active on your computer.";
+
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.DnsFilterTest, result, details));
+            }
+            catch (Exception ex)
+            {
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, ex.ToString()) { Exception = ex });
+            }
+        }
+
+        public void TestDNSSafeSearch()
         {
             int testsPassed = 0;
             int testsFailed = 0;
