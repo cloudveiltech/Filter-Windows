@@ -20,6 +20,7 @@ using System.Windows;
 using NLog;
 using Te.Citadel.Util;
 using System.Diagnostics;
+using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 
 // Although we don't actually use Topshelf internally, we need
 // to have this using statement present, so that topshelf
@@ -31,6 +32,7 @@ using System.Diagnostics;
 using Topshelf;
 using Te.Citadel.Services;
 using Citadel.Core.Windows.Util;
+using Microsoft.Win32.TaskScheduler;
 
 namespace CitadelService.Services
 {
@@ -81,6 +83,8 @@ namespace CitadelService.Services
                 return s_instance;
             }
         }
+
+        private const string serviceCheckTaskName = "CloudVeilCheck";
 
         private ServiceSpawner()
         {
@@ -141,6 +145,39 @@ namespace CitadelService.Services
                     LoggerUtil.RecursivelyLogException(m_logger, e);
                 }
             }
+
+            try
+            {
+                using (TaskService service = new TaskService())
+                {
+                    Win32Task task = service.GetTask(serviceCheckTaskName);
+                    if(task != null)
+                    {
+                        service.RootFolder.DeleteTask(serviceCheckTaskName);
+                    }
+
+                    TaskDefinition def = service.NewTask();
+                    def.RegistrationInfo.Description = "Ensures that CloudVeil is running";
+                    def.Principal.LogonType = TaskLogonType.ServiceAccount;
+
+                    var thisAppDir = AppDomain.CurrentDomain.BaseDirectory;
+                    ExecAction action = new ExecAction(string.Format("{0}{1}.exe", thisAppDir, "FilterStarter.exe"));
+
+                    def.Actions.Add(action);
+
+                    LogonTrigger trigger = (LogonTrigger)def.Triggers.Add(new LogonTrigger());
+                    trigger.Delay = new TimeSpan(0, 2, 0);
+
+                    service.RootFolder.RegisterTaskDefinition(serviceCheckTaskName, def);
+                }
+            }
+            catch(Exception e)
+            {
+                if(m_logger != null)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                }
+            }
         }
 
         public void InitializeServices()
@@ -181,6 +218,12 @@ namespace CitadelService.Services
             // The sentinel service is special. It's the only that's going to watch us.
             // So, we need to code our process name into its source before compilation.
             if(sourceResourcePath.IndexOf("Sentinel", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                scriptContents = scriptContents.Replace("TARGET_APPLICATION_NAME", Process.GetCurrentProcess().ProcessName);
+            }
+
+            // FilterStarter will be the scheduled task which makes sure our filter service is running.
+            if(sourceResourcePath.IndexOf("FilterStarter", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 scriptContents = scriptContents.Replace("TARGET_APPLICATION_NAME", Process.GetCurrentProcess().ProcessName);
             }

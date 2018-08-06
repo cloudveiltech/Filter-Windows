@@ -2543,7 +2543,7 @@ namespace CitadelService.Services
         /// <summary>
         /// Queries the service provider for updated filtering rules. 
         /// </summary>
-        private void ReloadFilteringRules()
+        private void ReloadFilteringRules(bool isSyncButton = false)
         {
             LogTime("ReloadFilteringRules()");
 
@@ -2601,7 +2601,7 @@ namespace CitadelService.Services
                             }
 
                             // Enforce DNS if present.
-                            m_dnsEnforcement.Trigger();
+                            m_dnsEnforcement.Trigger(isSyncButton); // If sync button was pressed, send DNS change events if any are available.
 
                             // Setup blacklist or whitelisted apps.
                             foreach(var appName in m_userConfig.BlacklistedApplications)
