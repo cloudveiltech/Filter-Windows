@@ -3,6 +3,7 @@ using Citadel.IPC.Messages;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace DiagnosticsCollector
         {
             if(filename == null)
             {
-                filename = $"diag-{DateTime.Now.ToString("ddMMyyyyhhmmss")}";
+                filename = $"diag-{DateTime.Now.ToString("dd-MM-yyyy-hh-mm-ss")}";
             }
 
             SqliteConnection connection = new SqliteConnection($"Filename={filename}");
@@ -121,7 +122,16 @@ namespace DiagnosticsCollector
                         break;
 
                     case "compare-client-server-requests":
-                        CompareClientServerRequestHeaders();
+                        {
+                            string filename = null;
+
+                            if (commandParts.Length > 1)
+                            {
+                                filename = string.Join(" ", commandParts.Skip(1).ToArray());
+                            }
+
+                            CompareClientServerRequestHeaders(filename);
+                        }
                         break;
 
                     case "help":
@@ -215,6 +225,11 @@ namespace DiagnosticsCollector
 
         static void LoadDiagnostics(string filename)
         {
+            if(!File.Exists(filename))
+            {
+                Console.WriteLine($"File '{filename}' does not exist.");
+            }
+
             try
             {
                 SqliteConnection connection = GetDiagnosticsSqlConnection(filename, false);
@@ -228,128 +243,153 @@ namespace DiagnosticsCollector
             }
         }
 
-        static void CompareClientServerRequestHeaders()
+        static void CompareClientServerRequestHeaders(string filename = null)
         {
-            List<HeaderComparisons> comparisonResults = new List<HeaderComparisons>();
+            TextWriter writer = null;
 
-            using (SqliteCommand command = currentConnection.CreateCommand())
+            try
             {
-                command.CommandText = "SELECT client_request_headers, server_request_headers, client_request_uri FROM diagnostics;";
-
-                using (SqliteDataReader reader = command.ExecuteReader())
+                if (filename == null)
                 {
-                    while (reader.Read())
-                    {
-                        string clientHeaders = reader.IsDBNull(0) ? null : reader.GetString(0);
-                        string serverHeaders = reader.IsDBNull(1) ? null : reader.GetString(1);
-                        string clientUri = reader.IsDBNull(2) ? null : reader.GetString(2);
-
-                        var clientHeaderList = HeaderParser.Parse(clientHeaders);
-                        var serverHeaderList = HeaderParser.Parse(serverHeaders);
-
-                        if(clientHeaderList == null || serverHeaderList == null)
-                        {
-                            comparisonResults.Add(new HeaderComparisons()
-                            {
-                                Uri = clientUri,
-                                Comparisons = null
-                            });
-                        }
-                        else
-                        {
-                            var headerComparisonResults = HeaderParser.Compare(clientHeaderList, serverHeaderList);
-
-                            var headerComparisons = new HeaderComparisons()
-                            {
-                                Uri = clientUri,
-                                Comparisons = headerComparisonResults
-                            };
-
-                            comparisonResults.Add(headerComparisons);
-                        }
-                    }
-                }
-            }
-
-            StringBuilder completeReportBuilder = new StringBuilder();
-
-            StringBuilder reportBuilder = new StringBuilder();
-            foreach(var result in comparisonResults)
-            {
-                reportBuilder.AppendLine($"URI {result.Uri}");
-
-                int linesPrinted = 0;
-
-                if(result.Comparisons == null)
-                {
-                    reportBuilder.AppendLine($"Either client or server request headers was null.");
-                    linesPrinted++;
+                    writer = Console.Out;
                 }
                 else
                 {
-                    foreach (var comparison in result.Comparisons)
+                    writer = new StreamWriter(filename);
+                }
+
+                List<HeaderComparisons> comparisonResults = new List<HeaderComparisons>();
+
+                using (SqliteCommand command = currentConnection.CreateCommand())
+                {
+                    command.CommandText = "SELECT client_request_headers, server_request_headers, client_request_uri FROM diagnostics;";
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        switch (comparison.ModificationType)
+                        while (reader.Read())
                         {
-                            case ModificationType.Added:
-                                reportBuilder.AppendLine($"Added by proxy :: {comparison.HeaderKey}");
-                                linesPrinted++;
+                            string clientHeaders = reader.IsDBNull(0) ? null : reader.GetString(0);
+                            string serverHeaders = reader.IsDBNull(1) ? null : reader.GetString(1);
+                            string clientUri = reader.IsDBNull(2) ? null : reader.GetString(2);
 
-                                foreach (var value in comparison.ValueComparisons)
+                            var clientHeaderList = HeaderParser.Parse(clientHeaders);
+                            var serverHeaderList = HeaderParser.Parse(serverHeaders);
+
+                            if (clientHeaderList == null || serverHeaderList == null)
+                            {
+                                comparisonResults.Add(new HeaderComparisons()
                                 {
-                                    reportBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
-                                    linesPrinted++;
-                                }
-                                break;
+                                    Uri = clientUri,
+                                    Comparisons = null
+                                });
+                            }
+                            else
+                            {
+                                var headerComparisonResults = HeaderParser.Compare(clientHeaderList, serverHeaderList);
 
-                            case ModificationType.Removed:
-                                reportBuilder.AppendLine($"Removed by proxy :: {comparison.HeaderKey}");
-                                linesPrinted++;
-
-                                foreach (var value in comparison.ValueComparisons)
+                                var headerComparisons = new HeaderComparisons()
                                 {
-                                    reportBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
-                                    linesPrinted++;
-                                }
-                                break;
+                                    Uri = clientUri,
+                                    Comparisons = headerComparisonResults
+                                };
 
-                            case ModificationType.BothLists:
-                                StringBuilder innerBuilder = new StringBuilder();
-                                int innerLinesPrinted = 0;
-                                foreach (var value in comparison.ValueComparisons)
-                                {
-                                    if (value.ModificationType != ModificationType.BothLists)
-                                    {
-                                        innerBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
-                                        innerLinesPrinted++;
-                                    }
-                                }
-
-                                if (innerLinesPrinted > 0)
-                                {
-                                    reportBuilder.AppendLine($"Header values modified by proxy :: {comparison.HeaderKey}");
-                                    linesPrinted++;
-
-                                    reportBuilder.Append(innerBuilder);
-                                    linesPrinted += innerLinesPrinted;
-                                }
-
-                                break;
-
+                                comparisonResults.Add(headerComparisons);
+                            }
                         }
                     }
                 }
 
-                if (linesPrinted > 0)
-                {
-                    reportBuilder.AppendLine("--------------------------------------------");
-                    linesPrinted++;
+                StringBuilder completeReportBuilder = new StringBuilder();
 
-                    completeReportBuilder.Append(reportBuilder);
+                StringBuilder reportBuilder = new StringBuilder();
+                foreach (var result in comparisonResults)
+                {
+                    reportBuilder.AppendLine($"URI {result.Uri}");
+
+                    int linesPrinted = 0;
+
+                    if (result.Comparisons == null)
+                    {
+                        reportBuilder.AppendLine($"Either client or server request headers was null.");
+                        linesPrinted++;
+                    }
+                    else
+                    {
+                        foreach (var comparison in result.Comparisons)
+                        {
+                            switch (comparison.ModificationType)
+                            {
+                                case ModificationType.Added:
+                                    reportBuilder.AppendLine($"Added by proxy :: {comparison.HeaderKey}");
+                                    linesPrinted++;
+
+                                    foreach (var value in comparison.ValueComparisons)
+                                    {
+                                        reportBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
+                                        linesPrinted++;
+                                    }
+                                    break;
+
+                                case ModificationType.Removed:
+                                    reportBuilder.AppendLine($"Removed by proxy :: {comparison.HeaderKey}");
+                                    linesPrinted++;
+
+                                    foreach (var value in comparison.ValueComparisons)
+                                    {
+                                        reportBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
+                                        linesPrinted++;
+                                    }
+                                    break;
+
+                                case ModificationType.BothLists:
+                                    StringBuilder innerBuilder = new StringBuilder();
+                                    int innerLinesPrinted = 0;
+                                    foreach (var value in comparison.ValueComparisons)
+                                    {
+                                        if (value.ModificationType != ModificationType.BothLists)
+                                        {
+                                            innerBuilder.AppendLine($"\t{value.HeaderKey}: {value.Value}");
+                                            innerLinesPrinted++;
+                                        }
+                                    }
+
+                                    if (innerLinesPrinted > 0)
+                                    {
+                                        reportBuilder.AppendLine($"Header values modified by proxy :: {comparison.HeaderKey}");
+                                        linesPrinted++;
+
+                                        reportBuilder.Append(innerBuilder);
+                                        linesPrinted += innerLinesPrinted;
+                                    }
+
+                                    break;
+
+                            }
+                        }
+                    }
+
+                    if (linesPrinted > 0)
+                    {
+                        reportBuilder.AppendLine("--------------------------------------------");
+                        linesPrinted++;
+
+                        completeReportBuilder.Append(reportBuilder);
+                    }
+                }
+
+                writer.Write(completeReportBuilder.ToString());
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if(filename != null)
+                {
+                    writer.Close();
                 }
             }
-
-            Console.Write(completeReportBuilder.ToString());
         }
     }
 }

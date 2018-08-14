@@ -56,6 +56,18 @@ namespace CitadelService.Services
 
         public bool Start()
         {
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                if (m_logger != null)
+                {
+                    m_logger.Error((Exception)e.ExceptionObject);
+                }
+                else
+                {
+                    File.WriteAllText("filterserviceprovider-unhandled-exception.log", $"Exception occurred: {((Exception)e.ExceptionObject).Message}");
+                }
+            };
+
             try
             {
                 Thread thread = new Thread(OnStartup);
