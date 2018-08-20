@@ -312,6 +312,8 @@ namespace CitadelService.Services
                 }
             }
 
+            AppDomain.CurrentDomain.TypeResolve += CurrentDomain_TypeResolve;
+
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
@@ -733,6 +735,13 @@ namespace CitadelService.Services
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync();
+        }
+
+        private Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
+        {
+            m_logger.Error($"Type resolution failed. Type name: {args.Name}, loading assembly: {args.RequestingAssembly.FullName}");
+
+            return null;
         }
 
         private void updateTimerFrequency(object sender, EventArgs e)
