@@ -77,8 +77,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FilterServiceProvider.cs" />
     <Compile Include="Util\Accountability.cs" />
+    <EmbeddedResource Include="Services\FilterStarter.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
+    <Compile Include="Util\CertificateExemptions.cs" />
+    <Compile Include="Util\ConsoleLog.cs" />
+    <Compile Include="Util\ConsoleLogWriter.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
@@ -114,7 +118,7 @@
       <Version>3.0.10</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.DistillNET">
-      <Version>1.4.6</Version>
+      <Version>1.4.8</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>2.1.0</Version>
@@ -154,6 +158,8 @@
     </PackageReference>
     <PackageReference Include="WinDivertSharp">
       <Version>1.4.3.2</Version>
+    <PackageReference Include="TaskScheduler">
+      <Version>2.8.4</Version>
     </PackageReference>
     <PackageReference Include="WindowsFirewallHelper">
       <Version>1.4.6592.8627</Version>

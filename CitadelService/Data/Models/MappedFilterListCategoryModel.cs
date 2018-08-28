@@ -38,6 +38,14 @@ namespace CitadelService.Data.Models
             private set;
         }
 
+        public string ShortCategoryName
+        {
+            get
+            {
+                return CategoryName.Trim('/').Split('/')[1];
+            }
+        }
+
         /// <summary>
         /// Constructs a new MappedFilterListCategoryModel instance.
         /// </summary>

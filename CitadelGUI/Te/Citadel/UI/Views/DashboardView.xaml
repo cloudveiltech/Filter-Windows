@@ -17,9 +17,9 @@
     xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     mc:Ignorable="d">
 
-    <local:BaseView.DataContext>
+    <UserControl.DataContext>
         <CitadelViewModels:DashboardViewModel />
-    </local:BaseView.DataContext>
+    </UserControl.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -436,7 +436,15 @@
                         Content="Deactivate"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
-
+                    <Button
+                        Width="136"
+                        Margin="290,294,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding ViewSslExemptionsCommand}"
+                        Content="View Certificate Errors"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+                    
                     <Label
                         Width="258"
                         Margin="431,10,21,0"
@@ -465,5 +473,103 @@
                 </Grid>
             </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>-->
+            <!--<TabItem Header="Diagnostics">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="21" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Filter"
+                            Grid.Column="0"
+                            Grid.Row="1"
+                            Margin="4"
+                            Command="{Binding TestFilterCommand}"
+                            />
+
+                    <Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test DNS"
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            Margin="4"
+                            Command="{Binding TestDnsCommand}"
+                            />
+
+                    <Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Safe Search"
+                            Grid.Column="0"
+                            Grid.Row="3"
+                            Margin="4"
+                            Command="{Binding TestSafeSearchCommand}"
+                            />
+
+                    <DataGrid Grid.Column="1"
+                              Grid.Row="1"
+                              Grid.RowSpan="4"
+                              Margin="8"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              ItemsSource="{Binding DiagnosticsEntries}"
+                              VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn
+                                Width="24"
+                                Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Check"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding PassedVisibility}"
+                                                Foreground="#CC13EC08"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Times"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding FailedVisibility}"
+                                                Foreground="#CCFE090F"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding PassedText}"
+                                Header="Passed" />
+                            
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding TestText, Mode=OneWay}"
+                                Header="Test"/>
+
+                            <DataGridTemplateColumn
+                                Width="75"
+                                Header="...">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding ViewTestDetails}">Details</Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                
+            </TabItem>-->
+        </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>
 </local:BaseView>

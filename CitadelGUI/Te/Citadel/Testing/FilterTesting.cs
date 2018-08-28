@@ -16,7 +16,8 @@ namespace Te.Citadel.Testing
         YoutubeSafeSearchTest,
         AllTestsCompleted,
         ExceptionOccurred,
-        PixabaySafeSearchTest
+        PixabaySafeSearchTest,
+        DnsFilterTest
     }
 
     public class DiagnosticsEntry
@@ -55,6 +56,7 @@ namespace Te.Citadel.Testing
         /// </summary>
         public const string filterMagicString = "filtering:ok-J1ynoE8POR";
         public const string GoogleSafeSearchIp = "216.239.38.120";
+        public const string GoogleSafeSearchDomain = "forcesafesearch.google.com";
 
         public event FilterTestResultHandler OnFilterTestResult;
 
@@ -179,23 +181,36 @@ namespace Te.Citadel.Testing
 
         public void TestDNS()
         {
+            try
+            {
+                string ip1, ip2, details;
+                bool result;
+
+                result = doUrlIpsMatch("https://testdns.cloudveil.org", "https://block.cloudveil.org", out ip1, out ip2);
+                details = result ? "DNS filtering is currently active on your computer." : "DNS filtering is not currently active on your computer.";
+
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.DnsFilterTest, result, details));
+            }
+            catch (Exception ex)
+            {
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, ex.ToString()) { Exception = ex });
+            }
+        }
+
+        public void TestDNSSafeSearch()
+        {
             int testsPassed = 0;
             int testsFailed = 0;
 
             try
             {
-                string ip = this.getIpFromRequest("https://www.google.com");
-                if (ip == GoogleSafeSearchIp)
-                {
-                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.GoogleSafeSearchTest, true, string.Format("IP {0} matches IP {1}", ip, GoogleSafeSearchIp)));
-                }
-                else
-                {
-                    OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.GoogleSafeSearchTest, false, string.Format("IP {0} does not match expected IP {1}", ip, GoogleSafeSearchIp)));
-                }
-
                 string ip1, ip2, details;
                 bool result;
+
+                result = doUrlIpsMatch("https://www.google.com", "https://forcesafesearch.google.com", out ip1, out ip2);
+                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
+
+                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.GoogleSafeSearchTest, result, details));
 
                 result = doUrlIpsMatch("https://www.bing.com", "https://strict.bing.com", out ip1, out ip2);
                 details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);

@@ -106,6 +106,7 @@
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
     <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
@@ -134,6 +135,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\SslExemptionsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Te\Citadel\UI\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -156,6 +161,9 @@
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SslExemptionsView.xaml.cs">
+      <DependentUpon>SslExemptionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
     <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">

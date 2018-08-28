@@ -149,10 +149,10 @@ namespace Citadel.IPC.Messages
         /// <param name="authenticationResult">
         /// The authentication result returned by the web server to the service.
         /// </param>
-        public AuthenticationMessage(AuthenticationAction action, AuthenticationResultObject authenticationResult)
+        public AuthenticationMessage(AuthenticationAction action, AuthenticationResultObject authenticationResult, string username = null)
         {
             Action = action;
-            Username = string.Empty;
+            Username = username;
             Password = new byte[0];
             AuthenticationResult = authenticationResult;
         }

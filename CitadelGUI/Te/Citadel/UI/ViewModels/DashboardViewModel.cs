@@ -26,6 +26,30 @@ using Te.Citadel.Util;
 namespace Te.Citadel.UI.ViewModels
 { 
 
+    /// <summary>
+    /// Class for displaying block event information in a DataGrid.
+    /// </summary>
+    public class ViewableBlockedRequests : ObservableObject
+    {
+        public string CategoryName
+        {
+            get;
+            private set;
+        }
+
+        public string FullRequest
+        {
+            get;
+            private set;
+        }
+
+        public ViewableBlockedRequests(string category, string fullRequest)
+        {
+            this.CategoryName = category;
+            this.FullRequest = fullRequest;
+        }
+    }
+
     public class DashboardViewModel : BaseCitadelViewModel
     {
 
@@ -34,7 +58,6 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         private DashboardModel m_model = new DashboardModel();
 
-        /* start of HEAD edits FIXME */
         /// <summary>
         /// List of observable block actions that the user can view.
         /// </summary>
@@ -49,8 +72,7 @@ namespace Te.Citadel.UI.ViewModels
             BlockEvents = new ObservableCollection<ViewableBlockedRequests>();
             DiagnosticsEntries = new ObservableCollection<DiagnosticsEntryViewModel>();
         }
-        /* end of HEAD edits FIXME */
-        
+
         /// <summary>
         /// Private data member for the public DeactivateCommand property.
         /// </summary>
@@ -71,11 +93,30 @@ namespace Te.Citadel.UI.ViewModels
         /// </summary>
         private RelayCommand m_relinquishRelaxedPolicyCommand;
 
+        private RelayCommand m_viewSslExemptionsCommand;
+
         internal DashboardModel Model
         {
             get
             {
                 return m_model;
+            }
+        }
+
+        
+	public RelayCommand ViewSslExemptionsCommand
+        {
+            get
+            {
+                if(m_viewSslExemptionsCommand == null)
+                {
+                    m_viewSslExemptionsCommand = new RelayCommand((Action)(() =>
+                    {
+                        ViewChangeRequest?.Invoke(typeof(SslExemptionsView));
+                    }));
+                }
+
+                return m_viewSslExemptionsCommand;
             }
         }
 
@@ -406,6 +447,33 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private RelayCommand m_testDnsCommand;
+
+        public RelayCommand TestDnsCommand
+        {
+            get
+            {
+                if(m_testDnsCommand == null)
+                {
+                    m_testDnsCommand = new RelayCommand(() =>
+                    {
+                        FilterTesting test = new FilterTesting();
+                        test.OnFilterTestResult += Test_OnFilterTestResult;
+                        DiagnosticsEntries.Clear();
+                        testsPassed = 0;
+                        testsTotal = 0;
+
+                        Task.Run(() =>
+                        {
+                            test.TestDNS();
+                        });
+                    });
+                }
+
+                return m_testDnsCommand;
+            }
+        }
+
         private RelayCommand m_testSafeSearchCommand;
 
         public RelayCommand TestSafeSearchCommand
@@ -424,7 +492,7 @@ namespace Te.Citadel.UI.ViewModels
 
                         Task.Run(() =>
                         {
-                            test.TestDNS();
+                            test.TestDNSSafeSearch();
                         });
                     });
                 }
@@ -450,7 +518,7 @@ namespace Te.Citadel.UI.ViewModels
                 m_logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
             }
 
-            if(entry.Test == FilterTest.BlockingTest)
+            if(entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
             {
                 CitadelApp.Current.Dispatcher.InvokeAsync(() =>
                 {
