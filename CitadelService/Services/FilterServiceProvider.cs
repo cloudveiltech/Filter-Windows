@@ -312,8 +312,6 @@ namespace CitadelService.Services
                 }
             }
 
-            AppDomain.CurrentDomain.TypeResolve += CurrentDomain_TypeResolve;
-
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
@@ -1764,11 +1762,16 @@ namespace CitadelService.Services
             {
                 if(message.ProxyNextAction == ProxyNextAction.DropConnection)
                 {
+                    m_logger.Info("Response blocked: {0}", message.Url);
+
                     message.Make204NoContent();
 
                     if(customBlockResponse != null)
                     {
                         message.CopyAndSetBody(customBlockResponse, 0, customBlockResponse.Length, customBlockResponseContentType);
+                        message.StatusCode = HttpStatusCode.OK;
+
+                        m_logger.Info("Writing custom block response: {0} {1} {2}", message.Url, message.StatusCode, customBlockResponse.Length);
                     }
                 }
             }
