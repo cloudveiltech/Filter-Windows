@@ -118,7 +118,7 @@ namespace CitadelService.Util
 
                             fn = (sender, e) =>
                             {
-                                this.SetDnsToDhcp();
+                                this.SetDnsToDhcp(sendDnsChangeEvents);
                                 m_policyConfiguration.OnConfigurationLoaded -= fn;
                             };
 

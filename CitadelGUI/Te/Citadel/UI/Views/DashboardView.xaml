@@ -569,7 +569,7 @@
                     </DataGrid>
                 </Grid>
                 
-            </TabItem>-->
-        </Controls:MetroAnimatedSingleRowTabControl>
+            </TabItem>
+        </Controls:MetroAnimatedSingleRowTabControl> -->
     </Grid>
 </local:BaseView>

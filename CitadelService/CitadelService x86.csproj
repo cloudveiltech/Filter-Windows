@@ -84,6 +84,7 @@
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
     <Compile Include="Util\DnsEnforcement.cs" />
+    <Compile Include="Util\ICertificateExemptions.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <Compile Include="Util\WebServiceUtil.cs" />

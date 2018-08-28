@@ -761,7 +761,7 @@ namespace CitadelService.Services
                     m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
                 };
 
-                m_ipcServer.OnDiagnosticsEnable = (msg) =>
+                /*m_ipcServer.OnDiagnosticsEnable = (msg) =>
                 {
                     CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
                 };
@@ -798,7 +798,7 @@ namespace CitadelService.Services
                         Host = report.Host,
                         RequestUri = report.RequestUri
                     });
-                };
+                };*/
             }
             catch(Exception ipce)
             {
@@ -1072,7 +1072,8 @@ namespace CitadelService.Services
                 FirewallCheckCallback = OnAppFirewallCheck,
                 NewHttpMessageHandler = OnHttpMessageBegin,
                 HttpMessageStreamedInspectionHandler = OnHttpStreamResponseInspection,
-                HttpMessageWholeBodyInspectionHandler = OnHttpWholeBodyResponseInspection
+                HttpMessageWholeBodyInspectionHandler = OnHttpWholeBodyResponseInspection,
+                BadCertificateHandler = OnBadCertificate
             });
 
 
@@ -1723,7 +1724,7 @@ namespace CitadelService.Services
 
                             // Instead of going to an external API for information, we should do everything 
                             // that we can locally.
-                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, message.Url, message.Headers);
                             List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
 
                             if (isHtml || hasReferer == false)
@@ -1731,7 +1732,7 @@ namespace CitadelService.Services
                                 // Only send HTML block page if we know this is a response of HTML we're blocking, or
                                 // if there is no referer (direct navigation).
                                 customBlockResponseContentType = "text/html";
-                                customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, urlInfo);
+                                customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, resolvedCategories);
                             }
                             else
                             {
@@ -1750,7 +1751,7 @@ namespace CitadelService.Services
                         OnRequestBlocked(matchCategory, BlockType.Url, message.Url, matchingFilter.OriginalRule);
                         message.ProxyNextAction = ProxyNextAction.DropConnection;
 
-                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, requestUrl, parsedHeaders);
+                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, message.Url, message.Headers);
                         List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
 
                         if (isHtml || hasReferer == false)
@@ -1758,7 +1759,7 @@ namespace CitadelService.Services
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, uriInfo);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, categories);
                         }
                         else
                         {
@@ -1785,12 +1786,16 @@ namespace CitadelService.Services
                 {
                     // There is currently no way to change an HTTP message to a response outside of CitadelCore.
                     // so, change it to a 204 and then modify the status code to what we want it to be.
+                    m_logger.Info("Response blocked: {0}", message.Url);
+
                     message.Make204NoContent();
 
-                    if(customBlockResponse != null)
+                    if (customBlockResponse != null)
                     {
                         message.CopyAndSetBody(customBlockResponse, 0, customBlockResponse.Length, customBlockResponseContentType);
                         message.StatusCode = HttpStatusCode.OK;
+
+                        m_logger.Info("Writing custom block response: {0} {1} {2}", message.Url, message.StatusCode, customBlockResponse.Length);
                     }
                 }
             }
@@ -1839,7 +1844,7 @@ namespace CitadelService.Services
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, contentClassResult, uriInfo, blockType, textCategory);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, contentClassResult, categories, blockType, textCategory);
                             message.ProxyNextAction = ProxyNextAction.DropConnection;
                         }
 
@@ -1871,19 +1876,14 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnBadCertificate(Uri requestUrl, HttpRequestException requestException, out string customResponseContentType, out byte[] customResponse)
+        private void OnBadCertificate(HttpMessageInfo info)
         {
-            WebException webEx = (requestException.InnerException as WebException);
-            var response = webEx?.Response;
+            info.Make204NoContent();
 
-            if(response != null)
-            {
-                // Figure out what's going on with the response.
-                m_logger.Info("Response returned from bad SSL.");
-            }
+            byte[] customResponse = getBadSslPageWithResolvedTemplates(info.Url, Encoding.UTF8.GetString(m_badSslHtmlPage));
 
-            customResponseContentType = "text/html";
-            customResponse = getBadSslPageWithResolvedTemplates(requestUrl, Encoding.UTF8.GetString(m_badSslHtmlPage));
+            info.CopyAndSetBody(customResponse, 0, customResponse.Length, "text/html");
+            info.StatusCode = HttpStatusCode.OK;
         }
 
         private bool CheckIfFiltersApply(List<UrlFilter> filters, Uri request, NameValueCollection headers, out UrlFilter matched, out short matchedCategory)
@@ -1918,7 +1918,7 @@ namespace CitadelService.Services
             var len = filters.Count;
             for(int i = 0; i < len; i++)
             {
-                if(m_categoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matchingCategories.Add(filters[i].CategoryId);
                 }
@@ -1932,7 +1932,7 @@ namespace CitadelService.Services
             List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
             int length = matchingCategories.Count;
-            var categoryValues = m_generatedCategoriesMap.Values;
+            var categoryValues = m_policyConfiguration.GeneratedCategoriesMap.Values;
             foreach(var category in categoryValues)
             {
                 for(int i = 0; i < length; i++)
@@ -2023,7 +2023,7 @@ namespace CitadelService.Services
                 {
                     matching_category = entry.ShortCategoryName;
                 }
-                else
+                else if(appliedCategories.Any(m => m.CategoryId == entry.CategoryId))
                 {
                     otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
                 }

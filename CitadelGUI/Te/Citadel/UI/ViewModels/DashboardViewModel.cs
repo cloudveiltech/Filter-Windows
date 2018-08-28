@@ -24,32 +24,7 @@ using Te.Citadel.UI.Views;
 using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.ViewModels
-{ 
-
-    /// <summary>
-    /// Class for displaying block event information in a DataGrid.
-    /// </summary>
-    public class ViewableBlockedRequests : ObservableObject
-    {
-        public string CategoryName
-        {
-            get;
-            private set;
-        }
-
-        public string FullRequest
-        {
-            get;
-            private set;
-        }
-
-        public ViewableBlockedRequests(string category, string fullRequest)
-        {
-            this.CategoryName = category;
-            this.FullRequest = fullRequest;
-        }
-    }
-
+{
     public class DashboardViewModel : BaseCitadelViewModel
     {
 
