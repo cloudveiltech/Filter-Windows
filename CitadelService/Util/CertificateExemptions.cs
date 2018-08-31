@@ -17,6 +17,7 @@ using System.Net;
 using System.Security.Cryptography;
 using Citadel.Core.Windows.Util;
 using Microsoft.Data.Sqlite;
+using System.Net.Security;
 
 namespace CitadelService.Util
 {
@@ -224,6 +225,29 @@ namespace CitadelService.Util
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
                 return false;
             }
+        }
+
+        public bool CertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            HttpWebRequest request = (HttpWebRequest)sender;
+
+            try
+            {
+                if (IsExempted(request, certificate))
+                {
+                    return true;
+                }
+                else
+                {
+                    AddExemptionRequest(request, certificate);
+                }
+            }
+            catch(Exception ex)
+            {
+                m_logger.Error(ex);
+            }
+
+            return false;
         }
     }
 }

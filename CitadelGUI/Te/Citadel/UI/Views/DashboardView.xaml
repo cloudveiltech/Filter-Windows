@@ -27,7 +27,13 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" Background="{StaticResource FlatButtonBackgroundBrush}">
-            <Grid.RowDefinitions>
+            <CitadelControls:Sidebar>
+                <CitadelControls:SidebarButton>
+                    History
+                </CitadelControls:SidebarButton>
+            </CitadelControls:Sidebar>
+            
+            <!--<Grid.RowDefinitions>
                 <RowDefinition Height="48"></RowDefinition>
                 <RowDefinition Height="48"></RowDefinition>
                 <RowDefinition Height="48"></RowDefinition>
@@ -66,7 +72,7 @@
                           Content="Advanced"
                           Style="{StaticResource MetroFlatToggleButton}"
                           Click="Click_SidebarButton" CommandParameter="advanced"
-                          Grid.Row="3" />
+                          Grid.Row="3" />-->
         </Grid>
 
         <Controls:TransitioningContentControl Grid.Column="1" x:Name="CurrentView" x:FieldModifier="internal" />

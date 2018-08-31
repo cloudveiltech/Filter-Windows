@@ -761,7 +761,7 @@ namespace CitadelService.Services
                     m_certificateExemptions.TrustCertificate(msg.Host, msg.CertificateHash);
                 };
 
-                /*m_ipcServer.OnDiagnosticsEnable = (msg) =>
+                m_ipcServer.OnDiagnosticsEnable = (msg) =>
                 {
                     CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
                 };
@@ -791,14 +791,8 @@ namespace CitadelService.Services
                     });
                 };
 
-                CitadelCore.Diagnostics.Collector.OnBadSsl += (report) =>
-                {
-                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
-                    {
-                        Host = report.Host,
-                        RequestUri = report.RequestUri
-                    });
-                };*/
+                ServicePointManager.ServerCertificateValidationCallback += m_certificateExemptions.CertificateValidationCallback;
+
             }
             catch(Exception ipce)
             {
