@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -44,11 +45,22 @@ namespace Te.Citadel.UI.Controls
     ///     <MyNamespace:Sidebar/>
     ///
     /// </summary>
-    public class Sidebar : Control
+    [ContentProperty("Content")]
+    public class Sidebar : ItemsControl
     {
         static Sidebar()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Sidebar), new FrameworkPropertyMetadata(typeof(Sidebar)));
         }
+
+        public object Content
+        {
+            get { return GetValue(MainContentProperty); }
+            set { SetValue(MainContentProperty, value); }
+        }
+
+        public static readonly DependencyProperty MainContentProperty =
+            DependencyProperty.Register("Content", typeof(object), typeof(Sidebar), null);
+
     }
 }

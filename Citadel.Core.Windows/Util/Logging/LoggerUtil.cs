@@ -38,10 +38,10 @@ namespace Citadel.Core.Windows.Util
 
             while(e != null)
             {
-                logger.Error(e.Message);
+                logger.Error($"{e.GetType().Name}: {e.Message}");
                 logger.Error(e.StackTrace);
 
-                Debug.WriteLine(e.Message);
+                Debug.WriteLine($"{e.GetType().Name}: {e.Message}");
                 Debug.WriteLine(e.StackTrace);
 
                 e = e.InnerException;

@@ -3,17 +3,27 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Te.Citadel.UI.Controls">
 
+    <SolidColorBrush x:Key="SidebarButtonBorderBrush" Color="#cccccc" />
 
     <Style TargetType="{x:Type local:SidebarButton}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:SidebarButton}">
                     <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
+                            BorderBrush="{StaticResource SidebarButtonBorderBrush}"
+                            BorderThickness="2"
+                            Padding="0,16,0,16"
+                            x:Name="SidebarButtonBorder"
+                            Cursor="Hand"
+                            >
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center" />
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="Blue" TargetName="SidebarButtonBorder" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -27,7 +37,7 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <ContentPresenter HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Top" />
+                                          VerticalAlignment="Top"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -26,12 +26,17 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Background="{StaticResource FlatButtonBackgroundBrush}">
-            <CitadelControls:Sidebar>
-                <CitadelControls:SidebarButton>
-                    History
-                </CitadelControls:SidebarButton>
-            </CitadelControls:Sidebar>
+        <Grid Grid.Column="0">
+            <ItemsControl>
+                <ItemsControl.Items>
+                    <CitadelControls:SidebarButton Content="Blocked Pages" />
+                    <CitadelControls:SidebarButton Content="Self-moderation" />
+                    <CitadelControls:SidebarButton Content="Time Restrictions" />
+                    <CitadelControls:SidebarButton Content="Relaxed Policy" />
+                    <CitadelControls:SidebarButton Content="Advanced" />
+                    <CitadelControls:SidebarButton Content="Support" />
+                </ItemsControl.Items>
+            </ItemsControl>
             
             <!--<Grid.RowDefinitions>
                 <RowDefinition Height="48"></RowDefinition>
