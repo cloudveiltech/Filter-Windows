@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Citadel.Core.Windows.Util;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +53,30 @@ namespace Te.Citadel.UI.Controls
         static SidebarButton()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(SidebarButton), new FrameworkPropertyMetadata(typeof(SidebarButton)));
+        }
+
+        private Control parent;
+
+        public SidebarButton()
+        {
+            LoggerUtil.GetAppWideLogger().Info("Parent type of sidebar button is {0}", Parent.GetType().Name);
+            Control parent = Parent as Control;
+
+            if(parent != null)
+            {
+                parent.SizeChanged += Parent_SizeChanged;
+                this.parent = parent;
+            }
+        }
+
+        private void Parent_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            LoggerUtil.GetAppWideLogger().Info("Parent_SizeChanged {0}", this.parent.ActualHeight);
+
+            int children = VisualTreeHelper.GetChildrenCount(this.parent);
+            double myHeight = this.parent.ActualHeight / children;
+
+            SetValue(Control.HeightProperty, myHeight);
         }
 
         public object Content

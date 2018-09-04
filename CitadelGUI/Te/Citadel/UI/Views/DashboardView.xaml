@@ -27,7 +27,7 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            <ItemsControl>
+            <ItemsControl VerticalAlignment="Stretch" BorderBrush="AliceBlue" BorderThickness="1">
                 <ItemsControl.Items>
                     <CitadelControls:SidebarButton Content="Blocked Pages" />
                     <CitadelControls:SidebarButton Content="Self-moderation" />
@@ -35,6 +35,7 @@
                     <CitadelControls:SidebarButton Content="Relaxed Policy" />
                     <CitadelControls:SidebarButton Content="Advanced" />
                     <CitadelControls:SidebarButton Content="Support" />
+                    <CitadelControls:SidebarButton Content="Diagnostics" />
                 </ItemsControl.Items>
             </ItemsControl>
             
