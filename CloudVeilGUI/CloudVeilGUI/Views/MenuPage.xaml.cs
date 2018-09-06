@@ -18,8 +18,13 @@ namespace CloudVeilGUI.Views
 
             menuItems = new List<HomeMenuItem>
             {
-                new HomeMenuItem {Id = MenuItemType.Browse, Title="Browse" },
-                new HomeMenuItem {Id = MenuItemType.About, Title="About" }
+                new HomeMenuItem { Id = MenuItemType.BlockedPages, Title = "Blocked Pages" },
+                new HomeMenuItem { Id = MenuItemType.SelfModeration, Title = "Self-moderation" },
+                new HomeMenuItem { Id = MenuItemType.TimeRestrictions, Title = "Time Restrictions" },
+                new HomeMenuItem { Id = MenuItemType.RelaxedPolicy, Title = "Relaxed Policy" },
+                new HomeMenuItem { Id = MenuItemType.Advanced, Title = "Advanced" },
+                new HomeMenuItem { Id = MenuItemType.Support, Title = "Support" },
+                new HomeMenuItem { Id = MenuItemType.Diagnostics, Title = "Diagnostics" }
             };
 
             ListViewMenu.ItemsSource = menuItems;

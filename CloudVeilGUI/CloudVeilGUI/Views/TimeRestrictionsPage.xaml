@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CloudVeilGUI.Views.TimeRestrictionsPage">
+    <ContentPage.Content>
+        <StackLayout Margin="32">
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Time Restrictions"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="End"
+                       Margin="0,0,8,0" />
+                <Switch IsToggled="{Binding IsTimeRestrictionsEnabled}" />
+            </StackLayout>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="AUTO" />
+                    <ColumnDefinition Width="AUTO" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="AUTO" />
+                    <RowDefinition Height="AUTO" />
+                </Grid.RowDefinitions>
+
+                <Label Text="From"
+                       Grid.Column="0"
+                       Grid.Row="0"
+                       VerticalOptions="Center"
+                       />
+                <TimePicker
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    Time="{Binding FromTime}" />
+
+                <Label Text="To"
+                       Grid.Column="0"
+                       Grid.Row="1"
+                       VerticalOptions="Center"
+                       />
+                <TimePicker
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Time="{Binding ToTime}"/>
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

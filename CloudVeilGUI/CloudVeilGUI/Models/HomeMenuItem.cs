@@ -6,9 +6,15 @@ namespace CloudVeilGUI.Models
 {
     public enum MenuItemType
     {
-        Browse,
-        About
+        BlockedPages,
+        SelfModeration,
+        TimeRestrictions,
+        RelaxedPolicy,
+        Advanced,
+        Support,
+        Diagnostics
     }
+
     public class HomeMenuItem
     {
         public MenuItemType Id { get; set; }

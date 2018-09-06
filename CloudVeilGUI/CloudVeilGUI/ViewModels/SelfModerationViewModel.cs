@@ -10,6 +10,34 @@ using CloudVeilGUI.Views;
 
 namespace CloudVeilGUI.ViewModels
 {
+    public class SelfModerationViewModel : BaseViewModel
+    {
+        public ObservableCollection<SelfModerationEntry> SelfModerationEntries { get; set; }
+        
+        public SelfModerationViewModel()
+        {
+            Title = "Self-moderation";
+            SelfModerationEntries = new ObservableCollection<SelfModerationEntry>();
+
+            SelfModerationEntries.Add(new SelfModerationEntry { Url = "bbc.com", SelfModerationType = SelfModerationType.Blacklist });
+            SelfModerationEntries.Add(new SelfModerationEntry { Url = "npr.org", SelfModerationType = SelfModerationType.Blacklist });
+        }
+    }
+}
+
+/*
+ * using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+
+using CloudVeilGUI.Models;
+using CloudVeilGUI.Views;
+
+namespace CloudVeilGUI.ViewModels
+{
     public class ItemsViewModel : BaseViewModel
     {
         public ObservableCollection<Item> Items { get; set; }
@@ -21,12 +49,12 @@ namespace CloudVeilGUI.ViewModels
             Items = new ObservableCollection<Item>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
-            /*MessagingCenter.Subscribe<NewItemPage, Item>(this, "AddItem", async (obj, item) =>
+            MessagingCenter.Subscribe<NewItemPage, Item>(this, "AddItem", async (obj, item) =>
             {
                 var newItem = item as Item;
                 Items.Add(newItem);
                 await DataStore.AddItemAsync(newItem);
-            });*/
+            });
         }
 
         async Task ExecuteLoadItemsCommand()
@@ -56,3 +84,4 @@ namespace CloudVeilGUI.ViewModels
         }
     }
 }
+*/

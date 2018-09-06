@@ -15,9 +15,10 @@ namespace CloudVeilGUI.Views
         {
             InitializeComponent();
 
-            MasterBehavior = MasterBehavior.Popover;
+            MasterBehavior = MasterBehavior.Split;
 
-            MenuPages.Add((int)MenuItemType.Browse, (NavigationPage)Detail);
+            // Not sure whats going on here?
+            MenuPages.Add((int)MenuItemType.BlockedPages, (NavigationPage)Detail);
         }
 
         public async Task NavigateFromMenu(int id)
@@ -26,11 +27,32 @@ namespace CloudVeilGUI.Views
             {
                 switch (id)
                 {
-                    case (int)MenuItemType.Browse:
-                        MenuPages.Add(id, new NavigationPage(new ItemsPage()));
+                    case (int)MenuItemType.BlockedPages:
+                        MenuPages.Add(id, new NavigationPage(new BlockedPagesPage()));
                         break;
-                    case (int)MenuItemType.About:
-                        MenuPages.Add(id, new NavigationPage(new AboutPage()));
+
+                    case (int)MenuItemType.SelfModeration:
+                        MenuPages.Add(id, new NavigationPage(new SelfModerationPage()));
+                        break;
+
+                    case (int)MenuItemType.TimeRestrictions:
+                        MenuPages.Add(id, new NavigationPage(new TimeRestrictionsPage()));
+                        break;
+
+                    case (int)MenuItemType.RelaxedPolicy:
+                        MenuPages.Add(id, new NavigationPage(new RelaxedPolicyContentPage()));
+                        break;
+
+                    case (int)MenuItemType.Advanced:
+                        MenuPages.Add(id, new NavigationPage(new AdvancedPage()));
+                        break;
+
+                    case (int)MenuItemType.Support:
+                        MenuPages.Add(id, new NavigationPage(new SupportPage()));
+                        break;
+
+                    case (int)MenuItemType.Diagnostics:
+                        MenuPages.Add(id, new NavigationPage(new DiagnosticsPage()));
                         break;
                 }
             }
@@ -43,8 +65,6 @@ namespace CloudVeilGUI.Views
 
                 if (Device.RuntimePlatform == Device.Android)
                     await Task.Delay(100);
-
-                IsPresented = false;
             }
         }
     }

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CloudVeilGUI.Views.RelaxedPolicyContentPage">
+    <ContentPage.Content>
+        <Grid Margin="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="6*" />
+            </Grid.ColumnDefinitions>
+
+            <StackLayout>
+                <Label FontSize="Large" Text="Relaxed Policy" />
+
+                <Label LineBreakMode="WordWrap">
+                    If your administrator has configured your policy to include the ability to relax restrictions on certain websites, you can use the relaxed filtering rules for the given time span below.
+                </Label>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="AUTO" />
+                        <ColumnDefinition Width="64" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="AUTO" />
+                        <RowDefinition Height="AUTO" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Column="0" Grid.Row="0" Text="Uses Available:" />
+                    <Label Grid.Column="1" Grid.Row="0" Text="3" />
+                    <Label Grid.Column="0" Grid.Row="1" Text="Time Permitted:" />
+                    <Label Grid.Column="1" Grid.Row="1" Text="00:15" />
+                </Grid>
+
+                <Button Text="Use Relaxed Policy" />
+                <Button Text="Relinquish Relaxed Policy" />
+            </StackLayout>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

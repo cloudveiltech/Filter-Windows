@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CloudVeilGUI.Views.SupportPage">
+    <ContentPage.Content>
+        <Grid Margin="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="6*" />
+            </Grid.ColumnDefinitions>
+
+            <StackLayout>
+                <Label>
+                    Spicy jalapeno bacon ipsum dolor amet occaecat turducken ground round fatback tail ea est nulla capicola et aute adipisicing. Ipsum meatloaf cow leberkas frankfurter, chuck exercitation turducken kielbasa veniam quis. Veniam cow dolore buffalo dolore ad. Kevin nostrud short ribs hamburger ground round aute proident ex exercitation turkey velit ham hock.
+                </Label>
+                <Button Text="Request Support Session" />
+            </StackLayout>
+        </Grid>
+        
+    </ContentPage.Content>
+</ContentPage>
