@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI.csproj">
-      <Project>{048EFC1C-63EB-41D1-A86C-8983011B4A2E}</Project>
+      <Project>{B5CCE52E-6D69-4F28-857A-1C546022A2A5}</Project>
       <Name>CloudVeilGUI</Name>
     </ProjectReference>
   </ItemGroup>
