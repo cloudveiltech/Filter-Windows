@@ -192,52 +192,19 @@ namespace Te.Citadel
 
             if(!mainServiceViable)
             {
-                var id = WindowsIdentity.GetCurrent();
-
-                var principal = new WindowsPrincipal(id);
-                if(principal.IsInRole(WindowsBuiltInRole.Administrator))
+                try
                 {
-                    needRestartAsAdmin = false;
+                    ProcessStartInfo startupInfo = new ProcessStartInfo();
+                    startupInfo.FileName = "FilterAgent.Windows.exe";
+                    startupInfo.Arguments = "start";
+                    startupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startupInfo.Verb = "runas";
+                    startupInfo.CreateNoWindow = true;
+                    Process.Start(startupInfo);
                 }
-                else
+                catch(Exception ex)
                 {
-                    needRestartAsAdmin = id.Owner == id.User;
-                }
-
-                if(needRestartAsAdmin)
-                {
-                    m_logger.Info("Restarting as admin.");
-
-                    try
-                    {
-                        // Restart program and run as admin
-                        ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
-                        updaterStartupInfo.FileName = "cmd.exe";
-                        updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
-                        updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                        updaterStartupInfo.Verb = "runas";
-                        updaterStartupInfo.CreateNoWindow = true;
-                        Process.Start(updaterStartupInfo);
-                    }
-                    catch(Exception se)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, se);
-                    }
-
-                    Environment.Exit(-1);
-                    return;
-                }
-                else
-                {
-                    if(File.Exists("debug-cloudveil"))
-                    {
-                        Debugger.Launch();
-                    }
-
-                    // Just creating an instance of this will do the job of forcing our service to
-                    // start. Letting it fly off into garbage collection land should have no effect.
-                    // The service is self-sustaining after this point.
-                    var provider = new ServiceRunner();
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
                 }
             }
 
