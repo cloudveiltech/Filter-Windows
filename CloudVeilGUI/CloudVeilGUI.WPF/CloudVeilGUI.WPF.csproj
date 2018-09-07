@@ -37,6 +37,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NamedPipeWrapper, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Com.TechnikEmpire.NamedPipeWrapper.1.5.0\lib\net40\NamedPipeWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NLog.4.5.9\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
@@ -44,7 +50,13 @@
       <HintPath>..\..\packages\OpenTK.GLControl.1.1.2349.61993\lib\NET40\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -91,6 +103,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
+    <Compile Include="Platform\Windows\WindowsIPCClient.cs" />
+    <Compile Include="Platform\Windows\WindowsPlatformServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -119,6 +134,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
+      <Project>{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}</Project>
+      <Name>Citadel.Core.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
+      <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
+      <Name>Citadel.IPC.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI.csproj">
       <Project>{b5cce52e-6d69-4f28-857a-1c546022a2a5}</Project>
       <Name>CloudVeilGUI</Name>
@@ -133,4 +156,8 @@
     <Error Condition="!Exists('..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets'))" />
   </Target>
   <Import Project="..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
+xcopy /E /Y /C "$(ProjectDir)..\..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

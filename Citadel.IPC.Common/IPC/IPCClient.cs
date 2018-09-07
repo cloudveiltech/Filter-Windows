@@ -7,7 +7,6 @@
 
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
-using NamedPipeWrapper;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -71,12 +70,9 @@ namespace Citadel.IPC
     /// <returns></returns>
     public delegate bool GenericReplyHandler(BaseMessage msg);
 
-    public class IPCClient : IDisposable
+    public abstract class IPCClient : IDisposable
     {
-
-        private NamedPipeClient<BaseMessage> m_client;
-
-        private IPCMessageTracker m_ipcQueue;
+        protected IPCMessageTracker ipcQueue;
 
         public ClientGenericParameterlessHandler ConnectedToServer;
 
@@ -111,45 +107,47 @@ namespace Citadel.IPC
         /// <summary>
         /// Our logger.
         /// </summary>
-        private readonly Logger m_logger;
+        protected readonly Logger logger;
 
         /// <summary>
         /// All message handlers get added to this IPC client as it will stick around and handle all the incoming messages.
         /// </summary>
-        public static IPCClient Default { get; set; }
+        private static IPCClient s_default;
+        public static IPCClient Default
+        {
+            get
+            {
+                if(s_default == null)
+                {
+                    throw new NullReferenceException("You must specify a Default IPCClient before using it.");
+                }
+
+                return s_default;
+            }
+
+            set
+            {
+                s_default = value;
+            }
+        }
 
         public static IPCClient InitDefault()
         {
+            throw new NotImplementedException("Use PlatformServices.Default.CreateIPCClient() instead.");
+        }
+
+        /*{
             Default = new IPCClient(true);
             return Default;
-        }
+        }*/
 
         public IPCClient(bool autoReconnect = false)
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
-
-            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerPrint.Value).ToLower();
-
-            m_logger.Info("Creating client.");
-
-            m_client = new NamedPipeClient<BaseMessage>(channel);
-            
-            m_client.Connected += OnConnected;
-            m_client.Disconnected += OnDisconnected;
-            m_client.ServerMessage += OnServerMessage;
-            m_client.AutoReconnect = autoReconnect;
-
-            m_client.Error += M_client_Error;
-
-            m_client.Start();
-
-            m_ipcQueue = new IPCMessageTracker();
+            logger = LoggerUtil.GetAppWideLogger();
+            ipcQueue = new IPCMessageTracker();
         }
 
-        public void WaitForConnection()
-        {
-            m_client.WaitForConnection();
-        }
+        public abstract void WaitForConnection();
 
         public AuthenticationMessage GetAuthMessage()
         {
@@ -158,43 +156,43 @@ namespace Citadel.IPC
 
         private void M_client_Error(Exception exception)
         {   
-            LoggerUtil.RecursivelyLogException(m_logger, exception);
+            LoggerUtil.RecursivelyLogException(logger, exception);
         }
 
-        private void OnConnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        protected void OnConnected()
         {
             ConnectedToServer?.Invoke();
         }
 
-        private void OnDisconnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        protected void OnDisconnected()
         {
             DisconnectedFromServer?.Invoke();
         }
 
-        private void OnServerMessage(NamedPipeConnection<BaseMessage, BaseMessage> connection, BaseMessage message)
+        protected void OnServerMessage(BaseMessage message)
         {
             // This is so gross, but unfortuantely we can't just switch on a type.
             // We can come up with a nice mapping system so we can do a switch,
             // but this can wait.
 
-            if(Default.m_ipcQueue.HandleMessage(message))
+            if(Default.ipcQueue.HandleMessage(message))
             {
                 return;
             }
 
-            if(m_ipcQueue.HandleMessage(message))
+            if(ipcQueue.HandleMessage(message))
             {
                 return;
             }
 
-            m_logger.Debug("Got IPC message from server.");
+            logger.Debug("Got IPC message from server.");
 
             var msgRealType = message.GetType();
 
             if(msgRealType == typeof(AuthenticationMessage))
             {
                 AuthMessage = (AuthenticationMessage)message;
-                m_logger.Debug("Server message is {0}", nameof(AuthenticationMessage));
+                logger.Debug("Server message is {0}", nameof(AuthenticationMessage));
                 var cast = (AuthenticationMessage)message;
                 if(cast != null)
                 {   
@@ -203,7 +201,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.DeactivationMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.DeactivationMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.DeactivationMessage));
                 var cast = (Messages.DeactivationMessage)message;
                 if(cast != null)
                 {   
@@ -212,7 +210,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.FilterStatusMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.FilterStatusMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.FilterStatusMessage));
                 var cast = (Messages.FilterStatusMessage)message;
                 if(cast != null)
                 {   
@@ -221,7 +219,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.NotifyBlockActionMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.NotifyBlockActionMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.NotifyBlockActionMessage));
                 var cast = (Messages.NotifyBlockActionMessage)message;
                 if(cast != null)
                 {   
@@ -230,7 +228,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.RelaxedPolicyMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.RelaxedPolicyMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.RelaxedPolicyMessage));
                 var cast = (Messages.RelaxedPolicyMessage)message;
                 if(cast != null)
                 {   
@@ -252,7 +250,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.ClientToClientMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.ClientToClientMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.ClientToClientMessage));
                 var cast = (Messages.ClientToClientMessage)message;
                 if(cast != null)
                 {   
@@ -261,7 +259,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.ServerUpdateQueryMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateQueryMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateQueryMessage));
                 var cast = (Messages.ServerUpdateQueryMessage)message;
                 if(cast != null)
                 {
@@ -270,7 +268,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.ServerUpdateNotificationMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateNotificationMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateNotificationMessage));
                 var cast = (Messages.ServerUpdateNotificationMessage)message;
                 if(cast != null)
                 {
@@ -279,7 +277,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
                 var cast = (Messages.CaptivePortalDetectionMessage)message;
                 if(cast != null)
                 {
@@ -288,7 +286,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.CertificateExemptionMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
                 var cast = (Messages.CertificateExemptionMessage)message;
                 if(cast != null)
                 {
@@ -297,7 +295,7 @@ namespace Citadel.IPC
             }
             else if(msgRealType == typeof(Messages.DiagnosticsInfoMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsInfoMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsInfoMessage));
                 var cast = (Messages.DiagnosticsInfoMessage)message;
                 if(cast != null)
                 {
@@ -307,7 +305,7 @@ namespace Citadel.IPC
             else
             {
                 // Unknown type.
-                m_logger.Info("Unknown type is {0}", msgRealType.Name);
+                logger.Info("Unknown type is {0}", msgRealType.Name);
             }
         }
 
@@ -424,8 +422,8 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        private void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)
-        {
+        protected abstract void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null);
+        /*{
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
             {
@@ -445,7 +443,7 @@ namespace Citadel.IPC
                     m_ipcQueue.AddMessage(msg, replyHandler);
                 }
             }
-        }
+        }*/
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -456,12 +454,7 @@ namespace Citadel.IPC
             {
                 if(disposing)
                 {
-                    if(m_client != null)
-                    {
-                        m_client.AutoReconnect = false;
-                        m_client.Stop();
-                        m_client = null;
-                    }
+                    
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

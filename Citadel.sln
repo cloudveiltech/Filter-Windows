@@ -62,6 +62,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeilGUI.UWP", "CloudVeilGUI\CloudVeilGUI.UWP\CloudVeilGUI.UWP.csproj", "{F64E676C-20CE-4235-8630-8E9D2C6FEB83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeilGUI.WPF", "CloudVeilGUI\CloudVeilGUI.WPF\CloudVeilGUI.WPF.csproj", "{9EB1E113-500F-4F47-9E01-63DC1E5DDC85}"
+	ProjectSection(ProjectDependencies) = postProject
+		{620ADC88-B91D-4FDA-A791-8B92473E927A} = {620ADC88-B91D-4FDA-A791-8B92473E927A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeilGUI.MacOS", "CloudVeilGUI\CloudVeilGUI.MacOS\CloudVeilGUI.MacOS.csproj", "{23E964E3-99F4-4D19-AF4C-ED45D151E494}"
 EndProject

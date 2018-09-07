@@ -2,24 +2,31 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using CloudVeilGUI.Views;
+using CloudVeilGUI.Platform.Common;
+using Citadel.IPC;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CloudVeilGUI
 {
     public partial class App : Application
     {
+        public IPCClient m_ipcClient;
 
         public App()
         {
             InitializeComponent();
-
 
             MainPage = new MainPage();
         }
 
         protected override void OnStart()
         {
-            // Handle when your app starts
+            var filterStarter = PlatformServices.Default.CreateFilterStarter();
+
+            filterStarter.StartFilter();
+
+            m_ipcClient = PlatformServices.Default.CreateIPCClient();
+            IPCClient.Default = m_ipcClient;
         }
 
         protected override void OnSleep()

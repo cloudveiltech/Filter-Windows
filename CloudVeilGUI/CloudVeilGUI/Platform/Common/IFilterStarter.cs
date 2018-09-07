@@ -7,7 +7,7 @@ namespace CloudVeilGUI.Platform.Common
     public interface IFilterStarter
     {
         /// <summary>
-        /// Starts the filter service. The filter itself will make sure it's running as a background service.
+        /// Checks to see if the filter service is running. If it is not, run the FilterAgent.{Platform} executable.
         /// </summary>
         void StartFilter();
     }

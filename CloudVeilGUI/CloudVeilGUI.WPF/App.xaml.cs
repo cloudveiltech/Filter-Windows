@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CloudVeilGUI.Platform.Common;
+using CloudVeilGUI.Platform.Windows;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +15,11 @@ namespace CloudVeilGUI.WPF
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            PlatformServices.RegisterPlatformServices(new WindowsPlatformServices());
+        }
     }
 }
