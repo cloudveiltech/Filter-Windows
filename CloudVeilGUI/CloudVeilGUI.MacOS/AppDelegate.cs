@@ -26,6 +26,7 @@ namespace CloudVeilGUI.MacOS
         {
             Forms.Init();
             LoadApplication(new CloudVeilGUI.App());
+
             base.DidFinishLaunching(notification);
         }
 
