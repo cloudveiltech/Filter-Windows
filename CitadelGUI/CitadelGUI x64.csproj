@@ -107,6 +107,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platform\WindowsPipeClient.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\PostInstallCommand.cs">

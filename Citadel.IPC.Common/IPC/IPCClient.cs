@@ -8,6 +8,7 @@
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
+using Filter.Platform.Common.IPC;
 using NamedPipeWrapper;
 using NLog;
 using System;
@@ -74,7 +75,7 @@ namespace Citadel.IPC
 
     public class IPCClient : IDisposable
     {
-        private NamedPipeClient<BaseMessage> client;
+        private IPipeClient client;
 
         protected IPCMessageTracker ipcQueue;
 
@@ -148,13 +149,13 @@ namespace Citadel.IPC
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
 
-            client = new NamedPipeClient<BaseMessage>(channel);
+            client = PlatformTypes.New<IPipeClient>(channel, true); // new NamedPipeClient<BaseMessage>(channel);
 
             logger.Info("Creating client");
 
-            client.Connected += OnClientConnected;
-            client.Disconnected += OnClientDisconnected;
-            client.ServerMessage += OnClientReceivedServerMessage;
+            client.Connected += OnConnected;
+            client.Disconnected += OnDisconnected;
+            client.ServerMessage += OnServerMessage;
             client.AutoReconnect = autoReconnect;
 
             client.Error += clientError;

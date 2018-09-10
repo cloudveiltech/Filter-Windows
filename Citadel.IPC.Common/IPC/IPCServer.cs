@@ -9,6 +9,7 @@ using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
+using Filter.Platform.Common.IPC;
 using NamedPipeWrapper;
 using NLog;
 using System;
@@ -200,7 +201,7 @@ namespace Citadel.IPC
         /// <summary>
         /// Actual named pipe server wrapper. 
         /// </summary>
-        private NamedPipeServer<BaseMessage> m_server;
+        private IPipeServer m_server;
 
         // XXX FIXME Currently not used in IPCServer.
         private IPCMessageTracker m_ipcQueue;
@@ -294,7 +295,9 @@ namespace Citadel.IPC
 
             var security = GetSecurityForChannel();
 
-            m_server = new NamedPipeServer<BaseMessage>(channel, security);
+            m_server = PlatformTypes.New<IPipeServer>(channel);
+
+            //m_server = new NamedPipeServer<BaseMessage>(channel, security);
             
             m_server.ClientConnected += OnClientConnected;
             m_server.ClientDisconnected += OnClientDisconnected;
@@ -314,17 +317,16 @@ namespace Citadel.IPC
             LoggerUtil.RecursivelyLogException(m_logger, exception);
         }
 
-        private void OnClientConnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        private void OnClientConnected(IPipeServer server)
         {
             m_logger.Debug("Client connected.");
             ClientConnected?.Invoke();
         }
 
-        private void OnClientDisconnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        private void OnClientDisconnected(IPipeServer server)
         {
             m_logger.Debug("Client disconnected.");
             ClientDisconnected?.Invoke();
-            connection.ReceiveMessage -= OnClientMessage;
         }
 
         /// <summary>
@@ -336,7 +338,7 @@ namespace Citadel.IPC
         /// <param name="message">
         /// The client's message to us. 
         /// </param>
-        private void OnClientMessage(NamedPipeConnection<BaseMessage, BaseMessage> connection, BaseMessage message)
+        private void OnClientMessage(IPipeServer server, BaseMessage message)
         {
             // This is so gross, but unfortuantely we can't just switch on a type. We can come up
             // with a nice mapping system so we can do a switch, but this can wait.

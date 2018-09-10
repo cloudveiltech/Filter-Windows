@@ -6,7 +6,8 @@
 */
 
 using Citadel.Core.Extensions;
-using Citadel.Core.Windows;
+using WindowsPlatform = Citadel.Core.Windows.Platform;
+
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
@@ -230,7 +231,7 @@ namespace Te.Citadel
 
             try
             {
-                Platform.Init();
+                WindowsPlatform.Init();
 
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
@@ -359,9 +360,9 @@ namespace Te.Citadel
                 {
                     m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
 
-                    if(deactivationCmd == DeactivationCommand.Granted)
+                    if (deactivationCmd == DeactivationCommand.Granted)
                     {
-                        if(CriticalKernelProcessUtility.IsMyProcessKernelCritical)
+                        if (CriticalKernelProcessUtility.IsMyProcessKernelCritical)
                         {
                             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
                         }
@@ -379,36 +380,36 @@ namespace Te.Citadel
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            if(m_mainWindow != null)
+                            if (m_mainWindow != null)
                             {
                                 string message = null;
                                 string title = null;
 
-                                switch(deactivationCmd)
+                                switch (deactivationCmd)
                                 {
                                     case DeactivationCommand.Requested:
-                                    message = "Your deactivation request has been received, but approval is still pending.";
-                                    title = "Request Received";
-                                    break;
+                                        message = "Your deactivation request has been received, but approval is still pending.";
+                                        title = "Request Received";
+                                        break;
 
                                     case DeactivationCommand.Denied:
-                                    // A little bit of tact will keep the mob and their pitchforks
-                                    // from slaughtering us.
-                                    message = "Your deactivation request has been received, but approval is still pending.";
-                                    title = "Request Received";
-                                    //message = "Your deactivation request has been denied.";
-                                    //title = "Request Denied";
-                                    break;
+                                        // A little bit of tact will keep the mob and their pitchforks
+                                        // from slaughtering us.
+                                        message = "Your deactivation request has been received, but approval is still pending.";
+                                        title = "Request Received";
+                                        //message = "Your deactivation request has been denied.";
+                                        //title = "Request Denied";
+                                        break;
 
                                     case DeactivationCommand.Granted:
-                                    message = "Your request was granted.";
-                                    title = "Request Granted";
-                                    break;
+                                        message = "Your request was granted.";
+                                        title = "Request Granted";
+                                        break;
 
                                     case DeactivationCommand.NoResponse:
-                                    message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
-                                    title = "No Response Received";
-                                    break;
+                                        message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
+                                        title = "No Response Received";
+                                        break;
                                 }
 
                                 m_mainWindow.ShowUserMessage(title, message);
@@ -416,21 +417,6 @@ namespace Te.Citadel
                         }
                     );
                     }
-                };
-
-                m_ipcClient.BlockActionReceived = (args) =>
-                {
-                    // Add this blocked request to the dashboard.
-                    Current.Dispatcher.BeginInvoke(
-                        System.Windows.Threading.DispatcherPriority.Normal,
-                        (Action)delegate ()
-                        {
-                            if(m_viewDashboard != null)
-                            {
-                                //m_viewDashboard.AppendBlockActionEvent(args.Category, args.Resource.ToString());
-                            }
-                        }
-                    );
                 };
 
                 m_ipcClient.AddCertificateExemptionRequest = (msg) =>

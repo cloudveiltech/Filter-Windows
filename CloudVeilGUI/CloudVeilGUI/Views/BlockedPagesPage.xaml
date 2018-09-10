@@ -42,7 +42,22 @@
             </Grid>
 
             <!-- Data grid here -->
-            <BoxView BackgroundColor="Blue" Grid.Row="1" Margin="32,0,32,0" />
+            <ListView Grid.Row="1" Margin="32,0,32,0">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*" />
+                                    <ColumnDefinition Width="7*" />
+                                </Grid.ColumnDefinitions>
+                                <Label Text="{Binding CategoryName}" Grid.Column="0" />
+                                <Label Text="{Binding FullRequestUri}" Grid.Column="1" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
             <Grid Margin="32,0,32,0" Grid.Row="2">
                 <Grid.ColumnDefinitions>

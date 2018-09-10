@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
+    <ProjectReference Include="..\..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

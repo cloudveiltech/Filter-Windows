@@ -6,7 +6,7 @@
 */
 
 using Citadel.Core.WinAPI;
-using Citadel.Core.Windows;
+using WindowsPlatform = Citadel.Core.Windows.Platform;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using NLog;
@@ -59,7 +59,7 @@ namespace Te.Citadel
 
             try
             {
-                Platform.Init();
+                WindowsPlatform.Init();
 
                 string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
                 System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();

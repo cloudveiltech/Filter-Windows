@@ -1,5 +1,6 @@
 ﻿using Citadel.IPC;
 using CloudVeilGUI.Platform.Common;
+using Filter.Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

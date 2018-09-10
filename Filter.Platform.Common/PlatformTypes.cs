@@ -9,6 +9,11 @@ namespace Filter.Platform.Common
     {
         private static ConcurrentDictionary<Type, Func<object[], object>> s_typeDictionary;
 
+        static PlatformTypes()
+        {
+            s_typeDictionary = new ConcurrentDictionary<Type, Func<object[], object>>();
+        }
+
         public static T New<T>(params object[] parameters)
         {
             Type type = typeof(T);

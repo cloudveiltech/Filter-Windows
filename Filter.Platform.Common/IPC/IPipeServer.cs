@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Citadel.IPC.Common.IPC
+namespace Filter.Platform.Common.IPC
 {
     public delegate void ConnectionHandler(IPipeServer server);
     public delegate void MessageHandler(IPipeServer server, BaseMessage message);
@@ -17,5 +17,8 @@ namespace Citadel.IPC.Common.IPC
         event PipeExceptionHandler Error;
 
         void Start();
+        void Stop();
+
+        void PushMessage(BaseMessage msg);
     }
 }
