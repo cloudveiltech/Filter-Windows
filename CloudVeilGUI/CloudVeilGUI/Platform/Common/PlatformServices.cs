@@ -27,7 +27,5 @@ namespace CloudVeilGUI.Platform.Common
         }
 
         public abstract IFilterStarter CreateFilterStarter();
-
-        public abstract IPCClient CreateIPCClient(bool autoReconnect = false);
     }
 }

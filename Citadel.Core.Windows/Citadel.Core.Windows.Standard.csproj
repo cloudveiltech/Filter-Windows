@@ -6,11 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudVeil.NamedPipeWrapper" Version="1.5.2" />
+    <Compile Remove="Services\BaseProtectiveService.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

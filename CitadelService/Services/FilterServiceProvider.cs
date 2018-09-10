@@ -52,6 +52,7 @@ using CitadelService.Common.Configuration;
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using CitadelCore.Net.Http;
 using CitadelCore.IO;
+using Citadel.Core.Windows;
 
 namespace CitadelService.Services
 {
@@ -359,6 +360,8 @@ namespace CitadelService.Services
 
             try
             {
+                Platform.Init();
+
                 m_ipcServer = new IPCServer();
                 m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
             }

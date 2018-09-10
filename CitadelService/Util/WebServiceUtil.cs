@@ -7,6 +7,7 @@
 
 using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util.Net;
+using Filter.Platform.Common;
 using Microsoft.Win32;
 using NLog;
 using System;
@@ -206,7 +207,7 @@ namespace Citadel.Core.Windows.Util
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}", username, FingerPrint.Value, deviceName));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}", username, FingerprintService.Default.Value, deviceName));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -580,7 +581,7 @@ namespace Citadel.Core.Windows.Util
                 string version = System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
 
                 // Build out post data with username and identifier.
-                string postString = string.Format("&identifier={0}&device_id={1}", FingerPrint.Value, Uri.EscapeDataString(deviceName));
+                string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
 
                 if(parameters != null)
                 {
@@ -767,7 +768,7 @@ namespace Citadel.Core.Windows.Util
                 }
 
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("identifier={0}&device_id={1}&", FingerPrint.Value, Uri.EscapeDataString(deviceName)));
+                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("identifier={0}&device_id={1}&", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName)));
 
                 // Merge all data.
                 var finalData = new byte[formData.Length + formEncodedData.Length];

@@ -19,6 +19,7 @@ namespace CloudVeilGUI.WPF
         {
             base.OnStartup(e);
 
+            Citadel.Core.Windows.Platform.Init();
             PlatformServices.RegisterPlatformServices(new WindowsPlatformServices());
         }
     }

@@ -8,6 +8,7 @@
 using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
+using Filter.Platform.Common;
 using NamedPipeWrapper;
 using NLog;
 using System;
@@ -289,12 +290,12 @@ namespace Citadel.IPC
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
-            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerPrint.Value).ToLower();
+            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
 
             var security = GetSecurityForChannel();
 
             m_server = new NamedPipeServer<BaseMessage>(channel, security);
-
+            
             m_server.ClientConnected += OnClientConnected;
             m_server.ClientDisconnected += OnClientDisconnected;
             m_server.ClientMessage += OnClientMessage;

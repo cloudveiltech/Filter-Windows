@@ -7,6 +7,8 @@
 
 using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
+using Filter.Platform.Common;
+using NamedPipeWrapper;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -70,8 +72,10 @@ namespace Citadel.IPC
     /// <returns></returns>
     public delegate bool GenericReplyHandler(BaseMessage msg);
 
-    public abstract class IPCClient : IDisposable
+    public class IPCClient : IDisposable
     {
+        private NamedPipeClient<BaseMessage> client;
+
         protected IPCMessageTracker ipcQueue;
 
         public ClientGenericParameterlessHandler ConnectedToServer;
@@ -133,30 +137,34 @@ namespace Citadel.IPC
 
         public static IPCClient InitDefault()
         {
-            throw new NotImplementedException("Use PlatformServices.Default.CreateIPCClient() instead.");
-        }
-
-        /*{
             Default = new IPCClient(true);
             return Default;
-        }*/
+        }
 
         public IPCClient(bool autoReconnect = false)
         {
             logger = LoggerUtil.GetAppWideLogger();
             ipcQueue = new IPCMessageTracker();
-        }
 
-        public abstract void WaitForConnection();
+            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
+
+            client = new NamedPipeClient<BaseMessage>(channel);
+
+            logger.Info("Creating client");
+
+            client.Connected += OnClientConnected;
+            client.Disconnected += OnClientDisconnected;
+            client.ServerMessage += OnClientReceivedServerMessage;
+            client.AutoReconnect = autoReconnect;
+
+            client.Error += clientError;
+
+            client.Start();
+        }
 
         public AuthenticationMessage GetAuthMessage()
         {
             return AuthMessage;
-        }
-
-        private void M_client_Error(Exception exception)
-        {   
-            LoggerUtil.RecursivelyLogException(logger, exception);
         }
 
         protected void OnConnected()
@@ -167,6 +175,31 @@ namespace Citadel.IPC
         protected void OnDisconnected()
         {
             DisconnectedFromServer?.Invoke();
+        }
+
+        private void clientError(Exception ex)
+        {
+            LoggerUtil.RecursivelyLogException(logger, ex);
+        }
+
+        public void WaitForConnection()
+        {
+            client.WaitForConnection();
+        }
+
+        private void OnClientConnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        {
+            OnConnected();
+        }
+
+        private void OnClientDisconnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
+        {
+            OnDisconnected();
+        }
+
+        private void OnClientReceivedServerMessage(NamedPipeConnection<BaseMessage, BaseMessage> connection, BaseMessage message)
+        {
+            OnServerMessage(message);
         }
 
         protected void OnServerMessage(BaseMessage message)
@@ -422,28 +455,28 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        protected abstract void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null);
-        /*{
+        protected void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)
+        {
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
             {
                 bf.Serialize(ms, msg);
             }
 
-            m_client.PushMessage(msg);
+            client.PushMessage(msg);
             
             if(replyHandler != null)
             {
                 if (Default != null)
                 {
-                    Default.m_ipcQueue.AddMessage(msg, replyHandler);
+                    Default.ipcQueue.AddMessage(msg, replyHandler);
                 }
                 else
                 {
-                    m_ipcQueue.AddMessage(msg, replyHandler);
+                    ipcQueue.AddMessage(msg, replyHandler);
                 }
             }
-        }*/
+        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -454,7 +487,9 @@ namespace Citadel.IPC
             {
                 if(disposing)
                 {
-                    
+                    client.AutoReconnect = false;
+                    client.Stop();
+                    client = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

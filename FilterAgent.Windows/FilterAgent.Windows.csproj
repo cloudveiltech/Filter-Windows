@@ -55,6 +55,10 @@
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Citadel.Core.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

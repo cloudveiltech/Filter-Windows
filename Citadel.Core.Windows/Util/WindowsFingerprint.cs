@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Filter.Platform.Common;
 using System;
 using System.Management;
 using System.Security.Cryptography;
@@ -12,9 +13,9 @@ using System.Text;
 
 namespace Citadel.Core.Windows.Util
 {
-    public class FingerPrint
+    public class WindowsFingerprint : IFingerprint
     {   
-        static FingerPrint()
+        static WindowsFingerprint()
         {
             using(var sec = new SHA1CryptoServiceProvider())
             {
@@ -86,7 +87,7 @@ namespace Citadel.Core.Windows.Util
         /// <summary>
         /// Gets a unique identifier for this device based on miscelleneous unique ID's.
         /// </summary>
-        public static string Value
+        public string Value
         {
             get
             {

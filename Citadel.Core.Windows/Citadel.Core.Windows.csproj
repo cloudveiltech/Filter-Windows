@@ -67,31 +67,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Serialization\CookieListConverter.cs" />
-    <Compile Include="Data\Serialization\IntToMinutesTimespanConverter.cs" />
-    <Compile Include="Data\Serialization\SafeFloatConverter.cs" />
-    <Compile Include="Data\Serialization\SafeIntConverter.cs" />
-    <Compile Include="Extensions\NameValueCollectionExtensions.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Extensions\X509Extensions.cs" />
+    <Compile Include="Platform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BaseProtectiveService.cs" />
-    <Compile Include="Types\ConfigUpdateResult.cs" />
-    <Compile Include="Util\AuthenticationResultObject.cs" />
     <Compile Include="Util\Net\NetworkListUtil.cs" />
-    <Compile Include="Util\Process\ExitCodes.cs" />
     <Compile Include="Util\Http\FastHtmlTextExtractor.cs" />
-    <Compile Include="Util\FingerPrint.cs" />
+    <Compile Include="Util\WindowsFingerprint.cs" />
     <Compile Include="..\Contrib\CreateProcessAsUser\ProcessExtensions\ProcessExtensions.cs">
       <Link>Util\Process\ProcessExtensions.cs</Link>
     </Compile>
-    <Compile Include="Util\GuidUtility.cs" />
     <Compile Include="Util\Http\HttpUtils.cs" />
-    <Compile Include="Util\Logging\LoggerUtil.cs" />
     <Compile Include="Util\Process\CriticalKernelProcessUtility.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
     <Compile Include="Util\Update\AppcastUpdater.cs" />
-    <Compile Include="Util\Update\ApplicationUpdate.cs" />
     <Compile Include="Util\Net\WFPUtility.cs" />
     <Compile Include="WinAPI\AppAssociationHelper.cs" />
     <Compile Include="WinAPI\SFC.cs" />
@@ -113,15 +101,18 @@
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.1</Version>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>10.0.3</Version>
-    </PackageReference>
     <PackageReference Include="NLog">
-      <Version>4.4.12</Version>
+      <Version>4.5.9</Version>
     </PackageReference>
     <PackageReference Include="Topshelf">
       <Version>4.0.3</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -104,7 +104,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
-    <Compile Include="Platform\Windows\WindowsIPCClient.cs" />
     <Compile Include="Platform\Windows\WindowsPlatformServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -141,6 +140,10 @@
     <ProjectReference Include="..\..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
       <Name>Citadel.IPC.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Name>Filter.Platform.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI.csproj">
       <Project>{b5cce52e-6d69-4f28-857a-1c546022a2a5}</Project>

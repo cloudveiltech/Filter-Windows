@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Citadel.Core.Windows;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
@@ -229,6 +230,8 @@ namespace Te.Citadel
 
             try
             {
+                Platform.Init();
+
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
                 m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>

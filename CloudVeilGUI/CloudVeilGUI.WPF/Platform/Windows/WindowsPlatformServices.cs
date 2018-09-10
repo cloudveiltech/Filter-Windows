@@ -14,10 +14,5 @@ namespace CloudVeilGUI.Platform.Windows
         {
             return new WindowsFilterStarter();
         }
-
-        public override IPCClient CreateIPCClient(bool autoReconnect = false)
-        {
-            return new WindowsIPCClient(autoReconnect);
-        }
     }
 }

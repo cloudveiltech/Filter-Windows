@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Citadel.Core.Windows\Citadel.Core.Windows.csproj" />
     <ProjectReference Include="..\..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
   </ItemGroup>
 

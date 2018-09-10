@@ -25,8 +25,7 @@ namespace CloudVeilGUI
 
             filterStarter.StartFilter();
 
-            m_ipcClient = PlatformServices.Default.CreateIPCClient();
-            IPCClient.Default = m_ipcClient;
+            m_ipcClient = IPCClient.InitDefault();
         }
 
         protected override void OnSleep()
