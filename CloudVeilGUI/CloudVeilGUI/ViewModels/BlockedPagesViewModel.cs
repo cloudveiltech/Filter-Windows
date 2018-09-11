@@ -3,17 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Text;
 
 namespace CloudVeilGUI.ViewModels
 {
     public class BlockedPagesViewModel
     {
-        public ObservableCollection<BlockedPageEntry> BlockedPages { get; set; }
+        //public event PropertyChangedEventHandler PropertyChanged;
+
+        private ObservableCollection<BlockedPageEntry> blockedPages;
+        public ObservableCollection<BlockedPageEntry> BlockedPages
+        {
+            get
+            {
+                return blockedPages;
+            }
+
+            set
+            {
+                blockedPages = value;
+                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlockedPages)));
+            }
+        }
 
         public BlockedPagesViewModel(BlockedPagesModel model)
         {
-            BlockedPages = new ObservableCollection<BlockedPageEntry>();
+            BlockedPages = new ObservableCollection<BlockedPageEntry>(model.BlockedPages);
 
             model.BlockedPages.CollectionChanged += BlockedPages_CollectionChanged;
         }

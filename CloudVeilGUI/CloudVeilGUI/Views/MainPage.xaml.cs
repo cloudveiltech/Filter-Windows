@@ -16,7 +16,7 @@ namespace CloudVeilGUI.Views
             InitializeComponent();
 
             MasterBehavior = MasterBehavior.Split;
-
+            
             // Not sure whats going on here?
             MenuPages.Add((int)MenuItemType.BlockedPages, (NavigationPage)Detail);
         }

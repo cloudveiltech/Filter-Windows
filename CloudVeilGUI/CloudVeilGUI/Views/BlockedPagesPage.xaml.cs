@@ -25,6 +25,7 @@ namespace CloudVeilGUI.Views
             var model = app.ModelManager.GetModel<BlockedPagesModel>();
 
             viewModel = new BlockedPagesViewModel(model);
+            BindingContext = viewModel;
 		}
-	}
+    }
 }

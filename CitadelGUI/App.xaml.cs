@@ -235,6 +235,8 @@ namespace Te.Citadel
 
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
+
+                /*
                 m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
                 {
                     switch(authenticationFailureResult.Action)
@@ -272,6 +274,7 @@ namespace Te.Citadel
                             break;
                     }
                 };
+                */
 
                 m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
                 {

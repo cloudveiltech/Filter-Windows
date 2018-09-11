@@ -29,7 +29,7 @@
                    VerticalTextAlignment="Center"
                    Margin="0,0,8,0" />
 
-                <DatePicker Grid.Row="0" Grid.Column="1" />
+                <DatePicker Grid.Row="0" Grid.Column="1" x:Name="fromDatePicker" />
 
                 <Label Text="To:"
                        Grid.Row="1"
@@ -42,7 +42,7 @@
             </Grid>
 
             <!-- Data grid here -->
-            <ListView Grid.Row="1" Margin="32,0,32,0">
+            <ListView Grid.Row="1" Margin="32,0,32,0" x:Name="listView" ItemsSource="{Binding BlockedPages}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>

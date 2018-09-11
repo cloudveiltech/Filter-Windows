@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CloudVeilGUI.Views.LoginPage">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="400" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackLayout Grid.Column="1">
+                <!-- Login SVG image-->
+                <BoxView BackgroundColor="Blue" Margin="0,0,24,0"/>
+
+                <Label Text="Username" />
+                <Entry Margin="0,0,16,0"/>
+
+                <Label Text="Password" />
+                <Entry IsPassword="True" Margin="0,0,16,0"/>
+
+                <Button Text="Log in" />
+            </StackLayout>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

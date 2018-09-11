@@ -12,7 +12,7 @@ namespace CloudVeilGUI.Models
             private set;
         }
 
-        public string FullRequest
+        public string FullRequestUri
         {
             get;
             private set;
@@ -21,7 +21,7 @@ namespace CloudVeilGUI.Models
         public BlockedPageEntry(string category, string fullRequest)
         {
             this.CategoryName = category;
-            this.FullRequest = fullRequest;
+            this.FullRequestUri = fullRequest;
         }
     }
 }
