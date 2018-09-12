@@ -305,11 +305,9 @@ namespace Citadel.IPC
 
             m_server.Error += M_server_Error;
 
-            m_server.Start();
-
+            // Server is no longer started by constructor. We start the IPCServer after everything else has been set up by the FilterServiceProvider.
             m_ipcQueue = new IPCMessageTracker();
-
-            m_logger.Info("IPC Server started.");
+            
         }
 
         private void M_server_Error(Exception exception)
@@ -499,6 +497,12 @@ namespace Citadel.IPC
             {
                 // Unknown type.
             }
+        }
+
+        public void Start()
+        {
+            m_logger.Info("IPC Server Started");
+            m_server.Start();
         }
 
         /// <summary>

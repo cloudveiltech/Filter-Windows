@@ -13,6 +13,7 @@ using NamedPipeWrapper;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -149,9 +150,9 @@ namespace Citadel.IPC
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
 
-            client = PlatformTypes.New<IPipeClient>(channel, true); // new NamedPipeClient<BaseMessage>(channel);
+            client = PlatformTypes.New<IPipeClient>(channel, autoReconnect); // new NamedPipeClient<BaseMessage>(channel);
 
-            logger.Info("Creating client");
+            logger.Info("Process {0} creating client", Process.GetCurrentProcess().Id);
 
             client.Connected += OnConnected;
             client.Disconnected += OnDisconnected;
