@@ -15,6 +15,7 @@ using Filter.Platform.Common.Client;
 using System.Threading;
 using Te.Citadel.Util;
 using System.Threading.Tasks;
+using CloudVeilGUI.IPCHandlers;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CloudVeilGUI
@@ -24,25 +25,35 @@ namespace CloudVeilGUI
         private Mutex instanceMutex = null;
 
         private IPCClient m_ipcClient;
+        private NLog.Logger logger;
 
         public ModelManager ModelManager { get; private set; }
 
         /// <summary>
         /// This is a stack for preserved pages in case one page needs to override another.
         /// </summary>
-        protected Stack<Page> preservedPages;
+        public Stack<Page> PreservedPages { get; set; }
 
-        public App()
+        public IPCClient IpcClient
         {
+            get { return m_ipcClient; }
+        }
+
+        private bool guiOnly;
+
+        public App(bool guiOnly = false)
+        {
+            this.guiOnly = guiOnly;
+
             InitializeComponent();
 
-            preservedPages = new Stack<Page>();
+            PreservedPages = new Stack<Page>();
 
             ModelManager = new ModelManager();
             ModelManager.Register(new BlockedPagesModel());
 
             // Code smell: MainPage() makes use of ModelManager, so we need to instantiate ModelManager first.
-            MainPage = new MainPage();
+            MainPage = guiOnly ? (Page)new MainPage() : (Page)new WaitingPage();
         }
 
         private void RunGuiChecks()
@@ -132,72 +143,22 @@ namespace CloudVeilGUI
 
         protected override void OnStart()
         {
+            if(guiOnly)
+            {
+                return;
+            }
+
             RunGuiChecks();
+
+            MainPage = new WaitingPage();
 
             m_ipcClient = IPCClient.InitDefault();
 
-            var filterStarter = PlatformServices.Default.CreateFilterStarter();
+            var filterStarter = PlatformTypes.New<IFilterStarter>();
             filterStarter.StartFilter();
 
-            m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
-            {
-                switch (authenticationFailureResult.Action)
-                {
-                    case AuthenticationAction.Denied:
-                    case AuthenticationAction.Required:
-                    case AuthenticationAction.InvalidInput:
-                        {
-                            // User needs to log in.
-                            //BringAppToFocus();
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                if(!(MainPage is LoginPage))
-                                {
-                                    preservedPages.Push(MainPage);
-                                    MainPage = new LoginPage();
-                                }
-                            });
-
-                            /*m_mainWindow.Dispatcher.InvokeAsync(() =>
-                            {
-                                ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = false;
-                            });*/
-                        }
-                        break;
-
-                    case AuthenticationAction.Authenticated:
-                    case AuthenticationAction.ErrorNoInternet:
-                    case AuthenticationAction.ErrorUnknown:
-                        {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                if (MainPage is LoginPage)
-                                {
-                                    if (preservedPages.Count > 0)
-                                    {
-                                        MainPage = preservedPages.Pop();
-                                    }
-                                    else
-                                    {
-                                        MainPage = new MainPage();
-                                    }
-                                }
-                            });
-                            
-                            /*m_logger.Info($"The logged in user is {authenticationFailureResult.Username}");
-
-                            m_mainWindow.Dispatcher.InvokeAsync(() =>
-                            {
-                                ((MainWindowViewModel)m_mainWindow.DataContext).LoggedInUser = authenticationFailureResult.Username;
-                                ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = true;
-                            });
-
-                            OnViewChangeRequest(typeof(DashboardView));*/
-                        }
-                        break;
-                }
-            };
+            m_ipcClient.AuthenticationResultReceived = new AuthenticationResultReceivedCallback(this).Callback;
+            m_ipcClient.StateChanged = new StateChangedCallback(this).Callback;
 
             m_ipcClient.BlockActionReceived = (args) =>
             {
@@ -210,7 +171,10 @@ namespace CloudVeilGUI
                 switch(args.Command)
                 {
                     case ClientToClientCommand.ShowYourself:
-                        //BringAppToFocus();
+                        {
+                            var guiServices = PlatformTypes.New<IGuiServices>();
+                            guiServices.BringAppToFront();
+                        }
                         break;
                 }
             };

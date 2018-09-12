@@ -43,6 +43,20 @@
 
             <!-- Data grid here -->
             <ListView Grid.Row="1" Margin="32,0,32,0" x:Name="listView" ItemsSource="{Binding BlockedPages}">
+                <ListView.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="7*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="AUTO" />
+                        </Grid.RowDefinitions>
+                        
+                        <Label Text="Category" Grid.Column="0" Grid.Row="0" />
+                        <Label Text="Request" Grid.Column="1" Grid.Row="0" />
+                    </Grid>
+                </ListView.Header>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>

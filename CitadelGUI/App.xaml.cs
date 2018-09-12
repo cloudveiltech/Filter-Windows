@@ -485,7 +485,7 @@ namespace Te.Citadel
                     );
                 };
 
-                m_ipcClient.StateChanged = (args) =>
+                /*m_ipcClient.StateChanged = (args) =>
                 {
                     m_logger.Info("Filter status from server is: {0}", args.State.ToString());
                     switch(args.State)
@@ -583,7 +583,7 @@ namespace Te.Citadel
                             }
                             break;
                     }
-                };
+                };*/
 
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {

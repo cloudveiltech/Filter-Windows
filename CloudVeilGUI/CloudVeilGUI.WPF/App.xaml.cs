@@ -1,6 +1,7 @@
 ﻿using Citadel.Core.Windows.Util;
 using CloudVeilGUI.Platform.Common;
 using CloudVeilGUI.Platform.Windows;
+using Filter.Platform.Common;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,12 +17,13 @@ namespace CloudVeilGUI.WPF
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class WPFApp : Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {
             Citadel.Core.Windows.Platform.Init();
-            PlatformServices.RegisterPlatformServices(new WindowsPlatformServices());
+            PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter());
+            PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
 
             base.OnStartup(e);
         }

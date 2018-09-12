@@ -21,7 +21,7 @@ namespace CloudVeilGUI.UWP
         {
             this.InitializeComponent();
 
-            LoadApplication(new CloudVeilGUI.App());
+            LoadApplication(new CloudVeilGUI.App(true));
         }
     }
 }
