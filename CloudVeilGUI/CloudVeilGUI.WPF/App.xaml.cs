@@ -1,3 +1,10 @@
+/*
+* Copyright © 2017 Cloudveil Technology Inc.
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
 ﻿using Citadel.Core.Windows.Util;
 using CloudVeilGUI.Platform.Common;
 using CloudVeilGUI.Platform.Windows;
@@ -24,6 +31,7 @@ namespace CloudVeilGUI.WPF
             Citadel.Core.Windows.Platform.Init();
             PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter());
             PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
+            PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
 
             base.OnStartup(e);
         }
