@@ -1,6 +1,8 @@
-﻿using Citadel.Core.Windows.Util;
+﻿using Citadel.Core.Windows.Client;
+using Citadel.Core.Windows.Util;
 using CitadelService.Platform;
 using Filter.Platform.Common;
+using Filter.Platform.Common.Client;
 using Filter.Platform.Common.IPC;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,8 @@ namespace Citadel.Core.Windows
 
             // params: channel
             PlatformTypes.Register<IPipeServer>((arr) => new WindowsPipeServer((string)arr[0]));
+
+            PlatformTypes.Register<IGUIChecks>((arr) => new WindowsGUIChecks());
         }
     }
 }

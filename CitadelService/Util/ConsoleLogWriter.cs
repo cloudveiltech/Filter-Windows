@@ -47,6 +47,7 @@ namespace CitadelService.Util
             }
 
             m_writer.Write(value);
+            m_writer.Flush();
         }
 
         private StreamWriter openLogFile()

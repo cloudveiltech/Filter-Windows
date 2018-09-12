@@ -218,16 +218,15 @@
     </Compile>
     <Resource Include="Resources\UserLicense.txt" />
     <Resource Include="Resources\appicon.ico" />
-    <Resource Include="Resources\NLog.config" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Resource Include="appicon.ico" />
-    <Content Include="NLog.config">
+    <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
-    </Content>
+    </None>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

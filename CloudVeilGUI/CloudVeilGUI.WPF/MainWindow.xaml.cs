@@ -14,7 +14,10 @@ namespace CloudVeilGUI.WPF
 
             Forms.Init();
 
-            LoadApplication(new CloudVeilGUI.App());
+            var app = new CloudVeilGUI.App();
+            LoadApplication(app);
+
+            //((App)App.Current).SessionEnding += MainWindow_SessionEnding;
         }
     }
 }

@@ -1,9 +1,12 @@
-﻿using CloudVeilGUI.Platform.Common;
+﻿using Citadel.Core.Windows.Util;
+using CloudVeilGUI.Platform.Common;
 using CloudVeilGUI.Platform.Windows;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,10 +20,21 @@ namespace CloudVeilGUI.WPF
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
             Citadel.Core.Windows.Platform.Init();
             PlatformServices.RegisterPlatformServices(new WindowsPlatformServices());
+
+            base.OnStartup(e);
+        }
+
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // TODO: Use to call custom OnExit() in CloudVeilGUI
+            base.OnExit(e);
         }
     }
 }

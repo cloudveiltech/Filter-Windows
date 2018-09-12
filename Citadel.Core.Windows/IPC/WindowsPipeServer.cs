@@ -20,11 +20,16 @@ namespace CitadelService.Platform
             server = new NamedPipeWrapper.NamedPipeServer<BaseMessage>(channel, GetSecurityForChannel());
 
             server.ClientConnected += (conn) => ClientConnected?.Invoke(this);
-            server.ClientDisconnected += (conn) => ClientDisconnected?.Invoke(this);
+            server.ClientDisconnected += clientDisconnected;
             server.ClientMessage += (conn, msg) => ClientMessage?.Invoke(this, msg);
             server.Error += (ex) => Error?.Invoke(ex);
         }
 
+        private void clientDisconnected(NamedPipeWrapper.NamedPipeConnection<BaseMessage, BaseMessage> conn)
+        {
+            conn.Disconnected -= clientDisconnected;
+            ClientDisconnected?.Invoke(this);
+        }
         public event ConnectionHandler ClientConnected;
         public event ConnectionHandler ClientDisconnected;
         public event MessageHandler ClientMessage;

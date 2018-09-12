@@ -177,6 +177,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\BadCertPage.html" />

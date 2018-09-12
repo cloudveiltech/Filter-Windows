@@ -17,7 +17,6 @@ using Citadel.IPC.Messages;
 using CitadelCore.Logging;
 using CitadelCore.Net.Proxy;
 using CitadelCore.Windows.Net.Proxy;
-using CitadelService.Data.Filtering;
 using CitadelService.Data.Models;
 using DistillNET;
 using Microsoft.Win32;
@@ -25,18 +24,15 @@ using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
 using NLog;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -44,9 +40,6 @@ using System.Threading.Tasks;
 using Te.Citadel.Util;
 using WindowsFirewallHelper;
 using CitadelService.Util;
-using DNS;
-using DNS.Client;
-using System.Net.Http;
 using CitadelService.Common.Configuration;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
@@ -799,6 +792,7 @@ namespace CitadelService.Services
 
                 ServicePointManager.ServerCertificateValidationCallback += m_certificateExemptions.CertificateValidationCallback;
 
+                m_ipcServer.Start();
             }
             catch(Exception ipce)
             {
@@ -815,8 +809,6 @@ namespace CitadelService.Services
             EnsureWindowsFirewallAccess();
 
             LogTime("EnsureWindowsFirewallAccess() is done");
-
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // Run the background init worker for non-UI related initialization.
             m_backgroundInitWorker = new BackgroundWorker();
@@ -920,12 +912,6 @@ namespace CitadelService.Services
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
 
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
-        }
-
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Exception err = e.ExceptionObject as Exception;
-            LoggerUtil.RecursivelyLogException(m_logger, err);
         }
 
         /// <summary>
@@ -1310,7 +1296,7 @@ namespace CitadelService.Services
                     LoggerUtil.RecursivelyLogException(m_logger, e.Error);
                 }
 
-                Environment.Exit(-1);
+                Environment.Exit((int)ExitCodes.ShutdownInitializationError);
                 return;
             }
             

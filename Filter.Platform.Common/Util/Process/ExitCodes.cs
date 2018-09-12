@@ -11,10 +11,12 @@ namespace Citadel.Core.Windows.Util
     /// Various exit codes indicating the reason for a shutdown. 
     /// </summary>
     public enum ExitCodes : int
-    {
+    { 
         ShutdownCriticalError = -1,
         ShutdownWithSafeguards = 100,
         ShutdownWithoutSafeguards = 101,
-        ShutdownForUpdate = 102
+        ShutdownForUpdate = 102,
+        ShutdownProcessAlreadyOpen = 201,
+        ShutdownInitializationError = 202,
     }
 }

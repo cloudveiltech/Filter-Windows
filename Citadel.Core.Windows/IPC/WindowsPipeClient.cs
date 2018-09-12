@@ -1,4 +1,5 @@
-﻿using Citadel.IPC.Messages;
+﻿using Citadel.Core.Windows.Util;
+using Citadel.IPC.Messages;
 using Filter.Platform.Common.IPC;
 
 namespace Te.Citadel.Platform
@@ -10,6 +11,7 @@ namespace Te.Citadel.Platform
         public WindowsPipeClient(string channel, bool autoReconnect = false)
         {
             client = new NamedPipeWrapper.NamedPipeClient<BaseMessage>(channel);
+            client.AutoReconnect = autoReconnect;
 
             client.Connected += (conn) => Connected?.Invoke();
             client.Disconnected += (conn) => Disconnected?.Invoke();
