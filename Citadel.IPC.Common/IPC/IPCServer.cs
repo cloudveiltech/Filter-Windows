@@ -10,10 +10,8 @@ using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
 using Filter.Platform.Common.IPC;
-using NamedPipeWrapper;
 using NLog;
 using System;
-using System.IO.Pipes;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -292,8 +290,6 @@ namespace Citadel.IPC
             m_logger = LoggerUtil.GetAppWideLogger();
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
-
-            var security = GetSecurityForChannel();
 
             m_server = PlatformTypes.New<IPipeServer>(channel);
 
@@ -681,25 +677,6 @@ namespace Citadel.IPC
             {
                 m_server.PushMessage(msg);
             }
-        }
-
-        /// <summary>
-        /// Gets a security descriptor that will permit non-elevated clients to connect to the server. 
-        /// </summary>
-        /// <returns>
-        /// A security descriptor that will permit non-elevated clients to connect to the server. 
-        /// </returns>
-        private static PipeSecurity GetSecurityForChannel()
-        {
-            PipeSecurity pipeSecurity = new PipeSecurity();
-
-            var permissions = PipeAccessRights.CreateNewInstance | PipeAccessRights.Read | PipeAccessRights.Synchronize | PipeAccessRights.Write;
-
-            var authUsersSid = new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null);
-            var authUsersAcct = authUsersSid.Translate(typeof(NTAccount));
-            pipeSecurity.SetAccessRule(new PipeAccessRule(authUsersAcct, permissions, AccessControlType.Allow));
-
-            return pipeSecurity;
         }
 
         #region IDisposable Support

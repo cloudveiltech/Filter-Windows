@@ -180,24 +180,32 @@ namespace CloudVeilGUI
             };
         }
 
-        protected override void OnSleep()
+        /// <summary>
+        /// This is a custom callback that should be called by platform specific code when the app is exiting.
+        /// </summary>
+        public void OnExit()
         {
             try
             {
                 instanceMutex.ReleaseMutex();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 try
                 {
                     var logger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(logger, e);
                 }
-                catch(Exception he)
+                catch (Exception he)
                 {
                     // XXX TODO - We can't really log here unless we do a direct-to-file write.
                 }
             }
+        }
+
+        protected override void OnSleep()
+        {
+            // Handle when your app sleeps.
         }
 
         protected override void OnResume()

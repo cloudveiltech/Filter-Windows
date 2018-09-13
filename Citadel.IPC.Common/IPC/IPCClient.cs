@@ -9,7 +9,6 @@ using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
 using Filter.Platform.Common.IPC;
-using NamedPipeWrapper;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -187,21 +186,6 @@ namespace Citadel.IPC
         public void WaitForConnection()
         {
             client.WaitForConnection();
-        }
-
-        private void OnClientConnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
-        {
-            OnConnected();
-        }
-
-        private void OnClientDisconnected(NamedPipeConnection<BaseMessage, BaseMessage> connection)
-        {
-            OnDisconnected();
-        }
-
-        private void OnClientReceivedServerMessage(NamedPipeConnection<BaseMessage, BaseMessage> connection, BaseMessage message)
-        {
-            OnServerMessage(message);
         }
 
         protected void OnServerMessage(BaseMessage message)

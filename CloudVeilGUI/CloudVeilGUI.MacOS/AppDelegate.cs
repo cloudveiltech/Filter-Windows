@@ -1,4 +1,5 @@
-﻿using AppKit;
+﻿using System;
+using AppKit;
 using Foundation;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.MacOS;
@@ -22,12 +23,35 @@ namespace CloudVeilGUI.MacOS
 
         public override NSWindow MainWindow => window;
 
+        private NSStatusItem statusItem;
+
         public override void DidFinishLaunching(NSNotification notification)
         {
             Forms.Init();
-            LoadApplication(new CloudVeilGUI.App());
+            LoadApplication(new CloudVeilGUI.App(true));
+
+            float width = 30.0f;
+            var item = NSStatusBar.SystemStatusBar.CreateStatusItem(width);
+
+            var button = item.Button;
+            button.Image = NSImage.ImageNamed("StatusBarButtonImage");
+
+            var menu = new NSMenu();
+            menu.AddItem(new NSMenuItem("Open", "o", eventHandler));
+            menu.AddItem(NSMenuItem.SeparatorItem);
+            menu.AddItem(new NSMenuItem("Settings", "s", eventHandler));
+            menu.AddItem(new NSMenuItem("Use Relaxed Policy", "p", eventHandler));
+
+            item.Menu = menu;
+
+            statusItem = item;
 
             base.DidFinishLaunching(notification);
+        }
+
+        private void eventHandler(object sender, EventArgs eventArgs)
+        {
+            
         }
 
         public override void WillTerminate(NSNotification notification)
