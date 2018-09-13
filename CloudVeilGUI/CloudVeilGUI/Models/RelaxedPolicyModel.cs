@@ -6,18 +6,13 @@
 */
 
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-namespace CloudVeilGUI.Views
+namespace CloudVeilGUI.Models
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AboutPage : ContentPage
+    public class RelaxedPolicyModel
     {
-        public AboutPage()
-        {
-            InitializeComponent();
-        }
+
     }
 }
