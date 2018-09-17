@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿#define LOCAL_POLICY_CONFIGURATION
+//﻿#define LOCAL_POLICY_CONFIGURATION
 
 using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
@@ -30,6 +30,7 @@ using DistillNET;
 using CitadelService.Data.Filtering;
 using Te.Citadel.Util;
 using System.Collections.Concurrent;
+using System.Security.AccessControl;
 
 namespace CitadelService.Common.Configuration
 {
@@ -126,25 +127,12 @@ namespace CitadelService.Common.Configuration
         public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get { return m_generatedCategoriesMap; } }
 
         public event EventHandler OnConfigurationLoaded;
-
-        private bool? verifyFile(ServiceResource sumCheck, string filePath)
+        
+        private string getSHA1ForFilePath(string filePath)
         {
-#if LOCAL_POLICY_CONFIGURATION
             if(!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
             {
-                return false;
-            }
-
-            string serverPath = sumCheck == ServiceResource.RuleDataSumCheck ? serverListDataFilePath : serverConfigFilePath;
-
-            string rHash = null;
-            using (var fs = File.OpenRead(serverPath))
-            {
-                using (SHA1 sec = new SHA1CryptoServiceProvider())
-                {
-                    byte[] bt = sec.ComputeHash(fs);
-                    rHash = BitConverter.ToString(bt).Replace("-", "");
-                }
+                return null;
             }
 
             using (var fs = File.OpenRead(filePath))
@@ -154,17 +142,67 @@ namespace CitadelService.Common.Configuration
                     byte[] bt = sec.ComputeHash(fs);
                     var lHash = BitConverter.ToString(bt).Replace("-", "");
 
-                    if (!lHash.OIEquals(rHash))
-                    {
-                        return false;
-                    }
+                    return lHash.ToLower();
+                }
+            }
+        }
+
+        private string getListFolder()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"rules");
+        }
+
+        private void createListFolderIfNotExists()
+        {
+            string listFolder = getListFolder();
+
+            if(!Directory.Exists(listFolder))
+            {
+                DirectoryInfo dirInfo = Directory.CreateDirectory(listFolder);
+                dirInfo.Attributes = FileAttributes.Directory | FileAttributes.Hidden | FileAttributes.System;
+            }
+        }
+
+        private string getListFilePath(FilteringPlainTextListModel listModel)
+        {
+            return Path.Combine(getListFolder(), listModel.RelativeListPath.Replace('/', '.'));
+        }
+
+        Dictionary<string, bool?> lastFilterListResults = null;
+
+        public bool? VerifyLists()
+        {
+            // Assemble list of SHA1 hashes for existing lists.
+            Dictionary<string, string> hashes = new Dictionary<string, string>();
+
+            foreach(var list in Configuration.ConfiguredLists)
+            {
+                string listFilePath = getListFilePath(list);
+                hashes[list.RelativeListPath] = getSHA1ForFilePath(listFilePath);
+            }
+
+            Dictionary<string, bool?> filterListResults = WebServiceUtil.Default.VerifyLists(hashes);
+            lastFilterListResults = filterListResults;
+
+            foreach (var result in filterListResults)
+            {
+                if (result.Value == null)
+                {
+                    return null;
+                }
+                else if (result.Value == false)
+                {
+                    return false;
                 }
             }
 
             return true;
-#else
+        }
+
+        public bool? VerifyConfiguration()
+        {
             HttpStatusCode code;
-            var rHashBytes = WebServiceUtil.Default.RequestResource(sumCheck, out code);
+            var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserConfigSumCheck, out code);
 
             if (code == HttpStatusCode.OK && rHashBytes != null)
             {
@@ -176,28 +214,17 @@ namespace CitadelService.Common.Configuration
                 var rHash = Encoding.UTF8.GetString(rHashBytes);
 
                 bool needsUpdate = false;
+                string filePathSHA1 = getSHA1ForFilePath(configFilePath);
 
-                if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+                if (filePathSHA1 == null)
                 {
                     needsUpdate = true;
                 }
                 else
                 {
-                    // We're going to hash our local version and compare. If they don't match, we're
-                    // going to update our lists.
-
-                    using (var fs = File.OpenRead(filePath))
+                    if (!filePathSHA1.OIEquals(rHash))
                     {
-                        using (SHA1 sec = new SHA1CryptoServiceProvider())
-                        {
-                            byte[] bt = sec.ComputeHash(fs);
-                            var lHash = BitConverter.ToString(bt).Replace("-", "");
-
-                            if (!lHash.OIEquals(rHash))
-                            {
-                                needsUpdate = true;
-                            }
-                        }
+                        needsUpdate = true;
                     }
                 }
 
@@ -207,12 +234,6 @@ namespace CitadelService.Common.Configuration
             {
                 return null;
             }
-#endif
-        }
-
-        public bool? VerifyConfiguration()
-        {
-            return verifyFile(ServiceResource.UserConfigSumCheck, configFilePath);
         }
 
         public bool? DownloadConfiguration()
@@ -266,17 +287,6 @@ namespace CitadelService.Common.Configuration
 
         public bool? DownloadLists()
         {
-#if LOCAL_POLICY_CONFIGURATION
-            if (VerifyLists() == true)
-            {
-                return false;
-            }
-
-            var configBytes = File.ReadAllBytes(serverListDataFilePath);
-
-            File.WriteAllBytes(listDataFilePath, configBytes);
-            return true;
-#else
             HttpStatusCode code;
 
             bool? isVerified = VerifyLists();
@@ -285,26 +295,42 @@ namespace CitadelService.Common.Configuration
                 return false;
             }
 
+            createListFolderIfNotExists();
+
             m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
-            var configBytes = WebServiceUtil.Default.RequestResource(ServiceResource.RuleDataRequest, out code);
 
-            if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
+            foreach(var list in Configuration.ConfiguredLists)
             {
-                File.WriteAllBytes(listDataFilePath, configBytes);
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine("Failed to download list data.");
-                m_logger.Error("Failed to download list data.");
-                return null;
-            }
-#endif
-        }
+                bool? downloadList = false;
 
-        public bool? VerifyLists()
-        {
-            return verifyFile(ServiceResource.RuleDataSumCheck, listDataFilePath);
+                if(lastFilterListResults != null && lastFilterListResults.TryGetValue(list.RelativeListPath, out downloadList))
+                {
+                    Console.WriteLine("{0} = {1}", list.RelativeListPath, downloadList);
+
+                    if(downloadList == false)
+                    {
+                        continue;
+                    }
+                }
+
+                string[] pathParts = list.RelativeListPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                string @namespace = pathParts[0];
+                string category = pathParts[1];
+                string typeName = Path.GetFileNameWithoutExtension(pathParts[2]);
+
+                byte[] listBytes = WebServiceUtil.Default.GetFilterList(@namespace, category, typeName);
+
+                if (listBytes != null)
+                {
+                    File.WriteAllBytes(getListFilePath(list), listBytes);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return true;
         }
 
         public bool LoadLists()
@@ -313,162 +339,159 @@ namespace CitadelService.Common.Configuration
             {
                 m_filteringRwLock.EnterWriteLock();
 
-                if (File.Exists(listDataFilePath))
+                var listFolderPath = getListFolder();
+
+                if (Directory.Exists(listFolderPath))
                 {
-                    using (var file = File.OpenRead(listDataFilePath))
+                    // Recreate our filter collection and reset all categories to be disabled.
+                    if (m_filterCollection != null)
                     {
-                        using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
+                        m_filterCollection.Dispose();
+                    }
+
+                    // Recreate our triggers container.
+                    if (m_textTriggers != null)
+                    {
+                        m_textTriggers.Dispose();
+                    }
+
+                    m_filterCollection = new FilterDbCollection();
+
+                    m_categoryIndex.SetAll(false);
+
+                    // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
+                    // be an in-memory DB or not.
+                    m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
+
+                    // Now clear all generated categories. These will be re-generated as needed.
+                    m_generatedCategoriesMap.Clear();
+
+                    uint totalFilterRulesLoaded = 0;
+                    uint totalFilterRulesFailed = 0;
+                    uint totalTriggersLoaded = 0;
+
+                    // Load all configured list files.
+                    foreach (var listModel in Configuration.ConfiguredLists)
+                    {
+                        var rulesetPath = getListFilePath(listModel);
+
+                        if(File.Exists(rulesetPath))
                         {
-                            // Recreate our filter collection and reset all categories to be disabled.
-                            if (m_filterCollection != null)
+                            var thisListCategoryName = listModel.RelativeListPath.Substring(0, listModel.RelativeListPath.LastIndexOfAny(new[] { '/', '\\' }) + 1) + Path.GetFileNameWithoutExtension(listModel.RelativeListPath);
+
+                            MappedFilterListCategoryModel categoryModel = null;
+
+                            switch (listModel.ListType)
                             {
-                                m_filterCollection.Dispose();
-                            }
-
-                            // Recreate our triggers container.
-                            if (m_textTriggers != null)
-                            {
-                                m_textTriggers.Dispose();
-                            }
-
-                            m_filterCollection = new FilterDbCollection();
-
-                            m_categoryIndex.SetAll(false);
-
-                            // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
-                            // be an in-memory DB or not.
-                            m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
-
-                            // Now clear all generated categories. These will be re-generated as needed.
-                            m_generatedCategoriesMap.Clear();
-
-                            uint totalFilterRulesLoaded = 0;
-                            uint totalFilterRulesFailed = 0;
-                            uint totalTriggersLoaded = 0;
-
-                            // Load all configured list files.
-                            foreach (var listModel in Configuration.ConfiguredLists)
-                            {
-                                var listEntry = zip.Entries.Where(pp => pp.FullName.TrimStart('/').OIEquals(listModel.RelativeListPath.TrimStart('/'))).FirstOrDefault();
-                                if (listEntry != null)
-                                {
-                                    var thisListCategoryName = listModel.RelativeListPath.Substring(0, listModel.RelativeListPath.LastIndexOfAny(new[] { '/', '\\' }) + 1) + Path.GetFileNameWithoutExtension(listModel.RelativeListPath);
-
-                                    MappedFilterListCategoryModel categoryModel = null;
-
-                                    switch (listModel.ListType)
+                                case PlainTextFilteringListType.Blacklist:
                                     {
-                                        case PlainTextFilteringListType.Blacklist:
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                        {
+                                            using (var listStream = File.OpenRead(rulesetPath))
                                             {
-                                                if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                                {
-                                                    using (var listStream = listEntry.Open())
-                                                    {
-                                                        var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
-                                                        totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                        totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+                                                var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
+                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
 
-                                                        if (loadedFailedRes.Item1 > 0)
-                                                        {
-                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                        }
-                                                    }
+                                                if (loadedFailedRes.Item1 > 0)
+                                                {
+                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                                 }
                                             }
-                                            break;
-
-                                        case PlainTextFilteringListType.BypassList:
-                                            {
-                                                MappedBypassListCategoryModel bypassCategoryModel = null;
-
-                                                // Must be loaded twice. Once as a blacklist, once as a whitelist.
-                                                if (TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
-                                                {
-                                                    // Load first as blacklist.
-                                                    using (var listStream = listEntry.Open())
-                                                    {
-                                                        var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
-                                                        totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                        totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                        if (loadedFailedRes.Item1 > 0)
-                                                        {
-                                                            m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
-                                                        }
-                                                    }
-
-                                                    GC.Collect();
-                                                }
-                                            }
-                                            break;
-
-                                        case PlainTextFilteringListType.TextTrigger:
-                                            {
-                                                // Always load triggers as blacklists.
-                                                if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                                {
-                                                    using (var listStream = listEntry.Open())
-                                                    {
-                                                        var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
-                                                        m_textTriggers.FinalizeForRead();
-
-                                                        totalTriggersLoaded += (uint)triggersLoaded;
-
-                                                        if (triggersLoaded > 0)
-                                                        {
-                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                        }
-                                                    }
-                                                }
-
-                                                GC.Collect();
-                                            }
-                                            break;
-
-                                        case PlainTextFilteringListType.Whitelist:
-                                            {
-                                                using (TextReader tr = new StreamReader(listEntry.Open()))
-                                                {
-                                                    if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                                    {
-                                                        var whitelistRules = new List<string>();
-                                                        string line = null;
-                                                        while ((line = tr.ReadLine()) != null)
-                                                        {
-                                                            whitelistRules.Add("@@" + line.Trim() + "\n");
-                                                        }
-
-                                                        using (var listStream = listEntry.Open())
-                                                        {
-                                                            var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
-                                                            totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                            totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                            if (loadedFailedRes.Item1 > 0)
-                                                            {
-                                                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                GC.Collect();
-                                            }
-                                            break;
+                                        }
                                     }
-                                }
+                                    break;
+
+                                case PlainTextFilteringListType.BypassList:
+                                    {
+                                        MappedBypassListCategoryModel bypassCategoryModel = null;
+
+                                        // Must be loaded twice. Once as a blacklist, once as a whitelist.
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
+                                        {
+                                            // Load first as blacklist.
+                                            using (var listStream = File.OpenRead(rulesetPath))
+                                            {
+                                                var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
+                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+
+                                                if (loadedFailedRes.Item1 > 0)
+                                                {
+                                                    m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
+                                                }
+                                            }
+
+                                            GC.Collect();
+                                        }
+                                    }
+                                    break;
+
+                                case PlainTextFilteringListType.TextTrigger:
+                                    {
+                                        // Always load triggers as blacklists.
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                        {
+                                            using (var listStream = File.OpenRead(rulesetPath))
+                                            {
+                                                var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
+                                                m_textTriggers.FinalizeForRead();
+
+                                                totalTriggersLoaded += (uint)triggersLoaded;
+
+                                                if (triggersLoaded > 0)
+                                                {
+                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                }
+                                            }
+                                        }
+
+                                        GC.Collect();
+                                    }
+                                    break;
+
+                                case PlainTextFilteringListType.Whitelist:
+                                    {
+                                        using (TextReader tr = new StreamReader(File.OpenRead(rulesetPath)))
+                                        {
+                                            if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                            {
+                                                var whitelistRules = new List<string>();
+                                                string line = null;
+                                                while ((line = tr.ReadLine()) != null)
+                                                {
+                                                    whitelistRules.Add("@@" + line.Trim() + "\n");
+                                                }
+
+                                                using (var listStream = File.OpenRead(rulesetPath))
+                                                {
+                                                    var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
+                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+
+                                                    if (loadedFailedRes.Item1 > 0)
+                                                    {
+                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        GC.Collect();
+                                    }
+                                    break;
                             }
-
-                            m_filterCollection.FinalizeForRead();
-                            m_filterCollection.InitializeBloomFilters();
-
-                            m_textTriggers.InitializeBloomFilters();
-
-                            m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                         }
                     }
-                }
 
+                    m_filterCollection.FinalizeForRead();
+                    m_filterCollection.InitializeBloomFilters();
+
+                    m_textTriggers.InitializeBloomFilters();
+
+                    m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
+                }
+                
                 return true;
             }
             catch(Exception ex)

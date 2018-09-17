@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,7 +39,8 @@ namespace Citadel.Core.Windows.Util
         RevokeToken,
         RetrieveToken,
         BypassRequest,
-        AccountabilityNotify
+        AccountabilityNotify,
+        Custom
     };
 
     public delegate void GenericWebServiceUtilDelegate();
@@ -100,19 +102,11 @@ namespace Citadel.Core.Windows.Util
             }
         }
 
-        public string LookupUriApiPath
-        {
-            get
-            {
-                return "https://manage.cloudveil.org";
-            }
-        }
-
         public string ServiceProviderApiPath
         {
             get
             {
-                return "https://manage.cloudveil.org/citadel";
+                return "https://build-server:8443";
             }
         }
 
@@ -203,7 +197,7 @@ namespace Citadel.Core.Windows.Util
 
             try
             {
-                var authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken]);
+                var authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.
@@ -380,7 +374,7 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// The configured request. 
         /// </returns>
-        private HttpWebRequest GetApiBaseRequest(string route, string baseRoute = null)
+        private HttpWebRequest GetApiBaseRequest(string route, ResourceOptions options, string baseRoute = null)
         {
             baseRoute = baseRoute == null ? ServiceProviderApiPath : baseRoute;
             var requestString = baseRoute + route;
@@ -391,120 +385,31 @@ namespace Citadel.Core.Windows.Util
             // on any and all operations and we want to look like Firefox in a generic way. Here we
             // also set the cookie container, so we can capture session cookies if we're successful.
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestRoute);
-            request.Method = "POST";
+            request.Method = options.Method; //"POST";
             request.Proxy = null;
             request.AllowAutoRedirect = false;
             request.UseDefaultCredentials = false;
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
             request.Timeout = 5000;
             request.ReadWriteTimeout = 5000;
-            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentType = options.ContentType; // "application/x-www-form-urlencoded";
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
+            if(options.ETag != null)
+            {
+                request.Headers.Add("ETag", options.ETag);
+            }
+
+#if DEBUG
+            // our local https://build-server:8443 is untrusted.
+            request.ServerCertificateValidationCallback += (sender, cert, chain, policyErrors) =>
+            {
+                return true;
+            };
+#endif
+
             return request;
-        }
-
-        /// <summary>
-        /// Used to look up a specific URL to return information about it.
-        /// Used primarily to determine what the block page category is going to be.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="noLogging"></param>
-        /// <returns></returns>
-        public UriInfo LookupUri(Uri uri, bool noLogging = false)
-        {
-            HttpStatusCode code;
-            UriInfo uriInfo = null;
-            string url = uri.ToString();
-
-            try
-            {
-                HttpWebRequest request = GetApiBaseRequest(string.Format("/api/uri/lookup/existing?uri={0}", Uri.EscapeDataString(url)), LookupUriApiPath);
-                request.Method = "GET";
-                
-                string uriInfoText = null;
-
-                using (var response = (HttpWebResponse)request.GetResponse())
-                {
-                    using (var reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        uriInfoText = reader.ReadToEnd();
-
-                        try
-                        {
-                            uriInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<UriInfo>(uriInfoText);
-                        }
-                        catch
-                        {
-                            uriInfo = null;
-                        }
-                    }
-                }
-
-                return uriInfo;
-            }
-            catch (WebException e)
-            {
-                // KF - Set this to 0 for default. 0's a pretty good indicator of no internet.
-                code = 0;
-
-                try
-                {
-                    using (WebResponse response = e.Response)
-                    {
-                        HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
-
-                        int intCode = (int)httpResponse.StatusCode;
-
-                        code = (HttpStatusCode)intCode;
-
-                        // Auth failure means re-log EXCEPT when requesting deactivation.
-                        if (intCode == 401 || intCode == 403)
-                        {
-                            WebServiceUtil.Default.AuthToken = string.Empty;
-                            m_logger.Info("Client error occurred while trying to lookup site.");
-                            //AuthTokenRejected?.Invoke();
-                        }
-                        else
-                        {
-                            m_logger.Info("Client error occurred while trying to lookup a site. {0}", intCode);
-                        }
-
-                        using (Stream data = response.GetResponseStream())
-                        using (var reader = new StreamReader(data))
-                        {
-                            string text = reader.ReadToEnd();
-                            m_logger.Error(text);
-                        }
-                    }
-                }
-                catch { }
-
-                if (noLogging == false)
-                {
-                    m_logger.Error(e.Message);
-                    m_logger.Error(e.StackTrace);
-                }
-            }
-            catch (Exception e)
-            {
-                // XXX TODO - Good default?
-                code = 0;
-
-                if (noLogging == false)
-                {
-                    while (e != null)
-                    {
-                        m_logger.Error(e.Message);
-                        m_logger.Error(e.StackTrace);
-                        e = e.InnerException;
-                    }
-                }
-            }
-
-            return uriInfo;
         }
 
         /// <summary>
@@ -515,10 +420,85 @@ namespace Citadel.Core.Windows.Util
         /// <param name="code"></param>
         /// <param name="noLogging"></param>
         /// <returns></returns>
-        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, Dictionary<string, string> parameters = null, bool noLogging = false)
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, Dictionary<string, object> parameters = null, bool noLogging = false)
         {
             bool responseReceived = false;
-            return RequestResource(resource, out code, out responseReceived, parameters, noLogging);
+
+            ResourceOptions options = new ResourceOptions();
+            options.Parameters = parameters;
+            options.NoLogging = noLogging;
+
+            return RequestResource(resource, out code, out responseReceived, options);
+        }
+
+        public Dictionary<string, bool?> VerifyLists(Dictionary<string, string> hashes)
+        {
+            Dictionary<string, object> hashesDict = new Dictionary<string, object>();
+            foreach(var hash in hashes)
+            {
+                hashesDict.Add(hash.Key, hash.Value);
+            }
+
+            ResourceOptions options = new ResourceOptions()
+            {
+                ContentType = "application/json",
+                Parameters = hashesDict
+            };
+
+            HttpStatusCode code;
+            bool responseReceived;
+
+            byte[] ret = RequestResource(ServiceResource.RuleDataSumCheck, out code, out responseReceived, options);
+
+            Console.WriteLine("{0}", Encoding.UTF8.GetString(ret));
+            Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
+
+            return responseDict;
+        }
+
+        public byte[] GetFilterList(string @namespace, string category, string type, string sha1 = null)
+        {
+            HttpStatusCode code;
+            bool responseReceived;
+
+            byte[] ret = RequestResource($"/api/v2/rules/{@namespace}/{category}/{type}.txt", out code, out responseReceived, new ResourceOptions()
+            {
+                Method = "GET",
+                ETag = sha1
+            });
+
+            // FIXME: First adult_abortion request_resource isn't working.
+            // TODO: Output to console and see if ret is null or not null.
+
+            if(!responseReceived)
+            {
+                return null;
+            }
+
+            if((int) code < 200 || (int)code > 399)
+            {
+                return null;
+            }
+
+            return ret;
+        }
+
+        public class ResourceOptions
+        {
+            public string Method { get; set; } = "POST";
+
+            public string ETag { get; set; } = null;
+
+            public Dictionary<string, object> Parameters { get; set; } = null;
+
+            public string ContentType { get; set; } = "application/x-www-form-urlencoded";
+
+            public bool NoLogging { get; set; } = false;
+        }
+
+        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, ResourceOptions options = null)
+        {
+            return RequestResource(m_namedResourceMap[resource], out code, out responseReceived, options, resource);
         }
 
         /// <summary>
@@ -538,9 +518,15 @@ namespace Citadel.Core.Windows.Util
         /// <returns>
         /// A non-null byte array on success. Null byte array on failure. 
         /// </returns>
-        public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, Dictionary<string, string> parameters = null, bool noLogging = false)
+        public byte[] RequestResource(string resourceUri, out HttpStatusCode code, out bool responseReceived, ResourceOptions options = null, ServiceResource resource = ServiceResource.Custom)
         {
+            if(options == null)
+            {
+                options = new ResourceOptions(); // Instantiate a resource options object with default options.
+            }
+
             responseReceived = true;
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
 
             try
             {
@@ -557,19 +543,56 @@ namespace Citadel.Core.Windows.Util
                     deviceName = "Unknown";
                 }
 
-                var request = GetApiBaseRequest(m_namedResourceMap[resource]);
-
                 var accessToken = WebServiceUtil.Default.AuthToken;
 
                 //m_logger.Info("RequestResource1: accessToken=" + accessToken);
-                m_logger.Info("RequestResource: accessToken length={0}", accessToken == null ? "(null)" : accessToken.Length.ToString());
-                m_logger.Info("RequestResource: {0}", resource.ToString());
 
-                if(StringExtensions.Valid(accessToken))
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                string version = System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
+                // Build out post data with username and identifier.
+                parameters.Add("identifier", FingerprintService.Default.Value);
+                parameters.Add("device_id", deviceName);
+
+                string postString = null;
+                //string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
+
+                if (options.Parameters != null)
+                {
+                    foreach (var parameter in options.Parameters)
+                    {
+                        parameters.Add(parameter.Key, parameter.Value);
+                    }
+                }
+
+                if (resource == ServiceResource.UserDataSumCheck)
+                {
+                    parameters.Add("app_version", version);
+                }
+
+                switch(options.ContentType)
+                {
+                    case "application/x-www-form-urlencoded":
+                        postString = string.Join("&", parameters.Select(kv => $"{kv.Key}={kv.Value}"));
+                        break;
+
+                    case "application/json":
+                        postString = Newtonsoft.Json.JsonConvert.SerializeObject(parameters);
+                        break;
+                }
+
+                if (options.Method == "GET" || options.Method == "DELETE")
+                {
+                    resourceUri += "?" + postString;
+                }
+
+                var request = GetApiBaseRequest(resourceUri, options);
+
+                if (StringExtensions.Valid(accessToken))
                 {
                     request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
                 }
-                else if(resource != ServiceResource.RetrieveToken)
+                else if (resource != ServiceResource.RetrieveToken)
                 {
                     m_logger.Info("RequestResource1: Authorization failed.");
                     AuthTokenRejected?.Invoke();
@@ -577,40 +600,22 @@ namespace Citadel.Core.Windows.Util
                     return null;
                 }
 
-                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                string version = System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
-
-                // Build out post data with username and identifier.
-                string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
-
-                if(parameters != null)
+                if (options.Method != "GET" && options.Method != "DELETE")
                 {
-                    foreach(var parameter in parameters)
+                    var formData = System.Text.Encoding.UTF8.GetBytes(postString);
+                    request.ContentLength = formData.Length;
+
+                    using (var requestStream = request.GetRequestStream())
                     {
-                        postString += $"&{parameter.Key}={parameter.Value}";
+                        requestStream.Write(formData, 0, formData.Length);
+                        requestStream.Close();
                     }
                 }
 
-                if(resource == ServiceResource.UserDataSumCheck)
-                {
-                    postString += string.Format("&app_version={0}", version);
-                }
-
-                var formData = System.Text.Encoding.UTF8.GetBytes(postString);
-
-                // Don't forget to the set the content length to the total length of our form POST data!
-                request.ContentLength = formData.Length;
-
-                // Grab the request stream so we can POST our login form data to it.
-                using(var requestStream = request.GetRequestStream())
-                {
-                    // Write and close.
-                    requestStream.Write(formData, 0, formData.Length);
-                    requestStream.Close();
-                }
+                m_logger.Info("RequestResource: uri={0}", request.RequestUri);
 
                 // Now that our login form data has been POST'ed, get a response.
-                using(var response = (HttpWebResponse)request.GetResponse())
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
                     // Get the response code as an int so we can range check it.
                     var intCode = (int)response.StatusCode;
@@ -620,17 +625,17 @@ namespace Citadel.Core.Windows.Util
                     try
                     {
                         // Check if response code is considered a success code.
-                        if(intCode >= 200 && intCode <= 299)
+                        if (intCode >= 200 && intCode <= 299)
                         {
-                            using(var memoryStream = new MemoryStream())
+                            using (var memoryStream = new MemoryStream())
                             {
-                                response.GetResponseStream().CopyTo(memoryStream);                                
+                                response.GetResponseStream().CopyTo(memoryStream);
 
                                 // We do this just in case we get something like a 204. The idea here
                                 // is that if we return a non-null, the call was a success.
                                 var responseBody = memoryStream.ToArray();
-                                if(responseBody == null || intCode == 204)
-                                {                                    
+                                if (responseBody == null || intCode == 204)
+                                {
                                     return null;
                                 }
 
@@ -692,7 +697,7 @@ namespace Citadel.Core.Windows.Util
                 }
                 catch { }
 
-                if(noLogging == false)
+                if(!options.NoLogging)
                 {
                     m_logger.Error(e.Message);
                     m_logger.Error(e.StackTrace);
@@ -703,7 +708,7 @@ namespace Citadel.Core.Windows.Util
                 // XXX TODO - Good default?
                 code = HttpStatusCode.InternalServerError;
 
-                if(noLogging == false)
+                if(!options.NoLogging)
                 {
                     while(e != null)
                     {
@@ -751,7 +756,7 @@ namespace Citadel.Core.Windows.Util
                     deviceName = "Unknown";
                 }
 
-                var request = GetApiBaseRequest(m_namedResourceMap[resource]);
+                var request = GetApiBaseRequest(m_namedResourceMap[resource], new ResourceOptions());
 
                 var accessToken = WebServiceUtil.Default.AuthToken;
 

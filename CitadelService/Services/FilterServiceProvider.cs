@@ -2806,7 +2806,7 @@ namespace CitadelService.Services
         private bool UpdateNumberOfBypassesFromServer()
         {
             HttpStatusCode statusCode;
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("check_only", "1");
 
             byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
