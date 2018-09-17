@@ -210,6 +210,9 @@ namespace CloudVeilGUI
             TrayIconController.InitializeIcon(trayIconMenu);
         }
 
+        /// <summary>
+        /// This is a custom callback that should be called by platform specific code when the app is exiting.
+        /// </summary>
         public void OnExit()
         {
             try
@@ -218,7 +221,7 @@ namespace CloudVeilGUI
 
                 instanceMutex.ReleaseMutex();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 try
                 {
@@ -234,7 +237,7 @@ namespace CloudVeilGUI
 
         protected override void OnSleep()
         {
-            
+            // Handle when your app sleeps.
         }
 
         protected override void OnResume()
