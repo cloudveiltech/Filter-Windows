@@ -453,12 +453,12 @@ namespace Te.Citadel
                     m_logger.Warn("Disconnected from IPC server! Automatically attempting reconnect.");
                 };
 
-                m_ipcClient.RelaxedPolicyExpired = () =>
+                /*m_ipcClient.RelaxedPolicyExpired = () =>
                 {
                     // We don't have to do anything here on our side, but we may want to do something
                     // here in the future if we modify how our UI shows relaxed policy timer stuff.
                     // Like perhaps changing views etc.
-                };
+                };*/
 
                 m_ipcClient.RelaxedPolicyInfoReceived = (args) =>
                 {
@@ -835,7 +835,7 @@ namespace Te.Citadel
         /// handlers to respond to user iteraction requesting to bring the application back out of
         /// the tray.
         /// </summary>
-        private void InitTrayIcon()
+        /*private void InitTrayIcon()
         {
             m_trayIcon = new System.Windows.Forms.NotifyIcon();
 
@@ -863,9 +863,9 @@ namespace Te.Citadel
             menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
 
             m_trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
-        }
+        }*/
 
-        private void TrayIcon_Open(object sender, EventArgs e)
+        /*private void TrayIcon_Open(object sender, EventArgs e)
         {
             BringAppToFocus();
         }
@@ -879,13 +879,13 @@ namespace Te.Citadel
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
         {
             OnRelaxedPolicyRequested(true);
-        }
+        }*/
 
         /// <summary>
         /// Brings the main application window into focus for the user and removes it from the tray
         /// if the application icon is in the tray.
         /// </summary>
-        public void BringAppToFocus()
+        /*public void BringAppToFocus()
         {
             Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
@@ -905,7 +905,7 @@ namespace Te.Citadel
                     }
                 }
             );
-        }
+        }*/
 
 #if CAPTIVE_PORTAL_GUI_ENABLED
         public void DisplayCaptivePortalToolTip()
@@ -994,12 +994,7 @@ namespace Te.Citadel
             m_mainWindow.ShowUserMessage(title, message);
         }
 
-        private void OnRelaxedPolicyRequested()
-        {
-            OnRelaxedPolicyRequested(false);
-        }
-
-        private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)
+        /*private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)
         {
             string title = "Relaxed Policy";
             string message = "";
@@ -1052,12 +1047,12 @@ namespace Te.Citadel
                     }
                 });
             }
-        }
+        }*/
 
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        private async void OnRelaxedPolicyRequested(bool fromTray)
+        /*private async void OnRelaxedPolicyRequested(bool fromTray)
         {
             using(var ipcClient = new IPCClient())
             {
@@ -1074,12 +1069,12 @@ namespace Te.Citadel
                 ipcClient.WaitForConnection();
                 await Task.Delay(3000);
             }
-        }
+        }*/
 
         /// <summary>
         /// Called when the user has manually requested to relinquish a relaxed policy. 
         /// </summary>
-        private async void OnRelinquishRelaxedPolicyRequested()
+        /*private async void OnRelinquishRelaxedPolicyRequested()
         {
             using(var ipcClient = new IPCClient())
             {
@@ -1096,7 +1091,7 @@ namespace Te.Citadel
                 ipcClient.WaitForConnection();
                 await Task.Delay(3000);
             }
-        }
+        }*/
 
         /// <summary>
         /// Sends the application to the task tray, optionally showing a tooltip explaining that the

@@ -52,7 +52,14 @@ namespace CloudVeilGUI.Platform.Windows
 
             foreach(var item in menuItems)
             {
-                windowsMenuItems.Add(new MenuItem(item.ItemName, item.OnTriggered));
+                if(item.IsSeparator)
+                {
+                    windowsMenuItems.Add(new MenuItem("-"));
+                }
+                else
+                {
+                    windowsMenuItems.Add(new MenuItem(item.ItemName, item.OnTriggered));
+                }
             }
 
             trayIcon.ContextMenu = new ContextMenu(windowsMenuItems.ToArray());

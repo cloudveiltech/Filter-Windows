@@ -23,6 +23,7 @@ using System.Threading;
 using Te.Citadel.Util;
 using System.Threading.Tasks;
 using CloudVeilGUI.IPCHandlers;
+using CloudVeilGUI.ViewModels;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CloudVeilGUI
@@ -34,7 +35,11 @@ namespace CloudVeilGUI
         private IPCClient m_ipcClient;
         private NLog.Logger logger;
 
+        private RelaxedPolicyHandlers relaxedPolicyHandlers;
+
         public ModelManager ModelManager { get; private set; }
+
+        public ITrayIconController TrayIconController { get; private set; }
 
         /// <summary>
         /// This is a stack for preserved pages in case one page needs to override another.
@@ -58,6 +63,7 @@ namespace CloudVeilGUI
 
             ModelManager = new ModelManager();
             ModelManager.Register(new BlockedPagesModel());
+            ModelManager.Register(new RelaxedPolicyViewModel());
 
             // Code smell: MainPage() makes use of ModelManager, so we need to instantiate ModelManager first.
             MainPage = guiOnly ? (Page)new MainPage() : (Page)new WaitingPage();
@@ -185,12 +191,31 @@ namespace CloudVeilGUI
                         break;
                 }
             };
+
+            relaxedPolicyHandlers = new RelaxedPolicyHandlers(this);
+
+            m_ipcClient.RelaxedPolicyExpired = relaxedPolicyHandlers.RelaxedPolicyExpired;
+            m_ipcClient.RelaxedPolicyInfoReceived = relaxedPolicyHandlers.RelaxedPolicyInfoReceived;
+
+            TrayIconController = PlatformTypes.New<ITrayIconController>();
+
+            var trayIconMenu = new List<StatusIconMenuItem>();
+
+            // TODO: Open event handler.
+            trayIconMenu.Add(new StatusIconMenuItem("Open", TrayIcon_Open));
+            trayIconMenu.Add(StatusIconMenuItem.Separator);
+            trayIconMenu.Add(new StatusIconMenuItem("Settings", TrayIcon_OpenSettings));
+            trayIconMenu.Add(new StatusIconMenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
+
+            TrayIconController.InitializeIcon(trayIconMenu);
         }
 
-        protected override void OnSleep()
+        public void OnExit()
         {
             try
             {
+                TrayIconController.DestroyIcon();
+
                 instanceMutex.ReleaseMutex();
             }
             catch(Exception e)
@@ -200,16 +225,39 @@ namespace CloudVeilGUI
                     var logger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(logger, e);
                 }
-                catch(Exception he)
+                catch (Exception he)
                 {
                     // XXX TODO - We can't really log here unless we do a direct-to-file write.
                 }
             }
         }
 
+        protected override void OnSleep()
+        {
+            
+        }
+
         protected override void OnResume()
         {
             // Handle when your app resumes
+        }
+
+        private void TrayIcon_Open(object sender, EventArgs e)
+        {
+            var guiServices = PlatformTypes.New<IGuiServices>();
+            guiServices.BringAppToFront();
+        }
+
+        private void TrayIcon_OpenSettings(object sender, EventArgs e)
+        {
+            var guiServices = PlatformTypes.New<IGuiServices>();
+            guiServices.BringAppToFront();
+            // TODO: What is the settings tab?
+        }
+
+        private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
+        {
+            relaxedPolicyHandlers.OnRelaxedPolicyRequested(true);
         }
     }
 }

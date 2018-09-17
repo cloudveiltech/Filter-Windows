@@ -5,7 +5,9 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using CloudVeilGUI.Models;
+using CloudVeilGUI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,11 +19,15 @@ using Xamarin.Forms.Xaml;
 namespace CloudVeilGUI.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class RelaxedPolicyContentPage : ContentPage
+	public partial class RelaxedPolicyPage : ContentPage
 	{
-		public RelaxedPolicyContentPage ()
+        private RelaxedPolicyViewModel viewModel;
+
+		public RelaxedPolicyPage ()
 		{
 			InitializeComponent ();
+
+            BindingContext = viewModel = ((App)App.Current).ModelManager.GetModel<RelaxedPolicyViewModel>();
 		}
 	}
 }

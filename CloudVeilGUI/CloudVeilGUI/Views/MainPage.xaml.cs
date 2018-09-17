@@ -47,7 +47,7 @@ namespace CloudVeilGUI.Views
                         break;
 
                     case (int)MenuItemType.RelaxedPolicy:
-                        MenuPages.Add(id, new NavigationPage(new RelaxedPolicyContentPage()));
+                        MenuPages.Add(id, new NavigationPage(new RelaxedPolicyPage()));
                         break;
 
                     case (int)MenuItemType.Advanced:

@@ -12,6 +12,13 @@
     /// </summary>
     public class StatusIconMenuItem
     {
+        public static readonly StatusIconMenuItem Separator = new StatusIconMenuItem(true);
+
+        public StatusIconMenuItem(bool isSeparator)
+        {
+            IsSeparator = isSeparator;
+        }
+
         public StatusIconMenuItem(string itemName, System.EventHandler handler) : this(itemName, null, handler)
         {
 
@@ -24,6 +31,11 @@
 
             Triggered += handler;
         }
+
+        /// <summary>
+        /// Determines whether the specified menu item should be rendered as a separator.
+        /// </summary>
+        public bool IsSeparator { get; set; }
 
         /// <summary>
         /// The name of the menu item.
