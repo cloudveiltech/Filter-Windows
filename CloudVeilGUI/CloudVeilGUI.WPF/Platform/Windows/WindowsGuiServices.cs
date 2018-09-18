@@ -36,8 +36,6 @@ namespace CloudVeilGUI.Platform.Windows
                         app.MainWindow.Topmost = true;
                         app.MainWindow.Topmost = false;
                     }
-
-                    // TODO: Implement tray icon.
                 });
         }
     }

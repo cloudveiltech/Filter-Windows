@@ -8,6 +8,7 @@
 using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util.Net;
 using Filter.Platform.Common;
+using Filter.Platform.Common.Util;
 using Microsoft.Win32;
 using NLog;
 using System;

@@ -5,8 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Util;
 using CitadelService.Services;
+using Filter.Platform.Common.Util;
 using System;
 using System.Threading;
 using Topshelf;

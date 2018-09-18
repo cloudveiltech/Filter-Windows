@@ -7,6 +7,7 @@
 
 using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using System;
 using System.Security;
 

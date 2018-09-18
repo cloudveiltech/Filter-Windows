@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-namespace Citadel.Core.Windows.Util
+namespace Filter.Platform.Common.Util
 {
     /// <summary>
     /// Various exit codes indicating the reason for a shutdown. 

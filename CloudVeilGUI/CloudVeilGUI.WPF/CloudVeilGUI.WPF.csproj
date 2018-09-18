@@ -103,12 +103,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CustomRenderers\BlurredFrameRenderer.cs" />
+    <Compile Include="CustomRenderers\ModalHostPageRenderer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomRenderers\ModalPageRenderer.cs" />
     <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
     <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
     <Compile Include="Platform\Windows\WindowsPlatformServices.cs" />

@@ -5,7 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeilGUI.Models;
+using CloudVeilGUI.CustomFormElements;
+using CloudVeilGUI.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace CloudVeilGUI.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : MasterDetailPage
     {
-        Dictionary<int, NavigationPage> MenuPages = new Dictionary<int, NavigationPage>();
+        Dictionary<int, ModalHostPage> MenuPages = new Dictionary<int, ModalHostPage>();
         public MainPage()
         {
             InitializeComponent();
@@ -25,7 +26,15 @@ namespace CloudVeilGUI.Views
             MasterBehavior = MasterBehavior.Split;
             
             // Not sure whats going on here?
-            MenuPages.Add((int)MenuItemType.BlockedPages, (NavigationPage)Detail);
+            MenuPages.Add((int)MenuItemType.BlockedPages, (ModalHostPage)Detail);
+        }
+
+        public async Task PushModal(Page modalPage)
+        {
+            if(Detail is ModalHostPage)
+            {
+                await (Detail as ModalHostPage).DisplayPageModal(modalPage);
+            }
         }
 
         public async Task NavigateFromMenu(int id)
@@ -35,31 +44,31 @@ namespace CloudVeilGUI.Views
                 switch (id)
                 {
                     case (int)MenuItemType.BlockedPages:
-                        MenuPages.Add(id, new NavigationPage(new BlockedPagesPage()));
+                        MenuPages.Add(id, new ModalHostPage(new BlockedPagesPage()));
                         break;
 
                     case (int)MenuItemType.SelfModeration:
-                        MenuPages.Add(id, new NavigationPage(new SelfModerationPage()));
+                        MenuPages.Add(id, new ModalHostPage(new SelfModerationPage()));
                         break;
 
                     case (int)MenuItemType.TimeRestrictions:
-                        MenuPages.Add(id, new NavigationPage(new TimeRestrictionsPage()));
+                        MenuPages.Add(id, new ModalHostPage(new TimeRestrictionsPage()));
                         break;
 
                     case (int)MenuItemType.RelaxedPolicy:
-                        MenuPages.Add(id, new NavigationPage(new RelaxedPolicyPage()));
+                        MenuPages.Add(id, new ModalHostPage(new RelaxedPolicyPage()));
                         break;
 
                     case (int)MenuItemType.Advanced:
-                        MenuPages.Add(id, new NavigationPage(new AdvancedPage()));
+                        MenuPages.Add(id, new ModalHostPage(new AdvancedPage()));
                         break;
 
                     case (int)MenuItemType.Support:
-                        MenuPages.Add(id, new NavigationPage(new SupportPage()));
+                        MenuPages.Add(id, new ModalHostPage(new SupportPage()));
                         break;
 
                     case (int)MenuItemType.Diagnostics:
-                        MenuPages.Add(id, new NavigationPage(new DiagnosticsPage()));
+                        MenuPages.Add(id, new ModalHostPage(new DiagnosticsPage()));
                         break;
                 }
             }

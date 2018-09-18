@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 
 namespace CitadelService.Util
 {

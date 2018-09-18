@@ -5,7 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using CloudVeilGUI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +20,12 @@ namespace CloudVeilGUI.Views
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class AdvancedPage : ContentPage
 	{
+        AdvancedPageViewModel viewModel;
+
 		public AdvancedPage ()
 		{
 			InitializeComponent ();
+            BindingContext = viewModel = new AdvancedPageViewModel();
 		}
 	}
 }

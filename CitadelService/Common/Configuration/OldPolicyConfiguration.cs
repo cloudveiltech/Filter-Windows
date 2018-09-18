@@ -28,6 +28,7 @@ using DistillNET;
 using CitadelService.Data.Filtering;
 using Te.Citadel.Util;
 using System.Collections.Concurrent;
+using Filter.Platform.Common.Util;
 
 namespace CitadelService.Common.Configuration
 {

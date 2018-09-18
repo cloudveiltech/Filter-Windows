@@ -34,6 +34,8 @@ namespace Citadel.Core.Windows
             PlatformTypes.Register<IPipeServer>((arr) => new WindowsPipeServer((string)arr[0]));
 
             PlatformTypes.Register<IGUIChecks>((arr) => new WindowsGUIChecks());
+
+            PlatformTypes.Register<IAntitampering>((arr) => new WindowsAntitampering());
         }
     }
 }

@@ -6,10 +6,10 @@
 */
 
 using Citadel.Core.Windows.Types;
-using Citadel.Core.Windows.Util;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
 using Filter.Platform.Common.IPC;
+using Filter.Platform.Common.Util;
 using NLog;
 using System;
 using System.Security;

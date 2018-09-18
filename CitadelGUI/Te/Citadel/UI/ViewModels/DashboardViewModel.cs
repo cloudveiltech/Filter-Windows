@@ -8,6 +8,7 @@
 using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
+using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;

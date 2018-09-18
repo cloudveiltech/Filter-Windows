@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
-using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using System.ServiceProcess;
 
 namespace FilterAgent.Windows

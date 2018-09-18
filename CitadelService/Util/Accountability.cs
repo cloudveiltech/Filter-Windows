@@ -15,6 +15,7 @@ using Citadel.Core.Windows.Util;
 using CitadelService.Data.Filtering;
 using Newtonsoft.Json;
 using System.Net;
+using Filter.Platform.Common.Util;
 
 namespace CitadelService.Util
 {

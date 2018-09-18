@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Citadel.Core.Windows.Util;
 using Microsoft.Data.Sqlite;
 using System.Net.Security;
+using Filter.Platform.Common.Util;
 
 namespace CitadelService.Util
 {

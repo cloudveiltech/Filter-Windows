@@ -24,7 +24,6 @@ using Te.Citadel.Util;
 using System.Threading.Tasks;
 using CloudVeilGUI.IPCHandlers;
 using CloudVeilGUI.ViewModels;
-using Filter.Platform.Common.Util;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace CloudVeilGUI
@@ -198,12 +197,11 @@ namespace CloudVeilGUI
             m_ipcClient.RelaxedPolicyExpired = relaxedPolicyHandlers.RelaxedPolicyExpired;
             m_ipcClient.RelaxedPolicyInfoReceived = relaxedPolicyHandlers.RelaxedPolicyInfoReceived;
 
-            m_ipcClient.DeactivationResultReceived = new DeactivationResultCallback(this).Callback;
-
             TrayIconController = PlatformTypes.New<ITrayIconController>();
 
             var trayIconMenu = new List<StatusIconMenuItem>();
 
+            // TODO: Open event handler.
             trayIconMenu.Add(new StatusIconMenuItem("Open", TrayIcon_Open));
             trayIconMenu.Add(StatusIconMenuItem.Separator);
             trayIconMenu.Add(new StatusIconMenuItem("Settings", TrayIcon_OpenSettings));
@@ -212,9 +210,12 @@ namespace CloudVeilGUI
             TrayIconController.InitializeIcon(trayIconMenu);
         }
 
+<<<<<<< HEAD
+=======
         /// <summary>
         /// This is a custom callback that should be called by platform specific code when the app is exiting.
         /// </summary>
+>>>>>>> c232b05b58901cba800dcb221d696a9b15011052
         public void OnExit()
         {
             try
@@ -239,7 +240,11 @@ namespace CloudVeilGUI
 
         protected override void OnSleep()
         {
+<<<<<<< HEAD
+            
+=======
             // Handle when your app sleeps.
+>>>>>>> c232b05b58901cba800dcb221d696a9b15011052
         }
 
         protected override void OnResume()

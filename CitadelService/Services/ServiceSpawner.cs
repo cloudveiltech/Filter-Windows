@@ -31,7 +31,7 @@ using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 // assemblies.
 using Topshelf;
 using Te.Citadel.Services;
-using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
 
 namespace CitadelService.Services

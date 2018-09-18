@@ -6,7 +6,7 @@
 */
 
 ﻿using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using Citadel.Core.Windows.Util.Net;
 using CitadelService.Common.Configuration;
 using DNS.Client;

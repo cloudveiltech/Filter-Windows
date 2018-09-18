@@ -50,7 +50,7 @@
                 <Label Margin="0,16,0,0" LineBreakMode="WordWrap">
                     Once approved, clicking deactivate will stop the filter.
                 </Label>
-                <Button Text="Deactivate" />
+                <Button Text="Deactivate" Command="{Binding DeactivateCommand}"/>
             </StackLayout>
         </Grid>
     </ContentPage.Content>

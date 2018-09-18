@@ -8,7 +8,7 @@
 using Citadel.Core.Extensions;
 using WindowsPlatform = Citadel.Core.Windows.Platform;
 
-using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using NLog;
@@ -359,7 +359,7 @@ namespace Te.Citadel
                     Application.Current.Shutdown(ExitCodes.ShutdownForUpdate);
                 };
 
-                m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
+                /*m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
                     m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
 
@@ -420,7 +420,7 @@ namespace Te.Citadel
                         }
                     );
                     }
-                };
+                };*/
 
                 m_ipcClient.AddCertificateExemptionRequest = (msg) =>
                 {

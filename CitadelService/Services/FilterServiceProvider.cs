@@ -45,10 +45,7 @@ using CitadelService.Common.Configuration;
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using CitadelCore.Net.Http;
 using CitadelCore.IO;
-using Citadel.Core.Windows;
-using Filter.Platform.Common;
-using CitadelService.Platform;
-using Filter.Platform.Common.IPC;
+using Filter.Platform.Common.Util;
 
 namespace CitadelService.Services
 {

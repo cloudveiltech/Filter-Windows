@@ -88,6 +88,7 @@
     <Compile Include="WinAPI\SFC.cs" />
     <Compile Include="WinAPI\WindowHelpers.cs" />
     <Compile Include="WinAPI\WindowMessages.cs" />
+    <Compile Include="WindowsAntitampering.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="NETWORKLIST">

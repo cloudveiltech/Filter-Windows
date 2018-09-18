@@ -7,6 +7,7 @@
 
 ﻿using Citadel.Core.Windows.Util;
 using CloudVeilGUI.Platform.Common;
+using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

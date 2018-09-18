@@ -32,6 +32,8 @@ using Te.Citadel.Util;
 using System.Collections.Concurrent;
 using System.Security.AccessControl;
 
+using Filter.Platform.Common.Util;
+
 namespace CitadelService.Common.Configuration
 {
     /*
@@ -301,13 +303,13 @@ namespace CitadelService.Common.Configuration
 
             foreach(var list in Configuration.ConfiguredLists)
             {
-                bool? downloadList = false;
+                bool? listIsCurrent = false;
 
-                if(lastFilterListResults != null && lastFilterListResults.TryGetValue(list.RelativeListPath, out downloadList))
+                if(lastFilterListResults != null && lastFilterListResults.TryGetValue(list.RelativeListPath, out listIsCurrent))
                 {
-                    Console.WriteLine("{0} = {1}", list.RelativeListPath, downloadList);
+                    Console.WriteLine("{0} = {1}", list.RelativeListPath, listIsCurrent);
 
-                    if(downloadList == false)
+                    if(listIsCurrent == true)
                     {
                         continue;
                     }

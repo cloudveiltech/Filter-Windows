@@ -7,7 +7,7 @@
 
 ﻿using System;
 
-namespace Citadel.Core.Windows.Util
+namespace Filter.Platform.Common.Util
 {
     /// <summary>
     /// Enumeration for summarizing the result of an authentication request. 

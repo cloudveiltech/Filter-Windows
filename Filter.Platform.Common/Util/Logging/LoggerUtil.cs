@@ -9,7 +9,7 @@ using NLog;
 using System;
 using System.Diagnostics;
 
-namespace Citadel.Core.Windows.Util
+namespace Filter.Platform.Common.Util
 {
     public static class LoggerUtil
     {
