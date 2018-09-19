@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;

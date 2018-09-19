@@ -7,10 +7,12 @@
 
 ﻿using Citadel.Core.Windows.Client;
 using Citadel.Core.Windows.Util;
+using Citadel.Core.Windows.Util.Net;
 using CitadelService.Platform;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.IPC;
+using Filter.Platform.Common.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,12 @@ namespace Citadel.Core.Windows
             PlatformTypes.Register<IGUIChecks>((arr) => new WindowsGUIChecks());
 
             PlatformTypes.Register<IAntitampering>((arr) => new WindowsAntitampering());
+
+            PlatformTypes.Register<INetworkInfo>((arr) => new NetworkListUtil());
+
+            PlatformTypes.Register<IAuthenticationStorage>((arr) => new RegistryAuthenticationStorage());
+
+            PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());
         }
     }
 }

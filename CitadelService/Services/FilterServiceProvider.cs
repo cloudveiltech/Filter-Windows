@@ -17,7 +17,7 @@ using Citadel.IPC.Messages;
 using CitadelCore.Logging;
 using CitadelCore.Net.Proxy;
 using CitadelCore.Windows.Net.Proxy;
-using CitadelService.Data.Models;
+using FilterProvider.Common.Data.Models;
 using DistillNET;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
@@ -40,48 +40,41 @@ using System.Threading.Tasks;
 using Te.Citadel.Util;
 using WindowsFirewallHelper;
 using CitadelService.Util;
-using CitadelService.Common.Configuration;
+using FilterProvider.Common.Configuration;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using CitadelCore.Net.Http;
 using CitadelCore.IO;
 using Filter.Platform.Common.Util;
+using FilterProvider.Common.Services;
+using Filter.Platform.Common;
+using CitadelService.Platform;
+using FilterProvider.Common.Platform;
+using Filter.Platform.Common.Net;
 
 namespace CitadelService.Services
 {
-    internal class FilterServiceProvider
+    public class FilterServiceProvider
     {
         #region Windows Service API
 
+        private CommonFilterServiceProvider m_provider;
+
         public bool Start()
         {
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-            {
-                if (m_logger != null)
-                {
-                    m_logger.Error((Exception)e.ExceptionObject);
-                }
-                else
-                {
-                    File.WriteAllText("filterserviceprovider-unhandled-exception.log", $"Exception occurred: {((Exception)e.ExceptionObject).Message}");
-                }
-            };
-
             try
             {
-                Thread thread = new Thread(OnStartup);
-                thread.Start();
-
-                //OnStartup();
+                return m_provider.Start();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // Critical failure.
                 try
                 {
                     EventLog.CreateEventSource("FilterServiceProvider", "Application");
                     EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred before logger was bootstrapped: {e.ToString()}");
-                } catch(Exception e2)
+                }
+                catch (Exception e2)
                 {
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
                 }
@@ -89,26 +82,23 @@ namespace CitadelService.Services
                 //LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
-
-            return true;
         }
 
         public bool Stop()
         {
             // We always return false because we don't let anyone tell us that we're going to stop.
-            return false;
+            return m_provider.Stop();
         }
 
         public bool Shutdown()
         {
             // Called on a shutdown event.
-            Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
-            return true;
+            return m_provider.Shutdown();
         }
 
         public void OnSessionChanged()
         {
-            ReviveGuiForCurrentUser(true);
+            m_provider.OnSessionChanged();
         }
 
         #endregion Windows Service API
@@ -291,8 +281,6 @@ namespace CitadelService.Services
 
         private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
 
-        private DnsEnforcement m_dnsEnforcement;
-
         private Accountability m_accountability;
 
         private TrustManager m_trustManager = new TrustManager();
@@ -304,6 +292,12 @@ namespace CitadelService.Services
         /// </summary>
         public FilterServiceProvider()
         {
+            PlatformTypes.Register<IPlatformDns>((arr) => new WindowsDns());
+            PlatformTypes.Register<IWifiManager>((arr) => new WindowsWifiManager());
+            PlatformTypes.Register<IPlatformTrust>((arr) => new TrustManager());
+            PlatformTypes.Register<ISystemServices>((arr) => new WindowsSystemServices(this));
+
+            m_provider = new CommonFilterServiceProvider();
         }
 
         private void OnStartup()
@@ -1441,7 +1435,7 @@ namespace CitadelService.Services
         /// True if the application at the specified absolute path should have its traffic forced
         /// through the filtering engine, false otherwise.
         /// </returns>
-        private FirewallResponse OnAppFirewallCheck(FirewallRequest request)
+        public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
         {
             // XXX TODO - The engine shouldn't even tell us about SYSTEM processes and just silently
             // let them through.

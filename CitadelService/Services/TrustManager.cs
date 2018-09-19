@@ -8,6 +8,7 @@
 ﻿using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Filter.Platform.Common.Util;
+using FilterProvider.Common.Platform;
 using murrayju.ProcessExtensions;
 using System;
 using System.Collections.Generic;
@@ -21,13 +22,19 @@ using System.Threading.Tasks;
 
 namespace CitadelService.Services
 {
-    public class TrustManager
+    public class TrustManager : IPlatformTrust
     {
         private NLog.Logger m_logger;
 
         public TrustManager()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
+        public void EstablishTrust()
+        {
+            EstablishTrustWithGit();
+            EstablishTrustWithFirefox();
         }
 
         /// <summary>

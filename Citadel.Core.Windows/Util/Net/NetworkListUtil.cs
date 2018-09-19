@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Util;
 using NETWORKLIST;
 using NLog;
@@ -14,138 +15,10 @@ using System.Runtime.InteropServices.ComTypes;
 namespace Citadel.Core.Windows.Util.Net
 {
     /// <summary>
-    /// Handler for network state change notifications.
-    /// </summary>
-    public delegate void ConnectionStateChangeHandler();
-
-    /// <summary>
-    /// Class we use to analayze network state information. This is a bit repetative but abstracts
-    /// away our underlying implementation.
-    /// </summary>
-    public class NetworkStatus
-    {
-        public event ConnectionStateChangeHandler ConnectionStateChanged;
-
-        private static NetworkStatus s_instance;
-
-        static NetworkStatus()
-        {
-            s_instance = new NetworkStatus();            
-        }
-
-        public static NetworkStatus Default
-        {
-            get
-            {
-                return s_instance;
-            }
-        }
-
-        private NetworkListUtil m_nListUtil;
-
-        /// <summary>
-        /// Gets whether or not the device has internet access that is not proxied nor behind a
-        /// captive portal.
-        /// </summary>
-        public bool HasUnencumberedInternetAccess
-        {
-            get
-            {
-                return (HasIpv4InetConnection || HasIpv6InetConnection) && (!BehindIPv4CaptivePortal && !BehindIPv6CaptivePortal) && (!BehindIPv4Proxy && !BehindIPv6Proxy);
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV4 connections have detected that they are behind a
-        /// captive portal.
-        /// </summary>
-        public bool BehindIPv4CaptivePortal
-        {
-            get
-            {
-                return m_nListUtil.BehindIPv4CaptivePortal;
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV6 connections have detected that they are behind a
-        /// captive portal.
-        /// </summary>
-        public bool BehindIPv6CaptivePortal
-        {
-            get
-            {
-                return m_nListUtil.BehindIPv6CaptivePortal;
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV4 connections have detected that they are behind a
-        /// proxy.
-        /// </summary>
-        public bool BehindIPv4Proxy
-        {
-            get
-            {
-                return m_nListUtil.BehindIPv4Proxy;
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV6 connections have detected that they are behind a
-        /// proxy.
-        /// </summary>
-        public bool BehindIPv6Proxy
-        {
-            get
-            {
-                return m_nListUtil.BehindIPv6Proxy;
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV4 connections have been determined to be capable
-        /// of reaching the internet.
-        /// </summary>
-        public bool HasIpv4InetConnection
-        {
-            get
-            {
-                return m_nListUtil.HasIpv4InetConnection;
-            }
-        }
-
-        /// <summary>
-        /// Gets whether or not any of the device IPV6 connections have been determined to be capable
-        /// of reaching the internet.
-        /// </summary>
-        public bool HasIpv6InetConnection
-        {
-            get
-            {
-                return m_nListUtil.HasIpv6InetConnection;
-            }
-        }
-
-        /// <summary>
-        /// Private ctor since we're cheezy and use a singleton.
-        /// </summary>
-        private NetworkStatus()
-        {
-            m_nListUtil = new NetworkListUtil();
-
-            m_nListUtil.ConnectionStateChanged += () =>
-            {
-                ConnectionStateChanged?.Invoke();
-            };
-        }
-    }
-
-    /// <summary>
     /// Internal class that hooks into the NETWORKLIST COM object for analyzing aspects of our
     /// network connections.
     /// </summary>
-    internal class NetworkListUtil : INetworkListManagerEvents, INetworkEvents, INetworkConnectionEvents
+    internal class NetworkListUtil : INetworkListManagerEvents, INetworkEvents, INetworkConnectionEvents, INetworkInfo
     {
         private Logger m_logger;
 
@@ -305,7 +178,7 @@ namespace Citadel.Core.Windows.Util.Net
         /// return true on the very first connection that has this flag set. False if no connections
         /// have this flag set, which means no internet detected.
         /// </summary>
-        public bool HasIpv4InetConnection
+        public bool HasIPv4InetConnection
         {
             get
             {
@@ -335,7 +208,7 @@ namespace Citadel.Core.Windows.Util.Net
         /// return true on the very first connection that has this flag set. False if no connections
         /// have this flag set, which means no internet detected.
         /// </summary>
-        public bool HasIpv6InetConnection
+        public bool HasIPv6InetConnection
         {
             get
             {

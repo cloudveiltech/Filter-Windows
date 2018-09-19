@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CloudVeil.DistillNET" Version="1.4.8" />
+    <PackageReference Include="DNS" Version="4.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="System.Memory" Version="4.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -75,15 +75,15 @@
     <Compile Include="Services\BaseProtectiveService.cs" />
     <Compile Include="Util\Net\NetworkListUtil.cs" />
     <Compile Include="Util\Http\FastHtmlTextExtractor.cs" />
+    <Compile Include="Util\RegistryAuthenticationStorage.cs" />
     <Compile Include="Util\WindowsFingerprint.cs" />
     <Compile Include="..\Contrib\CreateProcessAsUser\ProcessExtensions\ProcessExtensions.cs">
       <Link>Util\Process\ProcessExtensions.cs</Link>
     </Compile>
     <Compile Include="Util\Http\HttpUtils.cs" />
     <Compile Include="Util\Process\CriticalKernelProcessUtility.cs" />
-    <Compile Include="Util\RegistryUtil.cs" />
-    <Compile Include="Util\Update\AppcastUpdater.cs" />
     <Compile Include="Util\Net\WFPUtility.cs" />
+    <Compile Include="Util\WindowsPathProvider.cs" />
     <Compile Include="WinAPI\AppAssociationHelper.cs" />
     <Compile Include="WinAPI\SFC.cs" />
     <Compile Include="WinAPI\WindowHelpers.cs" />
