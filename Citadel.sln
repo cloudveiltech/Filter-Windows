@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citadel.Core.Windows", "Citadel.Core.Windows\Citadel.Core.Windows.csproj", "{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citadel.IPC.Common", "Citadel.IPC.Common\Citadel.IPC.Common.csproj", "{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Citadel.IPC.Common", "Citadel.IPC.Common\Citadel.IPC.Common.csproj", "{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CitadelService x86", "CitadelService\CitadelService x86.csproj", "{EE522E2C-F9FB-41D9-913F-2FEA9A374078}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -34,7 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignInstallers", "SignInsta
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetupPayload64", "Installers\SetupPayload64\SetupPayload64.wixproj", "{391C2798-5BF1-45B9-84E3-85D771F72586}"
 	ProjectSection(ProjectDependencies) = postProject
-		{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD} = {887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}
+		{9EB1E113-500F-4F47-9E01-63DC1E5DDC85} = {9EB1E113-500F-4F47-9E01-63DC1E5DDC85}
 	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetupPayload86", "Installers\SetupPayload86\SetupPayload86.wixproj", "{BC7647AC-B8CC-404C-B601-63044479C586}"
@@ -70,7 +70,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeilGUI.MacOS", "Cloud
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterAgent.Windows", "FilterAgent.Windows\FilterAgent.Windows.csproj", "{2CCD84A8-087F-4E40-A115-AF0707A146E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filter.Platform.Common", "Filter.Platform.Common\Filter.Platform.Common.csproj", "{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Filter.Platform.Common", "Filter.Platform.Common\Filter.Platform.Common.csproj", "{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterProvider.Common", "FilterProvider.Common\FilterProvider.Common.csproj", "{C5CF6D3F-967F-4BB2-BAC9-5A47C6C1867B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
