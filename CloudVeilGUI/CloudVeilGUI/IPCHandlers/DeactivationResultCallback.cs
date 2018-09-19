@@ -78,7 +78,7 @@ namespace CloudVeilGUI.IPCHandlers
 
                     if(Application.Current.MainPage is MainPage)
                     {
-                        await (Application.Current.MainPage as MainPage).PushModal(new PopupPage());
+                        await (Application.Current.MainPage as MainPage).DisplayAlert(title, message, "OK");
                     }
                 });
             }

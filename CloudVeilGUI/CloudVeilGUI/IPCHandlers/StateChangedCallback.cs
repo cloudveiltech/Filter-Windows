@@ -48,9 +48,16 @@ namespace CloudVeilGUI.IPCHandlers
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            if (!(app.MainPage is MainPage))
+                            if (app.MainPage is WaitingPage)
                             {
-                                app.MainPage = new MainPage();
+                                if(app.PreservedPages.Count > 0)
+                                {
+                                    app.MainPage = app.PreservedPages.Pop();
+                                }
+                                else
+                                {
+                                    app.MainPage = new MainPage();
+                                }
                             }
 
                             // TODO: Hide disabled internet message.

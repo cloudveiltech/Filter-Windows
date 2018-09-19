@@ -24,7 +24,9 @@
                                  Grid.Column="1"
                                  VerticalOptions="Fill"
                                  HorizontalOptions="Fill"
-                                 Padding="0">
+                                 Padding="0"
+                                 BackgroundColor="#000000"
+                                 >
                 <Grid x:Name="ContentGrid" ColumnSpacing="0" RowSpacing="1" VerticalOptions="Fill" HorizontalOptions="Fill" Padding="0">
                     <!-- TODO: Use a stack layout. -->
                     <Grid.RowDefinitions>
