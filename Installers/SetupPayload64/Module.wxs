@@ -388,6 +388,21 @@
         <Component Id="comp_2408E4E6_733A" Guid="D6AD658F-29FC-4FB1-AD56-EB28BDE69BD1" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_F8E79491_652E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Xaml.xml" KeyPath="yes" />
         </Component>
+        <Component Id="comp_EF93FB74_BA3D" Guid="9FDBA0BB-0C76-46CB-B44E-877B754E55E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_F70E68CC_6CD0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BrotliSharpLib.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\BrotliSharpLib.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_A2936DCD_CD71" Guid="E68CAFE3-7B47-4544-BF80-540B4E5791BB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4819A8DD_F41A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Titanium.Web.Proxy.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Titanium.Web.Proxy.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_364DFCC2_AEE8" Guid="B9A3C774-4D60-4479-96C4-D934936B72CD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_25C5585D_F64F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterProvider.Common.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_E0254AA0_DD67" Guid="3A34BD73-E319-4BCB-B6AC-101DEA89AF3F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_7A230D21_8429" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.ServiceModel.Syndication.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_F2865644_8363" Guid="D12604EB-8B9B-43CF-B55F-4F4F74B5C2E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_DE59FCB6_DD9C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterProvider.Common.pdb" KeyPath="yes" />
+        </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">
             <CreateFolder Directory="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" />

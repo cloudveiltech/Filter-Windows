@@ -72,7 +72,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterAgent.Windows", "Filt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Filter.Platform.Common", "Filter.Platform.Common\Filter.Platform.Common.csproj", "{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterProvider.Common", "FilterProvider.Common\FilterProvider.Common.csproj", "{C5CF6D3F-967F-4BB2-BAC9-5A47C6C1867B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilterProvider.Common", "FilterProvider.Common\FilterProvider.Common.csproj", "{C5CF6D3F-967F-4BB2-BAC9-5A47C6C1867B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

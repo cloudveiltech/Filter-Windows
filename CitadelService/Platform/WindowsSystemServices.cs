@@ -6,7 +6,7 @@
 */
 
 ﻿using Citadel.Core.Windows.Util;
-using CitadelCore.Logging;
+using CitadelCore.Windows.Diversion;
 using CitadelService.Services;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data;
@@ -15,8 +15,12 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Titanium.Web.Proxy;
+using Titanium.Web.Proxy.Models;
+using Titanium.Web.Proxy.Network;
 using WindowsFirewallHelper;
 
 namespace CitadelService.Platform
@@ -90,35 +94,68 @@ namespace CitadelService.Platform
             ServiceSpawner.Instance.InitializeServices();
         }
 
-        public IProxyServer CreateProxyServer(ProxyConfiguration config)
+        public ProxyServer StartProxyServer(ProxyConfiguration config)
         {
-            var server = new WindowsProxyServerWrapper(m_provider, config);
+            var transparentEndPointHttp = new TransparentProxyEndPoint(IPAddress.Any, 14300, false)
+            {
 
-            return server;
+            };
+
+            var transparentEndPointHttps = new TransparentProxyEndPoint(IPAddress.Any, 14301, true)
+            {
+
+            };
+
+            ProxyServer proxyServer = new ProxyServer(true, true);
+
+            proxyServer.EnableConnectionPool = false;
+
+            // TCP server connection prefetch doesn't work with our reverse proxy setup.
+            proxyServer.EnableTcpServerConnectionPrefetch = false;
+
+            proxyServer.CertificateManager.CreateRootCertificate(false);
+
+            proxyServer.CertificateManager.TrustRootCertificate();
+
+            //proxyServer.CertificateManager.CertificateEngine = CertificateEngine.BouncyCastle;
+            proxyServer.CertificateManager.CertificateEngine = CertificateEngine.BouncyCastle;
+
+            proxyServer.AddEndPoint(transparentEndPointHttp);
+            proxyServer.AddEndPoint(transparentEndPointHttps);
+
+            proxyServer.BeforeRequest += config.BeforeRequest;
+            proxyServer.BeforeResponse += config.BeforeResponse;
+            proxyServer.AfterResponse += config.AfterResponse;
+
+            proxyServer.ExceptionFunc += LogException;
+
+            proxyServer.CertificateManager.EnsureRootCertificate(true, true);
+            proxyServer.Start();
+
+            WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
+
+            diverter.ConfirmDenyFirewallAccess = m_provider.OnAppFirewallCheck;
+
+            diverter.Start(0);
+
+            return proxyServer;
         }
 
-        private void EngineOnInfo(string message)
+        private void LogException(Exception exception)
         {
-            m_logger.Info(message);
-        }
-
-        private void EngineOnWarning(string message)
-        {
-            m_logger.Warn(message);
-        }
-
-        private void EngineOnError(string message)
-        {
-            m_logger.Error(message);
+            m_logger.Error("TITANIUM.WEB.PROXY ERROR");
+            LoggerUtil.RecursivelyLogException(m_logger, exception);
         }
 
         public void EnableInternet()
         {
+            m_logger.Info("Enabling internet.");
             WFPUtility.EnableInternet();
         }
 
         public void DisableInternet()
         {
+            m_logger.Info("Disabling internet.");
             WFPUtility.DisableInternet();
         }
     }

@@ -61,15 +61,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platform\CitadelCore.Windows\ByteArrayExtensions.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallAction.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallRequest.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallResponse.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\IPAddressExtensions.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\ProxyCallbacks.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\WindowsDiverter.cs" />
+    <Compile Include="Platform\WinAPI\Iphlpapi.cs" />
+    <Compile Include="Platform\WinAPI\Kernel32.cs" />
+    <Compile Include="Platform\WinAPI\NetworkTables.cs" />
+    <Compile Include="Platform\WinAPI\ProcessUtilities.cs" />
     <Compile Include="Platform\WindowsDns.cs" />
     <Compile Include="Platform\WindowsPipeServer.cs" />
-    <Compile Include="Platform\WindowsProxyServerWrapper.cs" />
     <Compile Include="Platform\WindowsSystemServices.cs" />
     <Compile Include="Platform\WindowsWifiManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FilterServiceProvider.cs" />
-    <Compile Include="Util\Accountability.cs" />
     <EmbeddedResource Include="Services\FilterStarter.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\CaptivePortalHelper.cs" />
@@ -79,7 +88,6 @@
     <Compile Include="Util\ICertificateExemptions.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
-    <Compile Include="Util\WebServiceUtil.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />
     <Compile Include="Services\ServiceSpawner.cs" />
     <EmbeddedResource Include="Services\Warden.cs" />
@@ -115,9 +123,6 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CloudVeil.CitadelCore.Windows">
-      <Version>3.1.3</Version>
-    </PackageReference>
     <PackageReference Include="CloudVeil.DistillNET">
       <Version>1.4.8</Version>
     </PackageReference>

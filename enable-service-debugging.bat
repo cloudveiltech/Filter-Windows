@@ -1,7 +1,7 @@
 @echo off
 
-IF EXIST "CitadelGUI\bin\Debug x86\" (
-	touch "CitadelGUI\bin\Debug x86\debug-filterserviceprovider"
+IF EXIST "CloudVeilGUI\CloudVeilGUI.WPF\bin\Debug\" (
+	touch "CloudVeilGUI\CloudVeilGUI.WPF\bin\Debug\debug-filterserviceprovider"
 ) ELSE (
-	echo "Please build CitadelGUI x86 (Debug) and try again."
+	echo "Please build CloudVeilGUI.WPF x86 (Debug) and try again."
 )

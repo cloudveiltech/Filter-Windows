@@ -38,6 +38,9 @@ using FilterProvider.Common.Util;
 using Filter.Platform.Common;
 using FilterProvider.Common.Data;
 using Filter.Platform.Common.Net;
+using Titanium.Web.Proxy.EventArguments;
+using Titanium.Web.Proxy.Models;
+using Titanium.Web.Proxy;
 
 namespace FilterProvider.Common.Services
 {
@@ -47,18 +50,6 @@ namespace FilterProvider.Common.Services
 
         public bool Start()
         {
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-            {
-                if (m_logger != null)
-                {
-                    m_logger.Error((Exception)e.ExceptionObject);
-                }
-                else
-                {
-                    File.WriteAllText("filterserviceprovider-unhandled-exception.log", $"Exception occurred: {((Exception)e.ExceptionObject).Message}");
-                }
-            };
-
             Thread thread = new Thread(OnStartup);
             thread.Start();
 
@@ -164,7 +155,7 @@ namespace FilterProvider.Common.Services
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 #endif
 
-        private IProxyServer m_filteringEngine;
+        private ProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
@@ -228,6 +219,14 @@ namespace FilterProvider.Common.Services
         /// App function config file. 
         /// </summary>
         IPolicyConfiguration m_policyConfiguration;
+
+        public IPolicyConfiguration PolicyConfiguration
+        {
+            get
+            {
+                return m_policyConfiguration;
+            }
+        }
 
         /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
@@ -967,8 +966,8 @@ namespace FilterProvider.Common.Services
             LogTime("Starting InitEngine()");
 
             // Get our blocked HTML page
-            m_blockedHtmlPage = ResourceStreams.Get("CitadelService.Resources.BlockedPage.html");
-            m_badSslHtmlPage = ResourceStreams.Get("CitadelService.Resources.BadCertPage.html");
+            m_blockedHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
+            m_badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
             if(m_blockedHtmlPage == null)
             {
@@ -986,20 +985,20 @@ namespace FilterProvider.Common.Services
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
             //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
-            m_filteringEngine = PlatformTypes.New<IProxyServer>(new ProxyConfiguration()
-            {
-                AuthorityName = "CloudVeil for Windows",
-                NewHttpMessageHandler = OnHttpMessageBegin,
-                HttpMessageWholeBodyInspectionHandler = OnHttpWholeBodyResponseInspection,
-                BadCertificateHandler = OnBadCertificate
-            });
 
+            // TODO: Code smell. Do we instantiate types with special functions, or do we use PlatformTypes.New<T>() ?
+            m_filteringEngine = m_systemServices.StartProxyServer(new ProxyConfiguration()
+            {
+                BeforeRequest = OnHttpRequestBegin,
+                BeforeResponse = OnBeforeResponse,
+                AfterResponse = OnAfterResponse
+            });
 
             // Setup general info, warning and error events.
             
 
             // Start filtering, always.
-            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            if(m_filteringEngine != null && !m_filteringEngine.ProxyRunning)
             {
                 m_filterEngineStartupBgWorker = new BackgroundWorker();
                 m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
@@ -1361,10 +1360,28 @@ namespace FilterProvider.Common.Services
             return false;
         }
 
-        private void OnHttpMessageBegin(HttpMessageInfo message)
+        /*private async Task OnHttpResponseBegin(SessionEventArgs args)
         {
-            message.ProxyNextAction = ProxyNextAction.AllowAndIgnoreContent;
-            
+            if (args.WebSession.Response.Headers.HeaderExists("Content-Type"))
+            {
+                contentType = args.WebSession.Request.Headers.GetFirstHeader("Content-Type").Value;
+
+                // This is the start of a response with a content type that we want to inspect.
+                // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
+                isHtml = contentType.IndexOf("html") != -1;
+                isJson = contentType.IndexOf("json") != -1;
+
+                if (isHtml || isJson)
+                {
+                    nextAction = ProxyNextAction.AllowButRequestContentInspection;
+                }
+            }
+        }*/
+
+        private async Task OnHttpRequestBegin(object sender, SessionEventArgs args)
+        {
+            ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
+
             string customBlockResponseContentType = null;
             byte[] customBlockResponse = null;
 
@@ -1384,26 +1401,22 @@ namespace FilterProvider.Common.Services
                 bool isJson = false;
                 bool hasReferer = true;
 
-                if ((message.Headers["Referer"]) == null)
+                if(!args.WebSession.Request.Headers.HeaderExists("Referer"))
                 {
                     hasReferer = false;
                 }
 
-                if ((contentType = message.Headers["Content-Type"]) != null)
+                //contentType = args.WebSession.Request.Headers.GetFirstHeader("Content-Type").Value;
+                if(args.WebSession.Response != null)
                 {
-                    // This is the start of a response with a content type that we want to inspect.
-                    // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
-                    isHtml = contentType.IndexOf("html") != -1;
-                    isJson = contentType.IndexOf("json") != -1;
-                    if (isHtml || isJson)
-                    {
-                        // Let's only inspect responses, not user-sent payloads (request data).
-                        if (message.MessageType == MessageType.Response)
-                        {
-                            message.ProxyNextAction = ProxyNextAction.AllowButRequestContentInspection;
-                        }
-                    }
+                    
                 }
+                
+
+                /*if ((contentType = message.Headers["Content-Type"]) != null)
+                {
+                    
+                }*/
 
                 var filterCollection = m_policyConfiguration.FilterCollection;
                 var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
@@ -1419,8 +1432,17 @@ namespace FilterProvider.Common.Services
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    string host = message.Url.Host;
+                    Uri url = new Uri(args.WebSession.Request.Url);
+
+                    //string host = message.Url.Host;
+                    string host = url.Host;
                     string[] hostParts = host.Split('.');
+
+                    NameValueCollection headers = new NameValueCollection();
+                    foreach (var header in args.WebSession.Request.Headers)
+                    {
+                        headers.Add(header.Name, header.Value);
+                    }
 
                     // Check whitelists first.
                     // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
@@ -1436,42 +1458,42 @@ namespace FilterProvider.Common.Services
                     {
                         // domain might have filters, so we want to check for sure here.
 
-                        filters = filterCollection.GetWhitelistFiltersForDomain(message.Url.Host).Result;
+                        filters = filterCollection.GetWhitelistFiltersForDomain(url.Host).Result;
 
-                        if (CheckIfFiltersApply(filters, message.Url, message.Headers, out matchingFilter, out matchCategory))
+                        if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                         {
                             var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                             if (mappedCategory != null)
                             {
-                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", message.Url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                             }
                             else
                             {
-                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", message.Url.ToString(), matchingFilter.OriginalRule, matchCategory);
+                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, matchCategory);
                             }
 
-                            message.ProxyNextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                            nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                             return;
                         }
                     } // else domain has no whitelist filters, continue to next check.
 
                     filters = filterCollection.GetWhitelistFiltersForDomain().Result;
 
-                    if (CheckIfFiltersApply(filters, message.Url, message.Headers, out matchingFilter, out matchCategory))
+                    if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
                         var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
                         if (mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", message.Url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
                         }
                         else
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", message.Url.ToString(), matchingFilter.OriginalRule, matchCategory);
+                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, matchCategory);
                         }
 
-                        message.ProxyNextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
                         return;
                     }
 
@@ -1479,16 +1501,16 @@ namespace FilterProvider.Common.Services
 
                     if (isHostInList(filterCollection, hostParts, false))
                     {
-                        filters = filterCollection.GetFiltersForDomain(message.Url.Host).Result;
+                        filters = filterCollection.GetFiltersForDomain(url.Host).Result;
 
-                        if (CheckIfFiltersApply(filters, message.Url, message.Headers, out matchingFilter, out matchCategory))
+                        if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                         {
-                            OnRequestBlocked(matchCategory, BlockType.Url, message.Url, matchingFilter.OriginalRule);
-                            message.ProxyNextAction = ProxyNextAction.DropConnection;
+                            OnRequestBlocked(matchCategory, BlockType.Url, url, matchingFilter.OriginalRule);
+                            nextAction = ProxyNextAction.DropConnection;
 
                             // Instead of going to an external API for information, we should do everything 
                             // that we can locally.
-                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, message.Url, message.Headers);
+                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
                             List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
 
                             if (isHtml || hasReferer == false)
@@ -1496,7 +1518,7 @@ namespace FilterProvider.Common.Services
                                 // Only send HTML block page if we know this is a response of HTML we're blocking, or
                                 // if there is no referer (direct navigation).
                                 customBlockResponseContentType = "text/html";
-                                customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, resolvedCategories);
+                                customBlockResponse = getBlockPageWithResolvedTemplates(url, matchCategory, resolvedCategories);
                             }
                             else
                             {
@@ -1510,12 +1532,12 @@ namespace FilterProvider.Common.Services
 
                     filters = filterCollection.GetFiltersForDomain().Result;
 
-                    if (CheckIfFiltersApply(filters, message.Url, message.Headers, out matchingFilter, out matchCategory))
+                    if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
-                        OnRequestBlocked(matchCategory, BlockType.Url, message.Url, matchingFilter.OriginalRule);
-                        message.ProxyNextAction = ProxyNextAction.DropConnection;
+                        OnRequestBlocked(matchCategory, BlockType.Url, url, matchingFilter.OriginalRule);
+                        nextAction = ProxyNextAction.DropConnection;
 
-                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, message.Url, message.Headers);
+                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
                         List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
 
                         if (isHtml || hasReferer == false)
@@ -1523,7 +1545,7 @@ namespace FilterProvider.Common.Services
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(message.Url, matchCategory, categories);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(url, matchCategory, categories);
                         }
                         else
                         {
@@ -1546,20 +1568,107 @@ namespace FilterProvider.Common.Services
                     m_filteringRwLock.ExitReadLock();
                 }
 
-                if(message.ProxyNextAction == ProxyNextAction.DropConnection)
+                if(nextAction == ProxyNextAction.DropConnection)
                 {
                     // There is currently no way to change an HTTP message to a response outside of CitadelCore.
                     // so, change it to a 204 and then modify the status code to what we want it to be.
-                    m_logger.Info("Response blocked: {0}", message.Url);
-
-                    message.Make204NoContent();
+                    m_logger.Info("Response blocked: {0}", args.WebSession.Request.Url);
 
                     if (customBlockResponse != null)
                     {
-                        message.CopyAndSetBody(customBlockResponse, 0, customBlockResponse.Length, customBlockResponseContentType);
-                        message.StatusCode = HttpStatusCode.OK;
+                        var headerDict = new Dictionary<string, HttpHeader>();
+                        headerDict.Add("Content-Type", new HttpHeader("Content-Type", customBlockResponseContentType));
 
-                        m_logger.Info("Writing custom block response: {0} {1} {2}", message.Url, message.StatusCode, customBlockResponse.Length);
+                        args.GenericResponse(customBlockResponse, HttpStatusCode.OK, headerDict, true);
+                    }
+                }
+            }
+        }
+
+        private async Task OnAfterResponse(object sender, SessionEventArgs args)
+        {
+        }
+
+        private async Task OnBeforeResponse(object sender, SessionEventArgs args)
+        {
+            ProxyNextAction nextAction = ProxyNextAction.AllowButRequestContentInspection;
+
+            bool shouldBlock = false;
+            string customBlockResponseContentType = null;
+            byte[] customBlockResponse = null;
+
+            // Don't allow filtering if our user has been denied access and they
+            // have not logged back in.
+            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            {
+                return;
+            }
+
+            string contentType = null;
+            if (args.WebSession.Response.Headers.HeaderExists("Content-Type"))
+            {
+                contentType = args.WebSession.Response.Headers.GetFirstHeader("Content-Type").Value;
+
+                // This is the start of a response with a content type that we want to inspect.
+                // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
+                bool isHtml = contentType.IndexOf("html") != -1;
+                bool isJson = contentType.IndexOf("json") != -1;
+
+                if (!(isHtml || isJson))
+                {
+                    return;
+                }
+            }
+
+            // The only thing we can really do in this callback, and the only thing we care to do, is
+            // try to classify the content of the response payload, if there is any.
+            try
+            {
+                if (contentType != null && args.WebSession.Response.HasBody)
+                {
+                    contentType = contentType.ToLower();
+
+                    BlockType blockType;
+                    string textTrigger;
+                    string textCategory;
+
+                    byte[] responseBody = await args.GetResponseBody();
+                    var contentClassResult = OnClassifyContent(responseBody, contentType, out blockType, out textTrigger, out textCategory);
+
+                    if (contentClassResult > 0)
+                    {
+                        shouldBlock = true;
+
+                        List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
+
+                        if (contentType.IndexOf("html") != -1)
+                        {
+                            customBlockResponseContentType = "text/html";
+                            customBlockResponse = getBlockPageWithResolvedTemplates(args.WebSession.Request.RequestUri, contentClassResult, categories, blockType, textCategory);
+                            nextAction = ProxyNextAction.DropConnection;
+                        }
+
+                        OnRequestBlocked(contentClassResult, blockType, args.WebSession.Request.RequestUri);
+                        m_logger.Info("Response blocked by content classification.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+            finally
+            {
+                if (nextAction == ProxyNextAction.DropConnection)
+                {
+                    m_logger.Info("Response blocked: {0}", args.WebSession.Request.RequestUri);
+
+                    if (customBlockResponse != null)
+                    {
+                        var headerDict = new Dictionary<string, HttpHeader>();
+                        headerDict.Add("Content-Type", new HttpHeader("Content-Type", customBlockResponseContentType));
+
+                        args.GenericResponse(customBlockResponse, HttpStatusCode.OK, headerDict, true);
                     }
                 }
             }
@@ -2260,11 +2369,14 @@ namespace FilterProvider.Common.Services
             {
                 m_systemServices.EnableInternet();
             }
-            catch { }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
 
             try
             {
-                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                if(m_filteringEngine != null && !m_filteringEngine.ProxyRunning)
                 {
                     m_logger.Info("Start engine.");
 
@@ -2604,7 +2716,7 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StopFiltering()
         {
-            if(m_filteringEngine != null && m_filteringEngine.IsRunning)
+            if(m_filteringEngine != null && m_filteringEngine.ProxyRunning)
             {
                 m_filteringEngine.Stop();
             }

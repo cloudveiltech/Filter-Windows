@@ -11,3 +11,19 @@ For CitadelGUI (CloudVeil.exe): Add an empty file named 'debug-cloudveil' (no ex
 
 For CitadelService (FilterServiceProvider.exe): Add an empty file named 'debug-filterserviceprovider' (no extension) in the same directory as FilterServiceProvider.exe
 
+# FilterServiceProvider.exe Service Control Manager errors? - Windows
+
+When FilterServiceProvider throws an exception during initialization, the Service Control Manager (SCM) likes to spit this error onto the event log.
+```
+The FilterServiceProvider service failed to start due to the following error:
+The service did not respond to the start or control request in a timely fashion.
+```
+
+I've added a little shim into `CitadelService\Program.cs` that allows us to initialize the filter provider from the command line to see if there are any initialization errors.
+
+Just open `cmd` in administrator mode, and navigate to your CitadelService binary directory and run:
+```
+FilterServiceProvider.exe test-me
+```
+
+This should reveal any errors in initialization.

@@ -6,17 +6,12 @@
 */
 
 using Citadel.Core.Extensions;
-using Citadel.Core.WinAPI;
 using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
-using Citadel.Core.Windows.Util.Net;
 using Citadel.Core.Windows.Util.Update;
-using Citadel.Core.Windows.WinAPI;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
-using CitadelCore.Logging;
 using CitadelCore.Net.Proxy;
-using CitadelCore.Windows.Net.Proxy;
 using FilterProvider.Common.Data.Models;
 using DistillNET;
 using Microsoft.Win32;
@@ -43,14 +38,15 @@ using CitadelService.Util;
 using FilterProvider.Common.Configuration;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
-using CitadelCore.Net.Http;
-using CitadelCore.IO;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Services;
 using Filter.Platform.Common;
 using CitadelService.Platform;
 using FilterProvider.Common.Platform;
 using Filter.Platform.Common.Net;
+using FilterProvider.Common.Data;
+using Titanium.Web.Proxy;
+using Citadel.Core.WinAPI;
 
 namespace CitadelService.Services
 {
@@ -64,6 +60,9 @@ namespace CitadelService.Services
         {
             try
             {
+                Thread thread = new Thread(OnStartup);
+                thread.Start();
+
                 return m_provider.Start();
             }
             catch (Exception e)
@@ -182,7 +181,7 @@ namespace CitadelService.Services
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 #endif
 
-        private ProxyServer m_filteringEngine;
+        //private ProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
@@ -203,11 +202,6 @@ namespace CitadelService.Services
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
         private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
-
-        /// <summary>
-        /// Timer used to query for filter list changes every X minutes, as well as application updates. 
-        /// </summary>
-        private Timer m_updateCheckTimer;
 
         /// <summary>
         /// Timer used to cleanup logs every 12 hours.
@@ -243,11 +237,6 @@ namespace CitadelService.Services
         private BackgroundWorker m_backgroundInitWorker;
 
         /// <summary>
-        /// App function config file. 
-        /// </summary>
-        IPolicyConfiguration m_policyConfiguration;
-
-        /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
         private long m_thresholdTicks;
@@ -264,11 +253,6 @@ namespace CitadelService.Services
         private Timer m_thresholdEnforcementTimer;
 
         /// <summary>
-        /// This timer is used to count down to the expiry time for relaxed policy use. 
-        /// </summary>
-        private Timer m_relaxedPolicyExpiryTimer;
-
-        /// <summary>
         /// This timer is used to track a 24 hour cooldown period after the exhaustion of all
         /// available relaxed policy uses. Once the timer is expired, it will reset the count to the
         /// config default and then disable itself.
@@ -281,8 +265,6 @@ namespace CitadelService.Services
 
         private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
 
-        private Accountability m_accountability;
-
         private TrustManager m_trustManager = new TrustManager();
 
         private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
@@ -292,17 +274,45 @@ namespace CitadelService.Services
         /// </summary>
         public FilterServiceProvider()
         {
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                if (m_logger != null)
+                {
+                    m_logger.Error((Exception)e.ExceptionObject);
+                }
+                else
+                {
+                    File.WriteAllText("filterserviceprovider-unhandled-exception.log", $"Exception occurred: {((Exception)e.ExceptionObject).Message}");
+                }
+            };
+
             PlatformTypes.Register<IPlatformDns>((arr) => new WindowsDns());
             PlatformTypes.Register<IWifiManager>((arr) => new WindowsWifiManager());
             PlatformTypes.Register<IPlatformTrust>((arr) => new TrustManager());
+            PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());
             PlatformTypes.Register<ISystemServices>((arr) => new WindowsSystemServices(this));
+
+            Citadel.Core.Windows.Platform.Init();
 
             m_provider = new CommonFilterServiceProvider();
         }
 
         private void OnStartup()
         {
-            if(File.Exists("debug-filterserviceprovider"))
+            m_logger = LoggerUtil.GetAppWideLogger();
+
+            /*LoggerProxy.Default.OnError += EngineOnError;
+            LoggerProxy.Default.OnWarning += EngineOnWarning;
+            LoggerProxy.Default.OnInfo += EngineOnInfo;*/
+
+            // Run the background init worker for non-UI related initialization.
+            /*m_backgroundInitWorker = new BackgroundWorker();
+            m_backgroundInitWorker.DoWork += DoBackgroundInit;
+            m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
+
+            m_backgroundInitWorker.RunWorkerAsync();*/
+
+            /*if(File.Exists("debug-filterserviceprovider"))
             {
                 Debugger.Launch();
             }
@@ -344,19 +354,6 @@ namespace CitadelService.Services
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);
-
-            try
-            {
-                Citadel.Core.Windows.Platform.Init();
-
-                m_ipcServer = new IPCServer();
-                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
-            }
-            catch(Exception ex)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-                return;
-	    }
 	    
 	    if(!consoleOutStatus)
             {
@@ -365,28 +362,6 @@ namespace CitadelService.Services
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
-
-            // Load authtoken and email data from files.
-            if (WebServiceUtil.Default.AuthToken == null)
-            {
-                HttpStatusCode status;
-                byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
-                if (tokenResponse != null && status == HttpStatusCode.OK)
-                {
-                    try
-                    {
-                        string jsonText = Encoding.UTF8.GetString(tokenResponse);
-                        dynamic jsonData = JsonConvert.DeserializeObject(jsonText);
-
-                        WebServiceUtil.Default.AuthToken = jsonData.authToken;
-                        WebServiceUtil.Default.UserEmail = jsonData.userEmail;
-                    }
-                    catch
-                    {
-
-                    }
-                } // else let them continue. They'll have to enter their password if this if isn't taken.
-            }
             
             // Hook the shutdown/logoff event.
             SystemEvents.SessionEnding += OnAppSessionEnding;
@@ -396,112 +371,7 @@ namespace CitadelService.Services
 
             try
             {
-                var bitVersionUri = string.Empty;
-                if(Environment.Is64BitProcess)
-                {
-                    bitVersionUri = "/update/winx64/update.xml";
-                }
-                else
-                {
-                    bitVersionUri = "/update/winx86/update.xml";
-                }
-
-                var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
-
-                m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
-            }
-            catch(Exception e)
-            {
-                // This is a critical error. We cannot recover from this.
-                m_logger.Error("Critical error - Could not create application updater.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-
-                Environment.Exit(-1);
-            }
-
-            WebServiceUtil.Default.AuthTokenRejected += () =>
-            {
-                ReviveGuiForCurrentUser();                
-                m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
-            };
-
-            try
-            {
-                m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadRelaxedPolicy;
-                m_dnsEnforcement = new DnsEnforcement(m_policyConfiguration, m_logger);
-
-                m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
-                {
-                    m_ipcServer.SendCaptivePortalState(isCaptivePortal, isActive);
-                };
-
-                m_dnsEnforcement.OnDnsEnforcementUpdate += (isEnforcementActive) =>
-                {
-
-                };
-
-                m_accountability = new Accountability();
-
-                m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
-                m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
-                m_policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
-
-                m_ipcServer.AttemptAuthentication = (args) =>
-                {
-                    try
-                    {
-                        if(!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username) && args.Password != null && args.Password.Length > 0)
-                        {
-                            byte[] unencrypedPwordBytes = null;
-                            try
-                            {
-                                unencrypedPwordBytes = args.Password.SecureStringBytes();
-
-                                var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
-
-                                switch(authResult.AuthenticationResult)
-                                {
-                                    case AuthenticationResult.Success:
-                                    {
-                                        Status = FilterStatus.Running;
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
-
-                                        // Probe server for updates now.
-                                        ProbeMasterForApplicationUpdates(false);
-                                        OnUpdateTimerElapsed(null);
-                                    }
-                                    break;
-
-                                    case AuthenticationResult.Failure:
-                                    {
-                                        ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
-                                    }
-                                    break;
-
-                                    case AuthenticationResult.ConnectionFailed:
-                                    {
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
-                                    }
-                                    break;
-                                }
-                            }
-                            finally
-                            {
-                                if(unencrypedPwordBytes != null && unencrypedPwordBytes.Length > 0)
-                                {
-                                    Array.Clear(unencrypedPwordBytes, 0, unencrypedPwordBytes.Length);
-                                    unencrypedPwordBytes = null;
-                                }
-                            }
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
-                };
-
+                
                 m_ipcServer.ClientAcceptedPendingUpdate = () =>
                 {
                     try
@@ -535,34 +405,6 @@ namespace CitadelService.Services
                             // Save auth token when shutting down for update.
                             string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
 
-                            try
-                            {
-                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
-                                {
-                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
-
-                                    using (StreamWriter writer = File.CreateText(authTokenPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.AuthToken);
-                                    }
-                                }
-
-                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
-                                {
-                                    string emailPath = Path.Combine(appDataPath, "email.data");
-
-                                    using (StreamWriter writer = File.CreateText(emailPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.UserEmail);
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                m_logger.Warn("Could not save authtoken or email before update.");
-                                LoggerUtil.RecursivelyLogException(m_logger, e);
-                            }
-
                             Environment.Exit((int)ExitCodes.ShutdownForUpdate);
                         }
                     }
@@ -578,145 +420,10 @@ namespace CitadelService.Services
                         }
                     }
                 };
-
-                m_ipcServer.DeactivationRequested = (args) =>
-                {
-                    Status = FilterStatus.Synchronizing;
-
-                    try
-                    {
-                        HttpStatusCode responseCode;
-                        bool responseReceived;
-                        var response = WebServiceUtil.Default.RequestResource(ServiceResource.DeactivationRequest, out responseCode, out responseReceived);
-
-                        if (!responseReceived)
-                        {
-                            args.DeactivationCommand = DeactivationCommand.NoResponse;
-                        }
-                        else
-                        {
-                            args.DeactivationCommand = responseCode == HttpStatusCode.OK || responseCode == HttpStatusCode.NoContent ? DeactivationCommand.Granted : DeactivationCommand.Denied;
-                        }
-
-                        if(args.Granted)
-                        {
-                            Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
-                        }
-                        else
-                        {
-                            Status = FilterStatus.Running;
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                        Status = FilterStatus.Running;
-                    }
-                };
-
+              
                 m_ipcServer.ClientServerStateQueried = (args) =>
                 {
                     m_ipcServer.NotifyStatus(Status);
-                };
-
-                m_ipcServer.RelaxedPolicyRequested = (args) =>
-                {
-                    switch(args.Command)
-                    {
-                        case RelaxedPolicyCommand.Relinquished:
-                        {
-                            OnRelinquishRelaxedPolicyRequested();
-                        }
-                        break;
-
-                        case RelaxedPolicyCommand.Requested:
-                        {
-                            OnRelaxedPolicyRequested();
-                        }
-                        break;
-                    }
-                };
-
-                m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
-                {
-                    var curAuthToken = WebServiceUtil.Default.AuthToken;
-
-                    if(curAuthToken != null && curAuthToken.Length > 0)
-                    {   
-                        string deviceName = string.Empty;
-
-                        try
-                        {
-                            deviceName = Environment.MachineName;
-                        }
-                        catch
-                        {
-                            deviceName = "Unknown";
-                        }
-
-                        try
-                        {
-                            var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-                            reportPath = string.Format(
-                                @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}",
-                                reportPath,
-                                Uri.EscapeDataString(blockActionMsg.Category),
-                                Uri.EscapeDataString(curAuthToken),
-                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)),
-                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockActionMsg.Resource.ToString()))
-                                );
-
-                            //m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
-                            //m_logger.Info("With args: {0}", reportPath);
-
-                            var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
-                            var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
-                            ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
-
-                            //var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-                            //ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
-                        }
-                        catch(Exception e)
-                        {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
-                        }
-                    }
-                };
-
-                m_ipcServer.ClientConnected = () =>
-                {
-                    try
-                    {
-                        ConnectedClients++;
-
-                        var cfg = m_policyConfiguration.Configuration;
-                        if (cfg != null && cfg.BypassesPermitted > 0)
-                        {
-                            m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
-                        }
-                        else
-                        {
-                            m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-                        }
-
-                        m_ipcServer.NotifyStatus(Status);
-
-                        m_dnsEnforcement.Trigger();
-
-                        if (m_ipcServer.WaitingForAuth)
-                        {
-                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
-                        }
-                        else
-                        {
-                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        m_logger.Warn("Error occurred while trying to connect to IPC server.");
-                        LoggerUtil.RecursivelyLogException(m_logger, ex);
-                    }
                 };
 
                 m_ipcServer.ClientDisconnected = () =>
@@ -728,22 +435,6 @@ namespace CitadelService.Services
                     {
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                     }
-                };
-
-                m_ipcServer.RequestConfigUpdate = (msg) =>
-                {
-                    m_dnsEnforcement.InvalidateDnsResult();
-                    m_dnsEnforcement.Trigger();
-
-                    var result = this.UpdateAndWriteList(true);
-                    var reply = new NotifyConfigUpdateMessage(result);
-
-                    m_ipcServer.NotifyConfigurationUpdate(result, msg.Id);
-                };
-
-                m_ipcServer.RequestCaptivePortalDetection = (msg) =>
-                {
-                    m_dnsEnforcement.Trigger();
                 };
 
                 m_ipcServer.OnCertificateExemptionGranted = (msg) =>
@@ -800,13 +491,7 @@ namespace CitadelService.Services
             EnsureWindowsFirewallAccess();
 
             LogTime("EnsureWindowsFirewallAccess() is done");
-
-            // Run the background init worker for non-UI related initialization.
-            m_backgroundInitWorker = new BackgroundWorker();
-            m_backgroundInitWorker.DoWork += DoBackgroundInit;
-            m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
-
-            m_backgroundInitWorker.RunWorkerAsync();
+            */
         }
 
         private Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
@@ -816,39 +501,7 @@ namespace CitadelService.Services
             return null;
         }
 
-        private void updateTimerFrequency(object sender, EventArgs e)
-        {
-            if (m_policyConfiguration.Configuration != null)
-            {
-                // Put the new update frequence into effect.
-                this.m_updateCheckTimer.Change(m_policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
-            }
-        }
-
         #region Configuration event functions
-        private void reportRelaxedPolicy(object sender, EventArgs e)
-        {
-            var config = m_policyConfiguration.Configuration;
-
-            // XXX FIXME Update our dashboard view model if there are bypasses
-            // configured. Force this up to the UI thread because it's a UI model.
-            if (config.BypassesPermitted > 0)
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(config.BypassesPermitted, config.BypassDuration, getRelaxedPolicyStatus());
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-            }
-        }
-
-        private void configureThreshold(object sender, EventArgs e)
-        {
-            if(m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
-            {
-                InitThresholdData();
-            }
-        }
 
         #endregion
 
@@ -918,7 +571,7 @@ namespace CitadelService.Services
             }
 
             // Create the threshold count timer and start it with the configured timespan.
-            var cfg = m_policyConfiguration.Configuration;
+            var cfg = m_provider.PolicyConfiguration.Configuration;
             m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
 
             // Create the enforcement timer, but don't start it.
@@ -959,9 +612,9 @@ namespace CitadelService.Services
             {
                 m_appcastUpdaterLock.EnterWriteLock();
 
-                if (m_policyConfiguration.Configuration != null)
+                if (m_provider.PolicyConfiguration.Configuration != null)
                 {
-                    var config = m_policyConfiguration.Configuration;
+                    var config = m_provider.PolicyConfiguration.Configuration;
                     m_lastFetchedUpdate = m_updater.CheckForUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
                 }
                 else
@@ -1021,81 +674,6 @@ namespace CitadelService.Services
         /// </summary>
         private void InitEngine()
         {
-            LogTime("Starting InitEngine()");
-
-            // Get our blocked HTML page
-            m_blockedHtmlPage = ResourceStreams.Get("CitadelService.Resources.BlockedPage.html");
-            m_badSslHtmlPage = ResourceStreams.Get("CitadelService.Resources.BadCertPage.html");
-
-            if(m_blockedHtmlPage == null)
-            {
-                m_logger.Error("Could not load packed HTML block page.");
-            }
-
-            if(m_badSslHtmlPage == null)
-            {
-                m_logger.Error("Could not load packed HTML bad SSL page.");
-            }
-
-            LogTime("Loading filtering engine.");
-
-            // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
-            // ports it wants for listening, and give it our total processor count on this machine as
-            // a hint for how many threads to use.
-            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
-            m_filteringEngine = new WindowsProxyServer(new ProxyServerConfiguration()
-            {
-                AuthorityName = "CloudVeil for Windows",
-                FirewallCheckCallback = OnAppFirewallCheck,
-                NewHttpMessageHandler = OnHttpMessageBegin,
-                HttpMessageStreamedInspectionHandler = OnHttpStreamResponseInspection,
-                HttpMessageWholeBodyInspectionHandler = OnHttpWholeBodyResponseInspection,
-                BadCertificateHandler = OnBadCertificate
-            });
-
-
-            // Setup general info, warning and error events.
-            LoggerProxy.Default.OnInfo += EngineOnInfo;
-            LoggerProxy.Default.OnWarning += EngineOnWarning;
-            LoggerProxy.Default.OnError += EngineOnError;
-
-            // Start filtering, always.
-            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
-            {
-                m_filterEngineStartupBgWorker = new BackgroundWorker();
-                m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
-                {
-                    StartFiltering();
-                });
-
-                m_filterEngineStartupBgWorker.RunWorkerAsync();
-            }
-
-            // Now establish trust with FireFox. XXX TODO - This can actually be done elsewhere. We
-            // used to have to do this after the engine started up to wait for it to write the CA to
-            // disk and then use certutil to install it in FF. However, thanks to FireFox giving the
-            // option to trust the local certificate store, we don't have to do that anymore.
-            try
-            {
-                m_trustManager.EstablishTrustWithFirefox();
-            }
-            catch(Exception ffe)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, ffe);
-            }
-
-            // Establish trust with git. We have to wait for the engine to write the CA to disk? Why can't we just export it on demand?
-            try
-            {
-                m_trustManager.EstablishTrustWithGit();
-            }
-            catch (Exception ex)
-            {
-                m_logger.Error("EstablishTrustWithGit failed.");
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-            }
-
-            LogTime("Trust established with firefox.");
         }
 
 #if WITH_NLP
@@ -1207,17 +785,8 @@ namespace CitadelService.Services
                 LoggerUtil.RecursivelyLogException(m_logger, se);
             }
 
-            // Init update timer.
-            m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
             // Run log cleanup and schedule for next run.
             OnCleanupLogsElapsed(null);
-
-            // Set up our network availability checks so we can run captive portal detection on a changed network.
-            NetworkChange.NetworkAddressChanged += m_dnsEnforcement.OnNetworkChange;
-
-            // Run on startup so we can get the network state right away.
-            m_dnsEnforcement.Trigger();
         }
 
         /// <summary>
@@ -1291,8 +860,6 @@ namespace CitadelService.Services
                 return;
             }
             
-            OnUpdateTimerElapsed(null);
-
             Status = FilterStatus.Running;
 
             ReviveGuiForCurrentUser(true);
@@ -1335,7 +902,7 @@ namespace CitadelService.Services
         {
             bool internetShutOff = false;
 
-            var cfg = m_policyConfiguration.Configuration;
+            var cfg = m_provider.PolicyConfiguration.Configuration;
 
             if(cfg != null && cfg.UseThreshold)
             {
@@ -1360,7 +927,7 @@ namespace CitadelService.Services
             }
 
             string categoryNameString = "Unknown";
-            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
+            var mappedCategory = m_provider.PolicyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
 
             if(mappedCategory != null)
             {
@@ -1368,7 +935,6 @@ namespace CitadelService.Services
             }
 
             m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, matchingRule);
-            m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if(internetShutOff)
             {
@@ -1494,7 +1060,7 @@ namespace CitadelService.Services
             {
                 m_filteringRwLock.EnterReadLock();
 
-                if(m_policyConfiguration.BlacklistedApplications.Count == 0 && m_policyConfiguration.WhitelistedApplications.Count == 0)
+                if(m_provider.PolicyConfiguration.BlacklistedApplications.Count == 0 && m_provider.PolicyConfiguration.WhitelistedApplications.Count == 0)
                 {
                     // Just filter anything accessing port 80 and 443.
                     m_logger.Debug("1Filtering application: {0}", request.BinaryAbsolutePath);
@@ -1503,9 +1069,9 @@ namespace CitadelService.Services
 
                 var appName = Path.GetFileName(request.BinaryAbsolutePath);
 
-                if(m_policyConfiguration.WhitelistedApplications.Count > 0)
+                if(m_provider.PolicyConfiguration.WhitelistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_policyConfiguration.WhitelistedApplications, request.BinaryAbsolutePath, appName);
+                    bool inList = isAppInList(m_provider.PolicyConfiguration.WhitelistedApplications, request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {
@@ -1519,9 +1085,9 @@ namespace CitadelService.Services
                     }
                 }
 
-                if(m_policyConfiguration.BlacklistedApplications.Count > 0)
+                if(m_provider.PolicyConfiguration.BlacklistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_policyConfiguration.BlacklistedApplications, request.BinaryAbsolutePath, appName);
+                    bool inList = isAppInList(m_provider.PolicyConfiguration.BlacklistedApplications, request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {
@@ -1618,9 +1184,9 @@ namespace CitadelService.Services
                     }
                 }
 
-                var filterCollection = m_policyConfiguration.FilterCollection;
-                var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
-                var categoryIndex = m_policyConfiguration.CategoryIndex;
+                var filterCollection = m_provider.PolicyConfiguration.FilterCollection;
+                var categoriesMap = m_provider.PolicyConfiguration.GeneratedCategoriesMap;
+                var categoryIndex = m_provider.PolicyConfiguration.CategoryIndex;
 
                 if(filterCollection != null)
                 {
@@ -1778,11 +1344,6 @@ namespace CitadelService.Services
             }
         }
 
-        private void OnHttpStreamResponseInspection(HttpMessageInfo messageInfo, StreamOperation operation, Memory<byte> buffer, out bool dropConnection)
-        {
-            throw new NotImplementedException();
-        }
-
         private void OnHttpWholeBodyResponseInspection(HttpMessageInfo message)
         {
             bool shouldBlock = false;
@@ -1871,7 +1432,7 @@ namespace CitadelService.Services
             var len = filters.Count;
             for(int i = 0; i < len; ++i)
             {
-                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if(m_provider.PolicyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matched = filters[i];
                     matchedCategory = filters[i].CategoryId;
@@ -1895,7 +1456,7 @@ namespace CitadelService.Services
             var len = filters.Count;
             for(int i = 0; i < len; i++)
             {
-                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if(m_provider.PolicyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matchingCategories.Add(filters[i].CategoryId);
                 }
@@ -1909,7 +1470,7 @@ namespace CitadelService.Services
             List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
             int length = matchingCategories.Count;
-            var categoryValues = m_policyConfiguration.GeneratedCategoriesMap.Values;
+            var categoryValues = m_provider.PolicyConfiguration.GeneratedCategoriesMap.Values;
             foreach(var category in categoryValues)
             {
                 for(int i = 0; i < length; i++)
@@ -1964,100 +1525,7 @@ namespace CitadelService.Services
         private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
-
-            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
-            // IMO this looks slightly more friendly to a user than the entire URI.
-            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
-            string urlText = requestUri.ToString();
-
-            string deviceName;
-
-            try
-            {
-                deviceName = Environment.MachineName;
-            }
-            catch
-            {
-                deviceName = "Unknown";
-            }
-
-            string blockedRequestBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(urlText));
-
-            string unblockRequest = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-            string username = WebServiceUtil.Default.UserEmail ?? "DNS";
-
-            string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
-            unblockRequest += "?" + query;
-
-            string relaxed_policy_message = "";
-            string matching_category = "";
-            string otherCategories = "";
-
-            // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-            {
-                if (matchingCategory == entry.CategoryId)
-                {
-                    matching_category = entry.ShortCategoryName;
-                }
-                else if(appliedCategories.Any(m => m.CategoryId == entry.CategoryId))
-                {
-                    otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
-                }
-
-                if (entry is MappedBypassListCategoryModel)
-                {
-                    if(matchingCategory == entry.CategoryId)
-                    {
-                        relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
-                        break;
-                    }
-                }
-            }
-
-            // Get category or block type.
-            string url_text = urlText == null ? "" : urlText;
-            if (matchingCategory > 0 && blockType == BlockType.None)
-            {
-                // matching_category name already set.
-            }
-            else
-            {
-                otherCategories = "";
-
-                switch (blockType)
-                {
-                    case BlockType.None:
-                        matching_category = "unknown reason";
-                        break;
-
-                    case BlockType.ImageClassification:
-                        matching_category = "naughty image";
-                        break;
-
-                    case BlockType.Url:
-                        matching_category = "bad webpage";
-                        break;
-
-                    case BlockType.TextClassification:
-                    case BlockType.TextTrigger:
-                        matching_category = string.Format("offensive text: {0}", triggerCategory);
-                        break;
-
-                    case BlockType.OtherContentClassification:
-                    default:
-                        matching_category = "other content classification";
-                        break;
-                }
-            }
-
-            blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
-            blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
-            blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
-            blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
-            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
-            blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
-
+            
             return Encoding.UTF8.GetBytes(blockPageTemplate);
         }
 
@@ -2116,7 +1584,7 @@ namespace CitadelService.Services
                 m_filteringRwLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
-                if(m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
+                if(m_provider.PolicyConfiguration.TextTriggers != null && m_provider.PolicyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
@@ -2135,13 +1603,13 @@ namespace CitadelService.Services
 
                         short matchedCategory = -1;
                         string trigger = null;
-                        var cfg = m_policyConfiguration.Configuration;
+                        var cfg = m_provider.PolicyConfiguration.Configuration;
 
-                        if (m_policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (m_provider.PolicyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_provider.PolicyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
 
-                            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
+                            var mappedCategory = m_provider.PolicyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
                             if (mappedCategory != null)
                             {
@@ -2231,7 +1699,7 @@ namespace CitadelService.Services
                             {
                                 if(categoryNumber.CategoryId > 0 && m_categoryIndex.GetIsCategoryEnabled(categoryNumber.CategoryId))
                                 {
-                                    var cfg = m_policyConfiguration.Configuration;
+                                    var cfg = m_provider.PolicyConfiguration.Configuration;
                                     var threshold = cfg != null ? cfg.NlpThreshold : 0.9f;
 
                                     if(classificationResult.BestCategoryScore < threshold)
@@ -2285,7 +1753,7 @@ namespace CitadelService.Services
             // Reset count to zero.
             Interlocked.Exchange(ref m_thresholdTicks, 0);
 
-            var cfg = m_policyConfiguration.Configuration;
+            var cfg = m_provider.PolicyConfiguration.Configuration;
 
             this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
         }
@@ -2312,118 +1780,6 @@ namespace CitadelService.Services
 
             // Disable the timer before we leave.
             this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
-        {
-            LogTime("UpdateAndWriteList");
-
-            ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
-
-            try
-            {
-                m_logger.Info("Checking for filter list updates.");
-
-                m_updateRwLock.EnterWriteLock();
-
-                bool? configurationDownloaded = m_policyConfiguration.DownloadConfiguration();
-
-                if (configurationDownloaded == null)
-                {
-                    result = ConfigUpdateResult.NoInternet;
-                }
-                else if (configurationDownloaded == true)
-                {
-                    result = ConfigUpdateResult.Updated;
-                }
-                else
-                {
-                    result = ConfigUpdateResult.UpToDate;
-                }
-
-                bool doLoadLists = m_policyConfiguration.FilterCollection == null;
-
-                if(m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
-                {
-                    // Got new data. Gotta reload.
-                    bool configLoaded = m_policyConfiguration.LoadConfiguration();
-                    doLoadLists = true;
-
-                    result = ConfigUpdateResult.Updated;
-
-                    // Enforce DNS if present.
-                    m_dnsEnforcement.Trigger();
-                }
-
-                bool? listsDownloaded = m_policyConfiguration.DownloadLists();
-
-                doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && m_policyConfiguration.FilterCollection == null);
-
-                if(doLoadLists)
-                {
-                    m_policyConfiguration.LoadLists();
-                }
-
-                m_logger.Info("Checking for application updates.");
-
-                // Check for app updates.
-                bool available = ProbeMasterForApplicationUpdates(isSyncButton);
-
-                result |= available ? ConfigUpdateResult.AppUpdateAvailable : 0;
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-            finally
-            {
-                // Enable the timer again.
-                if(!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
-                {
-                    // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
-                    this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
-                }
-                else
-                {
-                    var cfg = m_policyConfiguration.Configuration;
-                    if(cfg != null)
-                    {
-                        this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
-                    }
-                    else
-                    {
-                        this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-                    }
-                }
-
-                m_updateRwLock.ExitWriteLock();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Called every X minutes by the update timer. We check for new lists, and hot-swap the
-        /// rules if we have found new ones. We also check for program updates.
-        /// </summary>
-        /// <param name="state">
-        /// This is always null. Ignore it. 
-        /// </param>
-        private void OnUpdateTimerElapsed(object state)
-        {
-            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
-            {
-                return;
-            }
-
-            this.UpdateAndWriteList(false);
-            this.CleanupLogs();
-
-            if(m_lastUsernamePrintTime.Date < DateTime.Now.Date)
-            {
-                m_lastUsernamePrintTime = DateTime.Now;
-                m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
-            }
         }
 
         public const int LogCleanupIntervalInHours = 12;
@@ -2488,365 +1844,12 @@ namespace CitadelService.Services
             }
         }
 
-        /// <summary>
-        /// Starts the filtering engine. 
-        /// </summary>
-        private void StartFiltering()
-        {
-            m_logger.Info(nameof(StartFiltering));
-            // Let's make sure we've pulled our internet block.
-            try
-            {
-                WFPUtility.EnableInternet();
-            }
-            catch { }
-
-            try
-            {
-                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
-                {
-                    m_logger.Info("Start engine.");
-
-                    // Start the engine right away, to ensure the atomic bool IsRunning is set.
-                    m_filteringEngine.Start();
-                }
-            }
-            catch(Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
         public class RelaxedPolicyResponseObject
         {
             public bool allowed { get; set; }
             public string message { get; set; }
             public int used { get; set; }
             public int permitted { get; set; }
-        }
-
-        /// <summary>
-        /// Whenever the config is reloaded, sync the bypasses from the server.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnConfigLoaded_LoadRelaxedPolicy(object sender, EventArgs e)
-        {
-            this.UpdateNumberOfBypassesFromServer();
-        }
-
-        /// <summary>
-        /// Called whenever a relaxed policy has been requested. 
-        /// </summary>
-        private void OnRelaxedPolicyRequested()
-        {
-            HttpStatusCode statusCode;
-            byte[] bypassResponse = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode);
-
-            bool useLocalBypassLogic = false;
-
-            bool grantBypass = false;
-            string bypassNotification = "";
-
-            int bypassesUsed = 0;
-            int bypassesPermitted = 0;
-
-            if (bypassResponse != null)
-            {
-                if(statusCode == HttpStatusCode.NotFound)
-                {
-                    // Fallback on local bypass logic if server does not support relaxed policy checks.
-                    useLocalBypassLogic = true;
-                }
-
-                string jsonString = Encoding.UTF8.GetString(bypassResponse);
-                m_logger.Info("Response received {0}: {1}", statusCode.ToString(), jsonString);
-
-                var bypassObject = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(jsonString);
-
-                if (bypassObject.allowed)
-                {
-                    grantBypass = true;
-                }
-                else
-                {
-                    grantBypass = false;
-                    bypassNotification = bypassObject.message;
-                }
-
-                bypassesUsed = bypassObject.used;
-                bypassesPermitted = bypassObject.permitted;
-            }
-            else
-            {
-                m_logger.Info("No response detected.");
-
-                useLocalBypassLogic = false;
-                grantBypass = false;
-            }
-
-            if(useLocalBypassLogic)
-            {
-                m_logger.Info("Using local bypass logic since server does not yet support bypasses.");
-
-                // Start the count down timer.
-                if (m_relaxedPolicyExpiryTimer == null)
-                {
-                    m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
-                }
-
-                // Disable every category that is a bypass category.
-                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                    }
-                }
-
-                var cfg = m_policyConfiguration.Configuration;
-                m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
-                DecrementRelaxedPolicy_Local();
-            }
-            else
-            {
-                if (grantBypass)
-                {
-                    m_logger.Info("Relaxed policy granted.");
-
-                    // Start the count down timer.
-                    if (m_relaxedPolicyExpiryTimer == null)
-                    {
-                        m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
-                    }
-
-                    // Disable every category that is a bypass category.
-                    foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                    {
-                        if (entry is MappedBypassListCategoryModel)
-                        {
-                            m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                        }
-                    }
-
-                    var cfg = m_policyConfiguration.Configuration;
-                    m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-                    
-                    DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
-                }
-                else
-                {
-                    var cfg = m_policyConfiguration.Configuration;
-                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), RelaxedPolicyStatus.AllUsed);
-                }
-            }
-        }
-
-        private void DecrementRelaxedPolicy(int bypassesUsed, int bypassesPermitted, TimeSpan bypassDuration)
-        {
-            bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
-            
-            if(allUsesExhausted)
-            {
-                m_logger.Info("All uses exhausted.");
-
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
-            }
-
-            if(allUsesExhausted)
-            {
-                // Reset our bypasses at 8:15 UTC.
-                var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
-
-                var span = resetTime - DateTime.UtcNow;
-
-                if(m_relaxedPolicyResetTimer == null)
-                {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
-                }
-
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        private void DecrementRelaxedPolicy_Local()
-        {
-            bool allUsesExhausted = false;
-
-            var cfg = m_policyConfiguration.Configuration;
-
-            if(cfg != null)
-            {
-                cfg.BypassesUsed++;
-
-                allUsesExhausted = cfg.BypassesPermitted - cfg.BypassesUsed <= 0;
-
-                if(allUsesExhausted)
-                {
-                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
-                }
-                else
-                {
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Granted);
-                }
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
-            }
-
-            if(allUsesExhausted)
-            {
-                // Refresh tomorrow at midnight.
-                var today = DateTime.Today;
-                var tomorrow = today.AddDays(1);
-                var span = tomorrow - DateTime.Now;
-
-                if(m_relaxedPolicyResetTimer == null)
-                {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
-                }
-
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        private RelaxedPolicyStatus getRelaxedPolicyStatus()
-        {
-            bool relaxedInEffect = false;
-
-            if (m_policyConfiguration.GeneratedCategoriesMap != null)
-            {
-                // Determine if a relaxed policy is currently in effect.
-                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
-                        {
-                            relaxedInEffect = true;
-                        }
-                    }
-                }
-            }
-
-            if (relaxedInEffect)
-            {
-                return RelaxedPolicyStatus.Activated;
-            }
-            else
-            {
-                if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.BypassesPermitted - m_policyConfiguration.Configuration.BypassesUsed == 0)
-                {
-                    return RelaxedPolicyStatus.AllUsed;
-                }
-                else
-                {
-                    return RelaxedPolicyStatus.Deactivated;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called when the user has manually requested to relinquish a relaxed policy. 
-        /// </summary>
-        private void OnRelinquishRelaxedPolicyRequested()
-        {
-            RelaxedPolicyStatus status = getRelaxedPolicyStatus();
-
-            // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if(status == RelaxedPolicyStatus.Activated)
-            {
-                OnRelaxedPolicyTimerExpired(null);
-            }
-
-            // We want to inform the user that there is no relaxed policy in effect currently for this installation.
-            if(status == RelaxedPolicyStatus.Deactivated)
-            {
-                var cfg = m_policyConfiguration.Configuration;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
-            }
-        }
-
-        /// <summary>
-        /// Called whenever the relaxed policy duration has expired. 
-        /// </summary>
-        /// <param name="state">
-        /// Async state. Not used. 
-        /// </param>
-        private void OnRelaxedPolicyTimerExpired(object state)
-        {
-            // Enable every category that is a bypass category.
-            foreach(var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-            {
-                if(entry is MappedBypassListCategoryModel)
-                {
-                    m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
-                }
-            }
-
-            // Disable the expiry timer.
-            m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        private bool UpdateNumberOfBypassesFromServer()
-        {
-            HttpStatusCode statusCode;
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("check_only", "1");
-
-            byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
-
-            if(response == null)
-            {
-                return false;
-            }
-
-            string responseString = Encoding.UTF8.GetString(response);
-
-            var bypassInfo = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(responseString);
-
-            m_logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
-            var cfg = m_policyConfiguration.Configuration;
-
-            if (cfg != null)
-            {
-                cfg.BypassesUsed = bypassInfo.used;
-                cfg.BypassesPermitted = bypassInfo.permitted;
-            }
-
-            m_ipcServer.NotifyRelaxedPolicyChange(bypassInfo.permitted - bypassInfo.used, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), getRelaxedPolicyStatus());
-            return true;
-        }
-
-        /// <summary>
-        /// Called whenever the relaxed policy reset timer has expired. This expiry refreshes the
-        /// available relaxed policy requests to the configured value.
-        /// </summary>
-        /// <param name="state">
-        /// Async state. Not used. 
-        /// </param>
-        private void OnRelaxedPolicyResetExpired(object state)
-        {
-            UpdateNumberOfBypassesFromServer();
-            // Disable the reset timer.
-            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        /// <summary>
-        /// Stops the filtering engine, shuts it down. 
-        /// </summary>
-        private void StopFiltering()
-        {
-            if(m_filteringEngine != null && m_filteringEngine.IsRunning)
-            {
-                m_filteringEngine.Stop();
-            }
         }
 
         /// <summary>
@@ -2880,16 +1883,6 @@ namespace CitadelService.Services
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
 
-                    try
-                    {
-                        // Shut down engine.
-                        StopFiltering();                        
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
-
                     if(installSafeguards)
                     {
                         try
@@ -2908,7 +1901,7 @@ namespace CitadelService.Services
 
                         try
                         {
-                            var cfg = m_policyConfiguration.Configuration;
+                            var cfg = m_provider.PolicyConfiguration.Configuration;
                             if(cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user

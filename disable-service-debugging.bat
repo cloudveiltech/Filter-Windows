@@ -1,5 +1,5 @@
 @echo off
 
-IF EXIST "CitadelGUI\bin\Debug x86\debug-filterserviceprovider" (
-	del "CitadelGUI\bin\Debug x86\debug-filterserviceprovider"
+IF EXIST "CloudVeilGUI\CloudVeilGUI.WPF\bin\Debug\debug-filterserviceprovider" (
+	del "CloudVeilGUI\CloudVeilGUI.WPF\bin\Debug\debug-filterserviceprovider"
 )

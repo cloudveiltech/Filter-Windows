@@ -26,47 +26,67 @@ namespace CitadelService
             bool createdNew;
             InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", appVerStr.Replace(" ", "")), out createdNew);
 
+            bool exiting = false;
+
             if(createdNew)
             {
-                var exitCode = HostFactory.Run(x =>
+                // Having problems with the service not starting? Run FilterServiceProvider.exe test-me in admin mode to figure out why.
+                if (args[0] == "test-me")
                 {
-                    x.Service<FilterServiceProvider>(s =>
+                    FilterServiceProvider provider = new FilterServiceProvider();
+                    provider.Start();
+                    AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
                     {
-                        s.ConstructUsing(name => new FilterServiceProvider());
-                        s.WhenStarted((fsp, hostCtl) => fsp.Start());
-                        s.WhenStopped((fsp, hostCtl) => fsp.Stop());
-                        s.WhenShutdown((fsp, hostCtl) =>
+                        exiting = true;
+                    };
+
+                    while(!exiting)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                }
+                else
+                {
+                    var exitCode = HostFactory.Run(x =>
+                    {
+                        x.Service<FilterServiceProvider>(s =>
                         {
-                            hostCtl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
-                            fsp.Shutdown();
+                            s.ConstructUsing(name => new FilterServiceProvider());
+                            s.WhenStarted((fsp, hostCtl) => fsp.Start());
+                            s.WhenStopped((fsp, hostCtl) => fsp.Stop());
+                            s.WhenShutdown((fsp, hostCtl) =>
+                            {
+                                hostCtl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
+                                fsp.Shutdown();
+                            });
+
+                            // When someone logs on, start up a GUI for them.
+                            s.WhenSessionChanged((fsp, hostCtl) => fsp.OnSessionChanged());
                         });
 
-                        // When someone logs on, start up a GUI for them.
-                        s.WhenSessionChanged((fsp, hostCtl) => fsp.OnSessionChanged());
+                        x.EnableShutdown();
+                        x.SetDescription("Content Filtering Service");
+                        x.SetDisplayName(nameof(FilterServiceProvider));
+                        x.SetServiceName(nameof(FilterServiceProvider));
+                        x.StartAutomatically();
+
+                        x.RunAsLocalSystem();
+
+                        // We don't need recovery options, because there will be multiple services all
+                        // watching eachother that will all record eachother in the event of a failure or
+                        // forced termination.
+                        /*
+                        //http://docs.topshelf-project.com/en/latest/configuration/config_api.html#id1
+                        x.EnableServiceRecovery(rc =>
+                        {
+                            rc.OnCrashOnly();
+                            rc.RestartService(0);
+                            rc.RestartService(0);
+                            rc.RestartService(0);
+                        });
+                        */
                     });
-
-                    x.EnableShutdown();
-                    x.SetDescription("Content Filtering Service");
-                    x.SetDisplayName(nameof(FilterServiceProvider));
-                    x.SetServiceName(nameof(FilterServiceProvider));
-                    x.StartAutomatically();
-
-                    x.RunAsLocalSystem();
-
-                    // We don't need recovery options, because there will be multiple services all
-                    // watching eachother that will all record eachother in the event of a failure or
-                    // forced termination.
-                    /*
-                    //http://docs.topshelf-project.com/en/latest/configuration/config_api.html#id1
-                    x.EnableServiceRecovery(rc =>
-                    {
-                        rc.OnCrashOnly();
-                        rc.RestartService(0);
-                        rc.RestartService(0);
-                        rc.RestartService(0);
-                    });
-                    */
-                });
+                }
 
                 InstanceMutex.ReleaseMutex();
             }

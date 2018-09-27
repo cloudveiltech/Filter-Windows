@@ -8,6 +8,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Titanium.Web.Proxy.EventArguments;
 
 namespace FilterProvider.Common.Data
 {
@@ -24,5 +25,9 @@ namespace FilterProvider.Common.Data
         public WholeBodyResponseHandler HttpMessageWholeBodyInspectionHandler { get; set; }
 
         public BadCertificateHandler BadCertificateHandler { get; set; }
+
+        public AsyncEventHandler<SessionEventArgs> BeforeRequest { get; set; }
+        public AsyncEventHandler<SessionEventArgs> BeforeResponse { get; set; }
+        public AsyncEventHandler<SessionEventArgs> AfterResponse { get; set; }
     }
 }
