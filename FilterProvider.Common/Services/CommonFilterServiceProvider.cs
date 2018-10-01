@@ -327,16 +327,21 @@ namespace FilterProvider.Common.Services
                 m_ipcServer = new IPCServer();
                 m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
                 return;
-	    }
-	    
-	    if(!consoleOutStatus)
+            }
+
+            if (!consoleOutStatus)
             {
                 m_logger.Warn("Failed to link console output to file.");
             }
+
+            ThreadPool.SetMinThreads(256, 32);
+
+            Thread monitorThread = new Thread(MonitorThreads);
+            //monitorThread.Start();
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -1380,6 +1385,19 @@ namespace FilterProvider.Common.Services
 
         private async Task OnHttpRequestBegin(object sender, SessionEventArgs args)
         {
+            if(args.WebSession.Request.UpgradeToWebSocket)
+            {
+                args.DataReceived += (_sender, e) =>
+                {
+                    m_logger.Info("DataReceived from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
+                };
+
+                args.DataSent += (_sender, e) =>
+                {
+                    m_logger.Info("DataSent from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
+                };
+            }
+
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
@@ -1587,6 +1605,14 @@ namespace FilterProvider.Common.Services
 
         private async Task OnAfterResponse(object sender, SessionEventArgs args)
         {
+            StringBuilder diagnostics = new StringBuilder();
+
+            foreach(var pair in args.TimeLine)
+            {
+                diagnostics.AppendLine($"{pair.Key} = {pair.Value.ToString("c")}");
+            }
+
+            Console.WriteLine(diagnostics);
         }
 
         private async Task OnBeforeResponse(object sender, SessionEventArgs args)

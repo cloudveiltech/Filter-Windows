@@ -96,19 +96,19 @@ namespace CitadelService.Platform
 
         public ProxyServer StartProxyServer(ProxyConfiguration config)
         {
-            var transparentEndPointHttp = new TransparentProxyEndPoint(IPAddress.Any, 14300, false)
+            var transparentEndPointHttp = new ExplicitProxyEndPoint(IPAddress.Any, 14300, true)
             {
 
             };
 
-            var transparentEndPointHttps = new TransparentProxyEndPoint(IPAddress.Any, 14301, true)
+            var transparentEndPointHttps = new ExplicitProxyEndPoint(IPAddress.Any, 14301, true)
             {
 
             };
 
             ProxyServer proxyServer = new ProxyServer(true, true);
 
-            proxyServer.EnableConnectionPool = false;
+            proxyServer.EnableConnectionPool = true;
 
             // TCP server connection prefetch doesn't work with our reverse proxy setup.
             proxyServer.EnableTcpServerConnectionPrefetch = false;
@@ -136,7 +136,7 @@ namespace CitadelService.Platform
 
             diverter.ConfirmDenyFirewallAccess = m_provider.OnAppFirewallCheck;
 
-            diverter.Start(0);
+            //diverter.Start(0);
 
             return proxyServer;
         }

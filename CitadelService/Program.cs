@@ -31,7 +31,7 @@ namespace CitadelService
             if(createdNew)
             {
                 // Having problems with the service not starting? Run FilterServiceProvider.exe test-me in admin mode to figure out why.
-                if (args[0] == "test-me")
+                if (args.Length > 0 && args[0] == "test-me")
                 {
                     FilterServiceProvider provider = new FilterServiceProvider();
                     provider.Start();
