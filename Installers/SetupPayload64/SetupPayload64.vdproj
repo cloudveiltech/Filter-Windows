@@ -1216,18 +1216,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B91356A0B63B427AA74155D58458948D"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8E4EF5FB45A44F47B3F7A838BA1DA83C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FE62404D67344FB7A6D7F7F18B9A7723"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1330,6 +1318,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_C1BF22D28A864145B8B801531883679F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_B91356A0B63B427AA74155D58458948D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_AF57A06658FD4E3E8F6402764EEB4B24"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1349,6 +1349,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_916BFF46182D479FBB7251860B66D9F9"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8E4EF5FB45A44F47B3F7A838BA1DA83C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -5706,7 +5712,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CitadelCore.Windows, Version=2.1.1.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:CitadelCore.Windows, Version=2.1.3.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_B6E4F3DB5E5C4A7FA39B645CA91DF80D"
@@ -6070,11 +6076,6 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv, Version=2.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_C4DB94A59DA741DDB194BE846C696C0F"
-                    {
-                    "Name" = "8:Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:..\\..\\CitadelGUI\\bin\\Release x64\\Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.dll"
             "TargetName" = "8:"
@@ -7581,7 +7582,7 @@
         "Module"
         {
         "ModuleSignature" = "8:CloudVeilPayload.0862028596DF4668AB1D736D2B40424F"
-        "Version" = "8:1.6.29.0"
+        "Version" = "8:1.6.30.0"
         "Title" = "8:SetupPayload64"
         "Subject" = "8:"
         "Author" = "8:CloudVeil Technologies Inc."
