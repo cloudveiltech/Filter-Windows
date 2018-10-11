@@ -1,11 +1,13 @@
 CloudVeilGUI.WPF    		PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter()); -- basic mac done
 CloudVeilGUI.WPF    		PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices()); -- basic mac done
 CloudVeilGUI.WPF    		PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController()); -- basic mac done
+
 CitadelService				PlatformTypes.Register<IPlatformDns>((arr) => new WindowsDns());
 CitadelService				PlatformTypes.Register<IWifiManager>((arr) => new WindowsWifiManager());
 CitadelService				PlatformTypes.Register<IPlatformTrust>((arr) => new TrustManager());
 CitadelService				PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());
 CitadelService				PlatformTypes.Register<ISystemServices>((arr) => new WindowsSystemServices(this));
+
 Citadel.Core.Windows        PlatformTypes.Register<IPipeClient>((arr) => new WindowsPipeClient((string)arr[0], (arr.Length > 1) ? (bool)arr[1] : false));
 Citadel.Core.Windows        PlatformTypes.Register<IPipeServer>((arr) => new WindowsPipeServer((string)arr[0]));
 Citadel.Core.Windows        PlatformTypes.Register<IGUIChecks>((arr) => new WindowsGUIChecks());

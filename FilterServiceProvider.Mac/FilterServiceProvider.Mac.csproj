@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
+    <Compile Include="Platform\MacPlatformDns.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FilterProvider.Common\FilterProvider.Common.csproj">

@@ -8,6 +8,4 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Filter_Platform_Mac_Native : NSObject
-
-@end
+const char* GetSystemFingerprint();

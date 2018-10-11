@@ -6,7 +6,7 @@
 //  Copyright © 2018 CloudVeil Technology, Inc. All rights reserved.
 //
 // FilterAgent.Mac is a more important application to our MacOS filter than FilterAgent.Windows is to our Windows filter.
-// 
+//
 #import <Foundation/Foundation.h>
 
 int main(int argc, const char * argv[]) {

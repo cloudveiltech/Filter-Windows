@@ -153,6 +153,10 @@
       <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Filter.Platform.Mac\Filter.Platform.Mac.csproj">
+      <Project>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</Project>
+      <Name>Filter.Platform.Mac</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\StatusBarButtonImage%402x.png" />

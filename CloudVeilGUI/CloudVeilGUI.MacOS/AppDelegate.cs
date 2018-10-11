@@ -7,6 +7,9 @@
 
 using System;
 ﻿using AppKit;
+using CloudVeilGUI.MacOS.Platform;
+using CloudVeilGUI.Platform.Common;
+using Filter.Platform.Common;
 using Foundation;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.MacOS;
@@ -34,6 +37,11 @@ namespace CloudVeilGUI.MacOS
 
         public override void DidFinishLaunching(NSNotification notification)
         {
+            Filter.Platform.Mac.Platform.Init();
+            PlatformTypes.Register<ITrayIconController>((arr) => new MacTrayIconController());
+            PlatformTypes.Register<IGuiServices>((arr) => new MacGuiServices());
+            PlatformTypes.Register<IFilterStarter>((arr) => new MacFilterStarter());
+
             Forms.Init();
             LoadApplication(new CloudVeilGUI.App(true));
 
@@ -55,11 +63,6 @@ namespace CloudVeilGUI.MacOS
 
             base.DidFinishLaunching(notification);
         }
-        private void eventHandler(object sender, EventArgs eventArgs)
-        {
-            
-        }
-
 
         public override void WillTerminate(NSNotification notification)
         {
