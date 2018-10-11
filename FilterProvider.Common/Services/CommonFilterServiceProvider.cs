@@ -340,8 +340,7 @@ namespace FilterProvider.Common.Services
 
             ThreadPool.SetMinThreads(256, 32);
 
-            Thread monitorThread = new Thread(MonitorThreads);
-            //monitorThread.Start();
+                        //monitorThread.Start();
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);

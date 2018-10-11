@@ -103,6 +103,7 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="Assets.xcassets\StatusBarButtonImage.imageset\" />
+    <Folder Include="Platform\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -117,6 +118,7 @@
       <DependentUpon>ViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="ButtonEffect.cs" />
+    <Compile Include="Platform\MacFilterStarter.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />
@@ -126,10 +128,15 @@
       <Project>{B5CCE52E-6D69-4F28-857A-1C546022A2A5}</Project>
       <Name>CloudVeilGUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\FilterServiceProvider.Mac\FilterServiceProvider.Mac.csproj">
+      <Project>{4B8C7D6B-8E18-47C2-8CA2-734ACAE0DC89}</Project>
+      <Name>FilterServiceProvider.Mac</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\StatusBarButtonImage%402x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.3.1.0.697729\build\netstandard2.0\Xamarin.Forms.targets')" />
+  <Import Project="CustomBuildActions.targets" />
 </Project>
