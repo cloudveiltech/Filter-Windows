@@ -4,15 +4,16 @@
 <dict>
 	<key>Label</key>
 	<string>CloudVeil Filtering Service</string>
-	<key>ProgramArguments</key>
-	<string>as-service</string>
 	<key>KeepAlive</key>
 	<true/>
 	<key>StandardOutPath</key>
 	<string>/var/log/FilterServiceProvider.log</string>
 	<key>StandardErrorPath</key>
 	<string>/var/log/FilterServiceProvider.log</string>
-	<key>Program</key>
-	<string>/Applications/CloudVeil.app/Contents/MacOS/FilterServiceProvider.Mac</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/open</string>
+		<string>/Library/Services/FilterServiceProvider.Mac.app</string>
+	</array>
 </dict>
 </plist>

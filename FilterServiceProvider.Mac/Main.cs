@@ -1,4 +1,5 @@
-﻿using AppKit;
+﻿using System;
+using AppKit;
 
 namespace FilterServiceProvider.Mac
 {
@@ -6,8 +7,7 @@ namespace FilterServiceProvider.Mac
     {
         static void Main(string[] args)
         {
-            NSApplication.Init();
-            NSApplication.Main(args);
+            Console.WriteLine("Daemon App!");
         }
     }
 }

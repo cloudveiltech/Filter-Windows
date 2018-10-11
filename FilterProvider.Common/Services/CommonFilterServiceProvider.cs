@@ -284,6 +284,16 @@ namespace FilterProvider.Common.Services
             m_systemServices = PlatformTypes.New<ISystemServices>();
         }
 
+        /// <summary>
+        /// Explicitly defining an object so that we don't need a reference to Microsoft.CSharp.
+        /// Xamarin.Mac includes Microsoft.CSharp 2.0.5.0, and the lowest one we can get is Microsoft.CSharp.4.0.0
+        /// </summary>
+        private class JsonAuthData
+        {
+            public string authToken { get; set; }
+            public string userEmail { get; set; }
+        }
+
         private void OnStartup()
         {
             if(File.Exists("debug-filterserviceprovider"))
@@ -355,7 +365,7 @@ namespace FilterProvider.Common.Services
                     try
                     {
                         string jsonText = Encoding.UTF8.GetString(tokenResponse);
-                        dynamic jsonData = JsonConvert.DeserializeObject(jsonText);
+                        JsonAuthData jsonData = JsonConvert.DeserializeObject<JsonAuthData>(jsonText);
 
                         WebServiceUtil.Default.AuthToken = jsonData.authToken;
                         WebServiceUtil.Default.UserEmail = jsonData.userEmail;

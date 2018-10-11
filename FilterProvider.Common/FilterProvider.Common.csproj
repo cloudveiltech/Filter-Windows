@@ -15,9 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudVeil.DistillNET" Version="1.4.8" />
+    <PackageReference Include="CloudVeil.DistillNET" Version="1.6.1" />
     <PackageReference Include="DNS" Version="4.0.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
     <PackageReference Include="Titanium.Web.Proxy" Version="3.0.695" />

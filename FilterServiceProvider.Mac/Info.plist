@@ -5,7 +5,7 @@
 	<key>CFBundleName</key>
 	<string>FilterServiceProvider.Mac</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.cloudveil.FilterServiceProvider-Mac</string>
+	<string>org.cloudveil.FilterServiceProvider</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
@@ -24,8 +24,6 @@
 	<string>${AuthorCopyright:HtmlEncode}</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSMainStoryboardFile</key>
-	<string>Main</string>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcon.appiconset</string>
 </dict>

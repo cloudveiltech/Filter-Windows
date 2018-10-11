@@ -9,5 +9,10 @@
 #ifndef PrivilegeElevation_h
 #define PrivilegeElevation_h
 
+#import <Foundation/Foundation.h>
+#import <ServiceManagement/ServiceManagement.h>
+#import <Security/Authorization.h>
+
+bool BlessHelper(const char* label, NSError** error);
 
 #endif /* PrivilegeElevation_h */

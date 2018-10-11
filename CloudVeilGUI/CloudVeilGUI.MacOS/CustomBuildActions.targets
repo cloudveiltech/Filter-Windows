@@ -4,11 +4,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<BinaryFiles Include="../../FilterServiceProvider.Mac/bin/$(Configuration)/*.dll" />
+		<BinaryFiles Include="../../FilterServiceProvider.Mac/bin/$(Configuration)/FilterServiceProvider.Mac.app/Contents/MonoBundle/*" />
 	</ItemGroup>
 
 	<Target Name="CopyOurFiles">
-		<Copy SourceFiles="@(BinaryFiles)" DestinationFolder="$(AppBundleDir)/Contents/MonoBundle/" />
-		<Copy SourceFiles="../../FilterServiceProvider.Mac/bin/$(Configuration)/FilterServiceProvider.Mac.app/Contents/MacOS/FilterServiceProvider.Mac" DestinationFolder="$(AppBundleDir)/Contents/MacOS/" />
+		<!--<Copy SourceFiles="@(BinaryFiles)" DestinationFolder="$(AppBundleDir)/Contents/MonoBundle/" />
+		<Copy SourceFiles="../../FilterServiceProvider.Mac/bin/$(Configuration)/FilterServiceProvider.Mac.app/Contents/MacOS/FilterServiceProvider.Mac" DestinationFolder="$(AppBundleDir)/Contents/MacOS/" />-->
+		
 	</Target>
 </Project>

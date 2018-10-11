@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
+
 namespace CloudVeilGUI.MacOS.Platform.Interop
 {
-    public class Authorization
+    public static class Authorization
     {
-        public Authorization()
-        {
-        }
+
     }
 }

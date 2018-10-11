@@ -9,12 +9,19 @@
 /* Begin PBXBuildFile section */
 		370673E4216E57BB0090AE60 /* Filter_Platform_Mac_Native.h in Headers */ = {isa = PBXBuildFile; fileRef = 370673E3216E57BB0090AE60 /* Filter_Platform_Mac_Native.h */; };
 		370673E6216E57BB0090AE60 /* Filter_Platform_Mac_Native.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673E5216E57BB0090AE60 /* Filter_Platform_Mac_Native.m */; };
+		370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673ED216E65170090AE60 /* PrivilegeElevation.m */; };
+		370673F3216E69E60090AE60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F1216E69E60090AE60 /* Security.framework */; };
+		370673F4216E69E60090AE60 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F2216E69E60090AE60 /* ServiceManagement.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		370673E0216E57BB0090AE60 /* libFilter.Platform.Mac.Native.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libFilter.Platform.Mac.Native.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		370673E3216E57BB0090AE60 /* Filter_Platform_Mac_Native.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Filter_Platform_Mac_Native.h; sourceTree = "<group>"; };
 		370673E5216E57BB0090AE60 /* Filter_Platform_Mac_Native.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Filter_Platform_Mac_Native.m; sourceTree = "<group>"; };
+		370673ED216E65170090AE60 /* PrivilegeElevation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrivilegeElevation.m; sourceTree = "<group>"; };
+		370673EF216E65280090AE60 /* PrivilegeElevation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrivilegeElevation.h; sourceTree = "<group>"; };
+		370673F1216E69E60090AE60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		370673F2216E69E60090AE60 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -22,6 +29,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				370673F3216E69E60090AE60 /* Security.framework in Frameworks */,
+				370673F4216E69E60090AE60 /* ServiceManagement.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +42,7 @@
 			children = (
 				370673E2216E57BB0090AE60 /* Filter.Platform.Mac.Native */,
 				370673E1216E57BB0090AE60 /* Products */,
+				370673F0216E69E60090AE60 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -49,8 +59,19 @@
 			children = (
 				370673E3216E57BB0090AE60 /* Filter_Platform_Mac_Native.h */,
 				370673E5216E57BB0090AE60 /* Filter_Platform_Mac_Native.m */,
+				370673ED216E65170090AE60 /* PrivilegeElevation.m */,
+				370673EF216E65280090AE60 /* PrivilegeElevation.h */,
 			);
 			path = Filter.Platform.Mac.Native;
+			sourceTree = "<group>";
+		};
+		370673F0216E69E60090AE60 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				370673F1216E69E60090AE60 /* Security.framework */,
+				370673F2216E69E60090AE60 /* ServiceManagement.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				370673E6216E57BB0090AE60 /* Filter_Platform_Mac_Native.m in Sources */,
+				370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
