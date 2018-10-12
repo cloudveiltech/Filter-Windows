@@ -5,6 +5,7 @@
 //
 using System;
 using System.Net;
+using System.Runtime.InteropServices;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Platform;
 
@@ -19,6 +20,9 @@ namespace FilterServiceProvider.Mac.Platform
 
         private NLog.Logger logger;
 
+        [DllImport("Filter.Platform.Mac.Native")]
+        private static extern bool EnforceDns(string primaryDns, string secondaryDns);
+
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
         {
             throw new NotImplementedException();
@@ -27,6 +31,16 @@ namespace FilterServiceProvider.Mac.Platform
         public void SetDnsForNicToDHCP(string nicName)
         {
             throw new NotImplementedException();
+        }
+
+        public bool SetDnsForAllInterfaces(IPAddress primary, IPAddress secondary)
+        {
+            return EnforceDns(primary?.ToString(), secondary?.ToString());
+        }
+
+        public bool SetDnsForAllInterfacesToDHCP()
+        {
+            return EnforceDns(null, null);
         }
     }
 }

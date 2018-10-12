@@ -28,6 +28,11 @@
     <HttpClientHandler></HttpClientHandler>
     <LinkMode></LinkMode>
     <XamMacArch></XamMacArch>
+    <CodeSigningKey></CodeSigningKey>
+    <PackagingExtraArgs></PackagingExtraArgs>
+    <EnableSGenConc></EnableSGenConc>
+    <AOTMode>None</AOTMode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -43,6 +48,8 @@
     <HttpClientHandler></HttpClientHandler>
     <LinkMode></LinkMode>
     <XamMacArch></XamMacArch>
+    <AOTMode>None</AOTMode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -53,6 +60,11 @@
     <Compile Include="MacFingerprint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Platform.cs" />
+    <Compile Include="MacPipeServer.cs" />
+    <Compile Include="MacPipeClient.cs" />
+    <Compile Include="MacGUIChecks.cs" />
+    <Compile Include="MacAntitampering.cs" />
+    <Compile Include="MacNetworkInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">

@@ -4,8 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 
-#import <Foundation/Foundation.h>
+#ifndef IPCDelegates_h
+#define IPCDelegates_h
 
-const char* GetSystemFingerprint(void);
+typedef void (*ConnectionDelegate)(void);
+typedef bool (*IncomingMessageDelegate)(const unsigned char* data, UInt64 length);
 
-bool EnforceDns(const char** dnsServers, int dnsServersCount);
+#endif /* IPCDelegates_h */

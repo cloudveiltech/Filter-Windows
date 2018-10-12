@@ -5,23 +5,31 @@
 //
 using System;
 using Filter.Platform.Common;
+using Filter.Platform.Common.Client;
+using Filter.Platform.Common.IPC;
 
 namespace Filter.Platform.Mac
 {
     public static class Platform
     {
+        public const string NativeLib = "Filter.Platform.Mac.Native";
+
         public static void Init()
         {
             FingerprintService.InitFingerprint(new MacFingerprint());
 
-            // These loosely typed parameter lists are rather gross. Is there a cleaner way to do this?
-            // params: channel, autoReconnect
-            /*PlatformTypes.Register<IPipeClient>((arr) => new WindowsPipeClient((string)arr[0], (arr.Length > 1) ? (bool)arr[1] : false));
+            PlatformTypes.Register<IPipeServer>((arr) => new MacPipeServer());
 
             // params: channel
-            PlatformTypes.Register<IPipeServer>((arr) => new WindowsPipeServer((string)arr[0]));
+            PlatformTypes.Register<IPipeClient>((arr) => new MacPipeClient((string)arr[0]));
 
-            PlatformTypes.Register<IGUIChecks>((arr) => new WindowsGUIChecks());
+            PlatformTypes.Register<IGUIChecks>((arr) => new MacGUIChecks());
+
+            PlatformTypes.Register<IAntitampering>((arr) => new MacAntitampering());
+
+            // These loosely typed parameter lists are rather gross. Is there a cleaner way to do this?
+            // params: channel, autoReconnect
+            /*
 
             PlatformTypes.Register<IAntitampering>((arr) => new WindowsAntitampering());
 

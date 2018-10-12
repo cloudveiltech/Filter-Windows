@@ -4,15 +4,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 
-#ifndef PrivilegeElevation_h
-#define PrivilegeElevation_h
+#ifndef DnsEnforcement_h
+#define DnsEnforcement_h
 
 #import <Foundation/Foundation.h>
-#import <ServiceManagement/ServiceManagement.h>
-#import <Security/Authorization.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 
-bool BlessHelper(const char* label, NSError** error);
+typedef bool (*NetworkServiceFn)(SCNetworkServiceRef networkService, void* cbData);
 
-bool IsEffectiveUserIdRoot();
+bool EnforceDns(const char* primary, const char* secondary);
 
-#endif /* PrivilegeElevation_h */
+#endif /* DnsEnforcement_h */

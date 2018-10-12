@@ -12,6 +12,11 @@
 		370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673ED216E65170090AE60 /* PrivilegeElevation.m */; };
 		370673F3216E69E60090AE60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F1216E69E60090AE60 /* Security.framework */; };
 		370673F4216E69E60090AE60 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F2216E69E60090AE60 /* ServiceManagement.framework */; };
+		370673F82170CFF30090AE60 /* DnsEnforcement.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673F72170CFF30090AE60 /* DnsEnforcement.m */; };
+		370673FC2170EED20090AE60 /* IPCClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 370673FA2170EED20090AE60 /* IPCClient.h */; };
+		370673FD2170EED20090AE60 /* IPCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673FB2170EED20090AE60 /* IPCClient.m */; };
+		370674002170EF070090AE60 /* IPCServer.h in Headers */ = {isa = PBXBuildFile; fileRef = 370673FE2170EF070090AE60 /* IPCServer.h */; };
+		370674012170EF070090AE60 /* IPCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673FF2170EF070090AE60 /* IPCServer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +27,13 @@
 		370673EF216E65280090AE60 /* PrivilegeElevation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrivilegeElevation.h; sourceTree = "<group>"; };
 		370673F1216E69E60090AE60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		370673F2216E69E60090AE60 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
+		370673F62170CFDE0090AE60 /* DnsEnforcement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DnsEnforcement.h; sourceTree = "<group>"; };
+		370673F72170CFF30090AE60 /* DnsEnforcement.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DnsEnforcement.m; sourceTree = "<group>"; };
+		370673FA2170EED20090AE60 /* IPCClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCClient.h; sourceTree = "<group>"; };
+		370673FB2170EED20090AE60 /* IPCClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IPCClient.m; sourceTree = "<group>"; };
+		370673FE2170EF070090AE60 /* IPCServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCServer.h; sourceTree = "<group>"; };
+		370673FF2170EF070090AE60 /* IPCServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IPCServer.m; sourceTree = "<group>"; };
+		37067406217125EF0090AE60 /* IPCDelegates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCDelegates.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +73,13 @@
 				370673E5216E57BB0090AE60 /* Filter_Platform_Mac_Native.m */,
 				370673ED216E65170090AE60 /* PrivilegeElevation.m */,
 				370673EF216E65280090AE60 /* PrivilegeElevation.h */,
+				370673F62170CFDE0090AE60 /* DnsEnforcement.h */,
+				370673F72170CFF30090AE60 /* DnsEnforcement.m */,
+				370673FA2170EED20090AE60 /* IPCClient.h */,
+				370673FB2170EED20090AE60 /* IPCClient.m */,
+				370673FE2170EF070090AE60 /* IPCServer.h */,
+				370673FF2170EF070090AE60 /* IPCServer.m */,
+				37067406217125EF0090AE60 /* IPCDelegates.h */,
 			);
 			path = Filter.Platform.Mac.Native;
 			sourceTree = "<group>";
@@ -81,7 +100,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				370673FC2170EED20090AE60 /* IPCClient.h in Headers */,
 				370673E4216E57BB0090AE60 /* Filter_Platform_Mac_Native.h in Headers */,
+				370674002170EF070090AE60 /* IPCServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,6 +163,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				370673E6216E57BB0090AE60 /* Filter_Platform_Mac_Native.m in Sources */,
+				370673FD2170EED20090AE60 /* IPCClient.m in Sources */,
+				370673F82170CFF30090AE60 /* DnsEnforcement.m in Sources */,
+				370674012170EF070090AE60 /* IPCServer.m in Sources */,
 				370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -23,5 +23,15 @@ namespace FilterProvider.Common.Platform
         void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary);
 
         void SetDnsForNicToDHCP(string nicName);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns><c>true</c> if any of the DNS interfaces were updated.
+        /// <param name="primary">Primary.</param>
+        /// <param name="secondary">Secondary.</param>
+        bool SetDnsForAllInterfaces(IPAddress primary, IPAddress secondary);
+
+        bool SetDnsForAllInterfacesToDHCP();
     }
 }

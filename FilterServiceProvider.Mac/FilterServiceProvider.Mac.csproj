@@ -91,6 +91,7 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="Platform\" />
+    <Folder Include="Services\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -100,6 +101,10 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="Platform\MacPlatformDns.cs" />
+    <Compile Include="Services\FilterServiceProvider.cs" />
+    <Compile Include="Platform\MacWifiManager.cs" />
+    <Compile Include="Platform\MacTrustManager.cs" />
+    <Compile Include="Platform\MacSystemServices.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FilterProvider.Common\FilterProvider.Common.csproj">
