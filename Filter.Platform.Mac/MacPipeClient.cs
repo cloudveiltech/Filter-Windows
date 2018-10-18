@@ -14,23 +14,6 @@ using Filter.Platform.Common.IPC;
 
 namespace Filter.Platform.Mac
 {
-    internal static class PipeClientInterop
-    {
-        internal const string PlatformLib = "Filter.Platform.Mac.Native";
-
-        [DllImport(PlatformLib, EntryPoint = "IpcClient_Create")]
-        internal static extern IntPtr Create(string serviceName, ConnectionDelegate onConnected, ConnectionDelegate onDisconnected);
-
-        [DllImport(PlatformLib, EntryPoint = "IpcClient_Destroy"]
-        internal static extern void Destroy(IntPtr handle);
-
-        [DllImport(PlatformLib, EntryPoint = "IpcClient_PushMessage")]
-        internal static extern void PushMessage(IntPtr handle, byte[] message, int length, bool broadcast);
-
-        [DllImport(PlatformLib, EntryPoint = "IpcClient_SetOnIncomingMessage")]
-        internal static extern void SetOnIncomingMessage(IntPtr handle, IncomingMessageDelegate onIncomingMessage);
-    }
-
     public class MacPipeClient : IPipeClient, IDisposable
     {
         public MacPipeClient(string channel)
@@ -63,6 +46,7 @@ namespace Filter.Platform.Mac
 
         private void onDisconnected()
         {
+            // This doesn't get called due to not being able to detect whether the other mach port is open.
             isConnected = false;
             Disconnected?.Invoke();
         }
@@ -96,21 +80,18 @@ namespace Filter.Platform.Mac
 
                 bool isBroadcast = msg is ClientToClientMessage;
 
-                PipeClientInterop.PushMessage(handle, arr, arr.Length, isBroadcast);
+                NativeIPCClientImpl.Send(handle, arr, arr.Length, isBroadcast);
             }
         }
 
         public void Start()
         {
-            handle = PipeClientInterop.Create(channel, onConnected, onDisconnected);
-
-            // Set all the callbacks for the client here.
-            PipeClientInterop.SetOnIncomingMessage(handle, this.onIncomingMessage);
+            handle = NativeIPCClientImpl.CreateIPCClient(onIncomingMessage, onConnected, onDisconnected);
         }
 
         public void Stop()
         {
-            PipeClientInterop.Destroy(handle);
+            NativeIPCClientImpl.Release(handle);
             handle = IntPtr.Zero;
         }
 
@@ -138,7 +119,7 @@ namespace Filter.Platform.Mac
 
                 if (handle != IntPtr.Zero)
                 {
-                    PipeClientInterop.Destroy(handle);
+                    NativeIPCClientImpl.Release(handle);
                     handle = IntPtr.Zero;
                 }
 

@@ -52,10 +52,10 @@ namespace CloudVeilGUI.MacOS
             button.Image = NSImage.ImageNamed("StatusBarButtonImage");
 
             var menu = new NSMenu();
-            menu.AddItem(new NSMenuItem("Open", "o", eventHandler));
+            menu.AddItem(new NSMenuItem("Open", "o", OpenApp));
             menu.AddItem(NSMenuItem.SeparatorItem);
-            menu.AddItem(new NSMenuItem("Settings", "s", eventHandler));
-            menu.AddItem(new NSMenuItem("Use Relaxed Policy", "p", eventHandler));
+            menu.AddItem(new NSMenuItem("Settings", "s", OpenSettings));
+            menu.AddItem(new NSMenuItem("Use Relaxed Policy", "p", UseRelaxedPolicy));
 
             item.Menu = menu;
 
@@ -63,6 +63,21 @@ namespace CloudVeilGUI.MacOS
 
             base.DidFinishLaunching(notification);
         }
+
+        void UseRelaxedPolicy(object sender, EventArgs e)
+        {
+        }
+
+
+        void OpenSettings(object sender, EventArgs e)
+        {
+        }
+
+
+        void OpenApp(object sender, EventArgs e)
+        {
+        }
+
 
         public override void WillTerminate(NSNotification notification)
         {

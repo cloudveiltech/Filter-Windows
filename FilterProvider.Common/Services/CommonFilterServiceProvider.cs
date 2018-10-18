@@ -317,7 +317,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                Console.SetOut(new ConsoleLogWriter());
+                //Console.SetOut(new ConsoleLogWriter());
                 consoleOutStatus = true;
             }
             catch (Exception ex)
@@ -2747,6 +2747,11 @@ namespace FilterProvider.Common.Services
         }
 
         /// <summary>
+        /// Occurs when the filtering engine is stopped.
+        /// </summary>
+        public event EventHandler OnStopFiltering;
+
+        /// <summary>
         /// Stops the filtering engine, shuts it down. 
         /// </summary>
         private void StopFiltering()
@@ -2754,6 +2759,16 @@ namespace FilterProvider.Common.Services
             if(m_filteringEngine != null && m_filteringEngine.ProxyRunning)
             {
                 m_filteringEngine.Stop();
+            }
+
+            try
+            {
+                OnStopFiltering?.Invoke(null, null);
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error occurred in OnStopFiltering event");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
 

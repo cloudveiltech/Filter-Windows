@@ -18,6 +18,7 @@ using Citadel.Core.Windows.Util;
 using Microsoft.Data.Sqlite;
 using System.Net.Security;
 using Filter.Platform.Common.Util;
+using Filter.Platform.Common;
 
 namespace FilterProvider.Common.Util
 {
@@ -34,8 +35,8 @@ namespace FilterProvider.Common.Util
 
         static CertificateExemptions()
         {
-            s_dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "ssl-exemptions.db");
-
+            IPathProvider provider = PlatformTypes.New<IPathProvider>();
+            s_dbPath = Path.Combine(provider.ApplicationDataFolder, "ssl-exemptions.db");
         }
 
         public CertificateExemptions()

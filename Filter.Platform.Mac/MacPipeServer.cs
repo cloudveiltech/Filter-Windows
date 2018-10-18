@@ -14,32 +14,6 @@ using Foundation;
 
 namespace Filter.Platform.Mac
 {
-    internal delegate void ConnectionDelegate();
-    internal delegate void IncomingMessageDelegate(IntPtr message, int length);
-
-    internal static class PipeServerInterop
-    {
-        internal const string PlatformLib = "Filter.Platform.Mac.Native";
-
-        [DllImport(PlatformLib)]
-        internal static extern IntPtr GetGlobalIPCServer();
-
-        [DllImport(PlatformLib)]
-        internal static extern void StopIPCServer(IntPtr handle);
-
-        [DllImport(PlatformLib, EntryPoint = "IPCServer_SetOnClientConnected")]
-        internal static extern void SetOnClientConnected(IntPtr handle, ConnectionDelegate onClientConnected);
-
-        [DllImport(PlatformLib, EntryPoint = "IPCServer_SetOnClientDisconnected")]
-        internal static extern void SetOnClientDisconnected(IntPtr handle, ConnectionDelegate onClientDisconnected);
-
-        [DllImport(PlatformLib, EntryPoint = "IPCServer_SetOnIncomingMessage")]
-        internal static extern void SetOnIncomingMessage(IntPtr handle, IncomingMessageDelegate onIncomingMessage);
-
-        [DllImport(PlatformLib, EntryPoint = "IPCServer_PushMessage")]
-        internal static extern bool PushMessage(IntPtr handle, byte[] message, int length);
-    }
-
     public class MacPipeServer : IPipeServer
     {
         public MacPipeServer()
@@ -91,27 +65,23 @@ namespace Filter.Platform.Mac
 
                 byte[] arr = stream.ToArray();
 
-                PipeServerInterop.PushMessage(serverHandle, arr, arr.Length);
+                NativeIPCServerImpl.SendToAll(serverHandle, arr, arr.Length);
             }
         }
 
         public void Start()
         {
-            serverHandle = PipeServerInterop.GetGlobalIPCServer();
+            serverHandle = NativeIPCServerImpl.CreateIPCServer("org.cloudveil.filterserviceprovider", onIncomingMessage, onClientConnected, onClientDisconnected);
 
             if (serverHandle == IntPtr.Zero)
             {
                 throw new Exception("Failed to initialize global IPC Server");
             }
-
-            PipeServerInterop.SetOnClientConnected(serverHandle, this.onClientConnected);
-            PipeServerInterop.SetOnClientDisconnected(serverHandle, this.onClientDisconnected);
-            PipeServerInterop.SetOnIncomingMessage(serverHandle, this.onIncomingMessage);
         }
 
         public void Stop()
         {
-            PipeServerInterop.StopIPCServer(serverHandle);
+            NativeIPCServerImpl.Release(serverHandle);
             serverHandle = IntPtr.Zero;
         }
     }

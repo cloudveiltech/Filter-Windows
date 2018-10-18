@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -63,10 +62,8 @@
     <Reference Include="Xamarin.Mac" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
-
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.3" />
-    <PackageReference Include="Titanium.Web.Proxy" Version="3.0.695" />
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="NLog" Version="4.5.10" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="4.5.0" />
@@ -105,6 +102,7 @@
     <Compile Include="Platform\MacWifiManager.cs" />
     <Compile Include="Platform\MacTrustManager.cs" />
     <Compile Include="Platform\MacSystemServices.cs" />
+    <Compile Include="Platform\MacProxyEnforcement.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FilterProvider.Common\FilterProvider.Common.csproj">
@@ -119,6 +117,25 @@
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
       <Name>Citadel.IPC.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Mac\Filter.Platform.Mac.csproj">
+      <Project>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</Project>
+      <Name>Filter.Platform.Mac</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.Mono.csproj">
+      <Project>{956F3D84-4D12-4CFA-ACAD-08C32A66D824}</Project>
+      <Name>Titanium.Web.Proxy.Mono</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">
+      <Kind>Dynamic</Kind>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
 </Project>

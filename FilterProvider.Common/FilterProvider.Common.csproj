@@ -19,12 +19,12 @@
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
-    <PackageReference Include="Titanium.Web.Proxy" Version="3.0.695" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
+    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.Mono.csproj" />
   </ItemGroup>
 
 </Project>

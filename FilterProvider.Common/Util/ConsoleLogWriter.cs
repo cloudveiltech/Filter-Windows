@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using System;
 using System.IO;
@@ -14,7 +15,14 @@ namespace FilterProvider.Common.Util
 {
     class ConsoleLogWriter : TextWriter
     {
+        public ConsoleLogWriter() : base()
+        {
+            m_pathsProvider = PlatformTypes.New<IPathProvider>();
+        }
+
         public override Encoding Encoding => Encoding.UTF8;
+
+        private IPathProvider m_pathsProvider;
 
         private StreamWriter m_writer = null;
 
@@ -56,8 +64,7 @@ namespace FilterProvider.Common.Util
 
         private StreamWriter openLogFile()
         {
-            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                "CloudVeil", "logs", $"console-{DateTime.Now.Date.ToString("yyyy-MM-dd")}.log");
+            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $"console-{DateTime.Now.Date.ToString("yyyy-MM-dd")}.log");
 
             FileStream log = new FileStream(logPath, FileMode.Append);
 

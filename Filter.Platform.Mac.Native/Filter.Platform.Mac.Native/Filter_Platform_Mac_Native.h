@@ -8,4 +8,21 @@
 
 const char* GetSystemFingerprint(void);
 
-bool EnforceDns(const char** dnsServers, int dnsServersCount);
+const char* ConvertCFStringToUTF8(CFStringRef cfStr);
+
+// This is to be used by the native code.
+void NativeLog(int severity, NSString* str);
+
+enum NativeLogSeverities {
+    NativeLogTrace,
+    NativeLogDebug,
+    NativeLogInfo,
+    NativeLogWarn,
+    NativeLogError,
+    NativeLogCritical
+};
+
+typedef void (*NativeLogCallback)(int severity, const char* str);
+
+// Use this to hook a callback into the native code for so that native code can log to the same source as our C# code.
+void SetNativeLogCallback(NativeLogCallback cb);

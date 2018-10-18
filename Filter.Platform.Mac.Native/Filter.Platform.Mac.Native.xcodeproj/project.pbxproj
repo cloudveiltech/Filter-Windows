@@ -12,12 +12,22 @@
 		370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673ED216E65170090AE60 /* PrivilegeElevation.m */; };
 		370673F3216E69E60090AE60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F1216E69E60090AE60 /* Security.framework */; };
 		370673F4216E69E60090AE60 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 370673F2216E69E60090AE60 /* ServiceManagement.framework */; };
-		370673F82170CFF30090AE60 /* DnsEnforcement.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673F72170CFF30090AE60 /* DnsEnforcement.m */; };
-		370673FC2170EED20090AE60 /* IPCClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 370673FA2170EED20090AE60 /* IPCClient.h */; };
-		370673FD2170EED20090AE60 /* IPCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673FB2170EED20090AE60 /* IPCClient.m */; };
-		370674002170EF070090AE60 /* IPCServer.h in Headers */ = {isa = PBXBuildFile; fileRef = 370673FE2170EF070090AE60 /* IPCServer.h */; };
-		370674012170EF070090AE60 /* IPCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673FF2170EF070090AE60 /* IPCServer.m */; };
+		370673F82170CFF30090AE60 /* NetworkServices.m in Sources */ = {isa = PBXBuildFile; fileRef = 370673F72170CFF30090AE60 /* NetworkServices.m */; };
+		3706740A2178C4F90090AE60 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 370674082178C4F90090AE60 /* IPC.h */; };
+		3706740B2178C4F90090AE60 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 370674092178C4F90090AE60 /* IPC.m */; };
+		3706740E2178D2D80090AE60 /* IPCThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 3706740C2178D2D80090AE60 /* IPCThread.h */; };
+		3706740F2178D2D80090AE60 /* IPCThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 3706740D2178D2D80090AE60 /* IPCThread.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3706742F2178F9E60090AE60 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3706742B2178F9E50090AE60 /* mac-native-tester.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 370674212178F9E50090AE60;
+			remoteInfo = "mac-native-tester";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		370673E0216E57BB0090AE60 /* libFilter.Platform.Mac.Native.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libFilter.Platform.Mac.Native.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -27,13 +37,14 @@
 		370673EF216E65280090AE60 /* PrivilegeElevation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrivilegeElevation.h; sourceTree = "<group>"; };
 		370673F1216E69E60090AE60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		370673F2216E69E60090AE60 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
-		370673F62170CFDE0090AE60 /* DnsEnforcement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DnsEnforcement.h; sourceTree = "<group>"; };
-		370673F72170CFF30090AE60 /* DnsEnforcement.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DnsEnforcement.m; sourceTree = "<group>"; };
-		370673FA2170EED20090AE60 /* IPCClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCClient.h; sourceTree = "<group>"; };
-		370673FB2170EED20090AE60 /* IPCClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IPCClient.m; sourceTree = "<group>"; };
-		370673FE2170EF070090AE60 /* IPCServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCServer.h; sourceTree = "<group>"; };
-		370673FF2170EF070090AE60 /* IPCServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IPCServer.m; sourceTree = "<group>"; };
+		370673F62170CFDE0090AE60 /* NetworkServices.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NetworkServices.h; sourceTree = "<group>"; };
+		370673F72170CFF30090AE60 /* NetworkServices.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkServices.m; sourceTree = "<group>"; };
 		37067406217125EF0090AE60 /* IPCDelegates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IPCDelegates.h; sourceTree = "<group>"; };
+		370674082178C4F90090AE60 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPC.h; sourceTree = "<group>"; };
+		370674092178C4F90090AE60 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPC.m; sourceTree = "<group>"; };
+		3706740C2178D2D80090AE60 /* IPCThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPCThread.h; sourceTree = "<group>"; };
+		3706740D2178D2D80090AE60 /* IPCThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPCThread.m; sourceTree = "<group>"; };
+		3706742B2178F9E50090AE60 /* mac-native-tester.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "mac-native-tester.xcodeproj"; path = "mac-native-tester/mac-native-tester.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +63,7 @@
 		370673D7216E57BB0090AE60 = {
 			isa = PBXGroup;
 			children = (
+				3706742B2178F9E50090AE60 /* mac-native-tester.xcodeproj */,
 				370673E2216E57BB0090AE60 /* Filter.Platform.Mac.Native */,
 				370673E1216E57BB0090AE60 /* Products */,
 				370673F0216E69E60090AE60 /* Frameworks */,
@@ -69,16 +81,16 @@
 		370673E2216E57BB0090AE60 /* Filter.Platform.Mac.Native */ = {
 			isa = PBXGroup;
 			children = (
+				3706740C2178D2D80090AE60 /* IPCThread.h */,
+				3706740D2178D2D80090AE60 /* IPCThread.m */,
+				370674082178C4F90090AE60 /* IPC.h */,
+				370674092178C4F90090AE60 /* IPC.m */,
 				370673E3216E57BB0090AE60 /* Filter_Platform_Mac_Native.h */,
 				370673E5216E57BB0090AE60 /* Filter_Platform_Mac_Native.m */,
 				370673ED216E65170090AE60 /* PrivilegeElevation.m */,
 				370673EF216E65280090AE60 /* PrivilegeElevation.h */,
-				370673F62170CFDE0090AE60 /* DnsEnforcement.h */,
-				370673F72170CFF30090AE60 /* DnsEnforcement.m */,
-				370673FA2170EED20090AE60 /* IPCClient.h */,
-				370673FB2170EED20090AE60 /* IPCClient.m */,
-				370673FE2170EF070090AE60 /* IPCServer.h */,
-				370673FF2170EF070090AE60 /* IPCServer.m */,
+				370673F62170CFDE0090AE60 /* NetworkServices.h */,
+				370673F72170CFF30090AE60 /* NetworkServices.m */,
 				37067406217125EF0090AE60 /* IPCDelegates.h */,
 			);
 			path = Filter.Platform.Mac.Native;
@@ -93,6 +105,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3706742C2178F9E50090AE60 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				370674302178F9E60090AE60 /* mac-native-tester */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -100,9 +120,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				370673FC2170EED20090AE60 /* IPCClient.h in Headers */,
 				370673E4216E57BB0090AE60 /* Filter_Platform_Mac_Native.h in Headers */,
-				370674002170EF070090AE60 /* IPCServer.h in Headers */,
+				3706740A2178C4F90090AE60 /* IPC.h in Headers */,
+				3706740E2178D2D80090AE60 /* IPCThread.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,6 +170,12 @@
 			mainGroup = 370673D7216E57BB0090AE60;
 			productRefGroup = 370673E1216E57BB0090AE60 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 3706742C2178F9E50090AE60 /* Products */;
+					ProjectRef = 3706742B2178F9E50090AE60 /* mac-native-tester.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				370673DF216E57BB0090AE60 /* Filter.Platform.Mac.Native */,
@@ -157,15 +183,25 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		370674302178F9E60090AE60 /* mac-native-tester */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = "mac-native-tester";
+			remoteRef = 3706742F2178F9E60090AE60 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXSourcesBuildPhase section */
 		370673DD216E57BB0090AE60 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3706740B2178C4F90090AE60 /* IPC.m in Sources */,
+				3706740F2178D2D80090AE60 /* IPCThread.m in Sources */,
 				370673E6216E57BB0090AE60 /* Filter_Platform_Mac_Native.m in Sources */,
-				370673FD2170EED20090AE60 /* IPCClient.m in Sources */,
-				370673F82170CFF30090AE60 /* DnsEnforcement.m in Sources */,
-				370674012170EF070090AE60 /* IPCServer.m in Sources */,
+				370673F82170CFF30090AE60 /* NetworkServices.m in Sources */,
 				370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

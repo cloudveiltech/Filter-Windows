@@ -4,14 +4,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 
-#ifndef DnsEnforcement_h
-#define DnsEnforcement_h
 
 #import <Foundation/Foundation.h>
-#import <SystemConfiguration/SystemConfiguration.h>
 
-typedef bool (*NetworkServiceFn)(SCNetworkServiceRef networkService, void* cbData);
+@interface IPCThread : NSThread {
+    CFRunLoopSourceRef m_runLoopSource;
+}
 
-bool EnforceDns(const char* primary, const char* secondary);
+- (instancetype)initWithRunLoopSource: (CFRunLoopSourceRef)runLoopSource;
+- (void)stopThread;
 
-#endif /* DnsEnforcement_h */
+@end

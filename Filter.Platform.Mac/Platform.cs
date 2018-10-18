@@ -7,6 +7,8 @@ using System;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.IPC;
+using Filter.Platform.Common.Net;
+using Filter.Platform.Common.Util;
 
 namespace Filter.Platform.Mac
 {
@@ -27,15 +29,15 @@ namespace Filter.Platform.Mac
 
             PlatformTypes.Register<IAntitampering>((arr) => new MacAntitampering());
 
+            PlatformTypes.Register<INetworkInfo>((arr) => new MacNetworkInfo());
+
+            PlatformTypes.Register<IAuthenticationStorage>((arr) => new FileAuthenticationStorage());
+
+            PlatformTypes.Register<IPathProvider>((arr) => new MacPathProvider());
+
             // These loosely typed parameter lists are rather gross. Is there a cleaner way to do this?
             // params: channel, autoReconnect
             /*
-
-            PlatformTypes.Register<IAntitampering>((arr) => new WindowsAntitampering());
-
-            PlatformTypes.Register<INetworkInfo>((arr) => new NetworkListUtil());
-
-            PlatformTypes.Register<IAuthenticationStorage>((arr) => new RegistryAuthenticationStorage());
 
             PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());*/
         }

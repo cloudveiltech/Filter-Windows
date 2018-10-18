@@ -5,6 +5,7 @@
 //
 using System;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data;
 using FilterProvider.Common.Platform;
@@ -52,7 +53,7 @@ namespace FilterServiceProvider.Mac.Platform
             var endPointHttps = new ExplicitProxyEndPoint(IPAddress.Any, 14301, true);
 
             // TODO: This trusting might need to be done with our own custom code.
-            ProxyServer proxyServer = new ProxyServer(true, true);
+            ProxyServer proxyServer = new ProxyServer(false, false);
 
             proxyServer.EnableConnectionPool = true;
 
@@ -72,8 +73,32 @@ namespace FilterServiceProvider.Mac.Platform
 
             proxyServer.ExceptionFunc += LogException;
 
-            proxyServer.CertificateManager.EnsureRootCertificate(true, true);
+            IntPtr appleCertificate = MacTrustManager.GetFromKeychain("org.cloudveil.filterserviceprovider");
+
+            if(appleCertificate == IntPtr.Zero)
+            {
+                // Keychain certificate doesn't exist? Create one here and add it to our keychain.
+
+                proxyServer.CertificateManager.EnsureRootCertificate(false, false);
+
+                byte[] appleCertificateBytes = proxyServer.CertificateManager.RootCertificate.Export(X509ContentType.Cert, "password");
+                appleCertificate = MacTrustManager.AddToKeychain(appleCertificateBytes, appleCertificateBytes.Length, "org.cloudveil.filterserviceprovider");
+            }
+            else
+            {
+                // Keychain certificate exists. Get the bytes and import to our root certificate.
+                byte[] appleCertificateBytes = MacTrustManager.GetAppleCertificateBytes(appleCertificate);
+                proxyServer.CertificateManager.RootCertificate = new X509Certificate2(appleCertificateBytes, "password");
+            }
+
+            MacTrustManager.EnsureCertificateTrust(appleCertificate);
+
+            MacTrustManager.ReleaseCertificate(appleCertificate);
+            appleCertificate = IntPtr.Zero;
+
             proxyServer.Start();
+
+            MacProxyEnforcement.SetProxy("localhost", 14300, 14301);
 
             return proxyServer;
         }

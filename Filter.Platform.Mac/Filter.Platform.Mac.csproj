@@ -65,6 +65,9 @@
     <Compile Include="MacGUIChecks.cs" />
     <Compile Include="MacAntitampering.cs" />
     <Compile Include="MacNetworkInfo.cs" />
+    <Compile Include="MacPathProvider.cs" />
+    <Compile Include="NativeIPCClientImpl.cs" />
+    <Compile Include="NativeIPCServerImpl.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">

@@ -6,9 +6,6 @@
 
 #import "Filter_Platform_Mac_Native.h"
 
-
-const char* ConvertCFStringToUTF8(CFStringRef cfStr);
-
 const char* GetSystemFingerprint() {
     CFStringRef serialNumber = NULL;
     
@@ -51,4 +48,20 @@ const char* ConvertCFStringToUTF8(CFStringRef cfStr) {
     
     free(buffer);
     return nil;
+}
+
+static NativeLogCallback loggerCallback = nil;
+
+void NativeLog(int severity, NSString* str) {
+    const char* c_str = nil;
+    
+    if(loggerCallback) {
+        c_str = ConvertCFStringToUTF8((__bridge CFStringRef)str);
+        
+        loggerCallback(severity, c_str);
+    }
+}
+
+void SetNativeLogCallback(NativeLogCallback cb) {
+    loggerCallback = cb;
 }
