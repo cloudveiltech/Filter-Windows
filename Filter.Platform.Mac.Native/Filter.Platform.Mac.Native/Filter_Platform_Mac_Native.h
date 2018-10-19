@@ -26,3 +26,9 @@ typedef void (*NativeLogCallback)(int severity, const char* str);
 
 // Use this to hook a callback into the native code for so that native code can log to the same source as our C# code.
 void SetNativeLogCallback(NativeLogCallback cb);
+
+bool AcquireFileLock(const char* filename, int *pfd);
+
+void ReleaseFileLock(int fd);
+
+bool IsFileLocked(const char* filename);

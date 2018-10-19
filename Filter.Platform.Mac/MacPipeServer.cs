@@ -22,6 +22,7 @@ namespace Filter.Platform.Mac
         }
 
         private IntPtr serverHandle;
+        private IntPtr serverThread;
 
         public event ConnectionHandler ClientConnected;
         public event ConnectionHandler ClientDisconnected;
@@ -77,10 +78,14 @@ namespace Filter.Platform.Mac
             {
                 throw new Exception("Failed to initialize global IPC Server");
             }
+
+            serverThread = NativeIPCServerImpl.StartLoop(serverHandle);
         }
 
         public void Stop()
         {
+            NativeIPCServerImpl.StopLoop(serverThread);
+
             NativeIPCServerImpl.Release(serverHandle);
             serverHandle = IntPtr.Zero;
         }

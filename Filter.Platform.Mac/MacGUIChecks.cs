@@ -9,6 +9,9 @@ using System.Runtime.InteropServices;
 using Filter.Platform.Common.Client;
 using System.Diagnostics;
 using System.Linq;
+using Filter.Platform.Common.Util;
+using Filter.Platform.Common;
+using System.IO;
 
 namespace Filter.Platform.Mac
 {
@@ -17,8 +20,13 @@ namespace Filter.Platform.Mac
         [DllImport(Platform.NativeLib)]
         private static extern bool IsEffectiveUserIdRoot();
 
+        private NLog.Logger logger;
+        private IPathProvider paths;
+
         public MacGUIChecks()
         {
+            logger = LoggerUtil.GetAppWideLogger();
+            paths = PlatformTypes.New<IPathProvider>();
         }
 
         public void DisplayExistingUI()
@@ -36,6 +44,47 @@ namespace Filter.Platform.Mac
         public bool IsInIsolatedSession()
         {
             return IsEffectiveUserIdRoot();
+        }
+
+        public bool IsAlreadyRunning()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cloudveil");
+
+            if(!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            string lockFile = Path.Combine(dir, ".cloudveil.lock");
+
+            if(Platform.IsFileLocked(lockFile))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool PublishRunningApp()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cloudveil");
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            string lockFile = Path.Combine(dir, ".cloudveil.lock");
+
+            int fd = 0;
+            if(Platform.AcquireFileLock(lockFile, out fd))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

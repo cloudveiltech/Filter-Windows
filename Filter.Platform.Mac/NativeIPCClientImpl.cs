@@ -28,5 +28,11 @@ namespace Filter.Platform.Mac
 
         [DllImport(Platform.NativeLib, EntryPoint = "IPCClient_IsConnected")]
         public static extern bool IsConnected(IntPtr handle);
+
+        [DllImport(Platform.NativeLib, EntryPoint = "IPCClient_StartLoop")]
+        public static extern IntPtr StartLoop(IntPtr handle);
+
+        [DllImport(Platform.NativeLib, EntryPoint = "IPC_StopLoop")]
+        public static extern void StopLoop(IntPtr thread);
     }
 }

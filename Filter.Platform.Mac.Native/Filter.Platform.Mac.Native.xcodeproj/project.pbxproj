@@ -17,6 +17,8 @@
 		3706740B2178C4F90090AE60 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 370674092178C4F90090AE60 /* IPC.m */; };
 		3706740E2178D2D80090AE60 /* IPCThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 3706740C2178D2D80090AE60 /* IPCThread.h */; };
 		3706740F2178D2D80090AE60 /* IPCThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 3706740D2178D2D80090AE60 /* IPCThread.m */; };
+		37610BBA217A48C30057C484 /* Notifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 37610BB8217A48C30057C484 /* Notifications.h */; };
+		37610BBB217A48C30057C484 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 37610BB9217A48C30057C484 /* Notifications.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		3706740C2178D2D80090AE60 /* IPCThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPCThread.h; sourceTree = "<group>"; };
 		3706740D2178D2D80090AE60 /* IPCThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPCThread.m; sourceTree = "<group>"; };
 		3706742B2178F9E50090AE60 /* mac-native-tester.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "mac-native-tester.xcodeproj"; path = "mac-native-tester/mac-native-tester.xcodeproj"; sourceTree = "<group>"; };
+		37610BB8217A48C30057C484 /* Notifications.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Notifications.h; sourceTree = "<group>"; };
+		37610BB9217A48C30057C484 /* Notifications.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Notifications.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +96,8 @@
 				370673F62170CFDE0090AE60 /* NetworkServices.h */,
 				370673F72170CFF30090AE60 /* NetworkServices.m */,
 				37067406217125EF0090AE60 /* IPCDelegates.h */,
+				37610BB8217A48C30057C484 /* Notifications.h */,
+				37610BB9217A48C30057C484 /* Notifications.m */,
 			);
 			path = Filter.Platform.Mac.Native;
 			sourceTree = "<group>";
@@ -123,6 +129,7 @@
 				370673E4216E57BB0090AE60 /* Filter_Platform_Mac_Native.h in Headers */,
 				3706740A2178C4F90090AE60 /* IPC.h in Headers */,
 				3706740E2178D2D80090AE60 /* IPCThread.h in Headers */,
+				37610BBA217A48C30057C484 /* Notifications.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,6 +209,7 @@
 				3706740F2178D2D80090AE60 /* IPCThread.m in Sources */,
 				370673E6216E57BB0090AE60 /* Filter_Platform_Mac_Native.m in Sources */,
 				370673F82170CFF30090AE60 /* NetworkServices.m in Sources */,
+				37610BBB217A48C30057C484 /* Notifications.m in Sources */,
 				370673EE216E65170090AE60 /* PrivilegeElevation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -39,5 +39,11 @@ namespace Filter.Platform.Mac
         /// <param name="handle">The IPC server handle</param>
         [DllImport(Platform.NativeLib, EntryPoint = "IPCServer_Release")]
         public static extern void Release(IntPtr handle);
+
+        [DllImport(Platform.NativeLib, EntryPoint = "IPCClient_StartLoop")]
+        public static extern IntPtr StartLoop(IntPtr handle);
+
+        [DllImport(Platform.NativeLib, EntryPoint = "IPC_StopLoop")]
+        public static extern void StopLoop(IntPtr thread);
     }
 }

@@ -55,6 +55,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.Mac" />
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.5.9\lib\netstandard2.0\NLog.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MacFingerprint.cs" />
@@ -68,6 +71,7 @@
     <Compile Include="MacPathProvider.cs" />
     <Compile Include="NativeIPCClientImpl.cs" />
     <Compile Include="NativeIPCServerImpl.cs" />
+    <Compile Include="NativeLog.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">
@@ -80,6 +84,9 @@
       <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
 

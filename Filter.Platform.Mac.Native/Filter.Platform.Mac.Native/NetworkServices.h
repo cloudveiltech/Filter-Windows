@@ -23,6 +23,8 @@ bool SetProxy(const char* hostname, int httpPort, int httpsPort);
 // Uses SCNetworkReachability APIs to determine whether we have internet access.
 bool IsInternetReachable(const char* hostname);
 
+bool RemoveFromKeychain(SecCertificateRef certificate);
+
 SecCertificateRef GetFromKeychain(const char* label);
 
 SecCertificateRef AddToKeychain(void* data, int length, const char* label);
@@ -31,7 +33,14 @@ void EnsureCertificateTrust(SecCertificateRef cert);
 
 void* GetCertificateBytes(SecCertificateRef cert, int* length);
 
-// A hack to allow us to call CFRelease() for our certificates and buffers
+// The next two lines are extremely evil. They are here to help us manage native memory from C# code.
+// This is an extremely bad code-smell.
+// This is done because we return a non-GC allocated buffer from GetCertificateBytes() and need a way to release that buffer once we're done marshalling to a C# type.
+
+// A hack to allow us to call CFRelease() for our certificates.
 void __CFRelease(CFTypeRef ptr);
+
+// A hack to allow us to call CFAllocatorDeallocate() for our buffer.
+void __CFDeallocate(void* ptr);
 
 #endif /* DnsEnforcement_h */

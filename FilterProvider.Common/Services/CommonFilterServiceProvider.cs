@@ -1614,14 +1614,6 @@ namespace FilterProvider.Common.Services
 
         private async Task OnAfterResponse(object sender, SessionEventArgs args)
         {
-            StringBuilder diagnostics = new StringBuilder();
-
-            foreach(var pair in args.TimeLine)
-            {
-                diagnostics.AppendLine($"{pair.Key} = {pair.Value.ToString("c")}");
-            }
-
-            Console.WriteLine(diagnostics);
         }
 
         private async Task OnBeforeResponse(object sender, SessionEventArgs args)

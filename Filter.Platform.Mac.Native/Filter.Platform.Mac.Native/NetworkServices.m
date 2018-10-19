@@ -1,6 +1,7 @@
 // Thanks to https://00f.net/2011/08/14/programmatically-changing-network-configuration-on-osx/
 
 #import "NetworkServices.h"
+#import "Filter_Platform_Mac_Native.h"
 
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -282,6 +283,23 @@ SecCertificateRef CreateCertificateFromData(void* data, int length) {
     return cert;
 }
 
+bool RemoveFromKeychain(SecCertificateRef certificate) {
+    
+    CFArrayRef deleteCerts = CFArrayCreate(nil, (const void**){ (void*)certificate }, 1, nil);
+    
+    CFStringRef keys[] = { kSecClass, kSecMatchItemList, kSecMatchLimit };
+    void* values[] = { (void*)kSecClassCertificate, (void*)deleteCerts, (void*)kSecMatchLimitOne };
+    
+    CFDictionaryRef deleteQuery = CFDictionaryCreate(nil, (const void**)keys, (const void**)keys, 3, nil, nil);
+    
+    OSStatus status = SecItemDelete(deleteQuery);
+    if(status != errSecSuccess) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 SecCertificateRef GetFromKeychain(const char* label) {
     NSDictionary* getquery = @{ (id)kSecClass: (id)kSecClassCertificate,
                                 (id)kSecAttrLabel: [NSString stringWithUTF8String:label],
@@ -324,9 +342,15 @@ void EnsureCertificateTrust(SecCertificateRef cert) {
 }
 
 void* GetCertificateBytes(SecCertificateRef cert, int* length) {
+    if(cert == nil) {
+        return nil;
+    }
+    
     CFDataRef certData = SecCertificateCopyData(cert);
     
     CFIndex _len = CFDataGetLength(certData);
+    
+    NativeLog(NativeLogInfo, [NSString stringWithFormat:@"certData %p %ld", certData, (long)_len]);
     
     void* buf = CFAllocatorAllocate(nil, _len, 0);
     CFDataGetBytes(certData, CFRangeMake(0, _len), buf);
@@ -340,4 +364,8 @@ void* GetCertificateBytes(SecCertificateRef cert, int* length) {
 
 void __CFRelease(CFTypeRef ptr) {
     CFRelease(ptr);
+}
+
+void __CFDeallocate(void* ptr) {
+    CFAllocatorDeallocate(nil, ptr);
 }

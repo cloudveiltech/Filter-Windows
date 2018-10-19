@@ -9,57 +9,59 @@ using CloudVeilGUI.Platform.Common;
 using AppKit;
 using UserNotifications;
 using Filter.Platform.Common.Util;
+using Foundation;
 
 namespace CloudVeilGUI.MacOS.Platform
 {
-    public class MacTrayIconController : ITrayIconController
+    interface INotificationController
     {
-        public MacTrayIconController()
+        void RequestAuthorization();
+
+        void ShowNotification(string title, string message);
+    }
+
+    /// <summary>
+    /// This class gets used in macOS 10.13 and lower because 10.14 is first with UNUserNotifications
+    /// </summary>
+    class NSUserNotificationsController : INotificationController
+    {
+        public void RequestAuthorization()
+        {
+            // No requesting of authorization needed.
+        }
+
+        public void ShowNotification(string title, string message)
+        {
+            var center = NSUserNotificationCenter.DefaultUserNotificationCenter;
+
+            var notification = new NSUserNotification()
+            {
+                Title = title,
+                InformativeText = message,
+                DeliveryDate = NSDate.Now
+            };
+
+            center.ScheduleNotification(notification);
+        }
+    }
+
+    class NewUserNotificationsController : INotificationController
+    {
+        public NewUserNotificationsController()
         {
             logger = LoggerUtil.GetAppWideLogger();
         }
 
         private NLog.Logger logger;
 
-        private NSStatusItem statusItem;
-        private bool isGranted;
+        private bool isGranted = false;
 
-        public void DestroyIcon()
+        public void RequestAuthorization()
         {
-            statusItem.Visible = false;
-            NSStatusBar.SystemStatusBar.RemoveStatusItem(statusItem);
-        }
-
-        public void InitializeIcon(List<StatusIconMenuItem> menuItems)
-        {
-
-            requestNotificationAuth((granted, nsError) =>
+            requestNotificationAuth((isGranted, nsError) =>
             {
-                isGranted = granted;
+                isGranted = true;
             });
-
-            float width = 30.0f;
-            var item = NSStatusBar.SystemStatusBar.CreateStatusItem(width);
-
-            var button = item.Button;
-            button.Image = NSImage.ImageNamed("StatusBarButtonImage");
-
-            var menu = new NSMenu();
-
-            foreach (var menuItem in menuItems)
-            {
-                if (menuItem.IsSeparator)
-                {
-                    menu.AddItem(NSMenuItem.SeparatorItem);
-                }
-                else
-                {
-                    menu.AddItem(new NSMenuItem(menuItem.ItemName, menuItem.CharCode, menuItem.OnTriggered));
-                }
-            }
-
-            item.Menu = menu;
-            statusItem = item;
         }
 
         private void requestNotificationAuth(Action<bool, Foundation.NSError> completionHandler)
@@ -111,11 +113,88 @@ namespace CloudVeilGUI.MacOS.Platform
 
             UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert, (granted, nsError) =>
             {
-                if(nsError == null && granted)
+                if (nsError == null && granted)
                 {
 
                 }
             });
+        }
+    }
+
+    public class MacTrayIconController : ITrayIconController
+    {
+        public MacTrayIconController()
+        {
+            logger = LoggerUtil.GetAppWideLogger();
+
+            if(UNUserNotificationCenter.Current == null)
+            {
+                notificationController = new NSUserNotificationsController();
+            }
+            else
+            {
+                notificationController = new NewUserNotificationsController();
+            }
+        }
+
+        private INotificationController notificationController;
+
+        private NLog.Logger logger;
+
+        private NSStatusItem statusItem;
+        private bool isGranted;
+
+        public void DestroyIcon()
+        {
+            if (statusItem != null)
+            {
+                statusItem.Visible = false;
+                NSStatusBar.SystemStatusBar.RemoveStatusItem(statusItem);
+            }
+        }
+
+        public void InitializeIcon(List<StatusIconMenuItem> menuItems)
+        {
+            notificationController.RequestAuthorization();
+
+            float width = 30.0f;
+            var item = NSStatusBar.SystemStatusBar.CreateStatusItem(width);
+
+            var button = item.Button;
+            button.Image = NSImage.ImageNamed("StatusBarButtonImage");
+
+            var menu = new NSMenu();
+
+            foreach (var menuItem in menuItems)
+            {
+                if (menuItem.IsSeparator)
+                {
+                    menu.AddItem(NSMenuItem.SeparatorItem);
+                }
+                else
+                {
+                    NSMenuItem nsMenuItem = null;
+
+                    if(menuItem.CharCode == null)
+                    {
+                        nsMenuItem = new NSMenuItem(menuItem.ItemName, menuItem.OnTriggered);
+                    }
+                    else
+                    {
+                        nsMenuItem = new NSMenuItem(menuItem.ItemName, menuItem.CharCode, menuItem.OnTriggered);
+                    }
+
+                    menu.AddItem(nsMenuItem);
+                }
+            }
+
+            item.Menu = menu;
+            statusItem = item;
+        }
+
+        public void ShowNotification(string title, string message)
+        {
+            notificationController.ShowNotification(title, message);
         }
     }
 }

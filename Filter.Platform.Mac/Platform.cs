@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 using System;
+using System.Runtime.InteropServices;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.IPC;
@@ -15,6 +16,15 @@ namespace Filter.Platform.Mac
     public static class Platform
     {
         public const string NativeLib = "Filter.Platform.Mac.Native";
+
+        [DllImport(NativeLib)]
+        public static extern bool AcquireFileLock(string filename, out int fd);
+
+        [DllImport(NativeLib)]
+        public static extern void ReleaseFileLock(int fd);
+
+        [DllImport(NativeLib)]
+        public static extern bool IsFileLocked(string filename);
 
         public static void Init()
         {
@@ -35,11 +45,7 @@ namespace Filter.Platform.Mac
 
             PlatformTypes.Register<IPathProvider>((arr) => new MacPathProvider());
 
-            // These loosely typed parameter lists are rather gross. Is there a cleaner way to do this?
-            // params: channel, autoReconnect
-            /*
-
-            PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());*/
+            NativeLog.Init();
         }
     }
 }

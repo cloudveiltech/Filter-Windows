@@ -22,11 +22,13 @@ namespace Filter.Platform.Mac
         }
 
         private IntPtr handle;
+        private IntPtr thread;
+
         private string channel;
         private bool isConnected = false;
         private EventWaitHandle connectionWaitHandle = null;
 
-        public bool AutoReconnect { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool AutoReconnect { get; set; }
 
         public event ClientConnectionHandler Connected;
         public event ClientConnectionHandler Disconnected;
@@ -87,10 +89,15 @@ namespace Filter.Platform.Mac
         public void Start()
         {
             handle = NativeIPCClientImpl.CreateIPCClient(onIncomingMessage, onConnected, onDisconnected);
+            thread = NativeIPCClientImpl.StartLoop(handle);
+
+            NativeIPCClientImpl.Connect(handle, "org.cloudveil.filterserviceprovider");
         }
 
         public void Stop()
         {
+            NativeIPCClientImpl.StopLoop(thread);
+
             NativeIPCClientImpl.Release(handle);
             handle = IntPtr.Zero;
         }

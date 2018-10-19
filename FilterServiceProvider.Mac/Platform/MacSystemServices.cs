@@ -53,14 +53,11 @@ namespace FilterServiceProvider.Mac.Platform
             var endPointHttps = new ExplicitProxyEndPoint(IPAddress.Any, 14301, true);
 
             // TODO: This trusting might need to be done with our own custom code.
-            ProxyServer proxyServer = new ProxyServer(false, false);
+            ProxyServer proxyServer = new ProxyServer("org.cloudveil.filterserviceprovider", "CloudVeil", false, false);
 
             proxyServer.EnableConnectionPool = true;
 
             proxyServer.EnableTcpServerConnectionPrefetch = false;
-
-            proxyServer.CertificateManager.CreateRootCertificate(false);
-            proxyServer.CertificateManager.TrustRootCertificate();
 
             proxyServer.CertificateManager.CertificateEngine = Titanium.Web.Proxy.Network.CertificateEngine.BouncyCastle;
 
@@ -75,21 +72,22 @@ namespace FilterServiceProvider.Mac.Platform
 
             IntPtr appleCertificate = MacTrustManager.GetFromKeychain("org.cloudveil.filterserviceprovider");
 
-            if(appleCertificate == IntPtr.Zero)
+            if(appleCertificate != IntPtr.Zero)
             {
-                // Keychain certificate doesn't exist? Create one here and add it to our keychain.
+                // If we have an old root certificate in the keychain, remove it and create a new one.
+                // This prevents any chance of the certificate becoming stale after 5 years.
 
-                proxyServer.CertificateManager.EnsureRootCertificate(false, false);
+                // Another reason we do it this way is because certificates restored from the keychain do not have their private keys attached, which for us is very important.
+                MacTrustManager.RemoveFromKeychain(appleCertificate);
+                MacTrustManager.ReleaseCertificate(appleCertificate);
+                appleCertificate = IntPtr.Zero;
+            }
 
-                byte[] appleCertificateBytes = proxyServer.CertificateManager.RootCertificate.Export(X509ContentType.Cert, "password");
-                appleCertificate = MacTrustManager.AddToKeychain(appleCertificateBytes, appleCertificateBytes.Length, "org.cloudveil.filterserviceprovider");
-            }
-            else
-            {
-                // Keychain certificate exists. Get the bytes and import to our root certificate.
-                byte[] appleCertificateBytes = MacTrustManager.GetAppleCertificateBytes(appleCertificate);
-                proxyServer.CertificateManager.RootCertificate = new X509Certificate2(appleCertificateBytes, "password");
-            }
+            proxyServer.CertificateManager.EnsureRootCertificate(false, false);
+
+            // TODO: Figure out what to do with this "password" thingy. This might be why the apple certificate private key storage wasn't working?
+            byte[] appleCertificateBytes = proxyServer.CertificateManager.RootCertificate.Export(X509ContentType.Cert, "password");
+            appleCertificate = MacTrustManager.AddToKeychain(appleCertificateBytes, appleCertificateBytes.Length, "org.cloudveil.filterserviceprovider");
 
             MacTrustManager.EnsureCertificateTrust(appleCertificate);
 

@@ -97,10 +97,11 @@ namespace CloudVeilGUI.MacOS.Platform
                     {
                         logger.Error("Failed to start filter.");
 
-                        using(var reader = startFilter.StandardError)
+                        /*using (var reader = startFilter.StandardError)
                         {
                             logger.Error(reader.ReadToEnd());
-                        }
+                        }*/
+                        // TODO: Maybe StandardError works before the process exits?
                     }
                 }
             }

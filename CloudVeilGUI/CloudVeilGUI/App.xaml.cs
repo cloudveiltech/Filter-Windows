@@ -92,7 +92,22 @@ namespace CloudVeilGUI
 
             try
             {
-                string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                bool createdNew = false;
+                if(guiChecks.IsAlreadyRunning())
+                {
+                    createdNew = false;
+                }
+                else
+                {
+                    createdNew = true;
+                }
+
+                if(guiChecks.PublishRunningApp())
+                {
+                    createdNew = true;
+                }
+
+                /*string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
                 System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
 
@@ -101,11 +116,11 @@ namespace CloudVeilGUI
                 {
                     instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
                 }
-                catch
+                catch(Exception ex)
                 {
                     // We can get access denied if SYSTEM is running this.
                     createdNew = false;
-                }
+                }*/
 
                 if (!createdNew)
                 {
@@ -164,7 +179,7 @@ namespace CloudVeilGUI
 
             RunGuiChecks();
 
-            MainPage = new WaitingPage();
+            //MainPage = new WaitingPage();
 
             m_ipcClient = IPCClient.InitDefault();
 

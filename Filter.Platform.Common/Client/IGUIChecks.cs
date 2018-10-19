@@ -20,6 +20,18 @@ namespace Filter.Platform.Common.Client
         bool IsInIsolatedSession();
 
         /// <summary>
+        /// Checks through OS-specific means whether another GUI is running.
+        /// </summary>
+        /// <returns><c>true</c>, if GUI is already running, <c>false</c> otherwise.</returns>
+        bool IsAlreadyRunning();
+
+        /// <summary>
+        /// Make known through OS-specific means that the cloudveil GUI is running.
+        /// </summary>
+        /// <returns><c>true</c>, if lock was acquired, <c>false</c> otherwise.</returns>
+        bool PublishRunningApp();
+
+        /// <summary>
         /// If there is a platform-specific way for the app to bring another instance to the front, implement this.
         /// This is an optional implementation as we have a second way to bring up client GUIs if this fails.
         /// </summary>
