@@ -30,10 +30,10 @@ namespace Filter.Platform.Mac
         {
             FingerprintService.InitFingerprint(new MacFingerprint());
 
-            PlatformTypes.Register<IPipeServer>((arr) => new MacPipeServer());
+            PlatformTypes.Register<IPipeServer>((arr) => new SocketPipeServer());
 
             // params: channel
-            PlatformTypes.Register<IPipeClient>((arr) => new MacPipeClient((string)arr[0]));
+            PlatformTypes.Register<IPipeClient>((arr) => new SocketPipeClient());
 
             PlatformTypes.Register<IGUIChecks>((arr) => new MacGUIChecks());
 

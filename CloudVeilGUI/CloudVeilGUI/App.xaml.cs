@@ -47,6 +47,8 @@ namespace CloudVeilGUI
         /// </summary>
         public Stack<Page> PreservedPages { get; set; }
 
+        public NavigationPage NavPage { get => (MainPage as NavigationPage); }
+
         public IPCClient IpcClient
         {
             get { return m_ipcClient; }
@@ -67,7 +69,7 @@ namespace CloudVeilGUI
             ModelManager.Register(new RelaxedPolicyViewModel());
 
             // Code smell: MainPage() makes use of ModelManager, so we need to instantiate ModelManager first.
-            MainPage = guiOnly ? (Page)new MainPage() : (Page)new WaitingPage();
+            MainPage = new NavigationPage(new MainPage());
         }
 
         private void RunGuiChecks()

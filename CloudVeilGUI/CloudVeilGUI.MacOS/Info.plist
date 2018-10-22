@@ -5,7 +5,7 @@
 	<key>CFBundleName</key>
 	<string>CloudVeilGUI.MacOS</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.cloudveil.CloudVeilGUI-MacOS</string>
+	<string>org.cloudveil.CloudVeil</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>

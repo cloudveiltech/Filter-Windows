@@ -4,7 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 using System;
+using System.IO;
 using System.Net;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data;
@@ -103,8 +105,34 @@ namespace FilterServiceProvider.Mac.Platform
 
         private void LogException(Exception exception)
         {
-            logger.Error("TITANIUM.WEB.PROXY ERROR");
-            LoggerUtil.RecursivelyLogException(logger, exception);
+            bool ignoreError = false;
+            bool useMessage = false;
+            string message = "";
+            if(exception.InnerException != null)
+            {
+                if(exception.InnerException is AuthenticationException)
+                {
+                    ignoreError = true;
+                } else if(exception.InnerException is IOException)
+                {
+                    useMessage = true;
+                    message = exception.InnerException.Message;
+                }
+            }
+
+            if(!ignoreError)
+            {
+                logger.Error("TITANIUM.WEB.PROXY ERROR");
+            }
+
+            if(useMessage)
+            {
+                logger.Error(message);
+            }
+            else
+            {
+                LoggerUtil.RecursivelyLogException(logger, exception);
+            }
         }
     }
 }

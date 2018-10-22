@@ -83,9 +83,9 @@ namespace CloudVeilGUI.IPCHandlers
                             break;
                     }
 
-                    if(Application.Current.MainPage is MainPage)
+                    if((Application.Current as App).NavPage.CurrentPage is MainPage)
                     {
-                        await (Application.Current.MainPage as MainPage).DisplayAlert(title, message, "OK");
+                        await ((Application.Current as App).NavPage.CurrentPage as MainPage).DisplayAlert(title, message, "OK");
                     }
                 });
             }

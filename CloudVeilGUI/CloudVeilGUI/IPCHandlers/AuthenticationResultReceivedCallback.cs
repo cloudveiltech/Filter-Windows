@@ -33,12 +33,11 @@ namespace CloudVeilGUI.IPCHandlers
                         // User needs to log in.
                         //BringAppToFocus();
 
-                        Device.BeginInvokeOnMainThread(() =>
+                        Device.BeginInvokeOnMainThread(async () =>
                         {
-                            if (!(app.MainPage is LoginPage))
+                            if(!(app.NavPage.CurrentPage is LoginPage))
                             {
-                                app.PreservedPages.Push(app.MainPage);
-                                app.MainPage = new LoginPage();
+                                await app.NavPage.PushAsync(new LoginPage());
                             }
                         });
 
@@ -53,18 +52,11 @@ namespace CloudVeilGUI.IPCHandlers
                 case AuthenticationAction.ErrorNoInternet:
                 case AuthenticationAction.ErrorUnknown:
                     {
-                        Device.BeginInvokeOnMainThread(() =>
+                        Device.BeginInvokeOnMainThread(async () =>
                         {
-                            if (app.MainPage is LoginPage)
+                            if (app.NavPage.CurrentPage is LoginPage)
                             {
-                                if (app.PreservedPages.Count > 0)
-                                {
-                                    app.MainPage = app.PreservedPages.Pop();
-                                }
-                                else
-                                {
-                                    app.MainPage = new MainPage();
-                                }
+                                await app.NavPage.PopToRootAsync();
                             }
                         });
 

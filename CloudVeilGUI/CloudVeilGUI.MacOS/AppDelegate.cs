@@ -41,7 +41,7 @@ namespace CloudVeilGUI.MacOS
 
             Filter.Platform.Mac.Platform.Init();
             PlatformTypes.Register<ITrayIconController>((arr) => new MacTrayIconController());
-            //PlatformTypes.Register<IGuiServices>((arr) => new MacGuiServices());
+            PlatformTypes.Register<IGuiServices>((arr) => new MacGuiServices());
             PlatformTypes.Register<IFilterStarter>((arr) => new MacFilterStarter());
 
 
@@ -50,21 +50,6 @@ namespace CloudVeilGUI.MacOS
 
             base.DidFinishLaunching(notification);
         }
-
-        void UseRelaxedPolicy(object sender, EventArgs e)
-        {
-        }
-
-
-        void OpenSettings(object sender, EventArgs e)
-        {
-        }
-
-
-        void OpenApp(object sender, EventArgs e)
-        {
-        }
-
 
         public override void WillTerminate(NSNotification notification)
         {

@@ -517,7 +517,7 @@ namespace FilterProvider.Common.Services
 
                             if (m_lastFetchedUpdate.IsRestartRequired)
                             {
-                                string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
+                                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
                                 using (StreamWriter writer = File.CreateText(restartFlagPath))
                                 {
                                     writer.Write("# This file left intentionally blank (tee-hee)\n");
@@ -525,7 +525,7 @@ namespace FilterProvider.Common.Services
                             }
 
                             // Save auth token when shutting down for update.
-                            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
+                            string appDataPath = m_platformPaths.ApplicationDataFolder;
 
                             try
                             {
@@ -886,7 +886,7 @@ namespace FilterProvider.Common.Services
             bool hadError = false;
             bool isAvailable = false;
 
-            string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+            string updateSettingsPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "update.settings");
 
             string[] commandParts = null;
             if (File.Exists(updateSettingsPath))
@@ -1394,19 +1394,6 @@ namespace FilterProvider.Common.Services
 
         private async Task OnHttpRequestBegin(object sender, SessionEventArgs args)
         {
-            if(args.WebSession.Request.UpgradeToWebSocket)
-            {
-                args.DataReceived += (_sender, e) =>
-                {
-                    m_logger.Info("DataReceived from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
-                };
-
-                args.DataSent += (_sender, e) =>
-                {
-                    m_logger.Info("DataSent from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
-                };
-            }
-
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;

@@ -278,7 +278,7 @@ namespace Te.Citadel
 
                 m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
                 {
-                    string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+                    string updateSettingsPath = Path.Combine(paths, "update.settings");
 
                     if(File.Exists(updateSettingsPath))
                     {

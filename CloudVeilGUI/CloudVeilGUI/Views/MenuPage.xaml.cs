@@ -17,7 +17,7 @@ namespace CloudVeilGUI.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MenuPage : ContentPage
     {
-        MainPage RootPage { get => Application.Current.MainPage as MainPage; }
+        MainPage RootPage { get => (Application.Current.MainPage as NavigationPage).RootPage as MainPage; }
         List<HomeMenuItem> menuItems;
         public MenuPage()
         {
