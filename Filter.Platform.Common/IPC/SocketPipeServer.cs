@@ -134,7 +134,7 @@ namespace Filter.Platform.Common.IPC
                         if (receiveBuffer[receiveBufferIdx] == SocketPipeHelper.MagicByte)
                         {
                             int length = 0;
-                            length = BitConverter.ToInt32(receiveBuffer, 4);
+                            length = BitConverter.ToInt32(receiveBuffer, receiveBufferIdx + 4);
 
                             MyBuffer = new byte[length + 8];
                             CompletedBufferLength = length + 8;
@@ -146,7 +146,7 @@ namespace Filter.Platform.Common.IPC
                         try
                         {
                             // Make sure that length left doesn't overflow MyBuffer.Length
-                            int lengthLeft = BytesReceived + receiveRet > MyBuffer.Length ? receiveRet - BytesReceived : MyBuffer.Length - BytesReceived;
+                            int lengthLeft = BytesReceived + receiveRet > MyBuffer.Length ? MyBuffer.Length - BytesReceived : receiveRet - BytesReceived;
 
                             Buffer.BlockCopy(receiveBuffer, receiveBufferIdx, MyBuffer, BytesReceived, lengthLeft);
                             BytesReceived += lengthLeft;

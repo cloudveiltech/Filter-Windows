@@ -107,7 +107,7 @@ namespace FilterProvider.Common.Util
         {
             get
             {
-                return "https://build-server:8443";
+                return "https://citadel.cv-test-dev.cloudveil.org/citadel";
             }
         }
 

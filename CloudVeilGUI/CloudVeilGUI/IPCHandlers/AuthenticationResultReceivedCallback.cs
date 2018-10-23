@@ -16,7 +16,6 @@ namespace CloudVeilGUI.IPCHandlers
 {
     public class AuthenticationResultReceivedCallback : CallbackBase
     {
-
         public AuthenticationResultReceivedCallback(App app) : base(app)
         {
 
@@ -24,6 +23,7 @@ namespace CloudVeilGUI.IPCHandlers
 
         public void Callback(AuthenticationMessage authenticationFailureResult)
         {
+            this.logger.Info("Authentication result {0}, {1}", authenticationFailureResult.Action, authenticationFailureResult.AuthenticationResult.AuthenticationResult);
             switch (authenticationFailureResult.Action)
             {
                 case AuthenticationAction.Denied:
