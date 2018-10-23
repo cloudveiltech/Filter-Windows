@@ -5,7 +5,7 @@
 	<key>CFBundleName</key>
 	<string>CloudVeilGUI.MacOS</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.cloudveil.CloudVeilGUI-MacOS</string>
+	<string>org.cloudveil.CloudVeil</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
@@ -24,11 +24,11 @@
 	<string>${AuthorCopyright:HtmlEncode}</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSMainStoryboardFile</key>
-	<string>Main</string>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcon.appiconset</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSMainStoryboardFile</key>
+	<string>Main</string>
 </dict>
 </plist>

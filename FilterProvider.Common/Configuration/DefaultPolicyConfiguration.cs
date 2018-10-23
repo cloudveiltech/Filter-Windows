@@ -59,6 +59,7 @@ namespace FilterProvider.Common.Configuration
 
         private static string configFilePath;
         private static string listDataFilePath;
+        private static IPathProvider s_paths;
 
         private static JsonSerializerSettings s_configSerializerSettings;
 
@@ -109,9 +110,10 @@ namespace FilterProvider.Common.Configuration
             serverListDataFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "server-a.dat");
 #endif
 
-            // cfg.json and data path? TODO FIXME
-            configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cfg.json");
-            listDataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "a.dat");
+            s_paths = PlatformTypes.New<IPathProvider>();
+
+            configFilePath = Path.Combine(s_paths.ApplicationDataFolder, "cfg.json");
+            listDataFilePath = Path.Combine(s_paths.ApplicationDataFolder, "a.dat");
 
             // Setup json serialization settings.
             s_configSerializerSettings = new JsonSerializerSettings();
@@ -153,7 +155,7 @@ namespace FilterProvider.Common.Configuration
 
         private string getListFolder()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"rules");
+            return Path.Combine(s_paths.ApplicationDataFolder, @"rules");
         }
 
         private void createListFolderIfNotExists()
@@ -266,7 +268,7 @@ namespace FilterProvider.Common.Configuration
 
             if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
             {
-                File.WriteAllBytes(listDataFilePath, configBytes);
+                File.WriteAllBytes(configFilePath, configBytes);
                 return true;
             }
             else

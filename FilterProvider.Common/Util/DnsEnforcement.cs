@@ -104,30 +104,9 @@ namespace FilterProvider.Common.Util
 
                         if (primaryDns != null || secondaryDns != null)
                         {
-                            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
-                            bool ranUpdate = false;
+                            bool ranUpdate = m_platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
 
-                            foreach (var iface in ifaces)
-                            {
-                                bool needsUpdate = false;
-
-                                if (primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
-                                {
-                                    needsUpdate = true;
-                                }
-                                if (secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
-                                {
-                                    needsUpdate = true;
-                                }
-
-                                if (needsUpdate)
-                                {
-                                    ranUpdate = true;
-                                    m_platformDns.SetDnsForNic(iface.Description, primaryDns, secondaryDns);
-                                }
-                            }
-
-                            if(ranUpdate)
+                            if(areDnsServersChanging(primaryDns, secondaryDns))
                             {
                                 OnDnsChanging(sendDnsChangeEvents);
                             }
@@ -229,12 +208,7 @@ namespace FilterProvider.Common.Util
                 OnDnsChanging(sendDnsChangeEvents);
             }
 
-            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
-
-            foreach (var iface in ifaces)
-            {
-                m_platformDns.SetDnsForNicToDHCP(iface.Description);
-            }
+            m_platformDns.SetDnsForAllInterfacesToDHCP();
         }
         #endregion
 

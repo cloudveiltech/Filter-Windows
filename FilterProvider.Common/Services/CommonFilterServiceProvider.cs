@@ -284,6 +284,16 @@ namespace FilterProvider.Common.Services
             m_systemServices = PlatformTypes.New<ISystemServices>();
         }
 
+        /// <summary>
+        /// Explicitly defining an object so that we don't need a reference to Microsoft.CSharp.
+        /// Xamarin.Mac includes Microsoft.CSharp 2.0.5.0, and the lowest one we can get is Microsoft.CSharp.4.0.0
+        /// </summary>
+        private class JsonAuthData
+        {
+            public string authToken { get; set; }
+            public string userEmail { get; set; }
+        }
+
         private void OnStartup()
         {
             if(File.Exists("debug-filterserviceprovider"))
@@ -307,7 +317,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                Console.SetOut(new ConsoleLogWriter());
+                //Console.SetOut(new ConsoleLogWriter());
                 consoleOutStatus = true;
             }
             catch (Exception ex)
@@ -340,8 +350,7 @@ namespace FilterProvider.Common.Services
 
             ThreadPool.SetMinThreads(256, 32);
 
-            Thread monitorThread = new Thread(MonitorThreads);
-            //monitorThread.Start();
+                        //monitorThread.Start();
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -356,7 +365,7 @@ namespace FilterProvider.Common.Services
                     try
                     {
                         string jsonText = Encoding.UTF8.GetString(tokenResponse);
-                        dynamic jsonData = JsonConvert.DeserializeObject(jsonText);
+                        JsonAuthData jsonData = JsonConvert.DeserializeObject<JsonAuthData>(jsonText);
 
                         WebServiceUtil.Default.AuthToken = jsonData.authToken;
                         WebServiceUtil.Default.UserEmail = jsonData.userEmail;
@@ -508,7 +517,7 @@ namespace FilterProvider.Common.Services
 
                             if (m_lastFetchedUpdate.IsRestartRequired)
                             {
-                                string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
+                                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
                                 using (StreamWriter writer = File.CreateText(restartFlagPath))
                                 {
                                     writer.Write("# This file left intentionally blank (tee-hee)\n");
@@ -516,7 +525,7 @@ namespace FilterProvider.Common.Services
                             }
 
                             // Save auth token when shutting down for update.
-                            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil");
+                            string appDataPath = m_platformPaths.ApplicationDataFolder;
 
                             try
                             {
@@ -877,7 +886,7 @@ namespace FilterProvider.Common.Services
             bool hadError = false;
             bool isAvailable = false;
 
-            string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+            string updateSettingsPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "update.settings");
 
             string[] commandParts = null;
             if (File.Exists(updateSettingsPath))
@@ -1385,19 +1394,6 @@ namespace FilterProvider.Common.Services
 
         private async Task OnHttpRequestBegin(object sender, SessionEventArgs args)
         {
-            if(args.WebSession.Request.UpgradeToWebSocket)
-            {
-                args.DataReceived += (_sender, e) =>
-                {
-                    m_logger.Info("DataReceived from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
-                };
-
-                args.DataSent += (_sender, e) =>
-                {
-                    m_logger.Info("DataSent from websocket: |{0}|", Encoding.ASCII.GetString(e.Buffer.AsSpan(e.Offset, e.Count).ToArray()));
-                };
-            }
-
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
@@ -1605,14 +1601,6 @@ namespace FilterProvider.Common.Services
 
         private async Task OnAfterResponse(object sender, SessionEventArgs args)
         {
-            StringBuilder diagnostics = new StringBuilder();
-
-            foreach(var pair in args.TimeLine)
-            {
-                diagnostics.AppendLine($"{pair.Key} = {pair.Value.ToString("o")}");
-            }
-
-            //Console.WriteLine(diagnostics);
         }
 
         private async Task OnBeforeResponse(object sender, SessionEventArgs args)
@@ -2738,6 +2726,11 @@ namespace FilterProvider.Common.Services
         }
 
         /// <summary>
+        /// Occurs when the filtering engine is stopped.
+        /// </summary>
+        public event EventHandler OnStopFiltering;
+
+        /// <summary>
         /// Stops the filtering engine, shuts it down. 
         /// </summary>
         private void StopFiltering()
@@ -2745,6 +2738,16 @@ namespace FilterProvider.Common.Services
             if(m_filteringEngine != null && m_filteringEngine.ProxyRunning)
             {
                 m_filteringEngine.Stop();
+            }
+
+            try
+            {
+                OnStopFiltering?.Invoke(null, null);
+            }
+            catch(Exception e)
+            {
+                m_logger.Error("Error occurred in OnStopFiltering event");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
 

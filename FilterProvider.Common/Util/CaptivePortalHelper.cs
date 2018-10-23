@@ -70,13 +70,12 @@ namespace FilterProvider.Common.Util
         }
 
         private object m_captivePortalSettingsLock = new object();
-        
+
+        private IPathProvider paths = PlatformTypes.New<IPathProvider>();
+
         private string portalSettingsPath
         {
-            get
-            {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil\captive-portal-settings.dat");
-            }
+            get => Path.Combine(paths.ApplicationDataFolder, "captive-portal-settings.dat");
         }
 
         private void deleteCaptivePortalSSIDsFile()

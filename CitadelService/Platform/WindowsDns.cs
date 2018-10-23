@@ -14,6 +14,7 @@ using System.Management;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
 
 namespace CitadelService.Platform
 {
@@ -104,6 +105,46 @@ namespace CitadelService.Platform
                     }
                 }
             }
+        }
+
+        public bool SetDnsForAllInterfaces(IPAddress primary, IPAddress secondary)
+        {
+            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+            bool ranUpdate = false;
+
+            foreach (var iface in ifaces)
+            {
+                bool needsUpdate = false;
+
+                if (primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
+                {
+                    needsUpdate = true;
+                }
+                if (secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
+                {
+                    needsUpdate = true;
+                }
+
+                if (needsUpdate)
+                {
+                    ranUpdate = true;
+                    m_platformDns.SetDnsForNic(iface.Description, primaryDns, secondaryDns);
+                }
+            }
+
+            return ranUpdate;
+        }
+
+        public bool SetDnsForAllInterfacesToDHCP()
+        {
+            var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+
+            foreach (var iface in ifaces)
+            {
+                SetDnsForNicToDHCP(iface.Description);
+            }
+
+            return true;
         }
     }
 }

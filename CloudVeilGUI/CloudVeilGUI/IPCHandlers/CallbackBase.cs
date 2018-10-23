@@ -8,16 +8,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Filter.Platform.Common.Util;
 
 namespace CloudVeilGUI.IPCHandlers
 {
     public class CallbackBase
     {
         protected App app;
+        protected NLog.Logger logger;
 
         public CallbackBase(App app)
         {
             this.app = app;
+            this.logger = LoggerUtil.GetAppWideLogger();
         }
     }
 }

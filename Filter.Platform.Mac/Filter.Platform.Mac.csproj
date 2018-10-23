@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</ProjectGuid>
+    <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Filter.Platform.Mac</RootNamespace>
+    <AssemblyName>Filter.Platform.Mac</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CreatePackage>false</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseSGen>false</UseSGen>
+    <HttpClientHandler></HttpClientHandler>
+    <LinkMode></LinkMode>
+    <XamMacArch></XamMacArch>
+    <CodeSigningKey></CodeSigningKey>
+    <PackagingExtraArgs></PackagingExtraArgs>
+    <EnableSGenConc></EnableSGenConc>
+    <AOTMode>None</AOTMode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants></DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CreatePackage>false</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseSGen>false</UseSGen>
+    <HttpClientHandler></HttpClientHandler>
+    <LinkMode></LinkMode>
+    <XamMacArch></XamMacArch>
+    <AOTMode>None</AOTMode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Xamarin.Mac" />
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.5.9\lib\netstandard2.0\NLog.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MacFingerprint.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Platform.cs" />
+    <Compile Include="MacPipeServer.cs" />
+    <Compile Include="MacPipeClient.cs" />
+    <Compile Include="MacGUIChecks.cs" />
+    <Compile Include="MacAntitampering.cs" />
+    <Compile Include="MacNetworkInfo.cs" />
+    <Compile Include="MacPathProvider.cs" />
+    <Compile Include="NativeIPCClientImpl.cs" />
+    <Compile Include="NativeIPCServerImpl.cs" />
+    <Compile Include="NativeLog.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">
+      <Kind>Dynamic</Kind>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>
+      <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
+
+  <!--
+    Some documentation here on this import:
+    All this import does is change directory to the Filter.Platform.Mac.Native directory and runs xcode and changes back to our directory.
+    Use this template for other native libraries if needed.
+  -->
+  <Import Project="..\Filter.Platform.Mac.Native\Filter.Platform.Mac.Native.targets" />
+</Project>

@@ -14,6 +14,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Filter.Platform.Common;
 
 namespace Citadel.Core.Windows.Util.Update
 {
@@ -85,8 +86,12 @@ namespace Citadel.Core.Windows.Util.Update
             private set;
         }
 
+        private IPathProvider paths;
+
         public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments, bool isRestartRequired)
         {
+            paths = PlatformTypes.New<IPathProvider>();
+
             DatePublished = datePublished;
             Title = title = title != null ? title : string.Empty;
             HtmlBody = htmlBody = htmlBody != null ? htmlBody : string.Empty;
@@ -97,8 +102,7 @@ namespace Citadel.Core.Windows.Util.Update
             UpdaterArguments = updaterArguments != null ? updaterArguments : string.Empty;
             IsRestartRequired = isRestartRequired;
 
-            var targetDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            targetDir = Path.Combine(targetDir, Process.GetCurrentProcess().ProcessName);
+            var targetDir = Path.Combine(paths.ApplicationDataFolder, "updates");
 
             if(!Directory.Exists(targetDir))
             {
@@ -129,6 +133,8 @@ namespace Citadel.Core.Windows.Util.Update
         /// </exception>
         public void BeginInstallUpdateDelayed(int secondDelay = 10, bool restartApplication = true)
         {
+            // TODO: Implement cross platform stuff.
+
             if(!File.Exists(UpdateFileLocalPath))
             {
                 throw new Exception("Target update installer does not exist at the expected location.");
