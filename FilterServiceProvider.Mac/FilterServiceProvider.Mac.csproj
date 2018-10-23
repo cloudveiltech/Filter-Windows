@@ -121,10 +121,6 @@
       <Project>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</Project>
       <Name>Filter.Platform.Mac</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.Mono.csproj">
-      <Project>{956F3D84-4D12-4CFA-ACAD-08C32A66D824}</Project>
-      <Name>Titanium.Web.Proxy.Mono</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

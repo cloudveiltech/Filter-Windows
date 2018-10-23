@@ -84,6 +84,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 m_authDict["AuthToken"] = value;
+                saveDictionary();
             }
         }
 
@@ -104,6 +105,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 m_authDict["UserEmail"] = value;
+                saveDictionary();
             }
         }
     }

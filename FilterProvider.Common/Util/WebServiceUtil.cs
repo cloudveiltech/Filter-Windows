@@ -197,9 +197,10 @@ namespace FilterProvider.Common.Util
                 deviceName = "Unknown";
             }
 
+            HttpWebRequest authRequest = null;
             try
             {
-                var authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
+                authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.
@@ -334,7 +335,7 @@ namespace FilterProvider.Common.Util
                     e = e.InnerException;
                 }
 
-                m_logger.Info("Authentication failed due to a failure to process the request and response.");
+                m_logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
                 WebServiceUtil.Default.AuthToken = string.Empty;
                 ret.AuthenticationResult = AuthenticationResult.Failure;
                 return ret;
@@ -354,7 +355,7 @@ namespace FilterProvider.Common.Util
                 }
             }
 
-            m_logger.Info("Authentication failed due to a complete failure to process the request and response.");
+            m_logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
 
             // If we had success, we should/would have returned by now.
             if(!connectionFailure)

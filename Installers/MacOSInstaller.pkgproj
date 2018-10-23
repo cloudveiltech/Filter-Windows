@@ -559,6 +559,8 @@
 			</dict>
 			<key>PREINSTALL_PATH</key>
 			<dict>
+				<key>PATH</key>
+				<string>MacOSInstaller/PreInstall.sh</string>
 				<key>PATH_TYPE</key>
 				<integer>1</integer>
 			</dict>
