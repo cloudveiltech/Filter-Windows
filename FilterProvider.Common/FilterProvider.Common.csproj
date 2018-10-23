@@ -20,10 +20,10 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
-    <PackageReference Include="Titanium.Web.Proxy" Version="3.0.694" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.csproj" />
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
   </ItemGroup>

@@ -1609,10 +1609,10 @@ namespace FilterProvider.Common.Services
 
             foreach(var pair in args.TimeLine)
             {
-                diagnostics.AppendLine($"{pair.Key} = {pair.Value.ToString("c")}");
+                diagnostics.AppendLine($"{pair.Key} = {pair.Value.ToString("o")}");
             }
 
-            Console.WriteLine(diagnostics);
+            //Console.WriteLine(diagnostics);
         }
 
         private async Task OnBeforeResponse(object sender, SessionEventArgs args)
