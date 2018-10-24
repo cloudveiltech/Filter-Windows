@@ -21,7 +21,7 @@ namespace Citadel.Core.Windows.Util
             {
                 if (appDataFolder == null)
                 {
-                    appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"CloudVeil");
+                    appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil");
                 }
 
                 return appDataFolder;
