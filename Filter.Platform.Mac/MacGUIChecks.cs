@@ -76,6 +76,11 @@ namespace Filter.Platform.Mac
 
             string lockFile = Path.Combine(dir, ".cloudveil.lock");
 
+            if(Platform.IsFileLocked(lockFile))
+            {
+                return false;
+            }
+
             int fd = 0;
             if(Platform.AcquireFileLock(lockFile, out fd))
             {

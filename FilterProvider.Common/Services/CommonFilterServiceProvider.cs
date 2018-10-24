@@ -1623,12 +1623,17 @@ namespace FilterProvider.Common.Services
             {
                 contentType = args.WebSession.Response.Headers.GetFirstHeader("Content-Type").Value;
 
-                // This is the start of a response with a content type that we want to inspect.
-                // Flag it for inspection once done. It will later call the OnHttpMessageEnd callback.
                 bool isHtml = contentType.IndexOf("html") != -1;
                 bool isJson = contentType.IndexOf("json") != -1;
+                bool isTextPlain = contentType.IndexOf("text/plain") != -1;
 
-                if (!(isHtml || isJson))
+                // Is the response content type text/html or application/json? Inspect it, otherwise return before we do content classification.
+                // Why enforce content classification on only these two? There are only a few MIME types which have a high risk of "carrying" explicit content.
+                // Those are:
+                // text/plain
+                // text/html
+                // application/json
+                if (!(isHtml || isJson || isTextPlain))
                 {
                     return;
                 }

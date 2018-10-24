@@ -107,7 +107,7 @@ namespace CitadelService.Platform
             }
         }
 
-        public bool SetDnsForAllInterfaces(IPAddress primary, IPAddress secondary)
+        public bool SetDnsForAllInterfaces(IPAddress primaryDns, IPAddress secondaryDns)
         {
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
             bool ranUpdate = false;
@@ -128,7 +128,7 @@ namespace CitadelService.Platform
                 if (needsUpdate)
                 {
                     ranUpdate = true;
-                    m_platformDns.SetDnsForNic(iface.Description, primaryDns, secondaryDns);
+                    SetDnsForNic(iface.Description, primaryDns, secondaryDns);
                 }
             }
 

@@ -387,8 +387,10 @@ namespace CitadelCore.Windows.Diversion
                         // Check if this packet belongs to an IPV4 flow marked for blocking.
                         if (parseResult.IsIPv4)
                         {
+                            int srcPortAction = Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]);
+
                             // Handle the special case of entirely blocking internet for this application/port.
-                            if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
+                            if (srcPortAction == (int)FirewallAction.BlockInternetForApplication)
                             {
                                 dropPacket = true;
                             }
@@ -397,8 +399,10 @@ namespace CitadelCore.Windows.Diversion
                         // Check if this packet belongs to an IPV6 flow marked for blocking.
                         if (!dropPacket && parseResult.IsIPv6)
                         {
+                            int srcPortAction = Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader.SrcPort]);
+
                             // Handle the special case of entirely blocking internet for this application/port.
-                            if (Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
+                            if (srcPortAction == (int)FirewallAction.BlockInternetForApplication)
                             {
                                 dropPacket = true;
                             }

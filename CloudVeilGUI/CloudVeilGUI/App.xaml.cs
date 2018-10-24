@@ -31,8 +31,6 @@ namespace CloudVeilGUI
 {
     public partial class App : Application
     {
-        private Mutex instanceMutex = null;
-
         private IPCClient m_ipcClient;
         private NLog.Logger logger;
 
@@ -55,6 +53,7 @@ namespace CloudVeilGUI
         }
 
         private bool guiOnly;
+        private IGUIChecks guiChecks;
 
         public App(bool guiOnly = false)
         {
@@ -74,7 +73,7 @@ namespace CloudVeilGUI
 
         private void RunGuiChecks()
         {
-            var guiChecks = PlatformTypes.New<IGUIChecks>();
+            guiChecks = PlatformTypes.New<IGUIChecks>();
 
             // First, lets check to see if the user started the GUI in an isolated session.
             try
@@ -95,34 +94,12 @@ namespace CloudVeilGUI
             try
             {
                 bool createdNew = false;
-                if(guiChecks.IsAlreadyRunning())
-                {
-                    createdNew = false;
-                }
-                else
+                if (guiChecks.PublishRunningApp())
                 {
                     createdNew = true;
                 }
 
-                if(guiChecks.PublishRunningApp())
-                {
-                    createdNew = true;
-                }
-
-                /*string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
-
-                bool createdNew;
-                try
-                {
-                    instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
-                }
-                catch(Exception ex)
-                {
-                    // We can get access denied if SYSTEM is running this.
-                    createdNew = false;
-                }*/
+                /**/
 
                 if (!createdNew)
                 {
@@ -238,7 +215,7 @@ namespace CloudVeilGUI
             {
                 TrayIconController.DestroyIcon();
 
-                instanceMutex.ReleaseMutex();
+                guiChecks?.UnpublishRunningApp();
             }
             catch (Exception e)
             {
