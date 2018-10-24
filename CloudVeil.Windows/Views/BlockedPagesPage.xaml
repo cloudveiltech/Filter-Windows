@@ -1,0 +1,96 @@
+﻿<!--
+* Copyright © 2017-2018 Cloudveil Technology Inc.
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+<LightContentPage x:Class="CloudVeil.Windows.Views.BlockedPagesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:CloudVeil.Windows.Views"
+      mc:Ignorable="d" 
+      Title="BlockedPagesPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="AUTO" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="32,8,32,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO" />
+                <RowDefinition Height="AUTO" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="96" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <Label Content="Date From:"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Margin="0,0,8,0" />
+
+            <DatePicker Grid.Row="0" Grid.Column="1" x:Name="fromDatePicker" />
+
+            <Label Content="To:"
+                       Grid.Row="1"
+                       Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0" />
+
+            <DatePicker Grid.Row="1" Grid.Column="1" />
+        </Grid>
+
+        <!-- Data grid here -->
+        <Grid Grid.Row="1" Margin="32, 0, 32, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="7*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="24" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Label Content="Category" Grid.Column="0" Grid.Row="0" />
+            <Label Content="Request" Grid.Column="1" Grid.Row="0" />
+
+            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="listView" ItemsSource="{Binding BlockedPages}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="7*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{Binding CategoryName}" Grid.Column="0" />
+                            <Label Content="{Binding FullRequestUri}" Grid.Column="1" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <Grid Margin="32,0,32,0" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <Button Content="Privacy Policy" Grid.Column="0" />
+            <Button Content="Request Review" Grid.Column="2" />
+        </Grid>
+    </Grid>
+</LightContentPage>

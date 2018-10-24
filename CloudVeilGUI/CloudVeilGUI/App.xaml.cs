@@ -94,7 +94,7 @@ namespace CloudVeilGUI
             try
             {
                 bool createdNew = false;
-                if(guiChecks.PublishRunningApp())
+                if (guiChecks.PublishRunningApp())
                 {
                     createdNew = true;
                 }
