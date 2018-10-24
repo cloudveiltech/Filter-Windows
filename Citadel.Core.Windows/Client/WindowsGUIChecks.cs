@@ -10,6 +10,8 @@ using System;
 using System.Linq;
 using System.Diagnostics;
 using Citadel.Core.WinAPI;
+using System.Threading;
+using Te.Citadel.Util;
 
 namespace Citadel.Core.Windows.Client
 {
@@ -30,9 +32,57 @@ namespace Citadel.Core.Windows.Client
             }
         }
 
+        public bool IsAlreadyRunning()
+        {
+            string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
+            bool createdNew;
+            try
+            {
+                var instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
+                instanceMutex.ReleaseMutex();
+            }
+            catch (Exception ex)
+            {
+                // We can get access denied if SYSTEM is running this.
+                createdNew = false;
+            }
+
+            return createdNew;
+        }
+
         public bool IsInIsolatedSession()
         {
             return Process.GetCurrentProcess().SessionId <= 0;
+        }
+
+        Mutex instanceMutex;
+
+        public bool PublishRunningApp()
+        {
+            string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
+            bool createdNew;
+            try
+            {
+                instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
+            }
+            catch (Exception ex)
+            {
+                // We can get access denied if SYSTEM is running this.
+                createdNew = false;
+            }
+
+            return createdNew;
+        }
+
+        public void UnpublishRunningApp()
+        {
+            instanceMutex.ReleaseMutex();
         }
     }
 }

@@ -12,7 +12,7 @@
              Title="Menu">
     <StackLayout VerticalOptions="FillAndExpand">
         <ListView x:Name="ListViewMenu"
-                    HasUnevenRows="True">
+                    HasUnevenRows="False">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
