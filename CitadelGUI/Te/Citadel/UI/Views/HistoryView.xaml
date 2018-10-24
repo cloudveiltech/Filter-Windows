@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
@@ -48,7 +48,7 @@
                         Foreground="#FF231F20"><Run Text="Request review of a blocked url by selecting the item and then click Request Review." /></Span>
         </TextBlock>
 
-        <Button
+        <custom:Button
                     Height="25"
                     Margin="554,315,10,0"
                     HorizontalAlignment="Stretch"
@@ -56,7 +56,7 @@
                     Command="{Binding RequestBlockActionReviewCommand}"
                     CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
                     Content="Request Review">
-            <Button.Style>
+            <custom:Button.Style>
                 <!-- This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
                 <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
                     <Setter Property="IsEnabled" Value="True" />

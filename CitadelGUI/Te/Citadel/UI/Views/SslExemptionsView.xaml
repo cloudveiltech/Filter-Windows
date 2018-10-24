@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
@@ -62,7 +62,7 @@
             </DataGrid.ColumnHeaderStyle>
         </DataGrid>
 
-        <Button
+        <custom:Button
             Grid.Column="1"
             Grid.Row="1"
             Margin="8"
@@ -70,7 +70,7 @@
             Command="{Binding TrustCertificateCommand}"
             CommandParameter="{Binding ElementName=m_sslExemptionsGrid, Path=SelectedItem}"
             >
-            <Button.Style>
+            <custom:Button.Style>
                 <!--  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
                 <Style BasedOn="{StaticResource AccentedSquareButtonStyle}" TargetType="Button">
                     <Setter Property="IsEnabled" Value="True" />
@@ -83,7 +83,7 @@
             </Button.Style>
         </Button>
 
-        <Button
+        <custom:Button
             Grid.Row="1"
             Grid.Column="2"
             Content="Back"

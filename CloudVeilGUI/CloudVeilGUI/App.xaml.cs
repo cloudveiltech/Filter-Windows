@@ -174,16 +174,16 @@ namespace CloudVeilGUI
 
         protected override void OnStart()
         {
-            if(guiOnly)
+            if (guiOnly)
             {
                 return;
             }
 
             RunGuiChecks();
 
-            //MainPage = new WaitingPage();
+        //MainPage = new WaitingPage();
 
-            m_ipcClient = IPCClient.InitDefault();
+        m_ipcClient = IPCClient.InitDefault();
 
             var filterStarter = PlatformTypes.New<IFilterStarter>();
             filterStarter.StartFilter();

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
@@ -9,6 +9,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:CloudVeilGUI"
+             xmlns:custom="clr-namespace:CloudVeilGUI.CustomFormElements"
              x:Class="CloudVeilGUI.Views.SelfModerationPage">
     <ContentPage.Content>
         <Grid Margin="32">
@@ -29,11 +30,7 @@
                    />
             
             <Entry Grid.Row="0" Grid.Column="1" />
-            <Button Text="Add" Grid.Row="0" Grid.Column="2">
-                <Button.Effects>
-                    <local:ButtonEffect />
-                </Button.Effects>
-            </Button>
+            <custom:Button Text="Add" Grid.Row="0" Grid.Column="2" />
 
             <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding SelfModerationEntries}" Header="Blocked Websites">
                 <ListView.ItemTemplate>

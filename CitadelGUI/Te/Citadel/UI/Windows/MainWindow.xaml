@@ -102,7 +102,7 @@
             
             <!---->
 
-            <!--<Button
+            <!--<custom:Button
                 Command="{Binding OpenGuestNetwork}"
                 Visibility="{Binding Path=IsCaptivePortalActive, Converter={StaticResource BooleanToVisibilityConverter}}"
                 >
@@ -142,7 +142,7 @@
                         <Run Text="It looks like you're on a network that requires logon information."/>
                     </TextBlock>
 
-                    <Button Command="{Binding HelpMeConnect}" Content="Help Me Connect" Grid.Row="1" Margin="8" Style="{DynamicResource SquareButtonStyle}"/>
+                    <custom:Button Command="{Binding HelpMeConnect}" Content="Help Me Connect" Grid.Row="1" Margin="8" Style="{DynamicResource SquareButtonStyle}"/>
                 </Grid>
             </MetroControls:Flyout>
         </MetroControls:FlyoutsControl>
