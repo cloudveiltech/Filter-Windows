@@ -1,4 +1,4 @@
-﻿<LightContentPage x:Class="CloudVeil.Windows.Views.MenuPage"
+﻿<LightContentPage x:Uid="LightContentPage_1" x:Class="CloudVeil.Windows.Views.MenuPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,10 +7,10 @@
       mc:Ignorable="d" 
       Title="MenuPage">
 
-    <ListView x:Name="Menu" ItemsSource="{Binding MenuItems}">
+    <ListView x:Uid="Menu" x:Name="Menu" ItemsSource="{Binding MenuItems}">
         <ListView.ItemTemplate>
-            <DataTemplate>
-                <Label Content="{Binding Title}" FontSize="20" Padding="10" />
+            <DataTemplate x:Uid="DataTemplate_1">
+                <Label x:Uid="Label_1" Content="{Binding Title}" FontSize="20" Padding="10" />
             </DataTemplate>
         </ListView.ItemTemplate>
     </ListView>

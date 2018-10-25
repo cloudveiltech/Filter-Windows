@@ -42,7 +42,9 @@ namespace CloudVeil.Windows.Views
                     return;
                 }
 
-                var id = (int)((HomeMenuItem)e.AddedItems[0]).Id;
+                var id = ((HomeMenuItem)e.AddedItems[0]).Id;
+
+                navigation.NavigateFromMenu(id);
             };
 
         }

@@ -1,4 +1,6 @@
-﻿using CloudVeil.Windows.Views;
+﻿using CloudVeil.Windows.ViewModels;
+using CloudVeilGUI.Models;
+using CloudVeilGUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,19 +17,18 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfLightToolkit.Controls;
 
-namespace CloudVeil.Windows
+namespace CloudVeil.Windows.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AdvancedPage.xaml
     /// </summary>
-    public partial class MainWindow : LightWindow
+    public partial class AdvancedPage : LightContentPage
     {
-        public MainWindow()
+        public AdvancedPage()
         {
             InitializeComponent();
-            this.StartupPage = new MainPage();
 
-            SetValue(HasNavigationBarProperty, false);
+            DataContext = new ProxyViewModel<AdvancedPageViewModel>(ModelManager.Default.GetModel<AdvancedPageViewModel>());
         }
     }
 }

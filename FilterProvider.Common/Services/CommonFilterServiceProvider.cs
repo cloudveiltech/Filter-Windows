@@ -6,7 +6,6 @@
 */
 
 using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
@@ -41,6 +40,7 @@ using Filter.Platform.Common.Net;
 using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Models;
 using Titanium.Web.Proxy;
+using Filter.Platform.Common.Types;
 
 namespace FilterProvider.Common.Services
 {

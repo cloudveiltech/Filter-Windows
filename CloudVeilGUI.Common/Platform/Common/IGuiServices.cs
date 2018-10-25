@@ -27,5 +27,7 @@ namespace CloudVeilGUI.Platform.Common
         void ShowMainScreen();
 
         void DisplayAlert(string title, string message, string okButton);
+
+        void ShowCertificateErrorsScreen();
     }
 }

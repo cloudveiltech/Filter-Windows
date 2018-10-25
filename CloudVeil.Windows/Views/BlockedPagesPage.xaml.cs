@@ -1,4 +1,5 @@
-﻿using CloudVeilGUI.Models;
+﻿using CloudVeil.Windows.ViewModels;
+using CloudVeilGUI.Models;
 using CloudVeilGUI.ViewModels;
 using System;
 using System.Collections.Generic;

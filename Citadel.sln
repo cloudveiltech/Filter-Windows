@@ -81,10 +81,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filter.Platform.Mac", "Filter.Platform.Mac\Filter.Platform.Mac.csproj", "{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeil.Windows", "CloudVeil.Windows\CloudVeil.Windows.csproj", "{7FEAFA81-A8F7-4ED3-B1B5-C60398948869}"
+	ProjectSection(ProjectDependencies) = postProject
+		{620ADC88-B91D-4FDA-A791-8B92473E927A} = {620ADC88-B91D-4FDA-A791-8B92473E927A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfLightToolkit", "..\WpfLightToolkit\Sources\WpfLightToolkit\WpfLightToolkit.csproj", "{9AB20093-D50A-4587-8B2B-66F1AEA8B101}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudVeilGUI.Common", "CloudVeilGUI.Common\CloudVeilGUI.Common.csproj", "{02DA72B6-7608-4304-929D-1A447D87774D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudVeilGUI.Common", "CloudVeilGUI.Common\CloudVeilGUI.Common.csproj", "{02DA72B6-7608-4304-929D-1A447D87774D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

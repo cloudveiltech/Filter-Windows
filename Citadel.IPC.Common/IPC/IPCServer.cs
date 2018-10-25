@@ -5,10 +5,10 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Types;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
 using Filter.Platform.Common.IPC;
+using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using NLog;
 using System;

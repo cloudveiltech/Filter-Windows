@@ -7,7 +7,6 @@
 
 //﻿#define LOCAL_POLICY_CONFIGURATION
 
-using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Extensions;
 

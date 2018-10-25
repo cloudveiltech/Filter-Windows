@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<LightContentPage xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<LightContentPage x:Uid="LightContentPage_1" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                   xmlns:local="clr-namespace:CloudVeil.Windows.Views"
                   mc:Ignorable="d" 
                   x:Class="CloudVeil.Windows.Views.Modal">
-    <Grid>
+    <Grid x:Uid="Grid_1">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*" MinHeight="100" />
-            <RowDefinition Height="*" />
+            <RowDefinition x:Uid="RowDefinition_1" Height="*"/>
+            <RowDefinition x:Uid="RowDefinition_2" Height="*" MinHeight="100" />
+            <RowDefinition x:Uid="RowDefinition_3" Height="*" />
         </Grid.RowDefinitions>
 
-        <LightContentPage Grid.Row="1" x:Name="innerContent">
-            <StackPanel>
-                <Label Content="Your Content Here" x:Name="titleLabel" />
-                <Label Content="Your content here" x:Name="messageLabel" />
-                <Button Content="--" x:Name="okButton" />
+        <LightContentPage x:Uid="innerContent" Grid.Row="1" x:Name="innerContent">
+            <StackPanel x:Uid="StackPanel_1">
+                <Label x:Uid="titleLabel" Content="Your Content Here" x:Name="titleLabel" />
+                <Label x:Uid="messageLabel" Content="Your content here" x:Name="messageLabel" />
+                <Button x:Uid="okButton" Content="--" x:Name="okButton" />
             </StackPanel>
         </LightContentPage>
     </Grid>

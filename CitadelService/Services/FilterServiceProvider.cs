@@ -6,7 +6,6 @@
 */
 
 using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;

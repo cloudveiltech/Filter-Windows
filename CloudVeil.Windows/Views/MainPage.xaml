@@ -4,7 +4,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-<LightMasterDetailPage x:Class="CloudVeil.Windows.Views.MainPage"
+<LightMasterDetailPage x:Uid="LightMasterDetailPage_1" x:Class="CloudVeil.Windows.Views.MainPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -15,11 +15,11 @@
       Title="MainPage">
 
     <LightMasterDetailPage.MasterPage>
-        <LightContentPage>
-            <Label Content="Welcome to WPF!" />
+        <LightContentPage x:Uid="LightContentPage_1">
+            <Label x:Uid="Label_1" Content="Welcome to WPF!" />
         </LightContentPage>
     </LightMasterDetailPage.MasterPage>
     <LightMasterDetailPage.DetailPage>
-        <local:BlockedPagesPage />
+        <local:BlockedPagesPage x:Uid="local:BlockedPagesPage_1" />
     </LightMasterDetailPage.DetailPage>
 </LightMasterDetailPage>

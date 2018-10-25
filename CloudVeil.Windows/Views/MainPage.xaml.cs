@@ -37,6 +37,14 @@ namespace CloudVeil.Windows.Views
                     this.DetailPage = new BlockedPagesPage();
                     break;
 
+                case MenuItemType.RelaxedPolicy:
+                    this.DetailPage = new RelaxedPolicyPage();
+                    break;
+
+                case MenuItemType.Advanced:
+                    this.DetailPage = new AdvancedPage();
+                    break;
+
                 default:
                     this.DetailPage = new BlockedPagesPage();
                     break;

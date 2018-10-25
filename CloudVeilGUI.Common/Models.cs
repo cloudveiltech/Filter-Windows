@@ -45,6 +45,8 @@ namespace CloudVeilGUI.Common
         {
             ModelManager.Default.Register(new MenuViewModel());
             ModelManager.Default.Register(new BlockedPagesModel());
+            ModelManager.Default.Register(new AdvancedPageViewModel());
+            ModelManager.Default.Register(new RelaxedPolicyViewModel());
 
             GuiServices = PlatformTypes.New<IGuiServices>();
         }

@@ -1,5 +1,4 @@
-﻿using CloudVeil.Windows.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,19 +14,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfLightToolkit.Controls;
 
-namespace CloudVeil.Windows
+namespace CloudVeil.Windows.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for WaitingPage.xaml
     /// </summary>
-    public partial class MainWindow : LightWindow
+    public partial class WaitingPage : LightContentPage
     {
-        public MainWindow()
+        public WaitingPage()
         {
             InitializeComponent();
-            this.StartupPage = new MainPage();
-
-            SetValue(HasNavigationBarProperty, false);
         }
     }
 }

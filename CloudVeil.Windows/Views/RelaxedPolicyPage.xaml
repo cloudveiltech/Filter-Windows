@@ -1,0 +1,24 @@
+﻿<LightContentPage x:Class="CloudVeil.Windows.Views.RelaxedPolicyPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:CloudVeil.Windows.Views"
+      mc:Ignorable="d" 
+      Title="Relaxed Policy">
+
+    <StackPanel Margin="32,0,0,0" Width="300">
+        <TextBlock Foreground="Black" Margin="0,16,0,16" TextWrapping="Wrap">
+            <Run Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions on certain websites, you can use the relaxed filtering rules for the given time span below." />
+            <Run />
+        </TextBlock>
+        <Button x:Uid="RelaxedPolicyButton" Margin="0,0,0,8" Content="Use Relaxed Policy" Command="{Binding UseRelaxedPolicyCommand}"/>
+        <Button x:Uid="RelinquishPolicyButton" Margin="0,0,0,16" Content="Relinquish Relaxed Policy" Command="{Binding RelinquishRelaxedPolicyCommand}" />
+        <Label Margin="0,0,0,8"
+               ContentStringFormat="Requests Available: {0}"
+               Content="{Binding AvailableRelaxedRequests}" />
+
+        <Label Content="{Binding RelaxedDuration}" ContentStringFormat="Relaxed Policy Duration: {0}" />
+
+    </StackPanel>
+</LightContentPage>

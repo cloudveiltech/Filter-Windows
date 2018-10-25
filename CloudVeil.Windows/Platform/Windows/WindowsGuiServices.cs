@@ -64,17 +64,54 @@ namespace CloudVeilGUI.Platform.Windows
 
         public void ShowLoginScreen()
         {
-            throw new NotImplementedException();
+            app.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                if(app.MainWindow is LightWindow)
+                {
+                    var window = app.MainWindow as LightWindow;
+
+                    window.StartupPage = (window.StartupPage is LoginPage) ? window.StartupPage : new LoginPage();
+                }
+            });
         }
 
         public void ShowWaitingScreen()
         {
-            throw new NotImplementedException();
+            app.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                if(app.MainWindow is LightWindow)
+                {
+                    var window = app.MainWindow as LightWindow;
+
+                    var waitingPage = new WaitingPage();
+                    window.StartupPage = (window.StartupPage is WaitingPage) ? window.StartupPage : new WaitingPage();
+                }
+            });
         }
 
+        private MainPage mainPage;
         public void ShowMainScreen()
         {
+            app.Dispatcher.BeginInvoke((Action)delegate ()
+            {
+                if(app.MainWindow is LightWindow)
+                {
+                    var window = app.MainWindow as LightWindow;
 
+                    if(window.StartupPage is MainPage && mainPage != null)
+                    {
+                        mainPage = window.StartupPage as MainPage;
+                    }
+
+                    window.StartupPage = (window.StartupPage is MainPage) ? window.StartupPage : (mainPage ?? (mainPage = new MainPage()));
+                    window.StartupPage = mainPage;
+                }
+            });
+        }
+
+        public void ShowCertificateErrorsScreen()
+        {
+            throw new NotImplementedException();
         }
     }
 }

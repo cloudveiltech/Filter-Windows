@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Citadel.Core.Windows.Types
+namespace Filter.Platform.Common.Types
 {
     /// <summary>
     /// Now used instead of a boolean to give callers of UpdateAndWriteList() a better idea of what's going on.

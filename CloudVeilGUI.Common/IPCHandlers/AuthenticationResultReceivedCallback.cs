@@ -45,7 +45,7 @@ namespace CloudVeilGUI.IPCHandlers
                 case AuthenticationAction.ErrorNoInternet:
                 case AuthenticationAction.ErrorUnknown:
                     {
-                        app.GuiServices.ShowMainScreen(false);
+                        app.GuiServices.ShowMainScreen();
 
                         /*m_logger.Info($"The logged in user is {authenticationFailureResult.Username}");
 

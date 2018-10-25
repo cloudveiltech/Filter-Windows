@@ -13,7 +13,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text;
 
-namespace CloudVeilGUI.ViewModels
+namespace CloudVeil.Windows.ViewModels
 {
     public class BlockedPagesViewModel
     {
@@ -43,30 +43,33 @@ namespace CloudVeilGUI.ViewModels
 
         private void BlockedPages_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            switch(e.Action)
+            App.Current.Dispatcher.BeginInvoke((Action)delegate ()
             {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (var item in e.NewItems)
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        if (e.NewItems != null)
                         {
-                            BlockedPages.Add(item as BlockedPageEntry);
+                            foreach (var item in e.NewItems)
+                            {
+                                BlockedPages.Add(item as BlockedPageEntry);
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case NotifyCollectionChangedAction.Remove:
-                    if(e.OldItems != null)
-                    {
-                        foreach(var item in e.OldItems)
+                    case NotifyCollectionChangedAction.Remove:
+                        if (e.OldItems != null)
                         {
-                            BlockedPages.Add(item as BlockedPageEntry);
+                            foreach (var item in e.OldItems)
+                            {
+                                BlockedPages.Add(item as BlockedPageEntry);
+                            }
                         }
-                    }
 
-                    break;
-            }
+                        break;
+                }
+            });
         }
     }
 }
