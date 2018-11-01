@@ -33,6 +33,10 @@ namespace CitadelService.Util
     public class CaptivePortalHelper
     {
         private static CaptivePortalHelper s_instance;
+
+        // Prevent leaking of resources.
+        private static WlanClient s_wlanClient;
+
         public static CaptivePortalHelper Default { get { return s_instance; } }
 
         static CaptivePortalHelper()
@@ -48,14 +52,13 @@ namespace CitadelService.Util
         /// SSIDs will be stored in a file when captive portal is detected.
         /// </summary>
         /// <returns>List of any SSIDs that the computer is connected to. The count of this list will most likely be 1.</returns>
-        private string[] detectCurrentSSIDs()
+        protected string[] detectCurrentSSIDs()
         {
             try
             {
-                WlanClient wlanClient = new WlanClient();
                 List<string> connectedSsids = new List<string>();
 
-                foreach (WlanClient.WlanInterface wlanInterface in wlanClient.Interfaces)
+                foreach (WlanClient.WlanInterface wlanInterface in s_wlanClient.Interfaces)
                 {
                     Wlan.Dot11Ssid ssid = wlanInterface.CurrentConnection.wlanAssociationAttributes.dot11Ssid;
                     connectedSsids.Add(new string(Encoding.ASCII.GetChars(ssid.SSID, 0, (int)ssid.SSIDLength)));
