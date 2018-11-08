@@ -95,7 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.CitadelCore.Windows">
-      <Version>2.1.6</Version>
+      <Version>2.1.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.DistillNET">
       <Version>1.4.8</Version>
