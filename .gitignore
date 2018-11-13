@@ -260,3 +260,5 @@ BuildBot/
 
 # Ignore tests
 Tests/
+
+CompileSecrets.cs
