@@ -5,9 +5,9 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Types;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
+using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
@@ -202,6 +202,26 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_requestBlockActionReviewCommand;
+            }
+        }
+
+        public void AppendBlockActionEvent(string category, string fullRequest)
+        {
+            try
+            {
+                var dataCtx = this;
+                // Keep number of items truncated to 50.
+                if (dataCtx.BlockEvents.Count > 50)
+                {
+                    dataCtx.BlockEvents.RemoveAt(0);
+                }
+
+                // Add the item to view.
+                dataCtx.BlockEvents.Add(new ViewableBlockedRequests(category, fullRequest));
+            }
+            catch (Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
             }
         }
     }

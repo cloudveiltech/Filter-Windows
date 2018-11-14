@@ -21,7 +21,7 @@ namespace CloudVeil.Windows.Views
     /// <summary>
     /// Interaction logic for BlockedPagesPage.xaml
     /// </summary>
-    public partial class BlockedPagesPage : WpfLightToolkit.Controls.LightContentPage
+    public partial class BlockedPagesPage : UserControl
     {
         public BlockedPagesPage()
         {

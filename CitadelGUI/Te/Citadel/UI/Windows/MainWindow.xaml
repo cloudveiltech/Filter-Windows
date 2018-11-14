@@ -1,10 +1,24 @@
 ﻿<!--
-    * Copyright © 2017 Jesse Nicholson
+    * Copyright © 2017 Jesse Nicholson, CloudVeil Technology, Inc.
     * This Source Code Form is subject to the terms of the Mozilla Public
     * License, v. 2.0. If a copy of the MPL was not distributed with this
     * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-<local:BaseWindow x:Class="Te.Citadel.UI.Windows.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls" xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels" xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views" xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks" xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Te.Citadel.UI.Windows" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Title="" Width="724" Height="418" AllowsTransparency="False" BorderBrush="{DynamicResource AccentColorBrush}" GlowBrush="{DynamicResource AccentColorBrush}" WindowStartupLocation="CenterScreen" mc:Ignorable="d">
+<local:BaseWindow
+    x:Class="Te.Citadel.UI.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+    xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+    xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views"
+    xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Te.Citadel.UI.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="" AllowsTransparency="False"
+    BorderBrush="{DynamicResource AccentColorBrush}" GlowBrush="{DynamicResource AccentColorBrush}"
+    ResizeMode="CanResize"  WindowStartupLocation="CenterScreen" mc:Ignorable="d">
 
     <local:BaseWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -64,7 +78,7 @@
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                Foreground="White"
-                                               Kind="User"
+                                               Kind="UserSolid"
                                                Style="{StaticResource UserIconStyle}"
                                                ToolTip="User logged in" />
 
@@ -75,7 +89,7 @@
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                Foreground="White"
-                                               Kind="ExclamationCircle"
+                                               Kind="ExclamationCircleSolid"
                                                Style="{StaticResource InternetDisconnectedIconStyle}"
                                                ToolTip="No Internet Connection" />
 
@@ -85,7 +99,7 @@
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                Foreground="White"
-                                               Kind="CheckCircle"
+                                               Kind="CheckCircleSolid"
                                                Style="{StaticResource InternetConnectedIconStyle}"
                                                ToolTip="Internet Connected" />
             </StackPanel>
@@ -95,7 +109,7 @@
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Foreground="White"
-                                           Kind="Wifi"
+                                           Kind="WifiSolid"
                                            Margin="4,0,4,0"
                                            ToolTip="Guest Network Mode"
                                            Style="{StaticResource GuestNetworkIconStyle}"/>
@@ -147,7 +161,6 @@
             </MetroControls:Flyout>
         </MetroControls:FlyoutsControl>
     </MetroControls:MetroWindow.Flyouts>-->
-    <Grid>
-        <MetroControls:TransitioningContentControl x:Name="CurrentView" x:FieldModifier="internal" />
-    </Grid>
+    
+    <MetroControls:TransitioningContentControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="CurrentView" x:FieldModifier="internal" />
 </local:BaseWindow>

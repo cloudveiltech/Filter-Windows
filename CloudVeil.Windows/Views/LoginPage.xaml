@@ -24,7 +24,7 @@
             <Label x:Uid="Label_3" Content="Password" />
             <PasswordBox x:Uid="password" Margin="0,0,0,16" x:Name="password" />
 
-            <Button x:Uid="Button_1" Content="Log in" Command="{Binding AuthenticateCommand}" />
+            <Button x:Uid="Button_1" Content="Log in" Style="{StaticResource BaseLightWindowButtonStyle}" Command="{Binding AuthenticateCommand}" />
         </StackPanel>
     </Grid>
 </LightContentPage>

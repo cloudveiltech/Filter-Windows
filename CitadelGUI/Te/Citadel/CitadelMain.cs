@@ -1,14 +1,15 @@
 ﻿/*
-* Copyright © 2017-2018 Cloudveil Technology Inc.
+* Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 using Citadel.Core.WinAPI;
-using WindowsPlatform = Citadel.Core.Windows.Platform;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
+using CloudVeil.Windows;
+using Filter.Platform.Common.Util;
 using NLog;
 using System;
 using System.Diagnostics;
@@ -16,7 +17,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
-using Filter.Platform.Common.Util;
 
 namespace Te.Citadel
 {
@@ -60,8 +60,6 @@ namespace Te.Citadel
 
             try
             {
-                WindowsPlatform.Init();
-
                 string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
                 System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();

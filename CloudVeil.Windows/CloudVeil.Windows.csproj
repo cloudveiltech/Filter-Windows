@@ -66,6 +66,7 @@
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="ViewModels\BlockedPagesViewModel.cs" />
     <Compile Include="ViewModels\ProxyViewModel.cs" />
+    <Compile Include="ViewModels\WPFMenuViewModel.cs" />
     <Compile Include="Views\AdvancedPage.xaml.cs">
       <DependentUpon>AdvancedPage.xaml</DependentUpon>
     </Compile>
@@ -78,12 +79,6 @@
     </Compile>
     <Compile Include="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MenuPage.xaml.cs">
-      <DependentUpon>MenuPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Modal.xaml.cs">
-      <DependentUpon>Modal.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\RelaxedPolicyPage.xaml.cs">
       <DependentUpon>RelaxedPolicyPage.xaml</DependentUpon>
@@ -118,13 +113,6 @@
     <Page Include="Views\MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MenuPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Modal.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </Page>
     <Page Include="Views\RelaxedPolicyPage.xaml">
       <SubType>Designer</SubType>
@@ -186,7 +174,14 @@
   <ItemGroup>
     <Resource Include="Resources\appicon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="MahApps.Metro">
+      <Version>1.6.5</Version>
+    </PackageReference>
+    <PackageReference Include="MahApps.Metro.IconPacks">
+      <Version>2.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"

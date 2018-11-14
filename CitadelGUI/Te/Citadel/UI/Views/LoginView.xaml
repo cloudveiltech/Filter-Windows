@@ -43,9 +43,9 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Top"
                                        Foreground="{StaticResource AccentColorBrush2}"
-                                       Kind="User" />
+                                       Kind="UserSolid" />
 
-        <IconPacks:PackIconFontAwesome Width="46" Height="46" Margin="374,111,0,0" Foreground="Gray" Kind="Plug" />
+        <IconPacks:PackIconFontAwesome Width="46" Height="46" Margin="374,111,0,0" Foreground="Gray" Kind="PlugSolid" />
 
         <!--  User name for authentication purposes. Expected to have a length greater than 0 and not be whitespace before relevant commands will be executable.  -->
         <TextBlock Width="220"

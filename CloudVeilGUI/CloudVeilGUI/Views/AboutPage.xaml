@@ -12,10 +12,6 @@
              xmlns:vm="clr-namespace:CloudVeilGUI.ViewModels"
              Title="{Binding Title}">
     
-    <ContentPage.BindingContext>
-        <vm:AboutViewModel />
-    </ContentPage.BindingContext>
-    
     <ContentPage.Resources>
         <ResourceDictionary>
             <!--Page Level Resources: Compatibile with Xamarin Live Player -->

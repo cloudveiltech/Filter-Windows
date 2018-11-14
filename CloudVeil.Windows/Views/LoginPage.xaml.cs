@@ -1,4 +1,5 @@
-﻿using CloudVeilGUI.Models;
+﻿using CloudVeil.Windows.ViewModels;
+using CloudVeilGUI.Models;
 using CloudVeilGUI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace CloudVeil.Windows.Views
         {
             InitializeComponent();
 
-            this.DataContext = ModelManager.Default.GetModel<LoginViewModel>();
+            this.DataContext = new ProxyViewModel<LoginViewModel>(ModelManager.Default.GetModel<LoginViewModel>());
         }
     }
 }

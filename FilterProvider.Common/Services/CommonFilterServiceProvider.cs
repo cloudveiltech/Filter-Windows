@@ -2171,12 +2171,21 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnThresholdTriggerPeriodElapsed(object state)
         {
-            // Reset count to zero.
-            Interlocked.Exchange(ref m_thresholdTicks, 0);
+            try
+            {
+                // Reset count to zero.
+                Interlocked.Exchange(ref m_thresholdTicks, 0);
 
-            var cfg = m_policyConfiguration.Configuration;
+                var cfg = m_policyConfiguration.Configuration;
 
-            this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                // TODO: Tell Sentry about this problem.
+            }
+            
         }
 
         /// <summary>
@@ -2359,21 +2368,29 @@ namespace FilterProvider.Common.Services
 
         private void CleanupLogs()
         {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
-
-            if(Directory.Exists(directoryPath))
+            try
             {
-                string[] files = Directory.GetFiles(directoryPath);
-                foreach(string filePath in files)
-                {
-                    FileInfo info = new FileInfo(filePath);
+                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
 
-                    DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
-                    if(expiryDate < DateTime.Now)
+                if (Directory.Exists(directoryPath))
+                {
+                    string[] files = Directory.GetFiles(directoryPath);
+                    foreach (string filePath in files)
                     {
-                        info.Delete();
+                        FileInfo info = new FileInfo(filePath);
+
+                        DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
+                        if (expiryDate < DateTime.Now)
+                        {
+                            info.Delete();
+                        }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                // TODO: Tell sentry about this.
             }
         }
 
@@ -2424,7 +2441,14 @@ namespace FilterProvider.Common.Services
         /// <param name="e"></param>
         private void OnConfigLoaded_LoadRelaxedPolicy(object sender, EventArgs e)
         {
-            this.UpdateNumberOfBypassesFromServer();
+            try
+            {
+                this.UpdateNumberOfBypassesFromServer();
+            } catch(Exception ex)
+            {
+                // TODO: Tell Sentry about this.
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
         }
 
         /// <summary>
@@ -2673,17 +2697,24 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnRelaxedPolicyTimerExpired(object state)
         {
-            // Enable every category that is a bypass category.
-            foreach(var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
+            try
             {
-                if(entry is MappedBypassListCategoryModel)
+                // Enable every category that is a bypass category.
+                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
                 {
-                    m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
+                    if (entry is MappedBypassListCategoryModel)
+                    {
+                        m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
+                    }
                 }
-            }
 
-            // Disable the expiry timer.
-            m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                // Disable the expiry timer.
+                m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
         }
 
         private bool UpdateNumberOfBypassesFromServer()
@@ -2725,9 +2756,17 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            UpdateNumberOfBypassesFromServer();
-            // Disable the reset timer.
-            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            try
+            {
+                UpdateNumberOfBypassesFromServer();
+                // Disable the reset timer.
+                m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+            catch(Exception ex)
+            {
+                // TODO: Tell sentry about this.
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
         }
 
         /// <summary>

@@ -1,0 +1,134 @@
+﻿<!--
+Copyright © 2018 Cloudveil Technology Inc., Jesse Nicholson
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+<UserControl x:Class="Te.Citadel.UI.Views.AdvancedView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+             xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextBlockStyle}" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Help me! -->
+        <StackPanel Grid.Column="0">
+            <Label HorizontalAlignment="Center"
+                   Content="Help"
+                   Style="{StaticResource HeaderStyle}"
+                   />
+
+            <TextBlock HorizontalAlignment="Center"
+                       Margin="0,20,0,0"
+                       TextWrapping="Wrap">
+                <Hyperlink NavigateUri="https://www.cloudveil.org" RequestNavigate="OnHyperlinkClicked">cloudveil.org</Hyperlink>
+            </TextBlock>
+
+            <TextBlock HorizontalAlignment="Center"
+                       Margin="0,20,0,0"
+                       TextWrapping="Wrap">
+                <Hyperlink NavigateUri="https://cloudveil.zendesk.com/hc/en-us" RequestNavigate="OnHyperlinkClicked">
+                    Knowledgebase
+                </Hyperlink>
+            </TextBlock>
+
+            <TextBlock HorizontalAlignment="Center"
+                       Margin="0,20,0,0"
+                       TextWrapping="Wrap">
+                <Hyperlink NavigateUri="mailto:support@cloudveil.org" RequestNavigate="OnHyperlinkClicked">
+                    support@cloudveil.org
+                </Hyperlink>
+                <LineBreak />
+                <Run>
+                    (888) 782-4962
+                </Run>
+            </TextBlock>
+
+            <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
+                <TextBlock Text="Review Logs" TextWrapping="Wrap" />
+
+                <Button Margin="10,0,0,0"
+                        Width="136"
+                        Command="{Binding ViewLogsCommand}"
+                        Content="View Log Files"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="requestUpdate"
+                        Content="{Binding UpdateText}"
+                        IsEnabled="{Binding IsUpdateButtonEnabled}"
+                        HorizontalAlignment="Left"
+                        Width="136"
+                        Style="{StaticResource AccentedSquareButtonStyle}"
+                        Command="{Binding RequestUpdateCommand}" />
+
+                <Controls:ProgressRing x:Name="requestUpdateProgress"
+                                       Margin="10,0,0,0"
+                                       Width="28" Height="28"
+                                       Visibility="{Binding Path=UpdateRequestInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <IconPacks:PackIconFontAwesome 
+                        Kind="CheckSolid"
+                        Margin="10,0,0,0"
+                        Width="28" Height="28"
+                        Foreground="#CC119EDA"
+                        Visibility="{Binding Path=UpToDate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+
+                <IconPacks:PackIconFontAwesome
+                        Kind="TimesSolid"
+                        Margin="10,0,0,0"
+                        Width="28" Height="28"
+                        Foreground="Red"
+                        Visibility="{Binding Path=ErrorOccurred, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+            </StackPanel>
+
+            <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2">
+            <Label HorizontalAlignment="Center"
+                   Style="{StaticResource HeaderStyle}"
+                   Content="Request Deactivation" />
+
+            <TextBlock Margin="0,20,0,0"
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap">
+                <Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. Cloud-Veil will see your request and verify the action." />
+                        <LineBreak /><Run />
+                        <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." />
+            </TextBlock>
+
+            <Button Margin="0,20,0,0"
+                    Width="136"
+                    HorizontalAlignment="Left"
+                    Command="{Binding RequestDeactivateCommand}"
+                    Content="Deactivate"
+                    Style="{StaticResource AccentedSquareButtonStyle}" />
+
+            <Button Margin="0,20,0,0"
+                    Width="136"
+                    HorizontalAlignment="Left"
+                    Command="{Binding ViewSslExemptionsCommand}"
+                    Content="View Certificate Errors"
+                    Style="{StaticResource AccentedSquareButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

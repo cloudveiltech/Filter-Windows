@@ -17,21 +17,6 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>false</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -65,7 +50,6 @@
     <DefineConstants>UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
     <Prefer32Bit>false</Prefer32Bit>
     <PlatformTarget>x64</PlatformTarget>
-    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <OutputPath>bin\x86\Debug\</OutputPath>
@@ -107,7 +91,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Platform\WindowsPipeClient.cs" />
+    <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
+    <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
+    <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\PostInstallCommand.cs">
@@ -117,16 +103,22 @@
       <DependentUpon>PostInstallCommand.cs</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\Testing\FilterTesting.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\Sidebar.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\SidebarButton.cs" />
+    <Compile Include="Te\Citadel\UI\ModelManager.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewManager.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\AdvancedViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
+      <DependentUpon>AdvancedView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
     <Compile Include="Te\Citadel\UI\Views\CaptivePortalView.xaml.cs">
       <DependentUpon>CaptivePortalView.xaml</DependentUpon>
@@ -138,7 +130,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Styles\AppStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Te\Citadel\UI\Controls\SecureInputBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\AdvancedView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -162,7 +162,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\SettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Te\Citadel\UI\Views\SslExemptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\DiagnosticsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -189,18 +197,20 @@
     <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\SslExemptionsView.xaml.cs">
       <DependentUpon>SslExemptionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
+      <DependentUpon>DiagnosticsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
     <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -218,15 +228,16 @@
     </Compile>
     <Resource Include="Resources\UserLicense.txt" />
     <Resource Include="Resources\appicon.ico" />
+    <Resource Include="Resources\NLog.config" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Resource Include="appicon.ico" />
-    <None Include="NLog.config">
+    <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
-    </None>
+    </Content>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -236,10 +247,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MahApps.Metro">
-      <Version>1.5.0</Version>
+      <Version>1.6.5</Version>
     </PackageReference>
     <PackageReference Include="MahApps.Metro.IconPacks">
-      <Version>1.9.1</Version>
+      <Version>2.3.0</Version>
     </PackageReference>
     <PackageReference Include="MvvmLight">
       <Version>5.3.0</Version>
@@ -254,22 +265,14 @@
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
       <Name>Citadel.IPC.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI\CloudVeilGUI.csproj">
+      <Project>{B5CCE52E-6D69-4F28-857A-1C546022A2A5}</Project>
+      <Name>CloudVeilGUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.6.2 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

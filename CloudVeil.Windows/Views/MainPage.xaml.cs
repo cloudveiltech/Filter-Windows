@@ -20,18 +20,17 @@ namespace CloudVeil.Windows.Views
     /// <summary>
     /// Interaction logic for MainPage.xaml
     /// </summary>
-    public partial class MainPage : LightMasterDetailPage, INavigation
+    public partial class MainPage : UserControl, INavigation
     {
         public MainPage()
         {
             InitializeComponent();
-
-            this.MasterPage = new MenuPage(this);
+            
         }
 
         public void NavigateFromMenu(MenuItemType item)
         {
-            switch(item)
+            /*switch(item)
             {
                 case MenuItemType.BlockedPages:
                     this.DetailPage = new BlockedPagesPage();
@@ -48,7 +47,12 @@ namespace CloudVeil.Windows.Views
                 default:
                     this.DetailPage = new BlockedPagesPage();
                     break;
-            }
+            }*/
+        }
+
+        private void MenuControl_ItemInvoked(object sender, MahApps.Metro.Controls.HamburgerMenuItemInvokedEventArgs e)
+        {
+
         }
     }
 }

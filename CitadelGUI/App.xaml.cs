@@ -1,16 +1,16 @@
 ﻿/*
-* Copyright © 2017-2018 Cloudveil Technology Inc.
+* Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 using Citadel.Core.Extensions;
-using WindowsPlatform = Citadel.Core.Windows.Platform;
-
-using Filter.Platform.Common.Util;
+using Citadel.Core.Windows.Util;
+using Citadel.Core.Windows;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
+using Filter.Platform.Common.Util;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -26,12 +26,16 @@ using System.Windows;
 using System.Windows.Controls;
 using Te.Citadel.Extensions;
 using Te.Citadel.Services;
+using Te.Citadel.UI;
 using Te.Citadel.UI.ViewModels;
 using Te.Citadel.UI.Views;
 using Te.Citadel.UI.Windows;
 using Te.Citadel.Util;
+using Filter.Platform.Common;
+using CloudVeilGUI.Platform.Common;
+using Filter.Platform.Common.Net;
 
-namespace Te.Citadel
+namespace CloudVeil.Windows
 {
     /// <summary>
     /// Interaction logic for App.xaml 
@@ -50,7 +54,7 @@ namespace Te.Citadel
                 // exit WITH safeguards. XXX TODO.
                 Current.Dispatcher.BeginInvoke((Action)delegate ()
                 {
-                    Application.Current.Shutdown(code);
+                    Application.Current.Shutdown((int)code);
                 });
             }
         }
@@ -106,11 +110,13 @@ namespace Te.Citadel
         private object m_dnsEnforcementLock = new object();
 
         #region Views
+        public ModelManager ModelManager { get; private set; }
 
-        /// <summary>
-        /// This view is shown whenever a valid auth or re-auth request cannot be performed, or has
-        /// never been performed.
+        /// <summary
+        /// Stores all the views that we want to keep alive.
         /// </summary>
+        private ViewManager viewManager;
+
         private LoginView m_viewLogin;
 
         /// <summary>
@@ -165,6 +171,8 @@ namespace Te.Citadel
 
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
+            Citadel.Core.Windows.Platform.Init();
+            
             // Here we need to check 2 things. First, we need to check to make sure that our filter
             // service is running. Second, and if the first condition proves to be false, we need to
             // check if we are running as an admin. If we are not admin, we need to schedule a
@@ -194,19 +202,52 @@ namespace Te.Citadel
 
             if(!mainServiceViable)
             {
-                try
+                var id = WindowsIdentity.GetCurrent();
+
+                var principal = new WindowsPrincipal(id);
+                if(principal.IsInRole(WindowsBuiltInRole.Administrator))
                 {
-                    ProcessStartInfo startupInfo = new ProcessStartInfo();
-                    startupInfo.FileName = "FilterAgent.Windows.exe";
-                    startupInfo.Arguments = "start";
-                    startupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    startupInfo.Verb = "runas";
-                    startupInfo.CreateNoWindow = true;
-                    Process.Start(startupInfo);
+                    needRestartAsAdmin = false;
                 }
-                catch(Exception ex)
+                else
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    needRestartAsAdmin = id.Owner == id.User;
+                }
+
+                if(needRestartAsAdmin)
+                {
+                    m_logger.Info("Restarting as admin.");
+
+                    try
+                    {
+                        // Restart program and run as admin
+                        ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
+                        updaterStartupInfo.FileName = "cmd.exe";
+                        updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
+                        updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        updaterStartupInfo.Verb = "runas";
+                        updaterStartupInfo.CreateNoWindow = true;
+                        Process.Start(updaterStartupInfo);
+                    }
+                    catch(Exception se)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, se);
+                    }
+
+                    Environment.Exit(-1);
+                    return;
+                }
+                else
+                {
+                    if(File.Exists("debug-cloudveil"))
+                    {
+                        Debugger.Launch();
+                    }
+
+                    // Just creating an instance of this will do the job of forcing our service to
+                    // start. Letting it fly off into garbage collection land should have no effect.
+                    // The service is self-sustaining after this point.
+                    var provider = new ServiceRunner();
                 }
             }
 
@@ -231,12 +272,8 @@ namespace Te.Citadel
 
             try
             {
-                WindowsPlatform.Init();
-
                 // XXX FIXME
                 m_ipcClient = IPCClient.InitDefault();
-
-                /*
                 m_ipcClient.AuthenticationResultReceived = (authenticationFailureResult) =>
                 {
                     switch(authenticationFailureResult.Action)
@@ -274,11 +311,10 @@ namespace Te.Citadel
                             break;
                     }
                 };
-                */
 
                 m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
                 {
-                    string updateSettingsPath = Path.Combine(paths, "update.settings");
+                    string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
 
                     if(File.Exists(updateSettingsPath))
                     {
@@ -356,16 +392,16 @@ namespace Te.Citadel
 
                 m_ipcClient.ServerUpdateStarting = () =>
                 {
-                    Application.Current.Shutdown(ExitCodes.ShutdownForUpdate);
+                    Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
                 };
 
-                /*m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
+                m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
                     m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
 
-                    if (deactivationCmd == DeactivationCommand.Granted)
+                    if(deactivationCmd == DeactivationCommand.Granted)
                     {
-                        if (CriticalKernelProcessUtility.IsMyProcessKernelCritical)
+                        if(CriticalKernelProcessUtility.IsMyProcessKernelCritical)
                         {
                             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
                         }
@@ -373,7 +409,7 @@ namespace Te.Citadel
                         m_logger.Info("Deactivation request granted on client.");
 
                         // Init the shutdown of this application.
-                        Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
+                        Application.Current.Shutdown((int)ExitCodes.ShutdownWithoutSafeguards);
                     }
                     else
                     {
@@ -383,36 +419,36 @@ namespace Te.Citadel
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            if (m_mainWindow != null)
+                            if(m_mainWindow != null)
                             {
                                 string message = null;
                                 string title = null;
 
-                                switch (deactivationCmd)
+                                switch(deactivationCmd)
                                 {
                                     case DeactivationCommand.Requested:
-                                        message = "Your deactivation request has been received, but approval is still pending.";
-                                        title = "Request Received";
-                                        break;
+                                    message = "Your deactivation request has been received, but approval is still pending.";
+                                    title = "Request Received";
+                                    break;
 
                                     case DeactivationCommand.Denied:
-                                        // A little bit of tact will keep the mob and their pitchforks
-                                        // from slaughtering us.
-                                        message = "Your deactivation request has been received, but approval is still pending.";
-                                        title = "Request Received";
-                                        //message = "Your deactivation request has been denied.";
-                                        //title = "Request Denied";
-                                        break;
+                                    // A little bit of tact will keep the mob and their pitchforks
+                                    // from slaughtering us.
+                                    message = "Your deactivation request has been received, but approval is still pending.";
+                                    title = "Request Received";
+                                    //message = "Your deactivation request has been denied.";
+                                    //title = "Request Denied";
+                                    break;
 
                                     case DeactivationCommand.Granted:
-                                        message = "Your request was granted.";
-                                        title = "Request Granted";
-                                        break;
+                                    message = "Your request was granted.";
+                                    title = "Request Granted";
+                                    break;
 
                                     case DeactivationCommand.NoResponse:
-                                        message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
-                                        title = "No Response Received";
-                                        break;
+                                    message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
+                                    title = "No Response Received";
+                                    break;
                                 }
 
                                 m_mainWindow.ShowUserMessage(title, message);
@@ -420,7 +456,22 @@ namespace Te.Citadel
                         }
                     );
                     }
-                };*/
+                };
+
+                m_ipcClient.BlockActionReceived = (args) =>
+                {
+                    // Add this blocked request to the dashboard.
+                    Current.Dispatcher.BeginInvoke(
+                        System.Windows.Threading.DispatcherPriority.Normal,
+                        (Action)delegate ()
+                        {
+                            if(m_viewDashboard != null)
+                            {
+                                ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString());
+                            }
+                        }
+                    );
+                };
 
                 m_ipcClient.AddCertificateExemptionRequest = (msg) =>
                 {
@@ -453,12 +504,12 @@ namespace Te.Citadel
                     m_logger.Warn("Disconnected from IPC server! Automatically attempting reconnect.");
                 };
 
-                /*m_ipcClient.RelaxedPolicyExpired = () =>
+                m_ipcClient.RelaxedPolicyExpired = () =>
                 {
                     // We don't have to do anything here on our side, but we may want to do something
                     // here in the future if we modify how our UI shows relaxed policy timer stuff.
                     // Like perhaps changing views etc.
-                };*/
+                };
 
                 m_ipcClient.RelaxedPolicyInfoReceived = (args) =>
                 {
@@ -467,25 +518,25 @@ namespace Te.Citadel
                         (Action)delegate ()
                         {
                             // Bypass lists have been enabled.
-                            if(args.PolicyInfo != null && m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is DashboardViewModel)
+                            var settingsViewModel = ModelManager.Get<SettingsViewModel>();
+                            if(args.PolicyInfo != null && settingsViewModel != null)
                             {
-                                var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
-                                dashboardViewModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
-                                dashboardViewModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+                                settingsViewModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
+                                settingsViewModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                dashboardViewModel.Model.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
-                                dashboardViewModel.Model.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
+                                settingsViewModel.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
+                                settingsViewModel.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                dashboardViewModel.Model.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
-                                dashboardViewModel.Model.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
+                                settingsViewModel.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
+                                settingsViewModel.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                             }
                         }
                     );
                 };
 
-                /*m_ipcClient.StateChanged = (args) =>
+                m_ipcClient.StateChanged = (args) =>
                 {
                     m_logger.Info("Filter status from server is: {0}", args.State.ToString());
                     switch(args.State)
@@ -499,7 +550,7 @@ namespace Te.Citadel
                                     {
                                         if(m_viewDashboard != null)
                                         {
-                                            m_viewDashboard.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
+                                            viewManager.Get<SettingsView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
                                         }
                                     }
                                 );
@@ -516,10 +567,7 @@ namespace Te.Citadel
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        if(m_viewDashboard != null)
-                                        {
-                                            m_viewDashboard.HideDisabledInternetMessage();
-                                        }
+                                        viewManager.Get<SettingsView>()?.HideDisabledInternetMessage();
                                     }
                                 );
                             }
@@ -561,10 +609,10 @@ namespace Te.Citadel
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        if(m_viewDashboard != null && m_viewDashboard.DataContext != null)
+                                        var settingsViewModel = ModelManager.Get<SettingsViewModel>();
+                                        if(settingsViewModel != null)
                                         {
-                                            var dashboardViewModel = ((DashboardViewModel)m_viewDashboard.DataContext);
-                                            dashboardViewModel.LastSync = DateTime.Now;
+                                            settingsViewModel.LastSync = DateTime.Now;
                                         }
                                     }
                                 );
@@ -583,7 +631,7 @@ namespace Te.Citadel
                             }
                             break;
                     }
-                };*/
+                };
 
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
@@ -658,7 +706,7 @@ namespace Te.Citadel
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
 
-            Application.Current.Shutdown(ExitCodes.ShutdownWithSafeguards);
+            Application.Current.Shutdown((int)ExitCodes.ShutdownWithSafeguards);
 
             // Does this cause a hand up?? m_ipcClient.Dispose();
         }
@@ -674,7 +722,31 @@ namespace Te.Citadel
         /// </summary>
         private void InitViews()
         {
-            m_mainWindow = new Citadel.UI.Windows.MainWindow();
+            ModelManager = new ModelManager();
+            viewManager = new ViewManager();
+
+            ModelManager.Register(new HistoryViewModel());
+            ModelManager.Register(new SettingsViewModel());
+            ModelManager.Register(new AdvancedViewModel());
+            ModelManager.Register(new DiagnosticsViewModel());
+
+            viewManager.Register(new LoginView(), (view) =>
+            {
+                (view.DataContext as BaseCitadelViewModel).ViewChangeRequest = OnViewChangeRequest;
+            });
+
+            // I think these two registration declarations aren't needed.
+            viewManager.Register(new HistoryView(), (view) =>
+            {
+                // TODO:Finish HistoryView registration thingy.
+            });
+
+            viewManager.Register(new SettingsView(), (view) =>
+            {
+                // TODO: Finish SettingsView stuff.
+            });
+
+            m_mainWindow = new Te.Citadel.UI.Windows.MainWindow();
 
             m_mainWindow.WindowRestoreRequested += (() =>
             {
@@ -688,7 +760,7 @@ namespace Te.Citadel
 
                 if(m_mainWindow.CurrentView.Content == m_viewLogin)
                 {
-                    Application.Current.Shutdown(ExitCodes.ShutdownWithoutSafeguards);
+                    Application.Current.Shutdown((int)ExitCodes.ShutdownWithoutSafeguards);
                     return;
                 }
 
@@ -696,12 +768,7 @@ namespace Te.Citadel
                 MinimizeToTray(true);
             });
 
-            m_viewLogin = new LoginView();
-
-            if(m_viewLogin.DataContext != null && m_viewLogin.DataContext is BaseCitadelViewModel)
-            {
-                ((BaseCitadelViewModel)(m_viewLogin.DataContext)).ViewChangeRequest = OnViewChangeRequest;
-            }
+            m_viewLogin = viewManager.Get<LoginView>();
 
             m_viewProgressWait = new ProgressWait();
 
@@ -835,7 +902,7 @@ namespace Te.Citadel
         /// handlers to respond to user iteraction requesting to bring the application back out of
         /// the tray.
         /// </summary>
-        /*private void InitTrayIcon()
+        private void InitTrayIcon()
         {
             m_trayIcon = new System.Windows.Forms.NotifyIcon();
 
@@ -863,9 +930,9 @@ namespace Te.Citadel
             menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
 
             m_trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
-        }*/
+        }
 
-        /*private void TrayIcon_Open(object sender, EventArgs e)
+        private void TrayIcon_Open(object sender, EventArgs e)
         {
             BringAppToFocus();
         }
@@ -873,19 +940,19 @@ namespace Te.Citadel
         private void TrayIcon_OpenSettings(object sender, EventArgs e)
         {
             BringAppToFocus();
-            // TODO m_viewDashboard.SwitchTab(1);
+            m_viewDashboard.SwitchTab(1);
         }
 
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
         {
             OnRelaxedPolicyRequested(true);
-        }*/
+        }
 
         /// <summary>
         /// Brings the main application window into focus for the user and removes it from the tray
         /// if the application icon is in the tray.
         /// </summary>
-        /*public void BringAppToFocus()
+        public void BringAppToFocus()
         {
             Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Normal,
@@ -905,7 +972,7 @@ namespace Te.Citadel
                     }
                 }
             );
-        }*/
+        }
 
 #if CAPTIVE_PORTAL_GUI_ENABLED
         public void DisplayCaptivePortalToolTip()
@@ -994,7 +1061,12 @@ namespace Te.Citadel
             m_mainWindow.ShowUserMessage(title, message);
         }
 
-        /*private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)
+        private void OnRelaxedPolicyRequested()
+        {
+            OnRelaxedPolicyRequested(false);
+        }
+
+        private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)
         {
             string title = "Relaxed Policy";
             string message = "";
@@ -1047,12 +1119,12 @@ namespace Te.Citadel
                     }
                 });
             }
-        }*/
+        }
 
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        /*private async void OnRelaxedPolicyRequested(bool fromTray)
+        private async void OnRelaxedPolicyRequested(bool fromTray)
         {
             using(var ipcClient = new IPCClient())
             {
@@ -1069,12 +1141,12 @@ namespace Te.Citadel
                 ipcClient.WaitForConnection();
                 await Task.Delay(3000);
             }
-        }*/
+        }
 
         /// <summary>
         /// Called when the user has manually requested to relinquish a relaxed policy. 
         /// </summary>
-        /*private async void OnRelinquishRelaxedPolicyRequested()
+        private async void OnRelinquishRelaxedPolicyRequested()
         {
             using(var ipcClient = new IPCClient())
             {
@@ -1091,7 +1163,7 @@ namespace Te.Citadel
                 ipcClient.WaitForConnection();
                 await Task.Delay(3000);
             }
-        }*/
+        }
 
         /// <summary>
         /// Sends the application to the task tray, optionally showing a tooltip explaining that the

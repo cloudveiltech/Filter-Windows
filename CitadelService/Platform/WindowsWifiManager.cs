@@ -18,14 +18,20 @@ namespace CitadelService.Platform
 {
     public class WindowsWifiManager : IWifiManager
     {
+        private static WlanClient s_wlanClient = null;
+
+        static WindowsWifiManager()
+        {
+            s_wlanClient = new WlanClient();
+        }
+
         public List<string> DetectCurrentSsids()
         {
             try
             {
-                WlanClient wlanClient = new WlanClient();
                 List<string> connectedSsids = new List<string>();
 
-                foreach (WlanClient.WlanInterface wlanInterface in wlanClient.Interfaces)
+                foreach (WlanClient.WlanInterface wlanInterface in s_wlanClient.Interfaces)
                 {
                     Wlan.Dot11Ssid ssid = wlanInterface.CurrentConnection.wlanAssociationAttributes.dot11Ssid;
                     connectedSsids.Add(new string(Encoding.ASCII.GetChars(ssid.SSID, 0, (int)ssid.SSIDLength)));

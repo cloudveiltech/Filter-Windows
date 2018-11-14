@@ -45,14 +45,7 @@ namespace CloudVeilGUI.Platform.Windows
         {
             app.Dispatcher.BeginInvoke((Action)delegate ()
             {
-                if (app.MainWindow is LightWindow)
-                {
-                    var window = app.MainWindow as LightWindow;
-
-                    var modal = new Modal(window, title, message, okButton);
-                    window.PushModal(modal);
-
-                }
+                // TODO: DisplayAlert
             }, DispatcherPriority.Normal);   
         }
 
