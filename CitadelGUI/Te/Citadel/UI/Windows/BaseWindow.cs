@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Citadel.Core.Windows.Util;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System;
@@ -27,9 +28,16 @@ namespace Te.Citadel.UI.Windows
     public class BaseWindow : MetroWindow
     {
 
+        public BaseWindow()
+        {
+            m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
         public delegate void OnWindowRestoreRequested();
 
         public event OnWindowRestoreRequested WindowRestoreRequested;
+
+        private NLog.Logger m_logger;
 
         private ReaderWriterLockSlim m_modalLock = new ReaderWriterLockSlim();
 
@@ -52,6 +60,9 @@ namespace Te.Citadel.UI.Windows
             // and if not, you've got big problems.
             if(m_modalLock.IsWriteLockHeld)
             {
+                m_logger.Info("Failed to AskUserYesNoQuestion() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to AskUserYesNoQuestion() thanks to write lock.");
+
                 return false;
             }
 
@@ -78,6 +89,9 @@ namespace Te.Citadel.UI.Windows
             // and if not, you've got big problems.
             if (m_modalLock.IsWriteLockHeld)
             {
+                m_logger.Info("Failed to AskUserUpdateQuestion() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to AskUserUpdateQuestion() thanks to write lock.");
+
                 return UpdateDialogResult.FailedOpen;
             }
 
@@ -102,7 +116,6 @@ namespace Te.Citadel.UI.Windows
 
                     case MessageDialogResult.FirstAuxiliary:
                         return UpdateDialogResult.SkipVersion;
-
                     default:
                         return UpdateDialogResult.FailedOpen;
                 }
@@ -132,6 +145,9 @@ namespace Te.Citadel.UI.Windows
             // and if not, you've got big problems.
             if(m_modalLock.IsWriteLockHeld)
             {
+                m_logger.Info("Failed to ShowUserMessage() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to ShowUserMessage() thanks to write lock.");
+
                 return;
             }
 
