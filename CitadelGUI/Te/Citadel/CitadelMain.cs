@@ -145,6 +145,8 @@ namespace Te.Citadel
 
             try
             {
+                Sentry.SentrySdk.Init(CompileSecrets.RavenDsn);
+
                 MainLogger = LoggerUtil.GetAppWideLogger();
             }
             catch { }
