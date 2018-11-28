@@ -18,5 +18,7 @@ namespace Filter.Platform.Common
         /// </summary>
         /// <returns></returns>
         string ApplicationDataFolder { get; }
+
+        string GetPath(params string[] pathParts);
     }
 }

@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Titanium.Web.Proxy;
 
 namespace FilterProvider.Common.Platform
 {
@@ -38,7 +37,7 @@ namespace FilterProvider.Common.Platform
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        ProxyServer StartProxyServer(ProxyConfiguration config);
+        IProxyServer StartProxyServer(ProxyConfiguration config);
 
         /// <summary>
         /// Use this to enable internet after we've disabled it.

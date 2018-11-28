@@ -37,9 +37,6 @@ using FilterProvider.Common.Util;
 using Filter.Platform.Common;
 using FilterProvider.Common.Data;
 using Filter.Platform.Common.Net;
-using Titanium.Web.Proxy.EventArguments;
-using Titanium.Web.Proxy.Models;
-using Titanium.Web.Proxy;
 using Filter.Platform.Common.Types;
 
 namespace FilterProvider.Common.Services
@@ -155,7 +152,7 @@ namespace FilterProvider.Common.Services
         private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 #endif
 
-        private ProxyServer m_filteringEngine;
+        private IProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
         
@@ -1003,16 +1000,16 @@ namespace FilterProvider.Common.Services
             // TODO: Code smell. Do we instantiate types with special functions, or do we use PlatformTypes.New<T>() ?
             m_filteringEngine = m_systemServices.StartProxyServer(new ProxyConfiguration()
             {
+                AuthorityName = "CloudVeil for Windows",
                 BeforeRequest = OnHttpRequestBegin,
-                BeforeResponse = OnBeforeResponse,
-                AfterResponse = OnAfterResponse
+                BeforeResponse = OnBeforeResponse
             });
 
             // Setup general info, warning and error events.
             
 
             // Start filtering, always.
-            if(m_filteringEngine != null && !m_filteringEngine.ProxyRunning)
+            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
             {
                 m_filterEngineStartupBgWorker = new BackgroundWorker();
                 m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
@@ -1392,7 +1389,7 @@ namespace FilterProvider.Common.Services
             }
         }*/
 
-        private async Task OnHttpRequestBegin(object sender, SessionEventArgs args)
+        private void OnHttpRequestBegin(GoproxyWrapper.Session args)
         {
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
@@ -1415,22 +1412,10 @@ namespace FilterProvider.Common.Services
                 bool isJson = false;
                 bool hasReferer = true;
 
-                if(!args.WebSession.Request.Headers.HeaderExists("Referer"))
+                if(!args.Request.Headers.HeaderExists("Referer"))
                 {
                     hasReferer = false;
                 }
-
-                //contentType = args.WebSession.Request.Headers.GetFirstHeader("Content-Type").Value;
-                if(args.WebSession.Response != null)
-                {
-                    
-                }
-                
-
-                /*if ((contentType = message.Headers["Content-Type"]) != null)
-                {
-                    
-                }*/
 
                 var filterCollection = m_policyConfiguration.FilterCollection;
                 var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
@@ -1446,14 +1431,14 @@ namespace FilterProvider.Common.Services
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
-                    Uri url = new Uri(args.WebSession.Request.Url);
+                    Uri url = new Uri(args.Request.Url);
 
                     //string host = message.Url.Host;
                     string host = url.Host;
                     string[] hostParts = host.Split('.');
 
                     NameValueCollection headers = new NameValueCollection();
-                    foreach (var header in args.WebSession.Request.Headers)
+                    foreach (var header in args.Request.Headers)
                     {
                         headers.Add(header.Name, header.Value);
                     }
@@ -1586,24 +1571,17 @@ namespace FilterProvider.Common.Services
                 {
                     // There is currently no way to change an HTTP message to a response outside of CitadelCore.
                     // so, change it to a 204 and then modify the status code to what we want it to be.
-                    m_logger.Info("Response blocked: {0}", args.WebSession.Request.Url);
+                    m_logger.Info("Response blocked: {0}", args.Request.Url);
 
                     if (customBlockResponse != null)
                     {
-                        var headerDict = new Dictionary<string, HttpHeader>();
-                        headerDict.Add("Content-Type", new HttpHeader("Content-Type", customBlockResponseContentType));
-
-                        args.GenericResponse(customBlockResponse, HttpStatusCode.OK, headerDict, true);
+                        args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
                     }
                 }
             }
         }
 
-        private async Task OnAfterResponse(object sender, SessionEventArgs args)
-        {
-        }
-
-        private async Task OnBeforeResponse(object sender, SessionEventArgs args)
+        private void OnBeforeResponse(GoproxyWrapper.Session args)
         {
             ProxyNextAction nextAction = ProxyNextAction.AllowButRequestContentInspection;
 
@@ -1619,9 +1597,9 @@ namespace FilterProvider.Common.Services
             }
 
             string contentType = null;
-            if (args.WebSession.Response.Headers.HeaderExists("Content-Type"))
+            if (args.Response.Headers.HeaderExists("Content-Type"))
             {
-                contentType = args.WebSession.Response.Headers.GetFirstHeader("Content-Type").Value;
+                contentType = args.Response.Headers.GetFirstHeader("Content-Type").Value;
 
                 bool isHtml = contentType.IndexOf("html") != -1;
                 bool isJson = contentType.IndexOf("json") != -1;
@@ -1643,7 +1621,7 @@ namespace FilterProvider.Common.Services
             // try to classify the content of the response payload, if there is any.
             try
             {
-                if (contentType != null && args.WebSession.Response.HasBody)
+                if (contentType != null && args.Response.HasBody)
                 {
                     contentType = contentType.ToLower();
 
@@ -1651,7 +1629,7 @@ namespace FilterProvider.Common.Services
                     string textTrigger;
                     string textCategory;
 
-                    byte[] responseBody = await args.GetResponseBody();
+                    byte[] responseBody = args.Response.Body;
                     var contentClassResult = OnClassifyContent(responseBody, contentType, out blockType, out textTrigger, out textCategory);
 
                     if (contentClassResult > 0)
@@ -1663,11 +1641,11 @@ namespace FilterProvider.Common.Services
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = getBlockPageWithResolvedTemplates(args.WebSession.Request.RequestUri, contentClassResult, categories, blockType, textCategory);
+                            customBlockResponse = getBlockPageWithResolvedTemplates(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
                             nextAction = ProxyNextAction.DropConnection;
                         }
 
-                        OnRequestBlocked(contentClassResult, blockType, args.WebSession.Request.RequestUri);
+                        OnRequestBlocked(contentClassResult, blockType, new Uri(args.Request.Url));
                         m_logger.Info("Response blocked by content classification.");
                     }
                 }
@@ -1680,14 +1658,12 @@ namespace FilterProvider.Common.Services
             {
                 if (nextAction == ProxyNextAction.DropConnection)
                 {
-                    m_logger.Info("Response blocked: {0}", args.WebSession.Request.RequestUri);
+                    // TODO: Do we really need this as Info?
+                    m_logger.Info("Response blocked: {0}", args.Request.Url);
 
                     if (customBlockResponse != null)
                     {
-                        var headerDict = new Dictionary<string, HttpHeader>();
-                        headerDict.Add("Content-Type", new HttpHeader("Content-Type", customBlockResponseContentType));
-
-                        args.GenericResponse(customBlockResponse, HttpStatusCode.OK, headerDict, true);
+                        args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
                     }
                 }
             }
@@ -2412,7 +2388,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                if(m_filteringEngine != null && !m_filteringEngine.ProxyRunning)
+                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
                 {
                     m_logger.Info("Start engine.");
 
@@ -2779,7 +2755,7 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StopFiltering()
         {
-            if(m_filteringEngine != null && m_filteringEngine.ProxyRunning)
+            if(m_filteringEngine != null && m_filteringEngine.IsRunning)
             {
                 m_filteringEngine.Stop();
             }

@@ -150,10 +150,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\WpfLightToolkit\Sources\WpfLightToolkit\WpfLightToolkit.csproj">
-      <Project>{9ab20093-d50a-4587-8b2b-66f1aea8b101}</Project>
-      <Name>WpfLightToolkit</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Citadel.Core.Windows</Name>

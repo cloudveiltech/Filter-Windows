@@ -14,6 +14,7 @@ namespace Citadel.Core.Windows.Util
     {
 
         string appDataFolder;
+
         public string ApplicationDataFolder
         {
             get
@@ -25,6 +26,11 @@ namespace Citadel.Core.Windows.Util
 
                 return appDataFolder;
             }
+        }
+
+        public string GetPath(params string[] pathParts)
+        {
+            return Path.Combine(ApplicationDataFolder, Path.Combine(pathParts));
         }
     }
 }

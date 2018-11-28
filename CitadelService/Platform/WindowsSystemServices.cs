@@ -8,19 +8,22 @@
 ﻿using Citadel.Core.Windows.Util;
 using CitadelCore.Windows.Diversion;
 using CitadelService.Services;
+using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data;
 using FilterProvider.Common.Platform;
+using FilterProvider.Common.Proxy;
+using FilterProvider.Common.Proxy.Certificate;
 using Microsoft.Win32;
+using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Titanium.Web.Proxy;
-using Titanium.Web.Proxy.Models;
-using Titanium.Web.Proxy.Network;
 using WindowsFirewallHelper;
 
 namespace CitadelService.Platform
@@ -94,57 +97,77 @@ namespace CitadelService.Platform
             ServiceSpawner.Instance.InitializeServices();
         }
 
-        public ProxyServer StartProxyServer(ProxyConfiguration config)
+        private void trustRootCertificate(X509Certificate2 cert)
         {
-            var transparentEndPointHttp = new ExplicitProxyEndPoint(IPAddress.Any, 14300, true)
+            var store = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
+            store.Open(OpenFlags.ReadWrite);
+
+            // Remove any certificates with this cert's subject name before installing this one.
+            foreach(var existingCert in store.Certificates)
             {
+                if(existingCert.SubjectName.Format(false) == cert.SubjectName.Format(false))
+                {
+                    store.Remove(existingCert);
+                }
+            }
 
-            };
+            store.Add(cert);
+        }
 
-            var transparentEndPointHttps = new ExplicitProxyEndPoint(IPAddress.Any, 14301, true)
+        public IProxyServer StartProxyServer(ProxyConfiguration config)
+        {
+            CommonProxyServer server = new CommonProxyServer();
+
+            var paths = PlatformTypes.New<IPathProvider>();
+
+            string certPath = paths.GetPath(@"rootCertificate.pem");
+            string keyPath = paths.GetPath(@"rootPrivateKey.pem");
+
+            BCCertificateMaker certMaker = new BCCertificateMaker();
+
+            AsymmetricCipherKeyPair pair = BCCertificateMaker.CreateKeyPair(2048);
+
+            using (StreamWriter writer = new StreamWriter(new FileStream(keyPath, FileMode.Create, FileAccess.Write)))
             {
+                BCCertificateMaker.ExportPrivateKey(pair.Private, writer);
+            }
 
-            };
+            X509Certificate2 cert = certMaker.MakeCertificate(config.AuthorityName, true, null, pair);
 
-            ProxyServer proxyServer = new ProxyServer(true, true);
+            using (StreamWriter writer = new StreamWriter(new FileStream(certPath, FileMode.Create, FileAccess.Write)))
+            {
+                BCCertificateMaker.ExportDotNetCertificate(cert, writer);
+            }
 
-            proxyServer.EnableConnectionPool = true;
+            trustRootCertificate(cert);
+
+            server.Init(14300, certPath, keyPath);
+
+            server.BeforeRequest += config.BeforeRequest;
+            server.BeforeResponse += config.BeforeResponse;
+
+            /*proxyServer.EnableConnectionPool = true;
 
             // TCP server connection prefetch doesn't work with our reverse proxy setup.
             proxyServer.EnableTcpServerConnectionPrefetch = false;
 
             proxyServer.CertificateManager.CreateRootCertificate(false);
 
-            proxyServer.CertificateManager.TrustRootCertificate();
+            proxyServer.CertificateManager.TrustRootCertificate();*/
 
             //proxyServer.CertificateManager.CertificateEngine = CertificateEngine.BouncyCastle;
-            proxyServer.CertificateManager.CertificateEngine = CertificateEngine.BouncyCastle;
 
-            proxyServer.AddEndPoint(transparentEndPointHttp);
-            proxyServer.AddEndPoint(transparentEndPointHttps);
+            //proxyServer.CertificateManager.EnsureRootCertificate(true, true);
+            server.Start();
+            //proxyServer.Start();
 
-            proxyServer.BeforeRequest += config.BeforeRequest;
-            proxyServer.BeforeResponse += config.BeforeResponse;
-            proxyServer.AfterResponse += config.AfterResponse;
-
-            proxyServer.ExceptionFunc += LogException;
-
-            proxyServer.CertificateManager.EnsureRootCertificate(true, true);
-            proxyServer.Start();
-
-            WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
+            WindowsDiverter diverter = new WindowsDiverter(14300, 14300, 14300, 14300);
 
             diverter.ConfirmDenyFirewallAccess = m_provider.OnAppFirewallCheck;
 
             //diverter.Start(0);
 
-            return proxyServer;
-        }
-
-        private void LogException(Exception exception)
-        {
-            m_logger.Error("TITANIUM.WEB.PROXY ERROR");
-            LoggerUtil.RecursivelyLogException(m_logger, exception);
+            return server;
         }
 
         public void EnableInternet()
