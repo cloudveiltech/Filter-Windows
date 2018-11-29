@@ -9,6 +9,11 @@ using Citadel.Core.WinAPI;
 using Citadel.Core.Windows.Util;
 using Citadel.IPC;
 using CloudVeil.Windows;
+using CloudVeil.Windows.Platform;
+using CloudVeilGUI.Platform.Common;
+using CloudVeilGUI.Platform.Windows;
+using Filter.Platform.Common;
+using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Util;
 using NLog;
 using System;
@@ -18,13 +23,91 @@ using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
 
-namespace Te.Citadel
+namespace CloudVeil.Windows
 {
     public static class CitadelMain
     {
         private static Logger MainLogger;
 
-        private static Mutex InstanceMutex = null;
+        private static IGUIChecks guiChecks;
+
+        private static void RunGuiChecks()
+        {
+            guiChecks = PlatformTypes.New<IGUIChecks>();
+
+            // First, lets check to see if the user started the GUI in an isolated session.
+            try
+            {
+                if (guiChecks.IsInIsolatedSession())
+                {
+                    LoggerUtil.GetAppWideLogger().Error("GUI client start in an isolated session. This should not happen.");
+                    Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                    return;
+                }
+            }
+            catch
+            {
+                Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                return;
+            }
+
+            try
+            {
+                bool createdNew = false;
+                if (guiChecks.PublishRunningApp())
+                {
+                    createdNew = true;
+                }
+
+                /**/
+
+                if (!createdNew)
+                {
+                    try
+                    {
+                        guiChecks.DisplayExistingUI();
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                    }
+
+                    // In case we have some out of sync state where the app is running at a higher
+                    // privilege level than us, the app won't get our messages. So, let's attempt an
+                    // IPC named pipe to deliver the message as well.
+                    try
+                    {
+                        // Something about instantiating an IPCClient here is making it all blow up in my face.
+                        using (var ipcClient = IPCClient.InitDefault())
+                        {
+                            ipcClient.RequestPrimaryClientShowUI();
+
+                            // Wait plenty of time before dispose to allow delivery of the message.
+                            Task.Delay(500).Wait();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // The only way we got here is if the server isn't running, in which case we
+                        // can do nothing because its beyond our domain.
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                    }
+
+                    LoggerUtil.GetAppWideLogger().Info("Shutting down process since one is already open.");
+
+                    // Close this instance.
+                    Environment.Exit((int)ExitCodes.ShutdownProcessAlreadyOpen);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                // The only way we got here is if the server isn't running, in which case we can do
+                // nothing because its beyond our domain.
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                return;
+            }
+        }
 
         /// <summary>
         /// </summary>
@@ -61,6 +144,12 @@ namespace Te.Citadel
                         return;
                     }
                 }
+
+                Citadel.Core.Windows.Platform.Init();
+
+                PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter());
+                PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
+                PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
             }
             catch
             {
@@ -69,74 +158,11 @@ namespace Te.Citadel
                 return;
             }
 
+            var guiChecks = PlatformTypes.New<IGUIChecks>();
+
             try
             {
-                string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                appVerStr += "." + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
-
-                bool createdNew;
-                try
-                {
-                    InstanceMutex = new Mutex(true, string.Format(@"Local\{0}", GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")), out createdNew);
-                }
-                catch
-                {
-                    // We can get access denied if SYSTEM is running this.
-                    createdNew = false;
-                }
-
-                if(!createdNew)
-                {
-                    try
-                    {
-                        var thisProcess = Process.GetCurrentProcess();
-                        var processes = Process.GetProcessesByName(thisProcess.ProcessName).Where(p => p.Id != thisProcess.Id);
-
-                        foreach(Process runningProcess in processes)
-                        {
-                            foreach(var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
-                            {
-                                // Send window show.
-                                if(!startMinimized)
-                                {
-                                    WindowHelpers.SendMessage(handle, (uint)WindowMessages.SHOWWINDOW, 9, 0);
-                                }
-                            }
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
-                    }
-
-                    // In case we have some out of sync state where the app is running at a higher
-                    // privilege level than us, the app won't get our messages. So, let's attempt an
-                    // IPC named pipe to deliver the message as well.
-                    try
-                    {
-                        using(var ipcClient = new IPCClient())
-                        {
-                            if(!startMinimized)
-                            {
-                                ipcClient.RequestPrimaryClientShowUI();
-                            }
-
-                            // Wait plenty of time before dispose to allow delivery of the msg.
-                            Task.Delay(500).Wait();
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        // The only way we got here is if the server isn't running, in which case we
-                        // can do nothing because its beyond our domain.
-                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
-                    }
-
-                    // Close this instance.
-                    Environment.Exit(-1);
-                    return;
-                }
+                RunGuiChecks();
             }
             catch(Exception e)
             {
@@ -159,7 +185,7 @@ namespace Te.Citadel
                 app.Run();
 
                 // Always release mutex.
-                InstanceMutex.ReleaseMutex();
+                guiChecks.UnpublishRunningApp();
             }
             catch(Exception e)
             {

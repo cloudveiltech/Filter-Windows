@@ -262,3 +262,6 @@ BuildBot/
 Tests/
 
 CompileSecrets.cs
+
+.DS_Store
+

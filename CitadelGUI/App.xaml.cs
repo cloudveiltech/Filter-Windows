@@ -34,6 +34,7 @@ using Te.Citadel.Util;
 using Filter.Platform.Common;
 using CloudVeilGUI.Platform.Common;
 using Filter.Platform.Common.Net;
+using Filter.Platform.Common.Client;
 
 namespace CloudVeil.Windows
 {
@@ -169,87 +170,90 @@ namespace CloudVeil.Windows
             this.Startup += CitadelOnStartup;
         }
 
+        private void RunGuiChecks()
+        {
+            IGUIChecks guiChecks = PlatformTypes.New<IGUIChecks>();
+
+            // First, lets check to see if the user started the GUI in an isolated session.
+            try
+            {
+                if (guiChecks.IsInIsolatedSession())
+                {
+                    LoggerUtil.GetAppWideLogger().Error("GUI client start in an isolated session. This should not happen.");
+                    Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                    return;
+                }
+            }
+            catch
+            {
+                Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
+                return;
+            }
+
+            try
+            {
+                bool createdNew = false;
+                if (guiChecks.PublishRunningApp())
+                {
+                    createdNew = true;
+                }
+
+                /**/
+
+                if (!createdNew)
+                {
+                    try
+                    {
+                        guiChecks.DisplayExistingUI();
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                    }
+
+                    // In case we have some out of sync state where the app is running at a higher
+                    // privilege level than us, the app won't get our messages. So, let's attempt an
+                    // IPC named pipe to deliver the message as well.
+                    try
+                    {
+                        // Something about instantiating an IPCClient here is making it all blow up in my face.
+                        using (var ipcClient = IPCClient.InitDefault())
+                        {
+                            ipcClient.RequestPrimaryClientShowUI();
+
+                            // Wait plenty of time before dispose to allow delivery of the message.
+                            Task.Delay(500).Wait();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // The only way we got here is if the server isn't running, in which case we
+                        // can do nothing because its beyond our domain.
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                    }
+
+                    LoggerUtil.GetAppWideLogger().Info("Shutting down process since one is already open.");
+
+                    // Close this instance.
+                    Environment.Exit((int)ExitCodes.ShutdownProcessAlreadyOpen);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                // The only way we got here is if the server isn't running, in which case we can do
+                // nothing because its beyond our domain.
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+                return;
+            }
+        }
+
         private void CitadelOnStartup(object sender, StartupEventArgs e)
         {
             Citadel.Core.Windows.Platform.Init();
-            
-            // Here we need to check 2 things. First, we need to check to make sure that our filter
-            // service is running. Second, and if the first condition proves to be false, we need to
-            // check if we are running as an admin. If we are not admin, we need to schedule a
-            // restart of the app to force us to run as admin. If we are admin, then we will create
-            // an instance of the service starter class that will take care of forcing our service
-            // into existence.
-            bool needRestartAsAdmin = false;
-            bool mainServiceViable = true;
-            try
-            {
-                var sc = new ServiceController("FilterServiceProvider");
 
-                switch(sc.Status)
-                {
-                    case ServiceControllerStatus.Stopped:
-                    case ServiceControllerStatus.StopPending:
-                        {
-                            mainServiceViable = false;
-                        }
-                        break;
-                }
-            }
-            catch(Exception ae)
-            {
-                mainServiceViable = false;
-            }
-
-            if(!mainServiceViable)
-            {
-                var id = WindowsIdentity.GetCurrent();
-
-                var principal = new WindowsPrincipal(id);
-                if(principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    needRestartAsAdmin = false;
-                }
-                else
-                {
-                    needRestartAsAdmin = id.Owner == id.User;
-                }
-
-                if(needRestartAsAdmin)
-                {
-                    m_logger.Info("Restarting as admin.");
-
-                    try
-                    {
-                        // Restart program and run as admin
-                        ProcessStartInfo updaterStartupInfo = new ProcessStartInfo();
-                        updaterStartupInfo.FileName = "cmd.exe";
-                        updaterStartupInfo.Arguments = string.Format("/C TIMEOUT {0} && \"{1}\"", 3, Process.GetCurrentProcess().MainModule.FileName);
-                        updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                        updaterStartupInfo.Verb = "runas";
-                        updaterStartupInfo.CreateNoWindow = true;
-                        Process.Start(updaterStartupInfo);
-                    }
-                    catch(Exception se)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, se);
-                    }
-
-                    Environment.Exit(-1);
-                    return;
-                }
-                else
-                {
-                    if(File.Exists("debug-cloudveil"))
-                    {
-                        Debugger.Launch();
-                    }
-
-                    // Just creating an instance of this will do the job of forcing our service to
-                    // start. Letting it fly off into garbage collection land should have no effect.
-                    // The service is self-sustaining after this point.
-                    var provider = new ServiceRunner();
-                }
-            }
+            var filterStarter = PlatformTypes.New<IFilterStarter>();
+            filterStarter.StartFilter();
 
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;
@@ -584,6 +588,7 @@ namespace CloudVeil.Windows
                                     {
                                         m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
                                         m_synchronizingTimer.Dispose();
+                                        m_synchronizingTimer = null;
                                     }
 
                                     m_synchronizingTimer = new Timer((state) =>
@@ -591,6 +596,7 @@ namespace CloudVeil.Windows
                                         m_ipcClient.RequestStatusRefresh();
                                         m_synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
                                         m_synchronizingTimer.Dispose();
+                                        m_synchronizingTimer = null;
                                     });
 
                                     m_synchronizingTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);

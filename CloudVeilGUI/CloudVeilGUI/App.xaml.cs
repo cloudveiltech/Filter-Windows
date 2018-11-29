@@ -71,92 +71,12 @@ namespace CloudVeilGUI
             MainPage = new NavigationPage(new MainPage());
         }
 
-        private void RunGuiChecks()
-        {
-            guiChecks = PlatformTypes.New<IGUIChecks>();
-
-            // First, lets check to see if the user started the GUI in an isolated session.
-            try
-            {
-                if (guiChecks.IsInIsolatedSession())
-                {
-                    LoggerUtil.GetAppWideLogger().Error("GUI client start in an isolated session. This should not happen.");
-                    Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
-                    return;
-                }
-            }
-            catch
-            {
-                Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
-                return;
-            }
-
-            try
-            {
-                bool createdNew = false;
-                if (guiChecks.PublishRunningApp())
-                {
-                    createdNew = true;
-                }
-
-                /**/
-
-                if (!createdNew)
-                {
-                    try
-                    {
-                        guiChecks.DisplayExistingUI();
-                    }
-                    catch (Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
-                    }
-
-                    // In case we have some out of sync state where the app is running at a higher
-                    // privilege level than us, the app won't get our messages. So, let's attempt an
-                    // IPC named pipe to deliver the message as well.
-                    try
-                    {
-                        // Something about instantiating an IPCClient here is making it all blow up in my face.
-                        using (var ipcClient = IPCClient.InitDefault())
-                        {
-                            ipcClient.RequestPrimaryClientShowUI();
-
-                            // Wait plenty of time before dispose to allow delivery of the message.
-                            Task.Delay(500).Wait();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // The only way we got here is if the server isn't running, in which case we
-                        // can do nothing because its beyond our domain.
-                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
-                    }
-
-                    LoggerUtil.GetAppWideLogger().Info("Shutting down process since one is already open.");
-
-                    // Close this instance.
-                    Environment.Exit((int)ExitCodes.ShutdownProcessAlreadyOpen);
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                // The only way we got here is if the server isn't running, in which case we can do
-                // nothing because its beyond our domain.
-                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
-                return;
-            }
-        }
-
         protected override void OnStart()
         {
             if(guiOnly)
             {
                 return;
             }
-
-            RunGuiChecks();
 
             //MainPage = new WaitingPage();
 
