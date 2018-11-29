@@ -115,6 +115,7 @@
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
@@ -175,6 +176,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\SupportView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\SelfModerationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Te\Citadel\UI\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -206,6 +215,12 @@
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
       <DependentUpon>DiagnosticsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SupportView.xaml.cs">
+      <DependentUpon>SupportView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SelfModerationView.xaml.cs">
+      <DependentUpon>SelfModerationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
     <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">
