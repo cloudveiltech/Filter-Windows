@@ -34,11 +34,6 @@ namespace Te.Citadel.UI.Windows
             m_logger = LoggerUtil.GetAppWideLogger();
         }
 
-        public BaseWindow()
-        {
-            m_logger = LoggerUtil.GetAppWideLogger();
-        }
-
         public delegate void OnWindowRestoreRequested();
 
         public static readonly TimeSpan TaskExpiryTimeout = new TimeSpan(12, 0, 0);
