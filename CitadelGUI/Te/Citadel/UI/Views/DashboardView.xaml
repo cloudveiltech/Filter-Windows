@@ -194,6 +194,11 @@
                             <local:DiagnosticsView />
                         </Controls:HamburgerMenuIconItem.Tag>
                     </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=QuestionCircleSolid}" Label="Help &amp; Support">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:SupportView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
                 </Controls:HamburgerMenuItemCollection>
             </Controls:HamburgerMenu.ItemsSource>
 
