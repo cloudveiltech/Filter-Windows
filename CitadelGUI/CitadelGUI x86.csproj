@@ -222,6 +222,7 @@ xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</Po
   </Target>
   -->
   <Import Project="CompileSecrets.targets" />
+
   <Target Name="RemoveNetFxForceConflicts" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'netfx.force.conflicts'" />

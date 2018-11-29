@@ -34,6 +34,11 @@ namespace Te.Citadel.UI.Windows
             m_logger = LoggerUtil.GetAppWideLogger();
         }
 
+        public BaseWindow()
+        {
+            m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
         public delegate void OnWindowRestoreRequested();
 
         public static readonly TimeSpan TaskExpiryTimeout = new TimeSpan(12, 0, 0);
@@ -60,6 +65,9 @@ namespace Te.Citadel.UI.Windows
             // Check to see if a dialog is currently displaying.
             if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
+                m_logger.Info("Failed to AskUserYesNoQuestion() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to AskUserYesNoQuestion() thanks to write lock.");
+
                 return false;
             }
 
@@ -79,6 +87,9 @@ namespace Te.Citadel.UI.Windows
             // Check to see if a dialog is currently displaying.
             if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
+                m_logger.Info("Failed to AskUserUpdateQuestion() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to AskUserUpdateQuestion() thanks to write lock.");
+
                 return UpdateDialogResult.FailedOpen;
             }
 
@@ -133,6 +144,9 @@ namespace Te.Citadel.UI.Windows
             // Check to see if a dialog is currently displaying.
             if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
+                m_logger.Info("Failed to ShowUserMessage() thanks to write lock.");
+                Sentry.SentrySdk.CaptureMessage("Failed to ShowUserMessage() thanks to write lock.");
+
                 return;
             }
 
