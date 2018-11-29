@@ -7,7 +7,9 @@
 
 using Citadel.Core.Windows.Util;
 using CitadelService.Services;
+using CitadelService.Util;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using Topshelf;
 
@@ -28,6 +30,10 @@ namespace CitadelService
 
             if(createdNew)
             {
+                if(args.Length > 0 && args[0] == "test-me")
+                {
+
+                }
                 var exitCode = HostFactory.Run(x =>
                 {
                     x.Service<FilterServiceProvider>(s =>

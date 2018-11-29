@@ -266,7 +266,7 @@ namespace CitadelService.Util
             }
         }
 
-        private void SetDnsToDhcp(bool sendDnsChangeEvents)
+        public void SetDnsToDhcp(bool sendDnsChangeEvents)
         {
             m_logger.Info("Setting DNS to DHCP.");
 
@@ -523,6 +523,7 @@ namespace CitadelService.Util
         #region DnsEnforcement.Triggers
 
         private bool isBehindCaptivePortal = false;
+        private bool isCaptivePortalActive = false;
 
         public async void Trigger(bool sendDnsChangeEvents = false)
         {
@@ -541,6 +542,8 @@ namespace CitadelService.Util
                 bool isCaptivePortal = await IsBehindCaptivePortal();
 
                 isBehindCaptivePortal = isCaptivePortal;
+                isCaptivePortalActive = await IsCaptivePortalActive();
+
                 TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
@@ -554,7 +557,11 @@ namespace CitadelService.Util
 
         public void SetupTimers()
         {
-            int timerTime = isBehindCaptivePortal ? 5000 : 60000;
+            int timerTime = isBehindCaptivePortal ? 30000 : 60000;
+            if(isCaptivePortalActive)
+            {
+                timerTime = 5000;
+            }
 
             lock(m_dnsEnforcementLock)
             {
@@ -589,7 +596,15 @@ namespace CitadelService.Util
 
         private void TriggerTimer(object state)
         {
-            Trigger();
+            try
+            {
+                Trigger();
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                m_provider.ErrorsClient?.Capture(new SharpRaven.Data.SentryEvent(ex));
+            }
         }
     }
 }

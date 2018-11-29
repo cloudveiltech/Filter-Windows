@@ -47,6 +47,7 @@ using CitadelService.Util;
 using DNS;
 using DNS.Client;
 using System.Net.Http;
+using SharpRaven.Data;
 
 namespace CitadelService.Services
 {
@@ -75,14 +76,14 @@ namespace CitadelService.Services
 
                 //OnStartup();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // Critical failure.
                 try
                 {
                     EventLog.CreateEventSource("FilterServiceProvider", "Application");
                     EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred before logger was bootstrapped: {e.ToString()}");
-                } catch(Exception e2)
+                } catch (Exception e2)
                 {
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
                 }
@@ -198,7 +199,7 @@ namespace CitadelService.Services
         private ProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
-        
+
         private byte[] m_blockedHtmlPage;
         private byte[] m_badSslHtmlPage;
 
@@ -217,7 +218,7 @@ namespace CitadelService.Services
         /// </summary>
         private ConcurrentDictionary<string, MappedFilterListCategoryModel> m_generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
 
-#endregion FilteringEngineVars
+        #endregion FilteringEngineVars
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
@@ -346,6 +347,10 @@ namespace CitadelService.Services
 
         private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
 
+        private SharpRaven.RavenClient m_errorsClient;
+
+        public SharpRaven.RavenClient ErrorsClient { get => m_errorsClient; }
+
         /// <summary>
         /// Default ctor. 
         /// </summary>
@@ -359,6 +364,20 @@ namespace CitadelService.Services
             {
                 Debugger.Launch();
             }
+
+            try
+            {
+                if (CompileSecrets.RavenDsn != null)
+                {
+                    m_errorsClient = new SharpRaven.RavenClient(CompileSecrets.RavenDsn);
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
             bool consoleOutStatus = false;
@@ -839,8 +858,6 @@ namespace CitadelService.Services
 
             LogTime("EnsureWindowsFirewallAccess() is done");
 
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
             // Run the background init worker for non-UI related initialization.
             m_backgroundInitWorker = new BackgroundWorker();
             m_backgroundInitWorker.DoWork += DoBackgroundInit;
@@ -905,6 +922,10 @@ namespace CitadelService.Services
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception err = e.ExceptionObject as Exception;
+            err.Data.Add("__cv4w_info", "unhandled");
+
+            m_errorsClient?.Capture(new SentryEvent(err));
+
             LoggerUtil.RecursivelyLogException(m_logger, err);
         }
 
@@ -2329,12 +2350,20 @@ namespace CitadelService.Services
         /// </param>
         private void OnThresholdTriggerPeriodElapsed(object state)
         {
-            // Reset count to zero.
-            Interlocked.Exchange(ref m_thresholdTicks, 0);
+            try
+            {
+                // Reset count to zero.
+                Interlocked.Exchange(ref m_thresholdTicks, 0);
 
-            var cfg = Config;
+                var cfg = Config;
 
-            this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            }
+            catch(Exception ex)
+            {
+                m_errorsClient.Capture(new SentryEvent(ex));
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
         }
 
         /// <summary>
@@ -2435,19 +2464,28 @@ namespace CitadelService.Services
         /// </param>
         private void OnUpdateTimerElapsed(object state)
         {
-            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            try
             {
-                return;
+                if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+                {
+                    return;
+                }
+
+                this.UpdateAndWriteList(false);
+                this.CleanupLogs();
+
+                if (m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+                {
+                    m_lastUsernamePrintTime = DateTime.Now;
+                    m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
+                }
             }
-
-            this.UpdateAndWriteList(false);
-            this.CleanupLogs();
-
-            if(m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+            catch (Exception ex)
             {
-                m_lastUsernamePrintTime = DateTime.Now;
-                m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
+                m_errorsClient.Capture(new SentryEvent(ex));
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
+            
         }
 
         public const int LogCleanupIntervalInHours = 12;
@@ -2455,15 +2493,23 @@ namespace CitadelService.Services
 
         private void OnCleanupLogsElapsed(object state)
         {
-            this.CleanupLogs();
+            try
+            {
+                this.CleanupLogs();
 
-            if(m_cleanupLogsTimer == null)
-            {
-                m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                if (m_cleanupLogsTimer == null)
+                {
+                    m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                }
+                else
+                {
+                    m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                m_errorsClient?.Capture(new SentryEvent(ex));
             }
         }
 
@@ -2492,22 +2538,39 @@ namespace CitadelService.Services
             m_logger.Info("TIME {0} {1}", timeInfo, message);
         }
 
+        private int failedCleanupsSinceDelete = 0;
+        private const int maxFailedCleanups = 4;
         private void CleanupLogs()
         {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
-
-            if(Directory.Exists(directoryPath))
+            try
             {
-                string[] files = Directory.GetFiles(directoryPath);
-                foreach(string filePath in files)
-                {
-                    FileInfo info = new FileInfo(filePath);
+                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
 
-                    DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
-                    if(expiryDate < DateTime.Now)
+                if (Directory.Exists(directoryPath))
+                {
+                    string[] files = Directory.GetFiles(directoryPath);
+                    foreach (string filePath in files)
                     {
-                        info.Delete();
+                        FileInfo info = new FileInfo(filePath);
+
+                        DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
+                        if (expiryDate < DateTime.Now)
+                        {
+                            info.Delete();
+                            failedCleanupsSinceDelete = 0;
+                        }
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                failedCleanupsSinceDelete++;
+
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+
+                if(failedCleanupsSinceDelete >= maxFailedCleanups)
+                {
+                    m_errorsClient.Capture(new SentryEvent(ex));
                 }
             }
         }
@@ -3170,20 +3233,17 @@ namespace CitadelService.Services
         /// </param>
         private void OnRelaxedPolicyResetExpired(object state)
         {
-            /*if(!UpdateNumberOfBypassesFromServer())
+            try
             {
-                var cfg = Config;
-
-                if (cfg != null)
-                {
-                    cfg.BypassesUsed = 0;
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted, cfg.BypassDuration, RelaxedPolicyStatus.Relinquished);
-                }
-            }*/
-
-            UpdateNumberOfBypassesFromServer();
-            // Disable the reset timer.
-            m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                UpdateNumberOfBypassesFromServer();
+                // Disable the reset timer.
+                m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                m_errorsClient?.Capture(new SentryEvent(ex));
+            }
         }
 
         /// <summary>
