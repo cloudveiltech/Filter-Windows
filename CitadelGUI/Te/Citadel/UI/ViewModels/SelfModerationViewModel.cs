@@ -49,9 +49,11 @@ namespace Te.Citadel.UI.ViewModels
                 {
                     addNewSiteCommand = new RelayCommand<string>((site) =>
                     {
-
+                        // TODO: Add m_ipcClient message.
                     });
                 }
+
+                return addNewSiteCommand;
             }
         }
     }

@@ -84,6 +84,11 @@ namespace CloudVeil.Windows
         private object m_synchronizingTimerLockObj = new object();
 
         /// <summary>
+        /// Used to track whether we should allow view changes away from ProgressWait when filter state has not yet been fetched.
+        /// </summary>
+        private bool m_hasStateBeenFetched = false;
+
+        /// <summary>
         /// Logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -310,7 +315,15 @@ namespace CloudVeil.Windows
                                     ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = true;
                                 });
 
-                                OnViewChangeRequest(typeof(DashboardView));
+                                // This code prevents the progress->dashboard->progress flash for authenticated users, but not for error'd users.
+                                if (authenticationFailureResult.Action != AuthenticationAction.Authenticated)
+                                {
+                                    OnViewChangeRequest(typeof(DashboardView));
+                                }
+                                else if (m_hasStateBeenFetched)
+                                {
+                                    OnViewChangeRequest(typeof(DashboardView));
+                                }
                             }
                             break;
                     }
@@ -543,6 +556,8 @@ namespace CloudVeil.Windows
                 m_ipcClient.StateChanged = (args) =>
                 {
                     m_logger.Info("Filter status from server is: {0}", args.State.ToString());
+                    m_hasStateBeenFetched = true;
+
                     switch(args.State)
                     {
                         case FilterStatus.CooldownPeriodEnforced:
