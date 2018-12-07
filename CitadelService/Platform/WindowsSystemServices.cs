@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -141,7 +142,7 @@ namespace CitadelService.Platform
 
             trustRootCertificate(cert);
 
-            server.Init(14300, certPath, keyPath);
+            server.Init(14300, 14301, certPath, keyPath);
 
             server.BeforeRequest += config.BeforeRequest;
             server.BeforeResponse += config.BeforeResponse;
@@ -161,11 +162,11 @@ namespace CitadelService.Platform
             server.Start();
             //proxyServer.Start();
 
-            WindowsDiverter diverter = new WindowsDiverter(14300, 14300, 14300, 14300);
+            WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
 
             diverter.ConfirmDenyFirewallAccess = m_provider.OnAppFirewallCheck;
 
-            //diverter.Start(0);
+            diverter.Start(0);
 
             return server;
         }

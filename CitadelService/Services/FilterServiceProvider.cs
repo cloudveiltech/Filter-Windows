@@ -44,8 +44,8 @@ using CitadelService.Platform;
 using FilterProvider.Common.Platform;
 using Filter.Platform.Common.Net;
 using FilterProvider.Common.Data;
-using Titanium.Web.Proxy;
 using Citadel.Core.WinAPI;
+using System.Runtime.InteropServices;
 
 namespace CitadelService.Services
 {
@@ -55,10 +55,20 @@ namespace CitadelService.Services
 
         private CommonFilterServiceProvider m_provider;
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetDllDirectory(string dllDirectory);
+
         public bool Start()
         {
             try
             {
+                var assembly = Assembly.GetExecutingAssembly();
+                var baseDirectory = Path.GetDirectoryName(assembly.Location);
+
+                var dllDirectory = Path.Combine(baseDirectory, Environment.Is64BitProcess ? "x64" : "x86");
+                SetDllDirectory(dllDirectory);
+
                 Thread thread = new Thread(OnStartup);
                 thread.Start();
 

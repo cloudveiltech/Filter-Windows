@@ -16,9 +16,9 @@ namespace FilterProvider.Common.Proxy
             GoProxy.Instance.BeforeResponse += OnBeforeResponse;
         }
 
-        public void Init(int portNumber, string certFile, string keyFile)
+        public void Init(int httpPortNumber, int httpsPortNumber, string certFile, string keyFile)
         {
-            GoProxy.Instance.Init(portNumber, certFile, keyFile);
+            GoProxy.Instance.Init(httpPortNumber, httpsPortNumber, certFile, keyFile);
         }
 
         public void Start()
