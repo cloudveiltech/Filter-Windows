@@ -93,10 +93,6 @@
     <EmbeddedResource Include="Services\Warden.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.csproj">
-      <Project>{75961f9a-d4eb-4f83-b347-56a6a43b3006}</Project>
-      <Name>Titanium.Web.Proxy</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Citadel.Core.Windows</Name>

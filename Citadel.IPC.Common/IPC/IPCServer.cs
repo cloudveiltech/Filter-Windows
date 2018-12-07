@@ -653,6 +653,11 @@ namespace Citadel.IPC
             PushMessage(message);
         }
 
+        public void SendConfigurationInfo(ConfigurationInfoMessage msg)
+        {
+            PushMessage(msg);
+        }
+
         private void PushMessage(BaseMessage msg)
         {
             if(m_waitingForAuth)

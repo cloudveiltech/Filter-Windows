@@ -65,6 +65,8 @@ namespace Citadel.IPC
 
     public delegate void DiagnosticsInfoHandler(DiagnosticsInfoMessage msg);
 
+    public delegate void ConfigurationInfoHandler(ConfigurationInfoMessage msg);
+
     /// <summary>
     /// A generic reply handler, called by IPC queue.
     /// </summary>
@@ -107,7 +109,9 @@ namespace Citadel.IPC
         public AddCertificateExemptionRequestHandler AddCertificateExemptionRequest;
 
         public DiagnosticsInfoHandler OnDiagnosticsInfo;
-        
+
+        public ConfigurationInfoHandler OnConfigurationInfo;
+
         /// <summary>
         /// Our logger.
         /// </summary>
@@ -135,6 +139,10 @@ namespace Citadel.IPC
             }
         }
 
+        static IPCClient()
+        {
+        }
+
         public static IPCClient InitDefault()
         {
             Default = new IPCClient(true);
@@ -160,6 +168,11 @@ namespace Citadel.IPC
             client.Error += clientError;
 
             client.Start();
+
+            m_callbacks.Add(typeof(ConfigurationInfoMessage), (msg) =>
+            {
+                OnConfigurationInfo?.Invoke(msg as ConfigurationInfoMessage);
+            });
         }
 
         public AuthenticationMessage GetAuthMessage()
@@ -187,6 +200,8 @@ namespace Citadel.IPC
             client.WaitForConnection();
         }
 
+        private Dictionary<Type, Action<BaseMessage>> m_callbacks = new Dictionary<Type, Action<BaseMessage>>();
+
         protected void OnServerMessage(BaseMessage message)
         {
             // This is so gross, but unfortuantely we can't just switch on a type.
@@ -207,7 +222,13 @@ namespace Citadel.IPC
 
             var msgRealType = message.GetType();
 
-            if(msgRealType == typeof(AuthenticationMessage))
+            Action<BaseMessage> callback = null;
+            if(m_callbacks.TryGetValue(msgRealType, out callback))
+            {
+                logger.Debug("Server message is {0}", msgRealType.Name);
+                callback?.Invoke(message);
+            }
+            else if(msgRealType == typeof(AuthenticationMessage))
             {
                 AuthMessage = (AuthenticationMessage)message;
                 logger.Debug("Server message is {0}", nameof(AuthenticationMessage));

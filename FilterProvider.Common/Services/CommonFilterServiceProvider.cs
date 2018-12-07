@@ -417,6 +417,8 @@ namespace FilterProvider.Common.Services
             try
             {
                 m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadRelaxedPolicy;
+                m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadSelfModeratedSites;
+
                 m_dnsEnforcement = new DnsEnforcement(m_policyConfiguration, m_logger);
 
                 m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
@@ -684,6 +686,10 @@ namespace FilterProvider.Common.Services
                         if (cfg != null && cfg.BypassesPermitted > 0)
                         {
                             m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
+                            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
+                            {
+                                SelfModeratedSites = cfg.SelfModeratedSites
+                            });
                         }
                         else
                         {
@@ -802,6 +808,14 @@ namespace FilterProvider.Common.Services
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync();
+        }
+
+        private void OnConfigLoaded_LoadSelfModeratedSites(object sender, EventArgs e)
+        {
+            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
+            {
+                SelfModeratedSites = m_policyConfiguration.Configuration.SelfModeratedSites
+            });
         }
 
         private Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)

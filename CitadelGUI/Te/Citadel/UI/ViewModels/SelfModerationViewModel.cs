@@ -52,6 +52,8 @@ namespace Te.Citadel.UI.ViewModels
 
                     });
                 }
+
+                return addNewSiteCommand;
             }
         }
     }

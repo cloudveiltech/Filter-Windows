@@ -208,6 +208,11 @@ namespace FilterProvider.Common.Data.Models
         } = new List<FilteringPlainTextListModel>();
 
         /// <summary>
+        /// List of all sites that the user wants blocked on their devices.
+        /// </summary>
+        public List<string> SelfModeratedSites { get; set; } = new List<string>();
+        
+        /// <summary>
         /// The maximum number of combined words to assemble when doing text trigger sliding window
         /// scanning. The window will dynamically go as it increments through the list of extracted
         /// words until it reaches this limit, or the maximum number of words avaibale. This can
