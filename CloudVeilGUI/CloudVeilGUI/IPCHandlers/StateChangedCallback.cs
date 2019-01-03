@@ -33,6 +33,8 @@ namespace CloudVeilGUI.IPCHandlers
         {
             logger.Info("Filter status from server is: {0}", args.State.ToString());
 
+            Console.WriteLine("Filter status changed: {0}", args.State.ToString());
+
             switch (args.State)
             {
                 case FilterStatus.CooldownPeriodEnforced:

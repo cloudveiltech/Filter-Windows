@@ -1019,6 +1019,9 @@ namespace CloudVeil.Windows
         /// </param>
         private void OnViewChangeRequest(Type viewType)
         {
+            Console.WriteLine("OnViewChangeRequest {0}", viewType.Name);
+            Console.WriteLine(new Exception().StackTrace);
+
             try
             {
                 Current.Dispatcher.Invoke(

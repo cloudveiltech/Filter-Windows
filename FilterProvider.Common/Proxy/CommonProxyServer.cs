@@ -18,7 +18,7 @@ namespace FilterProvider.Common.Proxy
 
         public void Init(int httpPortNumber, int httpsPortNumber, string certFile, string keyFile)
         {
-            GoProxy.Instance.Init(httpPortNumber, httpsPortNumber, certFile, keyFile);
+            GoProxy.Instance.Init((short)httpPortNumber, (short)httpsPortNumber, certFile, keyFile);
         }
 
         public void Start()
