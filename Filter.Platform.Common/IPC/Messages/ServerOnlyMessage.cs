@@ -40,10 +40,10 @@ namespace Citadel.IPC.Messages
             }
             catch { }
 
-            if(procId != 0)
+            /*if(procId != 0)
             {
                 throw new InvalidOperationException("This IPC message type is designed exclusively for use by the server side of the IPC channel. The server side should always be a service, which would be isolated in session 0. You are constructing this class from a non-session 0 process.");
-            }
+            }*/
         }
     }
 }

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Te.Citadel</RootNamespace>
     <AssemblyName>CloudVeil</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +24,7 @@
   </ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Te.Citadel.CitadelMain</StartupObject>
+    <StartupObject>CloudVeil.Windows.CitadelMain</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -75,8 +75,11 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
+    <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
+    <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />
-	<Compile Include="CompileSecrets.cs" />
+    <Compile Include="CompileSecrets.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\PostInstallCommand.cs">
       <SubType>Component</SubType>
@@ -85,13 +88,23 @@
       <DependentUpon>PostInstallCommand.cs</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\Testing\FilterTesting.cs" />
+    <Compile Include="Te\Citadel\UI\ModelManager.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewManager.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\AdvancedViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
+      <DependentUpon>AdvancedView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
     <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
@@ -100,13 +113,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+	<Page Include="Styles\AppStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Te\Citadel\UI\Controls\SecureInputBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\AdvancedView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Te\Citadel\UI\Views\DashboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\DiagnosticsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\HistoryView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Te\Citadel\UI\Views\ProgressWait.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -116,7 +145,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\SettingsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Te\Citadel\UI\Views\SslExemptionsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\SupportView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -134,14 +171,26 @@
     <Compile Include="Te\Citadel\UI\Models\LoginModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\BaseCitadelViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\LoginViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
+      <DependentUpon>DiagnosticsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\HistoryView.xaml.cs">
+      <DependentUpon>HistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\ProgressWait.xaml.cs">
       <DependentUpon>ProgressWait.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\SslExemptionsView.xaml.cs">
       <DependentUpon>SslExemptionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SupportView.xaml.cs">
+      <DependentUpon>SupportView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
     <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">
@@ -204,6 +253,14 @@
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
       <Name>Citadel.IPC.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI\CloudVeilGUI.csproj">
+      <Project>{b5cce52e-6d69-4f28-857a-1c546022a2a5}</Project>
+      <Name>CloudVeilGUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Name>Filter.Platform.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

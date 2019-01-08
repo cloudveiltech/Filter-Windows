@@ -45,8 +45,12 @@ namespace FilterProvider.Common.Services
     {
         #region Windows Service API
 
-        public bool Start()
+        private bool isTestRun = false;
+
+        public bool Start(bool isTest)
         {
+            isTestRun = isTest;
+
             Thread thread = new Thread(OnStartup);
             thread.Start();
 
@@ -344,10 +348,6 @@ namespace FilterProvider.Common.Services
             {
                 m_logger.Warn("Failed to link console output to file.");
             }
-
-            ThreadPool.SetMinThreads(256, 32);
-
-                        //monitorThread.Start();
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
@@ -1152,7 +1152,10 @@ namespace FilterProvider.Common.Services
             // Force start our cascade of protective processes.
             try
             {
-                m_systemServices.RunProtectiveServices();
+                if (isTestRun)
+                {
+                    m_systemServices.RunProtectiveServices();
+                }
             }
             catch(Exception se)
             {
@@ -1405,6 +1408,8 @@ namespace FilterProvider.Common.Services
 
         private void OnHttpRequestBegin(GoproxyWrapper.Session args)
         {
+            m_logger.Info("New request");
+
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
@@ -1435,6 +1440,8 @@ namespace FilterProvider.Common.Services
                 var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
                 var categoryIndex = m_policyConfiguration.CategoryIndex;
 
+                Console.WriteLine("Checking " + args.Request.Url);
+
                 if(filterCollection != null)
                 {
                     // Let's check whitelists first.
@@ -1456,6 +1463,8 @@ namespace FilterProvider.Common.Services
                     {
                         headers.Add(header.Name, header.Value);
                     }
+
+                    Console.WriteLine("Checking isHostInList");
 
                     // Check whitelists first.
                     // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
@@ -1568,6 +1577,10 @@ namespace FilterProvider.Common.Services
 
                         return;
                     }
+                }
+                else
+                {
+                    Console.WriteLine("filterCollection == null");
                 }
             }
             catch (Exception e)

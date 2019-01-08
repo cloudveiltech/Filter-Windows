@@ -61,6 +61,16 @@ namespace CitadelService.Services
 
         public bool Start()
         {
+            return Start(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isTestRun"></param>
+        /// <returns>This tells the service provider not to start the protective services since this is a test run.</returns>
+        public bool Start(bool isTestRun)
+        {
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
@@ -72,7 +82,7 @@ namespace CitadelService.Services
                 Thread thread = new Thread(OnStartup);
                 thread.Start();
 
-                return m_provider.Start();
+                return m_provider.Start(isTestRun);
             }
             catch (Exception e)
             {
@@ -310,6 +320,18 @@ namespace CitadelService.Services
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
+            var envList = Environment.GetEnvironmentVariables();
+
+            StringBuilder builder = new StringBuilder();
+
+            foreach(var key in envList.Keys)
+            {
+                builder.AppendLine($"{key.ToString()}: {envList[key].ToString()}");
+            }
+
+            m_logger.Info("Environment variables: {0}", builder.ToString());
+            Console.WriteLine("Environment variables: {0}", builder.ToString());
+
             /*LoggerProxy.Default.OnError += EngineOnError;
             LoggerProxy.Default.OnWarning += EngineOnWarning;
             LoggerProxy.Default.OnInfo += EngineOnInfo;*/
@@ -321,48 +343,7 @@ namespace CitadelService.Services
 
             m_backgroundInitWorker.RunWorkerAsync();*/
 
-            /*if(File.Exists("debug-filterserviceprovider"))
-            {
-                Debugger.Launch();
-            }
-
-            // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
-            bool consoleOutStatus = false;
-
-            try
-            {
-                // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
-                // on service control manager.
-                m_logger = LoggerUtil.GetAppWideLogger();
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred while initializing logger: {ex.ToString()}");
-                }
-                catch (Exception ex2)
-                {
-                    File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash. {ex.ToString()} \r\n{ex2.ToString()}");
-                }
-            }
-
-            try
-            {
-                Console.SetOut(new ConsoleLogWriter());
-                consoleOutStatus = true;
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
-            appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
-
-            m_logger.Info("CitadelService Version: {0}", appVerStr);
+            /*
 	    
 	    if(!consoleOutStatus)
             {
@@ -1101,7 +1082,7 @@ namespace CitadelService.Services
                     if(inList)
                     {
                         m_logger.Debug("3Filtering application: {0}", request.BinaryAbsolutePath);
-                        return new FirewallResponse(FirewallAction.BlockInternetForApplication);
+                        return new FirewallResponse(FirewallAction.FilterApplication);
                     }
 
                     return new FirewallResponse(FirewallAction.FilterApplication);

@@ -34,7 +34,7 @@ namespace CitadelService
                 if (args.Length > 0 && args[0] == "test-me")
                 {
                     FilterServiceProvider provider = new FilterServiceProvider();
-                    provider.Start();
+                    provider.Start(true);
                     AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
                     {
                         exiting = true;

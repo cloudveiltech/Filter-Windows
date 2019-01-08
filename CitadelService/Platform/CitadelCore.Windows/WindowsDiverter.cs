@@ -224,7 +224,7 @@ namespace CitadelCore.Windows.Diversion
 #if ENGINE_NO_BLOCK_TOR
                 string mainFilterString = "outbound and tcp and ((ip and ip.SrcAddr != 127.0.0.1) or (ipv6 and ipv6.SrcAddr != ::1))";
 #else
-                string mainFilterString = "outbound and tcp";
+                string mainFilterString = "outbound and tcp and (tcp.DstPort == 80 || tcp.DstPort == 443)";
 #endif
                 string QUICFilterString = "udp and (udp.DstPort == 80 || udp.DstPort == 443)";
 
@@ -263,7 +263,7 @@ namespace CitadelCore.Windows.Diversion
             }
         }
 
-        private void RunDiversion()
+        private unsafe void RunDiversion()
         {
             var packet = new WinDivertBuffer();
 
@@ -344,37 +344,38 @@ namespace CitadelCore.Windows.Diversion
 
                     #endregion Packet Reading Code
 
+                    WinDivertParseResult parseResult = null;
                     if (addr.Direction == WinDivertDirection.Outbound)
                     {
-                        var parseResult = WinDivert.WinDivertHelperParsePacket(packet, recvLength);
+                        parseResult = WinDivert.WinDivertHelperParsePacket(packet, recvLength);
 
                         #region New TCP Connection Detection
 
-                        if (parseResult.IsTcp && parseResult.TcpHeader.Syn > 0)
+                        if (parseResult.TcpHeader != null && parseResult.TcpHeader->Syn > 0)
                         {
                             // Brand new outbound connection. Grab the PID of the process holding this
                             // port and map it.
-                            if (parseResult.IsIPv4)
+                            if (parseResult.IPv4Header != null)
                             {
-                                var connInfo = GetLocalPacketInfo(parseResult.TcpHeader.SrcPort, parseResult.IPv4Header.SrcAddr);
+                                var connInfo = GetLocalPacketInfo(parseResult.TcpHeader->SrcPort, parseResult.IPv4Header->SrcAddr);
 
-                                HandleNewTcpConnection(connInfo, ref parseResult.TcpHeader, false);
+                                HandleNewTcpConnection(connInfo, parseResult.TcpHeader, false);
 
                                 // Handle the special case of entirely blocking internet for this application/port.
-                                if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
+                                if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader->SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
                                 {
                                     dropPacket = true;
                                 }
                             }
 
-                            if (parseResult.IsIPv6)
+                            if (parseResult.IPv6Header != null)
                             {
-                                var connInfo = GetLocalPacketInfo(parseResult.TcpHeader.SrcPort, parseResult.IPv6Header.SrcAddr);
+                                var connInfo = GetLocalPacketInfo(parseResult.TcpHeader->SrcPort, parseResult.IPv6Header->SrcAddr);
 
-                                HandleNewTcpConnection(connInfo, ref parseResult.TcpHeader, true);
+                                HandleNewTcpConnection(connInfo, parseResult.TcpHeader, true);
 
                                 // Handle the special case of entirely blocking internet for this application/port.
-                                if (Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
+                                if (Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader->SrcPort]) == (int)FirewallAction.BlockInternetForApplication)
                                 {
                                     dropPacket = true;
                                 }
@@ -385,9 +386,9 @@ namespace CitadelCore.Windows.Diversion
                         // packet belongs to an existing flow that was marked to be blocked.
 
                         // Check if this packet belongs to an IPV4 flow marked for blocking.
-                        if (parseResult.IsIPv4)
+                        if (parseResult.IPv4Header != null)
                         {
-                            int srcPortAction = Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]);
+                            int srcPortAction = Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader->SrcPort]);
 
                             // Handle the special case of entirely blocking internet for this application/port.
                             if (srcPortAction == (int)FirewallAction.BlockInternetForApplication)
@@ -397,9 +398,9 @@ namespace CitadelCore.Windows.Diversion
                         }
 
                         // Check if this packet belongs to an IPV6 flow marked for blocking.
-                        if (!dropPacket && parseResult.IsIPv6)
+                        if (!dropPacket && parseResult.IPv6Header != null)
                         {
-                            int srcPortAction = Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader.SrcPort]);
+                            int srcPortAction = Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader->SrcPort]);
 
                             // Handle the special case of entirely blocking internet for this application/port.
                             if (srcPortAction == (int)FirewallAction.BlockInternetForApplication)
@@ -419,7 +420,7 @@ namespace CitadelCore.Windows.Diversion
                         // something we want to block on local addresses, then we want to skip these for
                         // the rest of the filtering and just let them through.
 
-                        if (dropPacket == false && parseResult.IsIPv4 && parseResult.IsTcp)
+                        if (dropPacket == false && parseResult.IPv4Header != null && parseResult.TcpHeader != null)
                         {
                             // Let's explain the weird arcane logic here. First, we check if the current
                             // flow should even be filtered. We do this, because there's a good chance
@@ -441,9 +442,9 @@ namespace CitadelCore.Windows.Diversion
                             // certs, such as logging into one's router. If we didn't do this check and
                             // let these through, we would break such connections.
 
-                            if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.FilterApplication)
+                            if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader->SrcPort]) == (int)FirewallAction.FilterApplication)
                             {
-                                isLocalIpv4 = parseResult.IPv4Header.DstAddr.IsPrivateIpv4Address();
+                                isLocalIpv4 = parseResult.IPv4Header->DstAddr.IsPrivateIpv4Address();
 
                                 if (isLocalIpv4)
                                 {
@@ -466,9 +467,9 @@ namespace CitadelCore.Windows.Diversion
 
                         if (dropPacket == false && !isLocalIpv4)
                         {
-                            if (parseResult.IsIPv4 && parseResult.IsTcp)
+                            if (parseResult.IPv4Header != null && parseResult.TcpHeader != null)
                             {
-                                if (parseResult.TcpHeader.SrcPort == m_v4HttpProxyPort || parseResult.TcpHeader.SrcPort == m_v4HttpsProxyPort)
+                                if (parseResult.TcpHeader->SrcPort == m_v4HttpProxyPort || parseResult.TcpHeader->SrcPort == m_v4HttpsProxyPort)
                                 {
                                     // Means that the data is originating from our proxy in response to a
                                     // client's request, which means it was originally meant to go
@@ -478,15 +479,16 @@ namespace CitadelCore.Windows.Diversion
 
                                     modifiedPacket = true;
 
-                                    parseResult.TcpHeader.SrcPort = Volatile.Read(ref m_v4ReturnPorts[parseResult.TcpHeader.DstPort]);
+                                    parseResult.TcpHeader->SrcPort = Volatile.Read(ref m_v4ReturnPorts[parseResult.TcpHeader->DstPort]);
                                     addr.Direction = WinDivertDirection.Inbound;
 
-                                    var dstIp = parseResult.IPv4Header.DstAddr;
-                                    parseResult.IPv4Header.DstAddr = parseResult.IPv4Header.SrcAddr;
-                                    parseResult.IPv4Header.SrcAddr = dstIp;
+                                    var dstIp = parseResult.IPv4Header->DstAddr;
+                                    parseResult.IPv4Header->DstAddr = parseResult.IPv4Header->SrcAddr;
+                                    parseResult.IPv4Header->SrcAddr = dstIp;
                                 }
                                 else
                                 {
+
                                     // This means outbound traffic has been captured that we know for
                                     // sure is not coming from our proxy in response to a client, but we
                                     // don't know that it isn't the upstream portion of our proxy trying
@@ -498,7 +500,7 @@ namespace CitadelCore.Windows.Diversion
                                     // need to ensure that the binary has been granted firewall access to
                                     // generate outbound traffic.
 
-                                    if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.FilterApplication)
+                                    if (Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader->SrcPort]) == (int)FirewallAction.FilterApplication)
                                     {
                                         modifiedPacket = true;
 
@@ -506,43 +508,43 @@ namespace CitadelCore.Windows.Diversion
                                         // to access the internet, and is not a system process or
                                         // ourselves, then we divert its packets back inbound to the
                                         // local machine, changing the destination port appropriately.
-                                        var dstAddress = parseResult.IPv4Header.DstAddr;
+                                        var dstAddress = parseResult.IPv4Header->DstAddr;
 
-                                        parseResult.IPv4Header.DstAddr = parseResult.IPv4Header.SrcAddr;
-                                        parseResult.IPv4Header.SrcAddr = dstAddress;
+                                        parseResult.IPv4Header->DstAddr = parseResult.IPv4Header->SrcAddr;
+                                        parseResult.IPv4Header->SrcAddr = dstAddress;
 
                                         addr.Direction = WinDivertDirection.Inbound;
 
-                                        Volatile.Write(ref m_v4ReturnPorts[parseResult.TcpHeader.SrcPort], parseResult.TcpHeader.DstPort);
+                                        Volatile.Write(ref m_v4ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
                                         // Unless we know for sure this is an encrypted connection via
                                         // the HTTP port, we should always default to sending to the
                                         // non-encrypted listener.
-                                        var encrypted = Volatile.Read(ref m_v4EncryptionHints[parseResult.TcpHeader.SrcPort]);
+                                        var encrypted = Volatile.Read(ref m_v4EncryptionHints[parseResult.TcpHeader->SrcPort]);
 
-                                        parseResult.TcpHeader.DstPort = encrypted ? m_v4HttpsProxyPort : m_v4HttpProxyPort;
+                                        parseResult.TcpHeader->DstPort = encrypted ? m_v4HttpsProxyPort : m_v4HttpProxyPort;
                                     }
                                 }
                             }
 
                             // The ipV6 version works exactly the same, just with larger storage for the
                             // larger addresses. Look at the ipv4 version notes for clarification on anything.
-                            if (parseResult.IsIPv6 && parseResult.IsTcp)
+                            if (parseResult.IPv6Header != null && parseResult.TcpHeader != null)
                             {
-                                if (parseResult.TcpHeader.SrcPort == m_v6HttpProxyPort || parseResult.TcpHeader.SrcPort == m_v6HttpsProxyPort)
+                                if (parseResult.TcpHeader->SrcPort == m_v6HttpProxyPort || parseResult.TcpHeader->SrcPort == m_v6HttpsProxyPort)
                                 {
                                     modifiedPacket = true;
 
-                                    parseResult.TcpHeader.SrcPort = Volatile.Read(ref m_v6ReturnPorts[parseResult.TcpHeader.DstPort]);
+                                    parseResult.TcpHeader->SrcPort = Volatile.Read(ref m_v6ReturnPorts[parseResult.TcpHeader->DstPort]);
                                     addr.Direction = WinDivertDirection.Inbound;
 
-                                    var dstIp = parseResult.IPv6Header.DstAddr;
-                                    parseResult.IPv6Header.DstAddr = parseResult.IPv6Header.SrcAddr;
-                                    parseResult.IPv6Header.SrcAddr = dstIp;
+                                    var dstIp = parseResult.IPv6Header->DstAddr;
+                                    parseResult.IPv6Header->DstAddr = parseResult.IPv6Header->SrcAddr;
+                                    parseResult.IPv6Header->SrcAddr = dstIp;
                                 }
                                 else
                                 {
-                                    if (Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader.SrcPort]) == (int)FirewallAction.FilterApplication)
+                                    if (Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader->SrcPort]) == (int)FirewallAction.FilterApplication)
                                     {
                                         modifiedPacket = true;
 
@@ -550,21 +552,21 @@ namespace CitadelCore.Windows.Diversion
                                         // to access the internet, and is not a system process or
                                         // ourselves, then we divert its packets back inbound to the
                                         // local machine, changing the destination port appropriately.
-                                        var dstAddress = parseResult.IPv6Header.DstAddr;
+                                        var dstAddress = parseResult.IPv6Header->DstAddr;
 
-                                        parseResult.IPv6Header.DstAddr = parseResult.IPv6Header.SrcAddr;
-                                        parseResult.IPv6Header.SrcAddr = dstAddress;
+                                        parseResult.IPv6Header->DstAddr = parseResult.IPv6Header->SrcAddr;
+                                        parseResult.IPv6Header->SrcAddr = dstAddress;
 
                                         addr.Direction = WinDivertDirection.Inbound;
 
-                                        Volatile.Write(ref m_v6ReturnPorts[parseResult.TcpHeader.SrcPort], parseResult.TcpHeader.DstPort);
+                                        Volatile.Write(ref m_v6ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
                                         // Unless we know for sure this is an encrypted connection via
                                         // the HTTP port, we should always default to sending to the
                                         // non-encrypted listener.
-                                        var encrypted = Volatile.Read(ref m_v6EncryptionHints[parseResult.TcpHeader.SrcPort]);
+                                        var encrypted = Volatile.Read(ref m_v6EncryptionHints[parseResult.TcpHeader->SrcPort]);
 
-                                        parseResult.TcpHeader.DstPort = encrypted ? m_v6HttpsProxyPort : m_v6HttpProxyPort;
+                                        parseResult.TcpHeader->DstPort = encrypted ? m_v6HttpsProxyPort : m_v6HttpProxyPort;
                                     }
                                 }
                             }
@@ -583,7 +585,12 @@ namespace CitadelCore.Windows.Diversion
                             }
                         }
 
+                        Console.WriteLine("Sending packet src={0}:{1}, dst={2}:{3}, {4}", parseResult.IPv4Header->SrcAddr, parseResult.TcpHeader->SrcPortHostOrder, parseResult.IPv4Header->DstAddr, parseResult.TcpHeader->DstPortHostOrder, addr.Direction);
                         WinDivert.WinDivertSendEx(m_diversionHandle, packet, recvLength, 0, ref addr);
+                    }
+                    else
+                    {
+                        Console.WriteLine("dropping a packet");
                     }
                 }
                 catch (Exception loopException)
@@ -631,8 +638,13 @@ namespace CitadelCore.Windows.Diversion
         /// <param name="isIpv6">
         /// Whether or not this is from an IPV6 connection.
         /// </param>
-        private void HandleNewTcpConnection(ITcpConnectionInfo connInfo, ref TcpHeader tcpHeader, bool isIpv6)
+        private unsafe void HandleNewTcpConnection(ITcpConnectionInfo connInfo, TcpHeader* tcpHeader, bool isIpv6)
         {
+            if(tcpHeader == null)
+            {
+                
+            }
+
             if (connInfo != null && connInfo.OwnerPid == m_thisPid)
             {
                 // This is our process.
@@ -640,13 +652,13 @@ namespace CitadelCore.Windows.Diversion
                 {
                     case true:
                         {
-                            Volatile.Write(ref m_v6ShouldFilter[tcpHeader.SrcPort], (int)FirewallAction.DontFilterApplication);
+                            Volatile.Write(ref m_v6ShouldFilter[tcpHeader->SrcPort], (int)FirewallAction.DontFilterApplication);
                         }
                         break;
 
                     case false:
                         {
-                            Volatile.Write(ref m_v4ShouldFilter[tcpHeader.SrcPort], (int)FirewallAction.DontFilterApplication);
+                            Volatile.Write(ref m_v4ShouldFilter[tcpHeader->SrcPort], (int)FirewallAction.DontFilterApplication);
                         }
                         break;
                 }
@@ -656,7 +668,7 @@ namespace CitadelCore.Windows.Diversion
                 FirewallResponse response = null;
                 if (connInfo == null || connInfo.OwnerPid == 4 || connInfo.OwnerPid == 0)
                 {
-                    var firewallRequest = new FirewallRequest("SYSTEM", tcpHeader.SrcPort, tcpHeader.DstPort, connInfo.OwnerPid);
+                    var firewallRequest = new FirewallRequest("SYSTEM", tcpHeader->SrcPort, tcpHeader->DstPort, connInfo == null ? 0L : connInfo.OwnerPid);
                     response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
                 }
                 else
@@ -664,9 +676,11 @@ namespace CitadelCore.Windows.Diversion
                     // No need to null check here, because the above IF catches whenever connInfo
                     // is null.
                     var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
-                    var firewallRequest = new FirewallRequest(procPath, tcpHeader.SrcPort, tcpHeader.DstPort, connInfo.OwnerPid);
+                    var firewallRequest = new FirewallRequest(procPath, tcpHeader->SrcPort, tcpHeader->DstPort, connInfo.OwnerPid);
                     response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
                 }
+
+                m_logger.Info("Source port action for process {0} was {1}", connInfo?.OwnerProcessPath, response?.Action);
 
                 if (response == null)
                 {
@@ -677,17 +691,17 @@ namespace CitadelCore.Windows.Diversion
                     {
                         case true:
                             {
-                                Volatile.Write(ref m_v6ShouldFilter[tcpHeader.SrcPort], (byte)FirewallAction.DontFilterApplication);
+                                Volatile.Write(ref m_v6ShouldFilter[tcpHeader->SrcPort], (byte)FirewallAction.DontFilterApplication);
 
-                                Volatile.Write(ref m_v6EncryptionHints[tcpHeader.SrcPort], (tcpHeader.DstPort == m_httpsStandardPort || tcpHeader.DstPort == m_httpsAltPort));
+                                Volatile.Write(ref m_v6EncryptionHints[tcpHeader->SrcPort], (tcpHeader->DstPort == m_httpsStandardPort || tcpHeader->DstPort == m_httpsAltPort));
                             }
                             break;
 
                         case false:
                             {
-                                Volatile.Write(ref m_v4ShouldFilter[tcpHeader.SrcPort], (byte)FirewallAction.DontFilterApplication);
+                                Volatile.Write(ref m_v4ShouldFilter[tcpHeader->SrcPort], (byte)FirewallAction.DontFilterApplication);
 
-                                Volatile.Write(ref m_v4EncryptionHints[tcpHeader.SrcPort], (tcpHeader.DstPort == m_httpsStandardPort || tcpHeader.DstPort == m_httpsAltPort));
+                                Volatile.Write(ref m_v4EncryptionHints[tcpHeader->SrcPort], (tcpHeader->DstPort == m_httpsStandardPort || tcpHeader->DstPort == m_httpsAltPort));
                             }
                             break;
                     }
@@ -698,17 +712,17 @@ namespace CitadelCore.Windows.Diversion
                     {
                         case true:
                             {
-                                Volatile.Write(ref m_v6ShouldFilter[tcpHeader.SrcPort], (byte)response.Action);
+                                Volatile.Write(ref m_v6ShouldFilter[tcpHeader->SrcPort], (byte)response.Action);
 
-                                Volatile.Write(ref m_v6EncryptionHints[tcpHeader.SrcPort], response.EncryptedHint ?? (tcpHeader.DstPort == m_httpsStandardPort || tcpHeader.DstPort == m_httpsAltPort));
+                                Volatile.Write(ref m_v6EncryptionHints[tcpHeader->SrcPort], response.EncryptedHint ?? (tcpHeader->DstPort == m_httpsStandardPort || tcpHeader->DstPort == m_httpsAltPort));
                             }
                             break;
 
                         case false:
                             {
-                                Volatile.Write(ref m_v4ShouldFilter[tcpHeader.SrcPort], (byte)response.Action);
+                                Volatile.Write(ref m_v4ShouldFilter[tcpHeader->SrcPort], (byte)response.Action);
 
-                                Volatile.Write(ref m_v4EncryptionHints[tcpHeader.SrcPort], response.EncryptedHint ?? (tcpHeader.DstPort == m_httpsStandardPort || tcpHeader.DstPort == m_httpsAltPort));
+                                Volatile.Write(ref m_v4EncryptionHints[tcpHeader->SrcPort], response.EncryptedHint ?? (tcpHeader->DstPort == m_httpsStandardPort || tcpHeader->DstPort == m_httpsAltPort));
                             }
                             break;
                     }
@@ -716,13 +730,20 @@ namespace CitadelCore.Windows.Diversion
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="localPort">This port MUST BE network byte order. Performance optimizations mumble-mumble.</param>
+        /// <param name="localAddress"></param>
+        /// <returns></returns>
         private ITcpConnectionInfo GetLocalPacketInfo(ushort localPort, IPAddress localAddress)
         {
             switch (localAddress.AddressFamily)
             {
                 case System.Net.Sockets.AddressFamily.InterNetwork:
                     {
-                        return NetworkTables.GetTcp4Table().Where(x => x.LocalPort == localPort && (x.LocalAddress.Equals(localAddress) || x.LocalAddress.Equals(IPAddress.Any))).FirstOrDefault();
+                        return NetworkTables.GetTcp4Table().Where(x => x.LocalPort == localPort && (x.LocalAddress.Equals(localAddress) || x.LocalAddress.Equals(IPAddress.Any)))
+                            .FirstOrDefault();
                     }
 
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:
