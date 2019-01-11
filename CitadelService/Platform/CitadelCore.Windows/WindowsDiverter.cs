@@ -224,7 +224,7 @@ namespace CitadelCore.Windows.Diversion
 #if ENGINE_NO_BLOCK_TOR
                 string mainFilterString = "outbound and tcp and ((ip and ip.SrcAddr != 127.0.0.1) or (ipv6 and ipv6.SrcAddr != ::1))";
 #else
-                string mainFilterString = "outbound and tcp and (tcp.DstPort == 80 || tcp.DstPort == 443)";
+                string mainFilterString = "outbound and tcp";
 #endif
                 string QUICFilterString = "udp and (udp.DstPort == 80 || udp.DstPort == 443)";
 

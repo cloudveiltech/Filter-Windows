@@ -20,7 +20,7 @@
       <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
       <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
       
-    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\$(var.Platform)\$(var.Configuration)\InstallerCustomActions.CA.dll" />
+    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\$(var.Configuration)\InstallerCustomActions.CA.dll" />
 
     <!-- Initialize the 'TARGETDIR' directory property. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
