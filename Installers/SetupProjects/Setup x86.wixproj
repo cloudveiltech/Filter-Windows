@@ -119,10 +119,9 @@
     </ItemGroup>
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PostBuildEvent>"$(ProjectDir)add_reinstall_prop.vbs" "!(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)add_reinstall_prop.vbs" "!(TargetPath)"</PostBuildEvent>
+    <PreBuildEvent />
   </PropertyGroup>
 </Project>

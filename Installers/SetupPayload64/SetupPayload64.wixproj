@@ -107,11 +107,10 @@
     </ItemGroup>
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>"$(SolutionDir)\wix-verify-bin\wix-verify.exe" check-output "$(SolutionDir)\CitadelGUI\bin\Release x64" "$(SolutionDir)\Installers\SetupProjects\Product-x64.wxs" "$(SolutionDir)\Installers\SetupPayload64\Module.wxs"</PreBuildEvent>
   </PropertyGroup>
 </Project>

@@ -680,8 +680,6 @@ namespace CitadelCore.Windows.Diversion
                     response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
                 }
 
-                m_logger.Info("Source port action for process {0} was {1}", connInfo?.OwnerProcessPath, response?.Action);
-
                 if (response == null)
                 {
                     // The user couldn't be bothered to give us an answer, so just go ahead and

@@ -123,10 +123,9 @@
     <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />-->
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PostBuildEvent>"$(ProjectDir)add_reinstall_prop.vbs" "!(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)add_reinstall_prop.vbs" "!(TargetPath)"</PostBuildEvent>
+    <PreBuildEvent />
   </PropertyGroup>
 </Project>
