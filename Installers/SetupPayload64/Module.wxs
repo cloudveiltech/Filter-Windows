@@ -27,381 +27,234 @@
       </Directory>
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
         <Component Id="com_15BA3E04_E955_2942_9625_325577B7C8B6" Guid="12183EB0-B5B7-437B-8908-3C7C8262296E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_15BA3E04_E955_2942_9625_325577B7C8B6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Topshelf.dll" KeyPath="yes" />
+          <File Id="_15BA3E04_E955_2942_9625_325577B7C8B6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CitadelGUI\bin\Release x64\Topshelf.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_365225E7_1E4E_B84A_A1BB_A40338E9482F" Guid="39393005-51DA-4CA5-8465-75C2B30087B5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_365225E7_1E4E_B84A_A1BB_A40338E9482F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WindowsFirewallHelper.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\WindowsFirewallHelper.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="com_3CFD5D39_B93C_8146_8062_DAF03482A103" Guid="6295CB36-F89C-4F50-B7A8-9539752A3F6D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_3CFD5D39_B93C_8146_8062_DAF03482A103" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encodings.Web.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Text.Encodings.Web.dll" KeyPath="yes" />
+          <File Id="_365225E7_1E4E_B84A_A1BB_A40338E9482F" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WindowsFirewallHelper.dll" Source="..\..\CitadelGUI\bin\Release x64\WindowsFirewallHelper.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_4D4062FE_3467_B74F_A6D7_F7F18B9A7723" Guid="2CFB73D1-31DE-45F0-9B50-6FA11E054132" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4D4062FE_3467_B74F_A6D7_F7F18B9A7723" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\BouncyCastle.Crypto.dll" KeyPath="yes" />
-        </Component>
-        <!--<Component Id='com_80931B95_2D58_E7F1_083B_B146B5B972DE' Guid='3A2B6D22-6D6F-4687-9C11-E5B4E30881F2' Permanent='no' SharedDllRefCount='no' Transitive='no'>
-                    <File Id='_80931B95_2D58_E7F1_083B_B146B5B972DE' DiskId='1' Hidden='no' ReadOnly='no' System='no' Vital='yes' Compressed='yes' Name='System.Net.Http.dll' Source='System.Net.Http.dll' KeyPath='yes' />
-                </Component>-->
-        <Component Id="com_87387690_320E_1540_957B_7825676A0896" Guid="C41B4898-7CC1-470D-9A6D-8E60D2246AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_87387690_320E_1540_957B_7825676A0896" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Threading.Tasks.Extensions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Threading.Tasks.Extensions.dll" KeyPath="yes" />
+          <File Id="_4D4062FE_3467_B74F_A6D7_F7F18B9A7723" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CitadelGUI\bin\Release x64\BouncyCastle.Crypto.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_96C28C14_5E19_E44D_AF5E_315B42903962" Guid="4F334447-0B3E-4140-B338-E167A75BE8B9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_96C28C14_5E19_E44D_AF5E_315B42903962" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.Core.Windows.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Citadel.Core.Windows.dll" KeyPath="yes" />
+          <File Id="_96C28C14_5E19_E44D_AF5E_315B42903962" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Citadel.Core.Windows.dll" Source="..\..\CitadelGUI\bin\Release x64\Citadel.Core.Windows.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_B146E0A9_6068_C741_AC20_ECC2A0B0E1DA" Guid="25C27E60-2847-446D-A8F9-F7FA9E33B0BD" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B146E0A9_6068_C741_AC20_ECC2A0B0E1DA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\appicon.ico" KeyPath="yes" />
         </Component>
         <Component Id="com_B71AA335_0E78_E443_82DB_7AE818845593" Guid="4B61DA14-93CD-48C6-8073-707B4CCAA30C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B71AA335_0E78_E443_82DB_7AE818845593" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
+          <File Id="_B71AA335_0E78_E443_82DB_7AE818845593" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_CF59B35B_53F0_0D47_961D_74CE487FCCCB" Guid="7B353703-B680-4538-A8DD-3D2FCDE9D99E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_CF59B35B_53F0_0D47_961D_74CE487FCCCB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
+          <File Id="_CF59B35B_53F0_0D47_961D_74CE487FCCCB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
         </Component>
         <!-- The 'InstallGuard' project output. -->
         <!--<Component Id="comp_4DF2BCC6_189C" Guid="CE192BB4-A8BC-41F4-9829-291107227FE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1DE9226C_55B1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Net.Http.dll" KeyPath="yes" />
+          <File Id="_1DE9226C_55B1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_570282AB_9586" Guid="98B4F591-FB09-4C87-B453-A6A4B72F124E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_58E52A93_6301" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+          <File Id="_58E52A93_6301" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
         </Component>
         <Directory Id="InstallGuard.Binaries" />-->
         <Component Id="comp_5346A521_981B" Guid="64735ED0-0320-4F2C-8EE5-85F8940DB75B" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_84BCA417_832A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Filter.Platform.Common.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_E0E986D9_2F43" Guid="F7CA67EB-9A53-4B3B-B31C-118F1ECD2BC2" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_23C7BB5F_4206" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="..\..\..\..\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_1EBCB1DE_244B" Guid="CE748A35-1423-4A21-AD58-6D6E57FFD290" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E6F4FDB3_89AA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
+          <File Id="_84BCA417_832A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CitadelGUI\bin\Release x64\Filter.Platform.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_22AD1884_EB0B" Guid="3224360C-4774-423C-AE58-5FC753DC9F99" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4A720D00_8D41" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.Core.Windows.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Citadel.Core.Windows.pdb" KeyPath="yes" />
+          <File Id="_4A720D00_8D41" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.Core.Windows.pdb" Source="..\..\CitadelGUI\bin\Release x64\Citadel.Core.Windows.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_159D67FB_7D2E" Guid="EFC41DC3-1954-4EDD-ABFF-05FFA73DAAD6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C855A854_27E0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.IPC.Common.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Citadel.IPC.Common.dll" KeyPath="yes" />
+          <File Id="_C855A854_27E0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.IPC.Common.dll" Source="..\..\CitadelGUI\bin\Release x64\Citadel.IPC.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_D7EA2492_9EAA" Guid="9DB1DCEF-2E57-4A28-B5E0-03CA3DE1631D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.IPC.Common.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Citadel.IPC.Common.pdb" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_D4FB8357_3ACF" Guid="9AA43665-E4F7-4CC0-B6CC-656BDF08526E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4751D605_2C7B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CitadelCore.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CitadelCore.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_5DF28ADD_2816" Guid="8D69A864-15A6-44AF-BDCA-DC4B74EB0579" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_7D69A091_222C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Hosting.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Hosting.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_49401C69_36BF" Guid="1FB42CCD-53D1-41A0-84FB-128FC136EAF5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_00E3E80A_E573" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Hosting.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Hosting.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_ECD0F94A_B702" Guid="EFE3FF1F-9CBC-4386-9DD0-3909D3A593D1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C3BCAE58_5B37" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Http.Extensions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Http.Extensions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_A9506344_F896" Guid="CEA5884C-B578-40D3-8FD2-F122AE0E8A88" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_83E73BDC_D963" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_3BD4DBF5_36FC" Guid="CCDE935F-32FA-400A-9997-36F9ED1687E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_321F5B86_4D6D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_FAA24DB7_3DFA" Guid="B4A40647-3D67-4A17-803B-44F1E624B896" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B28AB42F_0BFA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.WebSockets.Protocol.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.WebSockets.Protocol.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_C620F6BA_38B0" Guid="A616F481-B6D0-4181-8FD9-89FB3F41A585" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_42F36828_9DF9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.WebSockets.Server.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.WebSockets.Server.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_FFD1B369_5D0F" Guid="46334F32-FB0A-40C3-A7D6-D04A39627CB9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_2C9FEF33_F508" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.WebUtilities.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.WebUtilities.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_AC1C4FA6_45D3" Guid="36CDC5AD-EBE6-48DF-9FA4-F04911FAF6A6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_221456F4_CF97" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Configuration.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Configuration.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_8D693E95_B67A" Guid="5161C301-3F93-4724-A2D0-C322D7B1CD36" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D5E781DD_F011" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Configuration.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_396A2207_203D" Guid="291CCE75-97B7-4B49-B55C-3DC18B3F5164" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_09EB49C5_B260" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Configuration.Binder.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Configuration.Binder.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_411FC4D5_BDDC" Guid="BCB5156D-52C0-4CC1-BE63-00D456453DEF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1316198C_8403" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_293EA3D6_8C72" Guid="65F3897D-43CF-4982-9347-0EFC841AFEAE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_73DFCE6B_2843" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Configuration.FileExtensions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_774A5357_00BB" Guid="7B888EEB-8639-442C-8DC2-3309E6CF9D95" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E4A2BF65_B466" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.DependencyInjection.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" />
+          <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.IPC.Common.pdb" Source="..\..\CitadelGUI\bin\Release x64\Citadel.IPC.Common.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_968AE87E_EE2C" Guid="0E9A0E25-9638-4405-A955-606C7A5207A1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_206EA336_3746" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_8E8FFCF9_0C51" Guid="826D3E33-61F7-441A-AA4E-2316EEF26F1E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C923AB1A_A6F4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.ObjectPool.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.ObjectPool.dll" KeyPath="yes" />
+          <File Id="_206EA336_3746" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_56C7FA05_9129" Guid="F5D8ED70-C1E1-4C19-AE1A-ED36FAE9DDFE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B15DE07F_8AEC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Options.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Options.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_31C4CAB3_8B71" Guid="D8235060-9E88-4271-BE0B-9CACFB3DF856" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_23897ED2_2AE6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="StreamExtended.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\StreamExtended.dll" KeyPath="yes" />
+          <File Id="_B15DE07F_8AEC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Options.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Options.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_0DC0F70F_7F99" Guid="B916D54D-687B-4BCE-A2DD-E0B4A23C7EA6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C283DB82_A3A9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Buffers.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_C007953B_87C8" Guid="A0EFFB8E-C664-4BB6-B7A5-9AE5651013A6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9F977845_FF50" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Diagnostics.DiagnosticSource.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Diagnostics.DiagnosticSource.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_857C9C44_C9BD" Guid="2C26C3E2-5A63-4638-BC02-8D966DD10B46" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_F3387522_E964" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipelines.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.IO.Pipelines.dll" KeyPath="yes" />
+          <File Id="_C283DB82_A3A9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_3EF89191_65EF" Guid="D50CDA52-C68C-40DD-9F08-8C7DD39F45FE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_841B5D86_5ADB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Memory.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Memory.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_3A6EDD5B_B35D" Guid="73FC0D42-0445-4463-BC2F-59A18852A7E8" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B1FD3BC2_A035" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
+          <File Id="_841B5D86_5ADB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Memory.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Memory.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_B4FBF7E2_E978" Guid="342467C6-C2EB-4178-BDB3-65BD40F101BA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4B7D63A7_45C5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CitadelCore.Windows.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CitadelCore.Windows.dll" KeyPath="yes" />
+          <File Id="_4B7D63A7_45C5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CitadelCore.Windows.dll" Source="..\..\CitadelGUI\bin\Release x64\CitadelCore.Windows.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2C193CF4_A806" Guid="212E5FAE-88B3-4A3E-9DBD-5A0D33883230" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_F11862ED_FFFB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\WinDivertSharp.dll" KeyPath="yes" />
+          <File Id="_F11862ED_FFFB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.dll" Source="..\..\CitadelGUI\bin\Release x64\WinDivertSharp.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_A08573E3_AAA3" Guid="5850308D-09D4-476C-B432-23DD07BA53CB" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1B4FFBDB_DE96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CloudVeil.exe" KeyPath="yes" />
+          <File Id="_1B4FFBDB_DE96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
         </Component>
         <Component Id="comp_808C4327_E9BD" Guid="8D6F2FE8-97F6-435F-8050-7329881D4CCC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1317AA89_0D43" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CloudVeilGUI.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_71A5A3DA_CFDC" Guid="80104C36-7589-4049-872C-E601DE535B47" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4D70FE6D_7E1A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="OpenTK.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\OpenTK.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_259AF7F1_0376" Guid="CC45B7A9-62C1-4D9B-B6C0-222B32672E76" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5FABC490_972E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="OpenTK.GLControl.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\OpenTK.GLControl.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_1F65BC5D_3EC4" Guid="E5143537-745A-4245-A6A8-FD8DF5F483FD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_94846232_2AF3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WpfLightToolkit.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\WpfLightToolkit.dll" KeyPath="yes" />
+          <File Id="_1317AA89_0D43" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.dll" Source="..\..\CitadelGUI\bin\Release x64\CloudVeilGUI.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_25A8CB5D_DC19" Guid="5B498873-67D1-41D6-8ED5-5D510D76F3B8" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4E6B6FD3_DE83" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Core.dll" KeyPath="yes" />
+          <File Id="_4E6B6FD3_DE83" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Core.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2C0EE004_9F64" Guid="062ECDD8-3D2A-4D57-9928-287C1D9781DF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_94869D06_D344" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Platform.dll" KeyPath="yes" />
+          <File Id="_94869D06_D344" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Platform.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_5809D2D8_2512" Guid="8F907D3E-6010-49FC-B543-E16350C5B706" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_7C1E5EAC_9CD5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.WPF.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Platform.WPF.dll" KeyPath="yes" />
+          <File Id="_7C1E5EAC_9CD5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.WPF.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Platform.WPF.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2803E906_5ECF" Guid="23D9C824-CD57-4BB4-8848-254A3B7DC1F1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D4D27BFC_8EB1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Xaml.dll" KeyPath="yes" />
+          <File Id="_D4D27BFC_8EB1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Xaml.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_108A7085_B85C" Guid="39FE7540-7433-4188-86E9-C4EB147036CE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D47FEB1F_CAAB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CloudVeil.exe.config" KeyPath="yes" />
+          <File Id="_D47FEB1F_CAAB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_34FF5E6C_1517" Guid="26D1EB12-8F07-4BB4-939D-5FE9FAE3E386" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_BC40A453_E469" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CloudVeil.pdb" KeyPath="yes" />
+          <File Id="_BC40A453_E469" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.pdb" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_9562B9CA_94B6" Guid="EA7D6EB8-C587-4431-825E-41847BE66AC4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_0C3EE252_A3D5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\CloudVeilGUI.pdb" KeyPath="yes" />
+          <File Id="_0C3EE252_A3D5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.pdb" Source="..\..\CitadelGUI\bin\Release x64\CloudVeilGUI.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_C719900C_4866" Guid="BA3022A6-5E3B-4E85-AC73-0D3B6154BA66" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9E7B6572_46CB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\DistillNET.dll" KeyPath="yes" />
+          <File Id="_9E7B6572_46CB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CitadelGUI\bin\Release x64\DistillNET.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_4CAB5E3B_494A" Guid="34DB44BB-17E8-4340-88A5-EC39D23CBA26" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C43371A2_93B5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.core.dll" Source="c:\program files (x86)\microsoft visual studio\2017\community\common7\ide\commonextensions\microsoft\managedlanguages\vbcsharp\languageservices\SQLitePCLRaw.core.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_1DC9B8F3_1F93" Guid="2612B7D7-752D-40A8-B745-6B85D5078CEC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_CD633B42_3FCE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DNS.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\DNS.dll" KeyPath="yes" />
+          <File Id="_CD633B42_3FCE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DNS.dll" Source="..\..\CitadelGUI\bin\Release x64\DNS.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2DE43EC2_F144" Guid="21FB69D1-9D8B-4571-9220-FF5390852461" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1C61AC70_49BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Filter.Platform.Common.pdb" KeyPath="yes" />
+          <File Id="_1C61AC70_49BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.pdb" Source="..\..\CitadelGUI\bin\Release x64\Filter.Platform.Common.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_69C00DA6_ED02" Guid="D8A83F48-475F-4BE4-9FBF-741B2ACD74C1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_59E0129D_C8E5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterAgent.Windows.exe" KeyPath="yes" />
+          <File Id="_59E0129D_C8E5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe" Source="..\..\CitadelGUI\bin\Release x64\FilterAgent.Windows.exe" KeyPath="yes" />
         </Component>
         <Component Id="comp_E9389479_3B98" Guid="47A0CD71-CA4C-49DC-B0C5-54D795A5ECF7" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_81EC26B0_2045" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe.config" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterAgent.Windows.exe.config" KeyPath="yes" />
+          <File Id="_81EC26B0_2045" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe.config" Source="..\..\CitadelGUI\bin\Release x64\FilterAgent.Windows.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_A41D0A49_C680" Guid="C33CD0D4-31EB-463F-ADC7-D263947785E8" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5EB6F359_8380" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterAgent.Windows.pdb" KeyPath="yes" />
+          <File Id="_5EB6F359_8380" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.pdb" Source="..\..\CitadelGUI\bin\Release x64\FilterAgent.Windows.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_5210632D_94BC" Guid="4A4222E8-35A0-48F3-B3E2-2CE73DAC811E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_54979095_2995" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterServiceProvider.exe" KeyPath="yes" />
+          <File Id="_54979095_2995" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe" Source="..\..\CitadelGUI\bin\Release x64\FilterServiceProvider.exe" KeyPath="yes" />
         </Component>
         <Component Id="comp_E24A581F_B3CF" Guid="2FDCE70A-2D36-44D6-977E-0B8E1A131A56" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9F94DE5E_7759" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe.config" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterServiceProvider.exe.config" KeyPath="yes" />
+          <File Id="_9F94DE5E_7759" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe.config" Source="..\..\CitadelGUI\bin\Release x64\FilterServiceProvider.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_E9A62009_6BF9" Guid="D5C90075-278C-4201-85AC-01014640228C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_868924A9_1788" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\InstallGuard.exe" KeyPath="yes" />
+          <File Id="_868924A9_1788" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.exe" KeyPath="yes" />
         </Component>
         <Component Id="comp_AD67EA11_0AFA" Guid="69160552-EB0A-42AF-A66A-7A0A062FC52E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9A8C981B_31CE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe.config" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\InstallGuard.exe.config" KeyPath="yes" />
+          <File Id="_9A8C981B_31CE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe.config" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_E7008D04_4FDD" Guid="79FE5C9F-F032-47ED-9BA7-4F9F0D952A66" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_818F2391_5641" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\InstallGuard.pdb" KeyPath="yes" />
+          <File Id="_818F2391_5641" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.pdb" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_5A5921FC_7E81" Guid="B6F07ED2-6F94-4EB5-A3BB-07447BE7F8C9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9DB26D42_DE46" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Interop.NetFwTypeLib.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Interop.NetFwTypeLib.dll" KeyPath="yes" />
+          <File Id="_9DB26D42_DE46" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Interop.NetFwTypeLib.dll" Source="..\..\CitadelGUI\bin\Release x64\Interop.NetFwTypeLib.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_0CF71C8C_3D22" Guid="26AA4EC4-1F6E-467D-BC7B-2F158B31F6B0" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D2DDC861_2608" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ManagedWifi.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\ManagedWifi.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_F1E308F6_E396" Guid="008FE497-DCA7-4B4A-9FA1-A1AAB39D1D16" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_71B15DD7_084A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Connections.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Connections.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_6162AD68_3DD9" Guid="05D4D493-DFFE-4FFD-80EA-16B5506CD7A7" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C17779FD_7121" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Diagnostics.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Diagnostics.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_51254A03_BE53" Guid="1F4908A6-66D6-43C0-AAC5-756AB856CA0F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_80C5AE77_1CE1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Diagnostics.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Diagnostics.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_33F3809A_2AAE" Guid="790948B2-B133-4548-B0AB-6463A6B19B63" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_449DC4BC_210E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Hosting.Server.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_BCC8D37E_D482" Guid="C50EAF3E-BF8C-4960-B003-7014A2693432" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_8B1AA7D6_9D44" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Http.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Http.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_73B979F1_DC18" Guid="5743CD4E-9AFA-400B-9FAA-F299D2A6E4D5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_38FED250_114F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Http.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Http.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_74AF67F8_60E2" Guid="E4A2661A-FE1A-4C51-9C58-A8D97D524B31" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B8788BE5_7851" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Http.Features.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Http.Features.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_F3593E2C_04F2" Guid="0391ECB8-3662-4367-86D7-B96BF81B7EF6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_99DC34C3_59B5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.ResponseCompression.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.ResponseCompression.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_FDAEFC07_3798" Guid="53F0EAB8-2EFF-4BC7-BBA8-5317EA7650E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C904BF5C_BF5E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Core.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Server.Kestrel.Core.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_2B904CD4_036D" Guid="51AA0E74-6F79-464D-AF52-6C8A5D5ACAD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D70FF26F_E84A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Server.Kestrel.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Server.Kestrel.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_29B02ED3_CC9D" Guid="3DFCD78C-900B-40E0-AA08-3A976B2D9511" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9AEF21B9_ABBD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.AspNetCore.Server.Kestrel.Https.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.AspNetCore.Server.Kestrel.Https.dll" KeyPath="yes" />
+          <File Id="_D2DDC861_2608" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ManagedWifi.dll" Source="..\..\CitadelGUI\bin\Release x64\ManagedWifi.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_77F6F034_A5C4" Guid="C4291C82-95EC-4E4A-9D25-005B0DD0D72D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_296D4AAF_1158" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
+          <File Id="_296D4AAF_1158" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_77853F9B_5CF4" Guid="19EE8454-1B54-4FBB-BD22-BED208DCA331" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_09C5C12B_2561" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
+          <File Id="_09C5C12B_2561" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_10E06469_8211" Guid="4B6407FE-5793-4DA6-9BDD-63B1DF0AB46A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D260A6A1_817D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_A77ACFD3_9C11" Guid="262D2EA6-DE69-414C-AFEA-A2133C6CBB7A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_0ACC6376_84BD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.FileProviders.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_B3A86404_E6D0" Guid="88197F5D-C751-487A-A5DF-90101E5883C2" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_608DE7F8_8583" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.FileProviders.Physical.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_A418D1E1_B617" Guid="C5EB2BF8-B3AC-4152-AE51-942B09114CEF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E4EF4108_713C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.FileSystemGlobbing.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_58182657_3423" Guid="38CC4B77-AE1B-4403-B6F8-E576F8CB8D63" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_3D213815_1379" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Hosting.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_4F3DF132_442C" Guid="ABAFC7AA-9101-4C47-9ACC-D4FC8992A2E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_6536980D_6DFD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Logging.Abstractions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_2E976E91_F3FC" Guid="C0F40CB2-BAA1-44F5-AD12-F32C28B64F23" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_AFF1F95A_4BF9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Logging.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Logging.dll" KeyPath="yes" />
+          <File Id="_D260A6A1_817D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_39ECE5A0_970B" Guid="5ADE4D72-2984-44AB-81AD-68A585FBE066" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_14B407DC_1D6D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Primitives.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
+          <File Id="_14B407DC_1D6D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_EC8785FF_A36E" Guid="A5DEAA43-BE16-4CA8-BC4F-998E9A7A6295" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E155F44C_64DF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Net.Http.Headers.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Net.Http.Headers.dll" KeyPath="yes" />
+          <File Id="_E155F44C_64DF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Net.Http.Headers.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Net.Http.Headers.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_10E6C4A9_B927" Guid="D3C46ED4-4EFF-4213-A85B-A0293A34E5D1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_6A96B849_FE82" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Microsoft.Win32.TaskScheduler.dll" KeyPath="yes" />
+          <File Id="_6A96B849_FE82" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Win32.TaskScheduler.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_993A8498_1AD6" Guid="78BC782A-F938-4F4D-8507-DE3F4F5B2E63" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_33EFE8D7_FD35" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NamedPipeWrapper.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NamedPipeWrapper.dll" KeyPath="yes" />
+          <File Id="_33EFE8D7_FD35" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NamedPipeWrapper.dll" Source="..\..\CitadelGUI\bin\Release x64\NamedPipeWrapper.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_EE50F174_B36A" Guid="FA1CFB4A-EA71-4B56-8044-77F520BF6F56" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_250C2D2E_2B69" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Newtonsoft.Json.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Newtonsoft.Json.dll" KeyPath="yes" />
+          <File Id="_250C2D2E_2B69" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Newtonsoft.Json.dll" Source="..\..\CitadelGUI\bin\Release x64\Newtonsoft.Json.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_FAE7F4DA_42A6" Guid="6B50C403-30CB-42AF-871D-D898598589EF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C7778199_7E1E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.config" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NLog.config" KeyPath="yes" />
+          <File Id="_C7778199_7E1E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.config" Source="..\..\CitadelGUI\bin\Release x64\NLog.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_81B88535_383A" Guid="F2D674C8-A3AC-457D-9B4E-D2AC822CDE9E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_353A4553_027A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NLog.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_180BAC58_F70A" Guid="C051CAF4-A0FE-4F1C-90E5-9321E7C2CB1E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_88E2D682_D3AB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NLog.xml" KeyPath="yes" />
+          <File Id="_353A4553_027A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.dll" Source="..\..\CitadelGUI\bin\Release x64\NLog.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_722D4427_A15D" Guid="4F3A6520-F316-4C55-82E9-EABFB437721B" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_64237356_F13F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NodaTime.dll" KeyPath="yes" />
+          <File Id="_64237356_F13F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.dll" Source="..\..\CitadelGUI\bin\Release x64\NodaTime.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_31E62DAB_4237" Guid="9476306E-A5C4-4DD0-B943-06E2100AD1D3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_2AC10A49_C50D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NodaTime.pdb" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_F6948302_9657" Guid="E883DFA0-0690-401B-8C46-15C49DA378BC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5B053890_4BC3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\NodaTime.xml" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_ADC80220_AF7D" Guid="F05C805D-49A1-4834-A9F8-F5DB4E63F581" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_2C7B5477_26E6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="OpenTK.GLControl.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\OpenTK.GLControl.xml" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_50E4A41D_00A4" Guid="18658AD6-4190-4D52-8F90-0AE9613762CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_F5179048_287B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="OpenTK.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\OpenTK.xml" KeyPath="yes" />
+          <File Id="_2AC10A49_C50D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.pdb" Source="..\..\CitadelGUI\bin\Release x64\NodaTime.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_D8C3B125_D057" Guid="2FEC91D8-CDAB-436E-80B2-9C1BA5FDD3A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_FDC6F254_185D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_green.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\SQLitePCLRaw.batteries_green.dll" KeyPath="yes" />
+          <File Id="_FDC6F254_185D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_green.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.batteries_green.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_10CE80FB_91A6" Guid="C7F41912-5523-4B99-94C5-23C6906DA94A" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_3B696487_76B9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.provider.e_sqlite3.dll" Source="c:\program files (x86)\microsoft visual studio\2017\community\common7\ide\commonextensions\microsoft\managedlanguages\vbcsharp\languageservices\SQLitePCLRaw.provider.e_sqlite3.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_3097A8C8_17A4" Guid="54D75551-3235-4F59-AF69-C6E5E7723092" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_895E1C9E_AC8C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" />
+          <File Id="_895E1C9E_AC8C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_2C706FF7_3152" Guid="1223A186-2745-4B2C-A89B-4D53A01A98A0" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4B14F61D_DB90" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Collections.Immutable.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Collections.Immutable.dll" KeyPath="yes" />
+          <File Id="_4B14F61D_DB90" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Collections.Immutable.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Collections.Immutable.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_035A2E97_3194" Guid="7C324C87-535C-49EC-B994-4CFB9B86AC95" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_725A5062_09BD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.IO.Pipes.AccessControl.dll" KeyPath="yes" />
+          <File Id="_725A5062_09BD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CitadelGUI\bin\Release x64\System.IO.Pipes.AccessControl.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_8B0C03BB_F50A" Guid="7B1CE0E8-0E72-4EFB-9EB9-C7FF3800C447" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_684E9962_0FE1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Numerics.Vectors.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Numerics.Vectors.dll" KeyPath="yes" />
+          <File Id="_684E9962_0FE1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Numerics.Vectors.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Numerics.Vectors.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_A4A77E63_2997" Guid="FAC967B7-5078-4178-B0B9-BA1C2B131D7F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_49C4D337_3CC3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.Metadata.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Reflection.Metadata.dll" KeyPath="yes" />
+          <File Id="_49C4D337_3CC3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.Metadata.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Reflection.Metadata.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_770EBE31_7E27" Guid="95C8D416-D468-42D9-8845-B9F1134E5E34" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D50AB5FE_C921" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Reflection.TypeExtensions.dll" KeyPath="yes" />
+          <File Id="_D50AB5FE_C921" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Reflection.TypeExtensions.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_FB002B61_B9E4" Guid="1617D6FE-421D-4C9C-A376-4CCCFAD5620A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E6BA8F5D_170B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.AccessControl.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Security.AccessControl.dll" KeyPath="yes" />
+          <File Id="_E6BA8F5D_170B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.AccessControl.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Security.AccessControl.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_253B3221_7D9E" Guid="D83A5F80-DCE5-4681-B385-3FF6AD234EBD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E21B43C5_3A39" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Cryptography.Cng.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Security.Cryptography.Cng.dll" KeyPath="yes" />
+          <File Id="_E21B43C5_3A39" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Cryptography.Cng.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Security.Cryptography.Cng.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_D4B83795_462E" Guid="0DAD5C78-0585-438F-8B0C-810C6A959F1A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_078239F9_93E4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Principal.Windows.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.Security.Principal.Windows.dll" KeyPath="yes" />
+          <File Id="_078239F9_93E4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Principal.Windows.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Security.Principal.Windows.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_E51A9349_B53B" Guid="8F0FED3B-86AE-425D-9CBC-0CA90AAEAB31" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B94FF609_A48C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\WinDivertSharp.pdb" KeyPath="yes" />
+          <File Id="_B94FF609_A48C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.pdb" Source="..\..\CitadelGUI\bin\Release x64\WinDivertSharp.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_0502A261_93CE" Guid="A333A963-8C3D-4FAE-952A-68F5CF34762D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_2C4E00FB_CF48" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Core.pdb" KeyPath="yes" />
+          <File Id="_2C4E00FB_CF48" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.pdb" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Core.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_2A46A112_98DF" Guid="AFF14D3B-2A8E-4DAA-ACC3-0E006EB7423A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5E6E07EE_FD0C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Core.xml" KeyPath="yes" />
+          <File Id="_5E6E07EE_FD0C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.xml" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Core.xml" KeyPath="yes" />
         </Component>
         <Component Id="comp_A75E0D6B_2C38" Guid="C26618EC-DDEB-4AEA-AE3A-FDA4E5CC0F4E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_A86F2B3F_B2FE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.WPF.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Platform.WPF.pdb" KeyPath="yes" />
+          <File Id="_A86F2B3F_B2FE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.WPF.pdb" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Platform.WPF.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_B6BE8231_9D81" Guid="8C2C6614-1EAC-4186-956C-B5503DD44902" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_2ED6E8D5_AA9A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Xaml.pdb" KeyPath="yes" />
+          <File Id="_2ED6E8D5_AA9A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.pdb" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Xaml.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_2408E4E6_733A" Guid="D6AD658F-29FC-4FB1-AD56-EB28BDE69BD1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_F8E79491_652E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.xml" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Xamarin.Forms.Xaml.xml" KeyPath="yes" />
+          <File Id="_F8E79491_652E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.xml" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Xaml.xml" KeyPath="yes" />
         </Component>
         <Component Id="comp_EF93FB74_BA3D" Guid="9FDBA0BB-0C76-46CB-B44E-877B754E55E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_F70E68CC_6CD0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BrotliSharpLib.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\BrotliSharpLib.dll" KeyPath="yes" />
+          <File Id="_F70E68CC_6CD0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BrotliSharpLib.dll" Source="..\..\CitadelGUI\bin\Release x64\BrotliSharpLib.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_A2936DCD_CD71" Guid="E68CAFE3-7B47-4544-BF80-540B4E5791BB" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4819A8DD_F41A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Titanium.Web.Proxy.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\Titanium.Web.Proxy.dll" KeyPath="yes" />
+          <File Id="_4819A8DD_F41A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Titanium.Web.Proxy.dll" Source="..\..\CitadelGUI\bin\Release x64\Titanium.Web.Proxy.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_364DFCC2_AEE8" Guid="B9A3C774-4D60-4479-96C4-D934936B72CD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_25C5585D_F64F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterProvider.Common.dll" KeyPath="yes" />
+          <File Id="_25C5585D_F64F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.dll" Source="..\..\CitadelGUI\bin\Release x64\FilterProvider.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_E0254AA0_DD67" Guid="3A34BD73-E319-4BCB-B6AC-101DEA89AF3F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_7A230D21_8429" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\System.ServiceModel.Syndication.dll" KeyPath="yes" />
+          <File Id="_7A230D21_8429" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CitadelGUI\bin\Release x64\System.ServiceModel.Syndication.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_F2865644_8363" Guid="D12604EB-8B9B-43CF-B55F-4F4F74B5C2E6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_DE59FCB6_DD9C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.pdb" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\FilterProvider.Common.pdb" KeyPath="yes" />
+          <File Id="_DE59FCB6_DD9C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.pdb" Source="..\..\CitadelGUI\bin\Release x64\FilterProvider.Common.pdb" KeyPath="yes" />
         </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">
@@ -409,13 +262,13 @@
             <RemoveFolder Id="_34874174_4D2F_43E5_8571_E73460E1D5B4" On="uninstall" />
           </Component>
           <Component Id="com_1E44E29B_5E1F_EE4C_A24B_C5372FBDE429" Guid="7AF90A9F-5675-4693-9E22-2505F3AE29FA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_1E44E29B_5E1F_EE4C_A24B_C5372FBDE429" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\x64\WinDivert64.sys" KeyPath="yes" />
+            <File Id="_1E44E29B_5E1F_EE4C_A24B_C5372FBDE429" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CitadelGUI\bin\Release x64\x64\WinDivert64.sys" KeyPath="yes" />
           </Component>
           <Component Id="com_5B643A28_522C_DA4F_AAB0_5643CDA65D3D" Guid="5C1040D7-8175-457D-BCD9-B728D594406B" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_5B643A28_522C_DA4F_AAB0_5643CDA65D3D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\x64\e_sqlite3.dll" KeyPath="yes" />
+            <File Id="_5B643A28_522C_DA4F_AAB0_5643CDA65D3D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="e_sqlite3.dll" Source="..\..\CitadelGUI\bin\Release x64\x64\e_sqlite3.dll" KeyPath="yes" />
           </Component>
           <Component Id="com_D51E1AB6_BE5B_BA4B_9256_EC83CDE3A455" Guid="52937FBF-1955-4DF6-B961-D50851181D23" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_D51E1AB6_BE5B_BA4B_9256_EC83CDE3A455" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert.dll" Source="..\..\CloudVeilGUI\CloudVeilGUI.WPF\bin\Release\x64\WinDivert.dll" KeyPath="yes" />
+            <File Id="_D51E1AB6_BE5B_BA4B_9256_EC83CDE3A455" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert.dll" Source="..\..\CitadelGUI\bin\Release x64\x64\WinDivert.dll" KeyPath="yes" />
           </Component>
         </Directory>
       </Directory>
