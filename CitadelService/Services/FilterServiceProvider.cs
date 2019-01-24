@@ -953,32 +953,7 @@ namespace CitadelService.Services
             Debug.WriteLine("Elements blocked.");
         }
 
-        /// <summary>
-        /// A little helper function for finding a path in a whitelist/blacklist.
-        /// </summary>
-        /// <param name="list"></param>
-        /// <param name="appAbsolutePath"></param>
-        /// <param name="appName"></param>
-        /// <returns></returns>
-        private bool isAppInList(HashSet<string> list, string appAbsolutePath, string appName)
-        {
-            if (list.Contains(appName))
-            {
-                // Whitelist is in effect and this app is whitelisted. So, don't force it through.
-                return true;
-            }
-
-            // Support for whitelisted apps like Android Studio\bin\jre\java.exe
-            foreach (string app in list)
-            {
-                if (app.Contains(Path.DirectorySeparatorChar) && appAbsolutePath.EndsWith(app))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        private AppListCheck appListCheck;
 
         /// <summary>
         /// Called whenever the Engine want's to check if the application at the supplied absolute
@@ -993,6 +968,11 @@ namespace CitadelService.Services
         /// </returns>
         public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
         {
+            if(appListCheck == null && m_provider.PolicyConfiguration != null)
+            {
+                appListCheck = new AppListCheck(m_provider.PolicyConfiguration);
+            }
+
             // XXX TODO - The engine shouldn't even tell us about SYSTEM processes and just silently
             // let them through.
             if (request.BinaryAbsolutePath.OIEquals("SYSTEM"))
@@ -1061,7 +1041,7 @@ namespace CitadelService.Services
 
                 if(m_provider.PolicyConfiguration.WhitelistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_provider.PolicyConfiguration.WhitelistedApplications, request.BinaryAbsolutePath, appName);
+                    bool inList = appListCheck.IsAppInWhitelist(request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {
@@ -1077,7 +1057,7 @@ namespace CitadelService.Services
 
                 if(m_provider.PolicyConfiguration.BlacklistedApplications.Count > 0)
                 {
-                    bool inList = isAppInList(m_provider.PolicyConfiguration.BlacklistedApplications, request.BinaryAbsolutePath, appName);
+                    bool inList = appListCheck.IsAppInBlacklist(request.BinaryAbsolutePath, appName);
 
                     if(inList)
                     {

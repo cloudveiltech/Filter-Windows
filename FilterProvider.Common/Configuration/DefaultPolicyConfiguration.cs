@@ -34,6 +34,8 @@ using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data.Filtering;
 using FilterProvider.Common.Util;
 using Filter.Platform.Common;
+using System.Text.RegularExpressions;
+using DotNet.Globbing;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -84,16 +86,6 @@ namespace FilterProvider.Common.Configuration
         private BagOfTextTriggers m_textTriggers;
 
         /// <summary>
-        /// Stores all, if any, applications that should be forced throught the filter. 
-        /// </summary>
-        private HashSet<string> m_blacklistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Stores all, if any, applications that should not be forced through the filter. 
-        /// </summary>
-        private HashSet<string> m_whitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
         /// along. We use this object to store what strings we map to numbers.
         /// </summary>
@@ -124,8 +116,18 @@ namespace FilterProvider.Common.Configuration
         public FilterDbCollection FilterCollection { get { return m_filterCollection; } }
         public BagOfTextTriggers TextTriggers { get { return m_textTriggers; } }
 
-        public HashSet<string> BlacklistedApplications { get { return m_blacklistedApplications; } }
-        public HashSet<string> WhitelistedApplications { get { return m_whitelistedApplications; } }
+        /// <summary>
+        /// Stores all, if any, applications that should be forced through the filter. 
+        /// </summary>
+        public HashSet<string> BlacklistedApplications { get; private set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Stores all, if any, applications that should be bypassed by the filter
+        /// </summary>
+        public HashSet<string> WhitelistedApplications { get; private set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        public HashSet<Glob> BlacklistedApplicationGlobs { get; private set; } = new HashSet<Glob>();
+        public HashSet<Glob> WhitelistedApplicationGlobs { get; private set; } = new HashSet<Glob>();
 
         public CategoryIndex CategoryIndex { get { return m_categoryIndex; } }
 
@@ -214,7 +216,7 @@ namespace FilterProvider.Common.Configuration
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
                 // back, so we just directly issue this msg.
-                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
+                m_ipcServer?.NotifyStatus(FilterStatus.Synchronized);
 
                 var rHash = Encoding.UTF8.GetString(rHashBytes);
 
@@ -510,22 +512,46 @@ namespace FilterProvider.Common.Configuration
             }
         }
 
-        /// <summary>
-        /// Queries the service provider for updated filtering rules. 
-        /// </summary>
         public bool LoadConfiguration()
         {
             try
             {
                 m_filteringRwLock.EnterWriteLock();
 
-                // Load our configuration file and load configured lists, etc.
-
                 if(File.Exists(configFilePath))
+                {
+                    using (var cfgStream = File.OpenRead(configFilePath))
+                    {
+                        return LoadConfiguration(cfgStream);
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+                return false;
+            }
+            finally
+            {
+                m_filteringRwLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Queries the service provider for updated filtering rules. 
+        /// </summary>
+        /// <param name="cfgStream">Added this parameter so that we could test the default policy configuration.</param>
+        public bool LoadConfiguration(Stream cfgStream)
+        {
+            try
+            {
+                // Load our configuration file and load configured lists, etc.
+                if(cfgStream != null)
                 {
                     string cfgJson = string.Empty;
 
-                    using (var cfgStream = File.OpenRead(configFilePath))
                     using (TextReader textReader = new StreamReader(cfgStream))
                     {
                         cfgJson = textReader.ReadToEnd();
@@ -555,8 +581,8 @@ namespace FilterProvider.Common.Configuration
                         Configuration.UpdateFrequency = TimeSpan.FromMinutes(5);
                     }
 
-                    loadAppList(m_blacklistedApplications, Configuration.BlacklistedApplications);
-                    loadAppList(m_whitelistedApplications, Configuration.WhitelistedApplications);
+                    loadAppList(BlacklistedApplications, Configuration.BlacklistedApplications, BlacklistedApplicationGlobs);
+                    loadAppList(WhitelistedApplications, Configuration.WhitelistedApplications, WhitelistedApplicationGlobs);
 
                     if (Configuration.CannotTerminate)
                     {
@@ -576,20 +602,48 @@ namespace FilterProvider.Common.Configuration
                 LoggerUtil.RecursivelyLogException(m_logger, e);
                 return false;
             }
-            finally
-            {
-                m_filteringRwLock.ExitWriteLock();
-            }
 
             return true;
         }
 
-        private void loadAppList(HashSet<string> myAppList, HashSet<string> appList)
+        private void loadAppList(HashSet<string> myAppList, HashSet<string> appList, HashSet<Glob> globs)
         {
             myAppList.Clear();
+
+            globs?.Clear();
+
             foreach (var app in appList)
             {
                 myAppList.Add(app);
+
+                if(globs != null && (app.Contains('*') || app.Contains('?')))
+                {
+                    string globString = app;
+
+                    try
+                    {
+                        // Check to see if the glob includes a ** at the beginning. This is required in order to match any partial paths.
+                        if(globString[0] != '*' || globString[1] != '*')
+                        {
+                            globString = Path.Combine("**", globString);
+                        }
+
+                        var glob = Glob.Parse(globString, new GlobOptions()
+                        {
+                            Evaluation = new EvaluationOptions()
+                            {
+                                CaseInsensitive = true
+                            }
+                        });
+
+                        if (glob != null)
+                            globs.Add(glob);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.Warn("Invalid glob '{0}'. Not adding.", app);
+                    }
+                }
             }
         }
 

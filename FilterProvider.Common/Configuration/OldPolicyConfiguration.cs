@@ -30,6 +30,7 @@ using System.Collections.Concurrent;
 using Filter.Platform.Common.Util;
 using Filter.Platform.Common;
 using FilterProvider.Common.Util;
+using System.Text.RegularExpressions;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -97,6 +98,10 @@ namespace FilterProvider.Common.Configuration
         public CategoryIndex CategoryIndex { get { return m_categoryIndex; } }
 
         public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get { return m_generatedCategoriesMap; } }
+
+        public HashSet<DotNet.Globbing.Glob> BlacklistedApplicationGlobs => null;
+
+        public HashSet<DotNet.Globbing.Glob> WhitelistedApplicationGlobs => null;
 
         public event EventHandler OnConfigurationLoaded;
 

@@ -42,7 +42,15 @@ namespace Citadel.Core.Data.Serialization
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            var cast = value as float?;
+            if (cast == null)
+            {
+                writer.WriteValue((float?)null);
+            }
+
+            var castValue = cast.Value;
+
+            writer.WriteValue(castValue);
         }
     }
 }

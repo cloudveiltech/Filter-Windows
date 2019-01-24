@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FilterProvider.Common.Data.Filtering;
+using DotNet.Globbing;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -65,6 +66,16 @@ namespace FilterProvider.Common.Configuration
        
         HashSet<string> BlacklistedApplications { get; }
         HashSet<string> WhitelistedApplications { get; }
+
+        /// <summary>
+        /// This is intended to be a cache of all wildcard strings in the blacklisted applications list.
+        /// </summary>
+        HashSet<Glob> BlacklistedApplicationGlobs { get; }
+
+        /// <summary>
+        /// This is intended to be a cache of all wildcard strings in the whitelisted applications list.
+        /// </summary>
+        HashSet<Glob> WhitelistedApplicationGlobs { get; }
 
         CategoryIndex CategoryIndex { get; }
 
