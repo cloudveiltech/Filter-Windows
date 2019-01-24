@@ -78,19 +78,14 @@ Once you've got the latest code pulled down from the server, go ahead and open t
 On the top bar you'll see options for 'Debug' or 'Release' and 'Any CPU', 'x64' or 'x86'. Let's change them to 'Release' and 'Any CPU' first.
 
 ## New instructions
-### x64 Installer
 
-1. Change configuration options to 'Release' and 'x64'
-2. Right-click Setup x64 and click Build.
+Run `.\build-installer.cmd`
 
-### x86 Installer
-
-1. Change configuration options to 'Release' and 'x86'
-2. Right-click Setup x86 and click Build.
-
-Follow the next instructions to sign the installer.
+`.\build-installer.cmd` (which wraps `.\build-installer.ps1`) will build both installers for you and output them into `.\Installers\`
 
 ## Signing installers
+
+### This is currently out of date for 1.7
 
 ### Method 1 - SignInstallers project.
 After building both the x86 and x64 installers, right click SignInstallers and click build.

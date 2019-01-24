@@ -628,6 +628,28 @@ namespace FilterProvider.Common.Services
                     }
                 };
 
+                m_ipcServer.AddSelfModerationEntry += (AddSelfModerationEntryMessage message) =>
+                {
+                    string site = message.Site;
+
+                    HttpStatusCode code;
+                    bool responseReceived;
+
+                    byte[] responseBytes = WebServiceUtil.Default.RequestResource(ServiceResource.AddSelfModerationEntry, out code, out responseReceived);
+
+                    if(responseReceived && code == HttpStatusCode.NoContent)
+                    {
+                        if(m_policyConfiguration?.Configuration != null)
+                        {
+                            m_policyConfiguration.Configuration.SelfModeratedSites.Add(site);
+                            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
+                            {
+                                SelfModeratedSites = m_policyConfiguration.Configuration.SelfModeratedSites
+                            });
+                        }
+                    }
+                };
+
                 m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
                 {
                     var curAuthToken = WebServiceUtil.Default.AuthToken;
@@ -1152,7 +1174,7 @@ namespace FilterProvider.Common.Services
             // Force start our cascade of protective processes.
             try
             {
-                if (isTestRun)
+                if (!isTestRun)
                 {
                     m_systemServices.RunProtectiveServices();
                 }

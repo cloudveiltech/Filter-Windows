@@ -11,6 +11,7 @@ using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -189,6 +190,8 @@ namespace Citadel.IPC
 
     public delegate void DiagnosticsEnableHandler(DiagnosticsMessage message);
 
+    public delegate void AddSelfModerationEntryHandler(AddSelfModerationEntryMessage message);
+
     /// <summary>
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
@@ -266,6 +269,11 @@ namespace Citadel.IPC
         public DiagnosticsEnableHandler OnDiagnosticsEnable;
 
         /// <summary>
+        /// Delegate to be called when a client requests that we add a self-moderation entry.
+        /// </summary>
+        public AddSelfModerationEntryHandler AddSelfModerationEntry;
+
+        /// <summary>
         /// Our logger. 
         /// </summary>
         private readonly Logger m_logger;
@@ -302,8 +310,14 @@ namespace Citadel.IPC
 
             // Server is no longer started by constructor. We start the IPCServer after everything else has been set up by the FilterServiceProvider.
             m_ipcQueue = new IPCMessageTracker();
-            
+
+            m_callbacks.Add(typeof(AddSelfModerationEntryMessage), (msg) =>
+            {
+                AddSelfModerationEntry?.Invoke(msg as AddSelfModerationEntryMessage);
+            });
         }
+
+        private Dictionary<Type, Action<BaseMessage>> m_callbacks = new Dictionary<Type, Action<BaseMessage>>();
 
         private void M_server_Error(Exception exception)
         {
@@ -340,6 +354,12 @@ namespace Citadel.IPC
 
             var msgRealType = message.GetType();
 
+            Action<BaseMessage> callback = null;
+            if(m_callbacks.TryGetValue(msgRealType, out callback))
+            {
+                m_logger.Debug("Server message is {0}", msgRealType.Name);
+                callback?.Invoke(message);
+            }
             if(msgRealType == typeof(Messages.AuthenticationMessage))
             {
                 m_logger.Debug("Client message is {0}", nameof(Messages.AuthenticationMessage));

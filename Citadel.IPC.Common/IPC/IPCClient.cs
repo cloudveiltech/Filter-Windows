@@ -448,6 +448,13 @@ namespace Citadel.IPC
             });
         }
 
+        public void RequestAddSelfModeratedSite(string site)
+        {
+            var msg = new AddSelfModerationEntryMessage(site);
+
+            PushMessage(msg);
+        }
+
         public void TrustCertificate(string host, string certificateHash)
         {
             var msg = new CertificateExemptionMessage(host, certificateHash, true);

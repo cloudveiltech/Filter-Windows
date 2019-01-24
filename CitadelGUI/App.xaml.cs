@@ -654,6 +654,21 @@ namespace CloudVeil.Windows
                     }
                 };
 
+                m_ipcClient.OnConfigurationInfo = (msg) =>
+                {
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        var viewModel = ModelManager.Get<SelfModerationViewModel>();
+
+                        viewModel.SelfModeratedSites.Clear();
+
+                        foreach (string site in msg.SelfModeratedSites)
+                        {
+                            viewModel.SelfModeratedSites.Add(site);
+                        }
+                    });
+                };
+
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
                     // C# doesn't like cross-thread GUI variable access, so run this on window thread.

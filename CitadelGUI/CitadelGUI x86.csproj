@@ -113,7 +113,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-	<Page Include="Styles\AppStyle.xaml">
+    <Page Include="Styles\AppStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -144,6 +144,10 @@
     <Page Include="Te\Citadel\UI\Views\LoginView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\SelfModerationView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Te\Citadel\UI\Views\SettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -182,6 +186,9 @@
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\SelfModerationView.xaml.cs">
+      <DependentUpon>SelfModerationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>

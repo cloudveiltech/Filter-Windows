@@ -1065,7 +1065,7 @@ namespace CitadelService.Services
                         return new FirewallResponse(FirewallAction.FilterApplication);
                     }
 
-                    return new FirewallResponse(FirewallAction.FilterApplication);
+                    return new FirewallResponse(FirewallAction.DontFilterApplication);
                 }
 
                 // This app was not hit by either an enforced whitelist or blacklist. So, by default

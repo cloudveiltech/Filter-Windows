@@ -585,7 +585,6 @@ namespace CitadelCore.Windows.Diversion
                             }
                         }
 
-                        Console.WriteLine("Sending packet src={0}:{1}, dst={2}:{3}, {4}", parseResult.IPv4Header->SrcAddr, parseResult.TcpHeader->SrcPortHostOrder, parseResult.IPv4Header->DstAddr, parseResult.TcpHeader->DstPortHostOrder, addr.Direction);
                         WinDivert.WinDivertSendEx(m_diversionHandle, packet, recvLength, 0, ref addr);
                     }
                     else

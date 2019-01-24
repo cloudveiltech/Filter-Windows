@@ -41,6 +41,7 @@ namespace FilterProvider.Common.Util
         RetrieveToken,
         BypassRequest,
         AccountabilityNotify,
+        AddSelfModerationEntry,
         Custom
     };
 
@@ -70,7 +71,8 @@ namespace FilterProvider.Common.Util
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
-            { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" }
+            { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
+            { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" }
         };
 
         private readonly Logger m_logger;
@@ -453,7 +455,12 @@ namespace FilterProvider.Common.Util
 
             byte[] ret = RequestResource(ServiceResource.RuleDataSumCheck, out code, out responseReceived, options);
 
-            Console.WriteLine("{0}", Encoding.UTF8.GetString(ret));
+            if(ret == null)
+            {
+                m_logger.Warn("No response text returned from {0}. Status code = {1}, Response received = {2}", m_namedResourceMap[ServiceResource.RuleDataSumCheck], code, responseReceived);
+                return null;
+            }
+
             Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
 
             return responseDict;

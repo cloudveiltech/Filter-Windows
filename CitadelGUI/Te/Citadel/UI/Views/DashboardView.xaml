@@ -174,9 +174,14 @@
                                 VerticalScrollBarOnLeftSide="False">
             <Controls:HamburgerMenu.ItemsSource>
                 <Controls:HamburgerMenuItemCollection>
-                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=HistorySolid}" Label="Blocked Pages">
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=HistorySolid}" Label="Block History">
                         <Controls:HamburgerMenuIconItem.Tag>
                             <local:HistoryView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="My Blocked Sites">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:SelfModerationView />
                         </Controls:HamburgerMenuIconItem.Tag>
                     </Controls:HamburgerMenuIconItem>
                     <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="Settings">

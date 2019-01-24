@@ -191,6 +191,11 @@ namespace FilterProvider.Common.Configuration
             Dictionary<string, bool?> filterListResults = WebServiceUtil.Default.VerifyLists(hashes);
             lastFilterListResults = filterListResults;
 
+            if(filterListResults == null)
+            {
+                return null;
+            }
+
             foreach (var result in filterListResults)
             {
                 if (result.Value == null)
