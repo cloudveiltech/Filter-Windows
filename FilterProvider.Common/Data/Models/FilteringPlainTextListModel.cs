@@ -40,6 +40,7 @@ namespace FilterProvider.Common.Data.Models
     /// This model contains a relative path to the plain text file within a parent zip container. It
     /// also gives an enumeration indicating the type or intent of the text data within the file.
     /// </summary>
+    [Serializable]
     public class FilteringPlainTextListModel
     {
         /// <summary>

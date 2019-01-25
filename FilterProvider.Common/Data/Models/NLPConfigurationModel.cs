@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using System;
 using System.Collections.Generic;
 
 namespace FilterProvider.Common.Data.Models
@@ -24,6 +25,7 @@ namespace FilterProvider.Common.Data.Models
     /// the best category returned by the classification matches a category selected for use, then a
     /// block action should take place because this counts as positive match.
     /// </summary>
+    [Serializable]
     public class NLPConfigurationModel
     {
         /// <summary>

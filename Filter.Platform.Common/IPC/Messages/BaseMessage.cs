@@ -14,6 +14,46 @@ using System.Threading.Tasks;
 
 namespace Citadel.IPC.Messages
 {
+    public class IpcMessage : BaseMessage
+    {
+        /// <summary>
+        /// Functionally equivalent to the request path in a REST API.
+        /// Think the "/endpoint" part in "GET /endpoint?param0=p
+        /// </summary>
+        public IpcCall Call { get; set; }
+
+        /// <summary>
+        /// Functionally equivalent to HTTP method in a REST API.
+        /// Think the "GET" part in "GET /endpoint?param0=p
+        /// </summary>
+        public IpcMessageMethod Method { get; set; }
+
+        /// <summary>
+        /// The data object associated with the <see cref="IpcCall"/>
+        /// Can be null.
+        /// </summary>
+        public object Data { get; set; }
+
+        public static IpcMessage Send(IpcCall call, object data)
+        {
+            return new IpcMessage()
+            {
+                Method = IpcMessageMethod.Send,
+                Call = call,
+                Data = data
+            };
+        }
+
+        public static IpcMessage Request(IpcCall call, object data = null)
+        {
+            return new IpcMessage()
+            {
+                Method = IpcMessageMethod.Request,
+                Call = call
+            };
+        }
+    }
+
     [Serializable]
     public class BaseMessage
     {

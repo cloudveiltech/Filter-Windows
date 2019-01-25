@@ -51,7 +51,7 @@ namespace Citadel.IPC
         /// <summary>
         /// Called by IPCClient.OnServerMessage() before any of its own handlers handle the message.
         /// 
-        /// If this function returns true, OnServerMessage() does not handle the message.
+        /// If this function returns true, that means that this function had the capability of handling this message.
         /// </summary>
         /// <param name="message">The reply message from the IPC server</param>
         /// <returns>true if handled, false if not</returns>

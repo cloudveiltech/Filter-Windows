@@ -74,7 +74,7 @@ namespace Citadel.IPC
     /// <returns></returns>
     public delegate bool GenericReplyHandler(BaseMessage msg);
 
-    public class IPCClient : IDisposable
+    public class IPCClient : IpcCommunicator, IDisposable
     {
         private IPipeClient client;
 
@@ -172,6 +172,11 @@ namespace Citadel.IPC
             m_callbacks.Add(typeof(ConfigurationInfoMessage), (msg) =>
             {
                 OnConfigurationInfo?.Invoke(msg as ConfigurationInfoMessage);
+            });
+
+            m_callbacks.Add(typeof(IpcMessage), (msg) =>
+            {
+                HandleIpcMessage(msg as IpcMessage);
             });
         }
 
@@ -466,6 +471,28 @@ namespace Citadel.IPC
             var msg = new DiagnosticsMessage();
             msg.EnableDiagnostics = enable;
             PushMessage(msg);
+        }
+
+        public override ReplyHandlerClass Request(IpcCall call, object data = null, BaseMessage replyToThis = null)
+        {
+            ReplyHandlerClass h = new ReplyHandlerClass(this);
+
+            BaseMessage msg = IpcMessage.Request(call, data);
+            msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
+
+            PushMessage(msg, h.TriggerHandler);
+            return h;
+        }
+
+        public override ReplyHandlerClass Send(IpcCall call, object data, BaseMessage replyToThis = null)
+        {
+            ReplyHandlerClass h = new ReplyHandlerClass(this);
+
+            BaseMessage msg = IpcMessage.Send(call, data);
+            msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
+
+            PushMessage(msg, h.TriggerHandler);
+            return h;
         }
 
         protected void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)

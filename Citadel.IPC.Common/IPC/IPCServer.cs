@@ -196,7 +196,7 @@ namespace Citadel.IPC
     /// The IPC server class is meant to be used with a session 0 isolated process, more specifically
     /// a Windows service. This class handles requests from clients (GUI) and responds accordingly.
     /// </summary>
-    public class IPCServer : IDisposable
+    public class IPCServer : IpcCommunicator, IDisposable
     {
         /// <summary>
         /// Actual named pipe server wrapper. 
@@ -315,6 +315,11 @@ namespace Citadel.IPC
             {
                 AddSelfModerationEntry?.Invoke(msg as AddSelfModerationEntryMessage);
             });
+
+            m_callbacks.Add(typeof(IpcMessage), (msg) =>
+            {
+                // The new IPC message Request/Send API handles 
+            });
         }
 
         private Dictionary<Type, Action<BaseMessage>> m_callbacks = new Dictionary<Type, Action<BaseMessage>>();
@@ -351,6 +356,11 @@ namespace Citadel.IPC
             // with a nice mapping system so we can do a switch, but this can wait.
 
             m_logger.Debug("Got IPC message from client.");
+
+            if(m_ipcQueue.HandleMessage(message))
+            {
+                return;
+            }
 
             var msgRealType = message.GetType();
 
@@ -673,12 +683,34 @@ namespace Citadel.IPC
             PushMessage(message);
         }
 
-        public void SendConfigurationInfo(ConfigurationInfoMessage msg)
+        public override ReplyHandlerClass Request(IpcCall call, object data = null, BaseMessage replyToThis = null)
         {
-            PushMessage(msg);
+            ReplyHandlerClass h = new ReplyHandlerClass(this);
+
+            BaseMessage msg = IpcMessage.Request(call, data);
+            msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
+
+            PushMessage(msg, h.TriggerHandler);
+            return h;
         }
 
-        private void PushMessage(BaseMessage msg)
+        public override ReplyHandlerClass Send(IpcCall call, object data, BaseMessage replyToThis = null)
+        {
+            ReplyHandlerClass h = new ReplyHandlerClass(this);
+
+            BaseMessage msg = IpcMessage.Send(call, data);
+            msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
+
+            PushMessage(msg, h.TriggerHandler);
+            return h;
+        }
+
+        public ReplyHandlerClass SendConfigurationInfo(ConfigurationInfoMessage msg)
+        {
+            return Send(IpcCall.ConfigurationInfo, msg);
+        }
+
+        private void PushMessage(BaseMessage msg, GenericReplyHandler handler = null)
         {
             if(m_waitingForAuth)
             {

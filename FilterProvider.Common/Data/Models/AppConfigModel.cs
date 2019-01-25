@@ -18,6 +18,7 @@ namespace FilterProvider.Common.Data.Models
     /// should function. This includes which filtering lists to use, how to apply those filtering
     /// lists, which applications to filter, which protection mechanisms to employ, etc.
     /// </summary>
+    [Serializable]
     public class AppConfigModel
     {
         /// <summary>
