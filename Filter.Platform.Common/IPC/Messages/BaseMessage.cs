@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Citadel.IPC.Messages
 {
+    [Serializable]
     public class IpcMessage : BaseMessage
     {
         /// <summary>
@@ -49,7 +50,8 @@ namespace Citadel.IPC.Messages
             return new IpcMessage()
             {
                 Method = IpcMessageMethod.Request,
-                Call = call
+                Call = call,
+                Data = data
             };
         }
     }
@@ -72,6 +74,11 @@ namespace Citadel.IPC.Messages
         public BaseMessage()
         {
             Id = Guid.NewGuid();
+        }
+
+        public ReplyHandlerClass SendReply(IpcCommunicator comm, IpcCall call, object data)
+        {
+            return comm.Send(call, data, this);
         }
     }
 }

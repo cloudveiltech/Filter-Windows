@@ -11,7 +11,7 @@ using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using CitadelCore.Net.Proxy;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using DistillNET;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;

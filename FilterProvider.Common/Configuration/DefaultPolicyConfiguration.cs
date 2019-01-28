@@ -20,7 +20,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using System.Diagnostics;
 using System.Threading;
 using System.IO.Compression;
@@ -36,6 +36,7 @@ using FilterProvider.Common.Util;
 using Filter.Platform.Common;
 using System.Text.RegularExpressions;
 using DotNet.Globbing;
+using Filter.Platform.Common.Data.Models;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -492,6 +493,38 @@ namespace FilterProvider.Common.Configuration
                                         GC.Collect();
                                     }
                                     break;
+                            }
+                        }
+                    }
+
+                    if(Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
+                    {
+                        List<string> sanitizedSelfModerationSites = new List<string>();
+
+                        // As we are importing directly into an Adblock Plus-style rule engine, we need to make sure
+                        // that the user can't whitelist sites by adding something with a "@@" in front of it.
+
+                        // The easiest way to do this is to limit the characters to 'safe' characters.
+                        Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
+
+                        foreach(string site in Configuration.SelfModeration)
+                        {
+                            if(isCleanRule.IsMatch(site))
+                            {
+                                sanitizedSelfModerationSites.Add(site);
+                            }
+                        }
+
+                        MappedFilterListCategoryModel categoryModel = null;
+                        if (TryFetchOrCreateCategoryMap("self_moderation", out categoryModel))
+                        {
+                            var loadedFailedRes = m_filterCollection.ParseStoreRules(sanitizedSelfModerationSites.ToArray(), categoryModel.CategoryId).Result;
+                            totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                            totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+
+                            if(loadedFailedRes.Item1 > 0)
+                            {
+                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
                         }
                     }

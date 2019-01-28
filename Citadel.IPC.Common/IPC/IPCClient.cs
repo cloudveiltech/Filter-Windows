@@ -65,8 +65,6 @@ namespace Citadel.IPC
 
     public delegate void DiagnosticsInfoHandler(DiagnosticsInfoMessage msg);
 
-    public delegate void ConfigurationInfoHandler(ConfigurationInfoMessage msg);
-
     /// <summary>
     /// A generic reply handler, called by IPC queue.
     /// </summary>
@@ -109,8 +107,6 @@ namespace Citadel.IPC
         public AddCertificateExemptionRequestHandler AddCertificateExemptionRequest;
 
         public DiagnosticsInfoHandler OnDiagnosticsInfo;
-
-        public ConfigurationInfoHandler OnConfigurationInfo;
 
         /// <summary>
         /// Our logger.
@@ -168,11 +164,6 @@ namespace Citadel.IPC
             client.Error += clientError;
 
             client.Start();
-
-            m_callbacks.Add(typeof(ConfigurationInfoMessage), (msg) =>
-            {
-                OnConfigurationInfo?.Invoke(msg as ConfigurationInfoMessage);
-            });
 
             m_callbacks.Add(typeof(IpcMessage), (msg) =>
             {
@@ -453,11 +444,9 @@ namespace Citadel.IPC
             });
         }
 
-        public void RequestAddSelfModeratedSite(string site)
+        public ReplyHandlerClass RequestAddSelfModeratedSite(string site)
         {
-            var msg = new AddSelfModerationEntryMessage(site);
-
-            PushMessage(msg);
+            return Request(IpcCall.AddSelfModeratedSite, site);
         }
 
         public void TrustCertificate(string host, string certificateHash)

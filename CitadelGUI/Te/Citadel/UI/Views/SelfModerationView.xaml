@@ -33,7 +33,7 @@
             Grid.Row="2"
             Grid.Column="1"
             Style="{StaticResource VirtualisedMetroListView}"
-            ItemsSource="{Binding SelfModeratedSites}"
+            ItemsSource="{Binding SelfModerationSites}"
             />
     </Grid>
 </UserControl>

@@ -4,13 +4,18 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
+using Citadel.IPC;
+using CloudVeil.Windows;
+using CloudVeilGUI;
 using GalaSoft.MvvmLight.CommandWpf;
+using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Te.Citadel.UI.Windows;
 
 namespace Te.Citadel.UI.ViewModels
 {
@@ -31,18 +36,18 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
-        private ObservableCollection<string> selfModeratedSites;
-        public ObservableCollection<string> SelfModeratedSites
+        private ObservableCollection<string> selfModerationSites = new ObservableCollection<string>();
+        public ObservableCollection<string> SelfModerationSites
         {
             get
             {
-                return selfModeratedSites;
+                return selfModerationSites;
             }
 
             set
             {
-                selfModeratedSites = value;
-                RaisePropertyChanged(nameof(SelfModeratedSites));
+                selfModerationSites = value;
+                RaisePropertyChanged(nameof(SelfModerationSites));
             }
         }
 
@@ -55,7 +60,21 @@ namespace Te.Citadel.UI.ViewModels
                 {
                     addNewSiteCommand = new RelayCommand<string>((site) =>
                     {
-                        // TODO: Add m_ipcClient message.
+                        bool result = (CitadelApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?").Result;
+
+                        if (!result)
+                            return;
+
+                        IPCClient.Default.RequestAddSelfModeratedSite(site)
+                            .OnReply((context, msg) =>
+                            {
+                                CitadelApp.Current.Dispatcher.Invoke(() =>
+                                {
+                                    SelfModerationSites = new ObservableCollection<string>(msg.Data as List<string>);
+                                });
+
+                                return true;
+                            });
                     });
                 }
 

@@ -18,7 +18,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using System.Diagnostics;
 using System.Threading;
 using System.IO.Compression;

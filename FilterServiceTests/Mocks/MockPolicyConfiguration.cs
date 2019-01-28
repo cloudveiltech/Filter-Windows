@@ -1,8 +1,9 @@
 ﻿using DistillNET;
 using DotNet.Globbing;
+using Filter.Platform.Common.Data.Models;
 using FilterProvider.Common.Configuration;
 using FilterProvider.Common.Data.Filtering;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

@@ -22,7 +22,7 @@ namespace Citadel.IPC
         {
             if(msg is IpcMessage)
             {
-                return Handler?.Invoke(this, msg) ?? false;
+                return Handler?.Invoke(this, msg as IpcMessage) ?? false;
             }
             else
             {

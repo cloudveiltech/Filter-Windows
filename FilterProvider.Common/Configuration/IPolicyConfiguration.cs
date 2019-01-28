@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using DistillNET;
 using System;
 using System.Collections.Concurrent;
@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FilterProvider.Common.Data.Filtering;
 using DotNet.Globbing;
+using Filter.Platform.Common.Data.Models;
 
 namespace FilterProvider.Common.Configuration
 {

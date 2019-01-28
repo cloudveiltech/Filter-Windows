@@ -6,6 +6,7 @@
 */
 using Citadel.IPC.Messages;
 using Filter.Platform.Common;
+using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.IPC;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
@@ -318,7 +319,8 @@ namespace Citadel.IPC
 
             m_callbacks.Add(typeof(IpcMessage), (msg) =>
             {
-                // The new IPC message Request/Send API handles 
+                // The new IPC message Request/Send API handles
+                HandleIpcMessage(msg);
             });
         }
 
@@ -367,7 +369,7 @@ namespace Citadel.IPC
             Action<BaseMessage> callback = null;
             if(m_callbacks.TryGetValue(msgRealType, out callback))
             {
-                m_logger.Debug("Server message is {0}", msgRealType.Name);
+                m_logger.Debug("Client message is {0}", msgRealType.Name);
                 callback?.Invoke(message);
             }
             if(msgRealType == typeof(Messages.AuthenticationMessage))
@@ -705,9 +707,9 @@ namespace Citadel.IPC
             return h;
         }
 
-        public ReplyHandlerClass SendConfigurationInfo(ConfigurationInfoMessage msg)
+        public ReplyHandlerClass SendConfigurationInfo(AppConfigModel cfg)
         {
-            return Send(IpcCall.ConfigurationInfo, msg);
+            return Send(IpcCall.ConfigurationInfo, cfg);
         }
 
         private void PushMessage(BaseMessage msg, GenericReplyHandler handler = null)

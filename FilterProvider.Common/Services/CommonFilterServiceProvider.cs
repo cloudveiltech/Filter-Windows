@@ -10,7 +10,7 @@ using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using DistillNET;
 using Newtonsoft.Json;
 using NLog;
@@ -628,27 +628,41 @@ namespace FilterProvider.Common.Services
                     }
                 };
 
-                m_ipcServer.AddSelfModerationEntry += (AddSelfModerationEntryMessage message) =>
+                m_ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
                 {
-                    string site = message.Site;
+                    string site = message.Data as string;
+                    if (site == null)
+                        return false;
 
                     HttpStatusCode code;
                     bool responseReceived;
 
-                    byte[] responseBytes = WebServiceUtil.Default.RequestResource(ServiceResource.AddSelfModerationEntry, out code, out responseReceived);
-
-                    if(responseReceived && code == HttpStatusCode.NoContent)
+                    byte[] responseBytes = WebServiceUtil.Default.RequestResource(ServiceResource.AddSelfModerationEntry, out code, out responseReceived, new WebServiceUtil.ResourceOptions()
                     {
-                        if(m_policyConfiguration?.Configuration != null)
+                        Parameters = new Dictionary<string, object>()
                         {
-                            m_policyConfiguration.Configuration.SelfModeratedSites.Add(site);
-                            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
-                            {
-                                SelfModeratedSites = m_policyConfiguration.Configuration.SelfModeratedSites
-                            });
+                            { "url", site }
+                        }
+                    });
+
+                    if (responseReceived && code == HttpStatusCode.NoContent)
+                    {
+                        m_logger.Info("Added self moderation site {0}", site);
+
+                        if (m_policyConfiguration?.Configuration != null)
+                        {
+                            m_policyConfiguration.Configuration.SelfModeration.Add(site);
+
+                            message.SendReply(m_ipcServer, IpcCall.AddSelfModeratedSite, m_policyConfiguration.Configuration.SelfModeration);
                         }
                     }
-                };
+                    else
+                    {
+                        m_logger.Error("Failed to add self-moderation site");
+                    }
+
+                    return true;
+                });
 
                 m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
                 {
@@ -708,10 +722,7 @@ namespace FilterProvider.Common.Services
                         if (cfg != null && cfg.BypassesPermitted > 0)
                         {
                             m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
-                            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
-                            {
-                                SelfModeratedSites = cfg.SelfModeratedSites
-                            });
+                            m_ipcServer.SendConfigurationInfo(cfg);
                         }
                         else
                         {
@@ -834,10 +845,7 @@ namespace FilterProvider.Common.Services
 
         private void OnConfigLoaded_LoadSelfModeratedSites(object sender, EventArgs e)
         {
-            m_ipcServer.SendConfigurationInfo(new ConfigurationInfoMessage()
-            {
-                SelfModeratedSites = m_policyConfiguration.Configuration.SelfModeratedSites
-            });
+            m_ipcServer.SendConfigurationInfo(m_policyConfiguration.Configuration);
         }
 
         private Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)

@@ -35,6 +35,7 @@ using Filter.Platform.Common;
 using CloudVeilGUI.Platform.Common;
 using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Client;
+using Filter.Platform.Common.Data.Models;
 
 namespace CloudVeil.Windows
 {
@@ -654,20 +655,24 @@ namespace CloudVeil.Windows
                     }
                 };
 
-                m_ipcClient.OnConfigurationInfo = (msg) =>
+                m_ipcClient.RegisterSendHandler(IpcCall.ConfigurationInfo, (msg) =>
                 {
+                    var cfg = msg.Data as AppConfigModel;
+
                     m_mainWindow.Dispatcher.InvokeAsync(() =>
                     {
                         var viewModel = ModelManager.Get<SelfModerationViewModel>();
 
-                        viewModel.SelfModeratedSites.Clear();
+                        viewModel.SelfModerationSites.Clear();
 
-                        foreach (string site in msg.SelfModeratedSites)
+                        foreach (string site in cfg.SelfModeration)
                         {
-                            viewModel.SelfModeratedSites.Add(site);
+                            viewModel.SelfModerationSites.Add(site);
                         }
                     });
-                };
+
+                    return true;
+                });
 
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
@@ -762,6 +767,7 @@ namespace CloudVeil.Windows
             viewManager = new ViewManager();
 
             ModelManager.Register(new HistoryViewModel());
+            ModelManager.Register(new SelfModerationViewModel());
             ModelManager.Register(new SettingsViewModel());
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());

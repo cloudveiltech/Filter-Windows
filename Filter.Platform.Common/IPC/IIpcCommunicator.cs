@@ -1,4 +1,5 @@
 ﻿using Citadel.IPC.Messages;
+using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,6 +21,13 @@ namespace Citadel.IPC
 
     public abstract class IpcCommunicator : IIpcCommunicator
     {
+        private NLog.Logger m_logger;
+
+        public IpcCommunicator()
+        {
+            m_logger = LoggerUtil.GetAppWideLogger();
+        }
+
         protected Dictionary<IpcCall, IpcMessageHandler> sendHandlers = new Dictionary<IpcCall, IpcMessageHandler>();
         protected Dictionary<IpcCall, IpcMessageHandler> requestHandlers = new Dictionary<IpcCall, IpcMessageHandler>();
 
@@ -28,12 +36,12 @@ namespace Citadel.IPC
 
         public void RegisterRequestHandler(IpcCall call, IpcMessageHandler handler)
         {
-            sendHandlers[call] = handler;
+            requestHandlers[call] = handler;
         }
 
         public void RegisterSendHandler(IpcCall call, IpcMessageHandler handler)
         {
-            requestHandlers[call] = handler;
+            sendHandlers[call] = handler;
         }
 
         public bool HandleIpcMessage(BaseMessage baseMessage)

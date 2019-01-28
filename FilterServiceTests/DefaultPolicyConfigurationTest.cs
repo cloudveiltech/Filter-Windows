@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FilterProvider.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using Newtonsoft.Json;
 using System.IO;
 using FilterProvider.Common.Configuration;
