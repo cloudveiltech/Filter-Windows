@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="CloudVeil For Windows" Language="1033" Version="1.7.0.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
+  <Product Id="*" Name="CloudVeil For Windows" Language="1033" Version="1.7.0.1" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x86" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -14,15 +14,12 @@
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
     <Icon Id="_1FCD93CB6069" SourceFile="..\..\CitadelGUI\appicon.ico" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-
-      <!-- TODO: Split this into its own shared CustomActions.wxs -->
-      <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]"/>
-      <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" />
-
-      <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
-      <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no"/>
-
-      <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x86\$(var.Configuration)\InstallerCustomActions.CA.dll" />
+    <!-- TODO: Split this into its own shared CustomActions.wxs -->
+    <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />
+    <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" />
+    <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
+    <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
+    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x86\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />
     <!-- The directory tree of the installation package. -->
@@ -75,21 +72,20 @@
       <MergeRef Id="Microsoft_VC140_CRT_x86.msm" />
     </Feature>
     <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="1.7.0.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
-      <UpgradeVersion Maximum="1.7.0.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
+      <UpgradeVersion Minimum="1.7.0.1" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
+      <UpgradeVersion Maximum="1.7.0.1" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
     </Upgrade>
     <InstallExecuteSequence>
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
       <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
-        <!--
+      <!--
         Are these conditions confusing?
         Check out https://www.firegiant.com/wix/tutorial/com-expression-syntax-miscellanea/expression-syntax/#prefixes for documentation.
         -->
-        <Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
-        <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
-
-        <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
-        <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
+      <Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
+      <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
+      <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
+      <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
@@ -130,16 +126,15 @@
       <Show Dialog="AdminResumeForm" Sequence="998"><![CDATA[Installed="" AND RESUME]]></Show>
       <Show Dialog="AdminMaintenanceForm" Sequence="999"><![CDATA[Installed<>""]]></Show>
     </AdminUISequence>
-      <UIRef Id="Base"/>
-      <UIRef Id="BasicDialogs"/>
-      <UIRef Id="UserInterface"/>
-      <UIRef Id="WelcomeDlg"/>
-      <UIRef Id="FolderDlg"/>
-      <UIRef Id="ConfirmDlg"/>
-      <UIRef Id="LicenseDlg"/>
-      <UIRef Id="ProgressDlg"/>
-      <UIRef Id="FinishedDlg"/>
-    
+    <UIRef Id="Base" />
+    <UIRef Id="BasicDialogs" />
+    <UIRef Id="UserInterface" />
+    <UIRef Id="WelcomeDlg" />
+    <UIRef Id="FolderDlg" />
+    <UIRef Id="ConfirmDlg" />
+    <UIRef Id="LicenseDlg" />
+    <UIRef Id="ProgressDlg" />
+    <UIRef Id="FinishedDlg" />
     <Property Id="AdminWelcomeForm_NextArgs" Value="AdminFolderForm" />
     <Property Id="AdminFolderForm_PrevArgs" Value="AdminWelcomeForm" />
     <Property Id="AdminFolderForm_NextArgs" Value="AdminConfirmInstallForm" />

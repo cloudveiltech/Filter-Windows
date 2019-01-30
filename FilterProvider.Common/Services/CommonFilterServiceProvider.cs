@@ -815,8 +815,6 @@ namespace FilterProvider.Common.Services
                     });
                 };*/
 
-                ServicePointManager.ServerCertificateValidationCallback += m_certificateExemptions.CertificateValidationCallback;
-
                 m_ipcServer.Start();
             }
             catch(Exception ipce)
@@ -2293,6 +2291,10 @@ namespace FilterProvider.Common.Services
                 if(doLoadLists)
                 {
                     m_policyConfiguration.LoadLists();
+                }
+                else if(listsDownloaded == null && m_policyConfiguration.Configuration == null)
+                {
+                    m_logger.Error("Was not able to download rulesets due to configuration being null");
                 }
 
                 m_logger.Info("Checking for application updates.");

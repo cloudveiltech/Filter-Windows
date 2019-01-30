@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 using Filter.Platform.Common;
+using Filter.Platform.Common.Util;
 using System;
 using System.Management;
 using System.Security.Cryptography;
@@ -75,6 +76,8 @@ namespace Citadel.Core.Windows.Util
 
                 byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
                 s_fingerPrint = BitConverter.ToString(bt).Replace("-", "");
+
+                LoggerUtil.GetAppWideLogger()?.Info("My fingerprint is {0}", s_fingerPrint);
             }
         }
 

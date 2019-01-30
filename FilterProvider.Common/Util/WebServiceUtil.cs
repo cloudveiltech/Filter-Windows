@@ -19,7 +19,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
@@ -130,6 +132,7 @@ namespace FilterProvider.Common.Util
         }
 
         private static WebServiceUtil s_instance;
+        private static NLog.Logger s_logger;
 
         static WebServiceUtil()
         {
@@ -406,14 +409,6 @@ namespace FilterProvider.Common.Util
                 request.Headers.Add("ETag", options.ETag);
             }
 
-#if DEBUG
-            // our local https://build-server:8443 is untrusted.
-            request.ServerCertificateValidationCallback += (sender, cert, chain, policyErrors) =>
-            {
-                return true;
-            };
-#endif
-
             return request;
         }
 
@@ -597,6 +592,8 @@ namespace FilterProvider.Common.Util
                 }
 
                 var request = GetApiBaseRequest(resourceUri, options);
+
+                m_logger.Debug("WebServiceUtil.Request {0}", request.RequestUri);
 
                 if (StringExtensions.Valid(accessToken))
                 {

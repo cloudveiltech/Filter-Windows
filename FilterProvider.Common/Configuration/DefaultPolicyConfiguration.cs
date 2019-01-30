@@ -183,6 +183,11 @@ namespace FilterProvider.Common.Configuration
             // Assemble list of SHA1 hashes for existing lists.
             Dictionary<string, string> hashes = new Dictionary<string, string>();
 
+            if(Configuration == null)
+            {
+                return null;
+            }
+
             foreach(var list in Configuration.ConfiguredLists)
             {
                 string listFilePath = getListFilePath(list);
@@ -306,6 +311,11 @@ namespace FilterProvider.Common.Configuration
             if (isVerified == true)
             {
                 return false;
+            }
+
+            if(Configuration == null)
+            {
+                return null;
             }
 
             createListFolderIfNotExists();
@@ -564,6 +574,7 @@ namespace FilterProvider.Common.Configuration
                     }
                 }
 
+                m_logger.Error("Configuration file does not exist.");
                 return false;
             }
             catch (Exception e)
