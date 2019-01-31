@@ -15,6 +15,7 @@ using FilterProvider.Common.Data.Filtering;
 using Newtonsoft.Json;
 using System.Net;
 using Filter.Platform.Common.Util;
+using NodaTime;
 
 namespace FilterProvider.Common.Util
 {
@@ -35,6 +36,24 @@ namespace FilterProvider.Common.Util
             //ReportList.Add(blockInfo);
 
             string json = JsonConvert.SerializeObject(blockInfo);
+            byte[] formData = Encoding.UTF8.GetBytes(json);
+
+            HttpStatusCode statusCode;
+
+            WebServiceUtil.Default.SendResource(ServiceResource.AccountabilityNotify, formData, out statusCode);
+        }
+
+        public void NotifyTimeZoneChanged(DateTimeZone oldZone, DateTimeZone newZone)
+        {
+            LoggerUtil.GetAppWideLogger().Info($"Sending time zone change to server: oldZone={oldZone.Id}, newZone={newZone.Id}");
+            TimeZoneChangeInfo info = new TimeZoneChangeInfo()
+            {
+                old_zone_id = oldZone?.Id,
+                new_zone_id = newZone?.Id
+            };
+
+
+            string json = JsonConvert.SerializeObject(info);
             byte[] formData = Encoding.UTF8.GetBytes(json);
 
             HttpStatusCode statusCode;

@@ -78,6 +78,10 @@ namespace FilterProvider.Common.Configuration
         /// </summary>
         HashSet<Glob> WhitelistedApplicationGlobs { get; }
 
+        TimeRestrictionModel[] TimeRestrictions { get; }
+
+        bool AreAnyTimeRestrictionsEnabled { get; }
+
         CategoryIndex CategoryIndex { get; }
 
         ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get; }

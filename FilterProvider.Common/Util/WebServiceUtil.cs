@@ -11,6 +11,8 @@ using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32;
 using NLog;
+using NodaTime;
+using NodaTime.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +46,8 @@ namespace FilterProvider.Common.Util
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
-        Custom
+        Custom,
+        ServerTime
     };
 
     public delegate void GenericWebServiceUtilDelegate();
@@ -74,6 +77,7 @@ namespace FilterProvider.Common.Util
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
+            { ServiceResource.ServerTime, "/api/v2/time" },
             { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" }
         };
 
@@ -727,6 +731,30 @@ namespace FilterProvider.Common.Util
             }
 
             return null;
+        }
+
+        public ZonedDateTime? GetServerTime()
+        {
+            HttpStatusCode statusCode;
+            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode);
+
+            if (statusCode != HttpStatusCode.OK)
+            {
+                return null;
+            }
+
+            string timeString = Encoding.UTF8.GetString(response);
+
+            ParseResult<ZonedDateTime> result = ZonedDateTimePattern.GeneralFormatOnlyIso.Parse(timeString);
+
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

@@ -40,6 +40,8 @@ namespace Citadel.IPC.Messages
         /// </summary>
         OtherContentClassification,
 
+        TimeRestriction,
+
         /// <summary>
         /// Placeholder for default conditions (such as first initialization of variables)
         /// </summary>

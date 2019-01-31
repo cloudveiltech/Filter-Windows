@@ -38,6 +38,9 @@ using Filter.Platform.Common;
 using FilterProvider.Common.Data;
 using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Types;
+using NodaTime;
+using GoproxyWrapper;
+using FilterProvider.Common.Data.Filtering;
 
 namespace FilterProvider.Common.Services
 {
@@ -159,7 +162,7 @@ namespace FilterProvider.Common.Services
         private IProxyServer m_filteringEngine;
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
-        
+
         private byte[] m_blockedHtmlPage;
         private byte[] m_badSslHtmlPage;
 
@@ -172,7 +175,7 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-#endregion FilteringEngineVars
+        #endregion FilteringEngineVars
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
 
@@ -267,6 +270,8 @@ namespace FilterProvider.Common.Services
 
         private Accountability m_accountability;
 
+        private TimeDetection m_timeDetection;
+
         private IPlatformTrust m_trustManager;
 
         private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
@@ -297,7 +302,7 @@ namespace FilterProvider.Common.Services
 
         private void OnStartup()
         {
-            if(File.Exists("debug-filterserviceprovider"))
+            if (File.Exists("debug-filterserviceprovider"))
             {
                 Debugger.Launch();
             }
@@ -386,7 +391,7 @@ namespace FilterProvider.Common.Services
             try
             {
                 var bitVersionUri = string.Empty;
-                if(Environment.Is64BitProcess)
+                if (Environment.Is64BitProcess)
                 {
                     bitVersionUri = "/update/winx64/update.xml";
                 }
@@ -399,7 +404,7 @@ namespace FilterProvider.Common.Services
 
                 m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // This is a critical error. We cannot recover from this.
                 m_logger.Error("Critical error - Could not create application updater.");
@@ -410,7 +415,7 @@ namespace FilterProvider.Common.Services
 
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
-                ReviveGuiForCurrentUser();                
+                ReviveGuiForCurrentUser();
                 m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
             };
 
@@ -433,6 +438,9 @@ namespace FilterProvider.Common.Services
 
                 m_accountability = new Accountability();
 
+                m_timeDetection = new TimeDetection(SystemClock.Instance);
+                m_timeDetection.ZoneTamperingDetected += OnZoneTampering;
+
                 m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
                 m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
                 m_policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
@@ -441,7 +449,7 @@ namespace FilterProvider.Common.Services
                 {
                     try
                     {
-                        if(!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username) && args.Password != null && args.Password.Length > 0)
+                        if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username) && args.Password != null && args.Password.Length > 0)
                         {
                             byte[] unencrypedPwordBytes = null;
                             try
@@ -450,36 +458,36 @@ namespace FilterProvider.Common.Services
 
                                 var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
 
-                                switch(authResult.AuthenticationResult)
+                                switch (authResult.AuthenticationResult)
                                 {
                                     case AuthenticationResult.Success:
-                                    {
-                                        Status = FilterStatus.Running;
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
+                                        {
+                                            Status = FilterStatus.Running;
+                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
 
-                                        // Probe server for updates now.
-                                        ProbeMasterForApplicationUpdates(false);
-                                        OnUpdateTimerElapsed(null);
-                                    }
-                                    break;
+                                            // Probe server for updates now.
+                                            ProbeMasterForApplicationUpdates(false);
+                                            OnUpdateTimerElapsed(null);
+                                        }
+                                        break;
 
                                     case AuthenticationResult.Failure:
-                                    {
-                                        ReviveGuiForCurrentUser();                                        
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
-                                    }
-                                    break;
+                                        {
+                                            ReviveGuiForCurrentUser();
+                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
+                                        }
+                                        break;
 
                                     case AuthenticationResult.ConnectionFailed:
-                                    {
-                                        m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
-                                    }
-                                    break;
+                                        {
+                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
+                                        }
+                                        break;
                                 }
                             }
                             finally
                             {
-                                if(unencrypedPwordBytes != null && unencrypedPwordBytes.Length > 0)
+                                if (unencrypedPwordBytes != null && unencrypedPwordBytes.Length > 0)
                                 {
                                     Array.Clear(unencrypedPwordBytes, 0, unencrypedPwordBytes.Length);
                                     unencrypedPwordBytes = null;
@@ -487,7 +495,7 @@ namespace FilterProvider.Common.Services
                             }
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
@@ -557,13 +565,13 @@ namespace FilterProvider.Common.Services
                             Environment.Exit((int)ExitCodes.ShutdownForUpdate);
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
                     finally
                     {
-                        if(m_appcastUpdaterLock.IsWriteLockHeld)
+                        if (m_appcastUpdaterLock.IsWriteLockHeld)
                         {
                             m_appcastUpdaterLock.ExitWriteLock();
                         }
@@ -589,7 +597,7 @@ namespace FilterProvider.Common.Services
                             args.DeactivationCommand = responseCode == HttpStatusCode.OK || responseCode == HttpStatusCode.NoContent ? DeactivationCommand.Granted : DeactivationCommand.Denied;
                         }
 
-                        if(args.Granted)
+                        if (args.Granted)
                         {
                             Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                         }
@@ -598,7 +606,7 @@ namespace FilterProvider.Common.Services
                             Status = FilterStatus.Running;
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                         Status = FilterStatus.Running;
@@ -612,19 +620,19 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.RelaxedPolicyRequested = (args) =>
                 {
-                    switch(args.Command)
+                    switch (args.Command)
                     {
                         case RelaxedPolicyCommand.Relinquished:
-                        {
-                            OnRelinquishRelaxedPolicyRequested();
-                        }
-                        break;
+                            {
+                                OnRelinquishRelaxedPolicyRequested();
+                            }
+                            break;
 
                         case RelaxedPolicyCommand.Requested:
-                        {
-                            OnRelaxedPolicyRequested();
-                        }
-                        break;
+                            {
+                                OnRelaxedPolicyRequested();
+                            }
+                            break;
                     }
                 };
 
@@ -652,6 +660,7 @@ namespace FilterProvider.Common.Services
                         if (m_policyConfiguration?.Configuration != null)
                         {
                             m_policyConfiguration.Configuration.SelfModeration.Add(site);
+                            m_policyConfiguration.LoadLists();
 
                             message.SendReply(m_ipcServer, IpcCall.AddSelfModeratedSite, m_policyConfiguration.Configuration.SelfModeration);
                         }
@@ -668,8 +677,8 @@ namespace FilterProvider.Common.Services
                 {
                     var curAuthToken = WebServiceUtil.Default.AuthToken;
 
-                    if(curAuthToken != null && curAuthToken.Length > 0)
-                    {   
+                    if (curAuthToken != null && curAuthToken.Length > 0)
+                    {
                         string deviceName = string.Empty;
 
                         try
@@ -705,7 +714,7 @@ namespace FilterProvider.Common.Services
                             //var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
                             //ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
@@ -742,7 +751,7 @@ namespace FilterProvider.Common.Services
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         m_logger.Warn("Error occurred while trying to connect to IPC server.");
                         LoggerUtil.RecursivelyLogException(m_logger, ex);
@@ -750,11 +759,11 @@ namespace FilterProvider.Common.Services
                 };
 
                 m_ipcServer.ClientDisconnected = () =>
-                {   
+                {
                     ConnectedClients--;
 
                     // All GUI clients are gone and no one logged in. Shut it down.
-                    if(ConnectedClients <= 0 && m_ipcServer.WaitingForAuth)
+                    if (ConnectedClients <= 0 && m_ipcServer.WaitingForAuth)
                     {
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                     }
@@ -817,7 +826,7 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.Start();
             }
-            catch(Exception ipce)
+            catch (Exception ipce)
             {
                 // This is a critical error. We cannot recover from this.
                 m_logger.Error("Critical error - Could not start IPC server.");
@@ -839,6 +848,18 @@ namespace FilterProvider.Common.Services
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync();
+        }
+
+        private void OnZoneTampering(object sender, ZoneTamperingEventArgs e)
+        {
+            ZonedDateTime currentTime = m_timeDetection.GetRealTime();
+
+            var date = currentTime.ToDateTimeOffset();
+
+            if (m_policyConfiguration.AreAnyTimeRestrictionsEnabled)
+            {
+                m_accountability.NotifyTimeZoneChanged(e.OldZone, e.NewZone);
+            }
         }
 
         private void OnConfigLoaded_LoadSelfModeratedSites(object sender, EventArgs e)
@@ -881,7 +902,7 @@ namespace FilterProvider.Common.Services
 
         private void configureThreshold(object sender, EventArgs e)
         {
-            if(m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
+            if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
             {
                 InitThresholdData();
             }
@@ -907,7 +928,7 @@ namespace FilterProvider.Common.Services
         private void InitThresholdData()
         {
             // If exists, stop it first.
-            if(m_thresholdCountTimer != null)
+            if (m_thresholdCountTimer != null)
             {
                 m_thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
@@ -989,7 +1010,7 @@ namespace FilterProvider.Common.Services
                     isAvailable = true;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
                 hadError = true;
@@ -999,7 +1020,7 @@ namespace FilterProvider.Common.Services
                 m_appcastUpdaterLock.ExitWriteLock();
             }
 
-            if(!hadError)
+            if (!hadError)
             {
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
@@ -1022,12 +1043,12 @@ namespace FilterProvider.Common.Services
             m_blockedHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
             m_badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
-            if(m_blockedHtmlPage == null)
+            if (m_blockedHtmlPage == null)
             {
                 m_logger.Error("Could not load packed HTML block page.");
             }
 
-            if(m_badSslHtmlPage == null)
+            if (m_badSslHtmlPage == null)
             {
                 m_logger.Error("Could not load packed HTML bad SSL page.");
             }
@@ -1048,10 +1069,10 @@ namespace FilterProvider.Common.Services
             });
 
             // Setup general info, warning and error events.
-            
+
 
             // Start filtering, always.
-            if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
             {
                 m_filterEngineStartupBgWorker = new BackgroundWorker();
                 m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
@@ -1070,7 +1091,7 @@ namespace FilterProvider.Common.Services
             {
                 m_trustManager.EstablishTrust();
             }
-            catch(Exception ffe)
+            catch (Exception ffe)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ffe);
             }
@@ -1172,7 +1193,7 @@ namespace FilterProvider.Common.Services
             {
                 InitEngine();
             }
-            catch(Exception ie)
+            catch (Exception ie)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ie);
             }
@@ -1185,7 +1206,7 @@ namespace FilterProvider.Common.Services
                     m_systemServices.RunProtectiveServices();
                 }
             }
-            catch(Exception se)
+            catch (Exception se)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, se);
             }
@@ -1221,14 +1242,14 @@ namespace FilterProvider.Common.Services
                 // Unhook first.
                 AppDomain.CurrentDomain.ProcessExit -= OnApplicationExiting;
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
 
             try
             {
-                if(Environment.ExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
+                if (Environment.ExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
                 {
                     m_logger.Info("Filter service provider process shutting down without safeguards.");
 
@@ -1242,7 +1263,7 @@ namespace FilterProvider.Common.Services
                     DoCleanShutdown(true);
                 }
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, err);
             }
@@ -1262,10 +1283,10 @@ namespace FilterProvider.Common.Services
             // Must ensure we're not blocking internet now that we're running.
             m_systemServices.EnableInternet();
 
-            if(e.Cancelled || e.Error != null)
+            if (e.Cancelled || e.Error != null)
             {
                 m_logger.Error("Error during initialization.");
-                if(e.Error != null && m_logger != null)
+                if (e.Error != null && m_logger != null)
                 {
                     LoggerUtil.RecursivelyLogException(m_logger, e.Error);
                 }
@@ -1273,7 +1294,7 @@ namespace FilterProvider.Common.Services
                 Environment.Exit((int)ExitCodes.ShutdownInitializationError);
                 return;
             }
-            
+
             OnUpdateTimerElapsed(null);
 
             Status = FilterStatus.Running;
@@ -1281,7 +1302,7 @@ namespace FilterProvider.Common.Services
             ReviveGuiForCurrentUser(true);
         }
 
-#region EngineCallbacks
+        #region EngineCallbacks
 
         /// <summary>
         /// Called whenever a block action occurs. 
@@ -1305,11 +1326,11 @@ namespace FilterProvider.Common.Services
 
             var cfg = m_policyConfiguration.Configuration;
 
-            if(cfg != null && cfg.UseThreshold)
+            if (cfg != null && cfg.UseThreshold)
             {
                 var currentTicks = Interlocked.Increment(ref m_thresholdTicks);
 
-                if(currentTicks >= cfg.ThresholdLimit)
+                if (currentTicks >= cfg.ThresholdLimit)
                 {
                     internetShutOff = true;
 
@@ -1318,7 +1339,7 @@ namespace FilterProvider.Common.Services
                         m_logger.Warn("Block action threshold met or exceeded. Disabling internet.");
                         m_systemServices.DisableInternet();
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
@@ -1330,7 +1351,7 @@ namespace FilterProvider.Common.Services
             string categoryNameString = "Unknown";
             var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
 
-            if(mappedCategory != null)
+            if (mappedCategory != null)
             {
                 categoryNameString = mappedCategory.CategoryName;
             }
@@ -1338,7 +1359,7 @@ namespace FilterProvider.Common.Services
             m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, matchingRule);
             m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
-            if(internetShutOff)
+            if (internetShutOff)
             {
                 var restoreDate = DateTime.Now.AddTicks(cfg != null ? cfg.ThresholdTimeoutPeriod.Ticks : TimeSpan.FromMinutes(1).Ticks);
 
@@ -1434,10 +1455,9 @@ namespace FilterProvider.Common.Services
             }
         }*/
 
+        private static readonly string[] htmlMimeTypes = { "text/html", "text/plain" };
         private void OnHttpRequestBegin(GoproxyWrapper.Session args)
         {
-            m_logger.Info("New request");
-
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
@@ -1454,23 +1474,65 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                string contentType = null;
-                bool isHtml = false;
-                bool isJson = false;
-                bool hasReferer = true;
+                ZonedDateTime date = m_timeDetection.GetRealTime();
+                TimeRestrictionModel todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
 
-                if(!args.Request.Headers.HeaderExists("Referer"))
+                // We don't know what's coming back from the server, but we can see what the client is expecting by looking at the 'Accept' header.
+
+                Header acceptHeader = args.Request.Headers.GetFirstHeader("Accept");
+
+                bool useHtmlBlockPage = false;
+
+                if (acceptHeader != null)
                 {
-                    hasReferer = false;
+                    foreach (string headerVal in htmlMimeTypes)
+                    {
+                        if (acceptHeader.Value.IndexOf(headerVal, StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        {
+                            useHtmlBlockPage = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // We don't know what the client is accepting. Make it obvious what's going on by spitting an error onto the screen.
+                    useHtmlBlockPage = true;
+                }
+
+                if (!args.Request.Headers.HeaderExists("Referer"))
+                {
+                    // Use the HTML block page if this is a direct navigation.
+                    useHtmlBlockPage = true;
+                }
+
+                Uri url = new Uri(args.Request.Url);
+
+                if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
+                {
+                    nextAction = ProxyNextAction.DropConnection;
+
+                    if (useHtmlBlockPage)
+                    {
+                        // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                        // if there is no referer (direct navigation).
+                        customBlockResponseContentType = "text/html";
+                        customBlockResponse = getBlockPageWithResolvedTemplates(url, 0, null, BlockType.TimeRestriction);
+                    }
+                    else
+                    {
+                        customBlockResponseContentType = string.Empty;
+                        customBlockResponse = null;
+                    }
+
+                    return;
                 }
 
                 var filterCollection = m_policyConfiguration.FilterCollection;
                 var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
                 var categoryIndex = m_policyConfiguration.CategoryIndex;
 
-                Console.WriteLine("Checking " + args.Request.Url);
-
-                if(filterCollection != null)
+                if (filterCollection != null)
                 {
                     // Let's check whitelists first.
                     readLocked = true;
@@ -1479,8 +1541,6 @@ namespace FilterProvider.Common.Services
                     List<UrlFilter> filters;
                     short matchCategory = -1;
                     UrlFilter matchingFilter = null;
-
-                    Uri url = new Uri(args.Request.Url);
 
                     //string host = message.Url.Host;
                     string host = url.Host;
@@ -1563,7 +1623,7 @@ namespace FilterProvider.Common.Services
                             List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
                             List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
 
-                            if (isHtml || hasReferer == false)
+                            if (useHtmlBlockPage)
                             {
                                 // Only send HTML block page if we know this is a response of HTML we're blocking, or
                                 // if there is no referer (direct navigation).
@@ -1590,7 +1650,7 @@ namespace FilterProvider.Common.Services
                         List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
                         List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
 
-                        if (isHtml || hasReferer == false)
+                        if (useHtmlBlockPage)
                         {
                             // Only send HTML block page if we know this is a response of HTML we're blocking, or
                             // if there is no referer (direct navigation).
@@ -1622,7 +1682,7 @@ namespace FilterProvider.Common.Services
                     m_filteringRwLock.ExitReadLock();
                 }
 
-                if(nextAction == ProxyNextAction.DropConnection)
+                if (nextAction == ProxyNextAction.DropConnection)
                 {
                     // There is currently no way to change an HTTP message to a response outside of CitadelCore.
                     // so, change it to a 204 and then modify the status code to what we want it to be.
@@ -1777,13 +1837,13 @@ namespace FilterProvider.Common.Services
             }
             finally
             {
-                if(message.ProxyNextAction == ProxyNextAction.DropConnection)
+                if (message.ProxyNextAction == ProxyNextAction.DropConnection)
                 {
                     m_logger.Info("Response blocked: {0}", message.Url);
 
                     message.Make204NoContent();
 
-                    if(customBlockResponse != null)
+                    if (customBlockResponse != null)
                     {
                         message.CopyAndSetBody(customBlockResponse, 0, customBlockResponse.Length, customBlockResponseContentType);
                         message.StatusCode = HttpStatusCode.OK;
@@ -1810,9 +1870,9 @@ namespace FilterProvider.Common.Services
             matched = null;
 
             var len = filters.Count;
-            for(int i = 0; i < len; ++i)
+            for (int i = 0; i < len; ++i)
             {
-                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matched = filters[i];
                     matchedCategory = filters[i].CategoryId;
@@ -1834,9 +1894,9 @@ namespace FilterProvider.Common.Services
             List<int> matchingCategories = new List<int>();
 
             var len = filters.Count;
-            for(int i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
-                if(m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
+                if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
                 {
                     matchingCategories.Add(filters[i].CategoryId);
                 }
@@ -1851,9 +1911,9 @@ namespace FilterProvider.Common.Services
 
             int length = matchingCategories.Count;
             var categoryValues = m_policyConfiguration.GeneratedCategoriesMap.Values;
-            foreach(var category in categoryValues)
+            foreach (var category in categoryValues)
             {
-                for(int i = 0; i < length; i++)
+                for (int i = 0; i < length; i++)
                 {
                     if (category.CategoryId == matchingCategories[i])
                     {
@@ -1909,6 +1969,8 @@ namespace FilterProvider.Common.Services
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;
 
+            string message = "was blocked because it was in the following category:";
+            string unblockRequestButton = "<a class=\"request-unblock button primary\" href=\"{{unblock_request}}\">Request an Unblock</a>";
             string relaxed_policy_message = "";
             string matching_category = "";
             string otherCategories = "";
@@ -1920,14 +1982,14 @@ namespace FilterProvider.Common.Services
                 {
                     matching_category = entry.ShortCategoryName;
                 }
-                else if(appliedCategories.Any(m => m.CategoryId == entry.CategoryId))
+                else if (appliedCategories.Any(m => m.CategoryId == entry.CategoryId))
                 {
                     otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
                 }
 
                 if (entry is MappedBypassListCategoryModel)
                 {
-                    if(matchingCategory == entry.CategoryId)
+                    if (matchingCategory == entry.CategoryId)
                     {
                         relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
                         break;
@@ -1964,6 +2026,12 @@ namespace FilterProvider.Common.Services
                         matching_category = string.Format("offensive text: {0}", triggerCategory);
                         break;
 
+                    case BlockType.TimeRestriction:
+                        message = "is blocked because your time restrictions do not allow internet access at this time.";
+                        //matching_category = "no internet allowed after hours";
+                        unblockRequestButton = "";
+                        break;
+
                     case BlockType.OtherContentClassification:
                     default:
                         matching_category = "other content classification";
@@ -1973,8 +2041,10 @@ namespace FilterProvider.Common.Services
 
             blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
             blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
+            blockPageTemplate = blockPageTemplate.Replace("{{message}}", message);
             blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
             blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
+            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request_button}}", unblockRequestButton);
             blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
             blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
 
@@ -1985,18 +2055,18 @@ namespace FilterProvider.Common.Services
         {
             var nvc = new NameValueCollection(StringComparer.OrdinalIgnoreCase);
 
-            using(var reader = new StringReader(headers))
+            using (var reader = new StringReader(headers))
             {
                 string line = null;
-                while((line = reader.ReadLine()) != null)
+                while ((line = reader.ReadLine()) != null)
                 {
-                    if(string.IsNullOrEmpty(line) || string.IsNullOrWhiteSpace(line))
+                    if (string.IsNullOrEmpty(line) || string.IsNullOrWhiteSpace(line))
                     {
                         continue;
                     }
 
                     var firstSplitIndex = line.IndexOf(':');
-                    if(firstSplitIndex == -1)
+                    if (firstSplitIndex == -1)
                     {
                         nvc.Add(line.Trim(), string.Empty);
                     }
@@ -2036,15 +2106,15 @@ namespace FilterProvider.Common.Services
                 m_filteringRwLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
-                if(m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
+                if (m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
-                    if(isHtml || isJson)
+                    if (isHtml || isJson)
                     {
                         var dataToAnalyzeStr = Encoding.UTF8.GetString(data.ToArray());
 
-                        if(isHtml)
+                        if (isHtml)
                         {
                             // This doesn't work anymore because google has started sending bad stuff directly
                             // embedded inside HTML responses, instead of sending JSON a separate response.
@@ -2078,7 +2148,7 @@ namespace FilterProvider.Common.Services
 
                 //m_logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
@@ -2191,7 +2261,7 @@ namespace FilterProvider.Common.Services
             return 0;
         }
 
-#endregion EngineCallbacks
+        #endregion EngineCallbacks
 
         /// <summary>
         /// Called by the threshold trigger timer whenever it's set time has passed. Here we'll reset
@@ -2211,12 +2281,12 @@ namespace FilterProvider.Common.Services
 
                 this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
                 // TODO: Tell Sentry about this problem.
             }
-            
+
         }
 
         /// <summary>
@@ -2231,7 +2301,7 @@ namespace FilterProvider.Common.Services
             {
                 m_systemServices.EnableInternet();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 m_logger.Warn("Error when trying to reinstate internet on threshold timeout period elapsed.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
@@ -2272,7 +2342,7 @@ namespace FilterProvider.Common.Services
 
                 bool doLoadLists = m_policyConfiguration.FilterCollection == null;
 
-                if(m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
+                if (m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
                 {
                     // Got new data. Gotta reload.
                     bool configLoaded = m_policyConfiguration.LoadConfiguration();
@@ -2288,11 +2358,11 @@ namespace FilterProvider.Common.Services
 
                 doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && m_policyConfiguration.FilterCollection == null);
 
-                if(doLoadLists)
+                if (doLoadLists)
                 {
                     m_policyConfiguration.LoadLists();
                 }
-                else if(listsDownloaded == null && m_policyConfiguration.Configuration == null)
+                else if (listsDownloaded == null && m_policyConfiguration.Configuration == null)
                 {
                     m_logger.Error("Was not able to download rulesets due to configuration being null");
                 }
@@ -2304,14 +2374,14 @@ namespace FilterProvider.Common.Services
 
                 result |= available ? ConfigUpdateResult.AppUpdateAvailable : 0;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
             finally
             {
                 // Enable the timer again.
-                if(!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
+                if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
                 {
                     // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
                     this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
@@ -2319,7 +2389,7 @@ namespace FilterProvider.Common.Services
                 else
                 {
                     var cfg = m_policyConfiguration.Configuration;
-                    if(cfg != null)
+                    if (cfg != null)
                     {
                         this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
                     }
@@ -2352,7 +2422,7 @@ namespace FilterProvider.Common.Services
             this.UpdateAndWriteList(false);
             this.CleanupLogs();
 
-            if(m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+            if (m_lastUsernamePrintTime.Date < DateTime.Now.Date)
             {
                 m_lastUsernamePrintTime = DateTime.Now;
                 m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
@@ -2366,7 +2436,7 @@ namespace FilterProvider.Common.Services
         {
             this.CleanupLogs();
 
-            if(m_cleanupLogsTimer == null)
+            if (m_cleanupLogsTimer == null)
             {
                 m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
             }
@@ -2422,7 +2492,7 @@ namespace FilterProvider.Common.Services
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
                 // TODO: Tell sentry about this.
@@ -2440,14 +2510,14 @@ namespace FilterProvider.Common.Services
             {
                 m_systemServices.EnableInternet();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
 
             try
             {
-                if(m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
                 {
                     m_logger.Info("Start engine.");
 
@@ -2455,7 +2525,7 @@ namespace FilterProvider.Common.Services
                     m_filteringEngine.Start();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
@@ -2479,7 +2549,8 @@ namespace FilterProvider.Common.Services
             try
             {
                 this.UpdateNumberOfBypassesFromServer();
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 // TODO: Tell Sentry about this.
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
@@ -2504,7 +2575,7 @@ namespace FilterProvider.Common.Services
 
             if (bypassResponse != null)
             {
-                if(statusCode == HttpStatusCode.NotFound)
+                if (statusCode == HttpStatusCode.NotFound)
                 {
                     // Fallback on local bypass logic if server does not support relaxed policy checks.
                     useLocalBypassLogic = true;
@@ -2536,7 +2607,7 @@ namespace FilterProvider.Common.Services
                 grantBypass = false;
             }
 
-            if(useLocalBypassLogic)
+            if (useLocalBypassLogic)
             {
                 m_logger.Info("Using local bypass logic since server does not yet support bypasses.");
 
@@ -2583,7 +2654,7 @@ namespace FilterProvider.Common.Services
 
                     var cfg = m_policyConfiguration.Configuration;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-                    
+
                     DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
                 else
@@ -2597,8 +2668,8 @@ namespace FilterProvider.Common.Services
         private void DecrementRelaxedPolicy(int bypassesUsed, int bypassesPermitted, TimeSpan bypassDuration)
         {
             bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
-            
-            if(allUsesExhausted)
+
+            if (allUsesExhausted)
             {
                 m_logger.Info("All uses exhausted.");
 
@@ -2609,14 +2680,14 @@ namespace FilterProvider.Common.Services
                 m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
             }
 
-            if(allUsesExhausted)
+            if (allUsesExhausted)
             {
                 // Reset our bypasses at 8:15 UTC.
                 var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
 
                 var span = resetTime - DateTime.UtcNow;
 
-                if(m_relaxedPolicyResetTimer == null)
+                if (m_relaxedPolicyResetTimer == null)
                 {
                     m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
@@ -2631,13 +2702,13 @@ namespace FilterProvider.Common.Services
 
             var cfg = m_policyConfiguration.Configuration;
 
-            if(cfg != null)
+            if (cfg != null)
             {
                 cfg.BypassesUsed++;
 
                 allUsesExhausted = cfg.BypassesPermitted - cfg.BypassesUsed <= 0;
 
-                if(allUsesExhausted)
+                if (allUsesExhausted)
                 {
                     m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
                 }
@@ -2651,14 +2722,14 @@ namespace FilterProvider.Common.Services
                 m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
             }
 
-            if(allUsesExhausted)
+            if (allUsesExhausted)
             {
                 // Refresh tomorrow at midnight.
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
                 var span = tomorrow - DateTime.Now;
 
-                if(m_relaxedPolicyResetTimer == null)
+                if (m_relaxedPolicyResetTimer == null)
                 {
                     m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
@@ -2711,13 +2782,13 @@ namespace FilterProvider.Common.Services
             RelaxedPolicyStatus status = getRelaxedPolicyStatus();
 
             // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if(status == RelaxedPolicyStatus.Activated)
+            if (status == RelaxedPolicyStatus.Activated)
             {
                 OnRelaxedPolicyTimerExpired(null);
             }
 
             // We want to inform the user that there is no relaxed policy in effect currently for this installation.
-            if(status == RelaxedPolicyStatus.Deactivated)
+            if (status == RelaxedPolicyStatus.Deactivated)
             {
                 var cfg = m_policyConfiguration.Configuration;
                 m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
@@ -2746,7 +2817,7 @@ namespace FilterProvider.Common.Services
                 // Disable the expiry timer.
                 m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
@@ -2760,7 +2831,7 @@ namespace FilterProvider.Common.Services
 
             byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
 
-            if(response == null)
+            if (response == null)
             {
                 return false;
             }
@@ -2797,7 +2868,7 @@ namespace FilterProvider.Common.Services
                 // Disable the reset timer.
                 m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // TODO: Tell sentry about this.
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
@@ -2814,7 +2885,7 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StopFiltering()
         {
-            if(m_filteringEngine != null && m_filteringEngine.IsRunning)
+            if (m_filteringEngine != null && m_filteringEngine.IsRunning)
             {
                 m_filteringEngine.Stop();
             }
@@ -2823,7 +2894,7 @@ namespace FilterProvider.Common.Services
             {
                 OnStopFiltering?.Invoke(null, null);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 m_logger.Error("Error occurred in OnStopFiltering event");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
@@ -2845,9 +2916,9 @@ namespace FilterProvider.Common.Services
             // immediately shut down, because we, the service, are shutting down.
             KillAllGuis();
 
-            lock(m_cleanShutdownLock)
+            lock (m_cleanShutdownLock)
             {
-                if(!m_cleanShutdownComplete)
+                if (!m_cleanShutdownComplete)
                 {
                     m_ipcServer.Dispose();
 
@@ -2856,7 +2927,7 @@ namespace FilterProvider.Common.Services
                         // Pull our critical status.
                         PlatformTypes.New<IAntitampering>().DisableProcessProtection();
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
@@ -2864,14 +2935,14 @@ namespace FilterProvider.Common.Services
                     try
                     {
                         // Shut down engine.
-                        StopFiltering();                        
+                        StopFiltering();
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, e);
                     }
 
-                    if(installSafeguards)
+                    if (installSafeguards)
                     {
                         try
                         {
@@ -2882,7 +2953,7 @@ namespace FilterProvider.Common.Services
                             scProcNfo.Arguments = "config \"FilterServiceProvider\" start= auto";
                             Process.Start(scProcNfo).WaitForExit();
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
@@ -2890,7 +2961,7 @@ namespace FilterProvider.Common.Services
                         try
                         {
                             var cfg = m_policyConfiguration.Configuration;
-                            if(cfg != null && cfg.BlockInternet)
+                            if (cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user
                                 // can't browse the web without us. Only do this of course if configured.
@@ -2901,7 +2972,7 @@ namespace FilterProvider.Common.Services
                                 catch { }
                             }
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
@@ -2927,15 +2998,15 @@ namespace FilterProvider.Common.Services
         private void ReviveGuiForCurrentUser(bool runInTray = false)
         {
             var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
-            
+
             try
             {
                 string guiExePath;
-                if(TryGetGuiFullPath(out guiExePath))
+                if (TryGetGuiFullPath(out guiExePath))
                 {
                     m_logger.Info("Starting external GUI executable : {0}", guiExePath);
 
-                    if(runInTray)
+                    if (runInTray)
                     {
                         var sanitizedArgs = "\"" + Regex.Replace("/StartMinimized", @"(\\+)$", @"$1$1") + "\"";
                         var sanitizedPath = "\"" + Regex.Replace(guiExePath, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
@@ -2949,11 +3020,11 @@ namespace FilterProvider.Common.Services
                         //ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
                     }
 
-                    
+
                     return;
-                }               
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 m_logger.Error("Error enumerating all files.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
@@ -2965,13 +3036,13 @@ namespace FilterProvider.Common.Services
             try
             {
                 string guiExePath;
-                if(TryGetGuiFullPath(out guiExePath))
+                if (TryGetGuiFullPath(out guiExePath))
                 {
-                    foreach(var proc in Process.GetProcesses())
+                    foreach (var proc in Process.GetProcesses())
                     {
                         try
                         {
-                            if(proc.MainModule.FileName.OIEquals(guiExePath))
+                            if (proc.MainModule.FileName.OIEquals(guiExePath))
                             {
                                 proc.Kill();
                             }
@@ -2980,7 +3051,7 @@ namespace FilterProvider.Common.Services
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
@@ -2994,7 +3065,7 @@ namespace FilterProvider.Common.Services
             try
             {
                 // Get all exe files in the same dir as this service executable.
-                foreach(var exe in allFilesWhereIam)
+                foreach (var exe in allFilesWhereIam)
                 {
                     try
                     {
@@ -3003,19 +3074,19 @@ namespace FilterProvider.Common.Services
                         var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
 
                         // If our description notes that it's a GUI...
-                        if(fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
+                        if (fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
                         {
                             fullGuiExePath = exe;
                             return true;
                         }
                     }
-                    catch(Exception le)
+                    catch (Exception le)
                     {
                         LoggerUtil.RecursivelyLogException(m_logger, le);
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 m_logger.Error("Error enumerating sibling files.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
