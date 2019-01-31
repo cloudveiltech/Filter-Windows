@@ -45,19 +45,17 @@ namespace FilterProvider.Common.Util
 
         public void NotifyTimeZoneChanged(DateTimeZone oldZone, DateTimeZone newZone)
         {
-            LoggerUtil.GetAppWideLogger().Info($"Sending time zone change to server: oldZone={oldZone.Id}, newZone={newZone.Id}");
+            LoggerUtil.GetAppWideLogger().Info($"Sending time zone changed to server. oldZone = {oldZone.Id}, newZone = {newZone.Id}");
             TimeZoneChangeInfo info = new TimeZoneChangeInfo()
             {
-                old_zone_id = oldZone?.Id,
-                new_zone_id = newZone?.Id
+                new_zone_id = newZone?.Id,
+                old_zone_id = oldZone?.Id
             };
-
 
             string json = JsonConvert.SerializeObject(info);
             byte[] formData = Encoding.UTF8.GetBytes(json);
 
             HttpStatusCode statusCode;
-
             WebServiceUtil.Default.SendResource(ServiceResource.AccountabilityNotify, formData, out statusCode);
         }
     }

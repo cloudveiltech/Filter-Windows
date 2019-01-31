@@ -36,13 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\Filtering\BlockedPage.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BlockedPage.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 

@@ -134,6 +134,9 @@ namespace FilterProvider.Common.Configuration
 
         public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get { return m_generatedCategoriesMap; } }
 
+        public TimeRestrictionModel[] TimeRestrictions { get; private set; }
+        public bool AreAnyTimeRestrictionsEnabled { get; private set; }
+
         public event EventHandler OnConfigurationLoaded;
         
         private string getSHA1ForFilePath(string filePath)
@@ -526,7 +529,7 @@ namespace FilterProvider.Common.Configuration
                         }
 
                         MappedFilterListCategoryModel categoryModel = null;
-                        if (TryFetchOrCreateCategoryMap("self_moderation", out categoryModel))
+                        if (TryFetchOrCreateCategoryMap("/user/self_moderation", out categoryModel))
                         {
                             var loadedFailedRes = m_filterCollection.ParseStoreRules(sanitizedSelfModerationSites.ToArray(), categoryModel.CategoryId).Result;
                             totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
@@ -632,6 +635,23 @@ namespace FilterProvider.Common.Configuration
 
                     loadAppList(BlacklistedApplications, Configuration.BlacklistedApplications, BlacklistedApplicationGlobs);
                     loadAppList(WhitelistedApplications, Configuration.WhitelistedApplications, WhitelistedApplicationGlobs);
+
+                    TimeRestrictions = new TimeRestrictionModel[7];
+                    
+                    for(int i = 0; i < 7; i++)
+                    {
+                        DayOfWeek day = (DayOfWeek)i;
+
+                        string configDay = day.ToString().ToLowerInvariant();
+
+                        TimeRestrictionModel restriction = null;
+
+                        Configuration.TimeRestrictions?.TryGetValue(configDay, out restriction);
+
+                        TimeRestrictions[i] = restriction;
+                    }
+
+                    AreAnyTimeRestrictionsEnabled = TimeRestrictions.Any(r => r?.RestrictionsEnabled == true);
 
                     if (Configuration.CannotTerminate)
                     {

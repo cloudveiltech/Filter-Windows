@@ -46,8 +46,8 @@ namespace FilterProvider.Common.Util
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
-        Custom,
-        ServerTime
+        ServerTime,
+        Custom
     };
 
     public delegate void GenericWebServiceUtilDelegate();
@@ -77,8 +77,8 @@ namespace FilterProvider.Common.Util
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
-            { ServiceResource.ServerTime, "/api/v2/time" },
-            { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" }
+            { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
+            { ServiceResource.ServerTime, "/api/v2/time" }
         };
 
         private readonly Logger m_logger;
@@ -736,9 +736,10 @@ namespace FilterProvider.Common.Util
         public ZonedDateTime? GetServerTime()
         {
             HttpStatusCode statusCode;
-            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode);
 
-            if (statusCode != HttpStatusCode.OK)
+            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode, parameters: null, noLogging: true);
+
+            if(statusCode != HttpStatusCode.OK)
             {
                 return null;
             }

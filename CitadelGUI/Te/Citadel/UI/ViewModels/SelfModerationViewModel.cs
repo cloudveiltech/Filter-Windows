@@ -58,9 +58,11 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(addNewSiteCommand == null)
                 {
-                    addNewSiteCommand = new RelayCommand<string>((site) =>
+                    addNewSiteCommand = new RelayCommand<string>(async (site) =>
                     {
-                        bool result = (CitadelApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?").Result;
+                        var window = (CitadelApp.Current.MainWindow as BaseWindow);
+
+                        bool result = await (CitadelApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?");
 
                         if (!result)
                             return;

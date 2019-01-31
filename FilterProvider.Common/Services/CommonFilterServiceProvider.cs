@@ -1982,7 +1982,7 @@ namespace FilterProvider.Common.Services
                 {
                     matching_category = entry.ShortCategoryName;
                 }
-                else if (appliedCategories.Any(m => m.CategoryId == entry.CategoryId))
+                else if (appliedCategories?.Any(m => m.CategoryId == entry.CategoryId) == true)
                 {
                     otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
                 }

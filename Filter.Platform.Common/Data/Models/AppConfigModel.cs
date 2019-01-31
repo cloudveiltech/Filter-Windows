@@ -212,7 +212,9 @@ namespace Filter.Platform.Common.Data.Models
         /// List of all sites that the user wants blocked on their devices.
         /// </summary>
         public List<string> SelfModeration { get; set; } = new List<string>();
-        
+
+        public Dictionary<string, TimeRestrictionModel> TimeRestrictions = new Dictionary<string, TimeRestrictionModel>();
+
         /// <summary>
         /// The maximum number of combined words to assemble when doing text trigger sliding window
         /// scanning. The window will dynamically go as it increments through the list of extracted

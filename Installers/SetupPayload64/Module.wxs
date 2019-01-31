@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.1" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.2" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
