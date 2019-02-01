@@ -1,53 +1,10 @@
-<!--
-* Copyright © 2017-2018 Cloudveil Technology Inc.
-* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/.
--->
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Te.Citadel.Themes"
+                    xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/CloudVeil;component/Themes/TimeRestrictionSlider.xaml" />
+    </ResourceDictionary.MergedDictionaries>
 
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Te.Citadel.UI.Controls">
-
-    <SolidColorBrush x:Key="SidebarButtonBorderBrush" Color="#cccccc" />
-
-    <Style TargetType="{x:Type local:SidebarButton}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:SidebarButton}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{StaticResource SidebarButtonBorderBrush}"
-                            BorderThickness="2"
-                            Padding="0,16,0,16"
-                            x:Name="SidebarButtonBorder"
-                            Cursor="Hand"
-                            >
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="Blue" TargetName="SidebarButtonBorder" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="{x:Type local:Sidebar}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:Sidebar}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Top"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <Style BasedOn="{StaticResource Te.Citadel.Styles.TimeRestrictionSlider}" TargetType="{x:Type localControls:TimeRestrictionSlider}" />
 </ResourceDictionary>
