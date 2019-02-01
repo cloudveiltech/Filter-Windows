@@ -630,7 +630,7 @@ namespace FilterProvider.Common.Services
 
                         case RelaxedPolicyCommand.Requested:
                             {
-                                OnRelaxedPolicyRequested();
+                                OnRelaxedPolicyRequested(args);
                             }
                             break;
                     }
@@ -728,10 +728,13 @@ namespace FilterProvider.Common.Services
                         ConnectedClients++;
 
                         var cfg = m_policyConfiguration.Configuration;
+
+                        if (cfg != null)
+                            m_ipcServer.SendConfigurationInfo(cfg);
+
                         if (cfg != null && cfg.BypassesPermitted > 0)
                         {
                             m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
-                            m_ipcServer.SendConfigurationInfo(cfg);
                         }
                         else
                         {
@@ -2560,10 +2563,17 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        private void OnRelaxedPolicyRequested()
+        private void OnRelaxedPolicyRequested(RelaxedPolicyEventArgs args)
         {
             HttpStatusCode statusCode;
-            byte[] bypassResponse = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode);
+
+            var parameters = new Dictionary<string, object>();
+            if(args.Passcode != null)
+            {
+                parameters.Add("passcode", args.Passcode);
+            }
+
+            byte[] bypassResponse = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
 
             bool useLocalBypassLogic = false;
 
@@ -2660,7 +2670,14 @@ namespace FilterProvider.Common.Services
                 else
                 {
                     var cfg = m_policyConfiguration.Configuration;
-                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), RelaxedPolicyStatus.AllUsed);
+
+                    RelaxedPolicyStatus status = RelaxedPolicyStatus.AllUsed;
+                    if (bypassNotification.IndexOf("incorrect passcode", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
+                        status = RelaxedPolicyStatus.Unauthorized;
+                    }
+
+                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), status);
                 }
             }
         }

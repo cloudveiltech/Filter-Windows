@@ -89,6 +89,8 @@ namespace CloudVeil.Windows
         /// </summary>
         private bool m_hasStateBeenFetched = false;
 
+        private AppConfigModel m_appConfig = null;
+
         /// <summary>
         /// Logger. 
         /// </summary>
@@ -658,6 +660,7 @@ namespace CloudVeil.Windows
                 m_ipcClient.RegisterSendHandler(IpcCall.ConfigurationInfo, (msg) =>
                 {
                     var cfg = msg.Data as AppConfigModel;
+                    m_appConfig = cfg;
 
                     m_mainWindow.Dispatcher.InvokeAsync(() =>
                     {
@@ -1134,6 +1137,10 @@ namespace CloudVeil.Windows
                     message = "Relaxed policy not currently active.";
                     break;
 
+                case RelaxedPolicyStatus.Unauthorized:
+                    message = "You entered an incorrect relaxed policy passcode.";
+                    break;
+
                 case RelaxedPolicyStatus.Deactivated:
                     message = null;
                     break;
@@ -1171,11 +1178,27 @@ namespace CloudVeil.Windows
         /// </summary>
         private async void OnRelaxedPolicyRequested(bool fromTray)
         {
+            string passcode = null;
+            if(m_appConfig != null && m_appConfig.EnableRelaxedPolicyPasscode)
+            {
+                if(fromTray)
+                {
+                    BringAppToFocus();
+                }
+
+                passcode = await m_mainWindow.PromptUser("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
+
+                if(fromTray)
+                {
+                    MinimizeToTray(false);
+                }
+            }
+
             using(var ipcClient = new IPCClient())
             {
                 ipcClient.ConnectedToServer = () =>
                 {
-                    ipcClient.RequestRelaxedPolicy();
+                    ipcClient.RequestRelaxedPolicy(passcode);
                 };
 
                 ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)

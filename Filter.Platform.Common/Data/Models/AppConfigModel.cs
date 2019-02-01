@@ -119,6 +119,11 @@ namespace Filter.Platform.Common.Data.Models
         } = Timeout.InfiniteTimeSpan;
 
         /// <summary>
+        /// Tells us whether the server is expecting a passcode from us in order to allow bypasses.
+        /// </summary>
+        public bool EnableRelaxedPolicyPasscode { get; set; }
+
+        /// <summary>
         /// The number of times the user may request relaxed/alternate filtering in a given day.
         /// </summary>
         public int BypassesPermitted
