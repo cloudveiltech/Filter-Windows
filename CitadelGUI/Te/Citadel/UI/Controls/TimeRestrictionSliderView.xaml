@@ -22,12 +22,12 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Column="0" Content="{Binding Path=Caption}" />
-        
+
         <local:TimeRestrictionSlider
             Grid.Column="1"
             LowerValue="{Binding Path=LowerValue}"
             UpperValue="{Binding Path=UpperValue}"
-            Value="{Binding Path=IndicatorValue}" 
-            IndicatorVisible="{Binding Path=IndicatorVisible}"/>
+            IndicatorVisible="{Binding Path=IndicatorVisible}"
+            Value="{Binding Path=IndicatorValue}" />
     </Grid>
 </UserControl>

@@ -19,14 +19,53 @@
     
     <StackPanel Width="600">
         <localControls:TimeRestrictionSliderView
-            UpperValue="17.5"
-            LowerValue="9"
+            UpperValue="{Binding Path=TimeRestrictions[1].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[1].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[1]}"
             Caption="Monday" />
 
         <localControls:TimeRestrictionSliderView
-            UpperValue="17.5"
-            LowerValue="9"
+            UpperValue="{Binding Path=TimeRestrictions[2].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[2].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[2]}"
             Caption="Tuesday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[3].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[3].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[3]}"
+            Caption="Wednesday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[4].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[4].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[4]}"
+            Caption="Thursday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[5].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[5].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[5]}"
+            Caption="Friday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[6].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[6].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[6]}"
+            Caption="Saturday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[0].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[0].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[0]}"
+            Caption="Sunday" />
 
     </StackPanel>
 </UserControl>

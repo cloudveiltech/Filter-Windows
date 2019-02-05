@@ -189,7 +189,7 @@ namespace CloudVeil.Windows
                 var app = new CitadelApp();
                 app.InitializeComponent();
                 app.Run();
-
+                
                 // Always release mutex.
                 guiChecks.UnpublishRunningApp();
             }

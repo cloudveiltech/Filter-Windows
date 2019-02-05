@@ -240,6 +240,9 @@ namespace Te.Citadel.UI.Controls
             DependencyProperty.Register("IsMoveToPointEnabled", typeof(Boolean), typeof(TimeRestrictionSlider),
                                         new PropertyMetadata(false));
 
+        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSlider),
+            new PropertyMetadata(false, IndicatorVisibleChangedCallback));
+
         /// <summary>
         /// Identifies the <see cref="P:MahApps.Metro.Controls.RangeSlider.AutoToolTipPlacement" /> dependency property.
         /// </summary>
@@ -420,6 +423,14 @@ namespace Te.Citadel.UI.Controls
         {
             get { return (Boolean)this.GetValue(IsMoveToPointEnabledProperty); }
             set { this.SetValue(IsMoveToPointEnabledProperty, value); }
+        }
+
+        [Bindable(true)]
+        [Category("Behavior")]
+        public bool IndicatorVisible
+        {
+            get { return (bool)GetValue(IndicatorVisibleProperty); }
+            set { SetValue(IndicatorVisibleProperty, value); }
         }
 
         /// <summary>
@@ -658,9 +669,8 @@ namespace Te.Citadel.UI.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(typeof(TimeRestrictionSlider)));
             MinimumProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsMeasure, MinPropertyChangedCallback, CoerceMinimum));
             MaximumProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.AffectsMeasure, MaxPropertyChangedCallback, CoerceMaximum));
+            ValueProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsMeasure, ValueChangedCallback));
         }
-
-        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView));
 
         /// <summary>
         /// Responds to a change in the value of the <see cref="P:System.Windows.Controls.Primitives.RangeBase.Minimum"/> property.
@@ -842,9 +852,25 @@ namespace Te.Citadel.UI.Controls
             }
         }
 
+        private void RecalculateIndicator()
+        {
+            if (_indicatorContainer != null) _indicatorContainer.Visibility = IndicatorVisible ? Visibility.Visible : Visibility.Hidden;
+
+            if(_indicator != null)
+            {
+                double range = Maximum - Minimum;
+
+                double indicatorLeft = (ActualWidth / range) * Value;
+
+                _indicator.SetValue(Canvas.LeftProperty, indicatorLeft);
+            }
+        }
+
         //Recalculation of Control Height or Width
         private void ReCalculateSize()
         {
+            RecalculateIndicator();
+
             if (this._leftButton != null && this._rightButton != null && this._centerThumb != null)
             {
                 if (this.Orientation == Orientation.Horizontal)
@@ -2226,6 +2252,18 @@ namespace Te.Citadel.UI.Controls
         {
             var rs = (TimeRestrictionSlider)dependencyObject;
             rs._timer.Interval = TimeSpan.FromMilliseconds((Int32)e.NewValue);
+        }
+
+        private static void IndicatorVisibleChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var slider = (TimeRestrictionSlider)sender;
+            slider.RecalculateIndicator();
+        }
+
+        private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var slider = (TimeRestrictionSlider)sender;
+            slider.RecalculateIndicator();
         }
 
         //Raises all value changes events
