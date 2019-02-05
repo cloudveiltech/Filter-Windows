@@ -111,9 +111,9 @@
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
       <Name>Citadel.IPC.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CitadelService\CitadelService x64.csproj">
+    <ProjectReference Include="..\CitadelService\CitadelService.csproj">
       <Project>{620adc88-b91d-4fda-a791-8b92473e927a}</Project>
-      <Name>CitadelService x64</Name>
+      <Name>CitadelService</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>

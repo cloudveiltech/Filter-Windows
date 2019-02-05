@@ -52,7 +52,7 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>bin\Debug x86\</OutputPath>
     <DefineConstants>TRACE;DEBUG;UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -61,9 +61,25 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>bin\Release x86\</OutputPath>
     <DefineConstants>UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
     <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutputPath>bin\Debug x64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\Release x64\</OutputPath>
+    <DefineConstants>UNBLOCK_REQUESTS_IN_BROWSER</DefineConstants>
+    <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -125,6 +141,7 @@
     <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\TimeRestrictionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
       <DependentUpon>AdvancedView.xaml</DependentUpon>
     </Compile>

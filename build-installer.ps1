@@ -28,10 +28,10 @@ $wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
 $builds = @(
     @("x86", "InstallerCustomActions\InstallerCustomActions.csproj"),
     @("x64", "InstallerCustomActions\InstallerCustomActions.csproj"),
-    @("Any CPU", "CitadelService\CitadelService x64.csproj"),
-    @("Any CPU", "CitadelService\CitadelService x86.csproj"),
-    @("Any CPU", "CitadelGUI\CitadelGUI x64.csproj"),
-    @("Any CPU", "CitadelGUI\CitadelGUI x86.csproj")
+    @("x64", "CitadelService\CitadelService.csproj"),
+    @("x86", "CitadelService\CitadelService.csproj"),
+    @("x64", "CitadelGUI\CitadelGUI.csproj"),
+    @("x86", "CitadelGUI\CitadelGUI.csproj")
 )
 
 foreach ($build in $builds) {
@@ -41,9 +41,9 @@ foreach ($build in $builds) {
     $platform = $build[0]
 
     if ($platform -eq "Any CPU") {
-        & $msbuildPath /p:Configuration=Release $projPath /t:Clean,Build
+        & $msbuildPath /Verbosity:minimal /p:Configuration=Release $projPath /t:Clean,Build
     } else {
-        & $msbuildPath /p:Configuration=Release /p:Platform=$platform $projPath /t:Clean,Build
+        & $msbuildPath /Verbosity:minimal /p:Configuration=Release /p:Platform=$platform $projPath /t:Clean,Build
 
     }
 }
