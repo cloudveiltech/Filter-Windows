@@ -72,7 +72,7 @@ With modifications by Kent Friesen
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" MinHeight="{TemplateBinding localControls:TimeRestrictionSlider.MinHeight}" />
             </Grid.RowDefinitions>
-            <Grid x:Name="PART_IndicatorContainer"
+            <Canvas x:Name="PART_IndicatorContainer"
                   Grid.ZIndex="3"
                   Background="Transparent">
                 <Controls:MetroThumb
@@ -80,9 +80,11 @@ With modifications by Kent Friesen
                     Width="{DynamicResource HorizontalThumbWidth}"
                     Height="{DynamicResource HorizontalThumbHeight}"
                     Background="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(localControls:SliderHelper.ThumbFillBrush)}"
+                    Canvas.Top="0"
+                    Canvas.Left="0"
                     Style="{DynamicResource Te.Citadel.Styles.Slider.Thumb}"
                     />
-            </Grid>
+            </Canvas>
             <StackPanel x:Name="PART_SliderContainer"
                         Grid.Row="0"
                         Grid.ZIndex="1"

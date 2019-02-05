@@ -38,7 +38,7 @@ namespace Te.Citadel.UI.Controls
      TemplatePart(Name = "PART_LeftEdge", Type = typeof(RepeatButton)),
      TemplatePart(Name = "PART_IndicatorContainer", Type = typeof(Grid)),
      TemplatePart(Name = "PART_Indicator", Type = typeof(Thumb)),
-     TemplatePart(Name = "PART_MiddleThumb", Type = typeof(Thumb)),
+     TemplatePart(Name = "PART_MiddleThumb", Type = typeof(RepeatButton)),
      TemplatePart(Name = "PART_RightEdge", Type = typeof(RepeatButton))]
     public class TimeRestrictionSlider : RangeBase
     {
@@ -600,7 +600,7 @@ namespace Te.Citadel.UI.Controls
         private const double Epsilon = 0.00000153;
 
         private Boolean _internalUpdate;
-        private Thumb _centerThumb;
+        private RepeatButton _centerThumb;
         private RepeatButton _leftButton;
         private RepeatButton _rightButton;
         private StackPanel _visualElementsContainer;
@@ -659,6 +659,8 @@ namespace Te.Citadel.UI.Controls
             MinimumProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsMeasure, MinPropertyChangedCallback, CoerceMinimum));
             MaximumProperty.OverrideMetadata(typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.AffectsMeasure, MaxPropertyChangedCallback, CoerceMaximum));
         }
+
+        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView));
 
         /// <summary>
         /// Responds to a change in the value of the <see cref="P:System.Windows.Controls.Primitives.RangeBase.Minimum"/> property.
@@ -1112,7 +1114,7 @@ namespace Te.Citadel.UI.Controls
 
             this._container = this.GetTemplateChild("PART_Container") as FrameworkElement;
             this._visualElementsContainer = this.GetTemplateChild("PART_SliderContainer") as StackPanel;
-            this._centerThumb = this.GetTemplateChild("PART_MiddleThumb") as Thumb;
+            this._centerThumb = this.GetTemplateChild("PART_MiddleThumb") as RepeatButton;
             this._leftButton = this.GetTemplateChild("PART_LeftEdge") as RepeatButton;
             this._rightButton = this.GetTemplateChild("PART_RightEdge") as RepeatButton;
             this._indicatorContainer = this.GetTemplateChild("PART_IndicatorContainer") as Grid;

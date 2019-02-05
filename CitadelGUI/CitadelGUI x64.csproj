@@ -108,6 +108,9 @@
     <Compile Include="Te\Citadel\UI\Controls\RangeSelectionChangedEventArgs.cs" />
     <Compile Include="Te\Citadel\UI\Controls\SliderHelper.cs" />
     <Compile Include="Te\Citadel\UI\Controls\TimeRestrictionSlider.cs" />
+    <Compile Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml.cs">
+      <DependentUpon>TimeRestrictionSliderView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\ModelManager.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
@@ -137,6 +140,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Styles\AppStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
