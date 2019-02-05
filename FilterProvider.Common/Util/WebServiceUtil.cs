@@ -11,6 +11,8 @@ using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32;
 using NLog;
+using NodaTime;
+using NodaTime.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,7 +21,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
@@ -42,6 +46,7 @@ namespace FilterProvider.Common.Util
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
+        ServerTime,
         Custom
     };
 
@@ -72,7 +77,8 @@ namespace FilterProvider.Common.Util
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
-            { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" }
+            { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
+            { ServiceResource.ServerTime, "/api/v2/time" }
         };
 
         private readonly Logger m_logger;
@@ -130,6 +136,7 @@ namespace FilterProvider.Common.Util
         }
 
         private static WebServiceUtil s_instance;
+        private static NLog.Logger s_logger;
 
         static WebServiceUtil()
         {
@@ -406,14 +413,6 @@ namespace FilterProvider.Common.Util
                 request.Headers.Add("ETag", options.ETag);
             }
 
-#if DEBUG
-            // our local https://build-server:8443 is untrusted.
-            request.ServerCertificateValidationCallback += (sender, cert, chain, policyErrors) =>
-            {
-                return true;
-            };
-#endif
-
             return request;
         }
 
@@ -598,6 +597,8 @@ namespace FilterProvider.Common.Util
 
                 var request = GetApiBaseRequest(resourceUri, options);
 
+                m_logger.Debug("WebServiceUtil.Request {0}", request.RequestUri);
+
                 if (StringExtensions.Valid(accessToken))
                 {
                     request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
@@ -730,6 +731,31 @@ namespace FilterProvider.Common.Util
             }
 
             return null;
+        }
+
+        public ZonedDateTime? GetServerTime()
+        {
+            HttpStatusCode statusCode;
+
+            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode, parameters: null, noLogging: true);
+
+            if(statusCode != HttpStatusCode.OK)
+            {
+                return null;
+            }
+
+            string timeString = Encoding.UTF8.GetString(response);
+
+            ParseResult<ZonedDateTime> result = ZonedDateTimePattern.GeneralFormatOnlyIso.Parse(timeString);
+
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

@@ -104,6 +104,10 @@
       <DependentUpon>PostInstallCommand.cs</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\Testing\FilterTesting.cs" />
+    <Compile Include="Te\Citadel\UI\Controls\RangeParameterChangedEventArgs.cs" />
+    <Compile Include="Te\Citadel\UI\Controls\RangeSelectionChangedEventArgs.cs" />
+    <Compile Include="Te\Citadel\UI\Controls\SliderHelper.cs" />
+    <Compile Include="Te\Citadel\UI\Controls\TimeRestrictionSlider.cs" />
     <Compile Include="Te\Citadel\UI\ModelManager.cs" />
     <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
     <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
@@ -133,6 +137,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Styles\AppStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\TimeRestrictionSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -184,6 +196,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Te\Citadel\UI\Views\TimeRestrictionsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Te\Citadel\UI\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -221,6 +237,9 @@
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\SelfModerationView.xaml.cs">
       <DependentUpon>SelfModerationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Te\Citadel\UI\Views\TimeRestrictionsView.xaml.cs">
+      <DependentUpon>TimeRestrictionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
     <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">

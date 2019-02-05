@@ -12,7 +12,7 @@
     xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
     xmlns:CitadelViews="clr-namespace:Te.Citadel.UI.Views"
     xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-    xmlns:MetroControls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:MetroControls="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Te.Citadel.UI.Windows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

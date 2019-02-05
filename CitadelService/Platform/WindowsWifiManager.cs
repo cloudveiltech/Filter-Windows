@@ -10,6 +10,7 @@ using FilterProvider.Common.Platform;
 using NativeWifi;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,13 +23,32 @@ namespace CitadelService.Platform
 
         static WindowsWifiManager()
         {
-            s_wlanClient = new WlanClient();
+            try
+            {
+                s_wlanClient = new WlanClient();
+            }
+            catch (Win32Exception ex)
+            {
+                LoggerUtil.GetAppWideLogger()?.Error("Win32 error occurred while trying to start WLAN Client. {0}, win32-error={1}", ex.Message, ex.NativeErrorCode);
+            }
+            catch (Exception ex)
+            {
+                var logger = LoggerUtil.GetAppWideLogger();
+
+                logger.Error("CLR error occurred while initializing WindowsWifiManager.");
+                LoggerUtil.RecursivelyLogException(logger, ex);
+            }
         }
 
         public List<string> DetectCurrentSsids()
         {
             try
             {
+                if(s_wlanClient == null)
+                {
+                    return new List<string>();
+                }
+
                 List<string> connectedSsids = new List<string>();
 
                 foreach (WlanClient.WlanInterface wlanInterface in s_wlanClient.Interfaces)

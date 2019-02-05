@@ -81,5 +81,15 @@ namespace FilterProvider.Common.Configuration
         CategoryIndex CategoryIndex { get; }
 
         ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get; }
+
+        /// <summary>
+        /// The IPolicyConfiguration implementor should map this to DayOfWeek.
+        /// </summary>
+        TimeRestrictionModel[] TimeRestrictions { get; }
+
+        /// <summary>
+        /// A cached boolean so we don't have to recalculate time restrictions enabled every time we want to get the value.
+        /// </summary>
+        bool AreAnyTimeRestrictionsEnabled { get; }
     }
 }

@@ -31,7 +31,7 @@ namespace CloudVeil.Windows
 
         private static IGUIChecks guiChecks;
 
-        private static void RunGuiChecks()
+        private static void RunGuiChecks(bool startMinimized)
         {
             guiChecks = PlatformTypes.New<IGUIChecks>();
 
@@ -65,7 +65,10 @@ namespace CloudVeil.Windows
                 {
                     try
                     {
-                        guiChecks.DisplayExistingUI();
+                        if (!startMinimized)
+                        {
+                            guiChecks.DisplayExistingUI();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -80,7 +83,10 @@ namespace CloudVeil.Windows
                         // Something about instantiating an IPCClient here is making it all blow up in my face.
                         using (var ipcClient = IPCClient.InitDefault())
                         {
-                            ipcClient.RequestPrimaryClientShowUI();
+                            if (!startMinimized)
+                            {
+                                ipcClient.RequestPrimaryClientShowUI();
+                            }
 
                             // Wait plenty of time before dispose to allow delivery of the message.
                             Task.Delay(500).Wait();
@@ -162,7 +168,7 @@ namespace CloudVeil.Windows
 
             try
             {
-                RunGuiChecks();
+                RunGuiChecks(startMinimized);
             }
             catch(Exception e)
             {

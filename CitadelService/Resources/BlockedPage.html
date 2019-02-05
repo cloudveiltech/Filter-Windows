@@ -121,7 +121,7 @@ The line below is used by the filter tester to determine whether the filter is w
         <!-- This block page does not use angular; it's just that the angular templating works well for find and replace. -->
 
         <!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
-        <p><a href="{{url_text}}">{{friendly_url_text}}</a> was blocked because it was in the following category:</p>
+        <p><a href="{{url_text}}">{{friendly_url_text}}</a> {{message}}</p>
         <p class="category">
             {{matching_category}}
         </p>
@@ -130,7 +130,7 @@ The line below is used by the filter tester to determine whether the filter is w
 
         {{relaxed_policy_message}}
 
-        <a class="request-unblock button primary" href="{{unblock_request}}">Request an Unblock</a>
+        {{unblock_request_button}}
     </div>
 
     <script>

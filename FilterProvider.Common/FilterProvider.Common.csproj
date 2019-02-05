@@ -21,6 +21,7 @@
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="NodaTime" Version="2.4.4" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.4" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
@@ -32,6 +33,18 @@
 
   <ItemGroup>
     <Folder Include="Data\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Data\Filtering\BlockedPage.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BlockedPage.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <Import Project="CompileSecrets.targets" />

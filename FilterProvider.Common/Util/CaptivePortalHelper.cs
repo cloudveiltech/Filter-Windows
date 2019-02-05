@@ -56,7 +56,14 @@ namespace FilterProvider.Common.Util
 
         public CaptivePortalHelper()
         {
-            m_wifiManager = PlatformTypes.New<IWifiManager>();
+            try
+            {
+                m_wifiManager = PlatformTypes.New<IWifiManager>();
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.GetAppWideLogger().Error(ex, "Failed to initialize WIFI Manager.");
+            }
         }
 
         /// <summary>
@@ -66,7 +73,7 @@ namespace FilterProvider.Common.Util
         /// <returns>List of any SSIDs that the computer is connected to. The count of this list will most likely be 1.</returns>
         private string[] detectCurrentSSIDs()
         {
-            return m_wifiManager.DetectCurrentSsids().ToArray();
+            return m_wifiManager?.DetectCurrentSsids()?.ToArray() ?? new string[0];
         }
 
         private object m_captivePortalSettingsLock = new object();

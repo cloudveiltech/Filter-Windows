@@ -462,8 +462,6 @@ namespace CitadelService.Services
                     });
                 };
 
-                ServicePointManager.ServerCertificateValidationCallback += m_certificateExemptions.CertificateValidationCallback;
-
                 m_ipcServer.Start();
             }
             catch(Exception ipce)

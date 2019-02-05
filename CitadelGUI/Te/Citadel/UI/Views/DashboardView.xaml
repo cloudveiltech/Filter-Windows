@@ -184,6 +184,11 @@
                             <local:SelfModerationView />
                         </Controls:HamburgerMenuIconItem.Tag>
                     </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=LockClock}" Label="Time Restrictions">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:TimeRestrictionsView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
                     <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="Settings">
                         <Controls:HamburgerMenuIconItem.Tag>
                             <local:SettingsView />

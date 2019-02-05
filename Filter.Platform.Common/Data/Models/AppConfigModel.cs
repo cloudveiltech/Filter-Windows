@@ -119,6 +119,11 @@ namespace Filter.Platform.Common.Data.Models
         } = Timeout.InfiniteTimeSpan;
 
         /// <summary>
+        /// Tells us whether the server is expecting a passcode from us in order to allow bypasses.
+        /// </summary>
+        public bool EnableRelaxedPolicyPasscode { get; set; }
+
+        /// <summary>
         /// The number of times the user may request relaxed/alternate filtering in a given day.
         /// </summary>
         public int BypassesPermitted
@@ -212,7 +217,9 @@ namespace Filter.Platform.Common.Data.Models
         /// List of all sites that the user wants blocked on their devices.
         /// </summary>
         public List<string> SelfModeration { get; set; } = new List<string>();
-        
+
+        public Dictionary<string, TimeRestrictionModel> TimeRestrictions = new Dictionary<string, TimeRestrictionModel>();
+
         /// <summary>
         /// The maximum number of combined words to assemble when doing text trigger sliding window
         /// scanning. The window will dynamically go as it increments through the list of extracted

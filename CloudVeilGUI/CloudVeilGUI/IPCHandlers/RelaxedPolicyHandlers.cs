@@ -62,7 +62,8 @@ namespace CloudVeilGUI.IPCHandlers
             {
                 ipcClient.ConnectedToServer = () =>
                 {
-                    ipcClient.RequestRelaxedPolicy();
+                    //ipcClient.RequestRelaxedPolicy();
+                    throw new NotImplementedException("When we use this library again, make sure to port OnRelaxedPolicyRequested() behavior to CloudVeilGUI");
                 };
 
                 ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)

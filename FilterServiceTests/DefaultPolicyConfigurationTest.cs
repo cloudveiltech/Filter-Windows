@@ -73,18 +73,33 @@ namespace FilterServiceTests
             return JsonConvert.SerializeObject(model);
         }
 
-        private DefaultPolicyConfiguration setupConfiguration()
+        private DefaultPolicyConfiguration setupConfiguration(bool useInvalidJson = false)
         {
-            string configFileText = provideConfigurationJsonForApplicationLists();
+            string configFileText = useInvalidJson ? "404 Some nasty error has occurred" : provideConfigurationJsonForApplicationLists();
 
             DefaultPolicyConfiguration configuration = new DefaultPolicyConfiguration(null, NLog.LogManager.GetCurrentClassLogger(), new System.Threading.ReaderWriterLockSlim());
 
             using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(configFileText)))
             {
-                Assert.IsTrue(configuration.LoadConfiguration(ms), "LoadConfiguration failed");
+                Assert.AreEqual(!useInvalidJson, configuration.LoadConfiguration(ms), "LoadConfiguration delivered unexpected result for the circumstances.");
             }
 
             return configuration;
+        }
+
+        [TestMethod]
+        public void TestNullBehavior()
+        {
+            DefaultPolicyConfiguration configuration = setupConfiguration(true);
+
+            AppListCheck alc = new AppListCheck(configuration);
+
+            Func<string, bool> isAppInBlacklist = (path) => alc.IsAppInBlacklist(path, System.IO.Path.GetFileName(path));
+
+            bool blacklistVal = isAppInBlacklist(@"C:\Program Files\Google\Chrome\chrome.exe");
+            bool whitelistVal = alc.IsAppInWhitelist(@"C:\Program Files\Google\Chrome\chrome.exe", "chrome.exe");
+
+            // The result doesn't matter, we just don't want any NullReferenceExceptions occurring.
         }
 
         [TestMethod]

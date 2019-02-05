@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Te.Citadel.Te.Citadel.UI.Views
+namespace Te.Citadel.UI.Views
 {
     /// <summary>
     /// Interaction logic for TimeRestrictionsView.xaml

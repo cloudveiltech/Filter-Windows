@@ -85,7 +85,6 @@
     <EmbeddedResource Include="Services\FilterStarter.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\AppListCheck.cs" />
-    <Compile Include="Util\CaptivePortalHelper.cs" />
     <Compile Include="Util\CertificateExemptions.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
@@ -153,6 +152,9 @@
     </PackageReference>
     <PackageReference Include="NLog">
       <Version>4.5.9</Version>
+    </PackageReference>
+    <PackageReference Include="NodaTime">
+      <Version>2.4.4</Version>
     </PackageReference>
     <PackageReference Include="Portable.BouncyCastle">
       <Version>1.8.4</Version>

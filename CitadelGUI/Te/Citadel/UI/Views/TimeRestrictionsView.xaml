@@ -4,9 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+             xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
+             mc:Ignorable="d">
+    <StackPanel Width="600">
+        <localControls:TimeRestrictionSlider
+            Width="600"
+            MinHeight="10"
+            Margin="4"
+            Maximum="24"
+            Minimum="0"
+            Orientation="Horizontal"
+            LowerValue="5"
+            UpperValue="10"/>
+    </StackPanel>
 </UserControl>

@@ -25,28 +25,45 @@ $currentLocation = Get-Location
 
 $wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
 
-$gui86 = Join-Path $currentLocation "CitadelGUI\CitadelGUI x86.csproj"
+$builds = @(
+    @("x86", "InstallerCustomActions\InstallerCustomActions.csproj"),
+    @("x64", "InstallerCustomActions\InstallerCustomActions.csproj"),
+    @("Any CPU", "CitadelService\CitadelService x64.csproj"),
+    @("Any CPU", "CitadelService\CitadelService x86.csproj"),
+    @("Any CPU", "CitadelGUI\CitadelGUI x64.csproj"),
+    @("Any CPU", "CitadelGUI\CitadelGUI x86.csproj")
+)
+
+foreach ($build in $builds) {
+    $projPath = Join-Path $currentLocation $build[1]
+    echo $projPath
+
+    $platform = $build[0]
+
+    if ($platform -eq "Any CPU") {
+        & $msbuildPath /p:Configuration=Release $projPath /t:Clean,Build
+    } else {
+        & $msbuildPath /p:Configuration=Release /p:Platform=$platform $projPath /t:Clean,Build
+
+    }
+}
+
 $payload86 = Join-Path $currentLocation "Installers\SetupPayload64\SetupPayload86.wixproj"
 $setup86 = Join-Path $currentLocation "Installers\SetupProjects\Setup x86.wixproj"
 $product86 = Join-Path $currentLocation "Installers\SetupProjects\Product-x86.wxs"
 $output86 = Join-Path $currentLocation "Installers\SetupProjects\Release\Setup x86.msi"
 
-$gui64 = Join-Path $currentLocation "CitadelGUI\CitadelGUI x64.csproj"
 $payload64 = Join-Path $currentLocation "Installers\SetupPayload64\SetupPayload64.wixproj"
 $setup64 = Join-Path $currentLocation "Installers\SetupProjects\Setup x64.wixproj"
 $product64 = Join-Path $currentLocation "Installers\SetupProjects\Product-x64.wxs"
 $output64 = Join-Path $currentLocation "Installers\SetupProjects\Release\Setup x64.msi"
 
-& $msbuildPath /p:Configuration=Release $gui64 /t:Clean,Build
-
-<# TODO: Sign executable files #>
+<# TODO: Sign executable files x64 #>
 
 & $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
 & $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build
 
-& $msbuildPath /p:Configuration=Release $gui86 /t:Clean,Build
-
-<# TODO: Sign executable files #>
+<# TODO: Sign executable files x86 #>
 
 & $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
 & $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build

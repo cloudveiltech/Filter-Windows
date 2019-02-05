@@ -33,6 +33,8 @@ namespace Citadel.IPC
             private set;
         }
 
+        public string Passcode { get; private set; }
+
         /// <summary>
         /// Constructs a new RelaxedPolicyEventArgs from the given client message. 
         /// </summary>
@@ -42,6 +44,7 @@ namespace Citadel.IPC
         public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg)
         {
             Command = msg.Command;
+            Passcode = msg.Passcode;
         }
     }
 

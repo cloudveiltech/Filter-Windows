@@ -103,6 +103,10 @@ namespace FilterProvider.Common.Configuration
 
         public HashSet<DotNet.Globbing.Glob> WhitelistedApplicationGlobs => null;
 
+        public TimeRestrictionModel[] TimeRestrictions => new TimeRestrictionModel[7];
+
+        public bool AreAnyTimeRestrictionsEnabled => false;
+
         public event EventHandler OnConfigurationLoaded;
 
         public bool? VerifyConfiguration()

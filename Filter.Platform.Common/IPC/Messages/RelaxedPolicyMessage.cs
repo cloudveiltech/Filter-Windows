@@ -38,6 +38,11 @@ namespace Citadel.IPC.Messages
         AlreadyRelinquished,
 
         /// <summary>
+        /// Means that the server expected a passcode and the user did not provide the correct one.
+        /// </summary>
+        Unauthorized,
+
+        /// <summary>
         /// Relaxed policy is currently deactivated and no click action occurred.
         /// </summary>
         Deactivated
@@ -161,6 +166,11 @@ namespace Citadel.IPC.Messages
         }
 
         /// <summary>
+        /// An optional passcode to be passed from client to server.
+        /// </summary>
+        public string Passcode { get; private set; }
+
+        /// <summary>
         /// Constructs a new RelaxedPolicyMessage instance. 
         /// </summary>
         /// <param name="command">
@@ -170,10 +180,15 @@ namespace Citadel.IPC.Messages
         /// Information about available policies. Only supply if the command is Info from the server.
         /// Null otherwise.
         /// </param>
-        public RelaxedPolicyMessage(RelaxedPolicyCommand command, RelaxedPolicyInfo policyInfo = null)
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode, RelaxedPolicyInfo policyInfo)
         {
             PolicyInfo = policyInfo;
             Command = command;
+            Passcode = passcode;
         }
+
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode) : this(command, passcode, null) { }
+
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, RelaxedPolicyInfo policyInfo = null) : this(command, null, policyInfo) { }
     }
 }

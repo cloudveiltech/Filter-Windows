@@ -409,9 +409,9 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        public void RequestRelaxedPolicy()
+        public void RequestRelaxedPolicy(string passcode)
         {
-            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Requested);
+            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Requested, passcode);
             PushMessage(msg);
         }
 

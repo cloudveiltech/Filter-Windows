@@ -74,6 +74,24 @@ namespace Te.Citadel.UI.Windows
             return userQueryResult == MessageDialogResult.Affirmative;
         }
 
+        public async Task<string> PromptUser(string title, string question)
+        {
+            if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            {
+                m_logger.Info("Failed to ShowUserMessage() thanks to existing dialog.");
+                Sentry.SentrySdk.CaptureMessage("Failed to ShowUserMessage() thanks to existing dialog.");
+
+                return null;
+            }
+
+            MetroDialogSettings settings = new MetroDialogSettings();
+            settings.AffirmativeButtonText = "OK";
+            settings.NegativeButtonText = "Cancel";
+            settings.DefaultButtonFocus = MessageDialogResult.Affirmative;
+
+            return await DialogManager.ShowInputAsync(this, title, question, settings);
+        }
+
         public async Task<UpdateDialogResult> AskUserUpdateQuestion(string title, string question)
         {
             // Check to see if a dialog is currently displaying.
