@@ -616,7 +616,7 @@ namespace Te.Citadel.UI.Controls
         private RepeatButton _rightButton;
         private StackPanel _visualElementsContainer;
         private Thumb _indicator;
-        private Grid _indicatorContainer;
+        private Canvas _indicatorContainer;
         private FrameworkElement _container;
         private Double _movableWidth;
         private readonly DispatcherTimer _timer;
@@ -1143,7 +1143,7 @@ namespace Te.Citadel.UI.Controls
             this._centerThumb = this.GetTemplateChild("PART_MiddleThumb") as RepeatButton;
             this._leftButton = this.GetTemplateChild("PART_LeftEdge") as RepeatButton;
             this._rightButton = this.GetTemplateChild("PART_RightEdge") as RepeatButton;
-            this._indicatorContainer = this.GetTemplateChild("PART_IndicatorContainer") as Grid;
+            this._indicatorContainer = this.GetTemplateChild("PART_IndicatorContainer") as Canvas;
             this._indicator = this.GetTemplateChild("PART_Indicator") as Thumb;
 
             this.InitializeVisualElementsContainer();
