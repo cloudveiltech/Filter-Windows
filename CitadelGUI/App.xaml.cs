@@ -674,6 +674,13 @@ namespace CloudVeil.Windows
                         }
                     });
 
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        var viewModel = ModelManager.Get<TimeRestrictionsViewModel>();
+
+                        viewModel.UpdateRestrictions(cfg.TimeRestrictions);
+                    });
+
                     return true;
                 });
 
@@ -774,6 +781,7 @@ namespace CloudVeil.Windows
             ModelManager.Register(new SettingsViewModel());
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
+            ModelManager.Register(new TimeRestrictionsViewModel());
 
             viewManager.Register(new LoginView(), (view) =>
             {

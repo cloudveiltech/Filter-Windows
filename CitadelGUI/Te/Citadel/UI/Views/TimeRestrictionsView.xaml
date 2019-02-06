@@ -6,17 +6,6 @@
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
              xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style TargetType="localControls:TimeRestrictionSlider">
-            <Setter Property="MaxWidth" Value="600" />
-            <Setter Property="MinHeight" Value="10" />
-            <Setter Property="Margin" Value="4" />
-            <Setter Property="Maximum" Value="24" />
-            <Setter Property="Minimum" Value="0" />
-            <Setter Property="Orientation" Value="Horizontal" />
-        </Style>
-    </UserControl.Resources>
-    
     <StackPanel Width="600">
         <localControls:TimeRestrictionSliderView
             UpperValue="{Binding Path=TimeRestrictions[1].EnabledThrough[1]}"

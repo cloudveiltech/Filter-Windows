@@ -11,8 +11,8 @@ namespace Filter.Platform.Common.Data.Models
     [Serializable]
     public class TimeRestrictionModel
     {
-        public decimal[] EnabledThrough;
+        public decimal[] EnabledThrough { get; set; }
 
-        public bool RestrictionsEnabled;
+        public bool RestrictionsEnabled { get; set; }
     }
 }

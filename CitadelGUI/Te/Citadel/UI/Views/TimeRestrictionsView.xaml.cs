@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloudVeil.Windows;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Views
 {
@@ -23,6 +25,7 @@ namespace Te.Citadel.UI.Views
         public TimeRestrictionsView()
         {
             InitializeComponent();
+            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<TimeRestrictionsViewModel>();
         }
     }
 }
