@@ -657,9 +657,25 @@ namespace CloudVeil.Windows
                     }
                 };
 
-                m_ipcClient.RegisterSendHandler(IpcCall.ConfigurationInfo, (msg) =>
+                // TODO: Add helper functions to wrap code in dispatcher functions.
+                // TODO: Add helper functions to bypass the need for any message handling.
+                m_ipcClient.RegisterSendHandler<bool?>(IpcCall.TimeRestrictionsEnabled, (msg) =>
                 {
-                    var cfg = msg.Data as AppConfigModel;
+                    bool? areTimeRestrictionsEnabled = msg.Data;
+
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        var viewModel = ModelManager.Get<TimeRestrictionsViewModel>();
+
+                        viewModel.AreTimeRestrictionsActive = areTimeRestrictionsEnabled;
+                    });
+                    
+                    return true;
+                });
+
+                m_ipcClient.RegisterSendHandler<AppConfigModel>(IpcCall.ConfigurationInfo, (msg) =>
+                {
+                    var cfg = msg.Data;
                     m_appConfig = cfg;
 
                     m_mainWindow.Dispatcher.InvokeAsync(() =>

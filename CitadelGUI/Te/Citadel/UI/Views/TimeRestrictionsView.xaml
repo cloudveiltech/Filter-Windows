@@ -5,8 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
              xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d">
     <StackPanel Width="600">
+        <Label Content="{Binding Path=TimeRestrictionsDescription}" />
+        
         <localControls:TimeRestrictionSliderView
             UpperValue="{Binding Path=TimeRestrictions[1].EnabledThrough[1]}"
             LowerValue="{Binding Path=TimeRestrictions[1].EnabledThrough[0]}"
@@ -56,5 +59,8 @@
             IndicatorVisible="{Binding Path=Visibilities[0]}"
             Caption="Sunday" />
 
+        <TextBlock Margin="0,20,0,0">
+            <Hyperlink NavigateUri="{Binding Path=TimeRestrictionsUri}" RequestNavigate="Hyperlink_RequestNavigate">Edit</Hyperlink>
+        </TextBlock>
     </StackPanel>
 </UserControl>

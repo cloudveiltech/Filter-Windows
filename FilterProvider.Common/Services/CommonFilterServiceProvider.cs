@@ -260,6 +260,11 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private Timer m_relaxedPolicyResetTimer;
 
+        /// <summary>
+        /// Allows us to periodically check status of time restrictions.
+        /// </summary>
+        private Timer m_timeRestrictionsTimer;
+
         private AppcastUpdater m_updater = null;
 
         private ApplicationUpdate m_lastFetchedUpdate = null;
@@ -440,6 +445,8 @@ namespace FilterProvider.Common.Services
 
                 m_timeDetection = new TimeDetection(SystemClock.Instance);
                 m_timeDetection.ZoneTamperingDetected += OnZoneTampering;
+
+                m_timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
 
                 m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
                 m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
@@ -638,7 +645,7 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
                 {
-                    string site = message.Data as string;
+                    string site = message.DataObject as string;
                     if (site == null)
                         return false;
 
@@ -851,6 +858,48 @@ namespace FilterProvider.Common.Services
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync();
+        }
+
+        private void timeRestrictionsCheck(object state)
+        {
+            bool? areTimeRestrictionsActive = false;
+
+            try
+            {
+                if (m_policyConfiguration == null || m_policyConfiguration.Configuration == null)
+                {
+                    m_timeRestrictionsTimer.Change(1000, 1000);
+                    return;
+                }
+
+                TimeRestrictionModel currentDay = m_policyConfiguration.TimeRestrictions[(int)DateTime.Now.DayOfWeek];
+
+                if (currentDay == null)
+                {
+                    m_timeRestrictionsTimer.Change(30000, 30000);
+                    return;
+                }
+
+                ZonedDateTime currentTime = m_timeDetection.GetRealTime();
+
+                if (m_timeDetection.IsDateTimeAllowed(m_timeDetection.GetRealTime(), currentDay))
+                {
+                    areTimeRestrictionsActive = false;
+                }
+                else
+                {
+                    areTimeRestrictionsActive = true;
+                }
+            }
+            finally
+            {
+                if(!(m_policyConfiguration?.TimeRestrictions?.Any(t => t?.RestrictionsEnabled ?? false) ?? false))
+                {
+                    areTimeRestrictionsActive = null;
+                }
+
+                m_ipcServer.Send<bool?>(IpcCall.TimeRestrictionsEnabled, areTimeRestrictionsActive);
+            }
         }
 
         private void OnZoneTampering(object sender, ZoneTamperingEventArgs e)

@@ -32,6 +32,14 @@ namespace Te.Citadel.UI.ViewModels
                     m_logger.Error(ex, "Error occurred while attempting to UpdateCurrentTime()");
                 }
             }, null, 0, 1000);
+
+            PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(AreTimeRestrictionsActive))
+                {
+                    UpdateTimeRestrictionsDescription();
+                }
+            };
         }
 
         public void UpdateRestrictions(Dictionary<string, TimeRestrictionModel> restrictions)
@@ -61,7 +69,7 @@ namespace Te.Citadel.UI.ViewModels
         public void UpdateCurrentTime()
         {
             DateTime now = DateTime.Now;
-
+            
             double currentTime = now.Hour + (now.Minute / 60.0) + (now.Second / 3600.0);
             CurrentTime = currentTime;
 
@@ -72,6 +80,22 @@ namespace Te.Citadel.UI.ViewModels
 
             Visibilities[(int)now.DayOfWeek] = true;
             RaisePropertyChanged(nameof(Visibilities));
+        }
+
+        public void UpdateTimeRestrictionsDescription()
+        {
+            if(AreTimeRestrictionsActive == null)
+            {
+                TimeRestrictionsDescription = "Time Restrictions not enabled. Click \"Edit\" below to set them up.";
+            }
+            else if(AreTimeRestrictionsActive.Value)
+            {
+                TimeRestrictionsDescription = "Time Restrictions currently active. Internet is blocked.";
+            }
+            else
+            {
+                TimeRestrictionsDescription = "Time Restrictions currently inactive. You may access the internet.";
+            }
         }
 
         private Timer currentTimeTimer = null;
@@ -98,6 +122,28 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private string timeRestrictionsDescription;
+        public string TimeRestrictionsDescription
+        {
+            get => timeRestrictionsDescription;
+            set
+            {
+                timeRestrictionsDescription = value;
+                RaisePropertyChanged(nameof(TimeRestrictionsDescription));
+            }
+        }
+
+        private bool? areTimeRestrictionsActive;
+        public bool? AreTimeRestrictionsActive
+        {
+            get => areTimeRestrictionsActive;
+            set
+            {
+                areTimeRestrictionsActive = value;
+                RaisePropertyChanged(nameof(AreTimeRestrictionsActive));
+            }
+        }
+
         private bool[] visibilities;
         public bool[] Visibilities
         {
@@ -108,5 +154,7 @@ namespace Te.Citadel.UI.ViewModels
                 RaisePropertyChanged(nameof(Visibilities));
             }
         }
+
+        public string TimeRestrictionsUri => CloudVeil.CompileSecrets.ServiceProviderUserTimeRestrictionsPath;
     }
 }

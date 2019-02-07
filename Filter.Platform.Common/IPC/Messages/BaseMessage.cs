@@ -15,8 +15,30 @@ using System.Threading.Tasks;
 namespace Citadel.IPC.Messages
 {
     [Serializable]
+    public class IpcMessage<T> : IpcMessage
+    {
+        public T Data
+        {
+            get => (T)DataObject;
+            set => DataObject = value;
+        }
+    }
+
+    [Serializable]
     public class IpcMessage : BaseMessage
     {
+        public IpcMessage<T> As<T>()
+        {
+            return new IpcMessage<T>()
+            {
+                Call = this.Call,
+                Method = this.Method,
+                DataObject = this.DataObject,
+                Id = this.Id,
+                ReplyToId = this.ReplyToId
+            };
+        }
+
         /// <summary>
         /// Functionally equivalent to the request path in a REST API.
         /// Think the "/endpoint" part in "GET /endpoint?param0=p
@@ -33,7 +55,7 @@ namespace Citadel.IPC.Messages
         /// The data object associated with the <see cref="IpcCall"/>
         /// Can be null.
         /// </summary>
-        public object Data { get; set; }
+        public object DataObject { get; set; }
 
         public static IpcMessage Send(IpcCall call, object data)
         {
@@ -41,7 +63,7 @@ namespace Citadel.IPC.Messages
             {
                 Method = IpcMessageMethod.Send,
                 Call = call,
-                Data = data
+                DataObject = data
             };
         }
 
@@ -51,7 +73,7 @@ namespace Citadel.IPC.Messages
             {
                 Method = IpcMessageMethod.Request,
                 Call = call,
-                Data = data
+                DataObject = data
             };
         }
     }
@@ -76,9 +98,14 @@ namespace Citadel.IPC.Messages
             Id = Guid.NewGuid();
         }
 
-        public ReplyHandlerClass SendReply(IpcCommunicator comm, IpcCall call, object data)
+        public ReplyHandlerClass SendReply<T>(IpcCommunicator comm, IpcCall call, T data)
         {
-            return comm.Send(call, data, this);
+            return comm.Send<T>(call, data, this);
+        }
+
+        public ReplyHandlerClass<TResponse> SendReply<T, TResponse>(IpcCommunicator comm, IpcCall call, T data)
+        {
+            return comm.Send<T, TResponse>(call, data, this);
         }
     }
 }

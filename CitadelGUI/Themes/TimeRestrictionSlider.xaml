@@ -58,7 +58,7 @@ With modifications by Kent Friesen
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RepeatButton}">
                     <Grid Background="{TemplateBinding Background}">
-                        <Rectangle Height="5" Fill="{TemplateBinding Foreground}" />
+                        <Rectangle Height="7" Fill="{TemplateBinding Foreground}" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

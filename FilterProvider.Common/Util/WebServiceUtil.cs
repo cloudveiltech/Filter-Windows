@@ -112,20 +112,10 @@ namespace FilterProvider.Common.Util
         }
 
         public string ServiceProviderApiPath
-        {
-            get
-            {
-                return "https://citadel.cv-test-dev.cloudveil.org/citadel";
-            }
-        }
+            => CloudVeil.CompileSecrets.ServiceProviderApiPath;
 
         public string ServiceProviderUnblockRequestPath
-        {
-            get
-            {
-                return "https://manage.cloudveil.org/unblock_request/new_request";
-            }
-        }
+            => CloudVeil.CompileSecrets.ServiceProviderUnblockRequestPath;
 
         public bool HasStoredCredentials
         {
@@ -736,10 +726,14 @@ namespace FilterProvider.Common.Util
         public ZonedDateTime? GetServerTime()
         {
             HttpStatusCode statusCode;
+            bool responseReceived;
 
-            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode, parameters: null, noLogging: true);
+            byte[] response = RequestResource(ServiceResource.ServerTime, out statusCode, out responseReceived, new ResourceOptions()
+            {
+                Method = "GET"
+            });
 
-            if(statusCode != HttpStatusCode.OK)
+            if(!responseReceived || statusCode != HttpStatusCode.OK)
             {
                 return null;
             }

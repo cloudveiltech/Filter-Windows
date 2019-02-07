@@ -6,18 +6,52 @@ using System.Text;
 namespace Citadel.IPC
 {
     public delegate bool OnReplyHandler(ReplyHandlerClass h, IpcMessage message);
+    public delegate bool OnReplyHandler<T>(ReplyHandlerClass<T> h, IpcMessage<T> message);
 
-    public class ReplyHandlerClass
+    public class ReplyHandlerClass<T> : ReplyHandlerClass
     {
-        public ReplyHandlerClass(IIpcCommunicator comm)
+        /// <summary>
+        /// The un-typed inner class.
+        /// </summary>
+
+        public ReplyHandlerClass(ReplyHandlerClass inner) : base(inner.Communicator)
         {
-            communicator = comm;
+            
         }
 
-        private IIpcCommunicator communicator;
+        /// <summary>
+        /// Use this to register a reply callback.
+        /// </summary>
+        /// <param name="callback"></param>
+        public void OnReply(OnReplyHandler<T> callback)
+        {
+            base.OnReply((h, msg) =>
+            {
+                return callback?.Invoke(this, msg.As<T>()) ?? false;
+            });
+        }
+    }
+
+    /// <summary>
+    /// This keeps track of a callback for a reply to a certain IPC message.
+    /// Allows us to use a fluent API for request-response on the IPC, which will enable more closely coupled code and make cause and effect clearer.
+    /// </summary>
+    public class ReplyHandlerClass
+    {
+        public ReplyHandlerClass(IpcCommunicator comm)
+        {
+            Communicator = comm;
+        }
+
+        public IpcCommunicator Communicator { get; set; }
 
         public event OnReplyHandler Handler;
 
+        /// <summary>
+        /// This is used by the IPC client and server as a callback when a reply is received to a specific message.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         public bool TriggerHandler(BaseMessage msg)
         {
             if(msg is IpcMessage)
@@ -30,7 +64,11 @@ namespace Citadel.IPC
             }
         }
 
-        public void OnReply(OnReplyHandler callback)
+        /// <summary>
+        /// Use this function to register a reply callback.
+        /// </summary>
+        /// <param name="callback"></param>
+        public virtual void OnReply(OnReplyHandler callback)
         {
             Handler += callback;
         }

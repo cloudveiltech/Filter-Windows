@@ -19,6 +19,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="110" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="230" />
         </Grid.ColumnDefinitions>
 
         <Label Grid.Column="0" Content="{Binding Path=Caption}" />
@@ -29,5 +30,7 @@
             UpperValue="{Binding Path=UpperValue}"
             IndicatorVisible="{Binding Path=IndicatorVisible}"
             Value="{Binding Path=IndicatorValue}" />
+
+        <Label Grid.Column="2" Content="{Binding Path=AllowedDescription}" />
     </Grid>
 </UserControl>

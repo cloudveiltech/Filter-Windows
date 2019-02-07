@@ -9,6 +9,7 @@ namespace Citadel.IPC
         AddSelfModeratedSite,
         ConfigurationInfo,
         Deactivate,
-        RelaxedPolicy
+        RelaxedPolicy,
+        TimeRestrictionsEnabled
     }
 }

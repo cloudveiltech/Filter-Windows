@@ -72,7 +72,7 @@ namespace Te.Citadel.UI.ViewModels
                             {
                                 CitadelApp.Current.Dispatcher.Invoke(() =>
                                 {
-                                    SelfModerationSites = new ObservableCollection<string>(msg.Data as List<string>);
+                                    SelfModerationSites = new ObservableCollection<string>(msg.DataObject as List<string>);
                                 });
 
                                 return true;

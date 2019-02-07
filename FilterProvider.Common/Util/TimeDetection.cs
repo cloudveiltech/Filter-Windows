@@ -53,10 +53,15 @@ namespace FilterProvider.Common.Util
 
         private IClock clock;
 
-        public TimeDetection(IClock clock)
+        private IDateTimeZoneProvider tzProvider;
+
+        public TimeDetection(IClock clock) : this(clock, DateTimeZoneProviders.Tzdb) { }
+
+        public TimeDetection(IClock clock, IDateTimeZoneProvider tzProvider)
         {
             ServerTimeRefreshMilliseconds = Stopwatch.IsHighResolution ? (15 * 60 * 1000) : (30 * 1000);
             this.clock = clock;
+            this.tzProvider = tzProvider;
         }
 
         private void fillServerTime()
@@ -64,7 +69,7 @@ namespace FilterProvider.Common.Util
             lock(lockObj)
             {
                 lastServerTime = WebServiceUtil.Default.GetServerTime();
-                lastDetectedZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+                lastDetectedZone = tzProvider.GetSystemDefault();
 
                 if (lastServerTime != null)
                 {
@@ -140,7 +145,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                var currentZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+                var currentZone = tzProvider.GetSystemDefault();
                 if (lastDetectedZone.Id != currentZone?.Id)
                 {
                     lastDetectedZone = currentZone;
@@ -183,7 +188,7 @@ namespace FilterProvider.Common.Util
                     }
 
                     Instant currentInstant = calculateServerInstant();
-                    return new ZonedDateTime(currentInstant, lastDetectedZone ?? DateTimeZoneProviders.Tzdb.GetSystemDefault());
+                    return new ZonedDateTime(currentInstant, lastDetectedZone ?? tzProvider.GetSystemDefault());
                 }
             }
             catch
@@ -192,30 +197,64 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        private void getHoursMinutes(decimal hourDecimal, out int hour, out int minute)
-        {
-            decimal hourTruncated = Math.Truncate(hourDecimal);
-
-            decimal minutePart = hourDecimal - hourTruncated;
-
-            minute = (int)(minutePart * 60);
-            hour = (int)hourTruncated;
-        }
-
         public bool IsDateTimeAllowed(ZonedDateTime date, TimeRestrictionModel model)
         {
+            if (!model.RestrictionsEnabled) return true;
+
             LocalDateTime d = date.LocalDateTime;
 
             LocalDateTime startDateLocal, endDateLocal;
 
             int hour, minute;
             getHoursMinutes(model.EnabledThrough[0], out hour, out minute);
-            startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+            if (hour == 24)
+            {
+                startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
+            }
+            else
+            {
+                startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+            }
 
             getHoursMinutes(model.EnabledThrough[1], out hour, out minute);
-            endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+            if (hour == 24)
+            {
+                endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
+            }
+            else
+            {
+                endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+            }
 
             return (d.CompareTo(startDateLocal) >= 0 && d.CompareTo(endDateLocal) <= 0);
+        }
+
+        private static void getHoursMinutes(decimal hourDecimal, out int hour, out int minute)
+        {
+            int second = 0;
+            getHoursMinutesSeconds(hourDecimal, out hour, out minute, out second);
+        }
+
+        private static void getHoursMinutesSeconds(decimal hourDecimal, out int hour, out int minute, out int second)
+        {
+            decimal hourTruncated = Math.Truncate(hourDecimal);
+
+
+            decimal secondPart = (hourDecimal - hourTruncated) * 3600; // Here this holds the number of seconds in the hour.
+            decimal minutePart = Math.Truncate(secondPart / 60); // Number of minutes in the hour.
+            secondPart = secondPart - (minutePart * 60); // Subtract number of seconds in whole minutes and leave the rest for the secondPart.
+
+            minute = (int)minutePart;
+            hour = (int)hourTruncated;
+            second = (int)secondPart;
+        }
+
+        public static TimeSpan GetTimeSpanFromDecimal(decimal hourDecimal)
+        {
+            int hour = 0, minute = 0, second = 0;
+            getHoursMinutesSeconds(hourDecimal, out hour, out minute, out second);
+
+            return new TimeSpan(hour, minute, second);
         }
     }
 }

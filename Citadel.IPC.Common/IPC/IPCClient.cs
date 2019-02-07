@@ -462,7 +462,7 @@ namespace Citadel.IPC
             PushMessage(msg);
         }
 
-        public override ReplyHandlerClass Request(IpcCall call, object data = null, BaseMessage replyToThis = null)
+        protected override ReplyHandlerClass RequestInternal(IpcCall call, object data = null, BaseMessage replyToThis = null)
         {
             ReplyHandlerClass h = new ReplyHandlerClass(this);
 
@@ -473,7 +473,7 @@ namespace Citadel.IPC
             return h;
         }
 
-        public override ReplyHandlerClass Send(IpcCall call, object data, BaseMessage replyToThis = null)
+        protected override ReplyHandlerClass SendInternal(IpcCall call, object data, BaseMessage replyToThis = null)
         {
             ReplyHandlerClass h = new ReplyHandlerClass(this);
 

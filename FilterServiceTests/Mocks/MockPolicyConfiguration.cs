@@ -34,6 +34,10 @@ namespace FilterServiceTests.Mocks
 
         public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get; set; }
 
+        public TimeRestrictionModel[] TimeRestrictions { get; set; }
+
+        public bool AreAnyTimeRestrictionsEnabled { get; set; }
+
         public event EventHandler OnConfigurationLoaded;
 
         public bool? DownloadConfiguration()
