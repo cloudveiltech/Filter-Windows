@@ -163,7 +163,7 @@
         </Grid.ColumnDefinitions>
 
         <Controls:HamburgerMenu x:Name="MenuControl"
-                                HamburgerVisibility="Hidden"
+                                HamburgerVisibility="Visible"
                                 HamburgerWidth="48"
                                 IsPaneOpen="True"
                                 ItemInvoked="MenuControl_ItemInvoked"
@@ -189,7 +189,7 @@
                             <local:TimeRestrictionsView />
                         </Controls:HamburgerMenuIconItem.Tag>
                     </Controls:HamburgerMenuIconItem>
-                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="Settings">
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=EyeSettingsOutline}" Label="Relaxed Policy">
                         <Controls:HamburgerMenuIconItem.Tag>
                             <local:SettingsView />
                         </Controls:HamburgerMenuIconItem.Tag>

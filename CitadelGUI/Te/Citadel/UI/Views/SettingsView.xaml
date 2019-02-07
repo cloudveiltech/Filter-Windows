@@ -15,12 +15,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
         <Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextBlockStyle}" />
         <Style TargetType="Label" BasedOn="{StaticResource BaseFontStyle}" />
     </UserControl.Resources>
-    <StackPanel>
-        <Label
-            HorizontalAlignment="Center"
-            Content="Relaxed Policy"
-            Style="{StaticResource HeaderStyle}" />
-
+    <StackPanel MaxWidth="800">
         <TextBlock
             HorizontalAlignment="Center"
             TextWrapping="Wrap">

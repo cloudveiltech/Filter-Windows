@@ -7,7 +7,7 @@
              xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d">
-    <StackPanel Width="600">
+    <StackPanel MaxWidth="800">
         <Label Content="{Binding Path=TimeRestrictionsDescription}" />
         
         <localControls:TimeRestrictionSliderView

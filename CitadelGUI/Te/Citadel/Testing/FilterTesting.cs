@@ -186,7 +186,7 @@ namespace Te.Citadel.Testing
                 string ip1, ip2, details;
                 bool result;
 
-                result = doUrlIpsMatch("https://testdns.cloudveil.org", "https://block.cloudveil.org", out ip1, out ip2);
+                result = doUrlIpsMatch("http://testdns.cloudveil.org", "http://block.cloudveil.org", out ip1, out ip2);
                 details = result ? "DNS filtering is currently active on your computer." : "DNS filtering is not currently active on your computer.";
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.DnsFilterTest, result, details));
