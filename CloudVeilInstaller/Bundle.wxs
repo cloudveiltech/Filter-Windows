@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Bundle Name="CloudVeilInstaller"
+          Version="1.7.0.2"
+          Manufacturer="CloudVeil Technology, Inc."
+          UpgradeCode="f034362e-0800-43d6-be30-721747f8a948">
+        <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
+            <PayloadGroupRef Id="InstallerPayload" />
+        </BootstrapperApplicationRef>
+
+		<Chain>
+            <PackageGroupRef Id="NetFx462Web"/>
+            <MsiPackage
+                Id="CloudVeilForWindows"
+                Cache="no"
+                Compressed="yes"
+                Vital="yes"
+                Name="CloudVeil.msi"
+                SourceFile="..\Installers\SetupProjects\Release\Setup x64.msi" />
+		</Chain>
+	</Bundle>
+
+    <Fragment>
+        <PayloadGroup Id="InstallerPayload">
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\CloudVeilInstallerUI.dll"/>
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\BootstrapperCore.config" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\ControlzEx.dll" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\MahApps.Metro.dll" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\Microsoft.Deployment.WindowsInstaller.dll" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\NamedPipeWrapper.dll" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\System.Windows.Interactivity.dll" />
+        </PayloadGroup>
+    </Fragment>
+</Wix>

@@ -21,7 +21,8 @@ namespace Citadel.Core.Windows.Util.Update
     public enum UpdateKind
     {
         MsiInstaller,
-        ZipFile
+        ZipFile,
+        ExePackage
     }
 
     public class ApplicationUpdate
@@ -131,7 +132,7 @@ namespace Citadel.Core.Windows.Util.Update
         /// If the file designated at UpdateFileLocalPath does not exist at the time of this call,
         /// this method will throw.
         /// </exception>
-        public void BeginInstallUpdateDelayed(int secondDelay = 10, bool restartApplication = true)
+        public void BeginInstallUpdateDelayed(int secondDelay = 5, bool restartApplication = true)
         {
             // TODO: Implement cross platform stuff.
 
