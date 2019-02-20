@@ -1526,6 +1526,18 @@ namespace FilterProvider.Common.Services
 
             try
             {
+                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified)
+                {
+                    customBlockResponseContentType = "text/html";
+                    customBlockResponse = getBadSslPageWithResolvedTemplates(new Uri(args.Request.Url), Encoding.UTF8.GetString(m_badSslHtmlPage));
+                    nextAction = ProxyNextAction.DropConnection;
+                    return;
+                }
+                else if (args.Response.CertificateCount > 0)
+                {
+                    m_logger.Info("Response Certificate count = {0}", args.Response.CertificateCount);
+                }
+
                 ZonedDateTime date = m_timeDetection.GetRealTime();
                 TimeRestrictionModel todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
 
