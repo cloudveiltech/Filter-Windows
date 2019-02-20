@@ -39,7 +39,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="3" />
 
-        <TextBlock Grid.Row="1"
+        <TextBlock Grid.Row="2"
                    Grid.Column="0"
                    Grid.ColumnSpan="3"
                    Text="{Binding FinishedMessage}"/>

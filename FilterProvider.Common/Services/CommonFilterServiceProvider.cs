@@ -863,42 +863,49 @@ namespace FilterProvider.Common.Services
         private void timeRestrictionsCheck(object state)
         {
             bool? areTimeRestrictionsActive = false;
-
             try
             {
-                if (m_policyConfiguration == null || m_policyConfiguration.Configuration == null)
+                try
                 {
-                    m_timeRestrictionsTimer.Change(1000, 1000);
-                    return;
+                    if (m_policyConfiguration == null || m_policyConfiguration.Configuration == null)
+                    {
+                        m_timeRestrictionsTimer.Change(1000, 1000);
+                        return;
+                    }
+
+                    TimeRestrictionModel currentDay = m_policyConfiguration.TimeRestrictions[(int)DateTime.Now.DayOfWeek];
+
+                    if (currentDay == null)
+                    {
+                        m_timeRestrictionsTimer.Change(30000, 30000);
+                        return;
+                    }
+
+                    ZonedDateTime currentTime = m_timeDetection.GetRealTime();
+
+                    if (m_timeDetection.IsDateTimeAllowed(m_timeDetection.GetRealTime(), currentDay))
+                    {
+                        areTimeRestrictionsActive = false;
+                    }
+                    else
+                    {
+                        areTimeRestrictionsActive = true;
+                    }
                 }
-
-                TimeRestrictionModel currentDay = m_policyConfiguration.TimeRestrictions[(int)DateTime.Now.DayOfWeek];
-
-                if (currentDay == null)
+                finally
                 {
-                    m_timeRestrictionsTimer.Change(30000, 30000);
-                    return;
-                }
+                    if (!(m_policyConfiguration?.TimeRestrictions?.Any(t => t?.RestrictionsEnabled ?? false) ?? false))
+                    {
+                        areTimeRestrictionsActive = null;
+                    }
 
-                ZonedDateTime currentTime = m_timeDetection.GetRealTime();
-
-                if (m_timeDetection.IsDateTimeAllowed(m_timeDetection.GetRealTime(), currentDay))
-                {
-                    areTimeRestrictionsActive = false;
-                }
-                else
-                {
-                    areTimeRestrictionsActive = true;
+                    m_ipcServer.Send<bool?>(IpcCall.TimeRestrictionsEnabled, areTimeRestrictionsActive);
                 }
             }
-            finally
+            catch(Exception ex)
             {
-                if(!(m_policyConfiguration?.TimeRestrictions?.Any(t => t?.RestrictionsEnabled ?? false) ?? false))
-                {
-                    areTimeRestrictionsActive = null;
-                }
-
-                m_ipcServer.Send<bool?>(IpcCall.TimeRestrictionsEnabled, areTimeRestrictionsActive);
+                m_logger.Error("timeRestrictionsCheck error occurred.");
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
         }
 
