@@ -102,6 +102,7 @@ namespace Citadel.Core.Windows.Util.Update
                             var sparkleOs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "os").FirstOrDefault().Value;
                             var updateChannel = enclosure.AttributeExtensions.Where(x => x.Key.Name == "channel").FirstOrDefault().Value;
                             var sparkleInstallerArgs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "installerArguments").FirstOrDefault().Value;
+                            var exeUrl = enclosure.AttributeExtensions.Where(x => x.Key.Name == "exeUrl").FirstOrDefault().Value;
 
                             if(StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
@@ -109,7 +110,9 @@ namespace Citadel.Core.Windows.Util.Update
                                 continue;
                             }
 
-                            Uri url = enclosure.Uri;
+                            UpdateKind updateKind = exeUrl == null ? UpdateKind.MsiInstaller : UpdateKind.ExePackage;
+
+                            Uri url = exeUrl == null ? enclosure.Uri : new Uri(exeUrl);
                             long length = enclosure.Length;
                             string mediaType = enclosure.MediaType;
 
@@ -121,7 +124,7 @@ namespace Citadel.Core.Windows.Util.Update
                             {
                                 m_logger.Info($"Available app update with version {thisUpdateVersion.ToString()} is superior to current best version {bestVersion.ToString()}.");
 
-                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, UpdateKind.MsiInstaller, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
+                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, updateKind, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
                                 bestVersion = thisUpdateVersion;
                             }
                         }

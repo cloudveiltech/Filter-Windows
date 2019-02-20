@@ -1,0 +1,34 @@
+﻿using CloudVeilInstallerUI.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace CloudVeilInstallerUI.Views
+{
+    /// <summary>
+    /// Interaction logic for InstallView.xaml
+    /// </summary>
+    public partial class InstallView : UserControl
+    {
+        public InstallView(IInstallerViewModel model)
+        {
+            viewModel = model;
+            DataContext = viewModel;
+
+            InitializeComponent();
+        }
+
+        private IInstallerViewModel viewModel;
+    }
+}
