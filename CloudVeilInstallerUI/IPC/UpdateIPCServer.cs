@@ -133,6 +133,7 @@ namespace CloudVeilInstallerUI.IPC
 
         protected void OnMessage(NamedPipeConnection<Message, Message> connection, Message message)
         {
+            Console.WriteLine("OnMessage Received {0}, {1}, {2}", message.Command, message.Data?.GetType()?.Name, message.Property);
             switch (message.Command)
             {
                 case Command.Set:

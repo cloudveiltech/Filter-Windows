@@ -20,11 +20,6 @@ namespace CloudVeilUpdater
         protected override void OnStartup(StartupEventArgs e)
         {
             UpdateIPCClient client = new UpdateIPCClient("__CloudVeilUpdaterPipe__");
-            client.Start();
-
-            Console.WriteLine("Client Waiting for connection");
-            client.WaitForConnection();
-            Console.WriteLine("Client connected");
 
             RemoteInstallerViewModel model = new RemoteInstallerViewModel(client);
             ISetupUI setupUi = null;
@@ -32,6 +27,12 @@ namespace CloudVeilUpdater
             setupUi = new MainWindow(model, true);
 
             client.RegisterObject("SetupUI", setupUi);
+
+            client.Start();
+
+            Console.WriteLine("Client Waiting for connection");
+            client.WaitForConnection();
+            Console.WriteLine("Client connected");
 
             setupUi.Closed += (sender, _e) =>
             {

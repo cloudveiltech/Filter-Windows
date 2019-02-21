@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace CloudVeilInstallerUI
 {
@@ -64,7 +65,30 @@ namespace CloudVeilInstallerUI
 
         public void ShowWelcome()
         {
-            Dispatcher.InvokeAsync(() => LoadView(new WelcomeView(viewModel)));
+            try
+            {
+                DispatcherOperation o = Dispatcher.InvokeAsync(
+                    () => LoadView(new WelcomeView(viewModel))
+                );
+
+                bool quit = false;
+                int elapsed = 0;
+                while(!quit)
+                {
+                    Console.WriteLine("o {0}", o.Status);
+                    o.Wait(new TimeSpan(0, 0, 0, 0, 150));
+                    elapsed += 150;
+
+                    if(elapsed > 5000)
+                    {
+                        quit = true;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         public void ShowFinish()
