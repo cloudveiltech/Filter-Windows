@@ -37,6 +37,9 @@ namespace CitadelService.Platform
 
         private FilterServiceProvider m_provider;
 
+        private X509Certificate2 rootCert;
+        public X509Certificate2 RootCertificate => rootCert;
+
         public WindowsSystemServices(FilterServiceProvider provider)
         {
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
@@ -141,6 +144,7 @@ namespace CitadelService.Platform
             }
 
             trustRootCertificate(cert);
+            rootCert = cert;
 
             server.Init(14300, 14301, certPath, keyPath);
 
@@ -168,6 +172,8 @@ namespace CitadelService.Platform
 
             diverter.Start(0);
 
+            OnStartProxy?.Invoke(this, new EventArgs());
+
             return server;
         }
 
@@ -182,5 +188,7 @@ namespace CitadelService.Platform
             m_logger.Info("Disabling internet.");
             WFPUtility.DisableInternet();
         }
+
+        public event EventHandler OnStartProxy;
     }
 }

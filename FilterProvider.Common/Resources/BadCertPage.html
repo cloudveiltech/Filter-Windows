@@ -112,13 +112,16 @@ The line below is used by the filter tester to determine whether the filter is w
     <div id="wrapper">
         <h1>SSL Certificate Error</h1>
         <p><a href="{{url_text}}">{{friendly_url_text}}</a> does not have a valid SSL certificate.</p>
-        <h2>What can I do to fix this?</h2>
-        <p>Open CloudVeil for Windows, go to 'Advanced' and click 'view certificate errors'. Then select the entry with host '{{host}}' and click 'trust certificate'</p>
         <h2>Why did this happen?</h2>
         <p>You tried to access a site that CloudVeil detected as not having a proper certificate. This might mean that the site is compromised. Proceed with caution.</p>
+
+        <p id="exemptWrapper"><a style="cursor: pointer;" id="unblockLink">Exempt</a></p>
+        <p id="unblockResult"></p>
     </div>
 
     <script>
+        var certThumbprintExists = '{{certThumprintExists}}';
+
         document.onreadystatechange = function () {
 
             function inIframe() {
@@ -130,12 +133,44 @@ The line below is used by the filter tester to determine whether the filter is w
             }
 
             if (document.readyState.toUpperCase() == "complete".toUpperCase()) {
+                var elem = document.getElementById("unblockLink");
+                elem.addEventListener('click', function () {
+                    var xhr = new XMLHttpRequest();
+
+                    // Panic not, {{certThumbprint}} gets replaced during template building. Same with {{host}}
+                    xhr.open("GET", "https://localhost:14299/api/exempt/{{certThumbprint}}?host={{host}}");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            var json = null;
+                            try {
+                                json = JSON.parse(xhr.responseText);
+                            } catch (e) {
+                                json = { success: false };
+                            }
+
+                            if (!json || !json.success) {
+                                var msgElem = document.getElementById("unblockResult");
+                                msgElem.innerHTML = "Failed to exempt SSL certificate. Please contact CloudVeil Support at <a href='mailto:support@cloudveil.org'>support@cloudveil.org</a>";
+                            } else {
+                                window.location.refresh(true);
+                            }
+                        }
+                    };
+
+                    xhr.send();
+                });
+
+                if (certThumbprintExists == 'false') {
+                    document.getElementById('exemptWrapper').setAttribute("display", "none");
+                }
 
                 if (inIframe()) {
                     document.getElementById('wrapper').setAttribute("display", "none");
                 } else {
                     console.log('nope');
                 }
+
+
             }
         }
     </script>

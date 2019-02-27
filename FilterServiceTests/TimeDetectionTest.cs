@@ -204,5 +204,15 @@ namespace FilterServiceTests
                 Assert.AreEqual(testResults[i], detection.IsDateTimeAllowed(dates[i], model), "Unexpected result from IsDateTimeAllowed");
             }
         }
+
+        [TestMethod]
+        public void TestGetRealTime()
+        {
+            TimeDetection detection = new TimeDetection(SystemClock.Instance);
+
+            ZonedDateTime time = detection.GetRealTime();
+
+            Assert.IsNotNull(time, "Time should not be null");
+        }
     }
 }

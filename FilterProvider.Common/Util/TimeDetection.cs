@@ -107,7 +107,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                lock (lockObj) return lastServerTime.Value.ToInstant().Plus(Duration.FromMilliseconds(timeSinceLastServerMeasurement.ElapsedMilliseconds));
+                return lastServerTime.Value.ToInstant().Plus(Duration.FromMilliseconds(timeSinceLastServerMeasurement?.ElapsedMilliseconds ?? 0));
             }
         }
 

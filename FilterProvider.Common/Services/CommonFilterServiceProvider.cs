@@ -41,6 +41,10 @@ using Filter.Platform.Common.Types;
 using NodaTime;
 using GoproxyWrapper;
 using FilterProvider.Common.Data.Filtering;
+using FilterProvider.Common.ControlServer;
+using FilterProvider.Common.Proxy.Certificate;
+using Org.BouncyCastle.Crypto;
+using System.Security.Cryptography.X509Certificates;
 
 namespace FilterProvider.Common.Services
 {
@@ -281,6 +285,8 @@ namespace FilterProvider.Common.Services
 
         private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
 
+        private Server m_controlServer;
+
         private IPathProvider m_platformPaths;
 
         private ISystemServices m_systemServices;
@@ -390,6 +396,19 @@ namespace FilterProvider.Common.Services
             m_systemServices.SessionEnding += OnAppSessionEnding;
             //SystemEvents.SessionEnding += OnAppSessionEnding;
 
+            m_systemServices.OnStartProxy += (sender, e) =>
+            {
+                BCCertificateMaker maker = new BCCertificateMaker();
+
+                AsymmetricCipherKeyPair keyPair = BCCertificateMaker.CreateKeyPair(2048);
+
+                X509Certificate2 cert = maker.MakeCertificate("localhost", false, m_systemServices.RootCertificate, keyPair);
+
+                m_controlServer = new Server(14299, cert);
+                m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
+                m_controlServer.Start();
+            };
+
             // Hook app exiting function. This must be done on this main app thread.
             AppDomain.CurrentDomain.ProcessExit += OnApplicationExiting;
 
@@ -417,6 +436,8 @@ namespace FilterProvider.Common.Services
 
                 Environment.Exit(-1);
             }
+
+
 
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
@@ -1515,8 +1536,17 @@ namespace FilterProvider.Common.Services
         }*/
 
         private static readonly string[] htmlMimeTypes = { "text/html", "text/plain" };
+        private static int nextTrackId = 1;
+        private static object trackIdLock = new object();
+
         private void OnHttpRequestBegin(GoproxyWrapper.Session args)
         {
+            int trackId = 0;
+            lock(trackIdLock)
+            {
+                trackId = nextTrackId++;
+            }
+
             ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
@@ -1533,20 +1563,13 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified)
-                {
-                    customBlockResponseContentType = "text/html";
-                    customBlockResponse = getBadSslPageWithResolvedTemplates(new Uri(args.Request.Url), Encoding.UTF8.GetString(m_badSslHtmlPage));
-                    nextAction = ProxyNextAction.DropConnection;
-                    return;
-                }
-                else if (args.Response.CertificateCount > 0)
-                {
-                    m_logger.Info("Response Certificate count = {0}", args.Response.CertificateCount);
-                }
-
                 ZonedDateTime date = m_timeDetection.GetRealTime();
-                TimeRestrictionModel todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
+                TimeRestrictionModel todayRestriction = null;
+
+                if(m_policyConfiguration != null && m_policyConfiguration.TimeRestrictions != null && date != null)
+                {
+                    todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
+                }
 
                 // We don't know what's coming back from the server, but we can see what the client is expecting by looking at the 'Accept' header.
 
@@ -1577,7 +1600,7 @@ namespace FilterProvider.Common.Services
                     useHtmlBlockPage = true;
                 }
 
-                Uri url = new Uri(args.Request.Url);
+                Uri url =new Uri(args.Request.Url);
 
                 if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
@@ -1622,8 +1645,6 @@ namespace FilterProvider.Common.Services
                     {
                         headers.Add(header.Name, header.Value);
                     }
-
-                    Console.WriteLine("Checking isHostInList");
 
                     // Check whitelists first.
                     // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
@@ -1757,7 +1778,7 @@ namespace FilterProvider.Common.Services
                 {
                     // There is currently no way to change an HTTP message to a response outside of CitadelCore.
                     // so, change it to a 204 and then modify the status code to what we want it to be.
-                    m_logger.Info("Response blocked: {0}", args.Request.Url);
+                    //m_logger.Info("Response blocked: {0}", args.Request.Url);
 
                     if (customBlockResponse != null)
                     {
@@ -1782,31 +1803,39 @@ namespace FilterProvider.Common.Services
                 return;
             }
 
-            string contentType = null;
-            if (args.Response.Headers.HeaderExists("Content-Type"))
-            {
-                contentType = args.Response.Headers.GetFirstHeader("Content-Type").Value;
-
-                bool isHtml = contentType.IndexOf("html") != -1;
-                bool isJson = contentType.IndexOf("json") != -1;
-                bool isTextPlain = contentType.IndexOf("text/plain") != -1;
-
-                // Is the response content type text/html or application/json? Inspect it, otherwise return before we do content classification.
-                // Why enforce content classification on only these two? There are only a few MIME types which have a high risk of "carrying" explicit content.
-                // Those are:
-                // text/plain
-                // text/html
-                // application/json
-                if (!(isHtml || isJson || isTextPlain))
-                {
-                    return;
-                }
-            }
-
             // The only thing we can really do in this callback, and the only thing we care to do, is
             // try to classify the content of the response payload, if there is any.
             try
             {
+                if(args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified)
+                {
+                    customBlockResponseContentType = "text/html";
+                    customBlockResponse = getBadSslPageWithResolvedTemplates(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint, Encoding.UTF8.GetString(m_badSslHtmlPage));
+                    nextAction = ProxyNextAction.DropConnection;
+                    return;
+                }
+
+                string contentType = null;
+                if (args.Response.Headers.HeaderExists("Content-Type"))
+                {
+                    contentType = args.Response.Headers.GetFirstHeader("Content-Type").Value;
+
+                    bool isHtml = contentType.IndexOf("html") != -1;
+                    bool isJson = contentType.IndexOf("json") != -1;
+                    bool isTextPlain = contentType.IndexOf("text/plain") != -1;
+
+                    // Is the response content type text/html or application/json? Inspect it, otherwise return before we do content classification.
+                    // Why enforce content classification on only these two? There are only a few MIME types which have a high risk of "carrying" explicit content.
+                    // Those are:
+                    // text/plain
+                    // text/html
+                    // application/json
+                    if (!(isHtml || isJson || isTextPlain))
+                    {
+                        return;
+                    }
+                }
+
                 if (contentType != null && args.Response.HasBody)
                 {
                     contentType = contentType.ToLower();
@@ -1925,16 +1954,6 @@ namespace FilterProvider.Common.Services
             }
         }
 
-        private void OnBadCertificate(HttpMessageInfo info)
-        {
-            info.Make204NoContent();
-
-            byte[] customResponse = getBadSslPageWithResolvedTemplates(info.Url, Encoding.UTF8.GetString(m_badSslHtmlPage));
-
-            info.CopyAndSetBody(customResponse, 0, customResponse.Length, "text/html");
-            info.StatusCode = HttpStatusCode.OK;
-        }
-
         private bool CheckIfFiltersApply(List<UrlFilter> filters, Uri request, NameValueCollection headers, out UrlFilter matched, out short matchedCategory)
         {
             matchedCategory = -1;
@@ -1996,7 +2015,7 @@ namespace FilterProvider.Common.Services
             return categories;
         }
 
-        private byte[] getBadSslPageWithResolvedTemplates(Uri requestUri, string pageTemplate)
+        private byte[] getBadSslPageWithResolvedTemplates(Uri requestUri, string certThumbprint, string pageTemplate)
         {
             // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
             // IMO this looks slightly more friendly to a user than the entire URI.
@@ -2008,6 +2027,8 @@ namespace FilterProvider.Common.Services
             pageTemplate = pageTemplate.Replace("{{url_text}}", urlText);
             pageTemplate = pageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
             pageTemplate = pageTemplate.Replace("{{host}}", requestUri.Host);
+            pageTemplate = pageTemplate.Replace("{{certThumbprintExists}}", certThumbprint == null ? "false" : "true");
+            pageTemplate = pageTemplate.Replace("{{certThumbprint}}", certThumbprint);
 
             return Encoding.UTF8.GetBytes(pageTemplate);
         }

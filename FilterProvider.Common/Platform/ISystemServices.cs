@@ -8,6 +8,7 @@
 ﻿using FilterProvider.Common.Data;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace FilterProvider.Common.Platform
@@ -49,6 +50,15 @@ namespace FilterProvider.Common.Platform
         /// </summary>
         void DisableInternet();
 
+        /// <summary>
+        /// Does not need to be available until after OnStartProxy is fired.
+        /// </summary>
+        X509Certificate2 RootCertificate { get; }
+
+        /// <summary>
+        /// Use this to determine when the proxy actually starts. Do not depend on root certificate being non-null until this event has fired once.
+        /// </summary>
+        event EventHandler OnStartProxy;
 
         // TODO: Rename IAntitampering stuff to something different.
     }
