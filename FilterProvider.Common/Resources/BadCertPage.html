@@ -29,15 +29,11 @@ The line below is used by the filter tester to determine whether the filter is w
         }
 
         div#wrapper {
-            display: table;
-            text-align: center;
-            height: 0px;
-            position: absolute;
-            overflow: visible;
             display: block;
-            width: 100%;
-            left: 0px;
-            top: 10%;
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
         }
 
         div#center {
@@ -79,48 +75,94 @@ The line below is used by the filter tester to determine whether the filter is w
             position: relative;
         }
 
-            .button.primary {
-                background: #2086bf;
-                color: #fff;
-                border-color: #2086bf;
+        .button.primary {
+            background: #2086bf;
+            color: #fff;
+            border-color: #2086bf;
+        }
+
+        .button.primary:active {
+            background: #1b6eae;
+            color: #fff;
+        }
+
+        .button:active {
+            box-shadow: none;
+        }
+
+        .button.red {
+            background: #ca221b;
+            color: #fff;
+            border-color: #ca221b;
+        }
+
+        .button.red:active {
+            background: #7d0904;
+            color: #fff;
+        }
+
+            .button.secondary {
+                background: transparent;
+                color: #bbb;
+                border-color: #bbb;
             }
 
-                .button.primary:active {
-                    background: #1b6eae;
-                    color: #fff;
-                }
-
-            .button:active {
-                box-shadow: none;
+            .link {
+                background: transparent;
+                color: #bbb;
+                text-decoration: underline;
             }
 
-        .request-unblock:visited {
-            color: inherit;
+        .float-left {
+            float: left;
+        }
+
+        .float-right {
+            float: right;
         }
 
         a.button {
             line-height: 2.125rem;
         }
 
-        #generated_category_list {
-            font-weight: 700;
+        #unblockResult, #buttonsWrapper, #advancedInfo, .margin-top-20 {
+            margin-top: 20px;
         }
+
+        .margin-top-10 {
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 
 <body id="home">
     <div id="wrapper">
-        <h1>SSL Certificate Error</h1>
+        <h1>Your connection is not private</h1>
         <p><a href="{{url_text}}">{{friendly_url_text}}</a> does not have a valid SSL certificate.</p>
         <h2>Why did this happen?</h2>
-        <p>You tried to access a site that CloudVeil detected as not having a proper certificate. This might mean that the site is compromised. Proceed with caution.</p>
+        <p>You tried to access a site that CloudVeil detected as not having a proper certificate. This might mean that attackers are trying to steal your information. Proceed with caution.</p>
 
-        <p id="exemptWrapper"><a style="cursor: pointer;" id="unblockLink">Exempt</a></p>
-        <p id="unblockResult"></p>
+        <p id="buttonsWrapper">
+            <a id="advanced" class="button secondary float-left">Advanced</a>
+            <a id="backToSafety" class="button primary float-right">Back to safety</a>
+        </p>
+
+        <div style="clear: both;"></div>
+
+        <div id="advancedInfo" style="display:none;">
+            <span>If you know you are able to trust this site, you may add the SSL certificate to your trusted list and continue.</span>
+
+            <p id="exemptWrapper" class="margin-top-10"><a class="link" style="cursor: pointer;" id="unblockLink">Proceed to {{friendly_url_text}} (unsafe)</a></p>
+            <p id="unblockResult"></p>
+        </div>
     </div>
 
     <script>
-        var certThumbprintExists = '{{certThumprintExists}}';
+        var certThumbprintExists = '{{certThumbprintExists}}';
+        function byId(id) {
+            return document.getElementById(id);
+        }
 
         document.onreadystatechange = function () {
 
@@ -133,12 +175,20 @@ The line below is used by the filter tester to determine whether the filter is w
             }
 
             if (document.readyState.toUpperCase() == "complete".toUpperCase()) {
+                byId("advanced").addEventListener('click', function () {
+                    byId("advancedInfo").style.display = "block";
+                });
+
+                byId("backToSafety").addEventListener("click", function () {
+                    window.history.back();
+                });
+
                 var elem = document.getElementById("unblockLink");
                 elem.addEventListener('click', function () {
                     var xhr = new XMLHttpRequest();
 
                     // Panic not, {{certThumbprint}} gets replaced during template building. Same with {{host}}
-                    xhr.open("GET", "https://localhost:14299/api/exempt/{{certThumbprint}}?host={{host}}");
+                    xhr.open("GET", "https://127.0.0.1:14299/api/exempt/{{certThumbprint}}?host={{host}}");
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {
                             var json = null;
@@ -149,10 +199,10 @@ The line below is used by the filter tester to determine whether the filter is w
                             }
 
                             if (!json || !json.success) {
-                                var msgElem = document.getElementById("unblockResult");
+                                var msgElem = byId("unblockResult");
                                 msgElem.innerHTML = "Failed to exempt SSL certificate. Please contact CloudVeil Support at <a href='mailto:support@cloudveil.org'>support@cloudveil.org</a>";
                             } else {
-                                window.location.refresh(true);
+                                window.location.reload(true);
                             }
                         }
                     };
@@ -161,11 +211,11 @@ The line below is used by the filter tester to determine whether the filter is w
                 });
 
                 if (certThumbprintExists == 'false') {
-                    document.getElementById('exemptWrapper').setAttribute("display", "none");
+                    byId('exemptWrapper').setAttribute("display", "none");
                 }
 
                 if (inIframe()) {
-                    document.getElementById('wrapper').setAttribute("display", "none");
+                    byId('wrapper').setAttribute("display", "none");
                 } else {
                     console.log('nope');
                 }

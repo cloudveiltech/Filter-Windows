@@ -78,10 +78,11 @@ namespace FilterProvider.Common.Proxy.Certificate
         /// <param name="sSubjectCn">The s subject cn.</param>
         /// <param name="isRoot">if set to <c>true</c> [is root].</param>
         /// <param name="signingCert">The signing cert.</param>
+        /// <param name="alternateNames">The list of possible hostnames, if they are different from <paramref name="sSubjectCn"/></param>
         /// <returns>X509Certificate2 instance.</returns>
-        public X509Certificate2 MakeCertificate(string sSubjectCn, bool isRoot, X509Certificate2 signingCert = null, AsymmetricCipherKeyPair subjectKeyPair = null)
+        public X509Certificate2 MakeCertificate(string sSubjectCn, bool isRoot, X509Certificate2 signingCert = null, AsymmetricCipherKeyPair subjectKeyPair = null, Asn1Encodable[] alternateNames = null)
         {
-            return makeCertificateInternal(sSubjectCn, isRoot, true, signingCert, subjectKeyPair);
+            return makeCertificateInternal(sSubjectCn, isRoot, true, signingCert, subjectKeyPair, alternateNames: alternateNames);
         }
 
         public static AsymmetricCipherKeyPair CreateKeyPair(int keyStrength)
@@ -116,7 +117,8 @@ namespace FilterProvider.Common.Proxy.Certificate
             DateTime validTo, int keyStrength = 2048,
             string signatureAlgorithm = "SHA256WithRSA",
             AsymmetricKeyParameter issuerPrivateKey = null,
-            AsymmetricCipherKeyPair subjectKeyPair = null)
+            AsymmetricCipherKeyPair subjectKeyPair = null,
+            Asn1Encodable[] alternateNames = null)
         {
             // Generating Random Numbers
             var randomGenerator = new CryptoApiRandomGenerator();
@@ -142,7 +144,7 @@ namespace FilterProvider.Common.Proxy.Certificate
             if (hostName != null)
             {
                 // add subject alternative names
-                var subjectAlternativeNames = new Asn1Encodable[] { new GeneralName(GeneralName.DnsName, hostName) };
+                var subjectAlternativeNames = alternateNames ?? new Asn1Encodable[] { new GeneralName(GeneralName.DnsName, hostName) };
 
                 var subjectAlternativeNamesExtension = new DerSequence(subjectAlternativeNames);
                 certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName.Id, false,
@@ -246,7 +248,7 @@ namespace FilterProvider.Common.Proxy.Certificate
         /// </exception>
         private X509Certificate2 makeCertificateInternal(bool isRoot,
             string hostName, string subjectName,
-            DateTime validFrom, DateTime validTo, X509Certificate2 signingCertificate, AsymmetricCipherKeyPair subjectKeyPair = null)
+            DateTime validFrom, DateTime validTo, X509Certificate2 signingCertificate, AsymmetricCipherKeyPair subjectKeyPair = null, Asn1Encodable[] alternateNames = null)
         {
             if (isRoot != (null == signingCertificate))
             {
@@ -257,12 +259,12 @@ namespace FilterProvider.Common.Proxy.Certificate
 
             if (isRoot)
             {
-                return generateCertificate(null, subjectName, subjectName, validFrom, validTo, subjectKeyPair: subjectKeyPair);
+                return generateCertificate(null, subjectName, subjectName, validFrom, validTo, subjectKeyPair: subjectKeyPair, alternateNames: alternateNames);
             }
 
             var kp = DotNetUtilities.GetKeyPair(signingCertificate.PrivateKey);
             return generateCertificate(hostName, subjectName, signingCertificate.Subject, validFrom, validTo,
-                issuerPrivateKey: kp.Private);
+                issuerPrivateKey: kp.Private, alternateNames: alternateNames);
         }
 
         /// <summary>
@@ -276,6 +278,7 @@ namespace FilterProvider.Common.Proxy.Certificate
         /// <returns>X509Certificate2.</returns>
         private X509Certificate2 makeCertificateInternal(string subject, bool isRoot,
             bool switchToMtaIfNeeded, X509Certificate2 signingCert = null, AsymmetricCipherKeyPair subjectKeyPair = null,
+            Asn1Encodable[] alternateNames = null,
             CancellationToken cancellationToken = default)
         {
 #if NET45
@@ -310,7 +313,8 @@ namespace FilterProvider.Common.Proxy.Certificate
 
             return makeCertificateInternal(isRoot, subject, $"CN={subject}",
                 DateTime.UtcNow.AddDays(-certificateGraceDays), DateTime.UtcNow.AddDays(certificateValidDays),
-                isRoot ? null : signingCert, subjectKeyPair: subjectKeyPair);
+                isRoot ? null : signingCert, subjectKeyPair: subjectKeyPair,
+                alternateNames: alternateNames);
         }
 
         public static void ExportDotNetCertificate(X509Certificate2 cert, TextWriter outputStream)

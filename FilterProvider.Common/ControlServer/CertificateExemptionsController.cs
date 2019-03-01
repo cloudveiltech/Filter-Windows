@@ -21,7 +21,7 @@ namespace FilterProvider.Common.ControlServer
         }
 
         [WebApiHandler(HttpVerbs.Get, "/api/exempt/{thumbprint}")]
-        public async Task<bool> Exempt(string thumbprint)
+        public Task<bool> Exempt(string thumbprint)
         {
             string host = this.QueryString("host");
 
@@ -30,7 +30,13 @@ namespace FilterProvider.Common.ControlServer
                 exemptions.TrustCertificate(host, thumbprint);
             }
 
-            return await this.JsonResponseAsync("{ success: 1 }");
+            return this.JsonResponseAsync("{ \"success\": 1 }");
+        }
+
+        [WebApiHandler(HttpVerbs.Get, "/api/testme")]
+        public Task<bool> TestMe()
+        {
+            return this.HtmlResponseAsync("<html><head><title>Test</title></head><body>This is my body</body></html>");
         }
     }
 }

@@ -45,6 +45,9 @@ using FilterProvider.Common.ControlServer;
 using FilterProvider.Common.Proxy.Certificate;
 using Org.BouncyCastle.Crypto;
 using System.Security.Cryptography.X509Certificates;
+using LogMessageType = Unosquare.Swan.LogMessageType;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace FilterProvider.Common.Services
 {
@@ -398,16 +401,29 @@ namespace FilterProvider.Common.Services
 
             m_systemServices.OnStartProxy += (sender, e) =>
             {
-                BCCertificateMaker maker = new BCCertificateMaker();
+                try
+                {
+                    BCCertificateMaker maker = new BCCertificateMaker();
 
-                AsymmetricCipherKeyPair keyPair = BCCertificateMaker.CreateKeyPair(2048);
+                    AsymmetricCipherKeyPair keyPair = BCCertificateMaker.CreateKeyPair(2048);
 
-                X509Certificate2 cert = maker.MakeCertificate("localhost", false, m_systemServices.RootCertificate, keyPair);
+                    X509Certificate2 cert = maker.MakeCertificate("localhost", false, m_systemServices.RootCertificate, keyPair, alternateNames: new Asn1Encodable[] {
+                        new GeneralName(GeneralName.DnsName, "localhost"),
+                        new GeneralName(GeneralName.IPAddress, "127.0.0.1"),
+                        new GeneralName(GeneralName.IPAddress, "::1")
+                        });
 
-                m_controlServer = new Server(14299, cert);
-                m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
-                m_controlServer.Start();
+                    m_controlServer = new Server(14299, cert);
+                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
+                    m_controlServer.Start();
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error(ex, "An error occurred while attempting to start the control server.");
+                }
             };
+
+            Unosquare.Swan.Terminal.OnLogMessageReceived += Terminal_OnLogMessageReceived;
 
             // Hook app exiting function. This must be done on this main app thread.
             AppDomain.CurrentDomain.ProcessExit += OnApplicationExiting;
@@ -879,6 +895,12 @@ namespace FilterProvider.Common.Services
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync();
+        }
+
+        // Now why would you code it like this? Because you're lazy.
+        private void Terminal_OnLogMessageReceived(object sender, Unosquare.Swan.LogMessageReceivedEventArgs e)
+        {
+            m_logger.Info($"SWAN: {e.Source}: {e.Message}: {e.Exception?.ToString()}");
         }
 
         private void timeRestrictionsCheck(object state)
@@ -1807,7 +1829,10 @@ namespace FilterProvider.Common.Services
             // try to classify the content of the response payload, if there is any.
             try
             {
-                if(args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified)
+                var uri = new Uri(args.Request.Url);
+
+                // Check our certificate exemptions to see if we should allow this site through or not.
+                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !m_certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
                 {
                     customBlockResponseContentType = "text/html";
                     customBlockResponse = getBadSslPageWithResolvedTemplates(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint, Encoding.UTF8.GetString(m_badSslHtmlPage));

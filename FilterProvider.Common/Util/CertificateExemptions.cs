@@ -18,7 +18,6 @@ using Citadel.Core.Windows.Util;
 using Microsoft.Data.Sqlite;
 using System.Net.Security;
 using Filter.Platform.Common.Util;
-using Filter.Platform.Common;
 
 namespace FilterProvider.Common.Util
 {
@@ -35,8 +34,7 @@ namespace FilterProvider.Common.Util
 
         static CertificateExemptions()
         {
-            IPathProvider provider = PlatformTypes.New<IPathProvider>();
-            s_dbPath = Path.Combine(provider.ApplicationDataFolder, "ssl-exemptions.db");
+            s_dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "ssl-exemptions.db");
         }
 
         public CertificateExemptions()
@@ -58,7 +56,8 @@ namespace FilterProvider.Common.Util
                 command.ExecuteNonQuery();
 
                 m_connection = conn;
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
@@ -120,74 +119,38 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        public event AddExemptionRequestHandler OnAddCertificateExemption;
-
-        public void TrustCertificate(string host, string certHash)
+        public void TrustCertificate(string host, string thumbprint)
         {
             try
             {
                 using (SqliteCommand command = m_connection.CreateCommand())
                 {
-                    SqliteParameter dateString = new SqliteParameter("$dateString", DateTime.UtcNow.ToString("o"));
-                    SqliteParameter param0 = new SqliteParameter("$certHash", certHash);
-                    SqliteParameter param1 = new SqliteParameter("$host", host);
-
-                    command.CommandText = $"UPDATE cert_exemptions SET DateExempted = $dateString WHERE Thumbprint = $certHash AND Host = $host";
-                    command.Parameters.Add(dateString);
-                    command.Parameters.Add(param0);
-                    command.Parameters.Add(param1);
-
-                    command.ExecuteNonQuery();
-
-                    OnAddCertificateExemption?.Invoke(host, certHash, true);
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-            }
-        }
-
-        public void AddExemptionRequest(HttpWebRequest request, X509Certificate certificate)
-        {
-            try
-            {
-                using (SqliteCommand command = m_connection.CreateCommand())
-                {
-                    bool clearExemptionData = false;
                     bool createExemptionData = false;
 
-                    SqliteParameter param0 = new SqliteParameter("$certHash", certificate.GetCertHashString());
-                    SqliteParameter param1 = new SqliteParameter("$host", request.Host);
+                    SqliteParameter dateString = new SqliteParameter("$dateExempted", DateTime.UtcNow.ToString("o"));
+                    SqliteParameter param0 = new SqliteParameter("$certHash", thumbprint);
+                    SqliteParameter param1 = new SqliteParameter("$host", host);
 
                     command.CommandText = $"SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
                     command.Parameters.Add(param0);
                     command.Parameters.Add(param1);
+
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        if (reader.Read())
-                        {
-                            clearExemptionData = !isReaderRowCurrentlyExempted(reader);
-                        }
-                        else
-                        {
-                            createExemptionData = true;
-                        }
+                        createExemptionData = !reader.Read();
                     }
 
-                    if (clearExemptionData)
-                    {
-                        command.CommandText = $"UPDATE cert_exemptions SET DateExempted = NULL, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
-                        command.ExecuteNonQuery();
+                    command.Parameters.Add(dateString);
 
-                        OnAddCertificateExemption?.Invoke(request.Host, certificate.GetCertHashString(), false);
+                    if (!createExemptionData)
+                    {
+                        command.CommandText = $"UPDATE cert_exemptions SET DateExempted = $dateExempted, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
+                        command.ExecuteNonQuery();
                     }
-                    else if (createExemptionData)
+                    else
                     {
-                        command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES (NULL, NULL, $certHash, $host)";
+                        command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES ($dateExempted, NULL, $certHash, $host)";
                         command.ExecuteNonQuery();
-
-                        OnAddCertificateExemption?.Invoke(request.Host, certificate.GetCertHashString(), false);
                     }
                 }
             }
@@ -197,7 +160,7 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        public bool IsExempted(HttpWebRequest request, X509Certificate certificate)
+        public bool IsExempted(string host, X509Certificate2 certificate)
         {
             try
             {
@@ -205,7 +168,7 @@ namespace FilterProvider.Common.Util
                 {
                     command.CommandText = "SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
                     command.Parameters.Add(new SqliteParameter("$certHash", certificate.GetCertHashString()));
-                    command.Parameters.Add(new SqliteParameter("$host", request.Host));
+                    command.Parameters.Add(new SqliteParameter("$host", host));
 
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
@@ -221,34 +184,11 @@ namespace FilterProvider.Common.Util
                     return false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
                 return false;
             }
-        }
-
-        public bool CertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            HttpWebRequest request = (HttpWebRequest)sender;
-
-            try
-            {
-                if (IsExempted(request, certificate))
-                {
-                    return true;
-                }
-                else
-                {
-                    AddExemptionRequest(request, certificate);
-                }
-            }
-            catch(Exception ex)
-            {
-                m_logger.Error(ex);
-            }
-
-            return false;
         }
     }
 }

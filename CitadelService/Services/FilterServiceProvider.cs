@@ -47,6 +47,21 @@ using FilterProvider.Common.Data;
 using Citadel.Core.WinAPI;
 using System.Runtime.InteropServices;
 
+/**
+ * TODO:
+ *
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * A lot of this code is obsolete and needs to be trimmed out!
+ * 
+ * 
+ */
 namespace CitadelService.Services
 {
     public class FilterServiceProvider
@@ -285,8 +300,6 @@ namespace CitadelService.Services
         private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
 
         private TrustManager m_trustManager = new TrustManager();
-
-        private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
 
         /// <summary>
         /// Default ctor. 

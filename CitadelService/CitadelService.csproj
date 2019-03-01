@@ -121,10 +121,8 @@
     <EmbeddedResource Include="Services\FilterStarter.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\AppListCheck.cs" />
-    <Compile Include="Util\CertificateExemptions.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
-    <Compile Include="Util\ICertificateExemptions.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />
