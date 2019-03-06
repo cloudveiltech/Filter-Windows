@@ -15,14 +15,17 @@ namespace FilterProvider.Common.Util
 {
     class ConsoleLogWriter : TextWriter
     {
-        public ConsoleLogWriter() : base()
+        public ConsoleLogWriter(string prefix="console") : base()
         {
             m_pathsProvider = PlatformTypes.New<IPathProvider>();
+            this.prefix = prefix;
         }
 
         public override Encoding Encoding => Encoding.UTF8;
 
         private IPathProvider m_pathsProvider;
+
+        private string prefix;
 
         private StreamWriter m_writer = null;
 
@@ -64,7 +67,7 @@ namespace FilterProvider.Common.Util
 
         private StreamWriter openLogFile()
         {
-            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $"console-{DateTime.Now.Date.ToString("yyyy-MM-dd")}.log");
+            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $"{prefix}-{DateTime.Now.Date.ToString("yyyy-MM-dd")}.log");
 
             FileStream log = new FileStream(logPath, FileMode.Append);
 

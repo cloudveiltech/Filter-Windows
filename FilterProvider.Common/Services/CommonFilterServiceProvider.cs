@@ -337,7 +337,9 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                //Console.SetOut(new ConsoleLogWriter());
+                Console.SetOut(new ConsoleLogWriter());
+                Console.SetError(new ConsoleLogWriter("error"));
+
                 consoleOutStatus = true;
             }
             catch (Exception ex)
@@ -916,7 +918,7 @@ namespace FilterProvider.Common.Services
                         return;
                     }
 
-                    TimeRestrictionModel currentDay = m_policyConfiguration.TimeRestrictions[(int)DateTime.Now.DayOfWeek];
+                    TimeRestrictionModel currentDay = m_policyConfiguration?.TimeRestrictions?[(int)DateTime.Now.DayOfWeek];
 
                     if (currentDay == null)
                     {

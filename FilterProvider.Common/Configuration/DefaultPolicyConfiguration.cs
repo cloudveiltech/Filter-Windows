@@ -348,7 +348,14 @@ namespace FilterProvider.Common.Configuration
 
                 if (listBytes != null)
                 {
-                    File.WriteAllBytes(getListFilePath(list), listBytes);
+                    try
+                    {
+                        File.WriteAllBytes(getListFilePath(list), listBytes);
+                    }
+                    catch(Exception ex)
+                    {
+                        m_logger.Error(ex, $"Failed to write to rule path {getListFilePath(list)}");
+                    }
                 }
                 else
                 {
