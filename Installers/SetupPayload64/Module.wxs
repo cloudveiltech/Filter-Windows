@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.2" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -270,6 +270,12 @@
         </Component>
         <Component Id="comp_EEC56972_6DBD" Guid="7BB44707-7B92-4AC8-A89A-DBD76E1A18DF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_BE10F67F_DD62" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe.config" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.exe.config" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_E518DA81_1B6B" Guid="6B34D0FB-235A-4D7C-A21C-65F78C89C230" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D5156E61_E31F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Labs.EmbedIO.dll" Source="..\..\CitadelGUI\bin\Release x64\Unosquare.Labs.EmbedIO.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_F51E2DAA_6755" Guid="9C63FC78-06E2-4F46-849B-C7D1647FF59C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_9CA8FDC4_DA0B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CitadelGUI\bin\Release x64\Unosquare.Swan.Lite.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">

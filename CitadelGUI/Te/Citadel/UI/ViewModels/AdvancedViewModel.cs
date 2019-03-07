@@ -4,23 +4,33 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
+using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
+using Citadel.IPC.Messages;
+using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.CommandWpf;
+using MahApps.Metro.IconPacks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using Te.Citadel.UI.Views;
 
 namespace Te.Citadel.UI.ViewModels
 {
     public class AdvancedViewModel : BaseCitadelViewModel
     {
+
+        public AdvancedViewModel() : base()
+        {
+        }
 
         /// <summary>
         /// Private data member for the public DeactivateCommand property.
@@ -34,47 +44,61 @@ namespace Te.Citadel.UI.ViewModels
 
         private RelayCommand m_viewSslExemptionsCommand;
 
-        private bool m_updateRequestInProgress = false;
-        public bool UpdateRequestInProgress
-        {
-            get { return m_updateRequestInProgress; }
-            set
-            {
-                m_updateRequestInProgress = value;
-                RaisePropertyChanged(nameof(UpdateRequestInProgress));
-            }
-        }
-
-        private bool m_upToDate = false;
-        public bool UpToDate
-        {
-            get { return m_upToDate; }
-            set
-            {
-                m_upToDate = value;
-                RaisePropertyChanged(nameof(UpToDate));
-            }
-        }
-
-        private bool m_errorOccurred = false;
-        public bool ErrorOccurred
-        {
-            get { return m_errorOccurred; }
-            set
-            {
-                m_errorOccurred = value;
-                RaisePropertyChanged(nameof(ErrorOccurred));
-            }
-        }
-
-        private string m_updateText = "Sync";
+        private string updateText;
         public string UpdateText
         {
-            get { return m_updateText; }
+            get => updateText;
             set
             {
-                m_updateText = value;
+                updateText = value;
                 RaisePropertyChanged(nameof(UpdateText));
+            }
+        }
+
+        private bool checkingForUpdates;
+        public bool CheckingForUpdates
+        {
+            get => checkingForUpdates;
+            set
+            {
+                checkingForUpdates = value;
+                RaisePropertyChanged(nameof(CheckingForUpdates));
+                RaisePropertyChanged(nameof(NotCheckingForUpdates));
+            }
+        }
+
+        public bool NotCheckingForUpdates => !CheckingForUpdates;
+
+        private PackIconFontAwesomeKind updateIcon;
+        public PackIconFontAwesomeKind UpdateIcon
+        {
+            get => updateIcon;
+            set
+            {
+                updateIcon = value;
+                RaisePropertyChanged(nameof(UpdateIcon));
+            }
+        }
+
+        private Brush updateIconForeground;
+        public Brush UpdateIconForeground
+        {
+            get => updateIconForeground;
+            set
+            {
+                updateIconForeground = value;
+                RaisePropertyChanged(nameof(UpdateIconForeground));
+            }
+        }
+
+        private string updateLastCheckedText;
+        public string UpdateLastCheckedText
+        {
+            get => updateLastCheckedText;
+            set
+            {
+                updateLastCheckedText = value;
+                RaisePropertyChanged(nameof(UpdateLastCheckedText));
             }
         }
 
@@ -100,103 +124,195 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
-        private RelayCommand m_requestUpdateCommand;
-        public RelayCommand RequestUpdateCommand
+        private RelayCommand checkForUpdatesCommand;
+        public RelayCommand CheckForUpdatesCommand
         {
             get
             {
-                if (m_requestUpdateCommand == null)
+                if(checkForUpdatesCommand == null)
                 {
-                    m_requestUpdateCommand = new RelayCommand(() =>
+                    checkForUpdatesCommand = new RelayCommand(() =>
                     {
-                        UpdateRequestInProgress = true;
-                        ErrorOccurred = false;
+                        CheckingForUpdates = true;
                         ErrorText = "";
 
                         Task.Run(() =>
                         {
-                            using (IPCClient client = new IPCClient())
-                            {
-                                client.ConnectedToServer = () =>
-                                {
-                                    client.RequestConfigUpdate((message) =>
-                                    {
-                                        m_logger.Info("We got a config update message back.");
-                                        UpdateRequestInProgress = false;
-
-                                        if (message.UpdateResult.HasFlag(ConfigUpdateResult.AppUpdateAvailable))
-                                        {
-                                            UpToDate = true;
-                                            UpdateText = "New Version";
-                                        }
-                                        else
-                                        {
-                                            switch (message.UpdateResult)
-                                            {
-                                                case ConfigUpdateResult.UpToDate:
-                                                    UpToDate = true;
-                                                    IsUpdateButtonEnabled = false;
-                                                    UpdateText = "Up to date";
-                                                    break;
-
-                                                case ConfigUpdateResult.Updated:
-                                                    UpToDate = true;
-                                                    IsUpdateButtonEnabled = false;
-                                                    UpdateText = "Updated";
-                                                    break;
-
-                                                case ConfigUpdateResult.NoInternet:
-                                                    IsUpdateButtonEnabled = true;
-                                                    UpToDate = false;
-                                                    ErrorOccurred = true;
-                                                    UpdateText = "Try Again";
-                                                    ErrorText = "No internet";
-                                                    break;
-
-                                                case ConfigUpdateResult.ErrorOccurred:
-                                                    IsUpdateButtonEnabled = true;
-                                                    UpToDate = false;
-                                                    ErrorOccurred = true;
-                                                    UpdateText = "Try Again";
-                                                    ErrorText = "Error occurred";
-                                                    break;
-
-                                                default:
-                                                    UpToDate = false;
-                                                    ErrorOccurred = true;
-                                                    UpdateText = "Try Again";
-                                                    ErrorText = "Unrecognized";
-                                                    break;
-                                            }
-
-                                            var timer = new System.Timers.Timer(30000);
-                                            timer.Elapsed += (sender, e) =>
-                                            {
-                                                IsUpdateButtonEnabled = true;
-                                                UpToDate = false;
-                                                ErrorOccurred = false;
-                                                UpdateText = "Sync";
-                                                ErrorText = "";
-
-                                                timer.Dispose();
-                                            };
-                                            timer.Enabled = true;
-
-                                        }
-
-
-                                        // TODO: Add code to display on dashboard view model.
-                                    });
-                                };
-
-                                client.WaitForConnection();
-                                Task.Delay(3000).Wait(); // FIXME Surely there's a good way to detect when our work is over with IPCClients
-                            }
+                            IPCClient.Default.Request(IpcCall.CheckForUpdates).OnReply((h, msg) => OnCheckForUpdates(msg.As<UpdateCheckInfo>()));
                         });
                     });
                 }
 
-                return m_requestUpdateCommand;
+                return checkForUpdatesCommand;
+            }
+        }
+
+        private static string dateTimeToString(DateTime? dt)
+        {
+            if(dt == null)
+            {
+                return "N/A";
+            }
+            else
+            {
+                return $"{dt.Value.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern)}";
+            }
+        }
+
+        private static string lastChecked(DateTime? dt)
+        {
+            return $"Last Checked: {dateTimeToString(dt)}";
+        }
+
+        public bool OnCheckForUpdates(IpcMessage<UpdateCheckInfo> msg)
+        {
+            CheckingForUpdates = false;
+
+            switch(msg.Data.CheckResult)
+            {
+                case null:
+                case UpdateCheckResult.CheckFailed:
+                    UpdateIcon = PackIconFontAwesomeKind.TimesSolid;
+                    UpdateIconForeground = Brushes.Red;
+                    UpdateText = "Update Check Failed";
+                    UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    break;
+
+                case UpdateCheckResult.UpToDate:
+                    UpdateIcon = PackIconFontAwesomeKind.CheckSolid;
+                    UpdateIconForeground = Brushes.DarkGreen;
+                    UpdateText = "You're up to date";
+                    UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    break;
+
+                case UpdateCheckResult.UpdateAvailable:
+                    UpdateIcon = PackIconFontAwesomeKind.ExclamationCircleSolid;
+                    UpdateIconForeground = Brushes.Red;
+                    UpdateText = "Update Available";
+                    UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    break;
+            }
+
+            return true;
+        }
+
+        public bool OnSettingsSynchronized(IpcMessage<ConfigCheckInfo> msg)
+        {
+            SynchronizingSettings = false;
+
+            switch(msg.Data.CheckResult)
+            {
+
+                case ConfigUpdateResult.ErrorOccurred:
+                case ConfigUpdateResult.NoInternet:
+                case null:
+                    SyncSettingsIcon = PackIconFontAwesomeKind.TimesSolid;
+                    SyncSettingsIconForeground = Brushes.Red;
+                    SyncSettingsText = "Error occurred";
+                    SettingsLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    break;
+
+                case ConfigUpdateResult.Updated:
+                case ConfigUpdateResult.UpToDate:
+                    SyncSettingsIcon = PackIconFontAwesomeKind.CheckSolid;
+                    SyncSettingsIconForeground = Brushes.DarkGreen;
+                    SyncSettingsText = "Settings up to date";
+                    SettingsLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    break;
+            }
+
+            return true;
+        }
+
+        private string syncSettingsText;
+        public string SyncSettingsText
+        {
+            get => syncSettingsText;
+            set
+            {
+                syncSettingsText = value;
+                RaisePropertyChanged(nameof(SyncSettingsText));
+            }
+        }
+
+        private bool synchronizingSettings;
+        public bool SynchronizingSettings
+        {
+            get => synchronizingSettings;
+            set
+            {
+                synchronizingSettings = value;
+                RaisePropertyChanged(nameof(SynchronizingSettings));
+                RaisePropertyChanged(nameof(NotSynchronizingSettings));
+            }
+        }
+
+        public bool NotSynchronizingSettings => !SynchronizingSettings;
+
+        private PackIconFontAwesomeKind syncSettingsIcon;
+        public PackIconFontAwesomeKind SyncSettingsIcon
+        {
+            get => syncSettingsIcon;
+            set
+            {
+                syncSettingsIcon = value;
+                RaisePropertyChanged(nameof(SyncSettingsIcon));
+            }
+        }
+
+        private Brush syncSettingsIconForeground;
+        public Brush SyncSettingsIconForeground
+        {
+            get => syncSettingsIconForeground;
+            set
+            {
+                syncSettingsIconForeground = value;
+                RaisePropertyChanged(nameof(SyncSettingsIconForeground));
+            }
+        }
+
+        private string settingsLastCheckedText;
+        public string SettingsLastCheckedText
+        {
+            get => settingsLastCheckedText;
+            set
+            {
+                settingsLastCheckedText = value;
+                RaisePropertyChanged(nameof(SettingsLastCheckedText));
+            }
+        }
+
+        private string syncErrorText;
+        public string SyncErrorText
+        {
+            get => syncErrorText;
+            set
+            {
+                syncErrorText = value;
+                RaisePropertyChanged(nameof(SyncErrorText));
+            }
+        }
+
+        private RelayCommand syncSettingsCommand;
+        public RelayCommand SyncSettingsCommand
+        {
+            get
+            {
+                if(syncSettingsCommand == null)
+                {
+                    syncSettingsCommand = new RelayCommand(() =>
+                    {
+                        SynchronizingSettings = true;
+                        SyncErrorText = "";
+
+                        Task.Run(() =>
+                        {
+                            IPCClient.Default.Request(IpcCall.SynchronizeSettings).OnReply((h, msg) => OnSettingsSynchronized(msg.As<ConfigCheckInfo>()));
+                        });
+                    });
+                }
+
+                return syncSettingsCommand;
             }
         }
 
@@ -241,22 +357,6 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 return m_viewLogsCommand;
-            }
-        }
-
-        public RelayCommand ViewSslExemptionsCommand
-        {
-            get
-            {
-                if (m_viewSslExemptionsCommand == null)
-                {
-                    m_viewSslExemptionsCommand = new RelayCommand((Action)(() =>
-                    {
-                        ViewChangeRequest?.Invoke(typeof(SslExemptionsView));
-                    }));
-                }
-
-                return m_viewSslExemptionsCommand;
             }
         }
 

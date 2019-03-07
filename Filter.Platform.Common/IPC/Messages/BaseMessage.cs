@@ -27,6 +27,11 @@ namespace Citadel.IPC.Messages
     [Serializable]
     public class IpcMessage : BaseMessage
     {
+        /// <summary>
+        /// Cast IpcMessage to IpcMessage<typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public IpcMessage<T> As<T>()
         {
             return new IpcMessage<T>()

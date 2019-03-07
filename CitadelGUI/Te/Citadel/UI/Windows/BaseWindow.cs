@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -18,14 +19,6 @@ using Te.Citadel.Util;
 
 namespace Te.Citadel.UI.Windows
 {
-    public enum UpdateDialogResult
-    {
-        RemindLater,
-        UpdateNow,
-        SkipVersion,
-        FailedOpen
-    }
-
     public class BaseWindow : MetroWindow
     {
         public BaseWindow()

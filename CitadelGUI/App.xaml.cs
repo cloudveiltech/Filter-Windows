@@ -36,6 +36,9 @@ using CloudVeilGUI.Platform.Common;
 using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Data.Models;
+using Citadel.Core.Windows.Util.Update;
+using Filter.Platform.Common.Types;
+using Filter.Platform.Common.IPC.Messages;
 
 namespace CloudVeil.Windows
 {
@@ -332,83 +335,57 @@ namespace CloudVeil.Windows
                     }
                 };
 
-                m_ipcClient.ServerAppUpdateRequestReceived = async (args) =>
+                m_ipcClient.RegisterResponseHandler<ConfigCheckInfo>(IpcCall.SynchronizeSettings, (msg) =>
                 {
-                    string updateSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "update.settings");
+                    var vm = ModelManager.Get<AdvancedViewModel>();
+                    vm.OnSettingsSynchronized(msg);
+                    return true;
+                });
 
-                    if(File.Exists(updateSettingsPath))
+                m_ipcClient.RegisterResponseHandler<UpdateCheckInfo>(IpcCall.CheckForUpdates, (msg) =>
+                {
+                    var vm = ModelManager.Get<AdvancedViewModel>();
+                    vm.OnCheckForUpdates(msg);
+                    return true;
+                });
+
+                m_ipcClient.RegisterResponseHandler<ApplicationUpdate>(IpcCall.RequestUpdate, (msg) =>
+                {
+                    var vm = ModelManager.Get<AdvancedViewModel>();
+
+                    if(msg.Data.CurrentVersion >= msg.Data.UpdateVersion)
                     {
-                        using(StreamReader reader = File.OpenText(updateSettingsPath))
-                        {
-                            string command = reader.ReadLine();
-
-                            string[] commandParts = command.Split(new char[] { ':' }, 2);
-
-                            if(commandParts[0] == "RemindLater")
-                            {
-                                DateTime remindLater;
-                                if(DateTime.TryParse(commandParts[1], out remindLater))
-                                {
-                                    if(DateTime.Now < remindLater)
-                                    {
-                                        return;
-                                    }
-                                }
-                            }
-                            else if(commandParts[0] == "SkipVersion")
-                            {
-                                if(commandParts[1] == args.NewVersionString)
-                                {
-                                    return;
-                                }
-                            }
-                        }
+                        return true;
                     }
 
                     BringAppToFocus();
 
-                    var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", args.NewVersionString, args.CurrentVersionString);
+                    var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", msg.Data.UpdateVersion.ToString(), msg.Data.CurrentVersion.ToString());
 
-                    if (args.IsRestartRequired)
+                    if (msg.Data.IsRestartRequired)
                     {
                         updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
                     }
 
-                    await Current.Dispatcher.BeginInvoke(
+                    Current.Dispatcher.Invoke(
                         System.Windows.Threading.DispatcherPriority.Normal,
 
                         (Action)async delegate ()
-                       {
-                           if (m_mainWindow != null)
-                           {
-                               var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
+                        {
+                            if (m_mainWindow != null)
+                            {
+                                var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
+                                m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateRequestResult, result);
 
-                               switch (result)
-                               {
-                                   case UpdateDialogResult.UpdateNow:
-                                       m_ipcClient.NotifyAcceptUpdateRequest();
-                                       m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                                       break;
+                                if(result == UpdateDialogResult.UpdateNow)
+                                {
+                                    m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
+                                }
+                            }
+                        });
 
-                                   case UpdateDialogResult.RemindLater:
-                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                       {
-                                           writer.WriteLine("RemindLater:{0}", DateTime.Now.AddDays(1).ToString("o"));
-                                       }
-
-                                       break;
-
-                                   case UpdateDialogResult.SkipVersion:
-                                       using (StreamWriter writer = new StreamWriter(File.Open(updateSettingsPath, FileMode.Create)))
-                                       {
-                                           writer.WriteLine("SkipVersion:{0}", args.NewVersionString);
-                                       }
-
-                                       break;
-                               }
-                           }
-                       });
-                };
+                    return true;
+                });
 
                 m_ipcClient.ServerUpdateStarting = () =>
                 {
@@ -659,7 +636,7 @@ namespace CloudVeil.Windows
 
                 // TODO: Add helper functions to wrap code in dispatcher functions.
                 // TODO: Add helper functions to bypass the need for any message handling.
-                m_ipcClient.RegisterSendHandler<bool?>(IpcCall.TimeRestrictionsEnabled, (msg) =>
+                m_ipcClient.RegisterResponseHandler<bool?>(IpcCall.TimeRestrictionsEnabled, (msg) =>
                 {
                     bool? areTimeRestrictionsEnabled = msg.Data;
 
@@ -673,7 +650,7 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
-                m_ipcClient.RegisterSendHandler<AppConfigModel>(IpcCall.ConfigurationInfo, (msg) =>
+                m_ipcClient.RegisterResponseHandler<AppConfigModel>(IpcCall.ConfigurationInfo, (msg) =>
                 {
                     var cfg = msg.Data;
                     m_appConfig = cfg;

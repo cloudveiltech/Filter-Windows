@@ -55,10 +55,9 @@ namespace Citadel.Core.Windows.Util.Update
         /// matches this value in a case-insensitive fashion.
         /// </param>
         /// <returns>
-        /// Returns an ApplicationUpdate if an update that supersedes the executing assembly version
-        /// could be found. Returns null otherwise.
+        /// Returns an ApplicationUpdate if one is found.
         /// </returns>
-        public async Task<ApplicationUpdate> CheckForUpdate(string myUpdateChannel = null)
+        public async Task<ApplicationUpdate> GetLatestUpdate(string myUpdateChannel = null)
         {
             var thisVersion = Assembly.GetEntryAssembly().GetName().Version;
             var bestVersion = thisVersion;
@@ -67,7 +66,7 @@ namespace Citadel.Core.Windows.Util.Update
 
             try
             {
-                using(var cli = new HttpClient())
+                using (var cli = new HttpClient())
                 {
                     string appInfo = null;
 
@@ -92,11 +91,11 @@ namespace Citadel.Core.Windows.Util.Update
 #endif
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
-                    foreach(var item in feed.Items)
+                    foreach (var item in feed.Items)
                     {
                         var enclosure = item.Links.Where(x => x.RelationshipType == "enclosure").FirstOrDefault();
 
-                        if(enclosure != null)
+                        if (enclosure != null)
                         {
                             var sparkleVersion = enclosure.AttributeExtensions.Where(x => x.Key.Name == "version").FirstOrDefault().Value;
                             var sparkleOs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "os").FirstOrDefault().Value;
@@ -104,7 +103,7 @@ namespace Citadel.Core.Windows.Util.Update
                             var sparkleInstallerArgs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "installerArguments").FirstOrDefault().Value;
                             var exeUrl = enclosure.AttributeExtensions.Where(x => x.Key.Name == "exeUrl").FirstOrDefault().Value;
 
-                            if(StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
+                            if (StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
                                 m_logger.Info($"Skipping app update in channel {updateChannel} because it doesn't match required channel {myUpdateChannel}.", updateChannel, myUpdateChannel);
                                 continue;
@@ -118,26 +117,19 @@ namespace Citadel.Core.Windows.Util.Update
 
                             var thisUpdateVersion = Version.Parse(sparkleVersion);
 
-                            m_logger.Info($"App version {sparkleVersion} detected in update channel. Checking if superior.");
-
-                            if(thisUpdateVersion > bestVersion)
-                            {
-                                m_logger.Info($"Available app update with version {thisUpdateVersion.ToString()} is superior to current best version {bestVersion.ToString()}.");
-
-                                bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, updateKind, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
-                                bestVersion = thisUpdateVersion;
-                            }
+                            bestAvailableUpdate = new ApplicationUpdate(item.PublishDate.DateTime, item.Title.Text, ((TextSyndicationContent)item.Content).Text, thisVersion, thisUpdateVersion, url, updateKind, sparkleInstallerArgs, sparkleInstallerArgs.IndexOf("norestart") < 0);
+                            bestVersion = thisUpdateVersion;
                         }
                     }
                 }
             }
-            catch(WebException we)
+            catch (WebException we)
             {
                 // Failed to load. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
                 LoggerUtil.RecursivelyLogException(m_logger, we);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // Other unknown failure. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
@@ -145,6 +137,34 @@ namespace Citadel.Core.Windows.Util.Update
             }
 
             return bestAvailableUpdate;
+        }
+
+        /// <summary>
+        /// Checks for application updates broadcasted by the appcast URI provided when this object
+        /// was constructed.
+        /// </summary>
+        /// <param name="myUpdateChannel">
+        /// An optional update channel. Will only look for updates where the channel of the update
+        /// matches this value in a case-insensitive fashion.
+        /// </param>
+        /// <returns>
+        /// Returns an ApplicationUpdate if an update that supersedes the executing assembly version
+        /// could be found. Returns null otherwise.
+        /// </returns>
+        public async Task<ApplicationUpdate> CheckForUpdate(string myUpdateChannel = null)
+        {
+            ApplicationUpdate update = await GetLatestUpdate(myUpdateChannel);
+
+            var thisVersion = Assembly.GetEntryAssembly().GetName().Version;
+
+            if(update.IsNewerThan(thisVersion))
+            {
+                return update;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

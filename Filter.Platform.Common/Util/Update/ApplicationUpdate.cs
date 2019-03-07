@@ -18,6 +18,7 @@ using Filter.Platform.Common;
 
 namespace Citadel.Core.Windows.Util.Update
 {
+    [Serializable]
     public enum UpdateKind
     {
         MsiInstaller,
@@ -25,6 +26,7 @@ namespace Citadel.Core.Windows.Util.Update
         ExePackage
     }
 
+    [Serializable]
     public class ApplicationUpdate
     {
         public DateTime DatePublished
@@ -87,6 +89,9 @@ namespace Citadel.Core.Windows.Util.Update
             private set;
         }
 
+        public bool IsNewerThanCurrentVersion => IsNewerThan(this.CurrentVersion);
+
+        [NonSerialized]
         private IPathProvider paths;
 
         public ApplicationUpdate(DateTime datePublished, string title, string htmlBody, Version currentVersion, Version updateVersion, Uri downloadLink, UpdateKind kind, string updaterArguments, bool isRestartRequired)
@@ -121,6 +126,12 @@ namespace Citadel.Core.Windows.Util.Update
                 await cli.DownloadFileTaskAsync(DownloadLink, UpdateFileLocalPath);
             }
         }
+
+        public bool IsNewerThan(Version v)
+        {
+            return UpdateVersion > v;
+        }
+
 
         /// <summary>
         /// Begins the external installation after a N second delay specified. 

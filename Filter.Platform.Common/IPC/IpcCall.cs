@@ -10,6 +10,10 @@ namespace Citadel.IPC
         ConfigurationInfo,
         Deactivate,
         RelaxedPolicy,
-        TimeRestrictionsEnabled
+        TimeRestrictionsEnabled,
+        CheckForUpdates,
+        UpdateRequestResult,
+        SynchronizeSettings,
+        RequestUpdate
     }
 }

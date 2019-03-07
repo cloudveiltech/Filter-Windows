@@ -21,7 +21,7 @@ namespace Citadel.IPC
             m_logger = LoggerUtil.GetAppWideLogger();
         }
 
-        protected Dictionary<IpcCall, IpcMessageHandler> sendHandlers = new Dictionary<IpcCall, IpcMessageHandler>();
+        protected Dictionary<IpcCall, IpcMessageHandler> responseHandlers = new Dictionary<IpcCall, IpcMessageHandler>();
         protected Dictionary<IpcCall, IpcMessageHandler> requestHandlers = new Dictionary<IpcCall, IpcMessageHandler>();
 
         protected abstract ReplyHandlerClass RequestInternal(IpcCall call, object data, BaseMessage replyTo);
@@ -48,6 +48,11 @@ namespace Citadel.IPC
             return RequestInternal(call, data, replyTo);
         }
 
+        public ReplyHandlerClass Request(IpcCall call, BaseMessage replyTo = null)
+        {
+            return RequestInternal(call, null, replyTo);
+        }
+
         /// <summary>
         /// Use this to send a strongly typed notification. Please use this rather than the weakly typed Send() function so as to reduce mismatched type errors.
         /// </summary>
@@ -68,9 +73,9 @@ namespace Citadel.IPC
             requestHandlers[call] = handler;
         }
 
-        public void RegisterSendHandler(IpcCall call, IpcMessageHandler handler)
+        public void RegisterResponseHandler(IpcCall call, IpcMessageHandler handler)
         {
-            sendHandlers[call] = handler;
+            responseHandlers[call] = handler;
         }
 
         public void RegisterRequestHandler<T>(IpcCall call, IpcMessageHandler<T> handler)
@@ -81,9 +86,9 @@ namespace Citadel.IPC
             };
         }
 
-        public void RegisterSendHandler<T>(IpcCall call, IpcMessageHandler<T> handler)
+        public void RegisterResponseHandler<T>(IpcCall call, IpcMessageHandler<T> handler)
         {
-            sendHandlers[call] = (msg) =>
+            responseHandlers[call] = (msg) =>
             {
                 return handler?.Invoke(msg.As<T>()) ?? false;
             };
@@ -101,7 +106,7 @@ namespace Citadel.IPC
 
             if(message.Method == IpcMessageMethod.Send)
             {
-                sendHandlers.TryGetValue(message.Call, out handler);
+                responseHandlers.TryGetValue(message.Call, out handler);
             }
             else if(message.Method == IpcMessageMethod.Request)
             {

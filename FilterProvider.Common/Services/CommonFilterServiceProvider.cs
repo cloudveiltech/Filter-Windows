@@ -48,6 +48,7 @@ using System.Security.Cryptography.X509Certificates;
 using LogMessageType = Unosquare.Swan.LogMessageType;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
+using Filter.Platform.Common.IPC.Messages;
 
 namespace FilterProvider.Common.Services
 {
@@ -547,6 +548,97 @@ namespace FilterProvider.Common.Services
                     }
                 };
 
+                m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateRequestResult, (msg) =>
+                {
+                    try
+                    {
+                        m_appcastUpdaterLock.EnterWriteLock();
+
+                        if(msg.Data == UpdateDialogResult.RemindLater)
+                        {
+                            AppSettings.Default.RemindLater = DateTime.Now.AddDays(1);
+                            AppSettings.Default.Save();
+                        }
+
+                        if(msg.Data != UpdateDialogResult.UpdateNow)
+                        {
+                            return true;
+                        }
+
+                        if (m_lastFetchedUpdate != null)
+                        {
+                            m_lastFetchedUpdate.DownloadUpdate().Wait();
+
+                            m_ipcServer.NotifyUpdating();
+                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();
+                            Task.Delay(200).Wait();
+
+                            m_logger.Info("Shutting down to update.");
+
+                            if (m_appcastUpdaterLock.IsWriteLockHeld)
+                            {
+                                m_appcastUpdaterLock.ExitWriteLock();
+                            }
+
+                            if (m_lastFetchedUpdate.IsRestartRequired)
+                            {
+                                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
+                                using (StreamWriter writer = File.CreateText(restartFlagPath))
+                                {
+                                    writer.Write("# This file left intentionally blank (tee-hee)\n");
+                                }
+                            }
+
+                            // Save auth token when shutting down for update.
+                            string appDataPath = m_platformPaths.ApplicationDataFolder;
+
+                            try
+                            {
+                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
+                                {
+                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
+
+                                    using (StreamWriter writer = File.CreateText(authTokenPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.AuthToken);
+                                    }
+                                }
+
+                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
+                                {
+                                    string emailPath = Path.Combine(appDataPath, "email.data");
+
+                                    using (StreamWriter writer = File.CreateText(emailPath))
+                                    {
+                                        writer.Write(WebServiceUtil.Default.UserEmail);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                m_logger.Warn("Could not save authtoken or email before update.");
+                                LoggerUtil.RecursivelyLogException(m_logger, e);
+                            }
+
+                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                    }
+                    finally
+                    {
+                        if (m_appcastUpdaterLock.IsWriteLockHeld)
+                        {
+                            m_appcastUpdaterLock.ExitWriteLock();
+                        }
+                    }
+
+                    return true;
+                });
+
+                /* Is this code obsolete? */
                 m_ipcServer.ClientAcceptedPendingUpdate = () =>
                 {
                     try
@@ -798,6 +890,9 @@ namespace FilterProvider.Common.Services
                         else
                         {
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
+
+                            m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
+                            m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
                         }
                     }
                     catch (Exception ex)
@@ -818,16 +913,28 @@ namespace FilterProvider.Common.Services
                     }
                 };
 
-                m_ipcServer.RequestConfigUpdate = (msg) =>
+                m_ipcServer.RegisterRequestHandler(IpcCall.CheckForUpdates, (msg) =>
+                {
+                    var checkResult = CheckForApplicationUpdate(true);
+
+                    // Code smell. It's a little unclear who updates LastUpdateCheck. We should really be accessing a different property, or make it more explicit.
+                    msg.SendReply<UpdateCheckInfo>(m_ipcServer, IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, checkResult));
+
+                    return true;
+                });
+
+                m_ipcServer.RegisterRequestHandler(IpcCall.SynchronizeSettings, (msg) =>
                 {
                     m_dnsEnforcement.InvalidateDnsResult();
                     m_dnsEnforcement.Trigger();
 
                     var result = this.UpdateAndWriteList(true);
-                    var reply = new NotifyConfigUpdateMessage(result);
 
-                    m_ipcServer.NotifyConfigurationUpdate(result, msg.Id);
-                };
+                    // Code smell. It's a little unclear who updates LastSettingsCheck. We should really make the accessing of this property more direct.
+                    msg.SendReply<ConfigCheckInfo>(m_ipcServer, IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, result));
+
+                    return true;
+                });
 
                 m_ipcServer.RequestCaptivePortalDetection = (msg) =>
                 {
@@ -1045,35 +1152,16 @@ namespace FilterProvider.Common.Services
             m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
         }
 
-        private bool ProbeMasterForApplicationUpdates(bool isSyncButton)
+        /// <summary>
+        /// Checks for application updates, and notifies the GUI of the result.
+        /// </summary>
+        /// <param name="isCheckButton"></param>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        private UpdateCheckResult ProbeMasterForApplicationUpdates(bool isCheckButton)
         {
             bool hadError = false;
-            bool isAvailable = false;
-
-            string updateSettingsPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "update.settings");
-
-            string[] commandParts = null;
-            if (File.Exists(updateSettingsPath))
-            {
-                using (StreamReader reader = File.OpenText(updateSettingsPath))
-                {
-                    string command = reader.ReadLine();
-
-                    commandParts = command.Split(new char[] { ':' }, 2);
-
-                    if (commandParts[0] == "RemindLater")
-                    {
-                        DateTime remindLater;
-                        if (DateTime.TryParse(commandParts[1], out remindLater))
-                        {
-                            if (DateTime.Now < remindLater)
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
+            UpdateCheckResult result = UpdateCheckResult.CheckFailed;
 
             try
             {
@@ -1082,36 +1170,39 @@ namespace FilterProvider.Common.Services
                 if (m_policyConfiguration.Configuration != null)
                 {
                     var config = m_policyConfiguration.Configuration;
-                    m_lastFetchedUpdate = m_updater.CheckForUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
+                    m_lastFetchedUpdate = m_updater.GetLatestUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
                 }
                 else
                 {
                     m_logger.Info("No configuration downloaded yet. Skipping application update checks.");
                 }
 
-                if (m_lastFetchedUpdate != null && !isSyncButton)
+                result = UpdateCheckResult.UpToDate;
+
+                if (AppSettings.Default.CanUpdate() && m_lastFetchedUpdate?.IsNewerThan(m_lastFetchedUpdate?.CurrentVersion) == true)
                 {
                     m_logger.Info("Found update. Asking clients to accept update.");
 
-                    if (commandParts != null && commandParts[0] == "SkipVersion")
+                    if(!isCheckButton)
                     {
-                        if (commandParts[1] == m_lastFetchedUpdate.CurrentVersion.ToString())
-                        {
-                            return false;
-                        }
+                        ReviveGuiForCurrentUser();
+                        Task.Delay(500).Wait();
+
+                        m_ipcServer.Send<ApplicationUpdate>(IpcCall.RequestUpdate, m_lastFetchedUpdate);
+                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
                     }
 
-                    ReviveGuiForCurrentUser();
-
-                    Task.Delay(500).Wait();
-
-                    m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString(), m_lastFetchedUpdate.IsRestartRequired));
-                    isAvailable = true;
+                    result = UpdateCheckResult.UpdateAvailable;
                 }
-                else if (m_lastFetchedUpdate != null && isSyncButton)
+                else if (m_lastFetchedUpdate != null)
                 {
-                    m_ipcServer.NotifyApplicationUpdateAvailable(new ServerUpdateQueryMessage(m_lastFetchedUpdate.Title, m_lastFetchedUpdate.HtmlBody, m_lastFetchedUpdate.CurrentVersion.ToString(), m_lastFetchedUpdate.UpdateVersion.ToString(), m_lastFetchedUpdate.IsRestartRequired));
-                    isAvailable = true;
+                    result = UpdateCheckResult.UpToDate;
+
+                    // We send an update check response here for only !isCheckButton because the other case returns a reply directly to its request message.
+                    if(!isCheckButton)
+                    {
+                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
+                    }
                 }
             }
             catch (Exception e)
@@ -1121,6 +1212,24 @@ namespace FilterProvider.Common.Services
             }
             finally
             {
+                try
+                {
+                    switch(result)
+                    {
+                        case UpdateCheckResult.UpdateAvailable:
+                        case UpdateCheckResult.UpToDate:
+                            AppSettings.Default.LastUpdateCheck = DateTime.Now;
+                            break;
+                    }
+
+                    AppSettings.Default.UpdateCheckResult = result;
+                    AppSettings.Default.Save();
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error(ex, "AppSettings update threw.");
+                }
+
                 m_appcastUpdaterLock.ExitWriteLock();
             }
 
@@ -1132,7 +1241,7 @@ namespace FilterProvider.Common.Services
                 m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
             }
 
-            return isAvailable;
+            return result;
         }
 
         /// <summary>
@@ -2432,6 +2541,12 @@ namespace FilterProvider.Common.Services
             this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
+        public UpdateCheckResult CheckForApplicationUpdate(bool isCheckButton)
+        {
+            m_logger.Info("Checking for application updates.");
+            return ProbeMasterForApplicationUpdates(isCheckButton);
+        }
+
         public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
         {
             LogTime("UpdateAndWriteList");
@@ -2486,12 +2601,6 @@ namespace FilterProvider.Common.Services
                     m_logger.Error("Was not able to download rulesets due to configuration being null");
                 }
 
-                m_logger.Info("Checking for application updates.");
-
-                // Check for app updates.
-                bool available = ProbeMasterForApplicationUpdates(isSyncButton);
-
-                result |= available ? ConfigUpdateResult.AppUpdateAvailable : 0;
             }
             catch (Exception e)
             {
@@ -2499,6 +2608,20 @@ namespace FilterProvider.Common.Services
             }
             finally
             {
+                // We don't handle all cases in the switch, because we don't want to set LastSettingsCheck for error states.
+                switch(result)
+                {
+                    case ConfigUpdateResult.Updated:
+                    case ConfigUpdateResult.UpToDate:
+                        AppSettings.Default.LastSettingsCheck = DateTime.Now;
+                        break;
+                }
+
+                AppSettings.Default.ConfigUpdateResult = result;
+                AppSettings.Default.Save();
+
+                m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
+
                 // Enable the timer again.
                 if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
                 {
@@ -2539,6 +2662,8 @@ namespace FilterProvider.Common.Services
             }
 
             this.UpdateAndWriteList(false);
+            this.CheckForApplicationUpdate(false);
+
             this.CleanupLogs();
 
             if (m_lastUsernamePrintTime.Date < DateTime.Now.Date)

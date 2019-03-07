@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\*.pdb -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\x64\* -->
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.2" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -259,6 +259,12 @@
         </Component>
         <Component Id="comp_83911550_3789" Guid="42F73748-2899-4119-B6B5-2AC6625AAC0B" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_55F20CDA_7EEB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.provider.e_sqlite3.dll" Source="..\..\CitadelGUI\bin\Release x86\SQLitePCLRaw.provider.e_sqlite3.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_D94B5152_9FA6" Guid="F04F0B99-CB06-42E1-83E3-FD5B6B8800BA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_4B378F92_C994" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Labs.EmbedIO.dll" Source="..\..\CitadelGUI\bin\Release x86\Unosquare.Labs.EmbedIO.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_5182EBDA_13B5" Guid="BEDA89C3-EBF6-4D2D-B8E4-E2A8A23C2AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CitadelGUI\bin\Release x86\Unosquare.Swan.Lite.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
           <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">

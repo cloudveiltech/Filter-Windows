@@ -253,11 +253,6 @@ namespace Citadel.IPC
         public BlockActionReportHandler ClientRequestsBlockActionReview;
 
         /// <summary>
-        /// Delegate to be called when a client is requesting a configuration/ruleset update.
-        /// </summary>
-        public RequestConfigUpdateHandler RequestConfigUpdate;
-
-        /// <summary>
         /// Delegate to be called when a client is requesting a captive portal state.
         /// </summary>
         public RequestCaptivePortalDetectionHandler RequestCaptivePortalDetection;
@@ -483,17 +478,6 @@ namespace Citadel.IPC
                     {
                         m_logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
                     }                    
-                }
-            }
-            else if(msgRealType == typeof(Messages.RequestConfigUpdateMessage))
-            {
-                m_logger.Debug("Client message is {0}", nameof(Messages.RequestConfigUpdateMessage));
-
-                var cast = (Messages.RequestConfigUpdateMessage)message;
-
-                if(cast != null)
-                {
-                    RequestConfigUpdate?.Invoke(cast);
                 }
             }
             else if (msgRealType == typeof(Messages.CaptivePortalDetectionMessage))

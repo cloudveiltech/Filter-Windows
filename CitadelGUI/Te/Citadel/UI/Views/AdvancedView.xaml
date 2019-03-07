@@ -19,116 +19,97 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="275" />
+            <ColumnDefinition Width="320" />
         </Grid.ColumnDefinitions>
-
-        <!-- Help me! -->
-        <StackPanel Grid.Column="0">
-            <Label HorizontalAlignment="Center"
-                   Content="Help"
-                   Style="{StaticResource HeaderStyle}"
-                   />
-
-            <TextBlock HorizontalAlignment="Center"
-                       Margin="0,20,0,0"
-                       TextWrapping="Wrap">
-                <Hyperlink NavigateUri="https://www.cloudveil.org" RequestNavigate="OnHyperlinkClicked">cloudveil.org</Hyperlink>
-            </TextBlock>
-
-            <TextBlock HorizontalAlignment="Center"
-                       Margin="0,20,0,0"
-                       TextWrapping="Wrap">
-                <Hyperlink NavigateUri="https://cloudveil.zendesk.com/hc/en-us" RequestNavigate="OnHyperlinkClicked">
-                    Knowledgebase
-                </Hyperlink>
-            </TextBlock>
-
-            <TextBlock HorizontalAlignment="Center"
-                       Margin="0,20,0,0"
-                       TextWrapping="Wrap">
-                <Hyperlink NavigateUri="mailto:support@cloudveil.org" RequestNavigate="OnHyperlinkClicked">
-                    support@cloudveil.org
-                </Hyperlink>
-                <LineBreak />
-                <Run>
-                    (888) 782-4962
-                </Run>
-            </TextBlock>
-
-            <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
-                <TextBlock Text="Review Logs" TextWrapping="Wrap" />
-
-                <Button Margin="10,0,0,0"
-                        Width="136"
-                        Command="{Binding ViewLogsCommand}"
-                        Content="View Log Files"
-                        Style="{StaticResource AccentedSquareButtonStyle}" />
-            </StackPanel>
-        </StackPanel>
-
-        <StackPanel Grid.Column="1">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="requestUpdate"
-                        Content="{Binding UpdateText}"
-                        IsEnabled="{Binding IsUpdateButtonEnabled}"
-                        HorizontalAlignment="Left"
-                        Width="136"
-                        Style="{StaticResource AccentedSquareButtonStyle}"
-                        Command="{Binding RequestUpdateCommand}" />
-
-                <Controls:ProgressRing x:Name="requestUpdateProgress"
-                                       Margin="10,0,0,0"
-                                       Width="28" Height="28"
-                                       Visibility="{Binding Path=UpdateRequestInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-
-                <IconPacks:PackIconFontAwesome 
-                        Kind="CheckSolid"
-                        Margin="10,0,0,0"
-                        Width="28" Height="28"
-                        Foreground="#CC119EDA"
-                        Visibility="{Binding Path=UpToDate, Converter={StaticResource BooleanToVisibilityConverter}}"
-                        />
-
-                <IconPacks:PackIconFontAwesome
-                        Kind="TimesSolid"
-                        Margin="10,0,0,0"
-                        Width="28" Height="28"
-                        Foreground="Red"
-                        Visibility="{Binding Path=ErrorOccurred, Converter={StaticResource BooleanToVisibilityConverter}}"
-                        />
-            </StackPanel>
-
-            <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
-        </StackPanel>
-
-        <StackPanel Grid.Column="2">
-            <Label HorizontalAlignment="Center"
+        
+        <StackPanel Grid.Column="1" Margin="56,0,16,0">
+            <StackPanel Margin="0,0,0,16">
+                <Label HorizontalAlignment="Center"
                    Style="{StaticResource HeaderStyle}"
                    Content="Request Deactivation" />
 
-            <TextBlock Margin="0,20,0,0"
+                <TextBlock Margin="0,20,0,0"
                        HorizontalAlignment="Center"
                        TextWrapping="Wrap">
                 <Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. Cloud-Veil will see your request and verify the action." />
                         <LineBreak /><Run />
                         <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." />
-            </TextBlock>
+                </TextBlock>
 
-            <Button Margin="0,20,0,0"
-                    Width="136"
-                    HorizontalAlignment="Left"
+                <Button Margin="0,20,0,0"
                     Command="{Binding RequestDeactivateCommand}"
                     Content="Deactivate"
                     Style="{StaticResource AccentedSquareButtonStyle}" />
-
-            <Button Margin="0,20,0,0"
-                    Width="136"
-                    HorizontalAlignment="Left"
-                    Command="{Binding ViewSslExemptionsCommand}"
-                    Content="View Certificate Errors"
-                    Style="{StaticResource AccentedSquareButtonStyle}" />
+            </StackPanel>
         </StackPanel>
+
+        <StackPanel Margin="16,0,16,0" Grid.Column="0">
+            <!-- Check for updates widget -->
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="28"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="{Binding UpdateText}" Style="{StaticResource HeaderStyle}"/>
+                        <Controls:ProgressRing x:Name="requestUpdateProgress"
+                                           Grid.Column="1"
+                                           Width="28" Height="28"
+                                           Visibility="{Binding Path=CheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <IconPacks:PackIconFontAwesome
+                        Kind="{Binding UpdateIcon}"
+                        Foreground="{Binding UpdateIconForeground}"
+                        Grid.Column="1"
+                        Margin="0,5,0,0"
+                        Width="28" Height="28"
+                        Visibility="{Binding Path=NotCheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    </Grid>
+                    <Label Content="{Binding UpdateLastCheckedText}" />
+                    <Button Command="{Binding CheckForUpdatesCommand}"
+                        IsEnabled="{Binding IsUpdateButtonEnabled}"
+                        Content="Check for Updates"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
+                </StackPanel>
+
+                <!-- Synchronize Settings widget -->
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="28"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="{Binding SyncSettingsText}" Style="{StaticResource HeaderStyle}"/>
+                        <Controls:ProgressRing x:Name="requestSyncSettingsProgress"
+                                           Width="28" Height="28"
+                                           Margin="0,5,0,0"
+                                           Grid.Column="1"
+                                           Visibility="{Binding Path=SynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <IconPacks:PackIconFontAwesome
+                        Kind="{Binding SyncSettingsIcon}"
+                        Foreground="{Binding SyncSettingsIconForeground}"
+                        Margin="0,5,0,0"
+                        Grid.Column="1"
+                        Width="28"
+                        Height="28"
+                        Visibility="{Binding Path=NotSynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    </Grid>
+                    <Label Content="{Binding SettingsLastCheckedText}" />
+                    <Button Command="{Binding SyncSettingsCommand}"
+                        Content="Synchronize Settings"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+
+                    <Label Style="{StaticResource BaseFontStyle}" Content="{Binding SyncErrorText}" Margin="0,5,0,0" Height="28" />
+                </StackPanel>
+
+            </StackPanel>
     </Grid>
 </UserControl>
