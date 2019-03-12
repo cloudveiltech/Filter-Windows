@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Extensions;
+using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Util;

@@ -5,7 +5,6 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
@@ -31,6 +30,7 @@ using System.Threading.Tasks;
 using Te.Citadel.Util;
 
 using Filter.Platform.Common.Util;
+using Filter.Platform.Common.Extensions;
 using FilterProvider.Common.Platform;
 using FilterProvider.Common.Configuration;
 using FilterProvider.Common.Util;
@@ -83,7 +83,7 @@ namespace FilterProvider.Common.Services
 
         public void OnSessionChanged()
         {
-            ReviveGuiForCurrentUser(true);
+            m_systemServices.EnsureGuiRunning(runInTray: true);
         }
 
         #endregion Windows Service API
@@ -189,6 +189,8 @@ namespace FilterProvider.Common.Services
 
         private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
 
+        private UpdateSystem m_updateSystem;
+
         /// <summary>
         /// Timer used to query for filter list changes every X minutes, as well as application updates. 
         /// </summary>
@@ -272,12 +274,6 @@ namespace FilterProvider.Common.Services
         /// Allows us to periodically check status of time restrictions.
         /// </summary>
         private Timer m_timeRestrictionsTimer;
-
-        private AppcastUpdater m_updater = null;
-
-        private ApplicationUpdate m_lastFetchedUpdate = null;
-
-        private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
 
         private DnsEnforcement m_dnsEnforcement;
 
@@ -433,19 +429,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                var bitVersionUri = string.Empty;
-                if (Environment.Is64BitProcess)
-                {
-                    bitVersionUri = "/update/winx64/update.xml";
-                }
-                else
-                {
-                    bitVersionUri = "/update/winx86/update.xml";
-                }
-
-                var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
-
-                m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
+                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv4w1.7");
             }
             catch (Exception e)
             {
@@ -460,7 +444,7 @@ namespace FilterProvider.Common.Services
 
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
-                ReviveGuiForCurrentUser();
+                m_systemServices.EnsureGuiRunning();
                 m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
             };
 
@@ -513,14 +497,14 @@ namespace FilterProvider.Common.Services
                                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
 
                                             // Probe server for updates now.
-                                            ProbeMasterForApplicationUpdates(false);
+                                            m_updateSystem.ProbeMasterForApplicationUpdates(false);
                                             OnUpdateTimerElapsed(null);
                                         }
                                         break;
 
                                     case AuthenticationResult.Failure:
                                         {
-                                            ReviveGuiForCurrentUser();
+                                            m_systemServices.EnsureGuiRunning(runInTray: false);
                                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                         }
                                         break;
@@ -548,173 +532,8 @@ namespace FilterProvider.Common.Services
                     }
                 };
 
-                m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateRequestResult, (msg) =>
-                {
-                    try
-                    {
-                        m_appcastUpdaterLock.EnterWriteLock();
-
-                        if(msg.Data == UpdateDialogResult.RemindLater)
-                        {
-                            AppSettings.Default.RemindLater = DateTime.Now.AddDays(1);
-                            AppSettings.Default.Save();
-                        }
-
-                        if(msg.Data != UpdateDialogResult.UpdateNow)
-                        {
-                            return true;
-                        }
-
-                        if (m_lastFetchedUpdate != null)
-                        {
-                            m_lastFetchedUpdate.DownloadUpdate().Wait();
-
-                            m_ipcServer.NotifyUpdating();
-                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();
-                            Task.Delay(200).Wait();
-
-                            m_logger.Info("Shutting down to update.");
-
-                            if (m_appcastUpdaterLock.IsWriteLockHeld)
-                            {
-                                m_appcastUpdaterLock.ExitWriteLock();
-                            }
-
-                            if (m_lastFetchedUpdate.IsRestartRequired)
-                            {
-                                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
-                                using (StreamWriter writer = File.CreateText(restartFlagPath))
-                                {
-                                    writer.Write("# This file left intentionally blank (tee-hee)\n");
-                                }
-                            }
-
-                            // Save auth token when shutting down for update.
-                            string appDataPath = m_platformPaths.ApplicationDataFolder;
-
-                            try
-                            {
-                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
-                                {
-                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
-
-                                    using (StreamWriter writer = File.CreateText(authTokenPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.AuthToken);
-                                    }
-                                }
-
-                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
-                                {
-                                    string emailPath = Path.Combine(appDataPath, "email.data");
-
-                                    using (StreamWriter writer = File.CreateText(emailPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.UserEmail);
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                m_logger.Warn("Could not save authtoken or email before update.");
-                                LoggerUtil.RecursivelyLogException(m_logger, e);
-                            }
-
-                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
-                    finally
-                    {
-                        if (m_appcastUpdaterLock.IsWriteLockHeld)
-                        {
-                            m_appcastUpdaterLock.ExitWriteLock();
-                        }
-                    }
-
-                    return true;
-                });
-
-                /* Is this code obsolete? */
-                m_ipcServer.ClientAcceptedPendingUpdate = () =>
-                {
-                    try
-                    {
-                        m_appcastUpdaterLock.EnterWriteLock();
-
-                        if (m_lastFetchedUpdate != null)
-                        {
-                            m_lastFetchedUpdate.DownloadUpdate().Wait();
-
-                            m_ipcServer.NotifyUpdating();
-                            m_lastFetchedUpdate.BeginInstallUpdateDelayed();
-                            Task.Delay(200).Wait();
-
-                            m_logger.Info("Shutting down to update.");
-
-                            if (m_appcastUpdaterLock.IsWriteLockHeld)
-                            {
-                                m_appcastUpdaterLock.ExitWriteLock();
-                            }
-
-                            if (m_lastFetchedUpdate.IsRestartRequired)
-                            {
-                                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
-                                using (StreamWriter writer = File.CreateText(restartFlagPath))
-                                {
-                                    writer.Write("# This file left intentionally blank (tee-hee)\n");
-                                }
-                            }
-
-                            // Save auth token when shutting down for update.
-                            string appDataPath = m_platformPaths.ApplicationDataFolder;
-
-                            try
-                            {
-                                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
-                                {
-                                    string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
-
-                                    using (StreamWriter writer = File.CreateText(authTokenPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.AuthToken);
-                                    }
-                                }
-
-                                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
-                                {
-                                    string emailPath = Path.Combine(appDataPath, "email.data");
-
-                                    using (StreamWriter writer = File.CreateText(emailPath))
-                                    {
-                                        writer.Write(WebServiceUtil.Default.UserEmail);
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                m_logger.Warn("Could not save authtoken or email before update.");
-                                LoggerUtil.RecursivelyLogException(m_logger, e);
-                            }
-
-                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
-                    }
-                    finally
-                    {
-                        if (m_appcastUpdaterLock.IsWriteLockHeld)
-                        {
-                            m_appcastUpdaterLock.ExitWriteLock();
-                        }
-                    }
-                };
+                m_ipcServer.RegisterRequestHandler(IpcCall.Update, m_updateSystem.OnRequestUpdate);
+                m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateResult, m_updateSystem.OnUpdateDialogResult);
 
                 m_ipcServer.DeactivationRequested = (args) =>
                 {
@@ -1153,98 +972,6 @@ namespace FilterProvider.Common.Services
         }
 
         /// <summary>
-        /// Checks for application updates, and notifies the GUI of the result.
-        /// </summary>
-        /// <param name="isCheckButton"></param>
-        /// <param name="update"></param>
-        /// <returns></returns>
-        private UpdateCheckResult ProbeMasterForApplicationUpdates(bool isCheckButton)
-        {
-            bool hadError = false;
-            UpdateCheckResult result = UpdateCheckResult.CheckFailed;
-
-            try
-            {
-                m_appcastUpdaterLock.EnterWriteLock();
-
-                if (m_policyConfiguration.Configuration != null)
-                {
-                    var config = m_policyConfiguration.Configuration;
-                    m_lastFetchedUpdate = m_updater.GetLatestUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
-                }
-                else
-                {
-                    m_logger.Info("No configuration downloaded yet. Skipping application update checks.");
-                }
-
-                result = UpdateCheckResult.UpToDate;
-
-                if (AppSettings.Default.CanUpdate() && m_lastFetchedUpdate?.IsNewerThan(m_lastFetchedUpdate?.CurrentVersion) == true)
-                {
-                    m_logger.Info("Found update. Asking clients to accept update.");
-
-                    if(!isCheckButton)
-                    {
-                        ReviveGuiForCurrentUser();
-                        Task.Delay(500).Wait();
-
-                        m_ipcServer.Send<ApplicationUpdate>(IpcCall.RequestUpdate, m_lastFetchedUpdate);
-                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
-                    }
-
-                    result = UpdateCheckResult.UpdateAvailable;
-                }
-                else if (m_lastFetchedUpdate != null)
-                {
-                    result = UpdateCheckResult.UpToDate;
-
-                    // We send an update check response here for only !isCheckButton because the other case returns a reply directly to its request message.
-                    if(!isCheckButton)
-                    {
-                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-                hadError = true;
-            }
-            finally
-            {
-                try
-                {
-                    switch(result)
-                    {
-                        case UpdateCheckResult.UpdateAvailable:
-                        case UpdateCheckResult.UpToDate:
-                            AppSettings.Default.LastUpdateCheck = DateTime.Now;
-                            break;
-                    }
-
-                    AppSettings.Default.UpdateCheckResult = result;
-                    AppSettings.Default.Save();
-                }
-                catch(Exception ex)
-                {
-                    m_logger.Error(ex, "AppSettings update threw.");
-                }
-
-                m_appcastUpdaterLock.ExitWriteLock();
-            }
-
-            if (!hadError)
-            {
-                // Notify all clients that we just successfully made contact with the server.
-                // We don't set the status here, because we'd have to store it and set it
-                // back, so we just directly issue this msg.
-                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Sets up the filtering engine, calls establish trust with firefox, sets up callbacks for
         /// classification and firewall checks, but does not start the engine.
         /// </summary>
@@ -1512,7 +1239,7 @@ namespace FilterProvider.Common.Services
 
             Status = FilterStatus.Running;
 
-            ReviveGuiForCurrentUser(true);
+            m_systemServices.EnsureGuiRunning(runInTray: true);
         }
 
         #region EngineCallbacks
@@ -2544,7 +2271,7 @@ namespace FilterProvider.Common.Services
         public UpdateCheckResult CheckForApplicationUpdate(bool isCheckButton)
         {
             m_logger.Info("Checking for application updates.");
-            return ProbeMasterForApplicationUpdates(isCheckButton);
+            return m_updateSystem.ProbeMasterForApplicationUpdates(isCheckButton);
         }
 
         public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
@@ -2656,6 +2383,8 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnUpdateTimerElapsed(object state)
         {
+            m_logger.Info("Running OnUpdateTimerElapsed");
+
             if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
             {
                 return;
@@ -3172,7 +2901,7 @@ namespace FilterProvider.Common.Services
         {
             // No matter what, ensure that all GUI instances for all users are
             // immediately shut down, because we, the service, are shutting down.
-            KillAllGuis();
+            m_systemServices.KillAllGuis();
 
             lock (m_cleanShutdownLock)
             {
@@ -3246,112 +2975,6 @@ namespace FilterProvider.Common.Services
                     m_cleanShutdownComplete = true;
                 }
             }
-        }
-
-        /// <summary>
-        /// Attempts to determine which neighbour application is the GUI and then, if it is not
-        /// running already as a user process, start the GUI. This should be used in situations like
-        /// when we need to ask the user to authenticate.
-        /// </summary>
-        private void ReviveGuiForCurrentUser(bool runInTray = false)
-        {
-            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
-
-            try
-            {
-                string guiExePath;
-                if (TryGetGuiFullPath(out guiExePath))
-                {
-                    m_logger.Info("Starting external GUI executable : {0}", guiExePath);
-
-                    if (runInTray)
-                    {
-                        var sanitizedArgs = "\"" + Regex.Replace("/StartMinimized", @"(\\+)$", @"$1$1") + "\"";
-                        var sanitizedPath = "\"" + Regex.Replace(guiExePath, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
-
-                        // TODO:X_PLAT
-                        //ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
-                    }
-                    else
-                    {
-                        // TODO:X_PLAT
-                        //ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
-                    }
-
-
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                m_logger.Error("Error enumerating all files.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
-        private void KillAllGuis()
-        {
-            try
-            {
-                string guiExePath;
-                if (TryGetGuiFullPath(out guiExePath))
-                {
-                    foreach (var proc in Process.GetProcesses())
-                    {
-                        try
-                        {
-                            if (proc.MainModule.FileName.OIEquals(guiExePath))
-                            {
-                                proc.Kill();
-                            }
-                        }
-                        catch { }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
-        private bool TryGetGuiFullPath(out string fullGuiExePath)
-        {
-            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
-
-            try
-            {
-                // Get all exe files in the same dir as this service executable.
-                foreach (var exe in allFilesWhereIam)
-                {
-                    try
-                    {
-                        m_logger.Info("Checking exe : {0}", exe);
-                        // Try to get the exe file metadata.
-                        var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
-
-                        // If our description notes that it's a GUI...
-                        if (fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
-                        {
-                            fullGuiExePath = exe;
-                            return true;
-                        }
-                    }
-                    catch (Exception le)
-                    {
-                        LoggerUtil.RecursivelyLogException(m_logger, le);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                m_logger.Error("Error enumerating sibling files.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-
-            fullGuiExePath = string.Empty;
-            return false;
         }
     }
 }

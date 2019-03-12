@@ -12,8 +12,10 @@ namespace Citadel.IPC
         RelaxedPolicy,
         TimeRestrictionsEnabled,
         CheckForUpdates,
-        UpdateRequestResult,
+        UpdateResult,
         SynchronizeSettings,
-        RequestUpdate
+        Update,
+        StartUpdater,
+        ShutdownForUpdate
     }
 }

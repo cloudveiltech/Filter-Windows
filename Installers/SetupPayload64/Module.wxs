@@ -262,9 +262,6 @@
         <Component Id="comp_DEEBFCE6_9CB6" Guid="5A5E3C8B-140D-4A00-9EB5-3B032DD3E2EC" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C37D95ED_BFCB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Xaml.dll" KeyPath="yes" />
         </Component>
-        <Component Id="comp_A6DB2B47_5CE7" Guid="5214F1F3-A2AA-4DA8-BE2B-74FDE51ADAAE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_6D9C5C30_B692" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CitadelGUI\bin\Release x64\DotNet.Glob.dll" KeyPath="yes" />
-        </Component>
         <Component Id="comp_47257075_A0FB" Guid="B21A1DEC-F89E-4467-B409-F13535FF60DA" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D8306A74_2BCD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.exe" KeyPath="yes" />
         </Component>
@@ -276,6 +273,9 @@
         </Component>
         <Component Id="comp_F51E2DAA_6755" Guid="9C63FC78-06E2-4F46-849B-C7D1647FF59C" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_9CA8FDC4_DA0B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CitadelGUI\bin\Release x64\Unosquare.Swan.Lite.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_5FBF3063_6114" Guid="2D24DD28-DC6C-4317-8012-A014CD3C8DB8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_1A161782_DAFC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CitadelGUI\bin\Release x64\DotNet.Glob.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">

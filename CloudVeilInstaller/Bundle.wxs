@@ -16,7 +16,7 @@
                 Compressed="yes"
                 Vital="yes"
                 Name="CloudVeil.msi"
-                SourceFile="..\Installers\SetupProjects\Release\Setup x64.msi" />
+                SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
 		</Chain>
 	</Bundle>
 

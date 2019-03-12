@@ -5,8 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Util;
+using Filter.Platform.Common;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using GalaSoft.MvvmLight;
@@ -15,6 +14,7 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
 using Te.Citadel.UI.ViewModels;
+using Filter.Platform.Common.Extensions;
 
 namespace Te.Citadel.UI.Models
 {

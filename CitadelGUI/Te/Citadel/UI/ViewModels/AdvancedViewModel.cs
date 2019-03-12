@@ -7,6 +7,7 @@
 using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
+using CloudVeil.Windows;
 using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
@@ -80,6 +81,17 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private string updateButtonText = "Check for Updates";
+        public string UpdateButtonText
+        {
+            get => updateButtonText;
+            set
+            {
+                updateButtonText = value;
+                RaisePropertyChanged(nameof(UpdateButtonText));
+            }
+        }
+
         private Brush updateIconForeground;
         public Brush UpdateIconForeground
         {
@@ -113,6 +125,8 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private bool shouldUpdateButtonInstall = false;
+
         private bool m_isUpdateButtonEnabled = true;
         public bool IsUpdateButtonEnabled
         {
@@ -136,10 +150,24 @@ namespace Te.Citadel.UI.ViewModels
                         CheckingForUpdates = true;
                         ErrorText = "";
 
-                        Task.Run(() =>
+                        if(shouldUpdateButtonInstall)
                         {
-                            IPCClient.Default.Request(IpcCall.CheckForUpdates).OnReply((h, msg) => OnCheckForUpdates(msg.As<UpdateCheckInfo>()));
-                        });
+                            Task.Run(() =>
+                            {
+                                IPCClient.Default.Request<object, ApplicationUpdate>(IpcCall.Update, null).OnReply((h, msg) =>
+                                {
+                                    (CitadelApp.Current as CitadelApp).BeginUpdateRequest(msg.Data);
+                                    return true;
+                                });
+                            });
+                        }
+                        else
+                        {
+                            Task.Run(() =>
+                            {
+                                IPCClient.Default.Request(IpcCall.CheckForUpdates).OnReply((h, msg) => OnCheckForUpdates(msg.As<UpdateCheckInfo>()));
+                            });
+                        }
                     });
                 }
 
@@ -176,6 +204,8 @@ namespace Te.Citadel.UI.ViewModels
                     UpdateIconForeground = Brushes.Red;
                     UpdateText = "Update Check Failed";
                     UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    UpdateButtonText = "Check for Updates";
+                    shouldUpdateButtonInstall = false;
                     break;
 
                 case UpdateCheckResult.UpToDate:
@@ -183,6 +213,8 @@ namespace Te.Citadel.UI.ViewModels
                     UpdateIconForeground = Brushes.DarkGreen;
                     UpdateText = "You're up to date";
                     UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    UpdateButtonText = "Check for Updates";
+                    shouldUpdateButtonInstall = false;
                     break;
 
                 case UpdateCheckResult.UpdateAvailable:
@@ -190,6 +222,17 @@ namespace Te.Citadel.UI.ViewModels
                     UpdateIconForeground = Brushes.Red;
                     UpdateText = "Update Available";
                     UpdateLastCheckedText = lastChecked(msg.Data.LastChecked);
+                    UpdateButtonText = "Install";
+                    shouldUpdateButtonInstall = true;
+                    break;
+
+                case UpdateCheckResult.UpdateFailed:
+                    UpdateIcon = PackIconFontAwesomeKind.TimesSolid;
+                    UpdateIconForeground = Brushes.Red;
+                    UpdateText = "Update Failed";
+                    UpdateLastCheckedText = $"Last attempt: {dateTimeToString(msg.Data.LastChecked)}";
+                    UpdateButtonText = "Check for Updates";
+                    shouldUpdateButtonInstall = false;
                     break;
             }
 

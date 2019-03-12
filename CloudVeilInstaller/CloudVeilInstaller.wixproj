@@ -3,20 +3,23 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <MsiPlatform Condition=" '$(MsiPlatform)' == ''">$(Platform)</MsiPlatform>
+    <Platform Condition=" '$(Platform)' == 'x64'">x86</Platform>
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>f034362e-0800-43d6-be30-721747f8a948</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>CloudVeilInstaller</OutputName>
+    <OutputName>CloudVeilInstaller-$(MsiPlatform)</OutputName>
     <OutputType>Bundle</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug</DefineConstants>
+    <DefineConstants>Debug;MsiPlatform=$(MsiPlatform)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>MsiPlatform=$(MsiPlatform)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Bundle.wxs" />

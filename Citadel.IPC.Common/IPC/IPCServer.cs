@@ -635,6 +635,7 @@ namespace Citadel.IPC
         public void NotifyUpdating()
         {
             var msg = new ServerUpdateNotificationMessage();
+
             PushMessage(msg);
         }
 
@@ -679,7 +680,7 @@ namespace Citadel.IPC
             BaseMessage msg = IpcMessage.Request(call, data);
             msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
 
-            PushMessage(msg, h.TriggerHandler);
+            PushMessage(msg, h);
             return h;
         }
 
@@ -690,7 +691,7 @@ namespace Citadel.IPC
             BaseMessage msg = IpcMessage.Send(call, data);
             msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
 
-            PushMessage(msg, h.TriggerHandler);
+            PushMessage(msg, h);
             return h;
         }
 
@@ -699,7 +700,15 @@ namespace Citadel.IPC
             return SendInternal(IpcCall.ConfigurationInfo, cfg);
         }
 
-        private void PushMessage(BaseMessage msg, GenericReplyHandler handler = null)
+        private void addMessageHandler(BaseMessage msg, ReplyHandlerClass handler)
+        {
+            if (handler != null)
+            {
+                m_ipcQueue.AddMessage(msg, handler);
+            }
+        }
+
+        private void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null)
         {
             if(m_waitingForAuth)
             {
@@ -708,14 +717,17 @@ namespace Citadel.IPC
                 if(msg.GetType() == typeof(AuthenticationMessage))
                 {
                     m_server.PushMessage(msg);
+                    addMessageHandler(msg, handler);
                 }
                 else if(msg.GetType() == typeof(RelaxedPolicyMessage))
                 {
                     m_server.PushMessage(msg);
+                    addMessageHandler(msg, handler);
                 }
                 else if(msg.GetType() == typeof(NotifyBlockActionMessage))
                 {
                     m_server.PushMessage(msg);
+                    addMessageHandler(msg, handler);
                 }
             }
             else

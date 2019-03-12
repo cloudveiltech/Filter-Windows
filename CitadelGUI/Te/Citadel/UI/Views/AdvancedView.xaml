@@ -70,7 +70,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                     <Label Content="{Binding UpdateLastCheckedText}" />
                     <Button Command="{Binding CheckForUpdatesCommand}"
                         IsEnabled="{Binding IsUpdateButtonEnabled}"
-                        Content="Check for Updates"
+                        Content="{Binding UpdateButtonText}"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
                     <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />

@@ -10,20 +10,24 @@ using CitadelCore.Windows.Diversion;
 using CitadelService.Services;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
+using Filter.Platform.Common.Extensions;
 using FilterProvider.Common.Data;
 using FilterProvider.Common.Platform;
 using FilterProvider.Common.Proxy;
 using FilterProvider.Common.Proxy.Certificate;
 using Microsoft.Win32;
+using murrayju.ProcessExtensions;
 using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFirewallHelper;
 
@@ -187,6 +191,110 @@ namespace CitadelService.Platform
         {
             m_logger.Info("Disabling internet.");
             WFPUtility.DisableInternet();
+        }
+
+        private bool TryGetGuiFullPath(out string fullGuiExePath)
+        {
+            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
+
+            try
+            {
+                // Get all exe files in the same dir as this service executable.
+                foreach (var exe in allFilesWhereIam)
+                {
+                    try
+                    {
+                        m_logger.Info("Checking exe : {0}", exe);
+                        // Try to get the exe file metadata.
+                        var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
+
+                        // If our description notes that it's a GUI...
+                        if (fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
+                        {
+                            fullGuiExePath = exe;
+                            return true;
+                        }
+                    }
+                    catch (Exception le)
+                    {
+                        LoggerUtil.RecursivelyLogException(m_logger, le);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                m_logger.Error("Error enumerating sibling files.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+
+            fullGuiExePath = string.Empty;
+            return false;
+        }
+
+        public void KillAllGuis()
+        {
+            try
+            {
+                string guiExePath;
+                if (TryGetGuiFullPath(out guiExePath))
+                {
+                    foreach (var proc in Process.GetProcesses())
+                    {
+                        try
+                        {
+                            if (proc.MainModule.FileName.OIEquals(guiExePath))
+                            {
+                                proc.Kill();
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to determine which neighbour application is the GUI and then, if it is not
+        /// running already as a user process, start the GUI. This should be used in situations like
+        /// when we need to ask the user to authenticate.
+        /// </summary>
+        public void EnsureGuiRunning(bool runInTray = false)
+        {
+            var allFilesWhereIam = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe", SearchOption.TopDirectoryOnly);
+
+            try
+            {
+                string guiExePath;
+                if (TryGetGuiFullPath(out guiExePath))
+                {
+                    m_logger.Info("Starting external GUI executable : {0}", guiExePath);
+
+                    if (runInTray)
+                    {
+                        var sanitizedArgs = "\"" + Regex.Replace("/StartMinimized", @"(\\+)$", @"$1$1") + "\"";
+                        var sanitizedPath = "\"" + Regex.Replace(guiExePath, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
+
+                        ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
+                    }
+                    else
+                    {
+                        ProcessExtensions.StartProcessAsCurrentUser(guiExePath);
+                    }
+
+
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                m_logger.Error("Error enumerating all files.");
+                LoggerUtil.RecursivelyLogException(m_logger, e);
+            }
         }
 
         public event EventHandler OnStartProxy;

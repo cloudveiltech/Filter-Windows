@@ -7,6 +7,7 @@
 
 ﻿using Citadel.Core.Extensions;
 using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Platform;
 using murrayju.ProcessExtensions;

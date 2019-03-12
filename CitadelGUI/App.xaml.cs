@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Extensions;
+using Filter.Platform.Common.Extensions;
 using Citadel.Core.Windows.Util;
 using Citadel.Core.Windows;
 using Citadel.IPC;
@@ -39,6 +39,7 @@ using Filter.Platform.Common.Data.Models;
 using Citadel.Core.Windows.Util.Update;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.IPC.Messages;
+using System.Reflection;
 
 namespace CloudVeil.Windows
 {
@@ -349,7 +350,7 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
-                m_ipcClient.RegisterResponseHandler<ApplicationUpdate>(IpcCall.RequestUpdate, (msg) =>
+                m_ipcClient.RegisterResponseHandler<ApplicationUpdate>(IpcCall.Update, (msg) =>
                 {
                     var vm = ModelManager.Get<AdvancedViewModel>();
 
@@ -360,37 +361,58 @@ namespace CloudVeil.Windows
 
                     BringAppToFocus();
 
-                    var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", msg.Data.UpdateVersion.ToString(), msg.Data.CurrentVersion.ToString());
-
-                    if (msg.Data.IsRestartRequired)
-                    {
-                        updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
-                    }
-
-                    Current.Dispatcher.Invoke(
-                        System.Windows.Threading.DispatcherPriority.Normal,
-
-                        (Action)async delegate ()
-                        {
-                            if (m_mainWindow != null)
-                            {
-                                var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
-                                m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateRequestResult, result);
-
-                                if(result == UpdateDialogResult.UpdateNow)
-                                {
-                                    m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                                }
-                            }
-                        });
+                    this.BeginUpdateRequest(msg.Data);
 
                     return true;
                 });
 
-                m_ipcClient.ServerUpdateStarting = () =>
+                m_ipcClient.RegisterRequestHandler(IpcCall.StartUpdater, (msg) =>
+                {
+                    Assembly appAssembly = Assembly.GetEntryAssembly();
+
+                    string appPath = appAssembly.Location;
+                    string appDirectory = Path.GetDirectoryName(appPath);
+
+                    try
+                    {
+                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(appDirectory, "CloudVeilUpdater.exe");
+
+                        string fileEntry = null;
+
+                        var enumerator = fileEntries.GetEnumerator();
+                        if (enumerator.MoveNext()) fileEntry = enumerator.Current;
+                        
+                        if(fileEntry == null)
+                        {
+                            msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
+                            m_logger.Error($"Failed to start CloudVeil Updater client. Could not find client in program folder.");
+                            return true;
+                        }
+
+                        Process process = new Process();
+                        process.StartInfo = new ProcessStartInfo()
+                        {
+                            UseShellExecute = true,
+                            FileName = fileEntry
+                        };
+
+                        process.Start();
+                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, true);
+                    }
+                    catch(Exception ex)
+                    {
+                        m_logger.Error($"Failed to start CloudVeil Updater client. {ex}");
+                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
+                    }
+
+                    return true;
+                });
+
+                m_ipcClient.RegisterRequestHandler(IpcCall.ShutdownForUpdate, (msg) =>
                 {
                     Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
-                };
+                    return true;
+                });
 
                 m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
@@ -1113,6 +1135,33 @@ namespace CloudVeil.Windows
         private void OnRelaxedPolicyRequested()
         {
             OnRelaxedPolicyRequested(false);
+        }
+
+        public void BeginUpdateRequest(ApplicationUpdate update)
+        {
+            var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", update.UpdateVersion.ToString(), update.CurrentVersion.ToString());
+
+            if (update.IsRestartRequired)
+            {
+                updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
+            }
+
+            Current.Dispatcher.Invoke(
+                System.Windows.Threading.DispatcherPriority.Normal,
+
+                (Action)async delegate ()
+                {
+                    if (m_mainWindow != null)
+                    {
+                        var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
+                        m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateResult, result);
+
+                        if (result == UpdateDialogResult.UpdateNow)
+                        {
+                            m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
+                        }
+                    }
+                });
         }
 
         private void ShowRelaxedPolicyMessage(RelaxedPolicyMessage msg, bool fromTray)

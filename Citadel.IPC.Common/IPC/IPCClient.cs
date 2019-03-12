@@ -102,8 +102,6 @@ namespace Citadel.IPC
 
         public CaptivePortalDetectionHandler CaptivePortalDetectionReceived;
 
-        public ClientGenericParameterlessHandler ServerUpdateStarting;
-
         public AddCertificateExemptionRequestHandler AddCertificateExemptionRequest;
 
         public DiagnosticsInfoHandler OnDiagnosticsInfo;
@@ -301,15 +299,6 @@ namespace Citadel.IPC
                     ServerAppUpdateRequestReceived?.Invoke(cast);
                 }
             }
-            else if(msgRealType == typeof(Messages.ServerUpdateNotificationMessage))
-            {
-                logger.Debug("Server message is {0}", nameof(Messages.ServerUpdateNotificationMessage));
-                var cast = (Messages.ServerUpdateNotificationMessage)message;
-                if(cast != null)
-                {
-                    ServerUpdateStarting?.Invoke();
-                }
-            }
             else if(msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
             {
                 logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
@@ -430,18 +419,21 @@ namespace Citadel.IPC
         public void RequestConfigUpdate(Action<NotifyConfigUpdateMessage> replyHandler)
         {
             var msg = new RequestConfigUpdateMessage();
-            PushMessage(msg, (reply) =>
+
+            ReplyHandlerClass h = new ReplyHandlerClass(this);
+
+            if (replyHandler != null)
             {
-                if (reply.GetType() == typeof(Messages.NotifyConfigUpdateMessage))
+                h.OnBaseReply((reply) =>
                 {
-                    replyHandler((Messages.NotifyConfigUpdateMessage)reply);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            });
+                    if (reply.GetType() == typeof(Messages.NotifyConfigUpdateMessage))
+                    {
+                        replyHandler((Messages.NotifyConfigUpdateMessage)reply);
+                    }
+                });
+            }
+
+            PushMessage(msg, h);
         }
 
         public ReplyHandlerClass RequestAddSelfModeratedSite(string site)
@@ -469,7 +461,7 @@ namespace Citadel.IPC
             BaseMessage msg = IpcMessage.Request(call, data);
             msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
 
-            PushMessage(msg, h.TriggerHandler);
+            PushMessage(msg, h);
             return h;
         }
 
@@ -480,11 +472,11 @@ namespace Citadel.IPC
             BaseMessage msg = IpcMessage.Send(call, data);
             msg.ReplyToId = replyToThis?.Id ?? Guid.Empty;
 
-            PushMessage(msg, h.TriggerHandler);
+            PushMessage(msg, h);
             return h;
         }
 
-        protected void PushMessage(BaseMessage msg, GenericReplyHandler replyHandler = null)
+        protected void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null)
         {
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())

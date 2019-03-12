@@ -31,7 +31,9 @@ $builds = @(
     @("x64", "CitadelService\CitadelService.csproj"),
     @("x86", "CitadelService\CitadelService.csproj"),
     @("x64", "CitadelGUI\CitadelGUI.csproj"),
-    @("x86", "CitadelGUI\CitadelGUI.csproj")
+    @("x86", "CitadelGUI\CitadelGUI.csproj"),
+    @("AnyCPU", "InstallGuard\InstallGuard.csproj"),
+    @("AnyCPU", "CloudVeilInstallerUI\CloudVeilInstallerUI.csproj")
 )
 
 foreach ($build in $builds) {
@@ -48,15 +50,19 @@ foreach ($build in $builds) {
     }
 }
 
-$payload86 = Join-Path $currentLocation "Installers\SetupPayload64\SetupPayload86.wixproj"
+$bundleProject = "CloudVeilInstaller\CloudVeilInstaller.wixproj"
+
+$payload86 = Join-Path $currentLocation "Installers\SetupPayload86\SetupPayload86.wixproj"
 $setup86 = Join-Path $currentLocation "Installers\SetupProjects\Setup x86.wixproj"
 $product86 = Join-Path $currentLocation "Installers\SetupProjects\Product-x86.wxs"
 $output86 = Join-Path $currentLocation "Installers\SetupProjects\Release\Setup x86.msi"
+$bundle86 = Join-Path $currentLocation "CloudVeilInstaller\bin\Release\CloudVeilInstaller-x86.exe"
 
 $payload64 = Join-Path $currentLocation "Installers\SetupPayload64\SetupPayload64.wixproj"
 $setup64 = Join-Path $currentLocation "Installers\SetupProjects\Setup x64.wixproj"
 $product64 = Join-Path $currentLocation "Installers\SetupProjects\Product-x64.wxs"
 $output64 = Join-Path $currentLocation "Installers\SetupProjects\Release\Setup x64.msi"
+$bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\Release\CloudVeilInstaller-x64.exe"
 
 <# TODO: Sign executable files x64 #>
 
@@ -70,10 +76,18 @@ $output64 = Join-Path $currentLocation "Installers\SetupProjects\Release\Setup x
 
 $version = & $wixVerifyPath get $product64 wix.product.version
 
-$final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-x64.msi"
-$final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-x86.msi"
+& $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build
+$finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x64.exe"
+$final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx64.msi"
+
+& $msbuildPath /p:Configuration=Release /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build
+$finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x86.exe"
+$final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx86.msi"
 
 <# TODO: Sign MSI #>
 
 Copy-Item $output64 -Destination $final64
 Copy-Item $output86 -Destination $final86
+
+Copy-Item $bundle64 -Destination $finalBundle64
+Copy-Item $bundle86 -Destination $finalBundle86

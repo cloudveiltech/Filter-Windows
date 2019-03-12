@@ -266,6 +266,9 @@
         <Component Id="comp_5182EBDA_13B5" Guid="BEDA89C3-EBF6-4D2D-B8E4-E2A8A23C2AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CitadelGUI\bin\Release x86\Unosquare.Swan.Lite.dll" KeyPath="yes" />
         </Component>
+        <Component Id="comp_58F5F8AC_E43A" Guid="28BE5B7E-9065-4D47-85F3-5B99B1F2E397" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A34F805F_BA3C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CitadelGUI\bin\Release x86\DotNet.Glob.dll" KeyPath="yes" />
+        </Component>
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
           <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_05620AE3_DE01_7943_8FA3_2D2F1316643A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CitadelGUI\bin\Release x86\x86\WinDivert64.sys" KeyPath="yes" />

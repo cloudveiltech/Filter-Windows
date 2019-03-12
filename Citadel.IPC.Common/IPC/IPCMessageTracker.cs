@@ -23,7 +23,7 @@ namespace Citadel.IPC
         private class IPCMessageData
         {
             public BaseMessage Message { get; set; }
-            public GenericReplyHandler Handler { get; set; }
+            public ReplyHandlerClass Handler { get; set; }
         }
 
         private List<IPCMessageData> m_messageList;
@@ -40,7 +40,7 @@ namespace Citadel.IPC
         /// </summary>
         /// <param name="message">The message which was sent to the server</param>
         /// <param name="handler">The handler for the reply message.</param>
-        public void AddMessage(BaseMessage message, GenericReplyHandler handler)
+        public void AddMessage(BaseMessage message, ReplyHandlerClass handler)
         {
             lock (m_lock)
             {
@@ -66,13 +66,20 @@ namespace Citadel.IPC
                         IPCMessageData data = null;
                         data = m_messageList[i];
 
+                        if(data.Handler.DisposeIfDiscarded())
+                        {
+                            m_messageList.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+
                         if (data.Message.Id == message.ReplyToId)
                         {
                             m_messageList.Remove(data);
 
                             if (data.Handler != null)
                             {
-                                bool ret = data.Handler(message);
+                                bool ret = data.Handler.TriggerHandler(message);
                                 return ret;
                             }
                             else

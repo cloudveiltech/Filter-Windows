@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using NLog;
 using System;
@@ -101,7 +102,6 @@ namespace Citadel.Core.Windows.Util.Update
                             var sparkleOs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "os").FirstOrDefault().Value;
                             var updateChannel = enclosure.AttributeExtensions.Where(x => x.Key.Name == "channel").FirstOrDefault().Value;
                             var sparkleInstallerArgs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "installerArguments").FirstOrDefault().Value;
-                            var exeUrl = enclosure.AttributeExtensions.Where(x => x.Key.Name == "exeUrl").FirstOrDefault().Value;
 
                             if (StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
@@ -109,9 +109,10 @@ namespace Citadel.Core.Windows.Util.Update
                                 continue;
                             }
 
-                            UpdateKind updateKind = exeUrl == null ? UpdateKind.MsiInstaller : UpdateKind.ExePackage;
+                            string extension = Path.GetExtension(enclosure.Uri.ToString());
+                            UpdateKind updateKind = extension == ".exe" ? UpdateKind.ExePackage : UpdateKind.MsiInstaller;
 
-                            Uri url = exeUrl == null ? enclosure.Uri : new Uri(exeUrl);
+                            Uri url = enclosure.Uri;
                             long length = enclosure.Length;
                             string mediaType = enclosure.MediaType;
 

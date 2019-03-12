@@ -7,8 +7,7 @@
 
 //﻿#define LOCAL_POLICY_CONFIGURATION
 
-using Citadel.Core.Windows.Util;
-using Citadel.Core.Extensions;
+using Filter.Platform.Common.Extensions;
 
 using Citadel.IPC;
 using Citadel.IPC.Messages;

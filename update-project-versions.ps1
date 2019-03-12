@@ -1,9 +1,7 @@
-
-$version = Read-Host 'Please enter a version to update projects: '
+$version = Read-Host "Enter new project versions: "
 
 $arr = Get-ChildItem AssemblyInfo.cs -Recurse
 
 foreach($file in $arr) {
-// TODO: THIS IS UNFINISHED!!!
-	$regex = ''
+	((Get-Content -path $file -Raw) -replace '\[assembly:\s(AssemblyVersion|AssemblyFileVersion)\("(.*)"\)\]', ('[assembly: $1("' + $version + '")]')) | Set-Content -Path $file
 }

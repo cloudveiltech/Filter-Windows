@@ -6,6 +6,7 @@ namespace Filter.Platform.Common.Types
     {
         UpToDate,
         UpdateAvailable,
-        CheckFailed
+        CheckFailed,
+        UpdateFailed
     }
 }

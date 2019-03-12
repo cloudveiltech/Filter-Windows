@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 
-namespace Citadel.Core.Extensions
+namespace Filter.Platform.Common.Extensions
 {
     public static class StringExtensions
     {
@@ -169,10 +169,7 @@ namespace Citadel.Core.Extensions
         /// <returns>
         /// False if the string is null, empty or whitespace only. True otherwise.
         /// </returns>
-        public static bool Valid(string str)
-        {
-            return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str) && str.Length > 0;
-        }
+        public static bool Valid(string str) => !string.IsNullOrWhiteSpace(str);
     }
 }
  

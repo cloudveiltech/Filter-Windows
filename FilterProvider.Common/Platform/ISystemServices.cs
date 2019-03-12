@@ -51,6 +51,17 @@ namespace FilterProvider.Common.Platform
         void DisableInternet();
 
         /// <summary>
+        /// Platform-specific way to ensure that the GUI application is running.
+        /// </summary>
+        /// <param name="runInTray">Used to determine whether the GUI application should become visible or stay in the tray or status bar.</param>
+        void EnsureGuiRunning(bool runInTray = false);
+
+        /// <summary>
+        /// Platform-specific way to ensure that all GUI applications are stopped.
+        /// </summary>
+        void KillAllGuis(); // FIXME: This might actually be a cross-platformable piece of code.
+
+        /// <summary>
         /// Does not need to be available until after OnStartProxy is fired.
         /// </summary>
         X509Certificate2 RootCertificate { get; }

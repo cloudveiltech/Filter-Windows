@@ -1,5 +1,5 @@
-ï»¿/*
-* Copyright Â© 2017-2018 Cloudveil Technology Inc.
+/*
+* Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Technik Empire")]
 [assembly: AssemblyProduct("CitadelService")]
-[assembly: AssemblyCopyright("Copyright Â© 2017-2018 Cloudveil Technology Inc., Licensed under the Mozilla Public License V2.0")]
+[assembly: AssemblyCopyright("Copyright © 2017-2018 Cloudveil Technology Inc., Licensed under the Mozilla Public License V2.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,6 +31,12 @@ using System.Runtime.InteropServices;
 // Major Version Minor Version Build Number Revision
 //
 // You can specify all the values or you can default the Build and Revision Numbers by using the '*'
-// as shown below: [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.7.1.0")]
-[assembly: AssemblyFileVersion("1.7.1.0")]
+// as shown below: [assembly: AssemblyVersion("1.7.0.0")]
+[assembly: AssemblyVersion("1.7.0.0")]
+[assembly: AssemblyFileVersion("1.7.0.0")]
+
+
+
+
+
+
