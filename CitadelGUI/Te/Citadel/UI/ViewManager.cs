@@ -106,17 +106,20 @@ namespace Te.Citadel.UI
             {
                 var view = this.Get(viewToShow.ViewType);
 
-                if(view != null)
+                window.Dispatcher.InvokeAsync(() =>
                 {
-                    window.CurrentView.Content = view;
-                }
+                    if (view != null && window.CurrentView.Content != view)
+                    {
+                        window.CurrentView.Content = view;
+                    }
+                });
             }
         }
 
         public void PushView(int zIndex, Type t)
         {
             var existingView = getView(t);
-            if(existingView != null)
+            if(existingView == null)
             {
                 views.Add(new ViewWithZIndex()
                 {

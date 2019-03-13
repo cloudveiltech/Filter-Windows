@@ -132,6 +132,8 @@ namespace CloudVeil.Windows
         /// </summary>
         private ViewManager viewManager;
 
+        public ViewManager ViewManager => viewManager;
+
         /// <summary>
         /// Used to communicate with the filtering back end service. 
         /// </summary>
@@ -770,6 +772,8 @@ namespace CloudVeil.Windows
         /// </summary>
         private void InitViews()
         {
+            m_mainWindow = new Te.Citadel.UI.Windows.MainWindow();
+
             ModelManager = new ModelManager();
             viewManager = new ViewManager(m_mainWindow);
 
@@ -781,28 +785,10 @@ namespace CloudVeil.Windows
             ModelManager.Register(new TimeRestrictionsViewModel());
             ModelManager.Register(new SoftwareConflictViewModel());
 
-            viewManager.Register(new LoginView(), (view) =>
-            {
-                
-            });
-
-            // I think these two registration declarations aren't needed.
-            viewManager.Register(new HistoryView(), (view) =>
-            {
-                // TODO:Finish HistoryView registration thingy.
-            });
-
-            viewManager.Register(new SettingsView(), (view) =>
-            {
-                // TODO: Finish SettingsView stuff.
-            });
-
-            viewManager.Register(new SoftwareConflictView(), (view) =>
-            {
-
-            });
-
-            m_mainWindow = new Te.Citadel.UI.Windows.MainWindow();
+            viewManager.Register(new DashboardView());
+            viewManager.Register(new LoginView());
+            viewManager.Register(new SoftwareConflictView());
+            viewManager.Register(new ProgressWait());
 
             m_mainWindow.WindowRestoreRequested += (() =>
             {

@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Windows.Util;
+using CloudVeil.Windows;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
@@ -69,6 +70,8 @@ namespace Te.Citadel.UI.ViewModels
         public BaseCitadelViewModel()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
+
+            ViewManager = ((CitadelApp)CitadelApp.Current).ViewManager;
         }
 
         protected ViewManager ViewManager { get; set; }
