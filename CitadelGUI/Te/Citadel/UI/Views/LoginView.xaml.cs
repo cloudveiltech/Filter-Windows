@@ -13,6 +13,8 @@ namespace Te.Citadel.UI.Views
     /// </summary>
     public partial class LoginView : BaseView
     {
+        public static int ModalZIndex = 200;
+
         public LoginView()
         {
             InitializeComponent();

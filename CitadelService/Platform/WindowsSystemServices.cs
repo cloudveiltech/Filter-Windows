@@ -30,6 +30,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFirewallHelper;
+using FilterNativeWindows;
 
 namespace CitadelService.Platform
 {
@@ -155,26 +156,7 @@ namespace CitadelService.Platform
             server.BeforeRequest += config.BeforeRequest;
             server.BeforeResponse += config.BeforeResponse;
 
-            /*proxyServer.EnableConnectionPool = true;
-
-            // TCP server connection prefetch doesn't work with our reverse proxy setup.
-            proxyServer.EnableTcpServerConnectionPrefetch = false;
-
-            proxyServer.CertificateManager.CreateRootCertificate(false);
-
-            proxyServer.CertificateManager.TrustRootCertificate();*/
-
-            //proxyServer.CertificateManager.CertificateEngine = CertificateEngine.BouncyCastle;
-
-            //proxyServer.CertificateManager.EnsureRootCertificate(true, true);
             server.Start();
-            //proxyServer.Start();
-
-            WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
-
-            diverter.ConfirmDenyFirewallAccess = m_provider.OnAppFirewallCheck;
-
-            diverter.Start(0);
 
             OnStartProxy?.Invoke(this, new EventArgs());
 

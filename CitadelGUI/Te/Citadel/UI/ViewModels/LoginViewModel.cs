@@ -56,9 +56,9 @@ namespace Te.Citadel.UI.ViewModels
                     {
                         try
                         {
-                            RequestViewChange(typeof(ProgressWait)); 
+                            ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
                             await m_model.Authenticate();
-
+                            ViewManager?.PopView(typeof(ProgressWait));
                         }
                         catch(Exception e)
                         {

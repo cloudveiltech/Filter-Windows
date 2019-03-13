@@ -40,6 +40,8 @@ using Citadel.Core.Windows.Util.Update;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.IPC.Messages;
 using System.Reflection;
+using FilterNativeWindows;
+using Te.Citadel;
 
 namespace CloudVeil.Windows
 {
@@ -129,23 +131,6 @@ namespace CloudVeil.Windows
         /// Stores all the views that we want to keep alive.
         /// </summary>
         private ViewManager viewManager;
-
-        private LoginView m_viewLogin;
-
-        /// <summary>
-        /// Used to show the user a nice spinny wheel while they wait for something. 
-        /// </summary>
-        private ProgressWait m_viewProgressWait;
-
-        /// <summary>
-        /// Primary view for a subscribed, authenticated user. 
-        /// </summary>
-        private DashboardView m_viewDashboard;
-
-        /// <summary>
-        /// View to show for SSL exemption requests.
-        /// </summary>
-        private SslExemptionsView m_sslExemptionsView;
 
         /// <summary>
         /// Used to communicate with the filtering back end service. 
@@ -279,7 +264,6 @@ namespace CloudVeil.Windows
             try
             {
                 InitViews();
-                OnViewChangeRequest(typeof(ProgressWait));
             }
             catch(Exception ve)
             {
@@ -306,7 +290,7 @@ namespace CloudVeil.Windows
                                     ((MainWindowViewModel)m_mainWindow.DataContext).IsUserLoggedIn = false;
                                 });
 
-                                OnViewChangeRequest(typeof(LoginView));
+                                viewManager.PushView(LoginView.ModalZIndex, typeof(LoginView));
                             }
                             break;
 
@@ -325,11 +309,11 @@ namespace CloudVeil.Windows
                                 // This code prevents the progress->dashboard->progress flash for authenticated users, but not for error'd users.
                                 if (authenticationFailureResult.Action != AuthenticationAction.Authenticated)
                                 {
-                                    OnViewChangeRequest(typeof(DashboardView));
+                                    viewManager.PopView(typeof(LoginView));
                                 }
                                 else if (m_hasStateBeenFetched)
                                 {
-                                    OnViewChangeRequest(typeof(DashboardView));
+                                    viewManager.PopView(typeof(LoginView));
                                 }
                             }
                             break;
@@ -414,6 +398,31 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
+                m_ipcClient.RegisterResponseHandler<ConflictReason>(IpcCall.ConflictDetected, (msg) =>
+                {
+                    var vm = ModelManager.Get<SoftwareConflictViewModel>();
+
+                    string link = null;
+                    string message = null;
+
+                    if(ConflictReasonInformation.ConflictReasonLinks.TryGetValue(msg.Data, out link))
+                    {
+                        vm.ConflictSupportArticle = new Uri(link);
+                    }
+
+                    if(ConflictReasonInformation.ConflictReasonMessages.TryGetValue(msg.Data, out message))
+                    {
+                        vm.ConflictText = message;
+                    }
+
+                    if(msg.Data != ConflictReason.NoConflict)
+                    {
+                        viewManager.PushView(SoftwareConflictView.ModalZIndex, typeof(SoftwareConflictView));
+                    }
+
+                    return true;
+                });
+
                 m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
                     m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
@@ -484,33 +493,9 @@ namespace CloudVeil.Windows
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            if(m_viewDashboard != null)
-                            {
-                                ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString());
-                            }
+                            ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString());
                         }
                     );
-                };
-
-                m_ipcClient.AddCertificateExemptionRequest = (msg) =>
-                {
-                    Current.Dispatcher.BeginInvoke(
-                        System.Windows.Threading.DispatcherPriority.Normal,
-                        (Action)delegate ()
-                        {
-                            if (msg.ExemptionGranted)
-                            {
-                                this.OnNotifyUserRequest("Certificate Trusted", $"The certificate for {msg.Host} is now trusted.");
-                            }
-                            else
-                            {
-                                var sslExemptionsModel = (SslExemptionsViewModel)m_sslExemptionsView.DataContext;
-
-                                m_logger.Info("Adding certificate trust request to list. {0}", msg.Host);
-
-                                sslExemptionsModel.AddSslCertificateExemptionRequest(msg);
-                            }
-                        });
                 };
 
                 m_ipcClient.ConnectedToServer = () =>
@@ -569,10 +554,7 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        if(m_viewDashboard != null)
-                                        {
-                                            viewManager.Get<SettingsView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
-                                        }
+                                        viewManager.Get<SettingsView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
                                     }
                                 );
                             }
@@ -580,7 +562,7 @@ namespace CloudVeil.Windows
 
                         case FilterStatus.Running:
                             {
-                                OnViewChangeRequest(typeof(DashboardView));
+                                viewManager.PopView(typeof(ProgressWait));
 
                                 // Change UI state of dashboard to not show disabled message anymore.
                                 // If we're not already in a disabled state, this will have no effect.
@@ -597,7 +579,7 @@ namespace CloudVeil.Windows
                         case FilterStatus.Synchronizing:
                             {
                                 // Update our timestamps for last sync.
-                                OnViewChangeRequest(typeof(ProgressWait));
+                                viewManager.PushView(ProgressWait.ModalZIndex, typeof(ProgressWait));
 
                                 lock(m_synchronizingTimerLockObj)
                                 {
@@ -624,7 +606,7 @@ namespace CloudVeil.Windows
                         case FilterStatus.Synchronized:
                             {
                                 // Update our timestamps for last sync.
-                                OnViewChangeRequest(typeof(DashboardView));
+                                viewManager.PopView(typeof(ProgressWait));
 
                                 // Change UI state of dashboard to not show disabled message anymore.
                                 // If we're not already in a disabled state, this will have no effect.
@@ -789,7 +771,7 @@ namespace CloudVeil.Windows
         private void InitViews()
         {
             ModelManager = new ModelManager();
-            viewManager = new ViewManager();
+            viewManager = new ViewManager(m_mainWindow);
 
             ModelManager.Register(new HistoryViewModel());
             ModelManager.Register(new SelfModerationViewModel());
@@ -797,10 +779,11 @@ namespace CloudVeil.Windows
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
+            ModelManager.Register(new SoftwareConflictViewModel());
 
             viewManager.Register(new LoginView(), (view) =>
             {
-                (view.DataContext as BaseCitadelViewModel).ViewChangeRequest = OnViewChangeRequest;
+                
             });
 
             // I think these two registration declarations aren't needed.
@@ -812,6 +795,11 @@ namespace CloudVeil.Windows
             viewManager.Register(new SettingsView(), (view) =>
             {
                 // TODO: Finish SettingsView stuff.
+            });
+
+            viewManager.Register(new SoftwareConflictView(), (view) =>
+            {
+
             });
 
             m_mainWindow = new Te.Citadel.UI.Windows.MainWindow();
@@ -826,7 +814,7 @@ namespace CloudVeil.Windows
                 // Don't actually let the window close, just hide it.
                 e.Cancel = true;
 
-                if(m_mainWindow.CurrentView.Content == m_viewLogin)
+                if(m_mainWindow.CurrentView.Content is LoginView)
                 {
                     Application.Current.Shutdown((int)ExitCodes.ShutdownWithoutSafeguards);
                     return;
@@ -836,30 +824,18 @@ namespace CloudVeil.Windows
                 MinimizeToTray(true);
             });
 
-            m_viewLogin = viewManager.Get<LoginView>();
-
-            m_viewProgressWait = new ProgressWait();
-
-            m_viewDashboard = new DashboardView();
-
-            if(m_viewDashboard.DataContext != null && m_viewDashboard.DataContext is BaseCitadelViewModel)
+            BaseCitadelViewModel dashboardVm = ModelManager.Get<DashboardViewModel>();
+            if(dashboardVm != null)
             {
-                ((BaseCitadelViewModel)(m_viewDashboard.DataContext)).ViewChangeRequest = OnViewChangeRequest;
-                ((BaseCitadelViewModel)(m_viewDashboard.DataContext)).UserNotificationRequest = OnNotifyUserRequest;
-            }
-
-            m_sslExemptionsView = new SslExemptionsView();
-
-            if(m_sslExemptionsView.DataContext != null && m_sslExemptionsView.DataContext is BaseCitadelViewModel)
-            {
-                ((BaseCitadelViewModel)(m_sslExemptionsView.DataContext)).ViewChangeRequest = OnViewChangeRequest;
-                ((BaseCitadelViewModel)(m_sslExemptionsView.DataContext)).UserNotificationRequest = OnNotifyUserRequest;
+                dashboardVm.UserNotificationRequest = OnNotifyUserRequest;
             }
 
             // Set the current view to ProgressWait because we're gonna do background init next.
             this.MainWindow = m_mainWindow;
             m_mainWindow.Show();
-            OnViewChangeRequest(typeof(ProgressWait));
+
+            viewManager.SetBaseView(typeof(DashboardView));
+            viewManager.PushView(ProgressWait.ModalZIndex, typeof(ProgressWait));
         }
 
         /// <summary>
@@ -1008,7 +984,7 @@ namespace CloudVeil.Windows
         private void TrayIcon_OpenSettings(object sender, EventArgs e)
         {
             BringAppToFocus();
-            m_viewDashboard.SwitchTab(1);
+            viewManager.Get<DashboardView>()?.SwitchTab(1);
         }
 
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
@@ -1054,68 +1030,7 @@ namespace CloudVeil.Windows
         {
             m_trayIcon.BalloonTipClicked -= captivePortalToolTipClicked;
 
-            System.Diagnostics.Process.Start("http://connectivitycheck.cloudveil.org");
-        }
-
-        /// <summary>
-        /// Handles a request from UserControls within the application to show a requested primary
-        /// view type.
-        /// </summary>
-        /// <param name="viewType">
-        /// The type of view requested. 
-        /// </param>
-        private void OnViewChangeRequest(Type viewType)
-        {
-            Console.WriteLine("OnViewChangeRequest {0}", viewType.Name);
-            Console.WriteLine(new Exception().StackTrace);
-
-            try
-            {
-                Current.Dispatcher.Invoke(
-                    System.Windows.Threading.DispatcherPriority.Background,
-                    (Action)delegate ()
-                    {
-                        UIElement current = (UserControl)m_mainWindow.CurrentView.Content;
-                        UIElement newView = null;
-
-                        switch(viewType.Name)
-                        {
-                            case nameof(LoginView):
-                                {
-                                    newView = m_viewLogin;
-                                }
-                                break;
-
-                            case nameof(ProgressWait):
-                                {
-                                    newView = m_viewProgressWait;
-                                }
-                                break;
-
-                            case nameof(DashboardView):
-                                {
-                                    newView = m_viewDashboard;
-                                }
-                                break;
-
-                            case nameof(SslExemptionsView):
-                                {
-                                    newView = m_sslExemptionsView;
-                                }
-                                break;
-                        }
-
-                        if(newView != null && current != newView)
-                        {
-                            m_mainWindow.CurrentView.Content = newView;
-                        }
-                    }
-                );
-            }
-            catch(Exception err)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, err);
-            }
+            System.Diagnostics.Process.Start(CloudVeil.CompileSecrets.ConnectivityCheck);
         }
 
         /// <summary>

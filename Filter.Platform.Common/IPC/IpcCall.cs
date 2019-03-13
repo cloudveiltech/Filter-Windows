@@ -16,6 +16,7 @@ namespace Citadel.IPC
         SynchronizeSettings,
         Update,
         StartUpdater,
-        ShutdownForUpdate
+        ShutdownForUpdate,
+        ConflictDetected
     }
 }

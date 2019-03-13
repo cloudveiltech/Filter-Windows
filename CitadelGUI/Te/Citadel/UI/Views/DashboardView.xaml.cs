@@ -33,6 +33,8 @@ namespace Te.Citadel.UI.Views
 
         public void SwitchTab(int tabIdx)
         {
+            MessageBox.Show("Invalid command. Please tell the developer to re-implement SwitchTab");
+
             //Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = tabIdx));
         }
 

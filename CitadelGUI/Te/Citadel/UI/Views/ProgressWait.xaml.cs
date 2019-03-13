@@ -18,5 +18,7 @@ namespace Te.Citadel.UI.Views
         {
             InitializeComponent();
         }
+
+        public static int ModalZIndex = 10;
     }
 }

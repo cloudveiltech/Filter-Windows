@@ -114,6 +114,7 @@
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />
     <Compile Include="CompileSecrets.cs" />
+    <Compile Include="Te\Citadel\ConflictReasonInformation.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\PostInstallCommand.cs">
       <SubType>Component</SubType>
@@ -142,7 +143,7 @@
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\SslExemptionsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SoftwareConflictViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\TimeRestrictionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
       <DependentUpon>AdvancedView.xaml</DependentUpon>
@@ -163,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\SoftwareConflictView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,10 +208,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Te\Citadel\UI\Views\SettingsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Te\Citadel\UI\Views\SslExemptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -252,8 +253,8 @@
     <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\SslExemptionsView.xaml.cs">
-      <DependentUpon>SslExemptionsView.xaml</DependentUpon>
+    <Compile Include="Te\Citadel\UI\Views\SoftwareConflictView.xaml.cs">
+      <DependentUpon>SoftwareConflictView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
       <DependentUpon>DiagnosticsView.xaml</DependentUpon>
@@ -332,6 +333,10 @@
     <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI\CloudVeilGUI.csproj">
       <Project>{B5CCE52E-6D69-4F28-857A-1C546022A2A5}</Project>
       <Name>CloudVeilGUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
+      <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>
+      <Name>Filter.Native.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>

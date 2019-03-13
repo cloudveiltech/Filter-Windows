@@ -26,6 +26,20 @@ namespace Te.Citadel.UI
             models[typeof(T)] = model;
         }
 
+        public object Get(Type t)
+        {
+            object model;
+
+            if(models.TryGetValue(t, out model))
+            {
+                return model;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public T Get<T>()
         {
             object model;

@@ -52,12 +52,37 @@ using Filter.Platform.Common.IPC.Messages;
 
 namespace FilterProvider.Common.Services
 {
+    /// <summary>
+    /// This is an optional delegate that the common filter services provider can call after its services are initialized.
+    /// Use this for platform-specific behaviors. Not intended to replace PlatformTypes.
+    /// </summary>
+    /// <param name="provider"></param>
+    public delegate void ExtensionDelegate(CommonFilterServiceProvider provider);
+
+    /// <summary>
+    /// FilterProvider.Common and CommonFilterServiceProvider are intended to be the cross-platform parts of our filter. You should be able to take FilterProvider.Common and wrap it in
+    /// a windows service, a MacOS app bundle, or a Linux executable and have it authenticate against the API, download rules, and filter.
+    /// </summary>
+    /// <remarks>
+    /// <seealso cref="PlatformTypes"/> This is an integral part of our cross-platform implementation. If there is an OS-specific implementation of something,
+    /// we use this to register an interface for it, so that we can instantiate the interface in cross-platform code.
+    /// 
+    /// <seealso cref="ExtensionDelegate"/> This is a more recent addition. The current use for it is to add Windows-only capabilities, such as conflict detection logic.
+    /// We may want to migrate some uses of <see cref="ISystemServices"/> to this ExtensionDelegate system.
+    ///
+    /// </remarks>
     public class CommonFilterServiceProvider
     {
         #region Windows Service API
 
         private bool isTestRun = false;
 
+        /// <summary>
+        /// Starts the common filter service provider logic.
+        /// </summary>
+        /// <param name="isTest"></param>
+        /// 
+        /// <returns></returns>
         public bool Start(bool isTest)
         {
             isTestRun = isTest;
@@ -158,6 +183,7 @@ namespace FilterProvider.Common.Services
 
         private IPCServer m_ipcServer;
 
+        public IPCServer IPCServer => m_ipcServer;
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
         /// </summary>
@@ -291,14 +317,17 @@ namespace FilterProvider.Common.Services
 
         private ISystemServices m_systemServices;
 
+        private ExtensionDelegate m_extensionDelegate;
+
         /// <summary>
         /// Default ctor. 
         /// </summary>
-        public CommonFilterServiceProvider()
+        public CommonFilterServiceProvider(ExtensionDelegate extensionDelegate)
         {
             m_trustManager = PlatformTypes.New<IPlatformTrust>();
             m_platformPaths = PlatformTypes.New<IPathProvider>();
             m_systemServices = PlatformTypes.New<ISystemServices>();
+            m_extensionDelegate = extensionDelegate;
         }
 
         /// <summary>
@@ -975,7 +1004,7 @@ namespace FilterProvider.Common.Services
         /// Sets up the filtering engine, calls establish trust with firefox, sets up callbacks for
         /// classification and firewall checks, but does not start the engine.
         /// </summary>
-        private void InitEngine()
+        private async void InitEngine()
         {
             LogTime("Starting InitEngine()");
 
@@ -1009,7 +1038,6 @@ namespace FilterProvider.Common.Services
             });
 
             // Setup general info, warning and error events.
-
 
             // Start filtering, always.
             if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
@@ -1131,12 +1159,23 @@ namespace FilterProvider.Common.Services
             // Init the Engine in the background.
             try
             {
-                InitEngine();
+                Task.Run(() => InitEngine());
             }
             catch (Exception ie)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ie);
             }
+
+            // Run our extension method if it exists.
+            try
+            {
+                m_extensionDelegate?.Invoke(this);
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
+
 
             // Force start our cascade of protective processes.
             try
