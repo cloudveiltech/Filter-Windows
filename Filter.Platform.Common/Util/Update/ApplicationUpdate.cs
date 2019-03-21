@@ -119,12 +119,37 @@ namespace Citadel.Core.Windows.Util.Update
             UpdateFileLocalPath = Path.Combine(targetDir, Path.GetFileName(DownloadLink.LocalPath));
         }
 
-        public async Task DownloadUpdate()
+        public Task<bool> DownloadUpdate(DownloadProgressChangedEventHandler eventHandler)
         {
+            if(File.Exists(UpdateFileLocalPath))
+            {
+                File.Delete(UpdateFileLocalPath);
+            }
+
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
             using(var cli = new WebClient())
             {
-                await cli.DownloadFileTaskAsync(DownloadLink, UpdateFileLocalPath);
+                if(eventHandler != null)
+                {
+                    cli.DownloadProgressChanged += eventHandler;
+                    cli.DownloadFileCompleted += (sender, e) =>
+                    {
+                        if(e.Cancelled || e.Error != null)
+                        {
+                            tcs.SetResult(false);
+                        }
+                        else
+                        {
+                            tcs.SetResult(true);
+                        }
+                    };
+                }
+
+                cli.DownloadFileTaskAsync(DownloadLink, UpdateFileLocalPath);
             }
+
+            return tcs.Task;
         }
 
         public bool IsNewerThan(Version v)
@@ -146,13 +171,13 @@ namespace Citadel.Core.Windows.Util.Update
             if (restartApplication)
             {
                 var executingProcess = Process.GetCurrentProcess().MainModule.FileName;
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" {3} && \"{4}\"", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments, executingProcess);
+                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" /ipc {3} && \"{4}\"", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments, executingProcess);
                 Console.WriteLine(args);
                 updaterStartupInfo = new ProcessStartInfo(args);
             }
             else
             {
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" {3}", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments);
+                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" /ipc {3}", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments);
                 Console.WriteLine(args);
                 updaterStartupInfo = new ProcessStartInfo(args);
             }

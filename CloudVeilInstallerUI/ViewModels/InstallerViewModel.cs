@@ -465,6 +465,10 @@ namespace CloudVeilInstallerUI.ViewModels
                     message = $"InstallGuard has blocked removal of CloudVeil for Windows. Please deactivate the filter before trying again.";
                     // TODO: We need to be able to check this stuff for certain.
                 }
+                else if(e.Status == ApplyStatus.FAIL_NOACTION_REBOOT)
+                {
+                    message = $"Failed to {installTypeVerb} CloudVeil for Windows because a reboot is required.";
+                }
                 else
                 {
                     message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {e.Status}. Please try again or contact support.";

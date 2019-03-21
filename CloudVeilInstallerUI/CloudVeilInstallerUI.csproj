@@ -88,6 +88,7 @@
     <Compile Include="IPC\Message.cs" />
     <Compile Include="IPC\UpdateIPCClient.cs" />
     <Compile Include="IPC\UpdateIPCServer.cs" />
+    <Compile Include="Models\ApplyStatus.cs" />
     <Compile Include="Models\InstallationState.cs" />
     <Compile Include="Models\InstallType.cs" />
     <Compile Include="ViewModels\InstallerViewModel.cs" />

@@ -6,7 +6,7 @@
 */
 
 ﻿using Citadel.Core.Windows.Util;
-using CloudVeilGUI.Platform.Common;
+using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,37 @@ using System.Threading.Tasks;
 
 namespace CloudVeil.Windows.Platform
 {
-    public class WindowsFilterStarter : IFilterStarter
+    public class WindowsFilterAgent : IFilterAgent
     {
+        private int agentProcess(string arguments, bool runasAdmin = true)
+        {
+            try
+            {
+                ProcessStartInfo startupInfo = new ProcessStartInfo();
+                startupInfo.FileName = "FilterAgent.Windows.exe";
+                startupInfo.Arguments = arguments;
+                startupInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+                if (runasAdmin)
+                {
+                    startupInfo.Verb = "runas";
+                }
+
+                startupInfo.CreateNoWindow = true;
+                Process process = Process.Start(startupInfo);
+
+                process.WaitForExit();
+
+                return process.ExitCode;
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
+            }
+
+            return -1;
+        }
+
         public void StartFilter()
         {
             bool mainServiceViable = true;
@@ -42,21 +71,13 @@ namespace CloudVeil.Windows.Platform
 
             if(!mainServiceViable)
             {
-                try
-                {
-                    ProcessStartInfo startupInfo = new ProcessStartInfo();
-                    startupInfo.FileName = "FilterAgent.Windows.exe";
-                    startupInfo.Arguments = "start";
-                    startupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    startupInfo.Verb = "runas";
-                    startupInfo.CreateNoWindow = true;
-                    Process.Start(startupInfo);
-                }
-                catch(Exception ex)
-                {
-                    LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
-                }
+                agentProcess("start", true);
             }
+        }
+
+        public ConnectivityCheck.Accessible CheckConnectivity()
+        {
+            return (ConnectivityCheck.Accessible)agentProcess("check", false);
         }
     }
 }

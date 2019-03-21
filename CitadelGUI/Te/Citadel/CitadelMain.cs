@@ -153,7 +153,7 @@ namespace CloudVeil.Windows
 
                 Citadel.Core.Windows.Platform.Init();
 
-                PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter());
+                PlatformTypes.Register<IFilterAgent>((arr) => new WindowsFilterAgent());
                 PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
                 PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
             }

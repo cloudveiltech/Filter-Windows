@@ -114,6 +114,7 @@
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />
     <Compile Include="CompileSecrets.cs" />
+    <Compile Include="Te\Citadel\ConflictInfo.cs" />
     <Compile Include="Te\Citadel\ConflictReasonInformation.cs" />
     <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
     <Compile Include="Te\Citadel\PostInstallCommand.cs">
@@ -143,7 +144,6 @@
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\SoftwareConflictViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\TimeRestrictionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
       <DependentUpon>AdvancedView.xaml</DependentUpon>
@@ -164,10 +164,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Te\Citadel\UI\Views\SoftwareConflictView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -253,9 +249,6 @@
     <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\SoftwareConflictView.xaml.cs">
-      <DependentUpon>SoftwareConflictView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
       <DependentUpon>DiagnosticsView.xaml</DependentUpon>
     </Compile>
@@ -330,9 +323,9 @@
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
       <Name>Citadel.IPC.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CloudVeilGUI\CloudVeilGUI\CloudVeilGUI.csproj">
-      <Project>{B5CCE52E-6D69-4F28-857A-1C546022A2A5}</Project>
-      <Name>CloudVeilGUI</Name>
+    <ProjectReference Include="..\CloudVeilGUI.Common\CloudVeilGUI.Common.csproj">
+      <Project>{b5f6349f-1971-46da-90dd-e02cdb6c6674}</Project>
+      <Name>CloudVeilGUI.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
       <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>
@@ -346,11 +339,19 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Platform)' == 'AnyCPU' Or '$(Platform)' == 'x64'">
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</PostBuildEvent>
+xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
+del "$(TargetDir)Updater"
+mkdir "$(TargetDir)Updater"
+xcopy /E /Y /C "$(ProjectDir)..\CloudVeilUpdater\bin\$(Configuration)\*.*" "$(TargetDir)Updater"
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x86\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</PostBuildEvent>
+xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
+del "$(TargetDir)Updater"
+mkdir "$(TargetDir)Updater"
+xcopy /E /Y /C "$(ProjectDir)..\CloudVeilUpdater\bin\$(Configuration)\*.*" "$(TargetDir)Updater"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -365,12 +366,4 @@ xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</Po
       <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'netfx.force.conflicts'" />
     </ItemGroup>
   </Target>
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
-del "$(TargetDir)Updater"
-mkdir "$(TargetDir)Updater"
-xcopy /E /Y /C "$(ProjectDir)..\CloudVeilUpdater\bin\$(Configuration)\*.*" "$(TargetDir)Updater"
-</PostBuildEvent>
-  </PropertyGroup>
 </Project>

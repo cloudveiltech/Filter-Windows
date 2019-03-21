@@ -6,16 +6,17 @@
 */
 
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Filter.Platform.Common.Util;
 
-namespace CloudVeilGUI.Platform.Common
+namespace Filter.Platform.Common
 {
-    public interface IFilterStarter
+    public interface IFilterAgent
     {
         /// <summary>
         /// Checks to see if the filter service is running. If it is not, run the FilterAgent.{Platform} executable.
         /// </summary>
         void StartFilter();
+
+        ConnectivityCheck.Accessible CheckConnectivity();
     }
 }

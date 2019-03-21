@@ -142,34 +142,49 @@ namespace FilterProvider.Common.Util
 
                 if (m_lastFetchedUpdate != null)
                 {
-                    m_lastFetchedUpdate.DownloadUpdate().Wait();
+                    m_ipcServer.Send<object>(IpcCall.InstallerDownloadStarted, null);
 
-                    m_lastFetchedUpdate.BeginInstallUpdateDelayed();
-
-                    if(m_lastFetchedUpdate.Kind == UpdateKind.ExePackage)
+                    m_lastFetchedUpdate.DownloadUpdate((sender, e) =>
                     {
-                        m_ipcServer.Request<object, bool>(IpcCall.StartUpdater, null).OnReply((h, _msg) =>
+                        m_ipcServer.Send<int>(IpcCall.InstallerDownloadProgress, e.ProgressPercentage);
+                    }).ContinueWith((task) =>
+                    {
+                        bool updateDownloadResult = task.Result;
+
+                        m_ipcServer.Send<bool>(IpcCall.InstallerDownloadFinished, updateDownloadResult);
+
+                        if(!updateDownloadResult)
                         {
-                            if (_msg.Data)
-                            {
-                                m_ipcServer.Request(IpcCall.ShutdownForUpdate);
-                                initializeUpdateEnvironment();
+                            return;
+                        }
 
-                                Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                            }
-                            else
-                            {
-                                m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(DateTime.Now, UpdateCheckResult.UpdateFailed));
-                            }
+                        m_lastFetchedUpdate.BeginInstallUpdateDelayed();
 
-                            return true;
-                        });
-                    }
-                    else
-                    {
-                        initializeUpdateEnvironment();
-                        Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                    }
+                        if (m_lastFetchedUpdate.Kind == UpdateKind.ExePackage)
+                        {
+                            m_ipcServer.Request<object, bool>(IpcCall.StartUpdater, null).OnReply((h, _msg) =>
+                            {
+                                if (_msg.Data)
+                                {
+                                    m_ipcServer.Request(IpcCall.ShutdownForUpdate);
+                                    initializeUpdateEnvironment();
+
+                                    Environment.Exit((int)ExitCodes.ShutdownForUpdate);
+                                }
+                                else
+                                {
+                                    m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(DateTime.Now, UpdateCheckResult.UpdateFailed));
+                                }
+
+                                return true;
+                            });
+                        }
+                        else
+                        {
+                            initializeUpdateEnvironment();
+                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
+                        }
+                    });
                 }
             }
             catch (Exception e)

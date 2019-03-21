@@ -44,67 +44,79 @@ namespace CloudVeilInstallerUI
 
         protected override void Run()
         {
-            string[] args = this.Command.GetCommandLineArgs();
-
-            bool runIpc = false;
-            bool showPrompts = true;
-
-            foreach(string arg in args)
+            try
             {
-                if(arg == "/ipc")
+                string[] args = this.Command.GetCommandLineArgs();
+
+                bool runIpc = false;
+                bool showPrompts = true;
+
+                Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
+                foreach (string arg in args)
                 {
-                    runIpc = true;
-                }
-                else if(arg == "/nomodals")
-                {
-                    showPrompts = false;
-                }
-            }
-
-            BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
-
-            Application app = new Application();
-
-            ISetupUI setupUi = null;
-            InstallerViewModel model = new InstallerViewModel(this);
-            UpdateIPCServer server = null;
-
-            if (runIpc)
-            {
-                server = new UpdateIPCServer("__CloudVeilUpdaterPipe__");
-                server.MessageReceived += CheckExit;
-
-                server.RegisterObject("InstallerViewModel", model);
-                server.RegisterObject("SetupUI", setupUi);
-                server.Start();
-
-                server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
-
-                setupUi = new IpcWindow(server, model, showPrompts);
-                model.SetSetupUi(setupUi);
-
-                model.PropertyChanged += (sender, e) =>
-                {
-                    server.PushMessage(new Message()
+                    if (arg == "/ipc")
                     {
-                        Command = IPC.Command.PropertyChanged,
-                        Property = e.PropertyName
-                    });
-                };
+                        runIpc = true;
+                    }
+                    else if (arg == "/nomodals")
+                    {
+                        showPrompts = false;
+                    }
+                }
 
-                this.Engine.Detect();
+                BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
+
+                Application app = new Application();
+
+                ISetupUI setupUi = null;
+                InstallerViewModel model = new InstallerViewModel(this);
+                UpdateIPCServer server = null;
+
+                if (runIpc)
+                {
+                    server = new UpdateIPCServer("__CloudVeilUpdaterPipe__");
+                    server.MessageReceived += CheckExit;
+
+                    server.RegisterObject("InstallerViewModel", model);
+                    server.RegisterObject("SetupUI", setupUi);
+                    server.Start();
+
+                    server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
+
+                    setupUi = new IpcWindow(server, model, showPrompts);
+                    model.SetSetupUi(setupUi);
+
+                    model.PropertyChanged += (sender, e) =>
+                    {
+                        server.PushMessage(new Message()
+                        {
+                            Command = IPC.Command.PropertyChanged,
+                            Property = e.PropertyName
+                        });
+                    };
+
+                    this.Engine.Detect();
+                }
+                else
+                {
+                    setupUi = new MainWindow(model, showPrompts);
+                    setupUi.Closed += (sender, e) => BootstrapperDispatcher.InvokeShutdown();
+
+                    model.SetSetupUi(setupUi);
+                    this.Engine.Detect();
+
+                    setupUi.Show();
+                    Dispatcher.Run();
+                    this.Engine.Quit(0);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                setupUi = new MainWindow(model, showPrompts);
-                setupUi.Closed += (sender, e) => BootstrapperDispatcher.InvokeShutdown();
+                Engine.Log(LogLevel.Error, "A .NET error occurred while running CloudVeilInstallerUI");
+                Engine.Log(LogLevel.Error, $"Error Type: {ex.GetType().Name}");
+                Engine.Log(LogLevel.Error, $"Error info: {ex}");
 
-                model.SetSetupUi(setupUi);
-                this.Engine.Detect();
-
-                setupUi.Show();
-                Dispatcher.Run();
-                this.Engine.Quit(0);
+                this.Engine.Quit(1);
             }
         }
 
@@ -112,6 +124,8 @@ namespace CloudVeilInstallerUI
         {
             if(message.Command == IPC.Command.Start)
             {
+                Engine.Log(LogLevel.Standard, "Start command received. Starting new thread for dispatcher.");
+
                 Thread t = new Thread(() =>
                 {
                     Dispatcher.Run();

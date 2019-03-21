@@ -194,6 +194,8 @@ namespace CitadelCore.Windows.Diversion
             }
         }
 
+        public delegate void StartEventHandler();
+
         /// <summary>
         /// Starts the packet diversion with the given number of threads.
         /// </summary>
@@ -205,7 +207,7 @@ namespace CitadelCore.Windows.Diversion
         /// The number of threads ought not to exceed Environment.ProcessorCount but this is not
         /// enforced with a bounds check.
         /// </remarks>
-        public void Start(int numThreads)
+        public void Start(int numThreads, StartEventHandler startHandler = null)
         {
             lock (m_startStopLock)
             {
@@ -260,6 +262,8 @@ namespace CitadelCore.Windows.Diversion
 
                     m_diversionThreads.Last().Start();
                 }
+
+                startHandler?.Invoke();
             }
         }
 

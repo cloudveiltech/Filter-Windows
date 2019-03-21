@@ -34,6 +34,11 @@ namespace CloudVeilUpdater
             client.WaitForConnection();
             Console.WriteLine("Client connected");
 
+            client.PushMessage(new Message()
+            {
+                Command = Command.Start
+            });
+
             setupUi.Closed += (sender, _e) =>
             {
                 client.PushMessage(new Message()
