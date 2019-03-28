@@ -70,6 +70,7 @@ bool AcquireFileLock(const char* filename, int* pfd) {
     int fd = open(filename, O_RDWR | O_CREAT);
     
     if(fd < 0) {
+        NSLog(@"Was unable to create .cloudveil.lock because of %d", errno);
         return false;
     }
     
@@ -79,6 +80,7 @@ bool AcquireFileLock(const char* filename, int* pfd) {
     fcntl(fd, F_GETLK, &fl);
     
     if(fl.l_pid > 0) {
+        NSLog(@".cloudveil.lock is currently locked by %d", fl.l_pid);
         return false;
     }
     
@@ -88,6 +90,7 @@ bool AcquireFileLock(const char* filename, int* pfd) {
     fl.l_len = 0;
     
     if(fcntl(fd, F_SETLK, &fl) == -1) {
+        NSLog(@"Errno = %d", errno);
         return false;
     }
     

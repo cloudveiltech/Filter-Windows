@@ -12,6 +12,9 @@
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
   </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -69,6 +72,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Views\" />
+    <Folder Include="DataSources\" />
+    <Folder Include="Delegates\" />
+    <Folder Include="Platform\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -77,13 +84,54 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="ViewController.cs" />
-    <Compile Include="ViewController.designer.cs">
-      <DependentUpon>ViewController.cs</DependentUpon>
+    <Compile Include="Views\MenuViewController.cs" />
+    <Compile Include="Views\MenuViewController.designer.cs">
+      <DependentUpon>MenuViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataSources\MenuViewDataSource.cs" />
+    <Compile Include="Delegates\MenuViewDelegate.cs" />
+    <Compile Include="Platform\Interop\Authorization.cs" />
+    <Compile Include="Platform\MacFilterStarter.cs" />
+    <Compile Include="Platform\MacGuiServices.cs" />
+    <Compile Include="Platform\MacTrayIconController.cs" />
+    <Compile Include="Views\LoginViewController.cs" />
+    <Compile Include="Views\LoginViewController.designer.cs">
+      <DependentUpon>LoginViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainViewController.cs" />
+    <Compile Include="MainViewController.designer.cs">
+      <DependentUpon>MainViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ViewAnimator.cs" />
+    <Compile Include="Views\BlockedPagesViewController.cs" />
+    <Compile Include="Views\BlockedPagesViewController.designer.cs">
+      <DependentUpon>BlockedPagesViewController.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />
+    <InterfaceDefinition Include="Resources\Views\BlockedPagesViewController.xib" />
+    <InterfaceDefinition Include="Resources\Views\BlockedPagesView.xib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CloudVeilGUI.Common\CloudVeilGUI.Common.csproj">
+      <Project>{02DA72B6-7608-4304-929D-1A447D87774D}</Project>
+      <Name>CloudVeilGUI.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>
+      <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Mac\Filter.Platform.Mac.csproj">
+      <Project>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</Project>
+      <Name>Filter.Platform.Mac</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="..\Filter.Platform.Mac.Native\build\$(Configuration)\libFilter.Platform.Mac.Native.dylib">
+      <Kind>Dynamic</Kind>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
 </Project>

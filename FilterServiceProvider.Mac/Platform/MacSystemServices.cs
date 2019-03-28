@@ -88,7 +88,7 @@ namespace FilterServiceProvider.Mac.Platform
             proxyServer.CertificateManager.EnsureRootCertificate(false, false);
 
             // TODO: Figure out what to do with this "password" thingy. This might be why the apple certificate private key storage wasn't working?
-            byte[] appleCertificateBytes = proxyServer.CertificateManager.RootCertificate.Export(X509ContentType.Cert, "password");
+            byte[] appleCertificateBytes = proxyServer.CertificateManager.RootCertificate.Export(X509ContentType.Cert);
             appleCertificate = MacTrustManager.AddToKeychain(appleCertificateBytes, appleCertificateBytes.Length, "org.cloudveil.filterserviceprovider");
 
             MacTrustManager.EnsureCertificateTrust(appleCertificate);

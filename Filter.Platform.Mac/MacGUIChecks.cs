@@ -65,6 +65,7 @@ namespace Filter.Platform.Mac
             return false;
         }
 
+        private int lockFd = -1;
         public bool PublishRunningApp()
         {
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cloudveil");
@@ -84,11 +85,20 @@ namespace Filter.Platform.Mac
             int fd = 0;
             if(Platform.AcquireFileLock(lockFile, out fd))
             {
+                lockFd = fd;
                 return true;
             }
             else
             {
                 return false;
+            }
+        }
+
+        public void UnpublishRunningApp()
+        {
+            if(lockFd >= 0)
+            {
+                Platform.ReleaseFileLock(lockFd);
             }
         }
     }

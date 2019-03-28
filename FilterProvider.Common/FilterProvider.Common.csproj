@@ -22,9 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy.csproj" />
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj" />
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
+    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy-MacOS.csproj" />
   </ItemGroup>
 
 </Project>
