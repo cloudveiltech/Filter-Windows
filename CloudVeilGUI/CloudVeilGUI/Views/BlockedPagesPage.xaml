@@ -8,6 +8,7 @@
 
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:custom="clr-namespace:CloudVeilGUI.CustomFormElements"
              x:Class="CloudVeilGUI.Views.BlockedPagesPage">
     <ContentPage.Content>
         <Grid>
@@ -87,8 +88,8 @@
                     <ColumnDefinition Width="AUTO" />
                 </Grid.ColumnDefinitions>
 
-                <Button Text="Privacy Policy" Grid.Column="0" />
-                <Button Text="Request Review" Grid.Column="2" />
+                <custom:Button Text="Privacy Policy" Grid.Column="0" />
+                <custom:Button Text="Request Review" Grid.Column="2" />
             </Grid>
         </Grid>
     </ContentPage.Content>
