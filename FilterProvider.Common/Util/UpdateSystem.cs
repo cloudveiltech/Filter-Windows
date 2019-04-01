@@ -65,6 +65,9 @@ namespace FilterProvider.Common.Util
 
         private ISystemServices m_systemServices = null;
 
+        /// <summary>
+        /// Initializes the update environment. DOES NOT start CloudVeilUpdater.
+        /// </summary>
         private void initializeUpdateEnvironment()
         {
             Task.Delay(200).Wait();
@@ -158,32 +161,10 @@ namespace FilterProvider.Common.Util
                             return;
                         }
 
-                        m_lastFetchedUpdate.BeginInstallUpdateDelayed();
+                        m_lastFetchedUpdate.BeginInstallUpdate();
 
-                        if (m_lastFetchedUpdate.Kind == UpdateKind.ExePackage)
-                        {
-                            m_ipcServer.Request<object, bool>(IpcCall.StartUpdater, null).OnReply((h, _msg) =>
-                            {
-                                if (_msg.Data)
-                                {
-                                    m_ipcServer.Request(IpcCall.ShutdownForUpdate);
-                                    initializeUpdateEnvironment();
-
-                                    Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                                }
-                                else
-                                {
-                                    m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(DateTime.Now, UpdateCheckResult.UpdateFailed));
-                                }
-
-                                return true;
-                            });
-                        }
-                        else
-                        {
-                            initializeUpdateEnvironment();
-                            Environment.Exit((int)ExitCodes.ShutdownForUpdate);
-                        }
+                        initializeUpdateEnvironment();
+                        Environment.Exit((int)ExitCodes.ShutdownForUpdate);
                     });
                 }
             }

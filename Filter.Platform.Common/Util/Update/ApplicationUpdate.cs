@@ -21,9 +21,21 @@ namespace Citadel.Core.Windows.Util.Update
     [Serializable]
     public enum UpdateKind
     {
-        MsiInstaller,
-        ZipFile,
-        ExePackage
+        /// <summary>
+        /// This update kind indicates that the installer file provided is intended for use with the platform's installer framework
+        /// (think msiexec for Windows, dpkg for Ubuntu, etc.
+        /// </summary>
+        InstallerPackage,
+
+        /// <summary>
+        /// This update kind indicates that the installer file provided is a zip archive.
+        /// </summary>
+        Archive,
+
+        /// <summary>
+        /// This update kind indicates that the installer file provided is intended to be directly run by the system.
+        /// </summary>
+        ExecutablePackage
     }
 
     [Serializable]
@@ -135,7 +147,8 @@ namespace Citadel.Core.Windows.Util.Update
                     cli.DownloadProgressChanged += eventHandler;
                     cli.DownloadFileCompleted += (sender, e) =>
                     {
-                        if(e.Cancelled || e.Error != null)
+
+                        if (e.Cancelled || e.Error != null)
                         {
                             tcs.SetResult(false);
                         }
@@ -156,74 +169,7 @@ namespace Citadel.Core.Windows.Util.Update
         {
             return UpdateVersion > v;
         }
-
-        private void beginInstallUpdateDelayedExe(int secondDelay = 5, bool restartApplication = true)
-        {
-            if (!File.Exists(UpdateFileLocalPath))
-            {
-                throw new Exception("Target update installer does not exist at the expected location.");
-            }
-
-            ProcessStartInfo updaterStartupInfo;
-
-            var systemFolder = Environment.GetFolderPath(Environment.SpecialFolder.System);
-
-            if (restartApplication)
-            {
-                var executingProcess = Process.GetCurrentProcess().MainModule.FileName;
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" /ipc {3} && \"{4}\"", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments, executingProcess);
-                Console.WriteLine(args);
-                updaterStartupInfo = new ProcessStartInfo(args);
-            }
-            else
-            {
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\" /ipc {3}", systemFolder, secondDelay, UpdateFileLocalPath, UpdaterArguments);
-                Console.WriteLine(args);
-                updaterStartupInfo = new ProcessStartInfo(args);
-            }
-
-            updaterStartupInfo.UseShellExecute = false;
-            //updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            updaterStartupInfo.CreateNoWindow = true;
-            updaterStartupInfo.Arguments = UpdaterArguments;
-            Process.Start(updaterStartupInfo);
-        }
-
-        private void beginInstallUpdateDelayedMsi(int secondDelay = 5, bool restartApplication = true)
-        {
-            // TODO: Implement cross platform stuff.
-
-            if (!File.Exists(UpdateFileLocalPath))
-            {
-                throw new Exception("Target update installer does not exist at the expected location.");
-            }
-
-            ProcessStartInfo updaterStartupInfo;
-
-            var systemFolder = Environment.GetFolderPath(Environment.SpecialFolder.System);
-
-            if (restartApplication)
-            {
-                var executingProcess = Process.GetCurrentProcess().MainModule.FileName;
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\\msiexec\" /I \"{3}\" {4} && \"{5}\"", systemFolder, secondDelay, systemFolder, UpdateFileLocalPath, UpdaterArguments, executingProcess);
-                Console.WriteLine(args);
-                updaterStartupInfo = new ProcessStartInfo(args);
-            }
-            else
-            {
-                var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\\msiexec\" /I \"{3}\" {4}", systemFolder, secondDelay, systemFolder, UpdateFileLocalPath, UpdaterArguments);
-                Console.WriteLine(args);
-                updaterStartupInfo = new ProcessStartInfo(args);
-            }
-
-            updaterStartupInfo.UseShellExecute = false;
-            //updaterStartupInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            updaterStartupInfo.CreateNoWindow = true;
-            updaterStartupInfo.Arguments = UpdaterArguments;
-            Process.Start(updaterStartupInfo);
-        }
-
-
+       
         /// <summary>
         /// Begins the external installation after a N second delay specified. 
         /// </summary>
@@ -234,18 +180,7 @@ namespace Citadel.Core.Windows.Util.Update
         /// If the file designated at UpdateFileLocalPath does not exist at the time of this call,
         /// this method will throw.
         /// </exception>
-        public void BeginInstallUpdateDelayed(int secondDelay = 5, bool restartApplication = true)
-        {
-            switch(this.Kind)
-            {
-                case UpdateKind.MsiInstaller:
-                    beginInstallUpdateDelayedMsi(secondDelay, restartApplication);
-                    break;
-
-                case UpdateKind.ExePackage:
-                    beginInstallUpdateDelayedExe(secondDelay, restartApplication);
-                    break;
-            }
-        }
+        public void BeginInstallUpdate(bool restartApplication = true) =>
+            PlatformTypes.New<IFilterUpdater>().BeginInstallUpdate(this, restartApplication);
     }
 }

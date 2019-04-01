@@ -399,7 +399,7 @@ namespace CloudVeil.Windows
 
                     try
                     {
-                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(appDirectory, "CloudVeilUpdater.exe");
+                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(Path.Combine(appDirectory, "Updater"), "CloudVeilUpdater.exe");
 
                         string fileEntry = null;
 
@@ -440,8 +440,6 @@ namespace CloudVeil.Windows
 
                 m_ipcClient.RegisterResponseHandler<List<ConflictReason>>(IpcCall.ConflictsDetected, (msg) =>
                 {
-                    return true;
-
                     string message;
                     string header;
 

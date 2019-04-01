@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudVeilInstallerUI.IPC
@@ -35,18 +36,19 @@ namespace CloudVeilInstallerUI.IPC
             });
         }
 
-        public async Task<object> Call(string varName, string method, object[] parameters)
+        public Task<object> Call(string varName, string method, object[] parameters)
         {
-            object ret = null;
-
-            // This task does not get started until ret == the value requested.
-            // This function sets up everything as needed, and awaits t.Start() to be called.
-            Task<object> t = new Task<object>(() =>
-            {
-                return ret;
-            });
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
 
             Guid replyId = Guid.NewGuid();
+
+            ConnectionEventHandler<Message, Message> disconnection = null;
+
+            disconnection = (connection) =>
+            {
+                Disconnected -= disconnection;
+                tcs.TrySetCanceled();
+            };
 
             ConnectionMessageEventHandler<Message, Message> fn = null;
 
@@ -55,12 +57,11 @@ namespace CloudVeilInstallerUI.IPC
                 if (msg.Id.Equals(replyId))
                 {
                     MessageReceived -= fn;
-                    ret = msg.Data;
-
-                    t.Start();
+                    tcs.TrySetResult(msg.Data);
                 }
             };
 
+            Disconnected += disconnection;
             MessageReceived += fn;
 
             PushMessage(new Message(replyId)
@@ -71,21 +72,22 @@ namespace CloudVeilInstallerUI.IPC
                 Data = parameters
             });
 
-            return await t;
+            return tcs.Task;
         }
 
-        public async Task<object> Get(string varName, string property)
+        public Task<object> Get(string varName, string property)
         {
-            object ret = null;
-
-            // This task does not get started until ret == the value requested.
-            // This function sets up everything as needed, and awaits t.Start() to be called.
-            Task<object> t = new Task<object>(() =>
-            {
-                return ret;
-            });
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
 
             Guid replyId = Guid.NewGuid();
+
+            ConnectionEventHandler<Message, Message> disconnection = null;
+
+            disconnection = (connection) =>
+            {
+                Disconnected -= disconnection;
+                tcs.TrySetCanceled();
+            };
 
             ConnectionMessageEventHandler<Message, Message> fn = null;
 
@@ -94,13 +96,12 @@ namespace CloudVeilInstallerUI.IPC
                 if (msg.Id.Equals(replyId))
                 {
                     MessageReceived -= fn;
-                    ret = msg.Data;
-
-                    t.Start();
+                    tcs.SetResult(msg.Data);
                 }
             };
 
             MessageReceived += fn;
+            Disconnected += disconnection;
 
             PushMessage(new Message(replyId)
             {
@@ -110,12 +111,13 @@ namespace CloudVeilInstallerUI.IPC
                 Data = null
             });
 
-            return await t;
+            return tcs.Task;
         }
 
         public abstract void PushMessage(Message message);
         
         public event ConnectionMessageEventHandler<Message, Message> MessageReceived;
+        public event ConnectionEventHandler<Message, Message> Disconnected;
 
         private static void Error(NamedPipeConnection<Message, Message> conn)
         {
@@ -124,6 +126,11 @@ namespace CloudVeilInstallerUI.IPC
                 Command = Command.Error,
                 Data = null
             });
+        }
+
+        protected void OnDisconnected(NamedPipeConnection<Message, Message> connection)
+        {
+            Disconnected?.Invoke(connection);
         }
 
         protected void OnMessageReceived(NamedPipeConnection<Message, Message> connection, Message message)
@@ -247,7 +254,7 @@ namespace CloudVeilInstallerUI.IPC
                         try
                         {
                             object ret = methodInfo.Invoke(obj, message.Data as object[]);
-                            connection.PushMessage(new Message()
+                            connection.PushMessage(new Message(message.Id)
                             {
                                 Command = Command.Response,
                                 Property = message.Property,
@@ -267,12 +274,24 @@ namespace CloudVeilInstallerUI.IPC
 
     }
 
+    public delegate void ClientConnectedHandler();
+
     public class UpdateIPCServer : IPCCommunicator
     {
-        NamedPipeServer<Message> server;
+        public const string PipeName = "__CloudVeilUpdaterPipe__";
+
+        public NamedPipeServer<Message> server;
+
+        public event ClientConnectedHandler ClientConnected;
 
         public static UpdateIPCServer Default { get; private set; }
 
+        /// <summary>
+        /// Gets a security descriptor that will permit non-elevated clients to connect to the server. 
+        /// </summary>
+        /// <returns>
+        /// A security descriptor that will permit non-elevated clients to connect to the server. 
+        /// </returns>
         private static PipeSecurity GetSecurityForChannel()
         {
             PipeSecurity pipeSecurity = new PipeSecurity();
@@ -296,6 +315,13 @@ namespace CloudVeilInstallerUI.IPC
             server = new NamedPipeServer<Message>(pipeName, GetSecurityForChannel());
 
             server.ClientMessage += OnMessageReceived;
+            server.ClientConnected += Server_ClientConnected;
+            server.ClientDisconnected += OnDisconnected;
+        }
+
+        private void Server_ClientConnected(NamedPipeConnection<Message, Message> connection)
+        {
+            ClientConnected?.Invoke();
         }
 
         public void Start() => server.Start();

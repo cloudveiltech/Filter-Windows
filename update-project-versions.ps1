@@ -1,4 +1,6 @@
-$version = Read-Host "Enter new project versions: "
+param (
+    [string]$version
+)
 
 $arr = Get-ChildItem AssemblyInfo.cs -Recurse
 

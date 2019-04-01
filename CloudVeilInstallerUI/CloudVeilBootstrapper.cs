@@ -4,6 +4,7 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -42,6 +43,18 @@ namespace CloudVeilInstallerUI
     {
         public static Dispatcher BootstrapperDispatcher { get; private set; }
 
+        public bool IsExiting { get; set; } = false;
+
+        private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
+        public void SignalExit()
+        {
+            IsExiting = true;
+            exitWaitHandle.Set();
+        }
+
+        UpdateIPCServer server = null;
+
         protected override void Run()
         {
             try
@@ -50,6 +63,7 @@ namespace CloudVeilInstallerUI
 
                 bool runIpc = false;
                 bool showPrompts = true;
+                bool waitForFilterExit = false;
 
                 Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
                 foreach (string arg in args)
@@ -62,6 +76,10 @@ namespace CloudVeilInstallerUI
                     {
                         showPrompts = false;
                     }
+                    else if(arg == "/waitforexit")
+                    {
+                        waitForFilterExit = true;
+                    }
                 }
 
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
@@ -70,20 +88,49 @@ namespace CloudVeilInstallerUI
 
                 ISetupUI setupUi = null;
                 InstallerViewModel model = new InstallerViewModel(this);
-                UpdateIPCServer server = null;
+
+                if (waitForFilterExit)
+                {
+                    while (true)
+                    {
+                        Process[] fsp = Process.GetProcessesByName("FilterServiceProvider");
+                        if (fsp.Length > 0)
+                        {
+                            Thread.Sleep(10);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
 
                 if (runIpc)
                 {
-                    server = new UpdateIPCServer("__CloudVeilUpdaterPipe__");
-                    server.MessageReceived += CheckExit;
+                    if (server == null)
+                    {
+                        server = new UpdateIPCServer(UpdateIPCServer.PipeName);
 
-                    server.RegisterObject("InstallerViewModel", model);
-                    server.RegisterObject("SetupUI", setupUi);
-                    server.Start();
+                        server.MessageReceived += CheckExit;
 
-                    server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
+                        server.RegisterObject("InstallerViewModel", model);
+
+                        server.Start();
+                    }
 
                     setupUi = new IpcWindow(server, model, showPrompts);
+                    server.RegisterObject("SetupUI", setupUi);
+
+                    server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
+                    
+                    setupUi.Closed += (sender, e) => SignalExit();
+
+                    server.ClientConnected += () =>
+                    {
+                        Engine.Log(LogLevel.Standard, "Resynchronizing UI with new client.");
+                        (setupUi as IpcWindow)?.ResynchronizeUI();
+                    };
+
                     model.SetSetupUi(setupUi);
 
                     model.PropertyChanged += (sender, e) =>
@@ -100,13 +147,24 @@ namespace CloudVeilInstallerUI
                 else
                 {
                     setupUi = new MainWindow(model, showPrompts);
-                    setupUi.Closed += (sender, e) => BootstrapperDispatcher.InvokeShutdown();
+                    setupUi.Closed += (sender, e) =>
+                    {
+                        Engine.Log(LogLevel.Standard, "Closing installer.");
+                        BootstrapperDispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);
+                        Engine.Log(LogLevel.Standard, "Shutdown invoked.");
+                    };
 
                     model.SetSetupUi(setupUi);
-                    this.Engine.Detect();
 
-                    setupUi.Show();
+                    Engine.Detect();
+                    
+                    if(Command.Display != Display.None && Command.Display != Display.Embedded)
+                    {
+                        setupUi.Show();
+                    }
+
                     Dispatcher.Run();
+
                     this.Engine.Quit(0);
                 }
             }
@@ -128,7 +186,11 @@ namespace CloudVeilInstallerUI
 
                 Thread t = new Thread(() =>
                 {
-                    Dispatcher.Run();
+                    while(!IsExiting)
+                    {
+                        exitWaitHandle.WaitOne(2000);
+                    }
+
                     Engine.Quit(0);
                 });
 
@@ -140,7 +202,7 @@ namespace CloudVeilInstallerUI
         {
             if(message.Command == IPC.Command.Exit)
             {
-                BootstrapperDispatcher.InvokeShutdown();
+                SignalExit();
             }
         }
     }

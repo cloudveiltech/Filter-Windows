@@ -7,6 +7,7 @@
 
 ﻿using Citadel.IPC;
 using Citadel.IPC.Messages;
+using Filter.Platform.Common.Types;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,8 @@ namespace DiagnosticsCollector
 
         static void Main(string[] args)
         {
+            Citadel.Core.Windows.Platform.Init();
+
             Console.WriteLine("This program was designed to be a diagnostics collector for CloudVeil for Windows.");
             Console.WriteLine("Use this program when you want to collect data on sites that aren't behaving properly while the filter is running.");
             Console.WriteLine("Here are the common commands:");
@@ -102,6 +105,24 @@ namespace DiagnosticsCollector
                             }
 
                             StartDiagnostics(filename);
+                            break;
+                        }
+
+                    case "admin-test":
+                        {
+                            string filename = null, arguments = null;
+                            Console.Write("Enter exe filename: ");
+                            filename = Console.ReadLine();
+
+                            Console.Write("Enter arguments: ");
+                            arguments = Console.ReadLine();
+
+                            ipcClient.Send<MyProcessInfo>(IpcCall.AdministratorStart, new MyProcessInfo()
+                            {
+                                Filename = filename,
+                                Arguments = arguments 
+                            });
+
                             break;
                         }
 

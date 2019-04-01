@@ -17,6 +17,7 @@ namespace CloudVeilInstallerUI.IPC
             client.AutoReconnect = true;
 
             client.ServerMessage += OnMessageReceived;
+            client.Disconnected += OnDisconnected;
         }
 
         public void Start() => client.Start();

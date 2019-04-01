@@ -19,7 +19,7 @@ namespace CloudVeilUpdater
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            UpdateIPCClient client = new UpdateIPCClient("__CloudVeilUpdaterPipe__");
+            UpdateIPCClient client = new UpdateIPCClient(UpdateIPCServer.PipeName);
 
             RemoteInstallerViewModel model = new RemoteInstallerViewModel(client);
             ISetupUI setupUi = null;

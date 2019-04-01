@@ -21,6 +21,7 @@ namespace Citadel.IPC
         InstallerDownloadProgress,
         InstallerDownloadFinished,
         InstallerDownloadStarted,
-        InternetAccessible
+        InternetAccessible,
+        AdministratorStart
     }
 }

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -28,9 +28,9 @@
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\e_sqlite3.dll -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\x86\* -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\*.pdb -->
-        <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
-        <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
-        <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
         <Component Id="com_15BA3E04_E955_2942_9625_325577B7C8B6" Guid="12183EB0-B5B7-437B-8908-3C7C8262296E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_15BA3E04_E955_2942_9625_325577B7C8B6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CitadelGUI\bin\Release x64\Topshelf.dll" KeyPath="yes" />

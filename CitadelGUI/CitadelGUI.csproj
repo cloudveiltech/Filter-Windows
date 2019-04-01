@@ -109,7 +109,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Platform\Windows\WindowsFilterStarter.cs" />
     <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Te\Citadel\CitadelMain.cs" />

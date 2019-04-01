@@ -51,7 +51,10 @@ foreach ($build in $builds) {
         & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration $projPath /t:Clean,Build
     } else {
         & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration /p:Platform=$platform $projPath /t:Clean,Build
+    }
 
+    if($LastExitCode -ne 0) {
+        exit
     }
 }
 
@@ -94,9 +97,3 @@ Copy-Item $bundle64 -Destination $finalBundle64
 Copy-Item $output64 -Destination $final64
 
 <# TODO: Sign MSI #>
-
-Copy-Item $output64 -Destination $final64
-Copy-Item $output86 -Destination $final86
-
-Copy-Item $bundle64 -Destination $finalBundle64
-Copy-Item $bundle86 -Destination $finalBundle86

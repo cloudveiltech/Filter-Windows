@@ -16,7 +16,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CloudVeil.Windows.Platform
+namespace Citadel.Core.Windows
 {
     public class WindowsFilterAgent : IFilterAgent
     {

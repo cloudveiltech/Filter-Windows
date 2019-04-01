@@ -20,37 +20,49 @@ namespace InstallerCustomActions
         [CustomAction]
         public static ActionResult GuardInstall(Session session)
         {
-            var installDir = session.CustomActionData["TargetDirectory"];
-
-            session.Log($"InstallGuard: Install directory is {installDir}");
-            
-            foreach(var proc in Process.GetProcesses())
+            try
             {
-                string mainModulePath = string.Empty;
-
-                try
+                string installDir = null;
+                if (!session.CustomActionData.TryGetValue("TargetDirectory", out installDir))
                 {
-                    if(proc.Id == Process.GetCurrentProcess().Id)
+                    session.Log($"InstallGuard: Could not find TargetDirectory variable");
+                }
+                else
+                {
+                    session.Log($"InstallGuard: Install directory is {installDir}");
+                }
+
+                foreach (var proc in Process.GetProcesses())
+                {
+                    string mainModulePath = string.Empty;
+
+                    try
                     {
-                        continue;
+                        if (proc.Id == Process.GetCurrentProcess().Id)
+                        {
+                            continue;
+                        }
+
+                        mainModulePath = proc.MainModule.FileName;
+
+                        session.Log("InstallGuard: Module Path = '{0}'", mainModulePath);
+                    }
+                    catch
+                    {
+
                     }
 
-                    mainModulePath = proc.MainModule.FileName;
+                    if (mainModulePath != null && mainModulePath.Length > 0 && mainModulePath.IndexOf(installDir) != -1)
+                    {
+                        session.Log($"InstallGuard: Found running CloudVeil instance.");
 
-                    session.Log("InstallGuard: Module Path = '{0}'", mainModulePath);
+                        return ActionResult.Failure;
+                    }
                 }
-                catch
-                {
-
-                }
-
-                if(mainModulePath != null && mainModulePath.Length > 0 && mainModulePath.IndexOf(installDir) != -1)
-                {
-                    session.Log($"InstallGuard: Found running CloudVeil instance.");
-
-                    return ActionResult.Failure;
-                    //throw new Exception("Cannot uninstall the filter while the filter is running. Please exit the filter, or contact your support provider for assistance.");
-                }
+            }
+            catch(Exception ex)
+            {
+                session.Log("GuardInstall error occurred {0}", ex);
             }
 
             return ActionResult.Success;

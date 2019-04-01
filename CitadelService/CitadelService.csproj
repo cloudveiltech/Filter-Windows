@@ -85,6 +85,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Filter.Native.Windows">
+      <HintPath>..\Filter.Native.Windows\bin\$(Platform)\$(Configuration)\Filter.Native.Windows.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -137,10 +140,6 @@
     <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
       <Name>Citadel.IPC.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
-      <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>
-      <Name>Filter.Native.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>

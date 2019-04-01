@@ -35,5 +35,19 @@ namespace CloudVeilInstallerUI.Views
         {
             viewModel.Exit();
         }
+
+        private void RestartComputer(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RebootMethods.Reboot(ShutdownReason.MajorApplication | ShutdownReason.MinorInstallation | ShutdownReason.FlagPlanned);
+            }
+            catch(Exception ex)
+            {
+                viewModel.FinishedMessage = "Failed to restart the computer. Please restart manually before trying again.";
+
+                viewModel.StartFilterIfExists();
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using CloudVeilInstallerUI.Models;
+﻿using CloudVeilInstallerUI.IPC;
+using CloudVeilInstallerUI.Models;
 using CloudVeilInstallerUI.Views;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
 
 namespace CloudVeilInstallerUI.ViewModels
@@ -18,6 +20,7 @@ namespace CloudVeilInstallerUI.ViewModels
     public interface ISetupUI
     {
         void ShowWelcome();
+        void ShowLicense();
         void ShowInstall();
 
         void ShowFinish();
@@ -28,16 +31,20 @@ namespace CloudVeilInstallerUI.ViewModels
         event EventHandler Closed;
 
         IntPtr Hwnd { get; }
+        Dispatcher Dispatcher { get; }
+
     }
 
     public interface IInstallerViewModel : INotifyPropertyChanged
     {
         void TriggerWelcome();
-        void TriggerDetect();
+        void TriggerLicense();
         void TriggerInstall();
-        void TriggerFailed(string message, string heading = null);
+        void TriggerFailed(string message, string heading = null, bool needsRestart = false);
         void TriggerFinished();
         void Exit();
+
+        void StartFilterIfExists();
 
         string WelcomeButtonText { get; set; }
 
@@ -46,6 +53,8 @@ namespace CloudVeilInstallerUI.ViewModels
         string WelcomeText { get; set; }
 
         bool ShowPrompts { get; set; }
+
+        bool NeedsRestart { get; set; }
 
         CVInstallType InstallType { get; set; }
 
@@ -66,7 +75,7 @@ namespace CloudVeilInstallerUI.ViewModels
 
     public class InstallerViewModel : IInstallerViewModel
     {
-        public InstallerViewModel(BootstrapperApplication ba)
+        public InstallerViewModel(CloudVeilBootstrapper ba)
         {
             this.ba = ba;
 
@@ -92,7 +101,7 @@ namespace CloudVeilInstallerUI.ViewModels
             ba.ResolveSource += ResolveSource;
         }
 
-        private BootstrapperApplication ba;
+        private CloudVeilBootstrapper ba;
         private IntPtr hwnd;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -109,6 +118,8 @@ namespace CloudVeilInstallerUI.ViewModels
 
         public void TriggerWelcome()
         {
+            ba.Engine.Log(LogLevel.Standard, $"TriggerWelcome {ba.Command.Display}");
+
             try
             {
                 SetupUi.ShowWelcome();
@@ -120,14 +131,20 @@ namespace CloudVeilInstallerUI.ViewModels
             }
         }
 
-        public void TriggerDetect()
+        public void TriggerLicense()
         {
-            ba.Engine.Detect(hwnd);
+            SetupUi.ShowLicense();
         }
 
         public void TriggerInstall()
         {
-            SetupUi.ShowInstall();
+            ba.Engine.Log(LogLevel.Standard, $"TriggerInstall {ba.Command.Display}");
+
+            if(ba.Command.Display != Display.None && ba.Command.Display != Display.Embedded)
+            {
+                SetupUi.ShowInstall();
+            }
+
             State = InstallationState.Initializing;
 
             LaunchAction desiredPlan = LaunchAction.Install;
@@ -142,18 +159,29 @@ namespace CloudVeilInstallerUI.ViewModels
                     break;
 
                 case CVInstallType.Update:
-                    desiredPlan = LaunchAction.UpdateReplace;
+                    desiredPlan = LaunchAction.Install;
                     break;
             }
 
             ba.Engine.Plan(desiredPlan);
-
-            // TODO: Set up planning here.
-            // Then apply.
         }
 
-        public void TriggerFailed(string message, string heading = null)
+        public void TriggerFailed(string message, string heading = null, bool needsRestart = false)
         {
+            ba.Engine.Log(LogLevel.Standard, $"TriggerFailed {ba.Command.Display}");
+
+            
+            switch (ba.Command.Display)
+            {
+                case Display.Full:
+                case Display.Passive:
+                    break;
+
+                default:
+                    Exit();
+                    return;
+            }
+
             if (heading == null) heading = $"Failed to {installTypeVerb} CloudVeil for Windows";
 
             State = InstallationState.Failed;
@@ -166,6 +194,18 @@ namespace CloudVeilInstallerUI.ViewModels
 
         public void TriggerFinished()
         {
+            ba.Engine.Log(LogLevel.Standard, $"TriggerFinished {ba.Command.Display}");
+
+            switch (ba.Command.Display)
+            {
+                case Display.Full:
+                    break;
+
+                default:
+                    Exit();
+                    return;
+            }
+
             State = InstallationState.Installed;
             string verb = "has been " + installTypeVerbPast;
 
@@ -178,7 +218,29 @@ namespace CloudVeilInstallerUI.ViewModels
 
         public void Exit()
         {
-            SetupUi.Close();
+            ba.Engine.Log(LogLevel.Standard, "Exit called");
+
+            ba.IsExiting = true;
+
+            Delegate closeMe = new Action(() => SetupUi.Close());
+
+            if (SetupUi.Dispatcher != null)
+            {
+                SetupUi.Dispatcher.BeginInvoke(closeMe);
+            }
+            else
+            {
+                SetupUi.Close();
+            }
+        }
+
+        public void StartFilterIfExists()
+        {
+            Services services = new Services(ba);
+            if(services.Exists("FilterServiceProvider"))
+            {
+                services.Start("FilterServiceProvider");
+            }
         }
 
         #region Variables
@@ -223,6 +285,17 @@ namespace CloudVeilInstallerUI.ViewModels
             {
                 showPrompts = value;
                 OnPropertyChanged(nameof(ShowPrompts));
+            }
+        }
+
+        private bool needsRestart = false;
+        public bool NeedsRestart
+        {
+            get => needsRestart;
+            set
+            {
+                needsRestart = value;
+                OnPropertyChanged(nameof(NeedsRestart));
             }
         }
 
@@ -321,15 +394,28 @@ namespace CloudVeilInstallerUI.ViewModels
             State = InstallationState.Initializing;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="detectedNewerBundle"/> is true and <see cref="installedMsiNonexistent"/> is false,
+        /// then we want to trigger removal of this bundle without surfacing any UI.
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetectComplete(object sender, DetectCompleteEventArgs e)
         {
-            if(ShowPrompts)
+            LaunchAction desiredPlan = ba.Command.Action;
+
+            switch(ba.Command.Display)
             {
-                this.TriggerWelcome();
-            }
-            else
-            {
-                this.TriggerInstall();
+                case Display.Full:
+                    TriggerWelcome();
+                    break;
+
+                default:
+                    TriggerInstall();
+                    break;
             }
         }
 
@@ -337,7 +423,11 @@ namespace CloudVeilInstallerUI.ViewModels
         {
             if(e.PackageId == "CloudVeilForWindows")
             {
-                if (e.State == PackageState.Absent && InstallType == CVInstallType.None)
+                if(ba.Command.Action == LaunchAction.Uninstall)
+                {
+                    InstallType = CVInstallType.Uninstall;
+                }
+                else if (e.State == PackageState.Absent && InstallType == CVInstallType.None)
                 {
                     InstallType = CVInstallType.NewInstall;
                 }
@@ -350,7 +440,7 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private void DetectRelatedPackage(object sender, DetectRelatedMsiPackageEventArgs e)
         {
-            if(e.Operation == RelatedOperation.MajorUpgrade)
+            if (e.Operation == RelatedOperation.MajorUpgrade)
             {
                 var installedPackage = new ProductInstallation(e.ProductCode);
 
@@ -361,14 +451,16 @@ namespace CloudVeilInstallerUI.ViewModels
             }
         }
 
-        private Dictionary<string, RequestState> relatedBundles = new Dictionary<string, RequestState>();
+        private Dictionary<string, Tuple<RequestState, DetectRelatedBundleEventArgs>> relatedBundles = new Dictionary<string, Tuple<RequestState, DetectRelatedBundleEventArgs>>();
         private void DetectRelatedBundle(object sender, DetectRelatedBundleEventArgs e)
         {
             ba.Engine.Log(LogLevel.Standard, e.ProductCode);
 
+            RequestState defaultBundleState = ba.Command.Action == LaunchAction.Uninstall ? RequestState.None : RequestState.Absent;
+
             if (e.RelationType == RelationType.Update || e.RelationType == RelationType.Upgrade)
             {
-                relatedBundles.Add(e.ProductCode, RequestState.Absent);
+                relatedBundles.Add(e.ProductCode, new Tuple<RequestState, DetectRelatedBundleEventArgs>(defaultBundleState, e));
             }
         }
 
@@ -384,10 +476,10 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private void PlanRelatedBundle(object sender, PlanRelatedBundleEventArgs e)
         {
-            RequestState state;
-            if(relatedBundles.TryGetValue(e.BundleId, out state))
+            Tuple<RequestState, DetectRelatedBundleEventArgs> stateTuple;
+            if(relatedBundles.TryGetValue(e.BundleId, out stateTuple))
             {
-                e.State = state;
+                e.State = stateTuple.Item1;
             }
         }
 
@@ -431,9 +523,13 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private void OnExecuteProgress(object sender, ExecuteProgressEventArgs e)
         {
-            ba.Engine.Log(LogLevel.Standard, $"ExecuteProgress: {e.PackageId} - {e.OverallPercentage} - {e.ProgressPercentage}");
             this.Progress = e.OverallPercentage;
             this.IsIndeterminate = false;
+
+            if(ba.Command.Display == Display.Embedded)
+            {
+                ba.Engine.SendEmbeddedProgress(e.ProgressPercentage, e.OverallPercentage);
+            }
         }
 
         private string failedPackageId = null;
@@ -460,6 +556,8 @@ namespace CloudVeilInstallerUI.ViewModels
             else
             {
                 string message = null;
+                bool needsRestart = false;
+
                 if(installType == CVInstallType.Uninstall && failedPackageId == "CloudVeilForWindows")
                 {
                     message = $"InstallGuard has blocked removal of CloudVeil for Windows. Please deactivate the filter before trying again.";
@@ -468,13 +566,14 @@ namespace CloudVeilInstallerUI.ViewModels
                 else if(e.Status == ApplyStatus.FAIL_NOACTION_REBOOT)
                 {
                     message = $"Failed to {installTypeVerb} CloudVeil for Windows because a reboot is required.";
+                    needsRestart = true;
                 }
                 else
                 {
                     message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {e.Status}. Please try again or contact support.";
                 }
 
-                TriggerFailed(message);
+                TriggerFailed(message, null, needsRestart);
             }
         }
 

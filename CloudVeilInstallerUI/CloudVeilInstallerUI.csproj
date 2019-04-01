@@ -53,8 +53,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\WiX Toolset v3.11\SDK\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
     </Reference>
-    <Reference Include="NamedPipeWrapper, Version=1.5.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CloudVeil.NamedPipeWrapper.1.5.2\lib\netstandard2.0\NamedPipeWrapper.dll</HintPath>
+    <Reference Include="NamedPipeWrapper, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Com.TechnikEmpire.NamedPipeWrapper.1.5.0\lib\net40\NamedPipeWrapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -67,6 +67,7 @@
     <Reference Include="System.Security.Principal.Windows, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Principal.Windows.4.5.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -91,6 +92,8 @@
     <Compile Include="Models\ApplyStatus.cs" />
     <Compile Include="Models\InstallationState.cs" />
     <Compile Include="Models\InstallType.cs" />
+    <Compile Include="RebootMethods.cs" />
+    <Compile Include="Services.cs" />
     <Compile Include="ViewModels\InstallerViewModel.cs" />
     <Compile Include="ViewModels\IpcInstallerViewModel.cs" />
     <Compile Include="Views\DownloadView.xaml.cs">
@@ -101,6 +104,9 @@
     </Compile>
     <Compile Include="Views\InstallView.xaml.cs">
       <DependentUpon>InstallView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LicenseView.xaml.cs">
+      <DependentUpon>LicenseView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WelcomeView.xaml.cs">
       <DependentUpon>WelcomeView.xaml</DependentUpon>
@@ -127,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\InstallView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LicenseView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -162,6 +172,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="Resources\MOZILLA_PUBLIC_LICENSE.rtf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

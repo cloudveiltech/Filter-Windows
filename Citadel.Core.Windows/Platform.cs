@@ -43,6 +43,10 @@ namespace Citadel.Core.Windows
             PlatformTypes.Register<IAuthenticationStorage>((arr) => new RegistryAuthenticationStorage());
 
             PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());
+
+            PlatformTypes.Register<IFilterAgent>((arr) => new WindowsFilterAgent());
+
+            PlatformTypes.Register<IFilterUpdater>((arr) => new WindowsFilterUpdater());
         }
     }
 }
