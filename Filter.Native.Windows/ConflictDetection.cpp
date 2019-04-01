@@ -107,14 +107,14 @@ static void initializeDriverConflictArray() {
     conflictsArrayLength = totalLength;
 }
 
-int isConflictInArray(int* arr, int len, int conflict) {
+bool isConflictInArray(int* arr, int len, int conflict) {
     for (int i = 0; i < len; i++) {
         if (arr[i] == conflict) {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 int SearchConflictReason(int** myConflictsArray) {
@@ -177,13 +177,14 @@ int SearchConflictReason(int** myConflictsArray) {
 
     // TODO: Check for services here.
 
-    *myConflictsArray = NULL;
-    delete conflictArrayList;
+    if (totalConflictTypesDiscovered == 0) {
+        delete conflictArrayList;
+        *myConflictsArray = NULL;
+    }
+    else {
+        *myConflictsArray = conflictArrayList;
+    }
 
 cleanup:
     return totalConflictTypesDiscovered;
-}
-
-int FindWFPDriverConflicts() {
-    return 0; // TODO: Build this yet.
 }
