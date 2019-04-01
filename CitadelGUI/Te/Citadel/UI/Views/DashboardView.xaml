@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿<!--
     * Copyright © 2017 Jesse Nicholson
     * This Source Code Form is subject to the terms of the Mozilla Public
@@ -261,3 +262,592 @@
         </Controls:MetroAnimatedSingleRowTabControl>
     </Grid>-->
 </local:BaseView>
+=======
+﻿<!--
+    * Copyright © 2017 Jesse Nicholson
+    * This Source Code Form is subject to the terms of the Mozilla Public
+    * License, v. 2.0. If a copy of the MPL was not distributed with this
+    * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+<local:BaseView
+    x:Class="Te.Citadel.UI.Views.DashboardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CitadelControls="clr-namespace:Te.Citadel.UI.Controls"
+    xmlns:CitadelViewModels="clr-namespace:Te.Citadel.UI.ViewModels"
+    xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    mc:Ignorable="d">
+
+    <UserControl.DataContext>
+        <CitadelViewModels:DashboardViewModel />
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <ItemsControl VerticalAlignment="Stretch" BorderBrush="AliceBlue" BorderThickness="1">
+                <ItemsControl.Items>
+                    <CitadelControls:SidebarButton Content="Blocked Pages" />
+                    <CitadelControls:SidebarButton Content="Self-moderation" />
+                    <CitadelControls:SidebarButton Content="Time Restrictions" />
+                    <CitadelControls:SidebarButton Content="Relaxed Policy" />
+                    <CitadelControls:SidebarButton Content="Advanced" />
+                    <CitadelControls:SidebarButton Content="Support" />
+                    <CitadelControls:SidebarButton Content="Diagnostics" />
+                </ItemsControl.Items>
+            </ItemsControl>
+            
+            <!--<Grid.RowDefinitions>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+                <RowDefinition Height="48"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <ToggleButton Style="{StaticResource MetroFlatToggleButton}" Grid.ColumnSpan="1" Grid.Row="0" x:Name="historyButton"
+                          Click="Click_SidebarButton" CommandParameter="history">
+                <TextBlock>
+                    <IconPacks:PackIconFontAwesome Width="16" Height="16" Kind="History" />
+                    <Label Content="History"/>
+                </TextBlock>
+            </ToggleButton>
+
+            <ToggleButton x:Name="settingsButton"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Grid.Row="1"
+                          Click="Click_SidebarButton"
+                          CommandParameter="settings">
+                <TextBlock>
+                    <IconPacks:PackIconFontAwesome Width="16" Height="16" Kind="Cog"/>
+                    <Label Content="Settings"/>
+                </TextBlock>
+            </ToggleButton>
+
+            <ToggleButton x:Name="troubleshootingButton"
+                          Content="Troubleshooting"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Grid.Row="2"
+                          Click="Click_SidebarButton" CommandParameter="troubleshooting"/>
+
+            <ToggleButton x:Name="advancedButton"
+                          Content="Advanced"
+                          Style="{StaticResource MetroFlatToggleButton}"
+                          Click="Click_SidebarButton" CommandParameter="advanced"
+                          Grid.Row="3" />-->
+        </Grid>
+
+        <Controls:TransitioningContentControl Grid.Column="1" x:Name="CurrentView" x:FieldModifier="internal" />
+
+        <!--
+        <Controls:MetroAnimatedSingleRowTabControl Grid.Column="1">
+            <TabItem Header="History">
+                <Grid>
+
+                    <!-  This style on the grid will force the cells in the DataGrid to truncate their text. -
+                    <Grid.Resources>
+                        <Style x:Key="TextBlockStyleKey" TargetType="{x:Type TextBlock}">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        </Style>
+                    </Grid.Resources>
+
+                    <TextBlock
+                        Width="690"
+                        Height="62"
+                        Margin="10,53,10,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap">
+                        <Span
+                            FontFamily="MyriadPro-Regular"
+                            FontSize="14"
+                            Foreground="#FF231F20"><Run Text="Request review of a blocked url by selecting the item and then click Request Review." /></Span>
+                    </TextBlock>
+
+                    <custom:Button
+                        Height="25"
+                        Margin="554,315,10,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Command="{Binding RequestBlockActionReviewCommand}"
+                        CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                        Content="Request Review">
+                        <custom:Button.Style>
+                            <!-  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -
+                            <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <DataGrid
+                        x:Name="m_blockEventsDataGrid"
+                        Grid.Row="0"
+                        Margin="10,121,10,43"
+                        x:FieldModifier="private"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding BlockEvents, Mode=OneWay}"
+                        VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding CategoryName, Mode=OneWay}"
+                                Header="Category" />
+
+                            <DataGridTextColumn
+                                Width="100*"
+                                Binding="{Binding FullRequest, Mode=OneWay}"
+                                Header="Request" />
+                        </DataGrid.Columns>
+
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Settings">
+                <Grid>
+
+                    <Label
+                        Width="258"
+                        Margin="21,10,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        HorizontalContentAlignment="Center"
+                        Content="Relaxed Policy"
+                        FontFamily="Segoe UI"
+                        FontSize="22"
+                        FontWeight="UltraLight"
+                        Foreground="Black" />
+
+                    <TextBlock
+                        Width="258"
+                        Height="98"
+                        Margin="21,70,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap">
+                        <Run Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions on certain websites, you can use the relaxed filtering rules for the given time span below." />
+                        <Run />
+                    </TextBlock>
+
+                    <!-  Shows the last time that we synced with the server that gives us filtering data.  -
+                    <TextBlock
+                        Width="333"
+                        Height="30"
+                        Margin="367,318,10,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextAlignment="Right"
+                        TextWrapping="Wrap">
+                        <Run Text="{Binding Path=LastSyncStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Run />
+                    </TextBlock>
+
+                    <Label
+                        Height="30"
+                        Margin="21,168,591,158"
+                        Content="Uses Available:"
+                        FontSize="12" />
+
+                    <custom:Button
+                        Width="171"
+                        Margin="108,258,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding UseRelaxedPolicyCommand}"
+                        Content="Use Relaxed Policy"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Label
+                        Height="30"
+                        Margin="21,200,591,126"
+                        Content="Time Permitted:"
+                        FontSize="12" />
+
+                    <TextBlock
+                        Width="120"
+                        Height="30"
+                        Margin="159,174,431,154"
+                        FontSize="12"
+                        Text="{Binding Path=AvailableRelaxedRequests, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextAlignment="Right" />
+
+                    <TextBlock
+                        Width="120"
+                        Height="30"
+                        Margin="159,206,431,122"
+                        FontSize="12"
+                        Text="{Binding Path=RelaxedDuration, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextAlignment="Right" />
+
+                    <custom:Button
+                        Width="171"
+                        Margin="108,295,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding RelinquishRelaxedPolicyCommand}"
+                        Content="Relinquish Relaxed Policy"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <Grid
+                        x:Name="m_disabledInternetGrid"
+                        x:FieldModifier="private"
+                        Visibility="Hidden">
+
+                        <Rectangle
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Fill="White" />
+
+                        <Label
+                            Width="258"
+                            Margin="229,10,229,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            Content="Internet Disabled"
+                            FontFamily="Segoe UI"
+                            FontSize="22"
+                            FontWeight="UltraLight"
+                            Foreground="Black" />
+
+                        <TextBlock
+                            Width="660"
+                            Height="98"
+                            Margin="28,70,28,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            FontFamily="Segoe UI"
+                            FontSize="14"
+                            FontWeight="UltraLight"
+                            Foreground="Black"
+                            TextWrapping="Wrap">
+                            <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run Text="Your internet will be restored at the date and time given below." /></TextBlock>
+
+                        <Label
+                            x:Name="m_internetRestorationTimeLabel"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            HorizontalContentAlignment="Center"
+                            x:FieldModifier="private"
+                            Content=""
+                            FontFamily="Segoe UI"
+                            FontSize="18"
+                            FontWeight="UltraLight"
+                            Foreground="Black" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Advanced" Margin="0,0,0,0">
+                <Grid>
+
+                    <Label
+                        Width="258"
+                        Margin="21,10,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        HorizontalContentAlignment="Center"
+                        Content="Help"
+                        FontFamily="Segoe UI"
+                        FontSize="22"
+                        FontWeight="UltraLight"
+                        Foreground="Black" />
+
+                    <TextBlock
+                        Width="258"
+                        Height="36"
+                        Margin="21,70,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="http://www.cloudveil.org" RequestNavigate="OnHyperlinkClicked">
+                            www.cloudveil.org
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock
+                        Width="258"
+                        Height="36"
+                        Margin="21,110,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="https://cloudveil.zendesk.com/hc/en-us" RequestNavigate="OnHyperlinkClicked">
+                            Knowledgebase
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock
+                        Width="258"
+                        Height="36"
+                        Margin="21,150,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap">
+                        <Hyperlink NavigateUri="mailto:support@cloudveil.org" RequestNavigate="OnHyperlinkClicked">
+                            support@cloudveil.org
+                        </Hyperlink>
+                        <LineBreak />
+                        <Run>
+                            (888) 782-4962
+                        </Run>
+                    </TextBlock>
+
+                    <TextBlock
+                        Width="258"
+                        Height="36"
+                        Margin="21,293,431,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        Text="Review Logs"
+                        TextWrapping="Wrap" />
+
+                    <custom:Button
+                        x:Name="requestUpdate"
+                        Content="{Binding UpdateText}"
+                        IsEnabled="{Binding IsUpdateButtonEnabled}"
+                        HorizontalAlignment="Left"
+                        Margin="144,263,0,0"
+                        VerticalAlignment="Top"
+                        Width="136"
+                        Style="{StaticResource AccentedSquareButtonStyle}"
+                        Command="{Binding RequestUpdateCommand}"/>
+
+                    <Controls:ProgressRing
+                        x:Name="requestUpdateProgress"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Visibility="{Binding Path=UpdateRequestInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+                    
+                    <IconPacks:PackIconFontAwesome 
+                        Kind="Check"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Foreground="#CC119EDA"
+                        Visibility="{Binding Path=UpToDate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+
+                    <IconPacks:PackIconFontAwesome
+                        Kind="Times"
+                        Margin="287,263,397,56"
+                        Width="28" Height="28"
+                        Foreground="Red"
+                        Visibility="{Binding Path=ErrorOccurred, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+
+                    <Label
+                        Content="{Binding ErrorText}"
+                        Height="28" Margin="322,263,296,56"/>
+
+                    <!-  View log directory button.  -
+                    <custom:Button
+                        Width="136"
+                        Margin="144,294,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding ViewLogsCommand}"
+                        Content="View Log Files"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <!-  Request deactivation button.  -
+                    <custom:Button
+                        Width="136"
+                        Margin="553,294,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding RequestDeactivateCommand}"
+                        Content="Deactivate"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                    <custom:Button
+                        Width="136"
+                        Margin="290,294,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Command="{Binding ViewSslExemptionsCommand}"
+                        Content="View Certificate Errors"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+                    
+                    <Label
+                        Width="258"
+                        Margin="431,10,21,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        HorizontalContentAlignment="Center"
+                        Content="Request Deactivation"
+                        FontFamily="Segoe UI"
+                        FontSize="22"
+                        FontWeight="UltraLight"
+                        Foreground="Black" />
+                    <TextBlock
+                        Width="258"
+                        Height="146"
+                        Margin="431,70,21,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        FontFamily="Segoe UI"
+                        FontSize="14"
+                        FontWeight="UltraLight"
+                        Foreground="Black"
+                        TextWrapping="Wrap"><Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. Cloud-Veil will see your request and verify the action." />
+                        <LineBreak /><Run />
+                        <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." /></TextBlock>
+
+                </Grid>
+            </TabItem>
+        </Controls:MetroAnimatedSingleRowTabControl>-->
+            <!--<TabItem Header="Diagnostics">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="21" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <custom:Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Filter"
+                            Grid.Column="0"
+                            Grid.Row="1"
+                            Margin="4"
+                            Command="{Binding TestFilterCommand}"
+                            />
+
+                    <custom:Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test DNS"
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            Margin="4"
+                            Command="{Binding TestDnsCommand}"
+                            />
+
+                    <custom:Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Test Safe Search"
+                            Grid.Column="0"
+                            Grid.Row="3"
+                            Margin="4"
+                            Command="{Binding TestSafeSearchCommand}"
+                            />
+
+                    <DataGrid Grid.Column="1"
+                              Grid.Row="1"
+                              Grid.RowSpan="4"
+                              Margin="8"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              ItemsSource="{Binding DiagnosticsEntries}"
+                              VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn
+                                Width="24"
+                                Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Check"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding PassedVisibility}"
+                                                Foreground="#CC13EC08"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                            <IconPacks:PackIconFontAwesome
+                                                Kind="Times"
+                                                Width="16" Height="24"
+                                                Visibility="{Binding FailedVisibility}"
+                                                Foreground="#CCFE090F"
+                                                VerticalAlignment="Center"
+                                                />
+                                            
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding PassedText}"
+                                Header="Passed" />
+                            
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding TestText, Mode=OneWay}"
+                                Header="Test"/>
+
+                            <DataGridTemplateColumn
+                                Width="75"
+                                Header="...">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <custom:Button Command="{Binding ViewTestDetails}">Details</Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                
+            </TabItem>
+        </Controls:MetroAnimatedSingleRowTabControl> -->
+    </Grid>
+</local:BaseView>
+>>>>>>> branch-1.7

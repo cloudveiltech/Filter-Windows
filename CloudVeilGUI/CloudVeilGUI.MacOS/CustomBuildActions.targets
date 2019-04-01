@@ -4,7 +4,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<BinaryFiles Include="../../FilterServiceProvider.Mac/bin/$(Configuration)/FilterServiceProvider.Mac.app/Contents/MonoBundle/*" />
+		<BinaryFiles Include="../FilterServiceProvider.Mac/bin/$(Configuration)/FilterServiceProvider.Mac.app/Contents/MonoBundle/*" />
 	</ItemGroup>
 
 	<Target Name="CopyOurFiles">
