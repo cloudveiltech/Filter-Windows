@@ -688,17 +688,7 @@ namespace FilterProvider.Common.Services
                                 Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockActionMsg.Resource.ToString()))
                                 );
 
-                            //m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
-                            //m_logger.Info("With args: {0}", reportPath);
-
-                            var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
-
-                            // TODO:X_PLAT
-                            //var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
-                            //ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
-
-                            //var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-                            //ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
+                            PlatformTypes.New<ISystemServices>().OpenUrlInSystemBrowser(new Uri(reportPath));
                         }
                         catch (Exception e)
                         {
@@ -1335,7 +1325,7 @@ namespace FilterProvider.Common.Services
                 categoryNameString = mappedCategory.CategoryName;
             }
 
-            m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, matchingRule);
+            m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule);
             m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if (internetShutOff)

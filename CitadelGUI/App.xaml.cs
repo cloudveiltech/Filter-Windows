@@ -555,7 +555,7 @@ namespace CloudVeil.Windows
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString());
+                            ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString(), args.BlockDate);
                         }
                     );
                 };

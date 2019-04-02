@@ -472,7 +472,7 @@ namespace Citadel.IPC
                     if(Uri.TryCreate(cast.FullRequestUrl, UriKind.Absolute, out output))
                     {
                         // Here we'll just recycle the block action message and handler.
-                        ClientRequestsBlockActionReview?.Invoke(new NotifyBlockActionMessage(BlockType.OtherContentClassification, output, string.Empty, cast.CategoryName));
+                        ClientRequestsBlockActionReview?.Invoke(new NotifyBlockActionMessage(BlockType.OtherContentClassification, output, string.Empty, cast.CategoryName, DateTime.Now));
                     }
                     else
                     {
@@ -575,9 +575,9 @@ namespace Citadel.IPC
         /// <param name="rule">
         /// The matching rule, if applicable. Defaults to null; 
         /// </param>
-        public void NotifyBlockAction(BlockType type, Uri resource, string category, string rule = null)
+        public void NotifyBlockAction(BlockType type, Uri resource, string category, DateTime blockDate, string rule = null)
         {
-            var msg = new NotifyBlockActionMessage(type, resource, rule, category);
+            var msg = new NotifyBlockActionMessage(type, resource, rule, category, blockDate);
             PushMessage(msg);
         }
 

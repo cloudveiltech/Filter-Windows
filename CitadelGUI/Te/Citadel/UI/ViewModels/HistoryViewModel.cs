@@ -12,6 +12,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace Te.Citadel.UI.ViewModels
     /// <summary>
     /// Class for displaying block event information in a DataGrid.
     /// </summary>
-    public class ViewableBlockedRequests : ObservableObject
+    public class ViewableBlockedRequest : ObservableObject
     {
         public string CategoryName
         {
@@ -40,10 +41,17 @@ namespace Te.Citadel.UI.ViewModels
             private set;
         }
 
-        public ViewableBlockedRequests(string category, string fullRequest)
+        public string BlockDate
+        {
+            get;
+            private set;
+        }
+
+        public ViewableBlockedRequest(string category, string fullRequest, DateTime blockDate)
         {
             this.CategoryName = category;
             this.FullRequest = fullRequest;
+            this.BlockDate = blockDate.ToString(CultureInfo.CurrentCulture);
         }
     }
 
@@ -59,7 +67,7 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// List of observable block actions that the user can view.
         /// </summary>
-        public ObservableCollection<ViewableBlockedRequests> BlockEvents
+        public ObservableCollection<ViewableBlockedRequest> BlockEvents
         {
             get;
             set;
@@ -67,39 +75,25 @@ namespace Te.Citadel.UI.ViewModels
 
         public HistoryViewModel()
         {
-            BlockEvents = new ObservableCollection<ViewableBlockedRequests>();
+            BlockEvents = new ObservableCollection<ViewableBlockedRequest>();
         }
-
-        /// <summary>
-        /// Private data member for the public DeactivateCommand property.
-        /// </summary>
-        private RelayCommand m_deactivationCommand;
-
-        /// <summary>
-        /// Private data member for the public RequestBlockActionReviewCommand property.
-        /// </summary>
-        private RelayCommand<ViewableBlockedRequests> m_requestBlockActionReviewCommand;
-
-        /// <summary>
-        /// Private data member for the public ViewLogsCommand property.
-        /// </summary>
-        private RelayCommand m_viewLogsCommand;
-
-        /// <summary>
-        /// Private data member for the public UseRelaxedPolicyCommand property.
-        /// </summary>
-        private RelayCommand m_useRelaxedPolicyCommand;
-
-        /// <summary>
-        /// Private data member for the public RelinquishRelaxedPolicyCommand property.
-        /// </summary>
-        private RelayCommand m_relinquishRelaxedPolicyCommand;
 
         internal DashboardModel Model
         {
             get
             {
                 return m_model;
+            }
+        }
+
+        private ViewableBlockedRequest m_selectedItem;
+        public ViewableBlockedRequest SelectedItem
+        {
+            get => m_selectedItem;
+            set
+            {
+                m_selectedItem = value;
+                RaisePropertyChanged(nameof(SelectedItem));
             }
         }
 
@@ -124,56 +118,48 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
-        /// <summary>
-        /// Command to run a deactivation request for the current authenticated user.
-        /// </summary>
-        public RelayCommand RequestDeactivateCommand
+        private RelayCommand<ViewableBlockedRequest> m_copySelectedUrlCommand;
+        public RelayCommand<ViewableBlockedRequest> CopySelectedUrlCommand
         {
             get
             {
-                if (m_deactivationCommand == null)
+                if(m_copySelectedUrlCommand == null)
                 {
-                    m_deactivationCommand = new RelayCommand((Action)(() =>
+                    m_copySelectedUrlCommand = new RelayCommand<ViewableBlockedRequest>((args) =>
                     {
                         try
                         {
-                            Task.Run(() =>
-                            {
-                                using (var ipcClient = new IPCClient())
-                                {
-                                    ipcClient.ConnectedToServer = () =>
-                                    {
-                                        ipcClient.RequestDeactivation();
-                                    };
+                            if (args == null) { return; }
 
-                                    ipcClient.WaitForConnection();
-                                    Task.Delay(3000).Wait();
-                                }
-                            });
+                            string fullUrl = args.FullRequest;
+                            Clipboard.SetText(fullUrl);
                         }
-                        catch (Exception e)
+                        catch(Exception ex)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            m_logger.Error(ex);
                         }
-                    }));
+                    });
                 }
 
-                return m_deactivationCommand;
+                return m_copySelectedUrlCommand;
             }
         }
+
+        private RelayCommand<ViewableBlockedRequest> m_requestBlockActionReviewCommand;
 
         /// <summary>
         /// Command to request the review of a logged block action.
         /// </summary>
-        public RelayCommand<ViewableBlockedRequests> RequestBlockActionReviewCommand
+        public RelayCommand<ViewableBlockedRequest> RequestBlockActionReviewCommand
         {
             get
             {
-                if (m_deactivationCommand == null)
+                if (m_requestBlockActionReviewCommand == null)
                 {
-
-                    m_requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequests>((Action<ViewableBlockedRequests>)((args) =>
+                    m_requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequest>((Action<ViewableBlockedRequest>)((args) =>
                     {
+                        if (args == null) { return; }
+
                         string category = args.CategoryName;
                         string fullUrl = args.FullRequest;
 
@@ -204,7 +190,7 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
-        public void AppendBlockActionEvent(string category, string fullRequest)
+        public void AppendBlockActionEvent(string category, string fullRequest, DateTime blockDate)
         {
             try
             {
@@ -216,7 +202,7 @@ namespace Te.Citadel.UI.ViewModels
                 }
 
                 // Add the item to view.
-                dataCtx.BlockEvents.Add(new ViewableBlockedRequests(category, fullRequest));
+                dataCtx.BlockEvents.Add(new ViewableBlockedRequest(category, fullRequest, blockDate));
             }
             catch (Exception e)
             {
