@@ -251,8 +251,8 @@ namespace CloudVeil.Windows
         {
             Citadel.Core.Windows.Platform.Init();
 
-            var filterStarter = PlatformTypes.New<IFilterAgent>();
-            filterStarter.StartFilter();
+            var filterAgent = PlatformTypes.New<IFilterAgent>();
+            filterAgent.StartFilter();
 
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;

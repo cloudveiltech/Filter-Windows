@@ -118,7 +118,6 @@
     <Compile Include="CompileSecrets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FilterServiceProvider.cs" />
-    <EmbeddedResource Include="Services\FilterStarter.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\AppListCheck.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
@@ -236,7 +235,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\FilterAgent.Windows\bin\$(Configuration)\*.*" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\FilterAgent.Windows\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

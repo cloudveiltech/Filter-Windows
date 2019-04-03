@@ -33,6 +33,8 @@ $wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
 $builds = @(
     @("x86", "InstallerCustomActions\InstallerCustomActions.csproj"),
     @("x64", "InstallerCustomActions\InstallerCustomActions.csproj"),
+    @("x86", "FilterAgent.Windows\FilterAgent.Windows.csproj"),
+    @("x64", "FilterAgent.Windows\FilterAgent.Windows.csproj"),
     @("x64", "CitadelService\CitadelService.csproj"),
     @("x86", "CitadelService\CitadelService.csproj"),
     @("x64", "CitadelGUI\CitadelGUI.csproj"),

@@ -1,6 +1,6 @@
 # Cross-platform code docs
 
-This document sets out to explain the high-level structure of the Filter-Windows code and how I plan for it to enable easier ports of the CV4W filtering engine to other platforms.
+This document sets out to explain the high-level structure of the Filter-Windows code and the plan for easier ports of the CV4W filtering engine to other platforms.
 
 There are some flaws with the way I have structured it, and some places where the restructuring is not complete, but hopefully this document will help any future contributor understand the logic behind some of the project structures.
 
@@ -44,4 +44,18 @@ PlatformTypes API:
 	public void Register<T>(Func<object[], T> instantiateFunc);
 ```
 
-... There is more documentation to come ... this document is a work in progress.
+# Platform Projects
+
+This section provides a general overview of the different platform projects and what needs to be implemented by them.
+
+## Filter.Platform.Mac, Citadel.Core.Windows, (and maybe Filter.Platform.Linux)
+
+These are chiefly responsible for implementing platform-specific code for the interfaces provided in Filter.Platform.Common
+
+They should also provide their own `{namespace}.Platform` class with an `Init()` method to allow the platform's service wrapper to register their platform types.
+
+## CitadelService, FilterServiceProvider.Mac, (and maybe FilterServiceProvider.Linux -- not implemented)
+
+These projects provide platform-specific service wrappers for FilterProvider.Common. They should implement the interfaces found in `FilterProvider.Common.Platform`
+
+These are the daemon/service processes that get run on the host OS.
