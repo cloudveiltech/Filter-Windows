@@ -173,10 +173,13 @@ namespace FilterProvider.Common.Configuration
             }
         }
 
-        private string getListFilePath(FilteringPlainTextListModel listModel)
+        private string getListFilePath(string relativePath)
         {
-            return Path.Combine(getListFolder(), listModel.RelativeListPath.Replace('/', '.'));
+            return Path.Combine(getListFolder(), relativePath.Replace('/', '.'));
         }
+
+        private string getListFilePath(FilteringPlainTextListModel listModel)
+            => getListFilePath(listModel.RelativeListPath);
 
         Dictionary<string, bool?> lastFilterListResults = null;
 
@@ -324,41 +327,45 @@ namespace FilterProvider.Common.Configuration
 
             m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
 
+            List<FilteringPlainTextListModel> listsToFetch = new List<FilteringPlainTextListModel>();
             foreach(var list in Configuration.ConfiguredLists)
             {
                 bool? listIsCurrent = false;
 
                 if(lastFilterListResults != null && lastFilterListResults.TryGetValue(list.RelativeListPath, out listIsCurrent))
                 {
-                    Console.WriteLine("{0} = {1}", list.RelativeListPath, listIsCurrent);
-
-                    if(listIsCurrent == true)
-                    {
-                        continue;
-                    }
+                    if(listIsCurrent == false || listIsCurrent == null) { listsToFetch.Add(list); }
                 }
+            }
 
-                string[] pathParts = list.RelativeListPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-                string @namespace = pathParts[0];
-                string category = pathParts[1];
-                string typeName = Path.GetFileNameWithoutExtension(pathParts[2]);
+            bool responseReceived;
+            byte[] jsonBytes = WebServiceUtil.Default.GetFilterLists(listsToFetch, out code, out responseReceived);
 
-                byte[] listBytes = WebServiceUtil.Default.GetFilterList(@namespace, category, typeName);
+            if (jsonBytes != null)
+            {
+                Dictionary<string, string> rulesets = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(jsonBytes));
 
-                if (listBytes != null)
+                if(rulesets != null)
                 {
-                    try
+                    foreach (KeyValuePair<string, string> info in rulesets)
                     {
-                        File.WriteAllBytes(getListFilePath(list), listBytes);
+                        if (info.Value == "304") { continue; }
+                        if (info.Value == "404")
+                        {
+                            m_logger.Error($"404 Error was returned for category {info.Key}");
+                            continue;
+                        }
+
+                        try
+                        {
+                            m_logger.Info("Writing list information for {0}", getListFilePath(info.Key));
+                            File.WriteAllText(getListFilePath(info.Key), info.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            m_logger.Error(ex, $"Failed to write to rule path {getListFilePath(info.Key)}");
+                        }
                     }
-                    catch(Exception ex)
-                    {
-                        m_logger.Error(ex, $"Failed to write to rule path {getListFilePath(list)}");
-                    }
-                }
-                else
-                {
-                    return null;
                 }
             }
 
