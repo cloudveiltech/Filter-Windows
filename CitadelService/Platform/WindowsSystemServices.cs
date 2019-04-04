@@ -31,6 +31,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFirewallHelper;
 using FilterNativeWindows;
+using Citadel.Core.Windows.WinAPI;
 
 namespace CitadelService.Platform
 {
@@ -238,6 +239,20 @@ namespace CitadelService.Platform
                 m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
+        }
+
+        public void OpenUrlInSystemBrowser(Uri url)
+        {
+            string reportPath = url.ToString();
+
+            m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
+            var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
+
+            var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
+            ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
+
+            var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+            ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
         }
 
         /// <summary>

@@ -63,13 +63,22 @@ namespace FilterProvider.Common.Platform
         void KillAllGuis(); // FIXME: This might actually be a cross-platformable piece of code.
 
         /// <summary>
+        /// Opens the URL in system browser.
+        /// </summary>
+        /// <param name="url">The URL to open.</param>
+        void OpenUrlInSystemBrowser(Uri url);
+
+        /// <summary>
         /// Does not need to be available until after OnStartProxy is fired.
         /// </summary>
         X509Certificate2 RootCertificate { get; }
 
         /// <summary>
-        /// Use this to determine when the proxy actually starts. Do not depend on root certificate being non-null until this event has fired once.
+        /// Use this to determine when the proxy actually starts.
         /// </summary>
+        /// <remarks>
+        /// Do not depend on root certificate being non-null until this event has fired once.
+        /// </remarks>
         event EventHandler OnStartProxy;
 
         // TODO: Rename IAntitampering stuff to something different.

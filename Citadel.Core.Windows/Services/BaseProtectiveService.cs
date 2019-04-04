@@ -68,6 +68,7 @@ namespace Te.Citadel.Services
         /// <param name="ensureRunning">
         /// Set to false if you don't want the constructor to ensure the service is already running.
         /// I added this parameter so that we could make behavior of the FilterStarter more explicit.
+        /// This parameter is obsolete now that FilterAgent.Windows.exe has superseded the auto-generated FilterStarter.exe
         /// </param>
         public BaseProtectiveService(string processNameToObserve, bool isService, bool ensureRunning = true)
         {

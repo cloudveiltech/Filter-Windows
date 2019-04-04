@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -28,6 +28,9 @@
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\e_sqlite3.dll -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\x86\* -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\*.pdb -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
         <Component Id="com_15BA3E04_E955_2942_9625_325577B7C8B6" Guid="12183EB0-B5B7-437B-8908-3C7C8262296E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_15BA3E04_E955_2942_9625_325577B7C8B6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CitadelGUI\bin\Release x64\Topshelf.dll" KeyPath="yes" />
@@ -83,13 +86,10 @@
           <File Id="_1B4FFBDB_DE96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
         </Component>
         <Component Id="comp_808C4327_E9BD" Guid="8D6F2FE8-97F6-435F-8050-7329881D4CCC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1317AA89_0D43" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.dll" Source="..\..\CitadelGUI\bin\Release x64\CloudVeilGUI.dll" KeyPath="yes" />
+          <File Id="_1317AA89_0D43" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.Common.dll" Source="..\..\CitadelGUI\bin\Release x64\CloudVeilGUI.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_108A7085_B85C" Guid="39FE7540-7433-4188-86E9-C4EB147036CE" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D47FEB1F_CAAB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe.config" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_9562B9CA_94B6" Guid="EA7D6EB8-C587-4431-825E-41847BE66AC4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_0C3EE252_A3D5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.pdb" Source="..\..\CitadelGUI\bin\Release x64\CloudVeilGUI.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_C719900C_4866" Guid="BA3022A6-5E3B-4E85-AC73-0D3B6154BA66" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_9E7B6572_46CB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CitadelGUI\bin\Release x64\DistillNET.dll" KeyPath="yes" />
@@ -199,9 +199,6 @@
         <Component Id="comp_6001E855_8AFD" Guid="2EB281B5-F716-4CDD-898F-B7ED52AEEDB7" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2B8C56D7_5B70" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Windows.Interactivity.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Windows.Interactivity.dll" KeyPath="yes" />
         </Component>
-        <Component Id="comp_98D78AFD_3D6A" Guid="38626D53-A2CE-4E22-91A3-8A5E42F8A336" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C39CE863_BE04" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="TimeZoneConverter.dll" Source="..\..\CitadelGUI\bin\Release x64\TimeZoneConverter.dll" KeyPath="yes" />
-        </Component>
         <Component Id="comp_0BD09307_090C" Guid="00BB3E43-B08F-4C2A-9CC1-EE77BCA279B4" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_413ED76B_BD78" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.dll" Source="..\..\CitadelGUI\bin\Release x64\GalaSoft.MvvmLight.dll" KeyPath="yes" />
         </Component>
@@ -253,15 +250,6 @@
         <Component Id="comp_4A7B40AC_F6D5" Guid="F1F69B7A-C855-4164-BB57-1F9E5CBADCDF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_E8AC86C3_12A8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.Core.Windows.pdb" Source="..\..\CitadelGUI\bin\Release x64\Citadel.Core.Windows.pdb" KeyPath="yes" />
         </Component>
-        <Component Id="comp_51DB0072_EDF8" Guid="32F28F4F-89FF-4867-AC22-7E4FD7D87A38" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_DC748EF6_6D5B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Core.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Core.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_829B62E2_1180" Guid="DA4C9358-B0E7-456D-BF8E-DA8F4D8E876F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_DD3D82D1_4A4B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Platform.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Platform.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_DEEBFCE6_9CB6" Guid="5A5E3C8B-140D-4A00-9EB5-3B032DD3E2EC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C37D95ED_BFCB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Xamarin.Forms.Xaml.dll" Source="..\..\CitadelGUI\bin\Release x64\Xamarin.Forms.Xaml.dll" KeyPath="yes" />
-        </Component>
         <Component Id="comp_47257075_A0FB" Guid="B21A1DEC-F89E-4467-B409-F13535FF60DA" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D8306A74_2BCD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe" Source="..\..\CitadelGUI\bin\Release x64\InstallGuard.exe" KeyPath="yes" />
         </Component>
@@ -276,6 +264,9 @@
         </Component>
         <Component Id="comp_5FBF3063_6114" Guid="2D24DD28-DC6C-4317-8012-A014CD3C8DB8" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_1A161782_DAFC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CitadelGUI\bin\Release x64\DotNet.Glob.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_D5A2370E_13CF" Guid="4C114D5C-0028-4ADD-BECC-BD938C33ABEE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_AF894AF6_A640" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Native.Windows.dll" Source="..\..\CitadelGUI\bin\Release x64\Filter.Native.Windows.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">
@@ -293,6 +284,24 @@
           </Component>
           <Component Id="comp_DD2A8132_36AD" Guid="50C3CAD9-6EC6-48C0-BEE2-BC1359D4B01C" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_DBF4245A_E8B4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="proxy.dll" Source="..\..\CitadelGUI\bin\Release x64\x64\proxy.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_045EFB89_B4C6" Guid="E730CD33-3C4C-4410-B98C-C792AE135A87" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_850C7E93_ED2E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x64\concrt140.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_388A30C4_7266" Guid="7565DFE8-46EF-4806-AD99-637030249851" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_C630E40A_EF6F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x64\msvcp140.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_6BA2DDAE_8890" Guid="B69022DF-52DD-4F0D-874E-02E25FDD1B87" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_5E4DCA14_51D5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x64\msvcp140_1.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_AF307BF5_9A49" Guid="C9E94AFE-2948-4649-8171-74BBBC11F300" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_0F8F7384_B3FD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x64\msvcp140_2.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_61060F80_7F8E" Guid="7CF71864-820B-434E-A6A6-7DE6528F0B8C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_9D2A879D_08AF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x64\vccorlib140.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_7B88C946_1330" Guid="71129FA4-1D35-4E04-BB9A-A93C1968EABC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_F6DB0CBD_5B82" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x64\vcruntime140.dll" KeyPath="yes" />
           </Component>
         </Directory>
         <Directory Id="dir_D03EDAA7_862A" Name="de">
@@ -328,6 +337,59 @@
         <Directory Id="dir_AC64573A_8635" Name="zh-CN">
           <Component Id="comp_CB56750F_37F6" Guid="E5FF43EC-6B32-4FD0-B4EC-502EC9043112" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_61BF38B2_EBBA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CitadelGUI\bin\Release x64\zh-CN\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+          </Component>
+        </Directory>
+        <Directory Id="dir_F4226F3B_2610" Name="Updater">
+          <Component Id="comp_32819DFD_5B80" Guid="7D715FCD-6F19-424B-8145-3BB3B9CFF877" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_2EA410E9_8590" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BootstrapperCore.config" Source="..\..\CitadelGUI\bin\Release x64\Updater\BootstrapperCore.config" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_11DB8931_F2BC" Guid="547B5165-B78C-4612-820E-CBCF841ACD4A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_919C50CD_791E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BootstrapperCore.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\BootstrapperCore.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_08C460B8_9C52" Guid="83272874-932B-4918-891A-E147AA21365D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_49C81008_8627" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BootstrapperCore.xml" Source="..\..\CitadelGUI\bin\Release x64\Updater\BootstrapperCore.xml" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_BB7DA1D6_33B2" Guid="EAF9DE27-AA85-4CF7-9AB0-78EFF7EC9707" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_7E3BFDC7_3EFF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilInstallerUI.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\CloudVeilInstallerUI.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_7FD2D15A_C52E" Guid="F31FD8C7-5BB9-4EE4-B999-D37EE9D49A0B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_6234BBAA_0D57" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_3B4E9364_ABE2" Guid="988D330B-CC89-46D8-928C-FA32ED0B6035" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_E78CCE2A_2472" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilInstallerUI.dll.config" Source="..\..\CitadelGUI\bin\Release x64\Updater\CloudVeilInstallerUI.dll.config" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_87F0C2BB_9916" Guid="7FF263FB-C49D-4EC2-B7DF-50FE5A5E984B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_031A9DE4_08BF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilUpdater.exe" Source="..\..\CitadelGUI\bin\Release x64\Updater\CloudVeilUpdater.exe" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_28C75222_DF9D" Guid="ABF44812-AB7F-47CB-B9B9-96032AA99389" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_A3582994_CA74" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilUpdater.exe.config" Source="..\..\CitadelGUI\bin\Release x64\Updater\CloudVeilUpdater.exe.config" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_4200BD14_A9CE" Guid="8A59B102-53C7-4BF4-A4AA-1E8BC96A8290" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_3F7E5F06_3B2E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ControlzEx.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\ControlzEx.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_F50BC51E_98A5" Guid="DB16D32B-0620-4171-9F92-49570E258B51" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_646EC3F9_E7A2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\MahApps.Metro.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_3549313E_BC00" Guid="09C5F5BE-9E5F-435B-A416-731E5B9712AC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_94708E58_1C5D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.pdb" Source="..\..\CitadelGUI\bin\Release x64\Updater\MahApps.Metro.pdb" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_1E42A9C4_F112" Guid="43C2EDAF-1F37-4E1D-A201-1E9708A6303F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_147A5B90_6E1E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.xml" Source="..\..\CitadelGUI\bin\Release x64\Updater\MahApps.Metro.xml" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_33D62844_918C" Guid="8DF7DA61-F7A2-4E88-A544-1F0E6225E223" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_0BDCBE24_5B02" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Deployment.WindowsInstaller.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\Microsoft.Deployment.WindowsInstaller.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_94CB02DD_965D" Guid="9C01CCFA-29A5-45B6-B244-C2697D571E50" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_13977750_ACFF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Deployment.WindowsInstaller.xml" Source="..\..\CitadelGUI\bin\Release x64\Updater\Microsoft.Deployment.WindowsInstaller.xml" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_B4643CF0_4527" Guid="E9E863D5-5107-4C28-898A-EC46C85F3691" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_FCB71ED4_4BA4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NamedPipeWrapper.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\NamedPipeWrapper.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_C9A8EF9E_C346" Guid="D270D45E-5E16-4BFA-9B01-AC4EA822BB7F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_BFE21DD9_3DD6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\System.IO.Pipes.AccessControl.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="comp_FFACB834_3628" Guid="AD25157D-FA1D-4007-979F-E04150C16C42" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_643FFB5C_68C8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Windows.Interactivity.dll" Source="..\..\CitadelGUI\bin\Release x64\Updater\System.Windows.Interactivity.dll" KeyPath="yes" />
           </Component>
         </Directory>
       </Directory>

@@ -21,8 +21,17 @@ namespace Te.Citadel
             ConflictReasonMessages.Add(ConflictReason.AVGEnhancedFirewall, "We detected that AVG Enhanced Firewall is enabled. Please disable it to continue using CloudVeil.");
 
             ConflictReasonLinks = CompileSecrets.ConflictReasonLinks;
+
+            ConflictReasonHeaders = new Dictionary<ConflictReason, string>();
+            ConflictReasonHeaders.Add(ConflictReason.Avast, "Avast");
+            ConflictReasonHeaders.Add(ConflictReason.CleanInternet, "Clean Internet");
+            ConflictReasonHeaders.Add(ConflictReason.Bluecoat, "Blue Coat");
+            ConflictReasonHeaders.Add(ConflictReason.McAfee, "McAfee");
+            ConflictReasonHeaders.Add(ConflictReason.Eset, "Eset");
+            ConflictReasonHeaders.Add(ConflictReason.AVGEnhancedFirewall, "AVG");
         }
 
+        public static Dictionary<ConflictReason, string> ConflictReasonHeaders;
         public static Dictionary<ConflictReason, string> ConflictReasonMessages;
         public static Dictionary<ConflictReason, string> ConflictReasonLinks;
 

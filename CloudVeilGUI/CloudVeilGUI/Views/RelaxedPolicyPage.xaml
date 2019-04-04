@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,6 +8,7 @@
 
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:custom="clr-namespace:CloudVeilGUI.CustomFormElements"
              x:Class="CloudVeilGUI.Views.RelaxedPolicyPage">
     <ContentPage.Content>
         <Grid Margin="32">
@@ -39,8 +40,8 @@
                     <Label Grid.Column="1" Grid.Row="1" Text="{Binding RelaxedDuration}" />
                 </Grid>
 
-                <Button Text="Use Relaxed Policy" Command="{Binding UseRelaxedPolicyCommand}"/>
-                <Button Text="Relinquish Relaxed Policy" Command="{Binding RelinquishRelaxedPolicyCommand}"/>
+                <custom:Button Text="Use Relaxed Policy" Command="{Binding UseRelaxedPolicyCommand}"/>
+                <custom:Button Text="Relinquish Relaxed Policy" Command="{Binding RelinquishRelaxedPolicyCommand}"/>
             </StackLayout>
         </Grid>
     </ContentPage.Content>

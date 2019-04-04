@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Filter.Platform.Common.Util;
 using System.ServiceProcess;
+using System.Net;
 
 namespace FilterAgent.Windows
 {
@@ -150,11 +151,21 @@ namespace FilterAgent.Windows
             return success;
         }
 
+        static void usage()
+        {
+            Console.WriteLine("Usage: FilterAgent.Windows.exe [start|check]");
+        }
+
+        static int connectivityCheck()
+        {
+            return (int)ConnectivityCheck.IsAccessible();
+        }
+
         static void Main(string[] args)
         {
             if(args.Length == 0)
             {
-                Console.WriteLine("Usage: FilterAgent.Windows.exe start");
+                usage();
                 Environment.Exit(1);
             }
 
@@ -164,35 +175,46 @@ namespace FilterAgent.Windows
                 Environment.Exit(2);
             }
 
-            if(args[0] != "start")
+            if(args[0] == "start")
             {
-                Console.WriteLine("The only supported command is currently 'start'");
+                if(!hasElevatedPrivileges())
+                {
+                    Console.WriteLine("Requires elevated privileges");
+                    Environment.Exit(2);
+                }
+                // Find FilterServiceProvider.exe
+                if (!File.Exists("FilterServiceProvider.exe"))
+                {
+                    Console.WriteLine("Couldn't find FilterServiceProvider.exe");
+                    Environment.Exit(3);
+                }
+
+                Console.WriteLine("FilterAgent.Windows all systems go");
+
+                // FilterServiceProvider.exe exists, so start it.
+                string processName = "FilterServiceProvider";
+                string baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Program)).Location);
+                string processBinaryPath = Path.Combine(baseDirectory, $"{processName}.exe");
+
+                s_mutexName = string.Join("", processBinaryPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
+                s_processBinaryAbsPath = processBinaryPath;
+
+                if (getRunningProcess("FilterServiceProvider") != null)
+                {
+                    Environment.Exit(0);
+                }
+
+                startService("FilterServiceProvider");
+            }
+            else if(args[0] == "check")
+            {
+                Environment.Exit(connectivityCheck());
+            }
+            else
+            {
+                usage();
                 Environment.Exit(1);
             }
-
-            // Find FilterServiceProvider.exe
-            if(!File.Exists("FilterServiceProvider.exe"))
-            {
-                Console.WriteLine("Couldn't find FilterServiceProvider.exe");
-                Environment.Exit(3);
-            }
-
-            Console.WriteLine("FilterAgent.Windows all systems go");
-
-            // FilterServiceProvider.exe exists, so start it.
-            string processName = "FilterServiceProvider";
-            string baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Program)).Location);
-            string processBinaryPath = Path.Combine(baseDirectory, $"{processName}.exe");
-
-            s_mutexName = string.Join("", processBinaryPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
-            s_processBinaryAbsPath = processBinaryPath;
-
-            if (getRunningProcess("FilterServiceProvider") != null)
-            {
-                Environment.Exit(0);
-            }
-
-            startService("FilterServiceProvider");
         }
     }
 }

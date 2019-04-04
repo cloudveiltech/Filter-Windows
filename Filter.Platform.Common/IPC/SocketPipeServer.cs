@@ -51,6 +51,8 @@ namespace Filter.Platform.Common.IPC
         public bool IsReceivingMessage { get; set; }
         public int CompletedBufferLength { get; set; }
 
+        private bool isInvalidSocket = false;
+
         private IAsyncResult receiveResult;
         private byte[] receiveBuffer;
 
@@ -58,7 +60,14 @@ namespace Filter.Platform.Common.IPC
 
         public void SendBytes(byte[] msg)
         {
-            ClientSocket.Send(msg);
+            try
+            {
+                ClientSocket.Send(msg);
+            }
+            catch (SocketException)
+            {
+                isInvalidSocket = true;
+            }
         }
 
         public void AwaitBytes()
@@ -97,6 +106,7 @@ namespace Filter.Platform.Common.IPC
         private void HandleAsyncCallback(IAsyncResult ar)
         {
             SocketError error;
+            bool continueAwaitingBytes = true;
 
             int receiveRet = 0, receiveBufferIdx = 0;
 
@@ -122,12 +132,20 @@ namespace Filter.Platform.Common.IPC
             if (error != SocketError.Success)
             {
                 server.RemoveClient(this);
+                continueAwaitingBytes = false;
             }
             else if (receiveRet != 0)
             {
+                int loops = 0;
                 // Process messages.
                 while(true)
                 {
+                    loops++;
+                    if((loops % 10) == 0)
+                    {
+                        Console.WriteLine("Number of while(true) loops = {0}", loops);
+                    }
+
                     // If buffer is null, see if this is the beginning of a message.
                     if (MyBuffer == null)
                     {
@@ -176,7 +194,10 @@ namespace Filter.Platform.Common.IPC
 
             }
 
-            AwaitBytes();
+            if(continueAwaitingBytes)
+            {
+                AwaitBytes();
+            }
         }
 
         void handleBuffer(byte[] buffer)

@@ -26,9 +26,11 @@
 	<string>NSApplication</string>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcon.appiconset</string>
-	<key>LSUIElement</key>
-	<true/>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<true/>
 </dict>
 </plist>

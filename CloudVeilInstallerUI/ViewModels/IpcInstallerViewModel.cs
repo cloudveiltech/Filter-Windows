@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using CloudVeilInstallerUI.IPC;
 using CloudVeilInstallerUI.Models;
 using NamedPipeWrapper;
@@ -43,12 +44,13 @@ namespace CloudVeilInstallerUI.ViewModels
             client.Set("InstallerViewModel", prop, val);
         }
 
-        private TRet call<TRet>(string method, params object[] parameters)
+        private Task<TRet> call<TRet>(string method, params object[] parameters)
         {
             Task<object> o = client.Call("InstallerViewModel", method, parameters);
-            o.Wait();
-
-            return (TRet)o.Result;
+            return o.ContinueWith<TRet>((t) =>
+            {
+                return (TRet)t.Result;
+            });
         }
 
         public string WelcomeButtonText
@@ -68,14 +70,21 @@ namespace CloudVeilInstallerUI.ViewModels
         public string FinishedHeading { get => get<string>(nameof(FinishedHeading)); set => set(nameof(FinishedHeading), value); }
         public string FinishedMessage { get => get<string>(nameof(FinishedMessage)); set => set(nameof(FinishedMessage), value); }
         public string FinishButtonText { get => get<string>(nameof(FinishButtonText)); set => set(nameof(FinishButtonText), value); }
+        public bool NeedsRestart { get => get<bool>(nameof(NeedsRestart)); set => set(nameof(NeedsRestart), value); }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void TriggerDetect() => call<object>("TriggerDetect");
-        public void TriggerFailed(string message, string heading = null) => call<object>("TriggerFailed", message, heading);
+        public void TriggerFailed(string message, string heading = null, bool needsRestart = false) => call<object>("TriggerFailed", message, heading, needsRestart);
         public void TriggerFinished() => call<object>("TriggerFinished");
         public void TriggerInstall() => call<object>("TriggerInstall");
+        public void TriggerLicense() => call<object>("TriggerLicense");
         public void TriggerWelcome() => call<object>("TriggerWelcome");
-        public void Exit() => call<object>("Exit");
+        public void StartFilterIfExists() => call<object>("StartFilterIfExists");
+
+        public void Exit()
+        {
+            call<object>("Exit");
+            Application.Current.Shutdown(0);
+        }
     }
 }

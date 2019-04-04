@@ -110,7 +110,7 @@ namespace Citadel.Core.Windows.Util.Update
                             }
 
                             string extension = Path.GetExtension(enclosure.Uri.ToString());
-                            UpdateKind updateKind = extension == ".exe" ? UpdateKind.ExePackage : UpdateKind.MsiInstaller;
+                            UpdateKind updateKind = extension == ".exe" ? UpdateKind.ExecutablePackage : UpdateKind.InstallerPackage;
 
                             Uri url = enclosure.Uri;
                             long length = enclosure.Length;

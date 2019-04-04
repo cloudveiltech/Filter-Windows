@@ -48,6 +48,8 @@ using Citadel.Core.WinAPI;
 using System.Runtime.InteropServices;
 using FilterNativeWindows;
 using CitadelCore.Windows.Diversion;
+using FilterProvider.Common.Util;
+using Filter.Platform.Common.Types;
 
 /**
  * TODO:
@@ -287,7 +289,6 @@ namespace CitadelService.Services
             PlatformTypes.Register<IPlatformDns>((arr) => new WindowsDns());
             PlatformTypes.Register<IWifiManager>((arr) => new WindowsWifiManager());
             PlatformTypes.Register<IPlatformTrust>((arr) => new TrustManager());
-            PlatformTypes.Register<IPathProvider>((arr) => new WindowsPathProvider());
             PlatformTypes.Register<ISystemServices>((arr) => new WindowsSystemServices(this));
 
             Citadel.Core.Windows.Platform.Init();
@@ -301,28 +302,48 @@ namespace CitadelService.Services
 
             Task.Run(async () =>
             {
-                ConflictReason conflict = ConflictReason.Failed;
-                ConflictReason lastConflict = ConflictReason.NoConflict;
+                List<ConflictReason> conflicts = ConflictDetection.SearchConflictReason();
+                server.Send<List<ConflictReason>>(IpcCall.ConflictsDetected, conflicts);
 
-                do
-                {
-                    conflict = ConflictDetection.SearchConflictReason();
+                IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
 
-                    if (conflict != ConflictReason.NoConflict && conflict != lastConflict)
-                    {
-                        server.Send<ConflictReason>(IpcCall.ConflictDetected, conflict);
-                    }
-
-                    lastConflict = conflict;
-                    await Task.Delay(1000);
-                } while (conflict != ConflictReason.NoConflict);
+                ConnectivityCheck.Accessible accessible = agent.CheckConnectivity();
 
                 WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
-
                 diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
 
-                diverter.Start(0);
+                diverter.Start(0, () =>
+                {
+                    ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
+
+                    if(accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
+                    {
+                        server.Send<bool>(IpcCall.InternetAccessible, false);
+                    }
+                    else
+                    {
+                        server.Send<bool>(IpcCall.InternetAccessible, true);
+                    }
+                });
             });
+
+            server.RegisterResponseHandler<MyProcessInfo>(IpcCall.AdministratorStart, (msg) =>
+            {
+                try
+                {
+                    if(!ProcessCreation.CreateElevatedProcessInCurrentSession(msg.Data.Filename, msg.Data.Arguments))
+                    {
+                        m_logger.Error($"Failed to create elevated process with {Marshal.GetLastWin32Error()}");
+                    }
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error(ex, "ProcessCreation failed with this exception.");
+                }
+
+                return true;
+            });
+
         }
 
         private void OnAppSessionEnding(object sender, SessionEndingEventArgs e)

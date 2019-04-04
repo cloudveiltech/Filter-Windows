@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace CloudVeilInstallerUI
 {
@@ -20,6 +21,7 @@ namespace CloudVeilInstallerUI
 
         public UpdateIPCServer server;
         public IntPtr Hwnd => IntPtr.Zero;
+        public Dispatcher Dispatcher => null;
 
         public event EventHandler Closed;
 
@@ -28,24 +30,34 @@ namespace CloudVeilInstallerUI
             Closed?.Invoke(this, new EventArgs());
         }
 
-        public void Show()
+        private object lastCalledLock = new object();
+
+        private string lastCalled = null;
+        private object[] lastCalledArgs = null;
+
+        public void ResynchronizeUI()
         {
-            server.Call("SetupUI", "Show", new object[] { }).Wait();
+            if(lastCalled != null && lastCalledArgs != null)
+            {
+                server.Call("SetupUI", lastCalled, lastCalledArgs).Wait();
+            }
         }
 
-        public void ShowFinish()
+        private Task<object> storeAndCall(string fn, object[] args)
         {
-            server.Call("SetupUI", "ShowFinish", new object[] { }).Wait();
+            lock(lastCalledLock)
+            {
+                lastCalled = fn;
+                lastCalledArgs = args;
+            }
+
+            return server.Call("SetupUI", fn, args);
         }
 
-        public void ShowInstall()
-        {
-            server.Call("SetupUI", "ShowInstall", new object[] { }).Wait();
-        }
-
-        public void ShowWelcome()
-        {
-            server.Call("SetupUI", "ShowWelcome", new object[] { }).Wait();
-        }
+        public void Show() => storeAndCall("Show", new object[] { });
+        public void ShowFinish() => storeAndCall("ShowFinish", new object[] { });
+        public void ShowInstall() => storeAndCall("ShowInstall", new object[] { });
+        public void ShowLicense() => storeAndCall("ShowLicense", new object[] { });
+        public void ShowWelcome() => storeAndCall("ShowWelcome", new object[] { });
     }
 }

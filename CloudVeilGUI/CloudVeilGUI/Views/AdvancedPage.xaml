@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,6 +8,7 @@
 
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:custom="clr-namespace:CloudVeilGUI.CustomFormElements"
              x:Class="CloudVeilGUI.Views.AdvancedPage">
     <ContentPage.Content>
         <Grid Margin="32">
@@ -25,21 +26,21 @@
                 <Label LineBreakMode="WordWrap">
                     Spicy jalapeno bacon ipsum dolor amet occaecat turducken ground round fatback tail ea est nulla capicola et aute adipisicing. Ipsum meatloaf cow leberkas frankfurter,
                 </Label>
-                <Button Text="Synchronize Settings" />
+                <custom:Button Text="Synchronize Settings" />
             </StackLayout>
 
             <StackLayout Grid.Row="0" Grid.Column="1">
                 <Label LineBreakMode="WordWrap">
                     Spicy jalapeno bacon ipsum dolor amet occaecat turducken ground round fatback tail ea est nulla capicola et aute adipisicing. Ipsum meatloaf cow leberkas frankfurter,
                 </Label>
-                <Button Text="View Certificate Errors" />
+                <custom:Button Text="View Certificate Errors" />
             </StackLayout>
 
             <StackLayout Grid.Row="1" Grid.Column="0">
                 <Label LineBreakMode="WordWrap">
                     Spicy jalapeno bacon ipsum dolor amet occaecat turducken ground round fatback tail ea est nulla capicola et aute adipisicing. Ipsum meatloaf cow leberkas frankfurter,
                 </Label>
-                <Button Text="Check for Updates" />
+                <custom:Button Text="Check for Updates" />
             </StackLayout>
 
             <StackLayout Grid.Row="1" Grid.Column="1">
@@ -50,7 +51,7 @@
                 <Label Margin="0,16,0,0" LineBreakMode="WordWrap">
                     Once approved, clicking deactivate will stop the filter.
                 </Label>
-                <Button Text="Deactivate" Command="{Binding DeactivateCommand}"/>
+                <custom:Button Text="Deactivate" Command="{Binding DeactivateCommand}"/>
             </StackLayout>
         </Grid>
     </ContentPage.Content>

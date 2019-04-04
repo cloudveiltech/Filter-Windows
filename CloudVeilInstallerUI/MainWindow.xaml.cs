@@ -67,23 +67,19 @@ namespace CloudVeilInstallerUI
         {
             try
             {
-                DispatcherOperation o = Dispatcher.InvokeAsync(
-                    () => LoadView(new WelcomeView(viewModel))
-                );
+                Dispatcher.InvokeAsync(() => LoadView(new WelcomeView(viewModel)));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
 
-                bool quit = false;
-                int elapsed = 0;
-                while(!quit)
-                {
-                    Console.WriteLine("o {0}", o.Status);
-                    o.Wait(new TimeSpan(0, 0, 0, 0, 150));
-                    elapsed += 150;
-
-                    if(elapsed > 5000)
-                    {
-                        quit = true;
-                    }
-                }
+        public void ShowLicense()
+        {
+            try
+            {
+                Dispatcher.InvokeAsync(() => LoadView(new LicenseView(viewModel)));
             }
             catch(Exception ex)
             {

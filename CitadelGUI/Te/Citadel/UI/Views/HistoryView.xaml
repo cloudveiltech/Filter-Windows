@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 Copyright © 2019 Cloudveil Technology Inc.  
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -10,7 +10,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
-             mc:Ignorable="d">
+             mc:Ignorable="d" Background="White">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -19,7 +19,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="48" />
+            <RowDefinition Height="56" />
             <RowDefinition Height="*" />
             <RowDefinition Height="48" />
         </Grid.RowDefinitions>
@@ -44,11 +44,11 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
             Foreground="Black"
             TextWrapping="Wrap">
             <Span
-                FontFamily="MyriadPro-Regular"
                 FontSize="14"
-                Foreground="#FF231F20"><Run Text="Request review of a blocked url by selecting the item and then click Request Review." /></Span>
+                Foreground="#FF231F20"><Run Text="Request review of a blocked URL by selecting the item and then click Request Review." /></Span>
+            <LineBreak/>
+            <Span><Run Text="Right-click an item to copy the URL."/></Span>
         </TextBlock>
-
         <Button
             Margin="8"
             Grid.Row="2"
@@ -82,16 +82,39 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
             CanUserAddRows="False"
             ItemsSource="{Binding BlockEvents, Mode=OneWay}"
             VerticalScrollBarVisibility="Auto">
+            <DataGrid.ContextMenu>
+                <ContextMenu x:Name="contextMenu">
+                    <MenuItem
+                        Command="{Binding RequestBlockActionReviewCommand}"
+                        CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                        Header="Request Review"
+                        IsCheckable="False" />
+                    
+                    <MenuItem
+                        Command="{Binding CopySelectedUrlCommand}"
+                        CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                        Header="Copy URL" IsCheckable="False" />
+                    
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            
             <DataGrid.Columns>
                 <DataGridTextColumn
-                                Width="150"
-                                Binding="{Binding CategoryName, Mode=OneWay}"
-                                Header="Category" />
+                    Width="Auto"
+                    MinWidth="150"
+                    Binding="{Binding CategoryName, Mode=OneWay}"
+                    Header="Category" />
 
                 <DataGridTextColumn
-                                Width="100*"
-                                Binding="{Binding FullRequest, Mode=OneWay}"
-                                Header="Request" />
+                    Width="Auto"
+                    MinWidth="100"
+                    Binding="{Binding BlockDate, Mode=OneWay}"
+                    Header="Date Blocked" />
+
+                <DataGridTextColumn
+                    Width="100*"
+                    Binding="{Binding FullRequest, Mode=OneWay}"
+                    Header="Request" />
             </DataGrid.Columns>
 
             <DataGrid.ColumnHeaderStyle>

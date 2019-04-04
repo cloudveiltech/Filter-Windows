@@ -11,9 +11,11 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Styles/AppStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
+    <Grid Margin="10,0,10,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="75" />
@@ -44,7 +46,14 @@
                    Grid.ColumnSpan="3"
                    Text="{Binding FinishedMessage}"/>
 
-
+        <Button Style="{StaticResource SquareButtonStyle}"
+                Visibility="{Binding NeedsRestart, Converter={StaticResource BoolToVis}}"
+                Content="Restart"
+                Click="RestartComputer"
+                Grid.Row="3"
+                Grid.Column="1"
+                Margin="4,8,8,0" />
+        
         <Button Style="{StaticResource AccentedSquareButtonStyle}"
                 Content="{Binding FinishButtonText}"
                 Click="Exit"

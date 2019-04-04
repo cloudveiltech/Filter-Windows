@@ -251,8 +251,8 @@ namespace CloudVeil.Windows
         {
             Citadel.Core.Windows.Platform.Init();
 
-            var filterStarter = PlatformTypes.New<IFilterStarter>();
-            filterStarter.StartFilter();
+            var filterAgent = PlatformTypes.New<IFilterAgent>();
+            filterAgent.StartFilter();
 
             // Hook the shutdown/logoff event.
             Current.SessionEnding += OnAppSessionEnding;
@@ -352,6 +352,44 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
+                m_ipcClient.RegisterResponseHandler<object>(IpcCall.InstallerDownloadStarted, (msg) =>
+                {
+                    m_mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        m_mainWindow.ViewModel.DownloadFlyoutIsOpen = true;
+                        m_mainWindow.ViewModel.DownloadProgress = 0;
+                    });
+
+                    return true;
+                });
+
+                m_ipcClient.RegisterResponseHandler<int>(IpcCall.InstallerDownloadProgress, (msg) =>
+                {
+                    m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ViewModel.DownloadProgress = msg.Data);
+
+                    return true;
+                });
+
+                m_ipcClient.RegisterResponseHandler<bool>(IpcCall.InstallerDownloadFinished, (msg) =>
+                {
+                    if (msg.Data)
+                    {
+                        m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ViewModel.DownloadProgress = 100);
+
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(3000);
+                            await m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ViewModel.DownloadFlyoutIsOpen = false);
+                        });
+                    }
+                    else
+                    {
+                        m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ShowUserMessage("Update Failed", "Failed to download the update file."));
+                    }
+
+                    return true;
+                });
+
                 m_ipcClient.RegisterRequestHandler(IpcCall.StartUpdater, (msg) =>
                 {
                     Assembly appAssembly = Assembly.GetEntryAssembly();
@@ -361,7 +399,7 @@ namespace CloudVeil.Windows
 
                     try
                     {
-                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(appDirectory, "CloudVeilUpdater.exe");
+                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(Path.Combine(appDirectory, "Updater"), "CloudVeilUpdater.exe");
 
                         string fileEntry = null;
 
@@ -400,26 +438,48 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
-                m_ipcClient.RegisterResponseHandler<ConflictReason>(IpcCall.ConflictDetected, (msg) =>
+                m_ipcClient.RegisterResponseHandler<List<ConflictReason>>(IpcCall.ConflictsDetected, (msg) =>
                 {
-                    var vm = ModelManager.Get<SoftwareConflictViewModel>();
+                    string message;
+                    string header;
 
-                    string link = null;
-                    string message = null;
-
-                    if(ConflictReasonInformation.ConflictReasonLinks.TryGetValue(msg.Data, out link))
+                    // Rather than viewManager.PushView, we want to show the conflict reasons
+                    if (msg.Data != null)
                     {
-                        vm.ConflictSupportArticle = new Uri(link);
+                        List<ConflictInfo> conflicts = new List<ConflictInfo>();
+
+                        foreach (var reason in msg.Data)
+                        {
+                            ConflictInfo info = new ConflictInfo();
+
+                            if (ConflictReasonInformation.ConflictReasonMessages.TryGetValue(reason, out message))
+                            {
+                                info.Message = message;
+                            }
+
+                            if (ConflictReasonInformation.ConflictReasonHeaders.TryGetValue(reason, out header))
+                            {
+                                info.Header = header;
+                            }
+
+                            info.ConflictReason = reason;
+
+                            conflicts.Add(info);
+                        }
+
+                        m_mainWindow.Dispatcher.InvokeAsync(() =>
+                        {
+                            m_mainWindow.ViewModel.ConflictReasons.Clear();
+                            
+                            foreach(var conflict in conflicts)
+                            {
+                                m_mainWindow.ViewModel.ConflictReasons.Add(conflict);
+                            }
+                        });
                     }
-
-                    if(ConflictReasonInformation.ConflictReasonMessages.TryGetValue(msg.Data, out message))
+                    else
                     {
-                        vm.ConflictText = message;
-                    }
-
-                    if(msg.Data != ConflictReason.NoConflict)
-                    {
-                        viewManager.PushView(SoftwareConflictView.ModalZIndex, typeof(SoftwareConflictView));
+                        m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ViewModel.ConflictReasons.Clear());
                     }
 
                     return true;
@@ -495,7 +555,7 @@ namespace CloudVeil.Windows
                         System.Windows.Threading.DispatcherPriority.Normal,
                         (Action)delegate ()
                         {
-                            ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString());
+                            ModelManager.Get<HistoryViewModel>()?.AppendBlockActionEvent(args.Category, args.Resource.ToString(), args.BlockDate);
                         }
                     );
                 };
@@ -783,11 +843,9 @@ namespace CloudVeil.Windows
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
-            ModelManager.Register(new SoftwareConflictViewModel());
 
             viewManager.Register(new DashboardView());
             viewManager.Register(new LoginView());
-            viewManager.Register(new SoftwareConflictView());
             viewManager.Register(new ProgressWait());
 
             m_mainWindow.WindowRestoreRequested += (() =>

@@ -1,34 +1,170 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Bundle Name="CloudVeilInstaller"
-          Version="1.7.0.2"
-          Manufacturer="CloudVeil Technology, Inc."
-          UpgradeCode="f034362e-0800-43d6-be30-721747f8a948">
-        <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
-            <PayloadGroupRef Id="InstallerPayload" />
-        </BootstrapperApplicationRef>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Bundle Name="CloudVeilInstaller" Version="1.7.0.0" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948">
+    <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
+      <PayloadGroupRef Id="InstallerPayload" />
+    </BootstrapperApplicationRef>
+    <Chain>
+      <PackageGroupRef Id="NetFx462Web" />
+      <MsiPackage Id="CloudVeilForWindows" Cache="no" Compressed="yes" Vital="yes" Name="CloudVeil.msi" SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
+    </Chain>
+  </Bundle>
+  <!-- The following snippet (and the rest of this file) are covered by the following licenses -->
+  <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. -->
+  <!--
+        .NET Framework installation state properties
 
-		<Chain>
-            <PackageGroupRef Id="NetFx462Web"/>
-            <MsiPackage
-                Id="CloudVeilForWindows"
-                Cache="no"
-                Compressed="yes"
-                Vital="yes"
-                Name="CloudVeil.msi"
-                SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
-		</Chain>
-	</Bundle>
+        Official documentation can be found at the following location:
 
-    <Fragment>
-        <PayloadGroup Id="InstallerPayload">
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\CloudVeilInstallerUI.dll"/>
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\BootstrapperCore.config" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\ControlzEx.dll" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\MahApps.Metro.dll" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\Microsoft.Deployment.WindowsInstaller.dll" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\NamedPipeWrapper.dll" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\Release\System.Windows.Interactivity.dll" />
-        </PayloadGroup>
-    </Fragment>
+           .NET Framework 4.5/4.5.1/4.5.2/4.6/4.6.1/4.6.2/4.7/4.7.1/4.7.2 - http://msdn.microsoft.com/en-us/library/w0x726c2(v=vs.110).aspx
+    -->
+  <?define NetFx472MinRelease = 461808 ?>
+  <?define NetFx472WebLink = http://go.microsoft.com/fwlink/?LinkId=863262 ?>
+  <?define NetFx472RedistLink = http://go.microsoft.com/fwlink/?LinkId=863265 ?>
+  <?define NetFx472EulaLink = http://referencesource.microsoft.com/license.html ?>
+  <Fragment>
+    <PropertyRef Id="WIXNETFX4RELEASEINSTALLED" />
+    <Property Id="WIX_IS_NETFRAMEWORK_472_OR_LATER_INSTALLED" Secure="yes" />
+    <SetProperty Id="WIX_IS_NETFRAMEWORK_472_OR_LATER_INSTALLED" Value="1" After="AppSearch">
+            WIXNETFX4RELEASEINSTALLED &gt;= "#$(var.NetFx472MinRelease)"
+        </SetProperty>
+  </Fragment>
+  <Fragment>
+    <util:RegistrySearchRef Id="NETFRAMEWORK45" />
+    <WixVariable Id="WixMbaPrereqPackageId" Value="NetFx472Web" />
+    <WixVariable Id="WixMbaPrereqLicenseUrl" Value="$(var.NetFx472EulaLink)" Overridable="yes" />
+    <WixVariable Id="NetFx472WebDetectCondition" Value="NETFRAMEWORK45 &gt;= $(var.NetFx472MinRelease)" Overridable="yes" />
+    <WixVariable Id="NetFx472WebInstallCondition" Value="" Overridable="yes" />
+    <WixVariable Id="NetFx472WebPackageDirectory" Value="redist\" Overridable="yes" />
+    <PackageGroup Id="NetFx472Web">
+      <ExePackage InstallCommand="/q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" RepairCommand="/q /norestart /repair /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" UninstallCommand="/uninstall /q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" PerMachine="yes" DetectCondition="!(wix.NetFx472WebDetectCondition)" InstallCondition="!(wix.NetFx472WebInstallCondition)" Id="NetFx472Web" Vital="yes" Permanent="yes" Protocol="netfx4" DownloadUrl="$(var.NetFx472WebLink)" LogPathVariable="NetFx472FullLog" Compressed="no" Name="!(wix.NetFx472WebPackageDirectory)NDP472-KB4054531-Web.exe">
+        <RemotePayload CertificatePublicKey="C090C1A2CAFA9B967D9C87C7FE02F7C01FBDE4F2" CertificateThumbprint="5EAD300DC7E4D637948ECB0ED829A072BD152E17" Description="Microsoft .NET Framework 4.7.2 Setup" Hash="507ECDADC23A27C2283BA130A2AA51650E6BC05B" ProductName="Microsoft .NET Framework 4.7.2" Size="1447320" Version="4.7.3062.0" />
+      </ExePackage>
+    </PackageGroup>
+  </Fragment>
+  <Fragment>
+    <util:RegistrySearchRef Id="NETFRAMEWORK45" />
+    <WixVariable Id="WixMbaPrereqPackageId" Value="NetFx472Redist" />
+    <WixVariable Id="WixMbaPrereqLicenseUrl" Value="$(var.NetFx472EulaLink)" Overridable="yes" />
+    <WixVariable Id="NetFx472RedistDetectCondition" Value="NETFRAMEWORK45 &gt;= $(var.NetFx472MinRelease)" Overridable="yes" />
+    <WixVariable Id="NetFx472RedistInstallCondition" Value="" Overridable="yes" />
+    <WixVariable Id="NetFx472RedistPackageDirectory" Value="redist\" Overridable="yes" />
+    <PackageGroup Id="NetFx472Redist">
+      <ExePackage InstallCommand="/q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" RepairCommand="/q /norestart /repair /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" UninstallCommand="/uninstall /q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx472FullLog].html&quot;" PerMachine="yes" DetectCondition="!(wix.NetFx472RedistDetectCondition)" InstallCondition="!(wix.NetFx472RedistInstallCondition)" Id="NetFx472Redist" Vital="yes" Permanent="yes" Protocol="netfx4" DownloadUrl="$(var.NetFx472RedistLink)" LogPathVariable="NetFx472FullLog" Compressed="no" Name="!(wix.NetFx472RedistPackageDirectory)NDP472-KB4054530-x86-x64-AllOS-ENU.exe">
+        <RemotePayload CertificatePublicKey="C090C1A2CAFA9B967D9C87C7FE02F7C01FBDE4F2" CertificateThumbprint="5EAD300DC7E4D637948ECB0ED829A072BD152E17" Description="Microsoft .NET Framework 4.7.2 Setup" Hash="D3A416DC5FC75758D41B4C0158ACA69270D2A904" ProductName="Microsoft .NET Framework 4.7.2" Size="71607232" Version="4.7.3062.0" />
+      </ExePackage>
+    </PackageGroup>
+  </Fragment>
+  <Fragment>
+    <PayloadGroup Id="InstallerPayload">
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\BootstrapperCore.config" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\CloudVeilInstallerUI.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\CloudVeilInstallerUI.dll.config" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\ControlzEx.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\MahApps.Metro.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\Microsoft.Deployment.WindowsInstaller.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\NamedPipeWrapper.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.Pipes.AccessControl.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.AccessControl.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Principal.Windows.dll" />
+      <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Windows.Interactivity.dll" />
+      <!--
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.Pipes.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\Microsoft.Win32.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\netstandard.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.AppContext.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Collections.Concurrent.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Collections.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Collections.NonGeneric.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Collections.Specialized.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ComponentModel.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ComponentModel.EventBasedAsync.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ComponentModel.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ComponentModel.TypeConverter.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Console.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Data.Common.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.Contracts.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.Debug.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.FileVersionInfo.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.Process.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.StackTrace.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.TextWriterTraceListener.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.Tools.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.TraceSource.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Diagnostics.Tracing.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Drawing.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Dynamic.Runtime.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Globalization.Calendars.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Globalization.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Globalization.Extensions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.Compression.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.Compression.ZipFile.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.FileSystem.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.FileSystem.DriveInfo.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.FileSystem.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.FileSystem.Watcher.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.IsolatedStorage.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.MemoryMappedFiles.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.IO.UnmanagedMemoryStream.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Linq.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Linq.Expressions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Linq.Parallel.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Linq.Queryable.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Http.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.NameResolution.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.NetworkInformation.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Ping.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Requests.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Security.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.Sockets.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.WebHeaderCollection.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.WebSockets.Client.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Net.WebSockets.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ObjectModel.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Reflection.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Reflection.Extensions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Reflection.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Resources.Reader.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Resources.ResourceManager.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Resources.Writer.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.CompilerServices.VisualC.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Extensions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Handles.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.InteropServices.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.InteropServices.RuntimeInformation.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Numerics.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Serialization.Formatters.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Serialization.Json.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Serialization.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Runtime.Serialization.Xml.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Claims.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Cryptography.Algorithms.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Cryptography.Csp.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Cryptography.Encoding.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Cryptography.Primitives.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Cryptography.X509Certificates.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.Principal.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Security.SecureString.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Text.Encoding.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Text.Encoding.Extensions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Text.RegularExpressions.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.Overlapped.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.Tasks.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.Tasks.Parallel.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.Thread.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.ThreadPool.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Threading.Timer.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.ValueTuple.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.ReaderWriter.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.XDocument.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.XmlDocument.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.XmlSerializer.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.XPath.dll" />
+        <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\System.Xml.XPath.XDocument.dll" />-->
+    </PayloadGroup>
+  </Fragment>
 </Wix>

@@ -4,6 +4,7 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -42,69 +43,138 @@ namespace CloudVeilInstallerUI
     {
         public static Dispatcher BootstrapperDispatcher { get; private set; }
 
+        public bool IsExiting { get; set; } = false;
+
+        private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
+        public void SignalExit()
+        {
+            IsExiting = true;
+            exitWaitHandle.Set();
+        }
+
+        UpdateIPCServer server = null;
+
         protected override void Run()
         {
-            string[] args = this.Command.GetCommandLineArgs();
-
-            bool runIpc = false;
-            bool showPrompts = true;
-
-            foreach(string arg in args)
+            try
             {
-                if(arg == "/ipc")
+                string[] args = this.Command.GetCommandLineArgs();
+
+                bool runIpc = false;
+                bool showPrompts = true;
+                bool waitForFilterExit = false;
+
+                Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
+                foreach (string arg in args)
                 {
-                    runIpc = true;
-                }
-                else if(arg == "/nomodals")
-                {
-                    showPrompts = false;
-                }
-            }
-
-            BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
-
-            Application app = new Application();
-
-            ISetupUI setupUi = null;
-            InstallerViewModel model = new InstallerViewModel(this);
-            UpdateIPCServer server = null;
-
-            if (runIpc)
-            {
-                server = new UpdateIPCServer("__CloudVeilUpdaterPipe__");
-                server.MessageReceived += CheckExit;
-
-                server.RegisterObject("InstallerViewModel", model);
-                server.RegisterObject("SetupUI", setupUi);
-                server.Start();
-
-                server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
-
-                setupUi = new IpcWindow(server, model, showPrompts);
-                model.SetSetupUi(setupUi);
-
-                model.PropertyChanged += (sender, e) =>
-                {
-                    server.PushMessage(new Message()
+                    if (arg == "/ipc")
                     {
-                        Command = IPC.Command.PropertyChanged,
-                        Property = e.PropertyName
-                    });
-                };
+                        runIpc = true;
+                    }
+                    else if (arg == "/nomodals")
+                    {
+                        showPrompts = false;
+                    }
+                    else if(arg == "/waitforexit")
+                    {
+                        waitForFilterExit = true;
+                    }
+                }
 
-                this.Engine.Detect();
+                BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
+
+                Application app = new Application();
+
+                ISetupUI setupUi = null;
+                InstallerViewModel model = new InstallerViewModel(this);
+
+                if (waitForFilterExit)
+                {
+                    while (true)
+                    {
+                        Process[] fsp = Process.GetProcessesByName("FilterServiceProvider");
+                        if (fsp.Length > 0)
+                        {
+                            Thread.Sleep(10);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (runIpc)
+                {
+                    if (server == null)
+                    {
+                        server = new UpdateIPCServer(UpdateIPCServer.PipeName);
+
+                        server.MessageReceived += CheckExit;
+
+                        server.RegisterObject("InstallerViewModel", model);
+
+                        server.Start();
+                    }
+
+                    setupUi = new IpcWindow(server, model, showPrompts);
+                    server.RegisterObject("SetupUI", setupUi);
+
+                    server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
+                    
+                    setupUi.Closed += (sender, e) => SignalExit();
+
+                    server.ClientConnected += () =>
+                    {
+                        Engine.Log(LogLevel.Standard, "Resynchronizing UI with new client.");
+                        (setupUi as IpcWindow)?.ResynchronizeUI();
+                    };
+
+                    model.SetSetupUi(setupUi);
+
+                    model.PropertyChanged += (sender, e) =>
+                    {
+                        server.PushMessage(new Message()
+                        {
+                            Command = IPC.Command.PropertyChanged,
+                            Property = e.PropertyName
+                        });
+                    };
+
+                    this.Engine.Detect();
+                }
+                else
+                {
+                    setupUi = new MainWindow(model, showPrompts);
+                    setupUi.Closed += (sender, e) =>
+                    {
+                        Engine.Log(LogLevel.Standard, "Closing installer.");
+                        BootstrapperDispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);
+                        Engine.Log(LogLevel.Standard, "Shutdown invoked.");
+                    };
+
+                    model.SetSetupUi(setupUi);
+
+                    Engine.Detect();
+                    
+                    if(Command.Display != Display.None && Command.Display != Display.Embedded)
+                    {
+                        setupUi.Show();
+                    }
+
+                    Dispatcher.Run();
+
+                    this.Engine.Quit(0);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                setupUi = new MainWindow(model, showPrompts);
-                setupUi.Closed += (sender, e) => BootstrapperDispatcher.InvokeShutdown();
+                Engine.Log(LogLevel.Error, "A .NET error occurred while running CloudVeilInstallerUI");
+                Engine.Log(LogLevel.Error, $"Error Type: {ex.GetType().Name}");
+                Engine.Log(LogLevel.Error, $"Error info: {ex}");
 
-                model.SetSetupUi(setupUi);
-                this.Engine.Detect();
-
-                setupUi.Show();
-                Dispatcher.Run();
-                this.Engine.Quit(0);
+                this.Engine.Quit(1);
             }
         }
 
@@ -112,9 +182,15 @@ namespace CloudVeilInstallerUI
         {
             if(message.Command == IPC.Command.Start)
             {
+                Engine.Log(LogLevel.Standard, "Start command received. Starting new thread for dispatcher.");
+
                 Thread t = new Thread(() =>
                 {
-                    Dispatcher.Run();
+                    while(!IsExiting)
+                    {
+                        exitWaitHandle.WaitOne(2000);
+                    }
+
                     Engine.Quit(0);
                 });
 
@@ -126,7 +202,7 @@ namespace CloudVeilInstallerUI
         {
             if(message.Command == IPC.Command.Exit)
             {
-                BootstrapperDispatcher.InvokeShutdown();
+                SignalExit();
             }
         }
     }
