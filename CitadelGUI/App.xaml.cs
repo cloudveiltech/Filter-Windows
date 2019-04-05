@@ -844,6 +844,7 @@ namespace CloudVeil.Windows
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
+            ModelManager.Register(new SupportViewModel());
             ModelManager.Register(new CollectDiagnosticsViewModel());
 
             viewManager.Register(new DashboardView());

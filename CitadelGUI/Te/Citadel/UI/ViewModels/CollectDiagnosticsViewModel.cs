@@ -18,7 +18,10 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(closeCommand == null)
                 {
-                    ViewManager.PopView(typeof(CollectDiagnosticsView));
+                    closeCommand = new RelayCommand(() =>
+                    {
+                        ViewManager.PopView(typeof(CollectDiagnosticsView));
+                    });
                 }
 
                 return closeCommand;

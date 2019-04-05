@@ -4,6 +4,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
+using CloudVeil.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,6 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Views
 {
@@ -30,6 +32,8 @@ namespace Te.Citadel.UI.Views
         public SupportView()
         {
             InitializeComponent();
+
+            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SupportViewModel>();
         }
 
         private void OnHyperlinkClicked(object sender, RequestNavigateEventArgs e)

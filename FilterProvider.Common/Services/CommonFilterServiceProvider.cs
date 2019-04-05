@@ -774,6 +774,18 @@ namespace FilterProvider.Common.Services
                     return true;
                 });
 
+                m_ipcServer.RegisterRequestHandler(IpcCall.CollectComputerInfo, (msg) =>
+                {
+                    m_logger.Info("Collecting computer information");
+
+                    ComputerInfo info = m_systemServices.GetComputerInfo();
+                    m_logger.Info("Collected computer information {0}", info?.DiagnosticsText);
+
+                    msg.SendReply<ComputerInfo>(m_ipcServer, IpcCall.CollectComputerInfo, info);
+
+                    return true;
+                });
+
                 m_ipcServer.RequestCaptivePortalDetection = (msg) =>
                 {
                     m_dnsEnforcement.Trigger();

@@ -122,6 +122,7 @@
     <Compile Include="Util\AppListCheck.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
+    <Compile Include="Util\InstalledPrograms.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />

@@ -42,22 +42,6 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                     Content="Deactivate"
                     Style="{StaticResource AccentedSquareButtonStyle}" />
             </StackPanel>
-
-            <StackPanel Margin="0,0,0,16">
-                <Label HorizontalAlignment="Center"
-                       Style="{StaticResource HeaderStyle}"
-                       Content="Collect Diagnostics" />
-
-                <TextBlock Margin="0,20,0,0"
-                           HorizontalAlignment="Center"
-                           TextWrapping="Wrap">
-                    <Run Text="If you are encountering a problem with an application, feel free to click the button below to collect information to send to CloudVeil with your support request." />
-                </TextBlock>
-                <Button Margin="0,20,0,0"
-                        Command="{Binding CollectDiagnosticsCommand}"
-                        Content="Collect Diagnostics"
-                        Style="{StaticResource SquareButtonStyle}" />
-            </StackPanel>
         </StackPanel>
 
         <StackPanel Margin="16,0,16,0" Grid.Column="0">

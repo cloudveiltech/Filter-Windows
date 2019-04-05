@@ -32,6 +32,10 @@ using System.Threading.Tasks;
 using WindowsFirewallHelper;
 using FilterNativeWindows;
 using Citadel.Core.Windows.WinAPI;
+using Filter.Platform.Common.Data.Models;
+using System.Reflection;
+using CitadelService.Util;
+using System.ComponentModel;
 
 namespace CitadelService.Platform
 {
@@ -253,6 +257,178 @@ namespace CitadelService.Platform
 
             var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
             ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
+        }
+
+        private Version getCV4WVersion()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            AssemblyName name = assembly?.GetName();
+
+            return name?.Version;
+        }
+
+        private string getIpConfigInfo()
+        {
+            Process p = new Process();
+            string ipconfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "ipconfig.exe");
+
+            p.StartInfo = new ProcessStartInfo(ipconfigPath, "/all")
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
+
+            p.Start();
+
+            Task<string> standardErrorTask = p.StandardError.ReadToEndAsync();
+            Task<string> standardOutputTask = p.StandardOutput.ReadToEndAsync();
+
+            p.WaitForExit();
+
+            StringBuilder b = new StringBuilder();
+
+            string separator = new string('-', 80);
+
+            string stderr = standardErrorTask.Result;
+            string stdout = standardErrorTask.Result;
+            if(stderr.Length > 0)
+            {
+                b.AppendLine("ipconfig stderr");
+                b.AppendLine(separator);
+                b.AppendLine(stderr);
+
+                if(stdout.Length > 0)
+                {
+                    b.AppendLine(separator);
+                }
+            }
+
+            if(stdout.Length > 0)
+            {
+                b.AppendLine("ipconfig stdout");
+                b.AppendLine(separator);
+                b.AppendLine(stdout);
+            }
+
+            return b.ToString();
+        }
+
+        private void printProcessToStringBuilder(StringBuilder sb, Process p)
+        {
+            string processName = "n/a";
+            int pid = -1;
+            bool? hasExited = false;
+            DateTime? exitTime = null;
+            DateTime? startTime = null;
+            TimeSpan? totalProcessorTime = null;
+            long workingSet = -1;
+
+            // We cannot guarantee that any specific process is going to allow us access to its information.
+            // So we must wrap each assignment from Process in a try-catch to attempt to glean as much information about
+            // it as we can.
+            try { processName = p.ProcessName; } catch (Exception) { }
+            try { pid = p.Id; } catch (Exception) { }
+            try { startTime = p.StartTime; } catch (Exception) { }
+            try { totalProcessorTime = p.TotalProcessorTime; } catch (Exception) { }
+            try { workingSet = p.WorkingSet64; } catch (Exception) { }
+
+            string startTimeString = startTime != null ? startTime.Value.ToString() : "n/a";
+            string totalProcessorTimeString = totalProcessorTime != null ? totalProcessorTime.ToString() : "n/a";
+
+            string timeRunString = null;
+            if(startTime == null)
+            {
+                timeRunString = "n/a";
+            }
+            else
+            {
+                TimeSpan timeRun = (hasExited == true && exitTime != null ? exitTime.Value : DateTime.Now) - startTime.Value;
+                timeRunString = timeRun.ToString();
+            }
+
+            sb.AppendLine($"\t{processName} ({pid}), StartTime={startTimeString}, ProcTime={totalProcessorTimeString}, MemUsage={workingSet / 1024L}KB");
+        }
+
+        private string getRunningProcessesReport()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Running Processes Report");
+
+            Process[] processes = Process.GetProcesses();
+
+            foreach(Process p in processes)
+            {
+                bool hasExited = false;
+                try
+                {
+                    hasExited = p.HasExited;
+                }
+                catch (Exception) { }
+
+                if (!hasExited)
+                {
+                    printProcessToStringBuilder(sb, p);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public ComputerInfo GetComputerInfo()
+        {
+            string mainSeparator = new string('=', 80);
+
+            StringBuilder text = new StringBuilder();
+
+            try
+            {
+                Version currentVersion = getCV4WVersion();
+
+                text.AppendLine($"CV4W {currentVersion} diagnostics log");
+                text.AppendLine(mainSeparator);
+                text.AppendLine();
+                text.AppendLine(getIpConfigInfo());
+                text.AppendLine();
+                text.AppendLine(mainSeparator);
+                text.AppendLine();
+                text.AppendLine(InstalledPrograms.BuildInstalledProgramsReport());
+                text.AppendLine();
+                text.AppendLine(mainSeparator);
+                text.AppendLine();
+                text.AppendLine(getRunningProcessesReport());
+                text.AppendLine();
+                text.AppendLine(mainSeparator);
+                text.AppendLine("End of Diagnostics log");
+
+                return new ComputerInfo()
+                {
+                    DiagnosticsText = text.ToString()
+                };
+            }
+            catch(Exception ex)
+            {
+                if(text != null)
+                {
+                    text.AppendLine(mainSeparator);
+                    text.AppendLine(ex.ToString());
+
+                    return new ComputerInfo()
+                    {
+                        DiagnosticsText = text.ToString()
+                    };
+                }
+                else
+                {
+                    return new ComputerInfo()
+                    {
+                        DiagnosticsText = ex.ToString()
+                    };
+                }
+            }
         }
 
         /// <summary>

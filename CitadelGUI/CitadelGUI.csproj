@@ -144,6 +144,7 @@
     <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\SupportViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\TimeRestrictionsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
       <DependentUpon>AdvancedView.xaml</DependentUpon>
