@@ -32,7 +32,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 <TextBlock Margin="0,20,0,0"
                        HorizontalAlignment="Center"
                        TextWrapping="Wrap">
-                <Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. Cloud-Veil will see your request and verify the action." />
+                <Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. CloudVeil will see your request and verify the action." />
                         <LineBreak /><Run />
                         <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." />
                 </TextBlock>
@@ -41,6 +41,22 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                     Command="{Binding RequestDeactivateCommand}"
                     Content="Deactivate"
                     Style="{StaticResource AccentedSquareButtonStyle}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,16">
+                <Label HorizontalAlignment="Center"
+                       Style="{StaticResource HeaderStyle}"
+                       Content="Collect Diagnostics" />
+
+                <TextBlock Margin="0,20,0,0"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap">
+                    <Run Text="If you are encountering a problem with an application, feel free to click the button below to collect information to send to CloudVeil with your support request." />
+                </TextBlock>
+                <Button Margin="0,20,0,0"
+                        Command="{Binding CollectDiagnosticsCommand}"
+                        Content="Collect Diagnostics"
+                        Style="{StaticResource SquareButtonStyle}" />
             </StackPanel>
         </StackPanel>
 

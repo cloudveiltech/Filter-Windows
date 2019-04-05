@@ -136,6 +136,7 @@
     <Compile Include="Te\Citadel\UI\ViewManager.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\AdvancedViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
+    <Compile Include="Te\Citadel\UI\ViewModels\CollectDiagnosticsViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
     <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsViewModel.cs" />
@@ -151,6 +152,9 @@
     <Compile Include="Te\Citadel\UI\Views\CaptivePortalView.xaml.cs">
       <DependentUpon>CaptivePortalView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Te\Citadel\UI\Views\CollectDiagnosticsView.xaml.cs">
+      <DependentUpon>CollectDiagnosticsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
     </Compile>
@@ -163,6 +167,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Te\Citadel\UI\Views\CollectDiagnosticsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

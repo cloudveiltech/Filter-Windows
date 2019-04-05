@@ -139,6 +139,7 @@ namespace CloudVeil.Windows
         /// </summary>
         private IPCClient m_ipcClient;
 
+        public IPCClient IpcClient => m_ipcClient;
         /// <summary>
         /// Tracks whether the captive portal tool tip has been displayed for the given network. Will
         /// be set back to false when captive portal detection goes back to false.
@@ -843,10 +844,12 @@ namespace CloudVeil.Windows
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
+            ModelManager.Register(new CollectDiagnosticsViewModel());
 
             viewManager.Register(new DashboardView());
             viewManager.Register(new LoginView());
             viewManager.Register(new ProgressWait());
+            viewManager.Register(new CollectDiagnosticsView());
 
             m_mainWindow.WindowRestoreRequested += (() =>
             {

@@ -5,7 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using FilterProvider.Common.Data;
+using Filter.Platform.Common.Data.Models;
+using FilterProvider.Common.Data;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
@@ -67,6 +68,12 @@ namespace FilterProvider.Common.Platform
         /// </summary>
         /// <param name="url">The URL to open.</param>
         void OpenUrlInSystemBrowser(Uri url);
+
+        /// <summary>
+        /// Collects information about this computer for diagnostic purposes.
+        /// </summary>
+        /// <returns>A ComputerInfo object</returns>
+        ComputerInfo GetComputerInfo();
 
         /// <summary>
         /// Does not need to be available until after OnStartProxy is fired.
