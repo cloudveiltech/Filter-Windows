@@ -327,23 +327,6 @@ namespace CitadelService.Services
                 });
             });
 
-            server.RegisterResponseHandler<MyProcessInfo>(IpcCall.AdministratorStart, (msg) =>
-            {
-                try
-                {
-                    if(!ProcessCreation.CreateElevatedProcessInCurrentSession(msg.Data.Filename, msg.Data.Arguments))
-                    {
-                        m_logger.Error($"Failed to create elevated process with {Marshal.GetLastWin32Error()}");
-                    }
-                }
-                catch(Exception ex)
-                {
-                    m_logger.Error(ex, "ProcessCreation failed with this exception.");
-                }
-
-                return true;
-            });
-
         }
 
         private void OnAppSessionEnding(object sender, SessionEndingEventArgs e)
