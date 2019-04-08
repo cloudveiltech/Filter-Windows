@@ -547,6 +547,8 @@ namespace CloudVeilInstallerUI.ViewModels
             ba.Engine.Log(LogLevel.Standard, "ApplyBegin");
         }
 
+        int applyRetries = 3;
+
         private void ApplyComplete(object sender, ApplyCompleteEventArgs e)
         {
             if (e.Status >= 0)
@@ -567,6 +569,13 @@ namespace CloudVeilInstallerUI.ViewModels
                 {
                     message = $"Failed to {installTypeVerb} CloudVeil for Windows because a reboot is required.";
                     needsRestart = true;
+                }
+                else if(e.Status == ApplyStatus.FAIL_PIPE_NO_DATA && applyRetries > 0)
+                {
+                    // Handle pipe errors introduced by our lovely friend the antivirus.
+                    ba.Engine.Apply(hwnd);
+                    applyRetries -= 1;
+                    return;
                 }
                 else
                 {
