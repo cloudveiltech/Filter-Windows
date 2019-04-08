@@ -49,6 +49,7 @@ using LogMessageType = Unosquare.Swan.LogMessageType;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
+using HandlebarsDotNet;
 
 namespace FilterProvider.Common.Services
 {
@@ -197,7 +198,9 @@ namespace FilterProvider.Common.Services
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
 
-        private byte[] m_blockedHtmlPage;
+        // Uses Handlebars.Net for compilation of this template function.
+        private Func<object, string> m_blockedHtmlPage;
+
         private byte[] m_badSslHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
@@ -1011,7 +1014,9 @@ namespace FilterProvider.Common.Services
             LogTime("Starting InitEngine()");
 
             // Get our blocked HTML page
-            m_blockedHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
+            byte[] htmlBytes = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
+            m_blockedHtmlPage = Handlebars.Compile(Encoding.UTF8.GetString(htmlBytes));
+
             m_badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
             if (m_blockedHtmlPage == null)
@@ -1937,15 +1942,8 @@ namespace FilterProvider.Common.Services
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        private string getUnblockRequestUrl(string urlText)
         {
-            string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
-
-            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
-            // IMO this looks slightly more friendly to a user than the entire URI.
-            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
-            string urlText = requestUri.ToString();
-
             string deviceName;
 
             try
@@ -1965,33 +1963,35 @@ namespace FilterProvider.Common.Services
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;
 
+            return unblockRequest;
+        }
+
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        {
+            //string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
+            Dictionary<string, object> blockPageContext = new Dictionary<string, object>();
+
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // In my opninion this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
+            string urlText = requestUri.ToString();
+
+            bool showUnblockRequestButton = true;
+            string unblockRequest = getUnblockRequestUrl(urlText);
+
             string message = "was blocked because it was in the following category:";
-            string unblockRequestButton = "<a class=\"request-unblock button primary\" href=\"{{unblock_request}}\">Request an Unblock</a>";
-            string relaxed_policy_message = "";
-            string matching_category = "";
-            string otherCategories = "";
 
-            // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-            {
-                if (matchingCategory == entry.CategoryId)
-                {
-                    matching_category = entry.ShortCategoryName;
-                }
-                else if (appliedCategories?.Any(m => m.CategoryId == entry.CategoryId) == true)
-                {
-                    otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
-                }
+            // Collect category information: Blocked category, other categories, and whether the blocked category is in the relaxed policy.
+            MappedFilterListCategoryModel matchingCategoryModel = m_policyConfiguration.GeneratedCategoriesMap.Values.FirstOrDefault(m => m.CategoryId == matchingCategory);
+            string matching_category = matchingCategoryModel?.ShortCategoryName;
 
-                if (entry is MappedBypassListCategoryModel)
-                {
-                    if (matchingCategory == entry.CategoryId)
-                    {
-                        relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
-                        break;
-                    }
-                }
-            }
+            List<string> otherCategories = appliedCategories?
+                .Where(c => c.CategoryId != matchingCategory)
+                .Select(c => c.ShortCategoryName)
+                .Distinct()
+                .ToList();
+
+            bool isRelaxedPolicy = (matchingCategoryModel is MappedBypassListCategoryModel);
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText;
@@ -2001,8 +2001,7 @@ namespace FilterProvider.Common.Services
             }
             else
             {
-                otherCategories = "";
-
+                otherCategories = null;
                 switch (blockType)
                 {
                     case BlockType.None:
@@ -2025,7 +2024,7 @@ namespace FilterProvider.Common.Services
                     case BlockType.TimeRestriction:
                         message = "is blocked because your time restrictions do not allow internet access at this time.";
                         //matching_category = "no internet allowed after hours";
-                        unblockRequestButton = "";
+                        showUnblockRequestButton = false;
                         break;
 
                     case BlockType.OtherContentClassification:
@@ -2035,16 +2034,17 @@ namespace FilterProvider.Common.Services
                 }
             }
 
-            blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
-            blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
-            blockPageTemplate = blockPageTemplate.Replace("{{message}}", message);
-            blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
-            blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
-            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request_button}}", unblockRequestButton);
-            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
-            blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
+            blockPageContext.Add("url_text", url_text);
+            blockPageContext.Add("friendly_url_text", friendlyUrlText);
+            blockPageContext.Add("message", message);
+            blockPageContext.Add("matching_category", matching_category);
+            blockPageContext.Add("other_categories", otherCategories);
+            blockPageContext.Add("showUnblockRequestButton", showUnblockRequestButton);
+            blockPageContext.Add("unblockRequest", unblockRequest);
+            blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
+            blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);
 
-            return Encoding.UTF8.GetBytes(blockPageTemplate);
+            return Encoding.UTF8.GetBytes(m_blockedHtmlPage(blockPageContext));
         }
 
         private NameValueCollection ParseHeaders(string headers)

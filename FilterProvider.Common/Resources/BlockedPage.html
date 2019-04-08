@@ -80,6 +80,10 @@ The line below is used by the filter tester to determine whether the filter is w
             position: relative;
         }
 
+        .button.secondary {
+            color: #4c4c4c;
+        }
+
         .button.primary {
             background: #2086bf;
             color: #fff;
@@ -118,19 +122,53 @@ The line below is used by the filter tester to determine whether the filter is w
 <body id="home">
     <div id="wrapper">
         <h1>Content Blocked</h1>
-        <!-- This block page does not use angular; it's just that the angular templating works well for find and replace. -->
-
+        <!-- This template uses Handlebars.Net. -->
         <!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
         <p><a href="{{url_text}}">{{friendly_url_text}}</a> {{message}}</p>
         <p class="category">
             {{matching_category}}
         </p>
 
-        {{other_categories}}
+        {{{#each other_categories}}}
+        <p class="category other">{{@value}}</p>
+        {{{/each}}}
 
-        {{relaxed_policy_message}}
+        {{#if isRelaxedPolicy}}
+        <p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy', or click the button below.</p>
 
-        {{unblock_request_button}}
+            {{#if isRelaxedPolicyPasscodeRequired}}
+            <div class="form-group">
+                <label class="control-label">Passcode</label>
+                <input type="password" id="passcodeInput" />
+            </div>
+            {{/if}}
+
+        <a class="request-unblock button primary" id="relaxedPolicyButton">Request Relaxed Policy</a>
+        {{/if}}
+
+        {{#if showUnblockRequestButton}}
+            {{#if isRelaxedPolicy}}
+                <a class="request-unblock button secondary" href="{{unblockRequest}}">Request an Unblock</a>
+            {{else}}
+                <a class="request-unblock button primary" href="{{unblockRequest}}">Request an Unblock</a>
+            {{/if}}
+        {{/if}}
+
+        <!-- Nasty hack to get around the fact that handlebars doesn't support if isRelaxedPolicy && !isRelaxedPolicyPasscodeRequired -->
+        {{#if isRelaxedPolicy}}
+            {{#if isRelaxedPolicyPasscodeRequired}} {{else}}
+                <h3>Did you know?</h3>
+                <p>You can now set up a passcode to protect your relaxed policy from unwanted users.</p>
+                <p>Just follow these steps to set up your passcode.</p>
+                <ol>
+                    <li>Go to <a href="{{passcodeSetupUrl}}">Relaxed Policy Setup</a> and login when requested to do so.</li>
+                    <li>Make sure the checkbox marked 'Enable Relaxed Policy Password' is checked</li>
+                    <li>Enter in the password you wish to use for protecting your relaxed policy.</li>
+                    <li>Click 'Save Changes'</li>
+                    <li>The changes to your account should take effect within 15 minutes.</li>
+                </ol>
+            {{/if}}
+        {{/if}}
     </div>
 
     <script>
