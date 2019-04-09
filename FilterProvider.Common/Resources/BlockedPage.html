@@ -21,7 +21,6 @@ The line below is used by the filter tester to determine whether the filter is w
             font-family: "Open Sans", sans-serif;
             background-color: transparent;
             color: #4c4c4c;
-
             margin: 0px;
         }
 
@@ -30,32 +29,38 @@ The line below is used by the filter tester to determine whether the filter is w
         }
 
         div#wrapper {
-            display: table;
-            text-align: center;
-            height: 0px;
-            position: absolute;
-            overflow: visible;
+            margin-top: 40px;
             display: block;
             width: 100%;
-            left: 0px;
-            top: 10%;
         }
 
-        div#center {
-            background-color: transparent;
+        div.centered {
+            text-align:center;
+            width: 100%;
+        }
+
+        div.buttons {
+            width: 25%;
+            margin: 0 auto;
             overflow: hidden;
-            position: absolute;
-            left: 50%;
-            margin-left: -200px;
-            width: 400px;
-            height: 300px;
-            top: -150px;
+            display: flex;
+            justify-content: space-between;
+            min-width: 400px;
         }
 
-        div#center > child {
-            display: table-cell;
+        .did-you-know.header {
+            margin-top: 20px;
             text-align: center;
-            vertical-align: middle;
+        }
+
+        .did-you-know {
+            width: 35%;
+            min-width: 320px;
+            margin: 0 auto;
+        }
+
+        .did-you-know p {
+            margin-left: 40px;
         }
 
         a.button.request-unblock {
@@ -64,12 +69,64 @@ The line below is used by the filter tester to determine whether the filter is w
             width: 150px;
         }
 
+        #relaxedPolicyMessage {
+            margin: 20px auto 0 auto;
+            padding: 20px;
+            width: 35%;
+            background-color: #ff514c;
+            color: #fff;
+            border-radius: 3px;
+            display: none;
+        }
+
+        .relaxed-policy a.button.request-unblock {
+            flex: 0 1 auto;
+            margin: unset;
+            width: auto;
+        }
+
+        .relaxed-policy {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .passcode-form {
+            flex: 0 1 auto;
+            margin-right: 20px;
+        }
+
+        .passcode-form .control-label {
+            margin-right: 20px;
+            width: 120px;
+            line-height: 36px;
+            height: 36px;
+            font-weight: 700;
+        }
+
+        /* Input borrowed from winstrap */
+        .passcode-form input {
+            -ms-user-select: element;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 0;
+            min-height: 36px;
+            background-clip: border-box;
+            box-sizing: border-box;
+            padding-left: 11px;
+            outline: 0;
+            width: 200px;
+            border: 1px solid #ccc;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
         /* Borrowed from metro.css */
         .button {
             padding: 0 1rem;
             height: 2.125rem;
-            text-align:center;
-            vertical-align:middle;
+            text-align: center;
+            vertical-align: middle;
             border: 1px #d9d9d9 solid;
             cursor: pointer;
             text-decoration: none;
@@ -80,24 +137,24 @@ The line below is used by the filter tester to determine whether the filter is w
             position: relative;
         }
 
-        .button.secondary {
-            color: #4c4c4c;
-        }
+            .button.secondary {
+                color: #4c4c4c;
+            }
 
-        .button.primary {
-            background: #2086bf;
-            color: #fff;
-            border-color: #2086bf;
-        }
+            .button.primary {
+                background: #2086bf;
+                color: #fff;
+                border-color: #2086bf;
+            }
 
-        .button.primary:active {
-            background: #1b6eae;
-            color: #fff;
-        }
+                .button.primary:active {
+                    background: #1b6eae;
+                    color: #fff;
+                }
 
-        .button:active {
-            box-shadow: none;
-        }
+            .button:active {
+                box-shadow: none;
+            }
 
         .request-unblock:visited {
             color: inherit;
@@ -112,62 +169,71 @@ The line below is used by the filter tester to determine whether the filter is w
             margin-bottom: 20px;
         }
 
-        p.category.other {
-            font-weight: 400;
-        }
-
+            p.category.other {
+                font-weight: 400;
+            }
     </style>
 </head>
 
+<!-- This template uses Handlebars.Net. -->
+<!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
 <body id="home">
     <div id="wrapper">
-        <h1>Content Blocked</h1>
-        <!-- This template uses Handlebars.Net. -->
-        <!-- Look at FilterServiceProvider.GetBlockedResponse for a list of available template variables. -->
-        <p><a href="{{url_text}}">{{friendly_url_text}}</a> {{message}}</p>
-        <p class="category">
-            {{matching_category}}
-        </p>
+        <div class="centered">
+            <h1>Content Blocked by CloudVeil</h1>
 
-        {{{#each other_categories}}}
-        <p class="category other">{{@value}}</p>
-        {{{/each}}}
+            <p><a href="{{url_text}}">{{friendly_url_text}}</a> {{message}}</p>
+            <p class="category">
+                {{matching_category}}
+            </p>
 
+            {{{#each other_categories}}}
+            <p class="category other">{{@value}}</p>
+            {{{/each}}}
+
+            {{#if isRelaxedPolicy}}
+            <p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy', or click the button below.</p>
+            {{/if}}
+        </div>
+
+        <!-- if isRelaxedPolicy && passcode required -->
         {{#if isRelaxedPolicy}}
-        <p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy', or click the button below.</p>
-
-            {{#if isRelaxedPolicyPasscodeRequired}}
-            <div class="form-group">
+        <div class="relaxed-policy">
+        {{#if isRelaxedPolicyPasscodeRequired}}
+            <div class="passcode-form">
                 <label class="control-label">Passcode</label>
                 <input type="password" id="passcodeInput" />
             </div>
-            {{/if}}
-
-        <a class="request-unblock button primary" id="relaxedPolicyButton">Request Relaxed Policy</a>
+        {{/if}}
+            <a class="request-unblock button primary" id="relaxedPolicyButton">Request Relaxed Policy</a>
+        </div>
+        <div id="relaxedPolicyMessage">
+            This is a test relaxed policy message from an error.
+        </div>
         {{/if}}
 
-        {{#if showUnblockRequestButton}}
-            {{#if isRelaxedPolicy}}
-                <a class="request-unblock button secondary" href="{{unblockRequest}}">Request an Unblock</a>
-            {{else}}
-                <a class="request-unblock button primary" href="{{unblockRequest}}">Request an Unblock</a>
+        <div class="buttons">
+            {{#if showUnblockRequestButton}}
+            <a class="request-unblock button {{#if isRelaxedPolicy}}secondary{{else}}primary{{/if}}" href="{{unblockRequest}}">Request an Unblock</a>
             {{/if}}
-        {{/if}}
+        </div>
 
         <!-- Nasty hack to get around the fact that handlebars doesn't support if isRelaxedPolicy && !isRelaxedPolicyPasscodeRequired -->
         {{#if isRelaxedPolicy}}
-            {{#if isRelaxedPolicyPasscodeRequired}} {{else}}
-                <h3>Did you know?</h3>
-                <p>You can now set up a passcode to protect your relaxed policy from unwanted users.</p>
-                <p>Just follow these steps to set up your passcode.</p>
-                <ol>
-                    <li>Go to <a href="{{passcodeSetupUrl}}">Relaxed Policy Setup</a> and login when requested to do so.</li>
-                    <li>Make sure the checkbox marked 'Enable Relaxed Policy Password' is checked</li>
-                    <li>Enter in the password you wish to use for protecting your relaxed policy.</li>
-                    <li>Click 'Save Changes'</li>
-                    <li>The changes to your account should take effect within 15 minutes.</li>
-                </ol>
-            {{/if}}
+        {{#if isRelaxedPolicyPasscodeRequired}} {{else}}
+        <h3 class="did-you-know header">Did you know?</h3>
+        <div class="did-you-know">
+            <p>You can now set up a passcode to protect your relaxed policy from unwanted users.</p>
+            <p>Just follow these steps to set up your passcode.</p>
+            <ol>
+                <li>Go to <a href="{{passcodeSetupUrl}}">Relaxed Policy Setup</a> and login when requested to do so.</li>
+                <li>Make sure the checkbox marked 'Enable Relaxed Policy Password' is checked</li>
+                <li>Enter the password you wish to use for protecting your relaxed policy.</li>
+                <li>Click 'Save Changes'</li>
+                <li>The changes to your account should take effect within 15 minutes.</li>
+            </ol>
+        </div>
+        {{/if}}
         {{/if}}
     </div>
 
@@ -182,14 +248,72 @@ The line below is used by the filter tester to determine whether the filter is w
                 }
             }
 
-            if (document.readyState.toUpperCase() == "complete".toUpperCase()) {
-
+            if (document.readyState.toLowerCase() == "complete") {
                 if (inIframe()) {
                     document.getElementById('wrapper').setAttribute("display", "none");
                 } else {
                     console.log('nope');
                 }
+
+                onload();
             }
+        }
+
+        function onload() {
+            var relaxedPolicyButton = document.getElementById("relaxedPolicyButton");
+            var relaxedPolicyMessage = document.getElementById("relaxedPolicyMessage");
+            var passcodeInput = document.getElementById("passcodeInput");
+
+            relaxedPolicyButton.addEventListener('click', function () {
+                var delay = relaxedPolicyMessage.style.display == 'block';
+
+                relaxedPolicyMessage.style.display = 'none';
+
+                var xhr = new XMLHttpRequest();
+
+                var passcode = null;
+
+                if (passcodeInput) {
+                    passcode = passcodeInput.value;
+                }
+
+                if (passcode && passcode.length == 0) {
+                    passcode = null;
+                } else if (!passcode) {
+                    passcode = null;
+                }
+
+                xhr.open("POST", "https://127.0.0.1:14299/api/relaxedpolicy");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        if (xhr.status == 200) {
+                            window.location.reload();
+
+                            relaxedPolicyMessage.style.display = 'none';
+                        } else {
+                            var json = null;
+                            try {
+                                json = JSON.parse(xhr.responseText);
+                            } catch (e) {
+                                json = {};
+                                json.message = "JSON parse error occurred. response text was " + xhr.responseText;
+                            }
+
+                            if (!json.message) {
+                                json.message = "Unknown error occurred.";
+                            }
+
+                            setTimeout(function () {
+                                relaxedPolicyMessage.style.display = 'block';
+                            }, delay ? 1500 : 0);
+
+                            relaxedPolicyMessage.innerHTML = json.message;
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify({ passcode: passcode }));
+            });
         }
     </script>
 </body>

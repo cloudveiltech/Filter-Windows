@@ -41,10 +41,14 @@ namespace Citadel.IPC
         /// <param name="msg">
         /// The client message. 
         /// </param>
-        public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg)
+        public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg) : this(msg.Command, msg.Passcode)
         {
-            Command = msg.Command;
-            Passcode = msg.Passcode;
+        }
+
+        public RelaxedPolicyEventArgs(RelaxedPolicyCommand command, string passcode)
+        {
+            Command = command;
+            Passcode = passcode;
         }
     }
 
