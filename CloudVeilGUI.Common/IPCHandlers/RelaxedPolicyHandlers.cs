@@ -59,7 +59,7 @@ namespace CloudVeilGUI.IPCHandlers
             {
                 ipcClient.ConnectedToServer = () =>
                 {
-                    ipcClient.RequestRelaxedPolicy();
+                    ipcClient.RequestRelaxedPolicy("");
                 };
 
                 ipcClient.RelaxedPolicyInfoReceived += delegate (RelaxedPolicyMessage msg)

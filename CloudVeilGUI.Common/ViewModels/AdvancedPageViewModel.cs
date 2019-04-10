@@ -277,7 +277,7 @@ namespace CloudVeilGUI.ViewModels
                 {
                     viewCertErrorsCommand = new Command(() =>
                     {
-                        CommonAppServices.Default.GuiServices.ShowCertificateErrorsScreen();
+                        //CommonAppServices.Default.GuiServices.ShowCertificateErrorsScreen();
                     });
                 }
 
