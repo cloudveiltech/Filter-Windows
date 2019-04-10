@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using FilterProvider.Common.Platform;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Net;
+using CloudVeil;
 
 namespace FilterProvider.Common.Util
 {
@@ -372,7 +373,7 @@ namespace FilterProvider.Common.Util
         }
 
         /// <summary>
-        /// Checks http://connectivitycheck.cloudveil.org for connectivity.
+        /// Checks URL specified at CloudVeil.CompileSecrets.ConnectivityCheck + "/ncsi.txt" for connectivity.
         /// </summary>
         /// <remarks>
         /// Windows 7 captive portal detection isn't perfect. Somehow in my testing, it got disabled on my test network.
@@ -390,35 +391,13 @@ namespace FilterProvider.Common.Util
             // "Oh, you want to depend on Windows captive portal detection? Haha nope!" -- Boingo Wi-FI
             // Some captive portals indeed let msftncsi.com through and thoroughly break windows captive portal detection.
             // BWI airport wifi is one of them.
-            WebClient client = new WebClient();
-            string captivePortalCheck = null;
-            try
+            switch(ConnectivityCheck.IsAccessible())
             {
-                captivePortalCheck = client.DownloadString("http://connectivitycheck.cloudveil.org/ncsi.txt");
-
-                if (captivePortalCheck.Trim(' ', '\r', '\n', '\t') != "CloudVeil NCSI")
-                {
-                    return CaptivePortalDetected.Yes;
-                }
+                case ConnectivityCheck.Accessible.No: return CaptivePortalDetected.NoResponseReturned;
+                case ConnectivityCheck.Accessible.Yes: return CaptivePortalDetected.No;
+                case ConnectivityCheck.Accessible.UnexpectedResponse: return CaptivePortalDetected.Yes;
+                default: return CaptivePortalDetected.No;
             }
-            catch (WebException ex)
-            {
-                if (ex.Response == null)
-                {
-                    return CaptivePortalDetected.NoResponseReturned;
-                }
-
-                m_logger.Info("Got an error response from captive portal check. {0}", ex.Status);
-                return CaptivePortalDetected.Yes;
-            }
-            catch (Exception ex)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-                return CaptivePortalDetected.No;
-            }
-
-            return CaptivePortalDetected.No;
-
         }
         #endregion
 

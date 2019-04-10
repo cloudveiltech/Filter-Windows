@@ -39,6 +39,43 @@ static const wchar_t* mcafeeDrivers[] = {
 
 static int mcafeeDriversLength = sizeof(mcafeeDrivers) / sizeof(mcafeeDrivers[0]);
 
+static const wchar_t* esetDrivers[] = {
+    TEXT("ehdrv.sys"),
+    TEXT("em000k_64.dll"),
+    TEXT("em000k_86.dll"),
+    TEXT("eamonm.sys"),
+    TEXT("edevmon.sys"),
+    TEXT("epfwwfp.sys"),
+    TEXT("epfw.sys"),
+    TEXT("em018k_64.dll"),
+    TEXT("em018k_86.dll"),
+    TEXT("em006_64.dll"),
+    TEXT("em006_86.dll"),
+    TEXT("em008k_64.dll"),
+    TEXT("em008k_86.dll"),
+    TEXT("em042_64.dll"),
+    TEXT("em042_86.dll")
+};
+
+static int esetDriversLength = sizeof(esetDrivers) / sizeof(esetDrivers[0]);
+
+static const wchar_t* avgDrivers[] = {
+    TEXT("avgVmm.sys"),
+    TEXT("avgSP.sys"),
+    TEXT("avgbidsdriver.sys"),
+    TEXT("avgbidsh.sys"),
+    TEXT("avgblog.sys"),
+    TEXT("avgbuniv.sys"),
+    TEXT("avgSnx.sys"),
+    TEXT("avgArPot.sys"),
+    TEXT("avgKbd.sys"),
+    TEXT("avgRdr2.sys"),
+    TEXT("avgMonFlt.sys"),
+    TEXT("avgStm.sys")
+};
+
+static int avgDriversLength = sizeof(avgDrivers) / sizeof(avgDrivers[0]);
+
 static int conflictsArrayLength;
 static DriverConflict* conflicts = NULL;
 
@@ -48,6 +85,8 @@ static void initializeDriverConflictArray() {
     totalLength += avastDriversLength; // Avast.
     totalLength += 2; // BlueCoat, CleanInternet.
     totalLength += mcafeeDriversLength; // McAfee
+    totalLength += esetDriversLength; // Eset
+    totalLength += avgDriversLength; // AVG
 
     conflicts = new DriverConflict[totalLength];
 
@@ -59,7 +98,7 @@ static void initializeDriverConflictArray() {
         conflicts[j].name = avastDrivers[i];
     }
 
-    // BlueCoat TODO
+    // BlueCoat. K9 not included. K9 doesn't seem to use a driver.
     conflicts[j].conflict = CONFLICT_REASON_BLUECOAT;
     conflicts[j].name = TEXT("bcua-wfp.sys");
     j++;
@@ -76,18 +115,41 @@ static void initializeDriverConflictArray() {
     }
 
     // Eset
+    for (i = 0; i < esetDriversLength; i++, j++) {
+        conflicts[j].conflict = CONFLICT_REASON_ESET;
+        conflicts[j].name = esetDrivers[i];
+    }
 
     // AVG
+    for (i = 0; i < avgDriversLength; i++, j++) {
+        conflicts[j].conflict = CONFLICT_REASON_AVG;
+        conflicts[j].name = avgDrivers[i];
+    }
 
     conflictsArrayLength = totalLength;
 }
 
-int SearchConflictReason() {
+bool isConflictInArray(int* arr, int len, int conflict) {
+    for (int i = 0; i < len; i++) {
+        if (arr[i] == conflict) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int SearchConflictReason(int** myConflictsArray) {
+    if (myConflictsArray == NULL) {
+        return -1;
+    }
+
+    int* conflictArrayList = new int[32];
+    int totalConflictTypesDiscovered = 0;
+
     if (conflicts == NULL) {
         initializeDriverConflictArray();
     }
-
-    int fnRet = CONFLICT_NO_CONFLICT;
 
     LPVOID* driverList = new LPVOID[MAX_DEVICE_DRIVERS_ENUM];
     DWORD driverListSize = sizeof(LPVOID) * MAX_DEVICE_DRIVERS_ENUM;
@@ -96,7 +158,8 @@ int SearchConflictReason() {
     BOOL ret = EnumDeviceDrivers(driverList, driverListSize, &recvDriverListSize);
 
     if (!ret) {
-        fnRet = CONFLICT_REASON_FAILED;
+        conflictArrayList[0] = CONFLICT_REASON_FAILED;
+        totalConflictTypesDiscovered = 1;
         goto cleanup;
     }
 
@@ -108,7 +171,8 @@ int SearchConflictReason() {
         ret = EnumDeviceDrivers(driverList, driverListSize, &recvDriverListSize);
 
         if (!ret) {
-            fnRet = CONFLICT_REASON_FAILED;
+            conflictArrayList[0] = CONFLICT_REASON_FAILED;
+            totalConflictTypesDiscovered = 1;
             goto cleanup;
         }
     }
@@ -124,8 +188,10 @@ int SearchConflictReason() {
             int j = 0;
             for (j = 0; j < conflictsArrayLength; j++) {
                 if (!wcscmp(driverName, conflicts[j].name)) {
-                    fnRet = conflicts[j].conflict;
-                    goto cleanup;
+                    if (!isConflictInArray(conflictArrayList, totalConflictTypesDiscovered, conflicts[j].conflict)) {
+                        conflictArrayList[totalConflictTypesDiscovered] = conflicts[j].conflict;
+                        totalConflictTypesDiscovered++;
+                    }
                 }
             }
         }
@@ -133,12 +199,14 @@ int SearchConflictReason() {
 
     // TODO: Check for services here.
 
-    fnRet = CONFLICT_NO_CONFLICT;
+    if (totalConflictTypesDiscovered == 0) {
+        delete conflictArrayList;
+        *myConflictsArray = NULL;
+    }
+    else {
+        *myConflictsArray = conflictArrayList;
+    }
 
 cleanup:
-    return fnRet;
-}
-
-int FindWFPDriverConflicts() {
-    return 0; // TODO: Build this yet.
+    return totalConflictTypesDiscovered;
 }

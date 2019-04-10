@@ -17,6 +17,12 @@ namespace Citadel.IPC
         Update,
         StartUpdater,
         ShutdownForUpdate,
-        ConflictDetected
+        ConflictsDetected,
+        InstallerDownloadProgress,
+        InstallerDownloadFinished,
+        InstallerDownloadStarted,
+        InternetAccessible,
+        AdministratorStart,
+        CollectComputerInfo
     }
 }

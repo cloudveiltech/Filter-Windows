@@ -8,6 +8,8 @@
 using Citadel.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using System;
+using System.Diagnostics;
+using Te.Citadel.UI.ViewModels;
 
 namespace Te.Citadel.UI.Windows
 {
@@ -43,6 +45,13 @@ namespace Te.Citadel.UI.Windows
         public void SwitchDashboardViewTab(int tabIdx)
         {
             
+        }
+
+        public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(e.Uri.ToString());
         }
     }
 }

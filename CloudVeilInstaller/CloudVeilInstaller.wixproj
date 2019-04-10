@@ -14,17 +14,21 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug;MsiPlatform=$(MsiPlatform)</DefineConstants>
+    <DefineConstants>Debug;ProjectConfiguration=$(Configuration);MsiPlatform=$(MsiPlatform)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>MsiPlatform=$(MsiPlatform)</DefineConstants>
+    <DefineConstants>ProjectConfiguration=$(Configuration);MsiPlatform=$(MsiPlatform)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Bundle.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
     <WixExtension Include="WixNetFxExtension">
       <HintPath>$(WixExtDir)\WixNetFxExtension.dll</HintPath>
       <Name>WixNetFxExtension</Name>

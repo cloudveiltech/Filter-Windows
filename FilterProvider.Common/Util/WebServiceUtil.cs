@@ -27,6 +27,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
+using Newtonsoft.Json;
+using Filter.Platform.Common.Data.Models;
 
 namespace FilterProvider.Common.Util
 {
@@ -287,7 +289,7 @@ namespace FilterProvider.Common.Util
                         using (var reader = new StreamReader(data))
                         {
                             errorText = reader.ReadToEnd();
-                            
+
                             // GS Just cleans up the punctuation at the end of string
                             string excpList = "$@*!.";
                             var chRemoved = errorText
@@ -455,11 +457,28 @@ namespace FilterProvider.Common.Util
             return responseDict;
         }
 
-        public byte[] GetFilterList(string @namespace, string category, string type, string sha1 = null)
+        public byte[] GetFilterLists(List<FilteringPlainTextListModel> toFetch, out HttpStatusCode code, out bool responseReceived)
         {
-            HttpStatusCode code;
-            bool responseReceived;
+            List<string> paths = toFetch.Select(t => t.RelativeListPath).ToList();
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("lists", paths);
 
+            byte[] ret = RequestResource($"/api/v2/rules/get", out code, out responseReceived, new ResourceOptions()
+            {
+                Method = "POST",
+                ContentType = "application/json",
+
+                Parameters = parameters
+            });
+
+            if (!responseReceived) { return null; }
+            if ((int)code < 200 || (int)code > 399) { return null; }
+
+            return ret;
+        }
+
+        public byte[] GetFilterList(string @namespace, string category, string type, out HttpStatusCode code, out bool responseReceived, string sha1 = null)
+        {
             byte[] ret = RequestResource($"/api/v2/rules/{@namespace}/{category}/{type}.txt", out code, out responseReceived, new ResourceOptions()
             {
                 Method = "GET",

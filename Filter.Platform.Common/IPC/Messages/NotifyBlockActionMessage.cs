@@ -71,6 +71,12 @@ namespace Citadel.IPC.Messages
             private set;
         }
 
+        public DateTime BlockDate
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// The absolute URI of the requested resource that caused the network connection to be blocked.
         /// </summary>
@@ -113,11 +119,12 @@ namespace Citadel.IPC.Messages
         /// <param name="category">
         /// The cateogry 
         /// </param>
-        public NotifyBlockActionMessage(BlockType type, Uri resource, string rule, string category)
+        public NotifyBlockActionMessage(BlockType type, Uri resource, string rule, string category, DateTime blockDate)
         {
             Type = type;
             Resource = resource;
             Category = category;
+            BlockDate = blockDate;
 
             switch(type)
             {

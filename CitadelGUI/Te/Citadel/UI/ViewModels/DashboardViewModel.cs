@@ -39,7 +39,7 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// List of observable block actions that the user can view.
         /// </summary>
-        public ObservableCollection<ViewableBlockedRequests> BlockEvents
+        public ObservableCollection<ViewableBlockedRequest> BlockEvents
         {
             get;
             set;

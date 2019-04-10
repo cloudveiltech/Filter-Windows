@@ -8,6 +8,7 @@ using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using CloudVeil.Windows;
+using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;

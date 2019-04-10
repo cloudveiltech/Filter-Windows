@@ -23,6 +23,15 @@
 
     <local:BaseWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="WindowCommandIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+            <Style.Setters>
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style.Setters>
+        </Style>
+        
         <Style x:Key="InternetConnectedIconStyle" TargetType="IconPacks:PackIconFontAwesome">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding InternetIsConnected, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
@@ -43,22 +52,12 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="GuestNetworkIconStyle" TargetType="IconPacks:PackIconFontAwesome">
+        <Style x:Key="GuestNetworkIconStyle" TargetType="IconPacks:PackIconFontAwesome" BasedOn="{StaticResource WindowCommandIconStyle}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ShowIsGuestNetwork, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
                     <Setter Property="Visibility" Value="Visible" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding ShowIsGuestNetwork, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="UserIconStyle" TargetType="IconPacks:PackIconFontAwesome">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsUserLoggedIn, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
-                    <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsUserLoggedIn, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
                     <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
             </Style.Triggers>
@@ -74,42 +73,37 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
                 <Label Content="{Binding LoggedInUser, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Foreground="White" />
 
-                <IconPacks:PackIconFontAwesome Width="20"
-                                               Height="20"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Foreground="White"
+                <IconPacks:PackIconFontAwesome Foreground="White"
                                                Kind="UserSolid"
-                                               Style="{StaticResource UserIconStyle}"
+                                               Visibility="{Binding IsUserLoggedIn, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, Converter={StaticResource BoolToVis}}"
+                                               Style="{StaticResource WindowCommandIconStyle}"
                                                ToolTip="User logged in" />
 
-                <Label Content="Internet " Foreground="White" />
+                
                 <!--  Internet Disconnected Status Icon.  -->
-                <IconPacks:PackIconFontAwesome Width="20"
-                                               Height="20"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Foreground="White"
-                                               Kind="ExclamationCircleSolid"
-                                               Style="{StaticResource InternetDisconnectedIconStyle}"
-                                               ToolTip="No Internet Connection" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding InverseConflictFlyoutButtonVisibility}">
+                    <Label Content="Internet " Foreground="White" />
 
-                <!--  Internet Connected Status Icon.  -->
-                <IconPacks:PackIconFontAwesome Width="20"
-                                               Height="20"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Foreground="White"
-                                               Kind="CheckCircleSolid"
-                                               Style="{StaticResource InternetConnectedIconStyle}"
-                                               ToolTip="Internet Connected" />
+                    <IconPacks:PackIconFontAwesome Style="{StaticResource WindowCommandIconStyle}"
+                                                   Foreground="White"
+                                                   Kind="{Binding InternetIconKind}"
+                                                   ToolTip="{Binding InternetToolTip}" />
+                </StackPanel>
+
+                <Button Command="{Binding OpenConflictsFlyout}"
+                        Visibility="{Binding ConflictFlyoutButtonVisibility}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Label Content="Conflicts Detected " Foreground="White" />
+                        <IconPacks:PackIconFontAwesome Style="{StaticResource WindowCommandIconStyle}"
+                                                       Foreground="Red"
+                                                       Kind="ExclamationCircleSolid"
+                                                       ToolTip="Conflicts Detected" />
+
+                    </StackPanel>
+                </Button>
             </StackPanel>
 
-            <IconPacks:PackIconFontAwesome Width="20"
-                                           Height="20"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Foreground="White"
+            <IconPacks:PackIconFontAwesome Foreground="White"
                                            Kind="WifiSolid"
                                            Margin="4,0,4,0"
                                            ToolTip="Guest Network Mode"
@@ -135,33 +129,67 @@
         </MetroControls:WindowCommands>
     </local:BaseWindow.RightWindowCommands>
 
-    <!--<MetroControls:MetroWindow.Flyouts>
+    <MetroControls:MetroWindow.Flyouts>
         <MetroControls:FlyoutsControl>
-            <MetroControls:Flyout IsOpen="{Binding ShowGuestNetwork}" Header="Guest Network" Position="Right" Width="250">
-                <MetroControls:Flyout.DataContext>
-                    <CitadelViewModels:CaptivePortalViewModel/>
-                </MetroControls:Flyout.DataContext>
+            <MetroControls:Flyout Position="Bottom"
+                                  Height="48"
+                                  IsPinned="False"
+                                  TitleVisibility="Collapsed"
+                                  CloseButtonVisibility="Collapsed"
+                                  IsOpen="{Binding DownloadFlyoutIsOpen}">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60"/>
-                        <RowDefinition Height="48"/>
-                    </Grid.RowDefinitions>
-
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
-                               Margin="8"
-                               TextWrapping="Wrap">
-                        <Run Text="It looks like you're on a network that requires logon information."/>
-                    </TextBlock>
+                    <TextBlock Grid.Column="0" Margin="16,0,16,0"
+                               Text="Download Progress"
+                               VerticalAlignment="Center" />
 
-                    <Button Command="{Binding HelpMeConnect}" Content="Help Me Connect" Grid.Row="1" Margin="8" Style="{DynamicResource SquareButtonStyle}"/>
+                    <MetroControls:MetroProgressBar Grid.Column="1" Margin="0,8,16,8"
+                                                    Minimum="0" Maximum="100"
+                                                    Value="{Binding DownloadProgress}" />
                 </Grid>
             </MetroControls:Flyout>
+
+            <MetroControls:Flyout Position="Right"
+                                  Width="300"
+                                  IsPinned="False"
+                                  TitleVisibility="Visible"
+                                  CloseButtonVisibility="Visible"
+                                  IsOpen="{Binding ConflictsFlyoutIsOpen}"
+                                  Margin="0,30,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="48" />
+                    </Grid.RowDefinitions>
+
+                    <ItemsControl Margin="2"
+                                  ItemsSource="{Binding ConflictReasons}"
+                                  Grid.Row="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="10,0,10,0">
+                                    <Label Content="{Binding Header}" Foreground="White" Style="{StaticResource HeaderStyle}" Margin="0,0,0,0" />
+                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
+
+                                    <TextBlock Margin="0,10,0,0"><Hyperlink NavigateUri="{Binding LinkUri}" RequestNavigate="Hyperlink_RequestNavigate">Instructions</Hyperlink></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!--<Button Style="{StaticResource AccentedSquareButtonStyle}"
+                            Content="Ignore Conflicts"
+                            Command="{Binding IgnoreConflicts}"
+                            Grid.Row="1" />-->
+                </Grid>
+                <!-- TODO -->
+            </MetroControls:Flyout>
         </MetroControls:FlyoutsControl>
-    </MetroControls:MetroWindow.Flyouts>-->
-    
+    </MetroControls:MetroWindow.Flyouts>
+   
     <MetroControls:TransitioningContentControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="CurrentView" x:FieldModifier="internal" />
 </local:BaseWindow>

@@ -36,6 +36,18 @@ namespace CloudVeilInstallerUI.Views
             model.TriggerInstall();
         }
 
+        private void TriggerLicense(object sender, RoutedEventArgs e)
+        {
+            if (model.InstallType == Models.InstallType.NewInstall)
+            {
+                model.TriggerLicense();
+            }
+            else
+            {
+                model.TriggerInstall();
+            }
+        }
+
         private void Exit(object sender, RoutedEventArgs e)
         {
             model.Exit();

@@ -161,7 +161,7 @@ namespace CitadelService.Services
                     def.Principal.LogonType = TaskLogonType.ServiceAccount;
 
                     var thisAppDir = AppDomain.CurrentDomain.BaseDirectory;
-                    ExecAction action = new ExecAction(string.Format("{0}{1}.exe", thisAppDir, "FilterStarter.exe"));
+                    ExecAction action = new ExecAction(string.Format("{0}{1}.exe", thisAppDir, "FilterAgent.Windows.exe"), "start");
 
                     def.Actions.Add(action);
 
@@ -218,12 +218,6 @@ namespace CitadelService.Services
             // The sentinel service is special. It's the only that's going to watch us.
             // So, we need to code our process name into its source before compilation.
             if(sourceResourcePath.IndexOf("Sentinel", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                scriptContents = scriptContents.Replace("TARGET_APPLICATION_NAME", Process.GetCurrentProcess().ProcessName);
-            }
-
-            // FilterStarter will be the scheduled task which makes sure our filter service is running.
-            if(sourceResourcePath.IndexOf("FilterStarter", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 scriptContents = scriptContents.Replace("TARGET_APPLICATION_NAME", Process.GetCurrentProcess().ProcessName);
             }

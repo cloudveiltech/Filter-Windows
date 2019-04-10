@@ -97,7 +97,7 @@
                                         TabIndex="3" />
 
         <!--  Auth action button bound to auth command.  -->
-        <custom:Button Width="105"
+        <Button Width="105"
                 Margin="363,289,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"

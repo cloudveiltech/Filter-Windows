@@ -49,6 +49,7 @@ using LogMessageType = Unosquare.Swan.LogMessageType;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
+using HandlebarsDotNet;
 
 namespace FilterProvider.Common.Services
 {
@@ -197,7 +198,9 @@ namespace FilterProvider.Common.Services
 
         private BackgroundWorker m_filterEngineStartupBgWorker;
 
-        private byte[] m_blockedHtmlPage;
+        // Uses Handlebars.Net for compilation of this template function.
+        private Func<object, string> m_blockedHtmlPage;
+
         private byte[] m_badSslHtmlPage;
 
         private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
@@ -269,6 +272,11 @@ namespace FilterProvider.Common.Services
         }
 
         /// <summary>
+        /// The class containing the relaxed policy logic.
+        /// </summary>
+        RelaxedPolicy m_relaxedPolicy;
+
+        /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
         private long m_thresholdTicks;
@@ -283,18 +291,6 @@ namespace FilterProvider.Common.Services
         /// for the internet lockout once the threshold has been hit.
         /// </summary>
         private Timer m_thresholdEnforcementTimer;
-
-        /// <summary>
-        /// This timer is used to count down to the expiry time for relaxed policy use. 
-        /// </summary>
-        private Timer m_relaxedPolicyExpiryTimer;
-
-        /// <summary>
-        /// This timer is used to track a 24 hour cooldown period after the exhaustion of all
-        /// available relaxed policy uses. Once the timer is expired, it will reset the count to the
-        /// config default and then disable itself.
-        /// </summary>
-        private Timer m_relaxedPolicyResetTimer;
 
         /// <summary>
         /// Allows us to periodically check status of time restrictions.
@@ -443,6 +439,7 @@ namespace FilterProvider.Common.Services
 
                     m_controlServer = new Server(14299, cert);
                     m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
+                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), (context) => new RelaxedPolicyController(m_relaxedPolicy, context));
                     m_controlServer.Start();
                 }
                 catch(Exception ex)
@@ -479,8 +476,9 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadRelaxedPolicy;
                 m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadSelfModeratedSites;
+
+                m_relaxedPolicy = new RelaxedPolicy(m_ipcServer, m_policyConfiguration);
 
                 m_dnsEnforcement = new DnsEnforcement(m_policyConfiguration, m_logger);
 
@@ -502,7 +500,6 @@ namespace FilterProvider.Common.Services
                 m_timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
 
                 m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
-                m_policyConfiguration.OnConfigurationLoaded += reportRelaxedPolicy;
                 m_policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
 
                 m_ipcServer.AttemptAuthentication = (args) =>
@@ -604,23 +601,7 @@ namespace FilterProvider.Common.Services
                     m_ipcServer.NotifyStatus(Status);
                 };
 
-                m_ipcServer.RelaxedPolicyRequested = (args) =>
-                {
-                    switch (args.Command)
-                    {
-                        case RelaxedPolicyCommand.Relinquished:
-                            {
-                                OnRelinquishRelaxedPolicyRequested();
-                            }
-                            break;
-
-                        case RelaxedPolicyCommand.Requested:
-                            {
-                                OnRelaxedPolicyRequested(args);
-                            }
-                            break;
-                    }
-                };
+                m_ipcServer.RelaxedPolicyRequested = m_relaxedPolicy.OnRelaxedPolicyRequested;
 
                 m_ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
                 {
@@ -688,17 +669,7 @@ namespace FilterProvider.Common.Services
                                 Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockActionMsg.Resource.ToString()))
                                 );
 
-                            //m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
-                            //m_logger.Info("With args: {0}", reportPath);
-
-                            var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
-
-                            // TODO:X_PLAT
-                            //var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
-                            //ProcessExtensions.StartProcessAsCurrentUser(null, sanitizedPath);
-
-                            //var cmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-                            //ProcessExtensions.StartProcessAsCurrentUser(cmdPath, string.Format("/c start \"{0}\"", reportPath));
+                            PlatformTypes.New<ISystemServices>().OpenUrlInSystemBrowser(new Uri(reportPath));
                         }
                         catch (Exception e)
                         {
@@ -718,14 +689,7 @@ namespace FilterProvider.Common.Services
                         if (cfg != null)
                             m_ipcServer.SendConfigurationInfo(cfg);
 
-                        if (cfg != null && cfg.BypassesPermitted > 0)
-                        {
-                            m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
-                        }
-                        else
-                        {
-                            m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-                        }
+                        m_relaxedPolicy.SendRelaxedPolicyInfo();
 
                         m_ipcServer.NotifyStatus(Status);
 
@@ -780,6 +744,18 @@ namespace FilterProvider.Common.Services
 
                     // Code smell. It's a little unclear who updates LastSettingsCheck. We should really make the accessing of this property more direct.
                     msg.SendReply<ConfigCheckInfo>(m_ipcServer, IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, result));
+
+                    return true;
+                });
+
+                m_ipcServer.RegisterRequestHandler(IpcCall.CollectComputerInfo, (msg) =>
+                {
+                    m_logger.Info("Collecting computer information");
+
+                    ComputerInfo info = m_systemServices.GetComputerInfo();
+                    m_logger.Info("Collected computer information {0}", info?.DiagnosticsText);
+
+                    msg.SendReply<ComputerInfo>(m_ipcServer, IpcCall.CollectComputerInfo, info);
 
                     return true;
                 });
@@ -943,22 +919,6 @@ namespace FilterProvider.Common.Services
         }
 
         #region Configuration event functions
-        private void reportRelaxedPolicy(object sender, EventArgs e)
-        {
-            var config = m_policyConfiguration.Configuration;
-
-            // XXX FIXME Update our dashboard view model if there are bypasses
-            // configured. Force this up to the UI thread because it's a UI model.
-            if (config.BypassesPermitted > 0)
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(config.BypassesPermitted, config.BypassDuration, getRelaxedPolicyStatus());
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, getRelaxedPolicyStatus());
-            }
-        }
-
         private void configureThreshold(object sender, EventArgs e)
         {
             if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
@@ -1009,7 +969,9 @@ namespace FilterProvider.Common.Services
             LogTime("Starting InitEngine()");
 
             // Get our blocked HTML page
-            m_blockedHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
+            byte[] htmlBytes = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
+            m_blockedHtmlPage = Handlebars.Compile(Encoding.UTF8.GetString(htmlBytes));
+
             m_badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
             if (m_blockedHtmlPage == null)
@@ -1335,7 +1297,7 @@ namespace FilterProvider.Common.Services
                 categoryNameString = mappedCategory.CategoryName;
             }
 
-            m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, matchingRule);
+            m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule);
             m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if (internetShutOff)
@@ -1935,15 +1897,8 @@ namespace FilterProvider.Common.Services
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        private string getUnblockRequestUrl(string urlText)
         {
-            string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
-
-            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
-            // IMO this looks slightly more friendly to a user than the entire URI.
-            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
-            string urlText = requestUri.ToString();
-
             string deviceName;
 
             try
@@ -1963,33 +1918,35 @@ namespace FilterProvider.Common.Services
             string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
             unblockRequest += "?" + query;
 
+            return unblockRequest;
+        }
+
+        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        {
+            //string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
+            Dictionary<string, object> blockPageContext = new Dictionary<string, object>();
+
+            // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
+            // In my opninion this looks slightly more friendly to a user than the entire URI.
+            string friendlyUrlText = (requestUri.Host + requestUri.PathAndQuery + requestUri.Fragment).TrimEnd('/');
+            string urlText = requestUri.ToString();
+
+            bool showUnblockRequestButton = true;
+            string unblockRequest = getUnblockRequestUrl(urlText);
+
             string message = "was blocked because it was in the following category:";
-            string unblockRequestButton = "<a class=\"request-unblock button primary\" href=\"{{unblock_request}}\">Request an Unblock</a>";
-            string relaxed_policy_message = "";
-            string matching_category = "";
-            string otherCategories = "";
 
-            // Determine if URL is in the relaxed policy.
-            foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-            {
-                if (matchingCategory == entry.CategoryId)
-                {
-                    matching_category = entry.ShortCategoryName;
-                }
-                else if (appliedCategories?.Any(m => m.CategoryId == entry.CategoryId) == true)
-                {
-                    otherCategories += $"<p class='category other'>{entry.ShortCategoryName}</p>";
-                }
+            // Collect category information: Blocked category, other categories, and whether the blocked category is in the relaxed policy.
+            MappedFilterListCategoryModel matchingCategoryModel = m_policyConfiguration.GeneratedCategoriesMap.Values.FirstOrDefault(m => m.CategoryId == matchingCategory);
+            string matching_category = matchingCategoryModel?.ShortCategoryName;
 
-                if (entry is MappedBypassListCategoryModel)
-                {
-                    if (matchingCategory == entry.CategoryId)
-                    {
-                        relaxed_policy_message = "<p style='margin-top: 10px;'>This site is allowed by the relaxed policy. To access it, open CloudVeil for Windows, go to settings, then click 'use relaxed policy'</p>";
-                        break;
-                    }
-                }
-            }
+            List<string> otherCategories = appliedCategories?
+                .Where(c => c.CategoryId != matchingCategory)
+                .Select(c => c.ShortCategoryName)
+                .Distinct()
+                .ToList();
+
+            bool isRelaxedPolicy = (matchingCategoryModel is MappedBypassListCategoryModel);
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText;
@@ -1999,8 +1956,7 @@ namespace FilterProvider.Common.Services
             }
             else
             {
-                otherCategories = "";
-
+                otherCategories = null;
                 switch (blockType)
                 {
                     case BlockType.None:
@@ -2023,7 +1979,7 @@ namespace FilterProvider.Common.Services
                     case BlockType.TimeRestriction:
                         message = "is blocked because your time restrictions do not allow internet access at this time.";
                         //matching_category = "no internet allowed after hours";
-                        unblockRequestButton = "";
+                        showUnblockRequestButton = false;
                         break;
 
                     case BlockType.OtherContentClassification:
@@ -2033,16 +1989,17 @@ namespace FilterProvider.Common.Services
                 }
             }
 
-            blockPageTemplate = blockPageTemplate.Replace("{{url_text}}", url_text);
-            blockPageTemplate = blockPageTemplate.Replace("{{friendly_url_text}}", friendlyUrlText);
-            blockPageTemplate = blockPageTemplate.Replace("{{message}}", message);
-            blockPageTemplate = blockPageTemplate.Replace("{{matching_category}}", matching_category);
-            blockPageTemplate = blockPageTemplate.Replace("{{other_categories}}", otherCategories);
-            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request_button}}", unblockRequestButton);
-            blockPageTemplate = blockPageTemplate.Replace("{{unblock_request}}", unblockRequest);
-            blockPageTemplate = blockPageTemplate.Replace("{{relaxed_policy_message}}", relaxed_policy_message);
+            blockPageContext.Add("url_text", url_text);
+            blockPageContext.Add("friendly_url_text", friendlyUrlText);
+            blockPageContext.Add("message", message);
+            blockPageContext.Add("matching_category", matching_category);
+            blockPageContext.Add("other_categories", otherCategories);
+            blockPageContext.Add("showUnblockRequestButton", showUnblockRequestButton);
+            blockPageContext.Add("unblockRequest", unblockRequest);
+            blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
+            blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);
 
-            return Encoding.UTF8.GetBytes(blockPageTemplate);
+            return Encoding.UTF8.GetBytes(m_blockedHtmlPage(blockPageContext));
         }
 
         private NameValueCollection ParseHeaders(string headers)
@@ -2540,364 +2497,6 @@ namespace FilterProvider.Common.Services
             catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-        }
-
-        public class RelaxedPolicyResponseObject
-        {
-            public bool allowed { get; set; }
-            public string message { get; set; }
-            public int used { get; set; }
-            public int permitted { get; set; }
-        }
-
-        /// <summary>
-        /// Whenever the config is reloaded, sync the bypasses from the server.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnConfigLoaded_LoadRelaxedPolicy(object sender, EventArgs e)
-        {
-            try
-            {
-                this.UpdateNumberOfBypassesFromServer();
-            }
-            catch (Exception ex)
-            {
-                // TODO: Tell Sentry about this.
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-            }
-        }
-
-        /// <summary>
-        /// Called whenever a relaxed policy has been requested. 
-        /// </summary>
-        private void OnRelaxedPolicyRequested(RelaxedPolicyEventArgs args)
-        {
-            HttpStatusCode statusCode;
-
-            var parameters = new Dictionary<string, object>();
-            if(args.Passcode != null)
-            {
-                parameters.Add("passcode", args.Passcode);
-            }
-
-            byte[] bypassResponse = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
-
-            bool useLocalBypassLogic = false;
-
-            bool grantBypass = false;
-            string bypassNotification = "";
-
-            int bypassesUsed = 0;
-            int bypassesPermitted = 0;
-
-            if (bypassResponse != null)
-            {
-                if (statusCode == HttpStatusCode.NotFound)
-                {
-                    // Fallback on local bypass logic if server does not support relaxed policy checks.
-                    useLocalBypassLogic = true;
-                }
-
-                string jsonString = Encoding.UTF8.GetString(bypassResponse);
-                m_logger.Info("Response received {0}: {1}", statusCode.ToString(), jsonString);
-
-                var bypassObject = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(jsonString);
-
-                if (bypassObject.allowed)
-                {
-                    grantBypass = true;
-                }
-                else
-                {
-                    grantBypass = false;
-                    bypassNotification = bypassObject.message;
-                }
-
-                bypassesUsed = bypassObject.used;
-                bypassesPermitted = bypassObject.permitted;
-            }
-            else
-            {
-                m_logger.Info("No response detected.");
-
-                useLocalBypassLogic = false;
-                grantBypass = false;
-            }
-
-            if (useLocalBypassLogic)
-            {
-                m_logger.Info("Using local bypass logic since server does not yet support bypasses.");
-
-                // Start the count down timer.
-                if (m_relaxedPolicyExpiryTimer == null)
-                {
-                    m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
-                }
-
-                // Disable every category that is a bypass category.
-                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                    }
-                }
-
-                var cfg = m_policyConfiguration.Configuration;
-                m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
-                DecrementRelaxedPolicy_Local();
-            }
-            else
-            {
-                if (grantBypass)
-                {
-                    m_logger.Info("Relaxed policy granted.");
-
-                    // Start the count down timer.
-                    if (m_relaxedPolicyExpiryTimer == null)
-                    {
-                        m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
-                    }
-
-                    // Disable every category that is a bypass category.
-                    foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                    {
-                        if (entry is MappedBypassListCategoryModel)
-                        {
-                            m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                        }
-                    }
-
-                    var cfg = m_policyConfiguration.Configuration;
-                    m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-
-                    DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
-                }
-                else
-                {
-                    var cfg = m_policyConfiguration.Configuration;
-
-                    RelaxedPolicyStatus status = RelaxedPolicyStatus.AllUsed;
-                    if (bypassNotification.IndexOf("incorrect passcode", StringComparison.InvariantCultureIgnoreCase) >= 0)
-                    {
-                        status = RelaxedPolicyStatus.Unauthorized;
-                    }
-
-                    m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), status);
-                }
-            }
-        }
-
-        private void DecrementRelaxedPolicy(int bypassesUsed, int bypassesPermitted, TimeSpan bypassDuration)
-        {
-            bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
-
-            if (allUsesExhausted)
-            {
-                m_logger.Info("All uses exhausted.");
-
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
-            }
-
-            if (allUsesExhausted)
-            {
-                // Reset our bypasses at 8:15 UTC.
-                var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
-
-                var span = resetTime - DateTime.UtcNow;
-
-                if (m_relaxedPolicyResetTimer == null)
-                {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
-                }
-
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        private void DecrementRelaxedPolicy_Local()
-        {
-            bool allUsesExhausted = false;
-
-            var cfg = m_policyConfiguration.Configuration;
-
-            if (cfg != null)
-            {
-                cfg.BypassesUsed++;
-
-                allUsesExhausted = cfg.BypassesPermitted - cfg.BypassesUsed <= 0;
-
-                if (allUsesExhausted)
-                {
-                    m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
-                }
-                else
-                {
-                    m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Granted);
-                }
-            }
-            else
-            {
-                m_ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
-            }
-
-            if (allUsesExhausted)
-            {
-                // Refresh tomorrow at midnight.
-                var today = DateTime.Today;
-                var tomorrow = today.AddDays(1);
-                var span = tomorrow - DateTime.Now;
-
-                if (m_relaxedPolicyResetTimer == null)
-                {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
-                }
-
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        private RelaxedPolicyStatus getRelaxedPolicyStatus()
-        {
-            bool relaxedInEffect = false;
-
-            if (m_policyConfiguration.GeneratedCategoriesMap != null)
-            {
-                // Determine if a relaxed policy is currently in effect.
-                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
-                        {
-                            relaxedInEffect = true;
-                        }
-                    }
-                }
-            }
-
-            if (relaxedInEffect)
-            {
-                return RelaxedPolicyStatus.Activated;
-            }
-            else
-            {
-                if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.BypassesPermitted - m_policyConfiguration.Configuration.BypassesUsed == 0)
-                {
-                    return RelaxedPolicyStatus.AllUsed;
-                }
-                else
-                {
-                    return RelaxedPolicyStatus.Deactivated;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called when the user has manually requested to relinquish a relaxed policy. 
-        /// </summary>
-        private void OnRelinquishRelaxedPolicyRequested()
-        {
-            RelaxedPolicyStatus status = getRelaxedPolicyStatus();
-
-            // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if (status == RelaxedPolicyStatus.Activated)
-            {
-                OnRelaxedPolicyTimerExpired(null);
-            }
-
-            // We want to inform the user that there is no relaxed policy in effect currently for this installation.
-            if (status == RelaxedPolicyStatus.Deactivated)
-            {
-                var cfg = m_policyConfiguration.Configuration;
-                m_ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
-            }
-        }
-
-        /// <summary>
-        /// Called whenever the relaxed policy duration has expired. 
-        /// </summary>
-        /// <param name="state">
-        /// Async state. Not used. 
-        /// </param>
-        private void OnRelaxedPolicyTimerExpired(object state)
-        {
-            try
-            {
-                // Enable every category that is a bypass category.
-                foreach (var entry in m_policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        m_policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
-                    }
-                }
-
-                // Disable the expiry timer.
-                m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
-            catch (Exception ex)
-            {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
-            }
-        }
-
-        private bool UpdateNumberOfBypassesFromServer()
-        {
-            HttpStatusCode statusCode;
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("check_only", "1");
-
-            byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
-
-            if (response == null)
-            {
-                return false;
-            }
-
-            string responseString = Encoding.UTF8.GetString(response);
-
-            var bypassInfo = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(responseString);
-
-            m_logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
-            var cfg = m_policyConfiguration.Configuration;
-
-            if (cfg != null)
-            {
-                cfg.BypassesUsed = bypassInfo.used;
-                cfg.BypassesPermitted = bypassInfo.permitted;
-            }
-
-            m_ipcServer.NotifyRelaxedPolicyChange(bypassInfo.permitted - bypassInfo.used, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), getRelaxedPolicyStatus());
-            return true;
-        }
-
-        /// <summary>
-        /// Called whenever the relaxed policy reset timer has expired. This expiry refreshes the
-        /// available relaxed policy requests to the configured value.
-        /// </summary>
-        /// <param name="state">
-        /// Async state. Not used. 
-        /// </param>
-        private void OnRelaxedPolicyResetExpired(object state)
-        {
-            try
-            {
-                UpdateNumberOfBypassesFromServer();
-                // Disable the reset timer.
-                m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
-            catch (Exception ex)
-            {
-                // TODO: Tell sentry about this.
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
             }
         }
 

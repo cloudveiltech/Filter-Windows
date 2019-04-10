@@ -52,7 +52,7 @@
 
         <Button Style="{StaticResource AccentedSquareButtonStyle}"
                 Content="{Binding WelcomeButtonText}"
-                Click="TriggerInstall"
+                Click="TriggerLicense"
                 Grid.Row="3"
                 Grid.Column="2"
                 Margin="4,8,8,8" />

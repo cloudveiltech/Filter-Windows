@@ -5,7 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using FilterProvider.Common.Data;
+using Filter.Platform.Common.Data.Models;
+using FilterProvider.Common.Data;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
@@ -63,13 +64,28 @@ namespace FilterProvider.Common.Platform
         void KillAllGuis(); // FIXME: This might actually be a cross-platformable piece of code.
 
         /// <summary>
+        /// Opens the URL in system browser.
+        /// </summary>
+        /// <param name="url">The URL to open.</param>
+        void OpenUrlInSystemBrowser(Uri url);
+
+        /// <summary>
+        /// Collects information about this computer for diagnostic purposes.
+        /// </summary>
+        /// <returns>A ComputerInfo object</returns>
+        ComputerInfo GetComputerInfo();
+
+        /// <summary>
         /// Does not need to be available until after OnStartProxy is fired.
         /// </summary>
         X509Certificate2 RootCertificate { get; }
 
         /// <summary>
-        /// Use this to determine when the proxy actually starts. Do not depend on root certificate being non-null until this event has fired once.
+        /// Use this to determine when the proxy actually starts.
         /// </summary>
+        /// <remarks>
+        /// Do not depend on root certificate being non-null until this event has fired once.
+        /// </remarks>
         event EventHandler OnStartProxy;
 
         // TODO: Rename IAntitampering stuff to something different.

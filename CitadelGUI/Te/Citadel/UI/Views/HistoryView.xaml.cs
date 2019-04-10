@@ -33,6 +33,8 @@ namespace Te.Citadel.UI.Views
             InitializeComponent();
 
             DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<HistoryViewModel>();
+
+            NameScope.SetNameScope(contextMenu, NameScope.GetNameScope(this));
         }
     }
 }

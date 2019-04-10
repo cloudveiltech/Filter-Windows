@@ -7,9 +7,8 @@
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:local="clr-namespace:CloudVeilInstallerUI"
         ShowMaxRestoreButton="False"
-        ShowCloseButton="False"
+        ShowCloseButton="True"
         ShowMinButton="False"
-        ShowTitleBar="False"
         ResizeMode="NoResize"
         mc:Ignorable="d"
         Title="CloudVeil for Windows" Height="450" Width="667">

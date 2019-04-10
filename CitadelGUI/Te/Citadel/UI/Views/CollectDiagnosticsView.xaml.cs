@@ -1,7 +1,6 @@
 ﻿using CloudVeil.Windows;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,22 +18,15 @@ using Te.Citadel.UI.ViewModels;
 namespace Te.Citadel.UI.Views
 {
     /// <summary>
-    /// Interaction logic for SoftwareConflictView.xaml
+    /// Interaction logic for CollectDiagnosticsView.xaml
     /// </summary>
-    public partial class SoftwareConflictView : BaseView
+    public partial class CollectDiagnosticsView : UserControl
     {
-        public static int ModalZIndex = 100;
-
-        public SoftwareConflictView()
+        public CollectDiagnosticsView()
         {
             InitializeComponent();
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SoftwareConflictViewModel>();
-        }
 
-        private void OnNavigate(object sender, RequestNavigateEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
-            e.Handled = true;
+            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<CollectDiagnosticsViewModel>();
         }
     }
 }

@@ -34,6 +34,20 @@ namespace Citadel.IPC.Messages
         /// <returns></returns>
         public IpcMessage<T> As<T>()
         {
+            var genericType = typeof(T);
+            var dataType = DataObject?.GetType();
+
+            // Throw InvalidCastException to help devs trace mismatched types.
+            if (DataObject != null && !dataType.Equals(genericType))
+            {
+                // Sometimes typeof(T) is Nullable. This takes care of InvalidCastException in that issue.
+                Type nullableUnderlying = Nullable.GetUnderlyingType(genericType);
+                if(nullableUnderlying == null || !nullableUnderlying.Equals(dataType))
+                {
+                    throw new InvalidCastException($"Expected DataObject to be of type {genericType.FullName}, but it was of type {DataObject.GetType().FullName}");
+                }
+            }
+
             return new IpcMessage<T>()
             {
                 Call = this.Call,
