@@ -50,6 +50,7 @@ using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
 using HandlebarsDotNet;
+using CloudVeil;
 
 namespace FilterProvider.Common.Services
 {

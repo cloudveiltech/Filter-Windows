@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-  <Bundle Name="CloudVeilInstaller" Version="1.7.1.0" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948">
+  <Bundle Name="CloudVeil for Windows" Version="1.7.1.0" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948" IconSourceFile="..\CitadelGUI\Resources\appicon.ico">
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <PayloadGroupRef Id="InstallerPayload" />
     </BootstrapperApplicationRef>

@@ -1,6 +1,44 @@
 #include <Windows.h>
+#include <WtsApi32.h>
 
 #include "Filter.Native.Windows.h"
+
+unsigned int GetActiveSessionId() {
+    PWTS_SESSION_INFOW pSessionInfo = NULL;
+    DWORD activeSessionId = -1;
+    DWORD sessionCount = 0;
+
+    if (WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE, 0, 1, &pSessionInfo, &sessionCount) != 0) {
+        for (int i = 0; i < sessionCount; i++) {
+            if (pSessionInfo[i].State == WTSActive) {
+                activeSessionId = pSessionInfo[i].SessionId;
+            }
+        }
+    }
+
+    // If enumerating did not work, fall back to the old method.
+    if (activeSessionId == -1) {
+        activeSessionId = WTSGetActiveConsoleSessionId();
+    }
+
+    return activeSessionId;
+}
+
+static BOOL GetSessionUserToken(PHANDLE phUserToken) {
+    HANDLE hImpersonationToken = NULL;
+    PWTS_SESSION_INFOW pSessionInfo = NULL;
+    BOOL bResult = false;
+
+    DWORD activeSessionId = GetActiveSessionId();
+
+    if (WTSQueryUserToken(activeSessionId, &hImpersonationToken) != 0) {
+        bResult = DuplicateTokenEx(hImpersonationToken, 0, NULL, SecurityImpersonation, TokenPrimary, phUserToken);
+
+        CloseHandle(hImpersonationToken);
+    }
+
+    return bResult;
+}
 
 int CreateProcessInCurrentSession(wchar_t* filename, wchar_t* cmdline, int winlogonPid) {
     if (winlogonPid < 0) {

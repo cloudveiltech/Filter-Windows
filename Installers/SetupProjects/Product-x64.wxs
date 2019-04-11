@@ -3,7 +3,7 @@
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
-  <Product Id="34b28f65-16b2-47c4-915c-5641959cfbf5" Name="CloudVeil For Windows" Language="1033" Version="1.7.1.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
+  <Product Id="f586a3d4-fe1d-4df4-8de2-dbd5b88428f4" Name="CloudVeil For Windows" Language="1033" Version="1.7.1.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x64" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />

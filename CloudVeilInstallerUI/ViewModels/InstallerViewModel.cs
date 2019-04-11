@@ -110,6 +110,8 @@ namespace CloudVeilInstallerUI.ViewModels
 
         public ISetupUI SetupUi { get; set; }
 
+        bool isOlderVersionThanInstalled = false;
+
         public void SetSetupUi(ISetupUI ui)
         {
             SetupUi = ui;
@@ -170,7 +172,6 @@ namespace CloudVeilInstallerUI.ViewModels
         {
             ba.Engine.Log(LogLevel.Standard, $"TriggerFailed {ba.Command.Display}");
 
-            
             switch (ba.Command.Display)
             {
                 case Display.Full:
@@ -405,9 +406,15 @@ namespace CloudVeilInstallerUI.ViewModels
         /// <param name="e"></param>
         private void DetectComplete(object sender, DetectCompleteEventArgs e)
         {
+            if(isOlderVersionThanInstalled)
+            {
+                TriggerFailed("A newer version of CloudVeil for Windows is already installed on this system. Please uninstall that version before installing this.", "Newer Version Installed");
+                return;
+            }
+
             LaunchAction desiredPlan = ba.Command.Action;
 
-            switch(ba.Command.Display)
+            switch (ba.Command.Display)
             {
                 case Display.Full:
                     TriggerWelcome();
@@ -440,6 +447,19 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private void DetectRelatedPackage(object sender, DetectRelatedMsiPackageEventArgs e)
         {
+            Version myVersion = null;
+            if(ba.Engine.VersionVariables.Contains("WixBundleVersion"))
+            {
+                myVersion = ba.Engine.VersionVariables["WixBundleVersion"];
+            }
+
+            Version otherVersion = e.Version;
+
+            if(myVersion < otherVersion)
+            {
+                isOlderVersionThanInstalled = true;
+            }
+
             if (e.Operation == RelatedOperation.MajorUpgrade)
             {
                 var installedPackage = new ProductInstallation(e.ProductCode);

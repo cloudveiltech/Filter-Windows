@@ -15,7 +15,6 @@ namespace Citadel.IPC
         UpdateResult,
         SynchronizeSettings,
         Update,
-        StartUpdater,
         ShutdownForUpdate,
         ConflictsDetected,
         InstallerDownloadProgress,

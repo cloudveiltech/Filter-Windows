@@ -391,48 +391,6 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
-                m_ipcClient.RegisterRequestHandler(IpcCall.StartUpdater, (msg) =>
-                {
-                    Assembly appAssembly = Assembly.GetEntryAssembly();
-
-                    string appPath = appAssembly.Location;
-                    string appDirectory = Path.GetDirectoryName(appPath);
-
-                    try
-                    {
-                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(Path.Combine(appDirectory, "Updater"), "CloudVeilUpdater.exe");
-
-                        string fileEntry = null;
-
-                        var enumerator = fileEntries.GetEnumerator();
-                        if (enumerator.MoveNext()) fileEntry = enumerator.Current;
-                        
-                        if(fileEntry == null)
-                        {
-                            msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
-                            m_logger.Error($"Failed to start CloudVeil Updater client. Could not find client in program folder.");
-                            return true;
-                        }
-
-                        Process process = new Process();
-                        process.StartInfo = new ProcessStartInfo()
-                        {
-                            UseShellExecute = true,
-                            FileName = fileEntry
-                        };
-
-                        process.Start();
-                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, true);
-                    }
-                    catch(Exception ex)
-                    {
-                        m_logger.Error($"Failed to start CloudVeil Updater client. {ex}");
-                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
-                    }
-
-                    return true;
-                });
-
                 m_ipcClient.RegisterRequestHandler(IpcCall.ShutdownForUpdate, (msg) =>
                 {
                     Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
@@ -1118,11 +1076,6 @@ namespace CloudVeil.Windows
                     {
                         var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
                         m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateResult, result);
-
-                        if (result == UpdateDialogResult.UpdateNow)
-                        {
-                            m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                        }
                     }
                 });
         }

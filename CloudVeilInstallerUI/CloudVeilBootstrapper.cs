@@ -96,7 +96,31 @@ namespace CloudVeilInstallerUI
                         Process[] fsp = Process.GetProcessesByName("FilterServiceProvider");
                         if (fsp.Length > 0)
                         {
-                            Thread.Sleep(10);
+                            // Check for HasExited, since the process may still be in the list, even though it has exited.
+                            try
+                            {
+                                bool allHaveExited = true;
+                                foreach (Process p in fsp)
+                                {
+                                    if (!p.HasExited)
+                                    {
+                                        allHaveExited = false;
+                                        break; // Break out from inner foreach loop.
+                                    }
+                                }
+
+                                if(allHaveExited)
+                                {
+                                    break;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                break;
+                            }
+
+
+                            Thread.Sleep(100);
                         }
                         else
                         {
