@@ -1996,6 +1996,7 @@ namespace FilterProvider.Common.Services
             blockPageContext.Add("matching_category", matching_category);
             blockPageContext.Add("other_categories", otherCategories);
             blockPageContext.Add("showUnblockRequestButton", showUnblockRequestButton);
+            blockPageContext.Add("passcodeSetupUrl", CompileSecrets.ServiceProviderUserRelaxedPolicyPath);
             blockPageContext.Add("unblockRequest", unblockRequest);
             blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
             blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);

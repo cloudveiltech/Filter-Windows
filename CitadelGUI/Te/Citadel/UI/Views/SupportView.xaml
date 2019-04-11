@@ -57,24 +57,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                         Style="{StaticResource AccentedSquareButtonStyle}" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="0">
-            <Label HorizontalAlignment="Center"
-                   Content="Support"
-                   Style="{StaticResource HeaderStyle}"
-                   />
-
-            <TextBlock HorizontalAlignment="Center"
-                       Margin="0,10,0,0"
-                       TextWrapping="Wrap">
-                <Run>Bacon ipsum dolor amet meatball kevin porchetta corned beef filet mignon boudin biltong tenderloin shoulder shankle beef burgdoggen. Kielbasa fatback venison drumstick doner jowl bacon, t-bone salami.</Run>
-            </TextBlock>
-
-            <Button Margin="20, 10, 20, 0"
-                    Command="{Binding RequestSupportCommand}"
-                    Content="Request Support Session"
-                    Style="{StaticResource AccentedSquareButtonStyle}" />
-        </StackPanel>
-
+        
         <StackPanel Margin="0,0,0,16">
             <Label HorizontalAlignment="Center"
                        Style="{StaticResource HeaderStyle}"
