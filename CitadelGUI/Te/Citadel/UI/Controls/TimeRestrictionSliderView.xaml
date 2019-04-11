@@ -29,6 +29,7 @@
             LowerValue="{Binding Path=LowerValue}"
             UpperValue="{Binding Path=UpperValue}"
             IndicatorVisible="{Binding Path=IndicatorVisible}"
+            AutoToolTipPlacement="{Binding Path=ToolTipPlacement}"
             Value="{Binding Path=IndicatorValue}" />
 
         <Label Grid.Column="2" Content="{Binding Path=AllowedDescription}" />
