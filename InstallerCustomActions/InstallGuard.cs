@@ -18,12 +18,6 @@ namespace InstallerCustomActions
     public class InstallGuard
     {
         [CustomAction]
-        public static ActionResult TriggerError(Session session)
-        {
-            return ActionResult.Failure;
-        }
-
-        [CustomAction]
         public static ActionResult GuardInstall(Session session)
         {
             try

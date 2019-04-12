@@ -25,7 +25,6 @@
     <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
     <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
     <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
-    <CustomAction Id="CA.TriggerError" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="TriggerError" Impersonate="no" />
     <CustomAction Id="CA.ConfigureUI" Execute="immediate" BinaryKey="B.CustomInstallerActions" DllEntry="ConfigureUI" Impersonate="no" />
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->
@@ -87,8 +86,6 @@
       <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
       <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[Installed]]></Custom>
       <Custom Action="CA.GuardInstall" Before="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
-      <Custom Action="CA.TriggerError" Before="InstallFiles">
-      </Custom>
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
