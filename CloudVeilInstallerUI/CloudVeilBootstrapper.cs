@@ -45,6 +45,8 @@ namespace CloudVeilInstallerUI
 
         public bool IsExiting { get; set; } = false;
 
+        public bool WaitForFilterExit { get; set; } = false;
+
         private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
         public void SignalExit()
@@ -63,7 +65,6 @@ namespace CloudVeilInstallerUI
 
                 bool runIpc = false;
                 bool showPrompts = true;
-                bool waitForFilterExit = false;
 
                 Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
                 foreach (string arg in args)
@@ -78,7 +79,7 @@ namespace CloudVeilInstallerUI
                     }
                     else if(arg == "/waitforexit")
                     {
-                        waitForFilterExit = true;
+                        WaitForFilterExit = true;
                     }
                 }
 
@@ -89,46 +90,7 @@ namespace CloudVeilInstallerUI
                 ISetupUI setupUi = null;
                 InstallerViewModel model = new InstallerViewModel(this);
 
-                if (waitForFilterExit)
-                {
-                    while (true)
-                    {
-                        Process[] fsp = Process.GetProcessesByName("FilterServiceProvider");
-                        if (fsp.Length > 0)
-                        {
-                            // Check for HasExited, since the process may still be in the list, even though it has exited.
-                            try
-                            {
-                                bool allHaveExited = true;
-                                foreach (Process p in fsp)
-                                {
-                                    if (!p.HasExited)
-                                    {
-                                        allHaveExited = false;
-                                        break; // Break out from inner foreach loop.
-                                    }
-                                }
-
-                                if(allHaveExited)
-                                {
-                                    break;
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                break;
-                            }
-
-
-                            Thread.Sleep(100);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
+                // NOTE: This runIpc check can be removed if our current system proves itself.
                 if (runIpc)
                 {
                     if (server == null)

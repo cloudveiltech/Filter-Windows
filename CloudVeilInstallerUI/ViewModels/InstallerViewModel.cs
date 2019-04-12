@@ -6,6 +6,7 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -170,27 +171,41 @@ namespace CloudVeilInstallerUI.ViewModels
 
         public void TriggerFailed(string message, string heading = null, bool needsRestart = false)
         {
-            ba.Engine.Log(LogLevel.Standard, $"TriggerFailed {ba.Command.Display}");
-
-            switch (ba.Command.Display)
+            try
             {
-                case Display.Full:
-                case Display.Passive:
-                    break;
+                ba.Engine.Log(LogLevel.Standard, $"TriggerFailed {ba.Command.Display}");
 
-                default:
-                    Exit();
-                    return;
+                switch (ba.Command.Display)
+                {
+                    case Display.Full:
+                    case Display.Passive:
+                        break;
+
+                    default:
+                        Exit();
+                        return;
+                }
+
+                if (heading == null) heading = $"Failed to {installTypeVerb} CloudVeil for Windows";
+
+                State = InstallationState.Failed;
+                FinishedMessage = message;
+                FinishedHeading = heading;
+                FinishButtonText = "Exit";
+
+                SetupUi.ShowFinish();
             }
-
-            if (heading == null) heading = $"Failed to {installTypeVerb} CloudVeil for Windows";
-
-            State = InstallationState.Failed;
-            FinishedMessage = message;
-            FinishedHeading = heading;
-            FinishButtonText = "Exit";
-
-            SetupUi.ShowFinish();
+            finally
+            {
+                try
+                {
+                    StartFilterIfExists();
+                }
+                catch(Exception ex)
+                {
+                    ba.Engine.Log(LogLevel.Error, $"Error occurred while restarting filter. {ex}");
+                }
+            }
         }
 
         public void TriggerFinished()
@@ -503,18 +518,61 @@ namespace CloudVeilInstallerUI.ViewModels
             }
         }
 
+        private bool allFiltersHaveExited()
+        {
+            Process[] fsp = Process.GetProcessesByName("FilterServiceProvider");
+            if (fsp.Length > 0)
+            {
+                // Check for HasExited, since the process may still be in the list, even though it has exited.
+                try
+                {
+                    foreach (Process p in fsp)
+                    {
+                        if (!p.HasExited)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    ba.Engine.Log(LogLevel.Standard, $"Warning: An exception occurred while waiting for filters to exit: {ex}");
+                    return true; // If there is an exception while gleaning info from the processes in the list, just return true. We don't want to get stuck in a forever-waiting loop.
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private async void executeOnFilterExited(Action action)
+        {
+            while (!allFiltersHaveExited())
+            {
+                await Task.Delay(100);
+            }
+
+            action?.Invoke();
+        }
+
         private void PlanComplete(object sender, PlanCompleteEventArgs e)
         {
-            ba.Engine.Log(LogLevel.Standard, "PlanComplete - " + e.Status);
-
             if(e.Status >= 0)
             {
-                ba.Engine.Log(LogLevel.Standard, "Should start executing apply");
-
                 this.State = InstallationState.Installing;
                 try
                 {
-                    ba.Engine.Apply(hwnd);
+                    if(ba.WaitForFilterExit)
+                    {
+                        executeOnFilterExited(() => ba.Engine.Apply(hwnd));
+                    }
+                    else
+                    {
+                        ba.Engine.Apply(hwnd);
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -599,7 +657,7 @@ namespace CloudVeilInstallerUI.ViewModels
                 }
                 else
                 {
-                    message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {e.Status}. Please try again or contact support.";
+                    message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {e.Status}. Please restart your computer and try again. If the issue persists, please contact support.";
                 }
 
                 TriggerFailed(message, null, needsRestart);

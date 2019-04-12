@@ -45,8 +45,6 @@ namespace CloudVeilInstallerUI.Views
             catch(Exception ex)
             {
                 viewModel.FinishedMessage = "Failed to restart the computer. Please restart manually before trying again.";
-
-                viewModel.StartFilterIfExists();
             }
         }
     }
