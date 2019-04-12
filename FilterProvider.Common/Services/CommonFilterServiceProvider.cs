@@ -704,8 +704,12 @@ namespace FilterProvider.Common.Services
                         {
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
 
+                            string fingerprint = FingerprintService.Default.Value;
+                            m_logger.Info("I am sending a fingerprint value of {0} to client.", fingerprint);
+
                             m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
                             m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
+                            m_ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
                         }
                     }
                     catch (Exception ex)

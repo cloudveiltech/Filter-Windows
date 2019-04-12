@@ -13,7 +13,16 @@ namespace Te.Citadel.UI.ViewModels
 {
     public class SupportViewModel : BaseCitadelViewModel
     {
-
+        private string activationIdentifier;
+        public string ActivationIdentifier
+        {
+            get => activationIdentifier;
+            set
+            {
+                activationIdentifier = value;
+                RaisePropertyChanged(nameof(ActivationIdentifier));
+            }
+        }
 
         private RelayCommand collectDiagnosticsCommand;
         public RelayCommand CollectDiagnosticsCommand

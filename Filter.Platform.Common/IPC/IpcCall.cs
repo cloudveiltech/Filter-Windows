@@ -22,6 +22,7 @@ namespace Citadel.IPC
         InstallerDownloadStarted,
         InternetAccessible,
         AdministratorStart,
-        CollectComputerInfo
+        CollectComputerInfo,
+        ActivationIdentifier
     }
 }

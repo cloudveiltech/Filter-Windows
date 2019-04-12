@@ -444,6 +444,14 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
+                m_ipcClient.RegisterResponseHandler<string>(IpcCall.ActivationIdentifier, (msg) =>
+                {
+                    var vm = ModelManager.Get<SupportViewModel>();
+                    m_mainWindow.Dispatcher.Invoke(() => vm.ActivationIdentifier = msg.Data);
+
+                    return true;
+                });
+
                 m_ipcClient.DeactivationResultReceived = (deactivationCmd) =>
                 {
                     m_logger.Info("Deactivation command is: {0}", deactivationCmd.ToString());
