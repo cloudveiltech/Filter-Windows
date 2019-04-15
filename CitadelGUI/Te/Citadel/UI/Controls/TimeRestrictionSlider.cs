@@ -1175,15 +1175,19 @@ namespace Te.Citadel.UI.Controls
 
                 this._autoToolTip.SetValue(ContentControl.ContentTemplateProperty, this.AutoToolTipTemplate);
                 this._autoToolTip.Content = this.GetToolTipInformation();
-                this._autoToolTip.PlacementTarget = this._centerThumb;
+                this._autoToolTip.PlacementTarget = this._indicator;
                 this._autoToolTip.IsOpen = true;
+
+                this.RelocateAutoToolTip();
             }
         }
 
         private void VisualElementsContainerMouseLeave(object sender, MouseEventArgs e)
         {
-            this._tickCount = 0;
-            this._timer.Stop();
+            if (this._autoToolTip != null)
+            {
+                this._autoToolTip.IsOpen = false;
+            }
         }
 
         private void VisualElementsContainerPreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -1570,22 +1574,23 @@ namespace Te.Citadel.UI.Controls
                 case AutoToolTipPlacement.TopLeft:
                     if (this.Orientation == Orientation.Horizontal)
                     {
+                        Console.WriteLine("CustomPopup thingy {0} {1} {2} {3}", targetSize.Width, popupSize.Width, targetSize.Height, popupSize.Height);
                         // Place popup at top of thumb
-                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, -popupSize.Height), PopupPrimaryAxis.Horizontal) };
+                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, -popupSize.Height - 5), PopupPrimaryAxis.Horizontal) };
                     }
 
                     // Place popup at left of thumb 
-                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(-popupSize.Width, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
+                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(-popupSize.Width - 5, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
 
                 case AutoToolTipPlacement.BottomRight:
                     if (this.Orientation == Orientation.Horizontal)
                     {
                         // Place popup at bottom of thumb 
-                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, targetSize.Height), PopupPrimaryAxis.Horizontal) };
+                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, targetSize.Height + 5), PopupPrimaryAxis.Horizontal) };
                     }
 
                     // Place popup at right of thumb 
-                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(targetSize.Width, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
+                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(targetSize.Width + 5, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
 
                 default:
                     return new CustomPopupPlacement[] { };

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,7 +37,8 @@ namespace Te.Citadel.UI.Controls
             new PropertyMetadata(0.0, new PropertyChangedCallback(OnLowerValueChanged)));
 
         public static readonly DependencyProperty IndicatorValueProperty = DependencyProperty.Register("IndicatorValue", typeof(double), typeof(TimeRestrictionSliderView));
-        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView));
+        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView), new PropertyMetadata(false, OnIndicatorVisibleChanged));
+
         public static readonly DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(TimeRestrictionSliderView));
         public static readonly DependencyProperty ToolTipPlacementProperty = DependencyProperty.Register("ToolTipPlacement", typeof(AutoToolTipPlacement), typeof(TimeRestrictionSliderView));
 
@@ -77,9 +79,10 @@ namespace Te.Citadel.UI.Controls
 
                 ToolTipPlacement = value ? AutoToolTipPlacement.TopLeft : AutoToolTipPlacement.None;
             }
+
         }
 
-        public AutoToolTipPlacement ToolTipPlacement
+    public AutoToolTipPlacement ToolTipPlacement
         {
             get => (AutoToolTipPlacement)GetValue(ToolTipPlacementProperty);
             set
@@ -120,6 +123,12 @@ namespace Te.Citadel.UI.Controls
                 OnPropertyChanged(nameof(Caption));
             }
         }
+
+        private static void OnIndicatorVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(ToolTipPlacementProperty, (bool)e.NewValue ? AutoToolTipPlacement.TopLeft : AutoToolTipPlacement.None);
+        }
+
 
         private static TimeSpan getTimeSpan(decimal time)
         {
