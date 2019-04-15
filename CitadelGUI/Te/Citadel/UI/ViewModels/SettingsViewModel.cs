@@ -7,9 +7,11 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 using static Te.Citadel.UI.Models.DashboardModel;
 
 namespace Te.Citadel.UI.ViewModels
@@ -83,6 +85,9 @@ namespace Te.Citadel.UI.ViewModels
                 RaisePropertyChanged(nameof(LastSyncStr));
             }
         }
+
+        public string RelaxedPolicySetupUri
+            => CloudVeil.CompileSecrets.ServiceProviderUserRelaxedPolicyPath;
 
         private RelayCommand m_useRelaxedPolicyCommand;
         public RelayCommand UseRelaxedPolicyCommand

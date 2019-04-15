@@ -67,6 +67,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 Width="180"
                 />
 
+        <TextBlock Margin="0,10,0,0"><Hyperlink NavigateUri="{Binding RelaxedPolicySetupUri}" RequestNavigate="OnHyperlinkClicked">Edit Relaxed Policy Passcode</Hyperlink></TextBlock>
         <StackPanel
             x:Name="m_disabledInternetGrid"
             x:FieldModifier="private"
