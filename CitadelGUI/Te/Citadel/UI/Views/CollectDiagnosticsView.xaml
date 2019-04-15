@@ -36,6 +36,12 @@
                     Margin="8,8,4,8"
                     Padding="16,0,16,0"/>
 
+            <Button Command="{Binding SaveToFileCommand}"
+                    Style="{StaticResource SquareButtonStyle}"
+                    Content="Save to File"
+                    Margin="8,8,4,8"
+                    Padding="16,0,16,0" />
+            
             <Button Command="{Binding CopyCommand}"
                     Style="{StaticResource AccentedSquareButtonStyle}"
                     Content="Copy"

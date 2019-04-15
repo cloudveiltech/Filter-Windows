@@ -246,7 +246,6 @@ namespace Te.Citadel.UI.ViewModels
 
             switch(msg.Data.CheckResult)
             {
-
                 case ConfigUpdateResult.ErrorOccurred:
                 case ConfigUpdateResult.NoInternet:
                 case null:
