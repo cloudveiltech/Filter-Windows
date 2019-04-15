@@ -142,16 +142,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="acls.h" />
     <ClInclude Include="ConflictReason.h" />
     <ClInclude Include="Filter.Native.Windows.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Security.h" />
+    <ClInclude Include="SeObjectType.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="acls.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="ConflictDetection.cpp" />
     <ClCompile Include="Filter.Native.Windows.cpp" />
     <ClCompile Include="ProcessCreation.cpp" />
+    <ClCompile Include="Security.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

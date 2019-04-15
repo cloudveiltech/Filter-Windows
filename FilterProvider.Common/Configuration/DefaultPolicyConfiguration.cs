@@ -36,6 +36,7 @@ using Filter.Platform.Common;
 using System.Text.RegularExpressions;
 using DotNet.Globbing;
 using Filter.Platform.Common.Data.Models;
+using System.Security.Principal;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -347,6 +348,9 @@ namespace FilterProvider.Common.Configuration
 
                 if(rulesets != null)
                 {
+                    var id = WindowsIdentity.GetCurrent();
+                    m_logger.Info("THE CURRENT WINDOWSIDENTITY is {0}", id.Name);
+
                     foreach (KeyValuePair<string, string> info in rulesets)
                     {
                         if (info.Value == "304") { continue; }
@@ -363,7 +367,7 @@ namespace FilterProvider.Common.Configuration
                         }
                         catch (Exception ex)
                         {
-                            m_logger.Error(ex, $"Failed to write to rule path {getListFilePath(info.Key)}");
+                            m_logger.Error( $"Failed to write to rule path {getListFilePath(info.Key)} {ex}");
                         }
                     }
                 }
