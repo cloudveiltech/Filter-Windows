@@ -372,9 +372,7 @@ namespace CitadelService.Services
             string path = paths.GetPath("rules");
 
             try
-            {
-                SetDirectoryAsSystemOnly(path);
-
+            { 
                 SetServicePermissions("FilterServiceProvider");
                 SetServicePermissions("Sentinel");
                 SetServicePermissions("Warden");
