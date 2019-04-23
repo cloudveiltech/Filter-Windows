@@ -27,12 +27,12 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsView : BaseView
+    public partial class RelaxedPolicyView : BaseView
     {
-        public SettingsView()
+        public RelaxedPolicyView()
         {
             InitializeComponent();
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SettingsViewModel>();
+            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<RelaxedPolicyViewModel>();
         }
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)

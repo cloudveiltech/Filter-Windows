@@ -551,19 +551,31 @@ namespace CloudVeil.Windows
                         (Action)delegate ()
                         {
                             // Bypass lists have been enabled.
-                            var settingsViewModel = ModelManager.Get<SettingsViewModel>();
-                            if(args.PolicyInfo != null && settingsViewModel != null)
+                            var rpModel = ModelManager.Get<RelaxedPolicyViewModel>();
+                            if(args.PolicyInfo != null && rpModel != null)
                             {
-                                settingsViewModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
-                                settingsViewModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+                                rpModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
+                                rpModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+
+                                switch(args.PolicyInfo.Status)
+                                {
+                                    case RelaxedPolicyStatus.Activated:
+                                    case RelaxedPolicyStatus.Granted:
+                                        rpModel.IsRelaxedPolicyInEffect = true;
+                                        break;
+
+                                    default:
+                                        rpModel.IsRelaxedPolicyInEffect = false;
+                                        break;
+                                }
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                settingsViewModel.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
-                                settingsViewModel.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
+                                rpModel.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
+                                rpModel.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                settingsViewModel.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
-                                settingsViewModel.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
+                                rpModel.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
+                                rpModel.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                             }
                         }
                     );
@@ -583,7 +595,7 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        viewManager.Get<SettingsView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
+                                        viewManager.Get<RelaxedPolicyView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
                                     }
                                 );
                             }
@@ -599,7 +611,7 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        viewManager.Get<SettingsView>()?.HideDisabledInternetMessage();
+                                        viewManager.Get<RelaxedPolicyView>()?.HideDisabledInternetMessage();
                                     }
                                 );
                             }
@@ -643,10 +655,10 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        var settingsViewModel = ModelManager.Get<SettingsViewModel>();
-                                        if(settingsViewModel != null)
+                                        var relaxedPolicyViewModel = ModelManager.Get<RelaxedPolicyViewModel>();
+                                        if(relaxedPolicyViewModel != null)
                                         {
-                                            settingsViewModel.LastSync = DateTime.Now;
+                                            relaxedPolicyViewModel.LastSync = DateTime.Now;
                                         }
                                     }
                                 );
@@ -806,7 +818,7 @@ namespace CloudVeil.Windows
 
             ModelManager.Register(new HistoryViewModel());
             ModelManager.Register(new SelfModerationViewModel());
-            ModelManager.Register(new SettingsViewModel());
+            ModelManager.Register(new RelaxedPolicyViewModel());
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
@@ -1096,7 +1108,7 @@ namespace CloudVeil.Windows
             switch (msg.PolicyInfo.Status)
             {
                 case RelaxedPolicyStatus.Activated:
-                    message = null;
+                    message = msg.Message;
                     break;
 
                 case RelaxedPolicyStatus.Granted:

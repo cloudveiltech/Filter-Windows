@@ -16,7 +16,7 @@ using static Te.Citadel.UI.Models.DashboardModel;
 
 namespace Te.Citadel.UI.ViewModels
 {
-    public class SettingsViewModel : BaseCitadelViewModel
+    public class RelaxedPolicyViewModel : BaseCitadelViewModel
     {
         public event RelaxedPolicyRequestDelegate RelaxedPolicyRequested;
 
@@ -30,6 +30,17 @@ namespace Te.Citadel.UI.ViewModels
         public void RelinquishRelaxedPolicy()
         {
             RelinquishRelaxedPolicyRequested?.Invoke();
+        }
+
+        private bool isRelaxedPolicyInEffect;
+        public bool IsRelaxedPolicyInEffect
+        {
+            get => isRelaxedPolicyInEffect;
+            set
+            {
+                isRelaxedPolicyInEffect = value;
+                RaisePropertyChanged(nameof(IsRelaxedPolicyInEffect));
+            }
         }
 
         private int availableRelaxedRequests;

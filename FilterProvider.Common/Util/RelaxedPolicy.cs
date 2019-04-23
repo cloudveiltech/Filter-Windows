@@ -116,6 +116,23 @@ namespace FilterProvider.Common.Util
             HttpStatusCode statusCode;
             bool grantBypass = false;
 
+            if(getRelaxedPolicyStatus() == RelaxedPolicyStatus.Activated)
+            {
+                bypassNotification = "Relaxed Policy already in effect.";
+
+                var cfg = policyConfiguration.Configuration;
+                if(cfg != null)
+                {
+                    ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Activated, bypassNotification);
+                }
+                else
+                {
+                    ipcServer.NotifyRelaxedPolicyChange(0, new TimeSpan(0), RelaxedPolicyStatus.Activated, bypassNotification);
+                }
+
+                return false;
+            }
+
             var parameters = new Dictionary<string, object>();
             if (passcode != null)
             {
@@ -212,6 +229,9 @@ namespace FilterProvider.Common.Util
 
                     var cfg = policyConfiguration.Configuration;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+
+                    cfg.BypassesUsed = bypassesUsed;
+                    cfg.BypassesPermitted = bypassesPermitted;
 
                     DecrementRelaxedPolicy(bypassesUsed, bypassesPermitted, cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5));
                 }
@@ -366,6 +386,8 @@ namespace FilterProvider.Common.Util
             // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
             if (status == RelaxedPolicyStatus.Activated)
             {
+                var cfg = policyConfiguration.Configuration;
+
                 OnRelaxedPolicyTimerExpired(null);
             }
 
@@ -387,6 +409,8 @@ namespace FilterProvider.Common.Util
         {
             try
             {
+                var cfg = policyConfiguration.Configuration;
+
                 // Enable every category that is a bypass category.
                 foreach (var entry in policyConfiguration.GeneratedCategoriesMap.Values)
                 {
@@ -395,6 +419,8 @@ namespace FilterProvider.Common.Util
                         policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
                     }
                 }
+
+                ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Deactivated);
 
                 // Disable the expiry timer.
                 m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
