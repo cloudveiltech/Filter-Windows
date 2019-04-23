@@ -466,7 +466,8 @@ namespace FilterProvider.Common.Configuration
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
                                         {
                                             // Load first as blacklist.
-                                            using (var listStream = File.OpenRead(rulesetPath))
+                                            using (var encryptedStream = File.OpenRead(rulesetPath))
+                                            using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
                                             {
                                                 var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
                                                 totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
@@ -488,7 +489,8 @@ namespace FilterProvider.Common.Configuration
                                         // Always load triggers as blacklists.
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                         {
-                                            using (var listStream = File.OpenRead(rulesetPath))
+                                            using (var encryptedStream = File.OpenRead(rulesetPath))
+                                            using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
                                             {
                                                 var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
                                                 m_textTriggers.FinalizeForRead();
@@ -508,7 +510,9 @@ namespace FilterProvider.Common.Configuration
 
                                 case PlainTextFilteringListType.Whitelist:
                                     {
-                                        using (TextReader tr = new StreamReader(File.OpenRead(rulesetPath)))
+                                        using (var encryptedStream = File.OpenRead(rulesetPath))
+                                        using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
+                                        using (TextReader tr = new StreamReader(listStream))
                                         {
                                             if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                             {
@@ -519,16 +523,13 @@ namespace FilterProvider.Common.Configuration
                                                     whitelistRules.Add("@@" + line.Trim() + "\n");
                                                 }
 
-                                                using (var listStream = File.OpenRead(rulesetPath))
-                                                {
-                                                    var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
-                                                    totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                    totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+                                                var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
+                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
 
-                                                    if (loadedFailedRes.Item1 > 0)
-                                                    {
-                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                    }
+                                                if (loadedFailedRes.Item1 > 0)
+                                                {
+                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                                 }
                                             }
                                         }

@@ -307,7 +307,8 @@ namespace FilterProvider.Common.Configuration
                                             {
                                                 if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                                 {
-                                                    using (var listStream = listEntry.Open())
+                                                    using (var unencrypted = listEntry.Open())
+                                                    using (var listStream = RulesetEncryption.DecryptionStream(unencrypted))
                                                     {
                                                         var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
                                                         totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
@@ -330,7 +331,8 @@ namespace FilterProvider.Common.Configuration
                                                 if (TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
                                                 {
                                                     // Load first as blacklist.
-                                                    using (var listStream = listEntry.Open())
+                                                    using (var unencrypted = listEntry.Open())
+                                                    using (var listStream = RulesetEncryption.DecryptionStream(unencrypted))
                                                     {
                                                         var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
                                                         totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
@@ -352,7 +354,8 @@ namespace FilterProvider.Common.Configuration
                                                 // Always load triggers as blacklists.
                                                 if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                                 {
-                                                    using (var listStream = listEntry.Open())
+                                                    using (var unencrypted = listEntry.Open())
+                                                    using (var listStream = RulesetEncryption.DecryptionStream(unencrypted))
                                                     {
                                                         var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
                                                         m_textTriggers.FinalizeForRead();
@@ -372,7 +375,7 @@ namespace FilterProvider.Common.Configuration
 
                                         case PlainTextFilteringListType.Whitelist:
                                             {
-                                                using (TextReader tr = new StreamReader(listEntry.Open()))
+                                                using (TextReader tr = new StreamReader(RulesetEncryption.DecryptionStream(listEntry.Open())))
                                                 {
                                                     if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                                     {
