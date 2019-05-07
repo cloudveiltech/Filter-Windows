@@ -107,6 +107,14 @@
     <Compile Include="Views\BlockedPagesViewController.designer.cs">
       <DependentUpon>BlockedPagesViewController.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\SelfModerationViewController.cs" />
+    <Compile Include="Views\SelfModerationViewControllerController.designer.cs">
+      <DependentUpon>SelfModerationViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelfModerationViewController.cs" />
+    <Compile Include="SelfModerationViewController.designer.cs">
+      <DependentUpon>SelfModerationViewController.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />
@@ -115,7 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CloudVeilGUI.Common\CloudVeilGUI.Common.csproj">
-      <Project>{02DA72B6-7608-4304-929D-1A447D87774D}</Project>
+      <Project>{B5F6349F-1971-46DA-90DD-E02CDB6C6674}</Project>
       <Name>CloudVeilGUI.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
