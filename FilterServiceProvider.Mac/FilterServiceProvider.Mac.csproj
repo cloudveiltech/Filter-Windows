@@ -63,7 +63,7 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.3" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="NLog" Version="4.5.10" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="4.5.0" />
@@ -120,10 +120,6 @@
     <ProjectReference Include="..\Filter.Platform.Mac\Filter.Platform.Mac.csproj">
       <Project>{DA4EB60A-475A-4240-B3F7-4DA9A1BAAB6E}</Project>
       <Name>Filter.Platform.Mac</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Titanium-Web-Proxy\src\Titanium.Web.Proxy\Titanium.Web.Proxy-MacOS.csproj">
-      <Project>{93B90733-D7C3-4EDD-936E-34689D9BFD2B}</Project>
-      <Name>Titanium.Web.Proxy-MacOS</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
