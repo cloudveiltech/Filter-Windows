@@ -54,6 +54,7 @@
                 Click="TriggerWelcome"
                 Grid.Row="3"
                 Grid.Column="1"
+                Padding="16,0,16,0"
                 Margin="8,8,4,8" />
 
         <Button Style="{StaticResource AccentedSquareButtonStyle}"
@@ -61,6 +62,7 @@
                 Click="TriggerInstall"
                 Grid.Row="3"
                 Grid.Column="2"
+                Padding="16,0,16,0"
                 Margin="4,8,8,8" />
     </Grid>
 </UserControl>

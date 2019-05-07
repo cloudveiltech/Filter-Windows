@@ -191,7 +191,7 @@
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=EyeSettingsOutline}" Label="Relaxed Policy">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:SettingsView />
+                                <local:RelaxedPolicyView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=CogSolid}" Label="Advanced">

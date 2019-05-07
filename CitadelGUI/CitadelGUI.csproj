@@ -211,7 +211,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\SettingsView.xaml">
+    <Page Include="Te\Citadel\UI\Views\RelaxedPolicyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -254,8 +254,8 @@
     <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\SettingsView.xaml.cs">
-      <DependentUpon>SettingsView.xaml</DependentUpon>
+    <Compile Include="Te\Citadel\UI\Views\RelaxedPolicyView.xaml.cs">
+      <DependentUpon>RelaxedPolicyView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
       <DependentUpon>DiagnosticsView.xaml</DependentUpon>

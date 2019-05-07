@@ -50,6 +50,7 @@ using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
 using HandlebarsDotNet;
+using CloudVeil;
 
 namespace FilterProvider.Common.Services
 {
@@ -703,8 +704,12 @@ namespace FilterProvider.Common.Services
                         {
                             m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
 
+                            string fingerprint = FingerprintService.Default.Value;
+                            m_logger.Info("I am sending a fingerprint value of {0} to client.", fingerprint);
+
                             m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
                             m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
+                            m_ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
                         }
                     }
                     catch (Exception ex)
@@ -1995,6 +2000,7 @@ namespace FilterProvider.Common.Services
             blockPageContext.Add("matching_category", matching_category);
             blockPageContext.Add("other_categories", otherCategories);
             blockPageContext.Add("showUnblockRequestButton", showUnblockRequestButton);
+            blockPageContext.Add("passcodeSetupUrl", CompileSecrets.ServiceProviderUserRelaxedPolicyPath);
             blockPageContext.Add("unblockRequest", unblockRequest);
             blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
             blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);

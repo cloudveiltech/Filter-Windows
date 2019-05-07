@@ -50,6 +50,9 @@ using FilterNativeWindows;
 using CitadelCore.Windows.Diversion;
 using FilterProvider.Common.Util;
 using Filter.Platform.Common.Types;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.ServiceProcess;
 
 /**
  * TODO:
@@ -296,9 +299,88 @@ namespace CitadelService.Services
             m_provider = new CommonFilterServiceProvider(OnExtension);
         }
 
+        const string SystemAccountIdentifier = "S-1-5-18";
+        const string EveryoneIdentifier = "S-1-1-0";
+
+        private void SetDirectoryAsSystemOnly(string name)
+        {
+            SecurityIdentifier si = new SecurityIdentifier(SystemAccountIdentifier);
+            IdentityReference userId = si.Translate(typeof(NTAccount));
+
+            DirectorySecurity security = Directory.GetAccessControl(name);
+            FileSystemAccessRule rule = new FileSystemAccessRule(userId, FileSystemRights.FullControl, InheritanceFlags.ObjectInherit, PropagationFlags.InheritOnly, AccessControlType.Allow);
+
+            security.SetAccessRule(rule);
+            security.SetAccessRuleProtection(true, false);
+
+            Directory.SetAccessControl(name, security);
+        }
+
+        private void SetFileAsSystemOnly(string name)
+        {
+            SecurityIdentifier si = new SecurityIdentifier(SystemAccountIdentifier);
+            IdentityReference userId = si.Translate(typeof(NTAccount));
+
+            FileSecurity security = File.GetAccessControl(name);
+            FileSystemAccessRule rule = new FileSystemAccessRule(userId, FileSystemRights.FullControl, InheritanceFlags.ObjectInherit, PropagationFlags.InheritOnly, AccessControlType.Allow);
+
+            security.SetAccessRule(rule);
+            security.SetAccessRuleProtection(true, false);
+            File.SetAccessControl(name, security);
+        }
+
+        private void SetServicePermissions(string name)
+        {
+            SecurityIdentifier si = new SecurityIdentifier(SystemAccountIdentifier);
+            SecurityIdentifier everyone = new SecurityIdentifier(EveryoneIdentifier);
+
+            RawSecurityDescriptor securityDescriptor = null;
+            if(!Security.GetServiceSecurity(name, out securityDescriptor))
+            {
+                m_logger.Warn($"Unable to get proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
+            }
+            else
+            {
+                while(securityDescriptor.DiscretionaryAcl.Count > 0)
+                {
+                    securityDescriptor.DiscretionaryAcl.RemoveAce(0);
+                }
+
+                ServiceAccessFlags systemFlags = ServiceAccessFlags.WriteOwner | ServiceAccessFlags.WriteDac | ServiceAccessFlags.ReadControl |
+                    ServiceAccessFlags.Delete | ServiceAccessFlags.UserDefinedControl | ServiceAccessFlags.Interrogate | ServiceAccessFlags.PauseContinue |
+                    ServiceAccessFlags.Stop | ServiceAccessFlags.Start | ServiceAccessFlags.EnumerateDependents | ServiceAccessFlags.QueryStatus |
+                    ServiceAccessFlags.QueryConfig;
+
+                ServiceAccessFlags everyoneFlags = ServiceAccessFlags.QueryConfig | ServiceAccessFlags.QueryStatus | ServiceAccessFlags.EnumerateDependents |
+                    ServiceAccessFlags.Start | ServiceAccessFlags.Stop | ServiceAccessFlags.PauseContinue | ServiceAccessFlags.Interrogate | ServiceAccessFlags.UserDefinedControl;
+
+                securityDescriptor.DiscretionaryAcl.InsertAce(0, new CommonAce(AceFlags.None, AceQualifier.AccessAllowed, (int)systemFlags, si, false, null));
+                securityDescriptor.DiscretionaryAcl.InsertAce(1, new CommonAce(AceFlags.None, AceQualifier.AccessAllowed, (int)everyoneFlags, everyone, false, null));
+
+                if(!Security.SetServiceSecurity(name, securityDescriptor))
+                {
+                    m_logger.Warn($"Unable to set proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
+                }
+            }
+        }
+
         private void OnExtension(CommonFilterServiceProvider provider)
         {
             IPCServer server = provider.IPCServer;
+
+            IPathProvider paths = PlatformTypes.New<IPathProvider>();
+            string path = paths.GetPath("rules");
+
+            try
+            { 
+                SetServicePermissions("FilterServiceProvider");
+                SetServicePermissions("Sentinel");
+                SetServicePermissions("Warden");
+            }
+            catch(Exception ex)
+            {
+                m_logger.Warn($"Failed to secure rules path: {ex}");
+            }
 
             Task.Run(async () =>
             {

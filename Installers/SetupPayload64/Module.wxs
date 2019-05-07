@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -267,6 +267,9 @@
         </Component>
         <Component Id="comp_D5A2370E_13CF" Guid="4C114D5C-0028-4ADD-BECC-BD938C33ABEE" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_AF894AF6_A640" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Native.Windows.dll" Source="..\..\CitadelGUI\bin\Release x64\Filter.Native.Windows.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_43A007AE_E31C" Guid="463D97D3-A5A4-490C-BCE0-F6CD10BE5950" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3572440B_53BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CitadelGUI\bin\Release x64\Handlebars.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">

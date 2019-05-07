@@ -24,11 +24,9 @@ With modifications by Kent Friesen
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="2"
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    <Polygon Points="0,0 0,2 4,7 4,9 0,14 0,16 10,16 10,14 6,9 6,7 10,2 10,0"
+                             Fill="{TemplateBinding Background}"
+                             SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -115,7 +113,7 @@ With modifications by Kent Friesen
 
     <Style x:Key="Te.Citadel.Styles.TimeRestrictionSlider" TargetType="{x:Type localControls:TimeRestrictionSlider}">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="localControls:SliderHelper.ThumbFillBrush" Value="{DynamicResource AccentBaseColorBrush}" />
+        <Setter Property="localControls:SliderHelper.ThumbFillBrush" Value="{DynamicResource GrayBrush2}" />
         <Setter Property="localControls:SliderHelper.TrackFillBrush" Value="{DynamicResource GrayBrush3}" />
         <Setter Property="localControls:SliderHelper.TrackValueFillBrush" Value="{DynamicResource AccentColorBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource GrayBrush1}" />

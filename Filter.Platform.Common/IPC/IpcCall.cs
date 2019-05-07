@@ -15,7 +15,6 @@ namespace Citadel.IPC
         UpdateResult,
         SynchronizeSettings,
         Update,
-        StartUpdater,
         ShutdownForUpdate,
         ConflictsDetected,
         InstallerDownloadProgress,
@@ -23,6 +22,7 @@ namespace Citadel.IPC
         InstallerDownloadStarted,
         InternetAccessible,
         AdministratorStart,
-        CollectComputerInfo
+        CollectComputerInfo,
+        ActivationIdentifier
     }
 }

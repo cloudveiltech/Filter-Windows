@@ -171,6 +171,11 @@ namespace Citadel.IPC.Messages
         public string Passcode { get; private set; }
 
         /// <summary>
+        /// The message attached with a particular bypass request.
+        /// </summary>
+        public string Message { get; private set; }
+
+        /// <summary>
         /// Constructs a new RelaxedPolicyMessage instance. 
         /// </summary>
         /// <param name="command">
@@ -180,15 +185,18 @@ namespace Citadel.IPC.Messages
         /// Information about available policies. Only supply if the command is Info from the server.
         /// Null otherwise.
         /// </param>
-        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode, RelaxedPolicyInfo policyInfo)
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode, string message, RelaxedPolicyInfo policyInfo)
         {
             PolicyInfo = policyInfo;
             Command = command;
             Passcode = passcode;
+            Message = message;
         }
 
-        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode) : this(command, passcode, null) { }
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode, RelaxedPolicyInfo policyInfo) : this(command, passcode, null, policyInfo) { }
 
-        public RelaxedPolicyMessage(RelaxedPolicyCommand command, RelaxedPolicyInfo policyInfo = null) : this(command, null, policyInfo) { }
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, string passcode) : this(command, passcode, null, null) { }
+
+        public RelaxedPolicyMessage(RelaxedPolicyCommand command, RelaxedPolicyInfo policyInfo = null) : this(command, null, null, policyInfo) { }
     }
 }

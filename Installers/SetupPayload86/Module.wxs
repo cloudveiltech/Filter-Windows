@@ -5,7 +5,7 @@
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\FilterStarter.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\Warden.exe -->
-  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.1.0" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="1.7.0.0" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -262,6 +262,9 @@
         </Component>
         <Component Id="comp_6CC0A7EA_9D35" Guid="FC7321BD-14D6-4E92-83DB-510A19123839" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_16C274F8_3E3E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Native.Windows.dll" Source="..\..\CitadelGUI\bin\Release x86\Filter.Native.Windows.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_62917226_1225" Guid="61E3C210-3A21-4CCD-AF7A-3C08F5FDC164" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2242D901_48C6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CitadelGUI\bin\Release x86\Handlebars.dll" KeyPath="yes" />
         </Component>
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
           <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
