@@ -391,48 +391,6 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
-                m_ipcClient.RegisterRequestHandler(IpcCall.StartUpdater, (msg) =>
-                {
-                    Assembly appAssembly = Assembly.GetEntryAssembly();
-
-                    string appPath = appAssembly.Location;
-                    string appDirectory = Path.GetDirectoryName(appPath);
-
-                    try
-                    {
-                        IEnumerable<string> fileEntries = Directory.EnumerateFiles(Path.Combine(appDirectory, "Updater"), "CloudVeilUpdater.exe");
-
-                        string fileEntry = null;
-
-                        var enumerator = fileEntries.GetEnumerator();
-                        if (enumerator.MoveNext()) fileEntry = enumerator.Current;
-                        
-                        if(fileEntry == null)
-                        {
-                            msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
-                            m_logger.Error($"Failed to start CloudVeil Updater client. Could not find client in program folder.");
-                            return true;
-                        }
-
-                        Process process = new Process();
-                        process.StartInfo = new ProcessStartInfo()
-                        {
-                            UseShellExecute = true,
-                            FileName = fileEntry
-                        };
-
-                        process.Start();
-                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, true);
-                    }
-                    catch(Exception ex)
-                    {
-                        m_logger.Error($"Failed to start CloudVeil Updater client. {ex}");
-                        msg.SendReply<bool>(m_ipcClient, IpcCall.StartUpdater, false);
-                    }
-
-                    return true;
-                });
-
                 m_ipcClient.RegisterRequestHandler(IpcCall.ShutdownForUpdate, (msg) =>
                 {
                     Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
@@ -482,6 +440,14 @@ namespace CloudVeil.Windows
                     {
                         m_mainWindow.Dispatcher.InvokeAsync(() => m_mainWindow.ViewModel.ConflictReasons.Clear());
                     }
+
+                    return true;
+                });
+
+                m_ipcClient.RegisterResponseHandler<string>(IpcCall.ActivationIdentifier, (msg) =>
+                {
+                    var vm = ModelManager.Get<SupportViewModel>();
+                    m_mainWindow.Dispatcher.Invoke(() => vm.ActivationIdentifier = msg.Data);
 
                     return true;
                 });
@@ -585,19 +551,31 @@ namespace CloudVeil.Windows
                         (Action)delegate ()
                         {
                             // Bypass lists have been enabled.
-                            var settingsViewModel = ModelManager.Get<SettingsViewModel>();
-                            if(args.PolicyInfo != null && settingsViewModel != null)
+                            var rpModel = ModelManager.Get<RelaxedPolicyViewModel>();
+                            if(args.PolicyInfo != null && rpModel != null)
                             {
-                                settingsViewModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
-                                settingsViewModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+                                rpModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
+                                rpModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+
+                                switch(args.PolicyInfo.Status)
+                                {
+                                    case RelaxedPolicyStatus.Activated:
+                                    case RelaxedPolicyStatus.Granted:
+                                        rpModel.IsRelaxedPolicyInEffect = true;
+                                        break;
+
+                                    default:
+                                        rpModel.IsRelaxedPolicyInEffect = false;
+                                        break;
+                                }
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                settingsViewModel.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
-                                settingsViewModel.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
+                                rpModel.RelaxedPolicyRequested -= OnRelaxedPolicyRequested;
+                                rpModel.RelaxedPolicyRequested += OnRelaxedPolicyRequested;
 
                                 // Ensure we don't overlap this event multiple times by decrementing first.
-                                settingsViewModel.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
-                                settingsViewModel.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
+                                rpModel.RelinquishRelaxedPolicyRequested -= OnRelinquishRelaxedPolicyRequested;
+                                rpModel.RelinquishRelaxedPolicyRequested += OnRelinquishRelaxedPolicyRequested;
                             }
                         }
                     );
@@ -617,7 +595,7 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        viewManager.Get<SettingsView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
+                                        viewManager.Get<RelaxedPolicyView>()?.ShowDisabledInternetMessage(DateTime.Now.Add(args.CooldownPeriod));
                                     }
                                 );
                             }
@@ -633,7 +611,7 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        viewManager.Get<SettingsView>()?.HideDisabledInternetMessage();
+                                        viewManager.Get<RelaxedPolicyView>()?.HideDisabledInternetMessage();
                                     }
                                 );
                             }
@@ -677,10 +655,10 @@ namespace CloudVeil.Windows
                                     System.Windows.Threading.DispatcherPriority.Normal,
                                     (Action)delegate ()
                                     {
-                                        var settingsViewModel = ModelManager.Get<SettingsViewModel>();
-                                        if(settingsViewModel != null)
+                                        var relaxedPolicyViewModel = ModelManager.Get<RelaxedPolicyViewModel>();
+                                        if(relaxedPolicyViewModel != null)
                                         {
-                                            settingsViewModel.LastSync = DateTime.Now;
+                                            relaxedPolicyViewModel.LastSync = DateTime.Now;
                                         }
                                     }
                                 );
@@ -840,10 +818,11 @@ namespace CloudVeil.Windows
 
             ModelManager.Register(new HistoryViewModel());
             ModelManager.Register(new SelfModerationViewModel());
-            ModelManager.Register(new SettingsViewModel());
+            ModelManager.Register(new RelaxedPolicyViewModel());
             ModelManager.Register(new AdvancedViewModel());
             ModelManager.Register(new DiagnosticsViewModel());
             ModelManager.Register(new TimeRestrictionsViewModel());
+            ModelManager.Register(new SupportViewModel());
             ModelManager.Register(new CollectDiagnosticsViewModel());
 
             viewManager.Register(new DashboardView());
@@ -1117,11 +1096,6 @@ namespace CloudVeil.Windows
                     {
                         var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
                         m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateResult, result);
-
-                        if (result == UpdateDialogResult.UpdateNow)
-                        {
-                            m_mainWindow.ShowUserMessage("Updating", "The update is being downloaded. The application will automatically update and restart when the download is complete.");
-                        }
                     }
                 });
         }
@@ -1134,7 +1108,7 @@ namespace CloudVeil.Windows
             switch (msg.PolicyInfo.Status)
             {
                 case RelaxedPolicyStatus.Activated:
-                    message = null;
+                    message = msg.Message;
                     break;
 
                 case RelaxedPolicyStatus.Granted:

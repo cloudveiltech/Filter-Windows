@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 using Filter.Platform.Common;
+using System.IO;
 
 namespace Filter.Platform.Mac
 {
@@ -14,5 +15,10 @@ namespace Filter.Platform.Mac
         }
 
         public string ApplicationDataFolder => @"/usr/local/share/cloudveil";
+
+        public string GetPath(params string[] pathParts)
+        {
+            return Path.Combine(ApplicationDataFolder, Path.Combine(pathParts));
+        }
     }
 }

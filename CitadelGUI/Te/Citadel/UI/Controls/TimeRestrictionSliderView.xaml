@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Te.Citadel.UI.Controls"
+             xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
              mc:Ignorable="d">
     <UserControl.Resources>
         <Style TargetType="local:TimeRestrictionSlider">
@@ -29,6 +30,7 @@
             LowerValue="{Binding Path=LowerValue}"
             UpperValue="{Binding Path=UpperValue}"
             IndicatorVisible="{Binding Path=IndicatorVisible}"
+            AutoToolTipPlacement="{Binding Path=ToolTipPlacement}"
             Value="{Binding Path=IndicatorValue}" />
 
         <Label Grid.Column="2" Content="{Binding Path=AllowedDescription}" />

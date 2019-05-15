@@ -59,6 +59,23 @@ static const wchar_t* esetDrivers[] = {
 
 static int esetDriversLength = sizeof(esetDrivers) / sizeof(esetDrivers[0]);
 
+static const wchar_t* avgDrivers[] = {
+    TEXT("avgVmm.sys"),
+    TEXT("avgSP.sys"),
+    TEXT("avgbidsdriver.sys"),
+    TEXT("avgbidsh.sys"),
+    TEXT("avgblog.sys"),
+    TEXT("avgbuniv.sys"),
+    TEXT("avgSnx.sys"),
+    TEXT("avgArPot.sys"),
+    TEXT("avgKbd.sys"),
+    TEXT("avgRdr2.sys"),
+    TEXT("avgMonFlt.sys"),
+    TEXT("avgStm.sys")
+};
+
+static int avgDriversLength = sizeof(avgDrivers) / sizeof(avgDrivers[0]);
+
 static int conflictsArrayLength;
 static DriverConflict* conflicts = NULL;
 
@@ -69,6 +86,7 @@ static void initializeDriverConflictArray() {
     totalLength += 2; // BlueCoat, CleanInternet.
     totalLength += mcafeeDriversLength; // McAfee
     totalLength += esetDriversLength; // Eset
+    totalLength += avgDriversLength; // AVG
 
     conflicts = new DriverConflict[totalLength];
 
@@ -103,6 +121,10 @@ static void initializeDriverConflictArray() {
     }
 
     // AVG
+    for (i = 0; i < avgDriversLength; i++, j++) {
+        conflicts[j].conflict = CONFLICT_REASON_AVG;
+        conflicts[j].name = avgDrivers[i];
+    }
 
     conflictsArrayLength = totalLength;
 }

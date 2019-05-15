@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:Te.Citadel.UI.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -14,26 +15,38 @@
             <RowDefinition Height="48" />
         </Grid.RowDefinitions>
 
-        <TextBlock TextWrapping="Wrap" Grid.Row="0">
+        <TextBlock TextWrapping="Wrap" Grid.Row="0" Margin="8">
             <Run Text="Click the 'copy' button below to copy the information in this box to your clipboard. You can send this information to CloudVeil in an email." />
         </TextBlock>
 
         <TextBox x:Name="diagnosticsInfoBox"
+                 Margin="16,0,16,0"
                  Grid.Row="1"
                  AcceptsReturn="True"
                  AcceptsTab="True"
                  IsReadOnly="True"
                  IsReadOnlyCaretVisible="False"
+                 VerticalScrollBarVisibility="Visible"
                  Text="{Binding DiagnosticsText}" />
 
-        <StackPanel Grid.Row="2" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button Command="{Binding CloseCommand}"
                     Style="{StaticResource SquareButtonStyle}"
-                    Content="Close" />
+                    Content="Close" 
+                    Margin="8,8,4,8"
+                    Padding="16,0,16,0"/>
 
+            <Button Command="{Binding SaveToFileCommand}"
+                    Style="{StaticResource SquareButtonStyle}"
+                    Content="Save to File"
+                    Margin="8,8,4,8"
+                    Padding="16,0,16,0" />
+            
             <Button Command="{Binding CopyCommand}"
                     Style="{StaticResource AccentedSquareButtonStyle}"
-                    Content="Copy" />
+                    Content="Copy"
+                    Margin="4,8,16,8"
+                    Padding="16,0,16,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

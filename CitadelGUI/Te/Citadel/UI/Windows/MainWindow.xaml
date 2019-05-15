@@ -133,9 +133,9 @@
         <MetroControls:FlyoutsControl>
             <MetroControls:Flyout Position="Bottom"
                                   Height="48"
-                                  IsPinned="False"
                                   TitleVisibility="Collapsed"
                                   CloseButtonVisibility="Collapsed"
+                                  Theme="Adapt"
                                   IsOpen="{Binding DownloadFlyoutIsOpen}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -144,10 +144,10 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Margin="16,0,16,0"
-                               Text="Download Progress"
+                               Text="Downloading. Will install once finished."
                                VerticalAlignment="Center" />
 
-                    <MetroControls:MetroProgressBar Grid.Column="1" Margin="0,8,16,8"
+                    <MetroControls:MetroProgressBar Grid.Column="1" Margin="0,12,16,12"
                                                     Minimum="0" Maximum="100"
                                                     Value="{Binding DownloadProgress}" />
                 </Grid>
@@ -175,7 +175,7 @@
                                     <Label Content="{Binding Header}" Foreground="White" Style="{StaticResource HeaderStyle}" Margin="0,0,0,0" />
                                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
 
-                                    <TextBlock Margin="0,10,0,0"><Hyperlink NavigateUri="{Binding LinkUri}" RequestNavigate="Hyperlink_RequestNavigate">Removal Instructions</Hyperlink></TextBlock>
+                                    <TextBlock Margin="0,10,0,0"><Hyperlink NavigateUri="{Binding LinkUri}" RequestNavigate="Hyperlink_RequestNavigate">Instructions</Hyperlink></TextBlock>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

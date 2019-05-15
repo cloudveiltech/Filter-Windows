@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -35,8 +37,10 @@ namespace Te.Citadel.UI.Controls
             new PropertyMetadata(0.0, new PropertyChangedCallback(OnLowerValueChanged)));
 
         public static readonly DependencyProperty IndicatorValueProperty = DependencyProperty.Register("IndicatorValue", typeof(double), typeof(TimeRestrictionSliderView));
-        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView));
+        public static readonly DependencyProperty IndicatorVisibleProperty = DependencyProperty.Register("IndicatorVisible", typeof(bool), typeof(TimeRestrictionSliderView), new PropertyMetadata(false, OnIndicatorVisibleChanged));
+
         public static readonly DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(TimeRestrictionSliderView));
+        public static readonly DependencyProperty ToolTipPlacementProperty = DependencyProperty.Register("ToolTipPlacement", typeof(AutoToolTipPlacement), typeof(TimeRestrictionSliderView));
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -72,6 +76,19 @@ namespace Te.Citadel.UI.Controls
             {
                 SetValue(IndicatorVisibleProperty, value);
                 OnPropertyChanged(nameof(IndicatorVisible));
+
+                ToolTipPlacement = value ? AutoToolTipPlacement.TopLeft : AutoToolTipPlacement.None;
+            }
+
+        }
+
+    public AutoToolTipPlacement ToolTipPlacement
+        {
+            get => (AutoToolTipPlacement)GetValue(ToolTipPlacementProperty);
+            set
+            {
+                SetValue(ToolTipPlacementProperty, value);
+                OnPropertyChanged(nameof(ToolTipPlacement));
             }
         }
 
@@ -106,6 +123,12 @@ namespace Te.Citadel.UI.Controls
                 OnPropertyChanged(nameof(Caption));
             }
         }
+
+        private static void OnIndicatorVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            d.SetValue(ToolTipPlacementProperty, (bool)e.NewValue ? AutoToolTipPlacement.TopLeft : AutoToolTipPlacement.None);
+        }
+
 
         private static TimeSpan getTimeSpan(decimal time)
         {

@@ -17,26 +17,26 @@ namespace FilterProvider.Common.ControlServer
         public CertificateExemptionsController(CertificateExemptions exemptions, IHttpContext context)
             : base(context)
         {
+          
             this.exemptions = exemptions;
         }
 
         [WebApiHandler(HttpVerbs.Get, "/api/exempt/{thumbprint}")]
         public Task<bool> Exempt(string thumbprint)
         {
-            string host = this.QueryString("host");
-
+            string host = HttpContext.QueryString("host");
             if(host != null)
             {
                 exemptions.TrustCertificate(host, thumbprint);
             }
 
-            return this.JsonResponseAsync("{ \"success\": 1 }");
+            return HttpContext.JsonResponseAsync("{ \"success\": 1 }");
         }
 
         [WebApiHandler(HttpVerbs.Get, "/api/testme")]
         public Task<bool> TestMe()
         {
-            return this.HtmlResponseAsync("<html><head><title>Test</title></head><body>This is my body</body></html>");
+            return HttpContext.HtmlResponseAsync("<html><head><title>Test</title></head><body>This is my body</body></html>");
         }
     }
 }

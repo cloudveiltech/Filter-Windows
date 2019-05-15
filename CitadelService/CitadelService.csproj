@@ -118,10 +118,12 @@
     <Compile Include="CompileSecrets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FilterServiceProvider.cs" />
+    <Compile Include="Services\ServiceAccessFlags.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Util\AppListCheck.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
+    <Compile Include="Util\InstalledPrograms.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
     <EmbeddedResource Include="Services\Sentinel.cs" />

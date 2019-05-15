@@ -7,6 +7,7 @@
 using CloudVeil.Windows;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,12 +27,12 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsView : BaseView
+    public partial class RelaxedPolicyView : BaseView
     {
-        public SettingsView()
+        public RelaxedPolicyView()
         {
             InitializeComponent();
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SettingsViewModel>();
+            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<RelaxedPolicyViewModel>();
         }
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)
@@ -44,6 +45,12 @@ namespace Te.Citadel.UI.Views
         public void HideDisabledInternetMessage()
         {
             m_disabledInternetGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void OnHyperlinkClicked(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

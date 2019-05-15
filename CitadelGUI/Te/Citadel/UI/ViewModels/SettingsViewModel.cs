@@ -7,14 +7,16 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 using static Te.Citadel.UI.Models.DashboardModel;
 
 namespace Te.Citadel.UI.ViewModels
 {
-    public class SettingsViewModel : BaseCitadelViewModel
+    public class RelaxedPolicyViewModel : BaseCitadelViewModel
     {
         public event RelaxedPolicyRequestDelegate RelaxedPolicyRequested;
 
@@ -28,6 +30,17 @@ namespace Te.Citadel.UI.ViewModels
         public void RelinquishRelaxedPolicy()
         {
             RelinquishRelaxedPolicyRequested?.Invoke();
+        }
+
+        private bool isRelaxedPolicyInEffect;
+        public bool IsRelaxedPolicyInEffect
+        {
+            get => isRelaxedPolicyInEffect;
+            set
+            {
+                isRelaxedPolicyInEffect = value;
+                RaisePropertyChanged(nameof(IsRelaxedPolicyInEffect));
+            }
         }
 
         private int availableRelaxedRequests;
@@ -83,6 +96,9 @@ namespace Te.Citadel.UI.ViewModels
                 RaisePropertyChanged(nameof(LastSyncStr));
             }
         }
+
+        public string RelaxedPolicySetupUri
+            => CloudVeil.CompileSecrets.ServiceProviderUserRelaxedPolicyPath;
 
         private RelayCommand m_useRelaxedPolicyCommand;
         public RelayCommand UseRelaxedPolicyCommand

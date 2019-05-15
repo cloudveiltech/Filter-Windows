@@ -284,49 +284,17 @@ namespace Te.Citadel.UI.Controls
         /// <summary>
         /// Identifies the <see cref="P:MahApps.Metro.Controls.RangeSlider.AutoToolTipLowerValueTemplate" /> dependency property.
         /// </summary>
-        public static readonly DependencyProperty AutoToolTipLowerValueTemplateProperty = DependencyProperty.Register(nameof(AutoToolTipLowerValueTemplate), typeof(DataTemplate), typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(null));
+        public static readonly DependencyProperty AutoToolTipTemplateProperty = DependencyProperty.Register(nameof(AutoToolTipTemplate), typeof(DataTemplate), typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// Gets or sets a template for the auto tooltip to show the lower value.
         /// </summary>
         [Bindable(true)]
         [Category("Behavior")]
-        public DataTemplate AutoToolTipLowerValueTemplate
+        public DataTemplate AutoToolTipTemplate
         {
-            get { return (DataTemplate)this.GetValue(AutoToolTipLowerValueTemplateProperty); }
-            set { this.SetValue(AutoToolTipLowerValueTemplateProperty, value); }
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="P:MahApps.Metro.Controls.RangeSlider.AutoToolTipUpperValueTemplate" /> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty AutoToolTipUpperValueTemplateProperty = DependencyProperty.Register(nameof(AutoToolTipUpperValueTemplate), typeof(DataTemplate), typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(null));
-
-        /// <summary>
-        /// Gets or sets a template for the auto tooltip to show the upper value.
-        /// </summary>
-        [Bindable(true)]
-        [Category("Behavior")]
-        public DataTemplate AutoToolTipUpperValueTemplate
-        {
-            get { return (DataTemplate)this.GetValue(AutoToolTipUpperValueTemplateProperty); }
-            set { this.SetValue(AutoToolTipUpperValueTemplateProperty, value); }
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="P:MahApps.Metro.Controls.RangeSlider.AutoToolTipRangeValuesTemplate" /> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty AutoToolTipRangeValuesTemplateProperty = DependencyProperty.Register(nameof(AutoToolTipRangeValuesTemplate), typeof(DataTemplate), typeof(TimeRestrictionSlider), new FrameworkPropertyMetadata(null));
-
-        /// <summary>
-        /// Gets or sets a template for the auto tooltip to show the center value.
-        /// </summary>
-        [Bindable(true)]
-        [Category("Behavior")]
-        public DataTemplate AutoToolTipRangeValuesTemplate
-        {
-            get { return (DataTemplate)this.GetValue(AutoToolTipRangeValuesTemplateProperty); }
-            set { this.SetValue(AutoToolTipRangeValuesTemplateProperty, value); }
+            get { return (DataTemplate)this.GetValue(AutoToolTipTemplateProperty); }
+            set { this.SetValue(AutoToolTipTemplateProperty, value); }
         }
 
         public static readonly DependencyProperty IntervalProperty =
@@ -1162,10 +1130,12 @@ namespace Te.Citadel.UI.Controls
                 //handle the drag delta events
                 //this._centerThumb.DragDelta -= this.CenterThumbDragDelta;
                 
-                this._visualElementsContainer.PreviewMouseDown -= this.VisualElementsContainerPreviewMouseDown;
                 this._visualElementsContainer.PreviewMouseUp -= this.VisualElementsContainerPreviewMouseUp;
+                this._visualElementsContainer.MouseEnter -= this.VisualElementsContainerMouseEnter;
                 this._visualElementsContainer.MouseLeave -= this.VisualElementsContainerMouseLeave;
                 this._visualElementsContainer.MouseDown -= this.VisualElementsContainerMouseDown;
+                this._indicatorContainer.MouseEnter -= this.VisualElementsContainerMouseEnter;
+                this._indicatorContainer.MouseLeave -= this.VisualElementsContainerMouseLeave;
 
                 //this._centerThumb.DragStarted += this.CenterThumbDragStarted;
                 //this._centerThumb.DragCompleted += this.CenterThumbDragCompleted;
@@ -1173,49 +1143,13 @@ namespace Te.Citadel.UI.Controls
                 //handle the drag delta events
                 //this._centerThumb.DragDelta += this.CenterThumbDragDelta;
 
-                this._visualElementsContainer.PreviewMouseDown += this.VisualElementsContainerPreviewMouseDown;
                 this._visualElementsContainer.PreviewMouseUp += this.VisualElementsContainerPreviewMouseUp;
+                this._visualElementsContainer.MouseEnter += this.VisualElementsContainerMouseEnter;
                 this._visualElementsContainer.MouseLeave += this.VisualElementsContainerMouseLeave;
                 this._visualElementsContainer.MouseDown += this.VisualElementsContainerMouseDown;
+                this._indicatorContainer.MouseEnter += this.VisualElementsContainerMouseEnter;
+                this._indicatorContainer.MouseLeave += this.VisualElementsContainerMouseLeave;
             }
-        }
-
-        //Handler for preview mouse button down for the whole StackPanel container
-        private void VisualElementsContainerPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            /*var position = Mouse.GetPosition(this._visualElementsContainer);
-            if (this.Orientation == Orientation.Horizontal)
-            {
-                if (position.X < this._leftButton.ActualWidth)
-                {
-                    this.LeftButtonMouseDown();
-                }
-                else if (position.X > this.ActualWidth - this._rightButton.ActualWidth)
-                {
-                    this.RightButtonMouseDown();
-                }
-                else if (position.X > (this._leftButton.ActualWidth + this._leftThumb.ActualWidth) &&
-                         position.X < (this.ActualWidth - (this._rightButton.ActualWidth + this._rightThumb.ActualWidth)))
-                {
-                    this.CentralThumbMouseDown();
-                }
-            }
-            else
-            {
-                if (position.Y > this.ActualHeight - this._leftButton.ActualHeight)
-                {
-                    this.LeftButtonMouseDown();
-                }
-                else if (position.Y < this._rightButton.ActualHeight)
-                {
-                    this.RightButtonMouseDown();
-                }
-                else if (position.Y > (this._rightButton.ActualHeight + this._rightButton.ActualHeight) &&
-                         position.Y < (this.ActualHeight - (this._leftButton.ActualHeight + this._leftThumb.ActualHeight)))
-                {
-                    this.CentralThumbMouseDown();
-                }
-            }*/
         }
 
         private void VisualElementsContainerMouseDown(object sender, MouseButtonEventArgs e)
@@ -1228,10 +1162,32 @@ namespace Te.Citadel.UI.Controls
 
         #region Mouse events
 
+        private void VisualElementsContainerMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
+            {
+                if (this._autoToolTip == null)
+                {
+                    this._autoToolTip = new ToolTip();
+                    this._autoToolTip.Placement = PlacementMode.Custom;
+                    this._autoToolTip.CustomPopupPlacementCallback = this.PopupPlacementCallback;
+                }
+
+                this._autoToolTip.SetValue(ContentControl.ContentTemplateProperty, this.AutoToolTipTemplate);
+                this._autoToolTip.Content = this.GetToolTipInformation();
+                this._autoToolTip.PlacementTarget = this._indicator;
+                this._autoToolTip.IsOpen = true;
+
+                this.RelocateAutoToolTip();
+            }
+        }
+
         private void VisualElementsContainerMouseLeave(object sender, MouseEventArgs e)
         {
-            this._tickCount = 0;
-            this._timer.Stop();
+            if (this._autoToolTip != null)
+            {
+                this._autoToolTip.IsOpen = false;
+            }
         }
 
         private void VisualElementsContainerPreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -1241,446 +1197,6 @@ namespace Te.Citadel.UI.Controls
             this._centerThumbBlocked = false;
         }
 
-        private void LeftButtonMouseDown()
-        {
-            /*
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
-            {
-                var p = Mouse.GetPosition(this._visualElementsContainer);
-                var change = this.Orientation == Orientation.Horizontal
-                    ? this._leftButton.ActualWidth - p.X + (this._leftThumb.ActualWidth / 2)
-                    : -(this._leftButton.ActualHeight - (this.ActualHeight - (p.Y + (this._leftThumb.ActualHeight / 2))));
-                if (!this.IsSnapToTickEnabled)
-                {
-                    if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                    {
-                        MoveThumb(this._leftButton, this._centerThumb, -change, this.Orientation, out this._direction);
-                        this.ReCalculateRangeSelected(true, false, this._direction);
-                    }
-                    else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                    {
-                        MoveThumb(this._leftButton, this._rightButton, -change, this.Orientation, out this._direction);
-                        this.ReCalculateRangeSelected(true, true, this._direction);
-                    }
-                }
-                else
-                {
-                    if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                    {
-                        this.JumpToNextTick(Direction.Decrease, ButtonType.BottomLeft, -change, this.LowerValue, true);
-                    }
-                    else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                    {
-                        this.JumpToNextTick(Direction.Decrease, ButtonType.Both, -change, this.LowerValue, true);
-                    }
-                }
-
-                if (!this.IsMoveToPointEnabled)
-                {
-                    this._position = Mouse.GetPosition(this._visualElementsContainer);
-                    this._bType = this.MoveWholeRange ? ButtonType.Both : ButtonType.BottomLeft;
-                    this._currentpoint = this.Orientation == Orientation.Horizontal ? this._position.X : this._position.Y;
-                    this._currenValue = this.LowerValue;
-                    this._isInsideRange = false;
-                    this._direction = Direction.Decrease;
-                    this._timer.Start();
-                }
-            }*/
-        }
-
-        private void RightButtonMouseDown()
-        {/*
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
-            {
-                var p = Mouse.GetPosition(this._visualElementsContainer);
-                var change = this.Orientation == Orientation.Horizontal
-                    ? this._rightButton.ActualWidth - (this.ActualWidth - (p.X + (this._rightThumb.ActualWidth / 2)))
-                    : -(this._rightButton.ActualHeight - (p.Y - (this._rightThumb.ActualHeight / 2)));
-                if (!this.IsSnapToTickEnabled)
-                {
-                    if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                    {
-                        MoveThumb(this._centerThumb, this._rightButton, change, this.Orientation, out this._direction);
-                        this.ReCalculateRangeSelected(false, true, this._direction);
-                    }
-                    else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                    {
-                        MoveThumb(this._leftButton, this._rightButton, change, this.Orientation, out this._direction);
-                        this.ReCalculateRangeSelected(true, true, this._direction);
-                    }
-                }
-                else
-                {
-                    if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                    {
-                        this.JumpToNextTick(Direction.Increase, ButtonType.TopRight, change, this.UpperValue, true);
-                    }
-                    else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                    {
-                        this.JumpToNextTick(Direction.Increase, ButtonType.Both, change, this.UpperValue, true);
-                    }
-                }
-
-                if (!this.IsMoveToPointEnabled)
-                {
-                    this._position = Mouse.GetPosition(this._visualElementsContainer);
-                    this._bType = this.MoveWholeRange ? ButtonType.Both : ButtonType.TopRight;
-                    this._currentpoint = this.Orientation == Orientation.Horizontal ? this._position.X : this._position.Y;
-                    this._currenValue = this.UpperValue;
-                    this._direction = Direction.Increase;
-                    this._isInsideRange = false;
-                    this._timer.Start();
-                }
-            }*/
-        }
-
-        private void CentralThumbMouseDown()
-        {
-            /*if (this.ExtendedMode)
-            {
-                if (Mouse.LeftButton == MouseButtonState.Pressed && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
-                {
-                    this._centerThumbBlocked = true;
-                    var p = Mouse.GetPosition(this._visualElementsContainer);
-                    var change = this.Orientation == Orientation.Horizontal
-                        ? (p.X + (this._leftThumb.ActualWidth / 2) - (this._leftButton.ActualWidth + this._leftThumb.ActualWidth))
-                        : -(this.ActualHeight - ((p.Y + (this._leftThumb.ActualHeight / 2)) + this._leftButton.ActualHeight));
-                    if (!this.IsSnapToTickEnabled)
-                    {
-                        if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                        {
-                            MoveThumb(this._leftButton, this._centerThumb, change, this.Orientation, out this._direction);
-                            this.ReCalculateRangeSelected(true, false, this._direction);
-                        }
-                        else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                        {
-                            MoveThumb(this._leftButton, this._rightButton, change, this.Orientation, out this._direction);
-                            this.ReCalculateRangeSelected(true, true, this._direction);
-                        }
-                    }
-                    else
-                    {
-                        if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                        {
-                            this.JumpToNextTick(Direction.Increase, ButtonType.BottomLeft, change, this.LowerValue, true);
-                        }
-                        else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                        {
-                            this.JumpToNextTick(Direction.Increase, ButtonType.Both, change, this.LowerValue, true);
-                        }
-                    }
-
-                    if (!this.IsMoveToPointEnabled)
-                    {
-                        this._position = Mouse.GetPosition(this._visualElementsContainer);
-                        this._bType = this.MoveWholeRange ? ButtonType.Both : ButtonType.BottomLeft;
-                        this._currentpoint = this.Orientation == Orientation.Horizontal ? this._position.X : this._position.Y;
-                        this._currenValue = this.LowerValue;
-                        this._direction = Direction.Increase;
-                        this._isInsideRange = true;
-                        this._timer.Start();
-                    }
-                }
-                else if (Mouse.RightButton == MouseButtonState.Pressed && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
-                {
-                    this._centerThumbBlocked = true;
-                    var p = Mouse.GetPosition(this._visualElementsContainer);
-                    var change = this.Orientation == Orientation.Horizontal
-                        ? this.ActualWidth - (p.X + (this._rightThumb.ActualWidth / 2) + this._rightButton.ActualWidth)
-                        : -(p.Y + (this._rightThumb.ActualHeight / 2) - (this._rightButton.ActualHeight + this._rightThumb.ActualHeight));
-                    if (!this.IsSnapToTickEnabled)
-                    {
-                        if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                        {
-                            MoveThumb(this._centerThumb, this._rightButton, -change, this.Orientation, out this._direction);
-                            this.ReCalculateRangeSelected(false, true, this._direction);
-                        }
-                        else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                        {
-                            MoveThumb(this._leftButton, this._rightButton, -change, this.Orientation, out this._direction);
-                            this.ReCalculateRangeSelected(true, true, this._direction);
-                        }
-                    }
-                    else
-                    {
-                        if (this.IsMoveToPointEnabled && !this.MoveWholeRange)
-                        {
-                            this.JumpToNextTick(Direction.Decrease, ButtonType.TopRight, -change, this.UpperValue, true);
-                        }
-                        else if (this.IsMoveToPointEnabled && this.MoveWholeRange)
-                        {
-                            this.JumpToNextTick(Direction.Decrease, ButtonType.Both, -change, this.UpperValue, true);
-                        }
-                    }
-
-                    if (!this.IsMoveToPointEnabled)
-                    {
-                        this._position = Mouse.GetPosition(this._visualElementsContainer);
-                        this._bType = this.MoveWholeRange ? ButtonType.Both : ButtonType.TopRight;
-                        this._currentpoint = this.Orientation == Orientation.Horizontal ? this._position.X : this._position.Y;
-                        this._currenValue = this.UpperValue;
-                        this._direction = Direction.Decrease;
-                        this._isInsideRange = true;
-                        this._timer.Start();
-                    }
-                }
-            }*/
-        }
-
-        #endregion
-
-        #region Thumb Drag event handlers
-        /*
-
-        private void LeftThumbDragStart(object sender, DragStartedEventArgs e)
-        {
-            this._isMoved = true;
-            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-            {
-                if (this._autoToolTip == null)
-                {
-                    this._autoToolTip = new ToolTip();
-                    this._autoToolTip.Placement = PlacementMode.Custom;
-                    this._autoToolTip.CustomPopupPlacementCallback = this.PopupPlacementCallback;
-                }
-
-                this._autoToolTip.SetValue(ContentControl.ContentTemplateProperty, this.AutoToolTipLowerValueTemplate);
-                this._autoToolTip.Content = this.GetToolTipNumber(this.LowerValue);
-                this._autoToolTip.PlacementTarget = this._leftThumb;
-                this._autoToolTip.IsOpen = true;
-            }
-
-            this._basePoint = Mouse.GetPosition(this._container);
-            e.RoutedEvent = LowerThumbDragStartedEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void LeftThumbDragDelta(object sender, DragDeltaEventArgs e)
-        {
-            var change = this.Orientation == Orientation.Horizontal ? e.HorizontalChange : e.VerticalChange;
-            if (!this.IsSnapToTickEnabled)
-            {
-                MoveThumb(this._leftButton, this._centerThumb, change, this.Orientation, out this._direction);
-                this.ReCalculateRangeSelected(true, false, this._direction);
-            }
-            else
-            {
-                Direction localDirection;
-                var currentPoint = Mouse.GetPosition(this._container);
-                if (this.Orientation == Orientation.Horizontal)
-                {
-                    if (currentPoint.X >= 0 && currentPoint.X < this._container.ActualWidth - (this._rightButton.ActualWidth + this._rightThumb.ActualWidth + this._centerThumb.MinWidth))
-                    {
-                        localDirection = currentPoint.X > this._basePoint.X ? Direction.Increase : Direction.Decrease;
-                        this.JumpToNextTick(localDirection, ButtonType.BottomLeft, change, this.LowerValue, false);
-                    }
-                }
-                else
-                {
-                    if (currentPoint.Y <= this._container.ActualHeight && currentPoint.Y > this._rightButton.ActualHeight + this._rightThumb.ActualHeight + this._centerThumb.MinHeight)
-                    {
-                        localDirection = currentPoint.Y < this._basePoint.Y ? Direction.Increase : Direction.Decrease;
-                        this.JumpToNextTick(localDirection, ButtonType.BottomLeft, -change, this.LowerValue, false);
-                    }
-                }
-            }
-
-            this._basePoint = Mouse.GetPosition(this._container);
-            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-            {
-                this._autoToolTip.Content = this.GetToolTipNumber(this.LowerValue);
-                this.RelocateAutoToolTip();
-            }
-
-            e.RoutedEvent = LowerThumbDragDeltaEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void LeftThumbDragComplete(object sender, DragCompletedEventArgs e)
-        {
-            if (this._autoToolTip != null)
-            {
-                this._autoToolTip.IsOpen = false;
-                this._autoToolTip = null;
-            }
-
-            e.RoutedEvent = LowerThumbDragCompletedEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void RightThumbDragStart(object sender, DragStartedEventArgs e)
-        {
-            this._isMoved = true;
-            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-            {
-                if (this._autoToolTip == null)
-                {
-                    this._autoToolTip = new ToolTip();
-                    this._autoToolTip.Placement = PlacementMode.Custom;
-                    this._autoToolTip.CustomPopupPlacementCallback = this.PopupPlacementCallback;
-                }
-
-                this._autoToolTip.SetValue(ContentControl.ContentTemplateProperty, this.AutoToolTipUpperValueTemplate);
-                this._autoToolTip.Content = this.GetToolTipNumber(this.UpperValue);
-                this._autoToolTip.PlacementTarget = this._rightThumb;
-                this._autoToolTip.IsOpen = true;
-            }
-
-            this._basePoint = Mouse.GetPosition(this._container);
-            e.RoutedEvent = UpperThumbDragStartedEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void RightThumbDragDelta(object sender, DragDeltaEventArgs e)
-        {
-            var change = this.Orientation == Orientation.Horizontal ? e.HorizontalChange : e.VerticalChange;
-            if (!this.IsSnapToTickEnabled)
-            {
-                MoveThumb(this._centerThumb, this._rightButton, change, this.Orientation, out this._direction);
-                this.ReCalculateRangeSelected(false, true, this._direction);
-            }
-            else
-            {
-                Direction localDirection;
-                var currentPoint = Mouse.GetPosition(this._container);
-                if (this.Orientation == Orientation.Horizontal)
-                {
-                    if (currentPoint.X < this._container.ActualWidth && currentPoint.X > this._leftButton.ActualWidth + this._leftThumb.ActualWidth + this._centerThumb.MinWidth)
-                    {
-                        localDirection = currentPoint.X > this._basePoint.X ? Direction.Increase : Direction.Decrease;
-                        this.JumpToNextTick(localDirection, ButtonType.TopRight, change, this.UpperValue, false);
-                    }
-                }
-                else
-                {
-                    if (currentPoint.Y >= 0 && currentPoint.Y < this._container.ActualHeight - (this._leftButton.ActualHeight + this._leftThumb.ActualHeight + this._centerThumb.MinHeight))
-                    {
-                        localDirection = currentPoint.Y < this._basePoint.Y ? Direction.Increase : Direction.Decrease;
-                        this.JumpToNextTick(localDirection, ButtonType.TopRight, -change, this.UpperValue, false);
-                    }
-                }
-
-                this._basePoint = Mouse.GetPosition(this._container);
-            }
-
-            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-            {
-                this._autoToolTip.Content = this.GetToolTipNumber(this.UpperValue);
-                this.RelocateAutoToolTip();
-            }
-
-            e.RoutedEvent = UpperThumbDragDeltaEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void RightThumbDragComplete(object sender, DragCompletedEventArgs e)
-        {
-            if (this._autoToolTip != null)
-            {
-                this._autoToolTip.IsOpen = false;
-                this._autoToolTip = null;
-            }
-
-            e.RoutedEvent = UpperThumbDragCompletedEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void CenterThumbDragStarted(object sender, DragStartedEventArgs e)
-        {
-            this._isMoved = true;
-            if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-            {
-                if (this._autoToolTip == null)
-                {
-                    this._autoToolTip = new ToolTip();
-                    this._autoToolTip.Placement = PlacementMode.Custom;
-                    this._autoToolTip.CustomPopupPlacementCallback = this.PopupPlacementCallback;
-                }
-
-                var autoToolTipRangeValuesTemplate = this.AutoToolTipRangeValuesTemplate;
-                this._autoToolTip.SetValue(ContentControl.ContentTemplateProperty, autoToolTipRangeValuesTemplate);
-                if (autoToolTipRangeValuesTemplate != null)
-                {
-                    this._autoToolTip.Content = new RangeSliderAutoTooltipValues(this);
-                }
-                else
-                {
-                    this._autoToolTip.Content = this.GetToolTipNumber(this.LowerValue) + " - " + this.GetToolTipNumber(this.UpperValue);
-                }
-
-                this._autoToolTip.PlacementTarget = this._centerThumb;
-                this._autoToolTip.IsOpen = true;
-            }
-
-            this._basePoint = Mouse.GetPosition(this._container);
-            e.RoutedEvent = CentralThumbDragStartedEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void CenterThumbDragDelta(object sender, DragDeltaEventArgs e)
-        {
-            if (!this._centerThumbBlocked)
-            {
-                var change = this.Orientation == Orientation.Horizontal ? e.HorizontalChange : e.VerticalChange;
-                if (!this.IsSnapToTickEnabled)
-                {
-                    MoveThumb(this._leftButton, this._rightButton, change, this.Orientation, out this._direction);
-                    this.ReCalculateRangeSelected(true, true, this._direction);
-                }
-                else
-                {
-                    Direction localDirection;
-                    var currentPoint = Mouse.GetPosition(this._container);
-                    if (this.Orientation == Orientation.Horizontal)
-                    {
-                        if (currentPoint.X >= 0 && currentPoint.X < this._container.ActualWidth)
-                        {
-                            localDirection = currentPoint.X > this._basePoint.X ? Direction.Increase : Direction.Decrease;
-                            this.JumpToNextTick(localDirection, ButtonType.Both, change, localDirection == Direction.Increase ? this.UpperValue : this.LowerValue, false);
-                        }
-                    }
-                    else
-                    {
-                        if (currentPoint.Y >= 0 && currentPoint.Y < this._container.ActualHeight)
-                        {
-                            localDirection = currentPoint.Y < this._basePoint.Y ? Direction.Increase : Direction.Decrease;
-                            this.JumpToNextTick(localDirection, ButtonType.Both, -change, localDirection == Direction.Increase ? this.UpperValue : this.LowerValue, false);
-                        }
-                    }
-                }
-
-                this._basePoint = Mouse.GetPosition(this._container);
-                if (this.AutoToolTipPlacement != AutoToolTipPlacement.None)
-                {
-                    if (this._autoToolTip.ContentTemplate != null)
-                    {
-                        (this._autoToolTip.Content as RangeSliderAutoTooltipValues)?.UpdateValues(this);
-                    }
-                    else
-                    {
-                        this._autoToolTip.Content = this.GetToolTipNumber(this.LowerValue) + " - " + this.GetToolTipNumber(this.UpperValue);
-                    }
-
-                    this.RelocateAutoToolTip();
-                }
-            }
-
-            e.RoutedEvent = CentralThumbDragDeltaEvent;
-            this.RaiseEvent(e);
-        }
-
-        private void CenterThumbDragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            if (this._autoToolTip != null)
-            {
-                this._autoToolTip.IsOpen = false;
-                this._autoToolTip = null;
-            }
-
-            e.RoutedEvent = CentralThumbDragCompletedEvent;
-            this.RaiseEvent(e);
-        }
-        */
         #endregion
 
         #region Helper methods
@@ -2038,6 +1554,11 @@ namespace Te.Citadel.UI.Controls
             return this.ApproximatelyEquals(Math.Abs(val - Math.Round(val)), 0);
         }
 
+        internal string GetToolTipInformation()
+        {
+            return DateTime.Now.ToShortTimeString();
+        }
+
         internal string GetToolTipNumber(double value)
         {
             var numberFormatInfo = (NumberFormatInfo)NumberFormatInfo.CurrentInfo.Clone();
@@ -2053,22 +1574,23 @@ namespace Te.Citadel.UI.Controls
                 case AutoToolTipPlacement.TopLeft:
                     if (this.Orientation == Orientation.Horizontal)
                     {
+                        Console.WriteLine("CustomPopup thingy {0} {1} {2} {3}", targetSize.Width, popupSize.Width, targetSize.Height, popupSize.Height);
                         // Place popup at top of thumb
-                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, -popupSize.Height), PopupPrimaryAxis.Horizontal) };
+                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, -popupSize.Height - 5), PopupPrimaryAxis.Horizontal) };
                     }
 
                     // Place popup at left of thumb 
-                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(-popupSize.Width, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
+                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(-popupSize.Width - 5, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
 
                 case AutoToolTipPlacement.BottomRight:
                     if (this.Orientation == Orientation.Horizontal)
                     {
                         // Place popup at bottom of thumb 
-                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, targetSize.Height), PopupPrimaryAxis.Horizontal) };
+                        return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point((targetSize.Width - popupSize.Width) * 0.5, targetSize.Height + 5), PopupPrimaryAxis.Horizontal) };
                     }
 
                     // Place popup at right of thumb 
-                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(targetSize.Width, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
+                    return new CustomPopupPlacement[] { new CustomPopupPlacement(new Point(targetSize.Width + 5, (targetSize.Height - popupSize.Height) * 0.5), PopupPrimaryAxis.Vertical) };
 
                 default:
                     return new CustomPopupPlacement[] { };

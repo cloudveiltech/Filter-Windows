@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.ServiceProcess;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using murrayju.ProcessExtensions;
 
 namespace InstallerCustomActions
 {
@@ -38,7 +39,7 @@ namespace InstallerCustomActions
             session.Log($"Main folder = {mainFolder}");
 
             Directory.SetCurrentDirectory(mainFolder);
-            Process.Start(Path.Combine(mainFolder, "CloudVeil.exe"));
+
             var filterServiceAssemblyPath = Path.Combine(mainFolder, "FilterServiceProvider.exe");
 
             // TODO: Not sure if uninstall command is needed any more? Seems like there was a conversation about this not being needed anymore.
@@ -68,6 +69,10 @@ namespace InstallerCustomActions
             }
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
+
+            // Wait until after service is started to start GUI so that we don't get a UAC prompt from FilterAgent.Windows.
+            string appPath = Path.Combine(mainFolder, "CloudVeil.exe");
+            ProcessExtensions.StartProcessAsCurrentUser(appPath, null, mainFolder, true);
 
             return ActionResult.Success;
         }

@@ -41,10 +41,14 @@ namespace Citadel.IPC
         /// <param name="msg">
         /// The client message. 
         /// </param>
-        public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg)
+        public RelaxedPolicyEventArgs(RelaxedPolicyMessage msg) : this(msg.Command, msg.Passcode)
         {
-            Command = msg.Command;
-            Passcode = msg.Passcode;
+        }
+
+        public RelaxedPolicyEventArgs(RelaxedPolicyCommand command, string passcode)
+        {
+            Command = command;
+            Passcode = passcode;
         }
     }
 
@@ -535,10 +539,10 @@ namespace Citadel.IPC
         /// The relaxed policy command which caused this notification to happen.
         /// If == RelaxedPolicyCommand.Info, ignore.
         /// </param>
-        public void NotifyRelaxedPolicyChange(int numPoliciesAvailable, TimeSpan policyDuration, RelaxedPolicyStatus status)
+        public void NotifyRelaxedPolicyChange(int numPoliciesAvailable, TimeSpan policyDuration, RelaxedPolicyStatus status, string bypassMessage = null)
         {
             var nfo = new RelaxedPolicyInfo(policyDuration, numPoliciesAvailable, status);
-            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Info, nfo);
+            var msg = new RelaxedPolicyMessage(RelaxedPolicyCommand.Info, null, bypassMessage, nfo);
             PushMessage(msg);
         }
 

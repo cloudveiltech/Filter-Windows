@@ -44,6 +44,7 @@
         <TextBlock Grid.Row="2"
                    Grid.Column="0"
                    Grid.ColumnSpan="3"
+                   TextWrapping="Wrap"
                    Text="{Binding FinishedMessage}"/>
 
         <Button Style="{StaticResource SquareButtonStyle}"
