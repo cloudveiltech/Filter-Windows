@@ -202,6 +202,26 @@ namespace CitadelService.Services
         /// </summary>
         private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Constant for port 80 TCP HTTP
+        /// </summary>
+        private readonly ushort m_httpStandardPort;
+
+        /// <summary>
+        /// Constant for port 443 TCP HTTPS
+        /// </summary>
+        private readonly ushort m_httpsStandardPort;
+
+        /// <summary>
+        /// Constant for port 8080 TCP HTTP
+        /// </summary>
+        private readonly ushort m_httpAltPort;
+
+        /// <summary>
+        /// Constant for port 8443 TCP HTTPS
+        /// </summary>
+        private readonly ushort m_httpsAltPort;
+
 #endregion FilteringEngineVars
 
         private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
@@ -297,6 +317,21 @@ namespace CitadelService.Services
             Citadel.Core.Windows.Platform.Init();
 
             m_provider = new CommonFilterServiceProvider(OnExtension);
+
+            if (BitConverter.IsLittleEndian)
+            {
+                m_httpAltPort = (ushort)IPAddress.HostToNetworkOrder((short)8080);
+                m_httpsAltPort = (ushort)IPAddress.HostToNetworkOrder((short)8443);
+                m_httpsStandardPort = (ushort)IPAddress.HostToNetworkOrder((short)443);
+                m_httpStandardPort = (ushort)IPAddress.HostToNetworkOrder((short)80);
+            }
+            else
+            {
+                m_httpAltPort = ((ushort)8080);
+                m_httpsAltPort = ((ushort)8443);
+                m_httpsStandardPort = ((ushort)443);
+                m_httpStandardPort = ((ushort)80);
+            }
         }
 
         const string SystemAccountIdentifier = "S-1-5-18";
@@ -421,8 +456,16 @@ namespace CitadelService.Services
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }
 
-#region EngineCallbacks
-        private AppListCheck appListCheck;
+        private bool IsStandardHttpPort(ushort port)
+        {
+            return port == m_httpStandardPort ||
+                port == m_httpsStandardPort ||
+                port == m_httpAltPort ||
+                port == m_httpsAltPort;
+        }
+
+    #region EngineCallbacks
+    private AppListCheck appListCheck;
 
         /// <summary>
         /// Called whenever the Engine want's to check if the application at the supplied absolute
@@ -437,6 +480,11 @@ namespace CitadelService.Services
         /// </returns>
         public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
         {
+            if(!IsStandardHttpPort(request.RemotePort))
+            {
+                return new FirewallResponse(FirewallAction.DontFilterApplication, null);
+            }
+
             if(appListCheck == null && m_provider.PolicyConfiguration != null)
             {
                 appListCheck = new AppListCheck(m_provider.PolicyConfiguration);
