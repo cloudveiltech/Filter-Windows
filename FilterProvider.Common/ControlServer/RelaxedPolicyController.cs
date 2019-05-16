@@ -36,7 +36,7 @@ namespace FilterProvider.Common.ControlServer
         public Task<bool> GetRelaxedPolicyInformation()
         {
             BypassInformation info = relaxedPolicy.GetInfo();
-            return this.JsonResponseAsync(info);
+            return HttpContext.JsonResponseAsync(info);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace FilterProvider.Common.ControlServer
         [WebApiHandler(HttpVerbs.Post, "/api/relaxedpolicy")]
         public async Task<bool> RequestRelaxedPolicy()
         {
-            var data = await this.ParseJsonAsync<RelaxedPolicyPostBody>();
+            var data = await HttpContext.ParseJsonAsync<RelaxedPolicyPostBody>();
 
             string bypassNotification = null;
             bool ret = relaxedPolicy.RequestRelaxedPolicy(data.passcode, out bypassNotification);
@@ -62,7 +62,7 @@ namespace FilterProvider.Common.ControlServer
                 Response.StatusCode = 401;
             }
 
-            return await this.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = bypassNotification });
+            return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = bypassNotification });
         }
     }
 }

@@ -28,6 +28,6 @@ namespace CloudVeilGUI.Platform.Common
 
         void DisplayAlert(string title, string message, string okButton);
 
-        void ShowCertificateErrorsScreen();
+        //void ShowCertificateErrorsScreen();
     }
 }
