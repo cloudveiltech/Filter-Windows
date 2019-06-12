@@ -638,10 +638,27 @@ namespace CloudVeilInstallerUI.ViewModels
                 string message = null;
                 bool needsRestart = false;
 
-                if(installType == CVInstallType.Uninstall && failedPackageId == "CloudVeilForWindows")
+                message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {(uint)e.Status:x}. Please restart your computer and try again. If the issue persists, please contact support.";
+
+                if ((installType == CVInstallType.Update || installType == CVInstallType.Uninstall) && failedPackageId == "CloudVeilForWindows")
                 {
-                    message = $"InstallGuard has blocked removal of CloudVeil for Windows. Please deactivate the filter before trying again.";
-                    // TODO: We need to be able to check this stuff for certain.
+                    bool isRunning = false;
+
+                    // Search for FilterServiceProvider in the list of processes.
+                    foreach(Process p in Process.GetProcesses())
+                    {
+                        
+                        if(p.ProcessName.StartsWith("FilterServiceProvider"))
+                        {
+                            isRunning = true;
+                            break;
+                        }
+                    }
+
+                    if(isRunning)
+                    {
+                        message = $"InstallGuard has blocked removal of CloudVeil for Windows. Please deactivate the filter before trying again.";
+                    }
                 }
                 else if(e.Status == ApplyStatus.FAIL_NOACTION_REBOOT)
                 {
@@ -657,7 +674,6 @@ namespace CloudVeilInstallerUI.ViewModels
                 }
                 else
                 {
-                    message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {e.Status}. Please restart your computer and try again. If the issue persists, please contact support.";
                 }
 
                 TriggerFailed(message, null, needsRestart);
