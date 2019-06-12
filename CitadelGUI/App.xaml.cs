@@ -710,6 +710,13 @@ namespace CloudVeil.Windows
                         {
                             viewModel.SelfModerationSites.Add(site);
                         }
+
+                        viewModel.TriggerBlacklist.Clear();
+
+                        foreach (string site in cfg.CustomTriggerBlacklist)
+                        {
+                            viewModel.TriggerBlacklist.Add(site);
+                        }
                     });
 
                     m_mainWindow.Dispatcher.InvokeAsync(() =>

@@ -23,6 +23,7 @@ namespace Citadel.IPC
         InternetAccessible,
         AdministratorStart,
         CollectComputerInfo,
-        ActivationIdentifier
+        ActivationIdentifier,
+        AddCustomTextTrigger
     }
 }

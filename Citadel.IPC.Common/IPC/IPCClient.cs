@@ -441,6 +441,11 @@ namespace Citadel.IPC
             return Request(IpcCall.AddSelfModeratedSite, site);
         }
 
+        public ReplyHandlerClass RequestAddCustomTrigger(string trigger)
+        {
+            return Request(IpcCall.AddCustomTextTrigger, trigger);
+        }
+
         public void TrustCertificate(string host, string certificateHash)
         {
             var msg = new CertificateExemptionMessage(host, certificateHash, true);

@@ -355,16 +355,26 @@ namespace FilterProvider.Common.Configuration
                                                 if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                                 {
                                                     using (var unencrypted = listEntry.Open())
-                                                    using (var listStream = RulesetEncryption.DecryptionStream(unencrypted))
                                                     {
-                                                        var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
-                                                        m_textTriggers.FinalizeForRead();
-
-                                                        totalTriggersLoaded += (uint)triggersLoaded;
-
-                                                        if (triggersLoaded > 0)
+                                                        try
                                                         {
-                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                            using (var listStream = RulesetEncryption.DecryptionStream(unencrypted))
+                                                            {
+                                                                var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
+                                                                m_textTriggers.FinalizeForRead();
+
+                                                                totalTriggersLoaded += (uint)triggersLoaded;
+
+                                                                if (triggersLoaded > 0)
+                                                                {
+                                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                                }
+
+                                                                while (listStream.ReadByte() != -1) { }
+                                                            }
+                                                        } catch(Exception ex)
+                                                        {
+                                                            m_logger.Info("Error occurred on decryption stream. {0}", ex);
                                                         }
                                                     }
                                                 }

@@ -218,6 +218,16 @@ namespace Filter.Platform.Common.Data.Models
         /// </summary>
         public List<string> SelfModeration { get; set; } = new List<string>();
 
+        /// <summary>
+        /// List of all sites that the user wants allowed on their devices.
+        /// </summary>
+        public List<string> CustomWhitelist { get; set; } = new List<string>();
+
+        /// <summary>
+        /// List of all text triggers that the user wants blocked on their devices.
+        /// </summary>
+        public List<string> CustomTriggerBlacklist { get; set; } = new List<string>();
+
         public Dictionary<string, TimeRestrictionModel> TimeRestrictions = new Dictionary<string, TimeRestrictionModel>();
 
         /// <summary>

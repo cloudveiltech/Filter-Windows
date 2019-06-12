@@ -604,6 +604,43 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.RelaxedPolicyRequested = m_relaxedPolicy.OnRelaxedPolicyRequested;
 
+                m_ipcServer.RegisterRequestHandler(IpcCall.AddCustomTextTrigger, (message) =>
+                {
+                    string trigger = message.DataObject as string;
+                    if (trigger == null) return false;
+
+                    HttpStatusCode code;
+                    bool responseReceived;
+
+                    byte[] responseBytes = WebServiceUtil.Default.RequestResource(ServiceResource.AddSelfModerationEntry, out code, out responseReceived, new WebServiceUtil.ResourceOptions()
+                    {
+                        Parameters = new Dictionary<string, object>()
+                        {
+                            { "url", trigger },
+                            { "list_type", "triggerBlacklist" }
+                        }
+                    });
+
+                    if(responseReceived && code == HttpStatusCode.NoContent)
+                    {
+                        m_logger.Info("Added custom text trigger {0}", trigger);
+
+                        if(m_policyConfiguration?.Configuration != null)
+                        {
+                            m_policyConfiguration.Configuration.CustomTriggerBlacklist.Add(trigger);
+                            m_policyConfiguration.LoadLists();
+
+                            message.SendReply(m_ipcServer, IpcCall.AddCustomTextTrigger, m_policyConfiguration.Configuration.CustomTriggerBlacklist);
+                        }
+                    }
+                    else
+                    {
+                        m_logger.Error("Failed to add custom text trigger site");
+                    }
+
+                    return true;
+                });
+
                 m_ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
                 {
                     string site = message.DataObject as string;

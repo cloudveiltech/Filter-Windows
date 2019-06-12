@@ -349,37 +349,73 @@ namespace FilterProvider.Common.Configuration
             }
 
             bool responseReceived;
-            byte[] jsonBytes = WebServiceUtil.Default.GetFilterLists(listsToFetch, out code, out responseReceived);
+            byte[] listBytes = WebServiceUtil.Default.GetFilterLists(listsToFetch, out code, out responseReceived);
 
-            if (jsonBytes != null)
+            if (listBytes != null)
             {
-                Dictionary<string, string> rulesets = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(jsonBytes));
+                Dictionary<string, string> rulesets = new Dictionary<string, string>();
 
-                if(rulesets != null)
+                using (MemoryStream ms = new MemoryStream(listBytes))
+                using (StreamReader reader = new StreamReader(ms))
                 {
-                    foreach (KeyValuePair<string, string> info in rulesets)
+                    string currentList = null;
+                    bool errorList = false;
+
+                    StringBuilder fileBuilder = new StringBuilder();
+
+                    string line = null;
+                    while((line = reader.ReadLine()) != null)
                     {
-                        if (info.Value == "304") { continue; }
-                        if (info.Value == "404")
+                        if(string.IsNullOrWhiteSpace(line))
                         {
-                            m_logger.Error($"404 Error was returned for category {info.Key}");
                             continue;
                         }
 
-                        try
+                        if(line.Contains("--startlist"))
                         {
-                            m_logger.Info("Writing list information for {0}", getListFilePath(info.Key));
+                            m_logger.Info("Processing list {0}", line);
 
-                            byte[] fileBytes = Encoding.UTF8.GetBytes(info.Value);
-                            using (FileStream stream = new FileStream(getListFilePath(info.Key), FileMode.Create))
-                            using (CryptoStream cs = RulesetEncryption.EncryptionStream(stream))
+                            currentList = line.Substring("--startlist".Length).TrimStart();
+                        }
+                        else if(line.StartsWith("--endlist"))
+                        {
+                            if(errorList)
                             {
-                                cs.Write(fileBytes, 0, fileBytes.Length);
+                                errorList = false;
+                            }
+                            else
+                            {
+                                rulesets[currentList] = fileBuilder.ToString();
+                                fileBuilder.Clear();
+                                
+                                try
+                                {
+                                    m_logger.Info("Writing list information for {0}", getListFilePath(currentList));
+
+                                    byte[] fileBytes = Encoding.UTF8.GetBytes(rulesets[currentList]);
+                                    using (FileStream stream = new FileStream(getListFilePath(currentList), FileMode.Create))
+                                    using (CryptoStream cs = RulesetEncryption.EncryptionStream(stream))
+                                    {
+                                        cs.Write(fileBytes, 0, fileBytes.Length);
+
+                                        cs.FlushFinalBlock();
+                                    }
+                                }
+                                catch(Exception ex)
+                                {
+                                    m_logger.Error($"Failed to write to rule path {getListFilePath(currentList)} {ex}");
+                                }
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            m_logger.Error( $"Failed to write to rule path {getListFilePath(info.Key)} {ex}");
+                            if(line == "http-result 404")
+                            {
+                                m_logger.Error($"404 Error was returned for category {currentList}");
+                                errorList = true;
+                                continue;
+                            }
+                            fileBuilder.AppendLine(line);
                         }
                     }
                 }
@@ -443,15 +479,24 @@ namespace FilterProvider.Common.Configuration
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
                                         {
                                             using (var encryptedStream = File.OpenRead(rulesetPath))
-                                            using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
                                             {
-                                                var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
-                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                if (loadedFailedRes.Item1 > 0)
+                                                try
                                                 {
-                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                    using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
+                                                    {
+                                                        var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
+                                                        totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                                                        totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+
+                                                        if (loadedFailedRes.Item1 > 0)
+                                                        {
+                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                        }
+                                                    }
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    m_logger.Info("CRIPPLED: {0}", ex);
                                                 }
                                             }
                                         }
@@ -492,14 +537,21 @@ namespace FilterProvider.Common.Configuration
                                             using (var encryptedStream = File.OpenRead(rulesetPath))
                                             using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
                                             {
-                                                var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
-                                                m_textTriggers.FinalizeForRead();
-
-                                                totalTriggersLoaded += (uint)triggersLoaded;
-
-                                                if (triggersLoaded > 0)
+                                                try
                                                 {
-                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                    var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
+                                                    m_textTriggers.FinalizeForRead();
+
+                                                    totalTriggersLoaded += (uint)triggersLoaded;
+
+                                                    if (triggersLoaded > 0)
+                                                    {
+                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                    }
+                                                }
+                                                catch(Exception ex)
+                                                {
+                                                    m_logger.Info("Error on LoadStoresFromStream {0}", ex);
                                                 }
                                             }
                                         }
@@ -537,6 +589,69 @@ namespace FilterProvider.Common.Configuration
                                         GC.Collect();
                                     }
                                     break;
+                            }
+                        }
+                    }
+
+                    if(Configuration != null && Configuration.CustomTriggerBlacklist != null && Configuration.CustomTriggerBlacklist.Count > 0)
+                    {
+                        List<string> triggerBlacklist = new List<string>();
+
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            StreamWriter writer = new StreamWriter(ms);
+                            foreach(var trigger in triggerBlacklist)
+                            {
+                                writer.WriteLine(trigger);
+                            }
+
+                            ms.Seek(0, SeekOrigin.Begin);
+
+                            MappedFilterListCategoryModel categoryModel = null;
+
+                            // Always load triggers as blacklists.
+                            if (TryFetchOrCreateCategoryMap("/user/trigger_blacklist", out categoryModel))
+                            {
+                                var triggersLoaded = m_textTriggers.LoadStoreFromStream(ms, categoryModel.CategoryId).Result;
+                                m_textTriggers.FinalizeForRead();
+
+                                totalTriggersLoaded += (uint)triggersLoaded;
+
+                                if (triggersLoaded > 0)
+                                {
+                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                }
+                            }
+                        }
+                    }
+
+                    if(Configuration != null && Configuration.CustomWhitelist != null && Configuration.CustomWhitelist.Count > 0)
+                    {
+                        List<string> sanitizedCustomWhitelist = new List<string>();
+
+                        // As we are importing directly into an Adblock Plus-style rule engine, we need to make sure
+                        // that the user can't whitelist sites by adding something with a "@@" in front of it.
+
+                        // The easiest way to do this is to limit the characters to 'safe' characters.
+                        Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
+                        foreach(string site in Configuration.CustomWhitelist)
+                        {
+                            if(isCleanRule.IsMatch(site))
+                            {
+                                sanitizedCustomWhitelist.Add("@@" + site);
+                            }
+                        }
+
+                        MappedFilterListCategoryModel categoryModel = null;
+                        if(TryFetchOrCreateCategoryMap("/user/custom_whitelist", out categoryModel))
+                        {
+                            var loadedFailedRes = m_filterCollection.ParseStoreRules(sanitizedCustomWhitelist.ToArray(), categoryModel.CategoryId).Result;
+                            totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
+                            totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
+
+                            if (loadedFailedRes.Item1 > 0)
+                            {
+                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
                         }
                     }

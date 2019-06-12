@@ -36,6 +36,18 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private string newTrigger;
+        public string NewTrigger
+        {
+            get => newTrigger;
+
+            set
+            {
+                newTrigger = value;
+                RaisePropertyChanged(nameof(NewTrigger));
+            }
+        }
+
         private ObservableCollection<string> selfModerationSites = new ObservableCollection<string>();
         public ObservableCollection<string> SelfModerationSites
         {
@@ -48,6 +60,17 @@ namespace Te.Citadel.UI.ViewModels
             {
                 selfModerationSites = value;
                 RaisePropertyChanged(nameof(SelfModerationSites));
+            }
+        }
+
+        private ObservableCollection<string> triggerBlacklist = new ObservableCollection<string>();
+        public ObservableCollection<string> TriggerBlacklist
+        {
+            get => triggerBlacklist;
+            set
+            {
+                triggerBlacklist = value;
+                RaisePropertyChanged(nameof(TriggerBlacklist));
             }
         }
 

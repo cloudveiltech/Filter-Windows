@@ -27,8 +27,9 @@ namespace FilterProvider.Common.Util
                 RijndaelManaged rijndael = new RijndaelManaged();
                 rijndael.IV = CompileSecrets.ListEncryptionInitVector;
                 rijndael.Key = CompileSecrets.ListEncryptionKey;
+                rijndael.Padding = PaddingMode.PKCS7;
 
-                ICryptoTransform decryptor = rijndael.CreateDecryptor(rijndael.Key, rijndael.IV);
+                ICryptoTransform decryptor = rijndael.CreateDecryptor(CompileSecrets.ListEncryptionKey, rijndael.IV);
 
                 CryptoStream cs = new CryptoStream(stream, decryptor, CryptoStreamMode.Read);
                 return cs;
@@ -47,8 +48,9 @@ namespace FilterProvider.Common.Util
                 RijndaelManaged rijndael = new RijndaelManaged();
                 rijndael.IV = CompileSecrets.ListEncryptionInitVector;
                 rijndael.Key = CompileSecrets.ListEncryptionKey;
+                rijndael.Padding = PaddingMode.PKCS7;
 
-                ICryptoTransform encryptor = rijndael.CreateEncryptor(rijndael.Key, rijndael.IV);
+                ICryptoTransform encryptor = rijndael.CreateEncryptor(CompileSecrets.ListEncryptionKey, rijndael.IV);
 
                 CryptoStream cs = new CryptoStream(stream, encryptor, CryptoStreamMode.Write);
                 return cs;
@@ -98,9 +100,16 @@ namespace FilterProvider.Common.Util
             try
             {
                 using (var output = new MemoryStream())
-                using (var cs = EncryptionStream(output))
                 {
-                    cs.Write(textBytes, 0, textBytes.Length);
+                    using (var cs = EncryptionStream(output))
+                    {
+                        cs.Write(textBytes, 0, textBytes.Length);
+
+                        cs.FlushFinalBlock();
+                    }
+
+                    if (output.CanSeek) output.Seek(0, SeekOrigin.Begin);
+
                     return output.ToArray();
                 }
             }
