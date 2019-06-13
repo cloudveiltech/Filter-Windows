@@ -36,5 +36,7 @@ namespace Te.Citadel.UI.Views
 
             NameScope.SetNameScope(contextMenu, NameScope.GetNameScope(this));
         }
+
+        public override ScrollBarVisibility ShouldViewScroll => ScrollBarVisibility.Disabled;
     }
 }

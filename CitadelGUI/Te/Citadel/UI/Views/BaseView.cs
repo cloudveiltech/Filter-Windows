@@ -32,6 +32,8 @@ namespace Te.Citadel.UI.Views
         /// </summary>
         private MetroWindow m_parentWindow = null;
 
+        public virtual ScrollBarVisibility ShouldViewScroll => ScrollBarVisibility.Auto;
+
         /// <summary>
         /// Default constructor. Initializes internal application logging references.
         /// </summary>

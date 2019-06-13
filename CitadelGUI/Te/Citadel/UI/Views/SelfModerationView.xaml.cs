@@ -20,7 +20,7 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class SelfModerationView : UserControl
+    public partial class SelfModerationView : BaseView
     {
         public SelfModerationView()
         {

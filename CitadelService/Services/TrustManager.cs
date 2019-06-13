@@ -132,7 +132,6 @@ namespace CitadelService.Services
             {
                 foreach(var cert in certs)
                 {
-                    m_logger.Info("OS Cert {0}", cert.SubjectName.Decode(X500DistinguishedNameFlags.None));
                     bundleBuilder.Append(cert.ExportToPem());
                     bundleBuilder.Append("\r\n");
                 }
