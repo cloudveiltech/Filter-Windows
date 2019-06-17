@@ -21,7 +21,7 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for TimeRestrictionsView.xaml
     /// </summary>
-    public partial class TimeRestrictionsView : UserControl
+    public partial class TimeRestrictionsView : BaseView
     {
         public TimeRestrictionsView()
         {

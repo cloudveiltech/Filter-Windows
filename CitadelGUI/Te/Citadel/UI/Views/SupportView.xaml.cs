@@ -27,7 +27,7 @@ namespace Te.Citadel.UI.Views
     /// <summary>
     /// Interaction logic for SupportView.xaml
     /// </summary>
-    public partial class SupportView : UserControl
+    public partial class SupportView : BaseView
     {
         public SupportView()
         {

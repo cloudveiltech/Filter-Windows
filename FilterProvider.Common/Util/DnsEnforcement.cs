@@ -62,6 +62,8 @@ namespace FilterProvider.Common.Util
         /// <param name="enableDnsFiltering">If true, this function enables DNS filtering with entries in the configuration.</param>
         public void TryEnforce(bool sendDnsChangeEvents, bool enableDnsFiltering = true)
         {
+            m_logger.Info("TryEnforce DNS {0}, {1}", sendDnsChangeEvents, enableDnsFiltering);
+
             lock (m_dnsEnforcementLock)
             {
                 try
@@ -103,6 +105,7 @@ namespace FilterProvider.Common.Util
                             IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
                         }
 
+                        m_logger.Info("primary,secondary:{0},{1}", primaryDns, secondaryDns);
                         if (primaryDns != null || secondaryDns != null)
                         {
                             bool ranUpdate = m_platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
@@ -196,6 +199,8 @@ namespace FilterProvider.Common.Util
                 IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
             }
 
+            m_logger.Info("Stored DNS in configuration {0}, {1}", primaryDns, secondaryDns);
+
             if (lastPrimary == null && lastSecondary == null && primaryDns == null && secondaryDns == null)
             {
                 // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
@@ -224,6 +229,8 @@ namespace FilterProvider.Common.Util
 
             if (active)
             {
+                m_logger.Info("Active captive portal detected");
+
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
                 OnCaptivePortalMode?.Invoke(true, true);
                 return active;
@@ -231,6 +238,8 @@ namespace FilterProvider.Common.Util
             else
             {
                 bool ret = CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal();
+                m_logger.Info("It looks like we're on a captive portal network, but you have internet access.");
+
                 OnCaptivePortalMode?.Invoke(ret, active);
                 return ret;
             }
@@ -349,6 +358,8 @@ namespace FilterProvider.Common.Util
             CaptivePortalDetected ret = checkCaptivePortalState();
             if (ret == CaptivePortalDetected.NoResponseReturned)
             {
+                m_logger.Info("Captive Portal no response returned.");
+
                 // If no response is returned, this may mean that 
                 // a) the network is still initializing
                 // b) we have no internet.
@@ -408,6 +419,8 @@ namespace FilterProvider.Common.Util
 
         public async void Trigger(bool sendDnsChangeEvents = false)
         {
+            m_logger.Info("Triggering DNS Enforcement Code (sendDnsChangeEvents={0})", sendDnsChangeEvents);
+
             try
             {
                 bool isDnsUp = await IsDnsUp();
@@ -423,6 +436,8 @@ namespace FilterProvider.Common.Util
                 bool isCaptivePortal = await IsBehindCaptivePortal();
 
                 isBehindCaptivePortal = isCaptivePortal;
+                m_logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
+
                 TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
@@ -454,6 +469,8 @@ namespace FilterProvider.Common.Util
 
         public void OnNetworkChange(object sender, EventArgs e)
         {
+            m_logger.Info("Network Change Detected");
+
             if (m_policyConfiguration.Configuration == null)
             {
                 EventHandler fn = null;

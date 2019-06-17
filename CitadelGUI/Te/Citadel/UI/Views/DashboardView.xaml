@@ -4,7 +4,7 @@
     * License, v. 2.0. If a copy of the MPL was not distributed with this
     * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-    <local:BaseView
+<local:BaseView
     x:Class="Te.Citadel.UI.Views.DashboardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -157,12 +157,12 @@
             </ResourceDictionary>
         </UserControl.Resources>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-            <Controls:HamburgerMenu x:Name="MenuControl"
+        <Controls:HamburgerMenu x:Name="MenuControl"
                                 HamburgerVisibility="Visible"
                                 HamburgerWidth="48"
                                 IsPaneOpen="True"
@@ -172,92 +172,70 @@
                                 SelectedIndex="0"
                                 DisplayMode="CompactInline"
                                 VerticalScrollBarOnLeftSide="False">
-                <Controls:HamburgerMenu.ItemsSource>
-                    <Controls:HamburgerMenuItemCollection>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=HistorySolid}" Label="Block History">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:HistoryView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="My Blocked Sites">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:SelfModerationView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=LockClock}" Label="Time Restrictions">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:TimeRestrictionsView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=EyeSettingsOutline}" Label="Relaxed Policy">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:RelaxedPolicyView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=CogSolid}" Label="Advanced">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:AdvancedView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=ToolboxSolid}" Label="Diagnostics">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:DiagnosticsView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=QuestionCircleSolid}" Label="Help &amp; Support">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:SupportView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                    </Controls:HamburgerMenuItemCollection>
-                </Controls:HamburgerMenu.ItemsSource>
+            <Controls:HamburgerMenu.ItemsSource>
+                <Controls:HamburgerMenuItemCollection>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=HistorySolid}" Label="Block History">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:HistoryView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=BanSolid}" Label="My Blocked Sites">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:SelfModerationView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=LockClock}" Label="Time Restrictions">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:TimeRestrictionsView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=EyeSettingsOutline}" Label="Relaxed Policy">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:RelaxedPolicyView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=CogSolid}" Label="Advanced">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:AdvancedView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=ToolboxSolid}" Label="Diagnostics">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:DiagnosticsView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=QuestionCircleSolid}" Label="Help &amp; Support">
+                        <Controls:HamburgerMenuIconItem.Tag>
+                            <local:SupportView />
+                        </Controls:HamburgerMenuIconItem.Tag>
+                    </Controls:HamburgerMenuIconItem>
+                </Controls:HamburgerMenuItemCollection>
+            </Controls:HamburgerMenu.ItemsSource>
 
-                <Controls:HamburgerMenu.ContentTemplate>
-                    <DataTemplate>
-                        <Grid x:Name="ContentGrid">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="48"/>
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Border Grid.Row="0">
-                                <TextBlock x:Name="Header"
+            <Controls:HamburgerMenu.ContentTemplate>
+                <DataTemplate>
+                    <Grid x:Name="ContentGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="48"/>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0">
+                            <TextBlock x:Name="Header"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontSize="24"
                                         Text="{Binding Label}" />
-                            </Border>
-                            <ScrollViewer Grid.Row="1"
+                        </Border>
+                        <ScrollViewer Grid.Row="1"
                                         Focusable="False"
                                         HorizontalScrollBarVisibility="Disabled"
-                                        VerticalScrollBarVisibility="Auto">
-                                <ContentControl Content="{Binding Tag}" Focusable="False" />
-                            </ScrollViewer>
-                        </Grid>
-                    </DataTemplate>
-                </Controls:HamburgerMenu.ContentTemplate>
-            </Controls:HamburgerMenu>
-        </Grid>
-
-        <!--<Grid>
-
-        <Controls:MetroAnimatedSingleRowTabControl x:Name="tabControl">
-
-            <TabItem Header="History">
-                
-            </TabItem>
-
-            <TabItem Header="Settings">
-                
-            </TabItem>
-
-            <TabItem Header="Advanced" Margin="0,0,0,0">
-                
-            </TabItem>
-
-            <TabItem Header="Diagnostics">
-                
-                
-            </TabItem>
-        </Controls:MetroAnimatedSingleRowTabControl>
-    </Grid>-->
-    </local:BaseView>
+                                        CanContentScroll="False"
+                                        VerticalScrollBarVisibility="{Binding Tag.ShouldViewScroll}">
+                            <ContentControl Content="{Binding Tag}" Focusable="False" />
+                        </ScrollViewer>
+                    </Grid>
+                </DataTemplate>
+            </Controls:HamburgerMenu.ContentTemplate>
+        </Controls:HamburgerMenu>
+    </Grid>
+</local:BaseView>
