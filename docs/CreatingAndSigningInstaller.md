@@ -70,40 +70,17 @@ Then checkout the tag by running
 git checkout tags/v.1.6.9
 ```
 
-## Building installers
-Once you've got the latest code pulled down from the server, go ahead and open the solution file in Visual Studio 2017. `(Project Root)\Citadel.sln`
 
-(If this is your first time doing this, you may need to install the .NET targeting pack for 4.6.2)
+## Building and signing installers
 
-On the top bar you'll see options for 'Debug' or 'Release' and 'Any CPU', 'x64' or 'x86'. Let's change them to 'Release' and 'Any CPU' first.
-
-## New instructions
-
+Open Powershell to the project root folder  
 Run `.\build-installer.cmd`
 
-`.\build-installer.cmd` (which wraps `.\build-installer.ps1`) will build both installers for you and output them into `.\Installers\`
+Wait for the command to complete.
 
-## Signing installers
+Once the command is done, the installer bundles will be in `.\Installers\`
 
-### This is currently out of date for 1.7
-
-### Method 1 - SignInstallers project.
-After building both the x86 and x64 installers, right click SignInstallers and click build.
-
-### Method 2 - Manually
-1. Open "Developer Command Prompt for VS 2017" `Start Menu > Visual Studio 2017`
-2. Go to wherever the installer was built with `cd` on the command prompt. (i.e. `cd C:\git\Citadel-Windows\Installers\Setup x64\bin\Release`)
-
-With the certificate USB drive plugged in, all you should need to do is run
-```
-signtool.exe sign /a <Installer Name>.msi
-```
-
-Note that you'll need to run this once for both the x86 and the x64 installer.
-```
-Installers/Setup x64/Release/Setup-x64.msi
-Installers/Setup x86/Release/Setup-x86.msi
-```
+If signing has been configured correctly, this should also sign the bundles for you.
 
 ## Verifying signatures
 To verify that the sign tool was successful, run
