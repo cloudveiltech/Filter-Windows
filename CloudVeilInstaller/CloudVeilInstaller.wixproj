@@ -10,6 +10,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>CloudVeilInstaller-$(MsiPlatform)</OutputName>
     <OutputType>Bundle</OutputType>
+    <SignOutput>true</SignOutput>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>

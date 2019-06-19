@@ -97,7 +97,7 @@ signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$co
 
 $version = & $wixVerifyPath get $product64 wix.product.version
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build,SignBundleEngine,SignBundle
 # signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $bundle86
 
 $finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x86.exe"
@@ -105,8 +105,8 @@ $final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx86.msi"
 Copy-Item $bundle86 -Destination $finalBundle86
 Copy-Item $output86 -Destination $final86
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $bundle64
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build,SignBundleEngine,SignBundle
+# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $bundle64
 
 $finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x64.exe"
 $final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx64.msi"
