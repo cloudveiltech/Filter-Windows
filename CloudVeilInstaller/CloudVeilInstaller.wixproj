@@ -51,4 +51,21 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
+
+  <Target Name="UsesFrameworkSdk">
+    <GetFrameworkSdkPath>
+      <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
+    </GetFrameworkSdkPath>
+  </Target>
+  <Target Name="UsesSignTool" DependsOnTargets="UsesFrameworkSdk">
+    <PropertyGroup>
+      <SignToolPath Condition="'@(SignToolPath)'==''">$(FrameworkSdkPath)bin\signtool.exe</SignToolPath>
+    </PropertyGroup>
+  </Target>
+  <Target Name="SignBundleEngine" DependsOnTargets="UsesSignTool">
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot;CloudVeil for Windows Setup&quot; /tr http://timestamp.comodoca.com /a &quot;@(SignBundleEngine)&quot;" />
+  </Target>
+  <Target Name="SignBundle" DependsOnTargets="UsesSignTool">
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;@(SignBundle)&quot;" />
+  </Target>
 </Project>
