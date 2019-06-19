@@ -34,6 +34,8 @@ x64/
 x86/
 !WinDivertLibraries/x64
 !WinDivertLibraries/x86
+!Installers/SetupProjects/External/x64
+!Installers/SetupProjects/External/x86
 build/
 bld/
 [Bb]in/
