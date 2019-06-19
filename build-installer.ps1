@@ -49,6 +49,8 @@ foreach ($build in $builds) {
 
     $platform = $build[0]
 
+    & $msbuildPath /Verbosity:minimal /p:Configuartion=$configuration $projPath /t:Restore
+
     if ($platform -eq "Any CPU") {
         & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration $projPath /t:Clean,Build
     } else {
@@ -75,28 +77,28 @@ $output64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\
 $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-x64.exe"
 
 <# Sign executable files x64 #>
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\CloudVeil.exe
+<# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\CloudVeil.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe
+signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe #>
 
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64
+# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64
 
 <# Sign executable files x86 #>
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\CloudVeil.exe
+<# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\CloudVeil.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe
+signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe #>
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
+# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
 
 $version = & $wixVerifyPath get $product64 wix.product.version
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build
-signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $bundle86
+# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $bundle86
 
 $finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x86.exe"
 $final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx86.msi"
