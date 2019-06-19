@@ -19,6 +19,13 @@ Function Find-MsBuild([int] $MaxVersion = 2017)
     throw "Yikes - Unable to find msbuild"
 }
 
+<# Finish this tomorrow
+Function Find-SignTool()
+{
+    $winsdkKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0"
+    If 
+} #>
+
 $configuration = "Release"
 if($Env:CONFIGURATION -eq "Debug") {
     $configuration = "Debug"
@@ -77,19 +84,21 @@ $output64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\
 $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-x64.exe"
 
 <# Sign executable files x64 #>
+<#
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\CloudVeil.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe
-
+#>
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi
-# signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64
 
 <# Sign executable files x86 #>
+<#
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\CloudVeil.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe
 signtool sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe
+#>
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi
