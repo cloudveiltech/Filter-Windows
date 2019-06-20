@@ -316,7 +316,7 @@ namespace CitadelService.Services
 
             Citadel.Core.Windows.Platform.Init();
 
-            m_provider = new CommonFilterServiceProvider(OnExtension);
+            m_provider = new CommonFilterServiceProvider(VersionFunction, OnExtension);
 
             if (BitConverter.IsLittleEndian)
             {
@@ -399,49 +399,64 @@ namespace CitadelService.Services
             }
         }
 
+        private Version VersionFunction(CommonFilterServiceProvider provider)
+        {
+            Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            Version version = AssemblyName.GetAssemblyName(assembly.Location).Version;
+            return version;
+        }
+
         private void OnExtension(CommonFilterServiceProvider provider)
         {
             IPCServer server = provider.IPCServer;
 
             IPathProvider paths = PlatformTypes.New<IPathProvider>();
-            string path = paths.GetPath("rules");
-
-            try
-            { 
-                SetServicePermissions("FilterServiceProvider");
-                SetServicePermissions("Sentinel");
-                SetServicePermissions("Warden");
-            }
-            catch(Exception ex)
-            {
-                m_logger.Warn($"Failed to secure rules path: {ex}");
-            }
 
             Task.Run(async () =>
             {
-                List<ConflictReason> conflicts = ConflictDetection.SearchConflictReason();
-                server.Send<List<ConflictReason>>(IpcCall.ConflictsDetected, conflicts);
+                ConnectivityCheck.Accessible accessible = ConnectivityCheck.Accessible.Yes;
 
-                IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
-
-                ConnectivityCheck.Accessible accessible = agent.CheckConnectivity();
-
-                WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
-                diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
-
-                diverter.Start(0, () =>
+                try
                 {
-                    ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
+                    List<ConflictReason> conflicts = ConflictDetection.SearchConflictReason();
+                    server.Send<List<ConflictReason>>(IpcCall.ConflictsDetected, conflicts);
 
-                    if(accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
+                    IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
+
+                    accessible = agent.CheckConnectivity();
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error(ex, "Failed to check connectivity.");
+                }
+
+                try
+                {
+                    WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
+                    diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
+
+                    diverter.Start(0, () =>
                     {
-                        server.Send<bool>(IpcCall.InternetAccessible, false);
-                    }
-                    else
-                    {
-                        server.Send<bool>(IpcCall.InternetAccessible, true);
-                    }
-                });
+                        m_logger.Info("Diverter was started successfully.");
+
+                        IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
+                        ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
+
+                        if (accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
+                        {
+                            server.Send<bool>(IpcCall.InternetAccessible, false);
+                        }
+                        else
+                        {
+                            server.Send<bool>(IpcCall.InternetAccessible, true);
+                        }
+                    });
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error(ex, "Error occurred while starting the diverter.");
+                }
+                
             });
 
         }

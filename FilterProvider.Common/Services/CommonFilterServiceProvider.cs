@@ -62,6 +62,13 @@ namespace FilterProvider.Common.Services
     public delegate void ExtensionDelegate(CommonFilterServiceProvider provider);
 
     /// <summary>
+    /// This is an optional delegate that the common filter services provider can call to determine the version of the program that is running it.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <returns></returns>
+    public delegate Version VersionDelegate(CommonFilterServiceProvider provider);
+
+    /// <summary>
     /// FilterProvider.Common and CommonFilterServiceProvider are intended to be the cross-platform parts of our filter. You should be able to take FilterProvider.Common and wrap it in
     /// a windows service, a MacOS app bundle, or a Linux executable and have it authenticate against the API, download rules, and filter.
     /// </summary>
@@ -308,15 +315,17 @@ namespace FilterProvider.Common.Services
 
         private ExtensionDelegate m_extensionDelegate;
 
+        private VersionDelegate m_versionDelegate;
         /// <summary>
         /// Default ctor. 
         /// </summary>
-        public CommonFilterServiceProvider(ExtensionDelegate extensionDelegate)
+        public CommonFilterServiceProvider(VersionDelegate versionDelegate, ExtensionDelegate extensionDelegate)
         {
             m_trustManager = PlatformTypes.New<IPlatformTrust>();
             m_platformPaths = PlatformTypes.New<IPathProvider>();
             m_systemServices = PlatformTypes.New<ISystemServices>();
             m_extensionDelegate = extensionDelegate;
+            m_versionDelegate = versionDelegate;
         }
 
         /// <summary>
@@ -363,8 +372,19 @@ namespace FilterProvider.Common.Services
             }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+
+            Version version = null;
+            if(m_versionDelegate != null)
+            {
+                version = m_versionDelegate(this);
+            }
+            else
+            {
+                Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                version = AssemblyName.GetAssemblyName(assembly.Location).Version;
+            }
+
+            appVerStr += " " + version.ToString();
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);
