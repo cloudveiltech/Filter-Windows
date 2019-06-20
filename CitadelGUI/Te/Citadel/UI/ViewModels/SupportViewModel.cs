@@ -4,6 +4,8 @@ using Filter.Platform.Common.Data.Models;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,5 +58,51 @@ namespace Te.Citadel.UI.ViewModels
                 return collectDiagnosticsCommand;
             }
         }
+
+        private RelayCommand viewLogsCommand;
+        public RelayCommand ViewLogsCommand
+        {
+            get
+            {
+                if (viewLogsCommand == null)
+                {
+                    viewLogsCommand = new RelayCommand(() =>
+                    {
+                        // Scan all Nlog log targets
+                        var logDir = string.Empty;
+
+                        var targets = NLog.LogManager.Configuration.AllTargets;
+
+                        foreach (var target in targets)
+                        {
+                            if (target is NLog.Targets.FileTarget)
+                            {
+                                var fTarget = (NLog.Targets.FileTarget)target;
+                                var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
+                                var fName = fTarget.FileName.Render(logEventInfo);
+
+                                if (!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
+                                {
+                                    logDir = Directory.GetParent(fName).FullName;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
+                        {
+                            // Fallback, just in case.
+                            logDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                        }
+
+                        // Call process start with the dir path, explorer will handle it.
+                        Process.Start(logDir);
+                    });
+                }
+
+                return viewLogsCommand;
+            }
+        }
+
     }
 }

@@ -359,50 +359,6 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
-        public RelayCommand ViewLogsCommand
-        {
-            get
-            {
-                if (m_viewLogsCommand == null)
-                {
-                    m_viewLogsCommand = new RelayCommand(() =>
-                    {
-                        // Scan all Nlog log targets
-                        var logDir = string.Empty;
-
-                        var targets = NLog.LogManager.Configuration.AllTargets;
-
-                        foreach (var target in targets)
-                        {
-                            if (target is NLog.Targets.FileTarget)
-                            {
-                                var fTarget = (NLog.Targets.FileTarget)target;
-                                var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
-                                var fName = fTarget.FileName.Render(logEventInfo);
-
-                                if (!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
-                                {
-                                    logDir = Directory.GetParent(fName).FullName;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
-                        {
-                            // Fallback, just in case.
-                            logDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                        }
-
-                        // Call process start with the dir path, explorer will handle it.
-                        Process.Start(logDir);
-                    });
-                }
-
-                return m_viewLogsCommand;
-            }
-        }
-
         /// <summary>
         /// Command to run a deactivation request for the current authenticated user.
         /// </summary>
