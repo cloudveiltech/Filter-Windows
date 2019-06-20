@@ -47,7 +47,11 @@ Function Find-SignTool()
     $win10SDKKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0" -ErrorAction SilentlyContinue
 
     If(!$win10SDKKey) {
-        return ''
+        $win10SDKKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" -ErrorAction SilentlyContinue
+
+        if(!$win10SDKKey) {
+            return ''
+        }
     }
 
     $win10SDKBinPath = $win10SDKKey.InstallationFolder + "bin\"
@@ -84,8 +88,7 @@ if($Env:CONFIGURATION -eq "Debug") {
 $msbuildPath = Find-MsBuild
 $signtoolPath = Find-SignTool
 $useSigntool = Does-SignTool-Have-Certificate $signtoolPath
-echo $useSigntool
-exit
+echo $useSigntoolex
 
 $currentLocation = Get-Location
 
