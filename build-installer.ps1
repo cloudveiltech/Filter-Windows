@@ -22,7 +22,8 @@ Function Find-MsBuild([int] $MaxVersion = 2017)
 <# Finish this tomorrow #>
 Function Find-SignTool()
 {
-    $winsdkKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0"
+    $winsdkKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0" -ErrorAction SilentlyContinue
+
     If (!$winsdkKey -or !$winsdkKey.InstallationFolder) {
         $winsdkKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots"
 
@@ -30,12 +31,20 @@ Function Find-SignTool()
         If (!$winsdkKey.KitsRoot10) { return '' }
 
         $winsdk = $winsdkKey.KitsRoot10
+
+        Write-Host $winsdk
     } Else {
         If(!$winsdkKey.InstallationFolder) { return '' }
         $winsdk = $winsdkKey.InstallationFolder
     }
 
-    $win10SDKKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0"
+    $signtoolWinSDK = $winsdk + "\bin\x86\signtool.exe"
+
+    If(Test-Path $signtoolWinSDK) {
+        return $signtoolWinSDK
+    }
+
+    $win10SDKKey = Get-ItemProperty -Path "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0" -ErrorAction SilentlyContinue
 
     If(!$win10SDKKey) {
         return ''
@@ -45,15 +54,10 @@ Function Find-SignTool()
     $win10SDKVersion = $win10SDKKey.ProductVersion + ".0\"
     $win10SDKVersionBinPath = $win10SDKBinPath + $win10SDKVersion
 
-    $signtool0 = $win10SDKBinPath + "signtool.exe"
-    $signtool1 = $win10SDKVersionBinPath + "signtool.exe"
+    $signtool = $win10SDKVersionBinPath + "x86\signtool.exe"
 
-    if(Test-Path $signtool0) {
-        return $signtool0
-    }
-
-    if(Test-Path $signtool1) {
-        return $signtool1
+    if(Test-Path $signtool) {
+        return $signtool
     }
 
     return ''
@@ -80,6 +84,8 @@ if($Env:CONFIGURATION -eq "Debug") {
 $msbuildPath = Find-MsBuild
 $signtoolPath = Find-SignTool
 $useSigntool = Does-SignTool-Have-Certificate $signtoolPath
+echo $useSigntool
+exit
 
 $currentLocation = Get-Location
 
