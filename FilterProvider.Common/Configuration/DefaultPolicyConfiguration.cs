@@ -373,8 +373,6 @@ namespace FilterProvider.Common.Configuration
 
                         if(line.Contains("--startlist"))
                         {
-                            m_logger.Info("Processing list {0}", line);
-
                             currentList = line.Substring("--startlist".Length).TrimStart();
                         }
                         else if(line.StartsWith("--endlist"))
@@ -390,8 +388,6 @@ namespace FilterProvider.Common.Configuration
                                 
                                 try
                                 {
-                                    m_logger.Info("Writing list information for {0}", getListFilePath(currentList));
-
                                     byte[] fileBytes = Encoding.UTF8.GetBytes(rulesets[currentList]);
                                     using (FileStream stream = new FileStream(getListFilePath(currentList), FileMode.Create))
                                     using (CryptoStream cs = RulesetEncryption.EncryptionStream(stream))

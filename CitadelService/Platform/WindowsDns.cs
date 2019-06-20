@@ -111,8 +111,6 @@ namespace CitadelService.Platform
 
         public bool SetDnsForAllInterfaces(IPAddress primaryDns, IPAddress secondaryDns)
         {
-            m_logger.Info("SetDnsForAllInterfaces {0}, {1}", primaryDns, secondaryDns);
-
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
             bool ranUpdate = false;
 

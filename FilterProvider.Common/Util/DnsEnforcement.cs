@@ -105,7 +105,6 @@ namespace FilterProvider.Common.Util
                             IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
                         }
 
-                        m_logger.Info("primary,secondary:{0},{1}", primaryDns, secondaryDns);
                         if (primaryDns != null || secondaryDns != null)
                         {
                             bool ranUpdate = m_platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
