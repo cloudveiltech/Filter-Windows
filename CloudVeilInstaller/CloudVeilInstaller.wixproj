@@ -68,6 +68,6 @@
     <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot;CloudVeil for Windows Setup&quot; /tr http://timestamp.comodoca.com /a &quot;@(SignBundleEngine)&quot;" />
   </Target>
   <Target Name="SignBundle" DependsOnTargets="UsesSignTool">
-    <Exec Command="&quot;$(SignToolPath)&quot; sign /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;@(SignBundle)&quot;" />
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;@(SignBundle)&quot;" />
   </Target>
 </Project>
