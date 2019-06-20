@@ -132,6 +132,7 @@ $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\Cl
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64
 
 <# Sign executable files x86 #>
 & $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\CloudVeil.exe"
@@ -140,6 +141,7 @@ $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\Cl
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
 
 $version = & $wixVerifyPath get $product64 wix.product.version
 
