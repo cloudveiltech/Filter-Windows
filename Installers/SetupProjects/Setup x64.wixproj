@@ -142,7 +142,7 @@
       <SignToolPath Condition="('@(SignToolPath)'=='') and Exists('$(Win10SDKVerBinPath)x86\signtool.exe')">$(Win10SDKVerBinPath)x86\signtool.exe</SignToolPath>
     </PropertyGroup>
   </Target>
-  <Target Name="SignMsi">
+  <Target Name="SignMsi" DependsOnTargets="UsesSignTool">
     <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;@(SignMsi.FullPath)&quot;" />
   </Target>
   <PropertyGroup>
