@@ -145,6 +145,6 @@
     </PropertyGroup>
   </Target>
   <Target Name="SignMsi" DependsOnTargets="UsesSignTool">
-    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;@(SignMsi.FullPath)&quot;" />
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /tr http://timestamp.comodoca.com /a &quot;%(SignMsi.FullPath)&quot;" />
   </Target>
 </Project>

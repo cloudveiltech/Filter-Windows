@@ -126,17 +126,17 @@ $output64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\
 $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-x64.exe"
 
 <# Sign executable files x64 #>
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\CloudVeil.exe
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\CloudVeil.exe"
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe"
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe"
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi
 
 <# Sign executable files x86 #>
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\CloudVeil.exe
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\CloudVeil.exe"
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe"
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe"
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi
