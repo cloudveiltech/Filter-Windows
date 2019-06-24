@@ -536,7 +536,6 @@ namespace FilterProvider.Common.Configuration
                                                 try
                                                 {
                                                     var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
-                                                    m_textTriggers.FinalizeForRead();
 
                                                     totalTriggersLoaded += (uint)triggersLoaded;
 
@@ -591,33 +590,21 @@ namespace FilterProvider.Common.Configuration
 
                     if(Configuration != null && Configuration.CustomTriggerBlacklist != null && Configuration.CustomTriggerBlacklist.Count > 0)
                     {
-                        List<string> triggerBlacklist = new List<string>();
+                        MappedFilterListCategoryModel categoryModel = null;
 
-                        using (MemoryStream ms = new MemoryStream())
+                        // Always load triggers as blacklists.
+                        if(TryFetchOrCreateCategoryMap("/user/trigger_blacklist", out categoryModel))
                         {
-                            StreamWriter writer = new StreamWriter(ms);
-                            foreach(var trigger in triggerBlacklist)
+                            var triggersLoaded = m_textTriggers.LoadStoreFromList(Configuration.CustomTriggerBlacklist, categoryModel.CategoryId).Result;
+
+                            totalTriggersLoaded += (uint)triggersLoaded;
+
+                            if (triggersLoaded > 0)
                             {
-                                writer.WriteLine(trigger);
+                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
 
-                            ms.Seek(0, SeekOrigin.Begin);
-
-                            MappedFilterListCategoryModel categoryModel = null;
-
-                            // Always load triggers as blacklists.
-                            if (TryFetchOrCreateCategoryMap("/user/trigger_blacklist", out categoryModel))
-                            {
-                                var triggersLoaded = m_textTriggers.LoadStoreFromStream(ms, categoryModel.CategoryId).Result;
-                                m_textTriggers.FinalizeForRead();
-
-                                totalTriggersLoaded += (uint)triggersLoaded;
-
-                                if (triggersLoaded > 0)
-                                {
-                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                }
-                            }
+                            m_logger.Info("Number of triggers loaded for CustomTriggerBlacklist {0}", triggersLoaded);
                         }
                     }
 
@@ -687,6 +674,7 @@ namespace FilterProvider.Common.Configuration
                     m_filterCollection.FinalizeForRead();
                     m_filterCollection.InitializeBloomFilters();
 
+                    m_textTriggers.FinalizeForRead();
                     m_textTriggers.InitializeBloomFilters();
 
                     m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);

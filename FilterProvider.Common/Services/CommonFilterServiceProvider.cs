@@ -371,6 +371,19 @@ namespace FilterProvider.Common.Services
 
             }
 
+            try
+            {
+                IPathProvider paths = PlatformTypes.New<IPathProvider>();
+                DateTime currentDate = DateTime.Now.Date;
+                string dirPath = paths.GetPath("logs");
+
+                GoProxy.Instance.SetProxyLogFile(paths.GetPath("logs", $"proxy-{currentDate.ToString("MM-dd-yyyy")}.log"));
+            }
+            catch (Exception ex)
+            {
+                m_logger.Error(ex, "Unable to set proxy log file.");
+            }
+
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
             Version version = null;
@@ -1624,11 +1637,21 @@ namespace FilterProvider.Common.Services
             m_logger.Info("TIME {0} {1}", timeInfo, message);
         }
 
+        private DateTime? lastCleanupLogDate = null;
+
         private void CleanupLogs()
         {
             try
             {
-                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
+                IPathProvider paths = PlatformTypes.New<IPathProvider>();
+
+                DateTime currentDate = DateTime.Now.Date;
+                if(lastCleanupLogDate == null || currentDate != lastCleanupLogDate.Value)
+                {
+                    GoProxy.Instance.SetProxyLogFile(paths.GetPath("logs", $"proxy-{currentDate.ToString("MM-dd-yyyy")}.log"));
+                }
+
+                string directoryPath = paths.GetPath("logs");
 
                 if (Directory.Exists(directoryPath))
                 {

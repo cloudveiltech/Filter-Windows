@@ -276,6 +276,118 @@ namespace FilterProvider.Common.Data.Filtering
             m_logger.Info($"trigger count = {triggerCount}, first word count = {firstWordCount}");
         }
 
+        private class StoreCommands : IDisposable
+        {
+            SqliteConnection connection;
+
+            SqliteCommand firstWordCommand;
+            SqliteCommand triggerCommand;
+
+            public StoreCommands(SqliteConnection connection)
+            {
+                this.connection = connection;
+
+                firstWordCommand = connection.CreateCommand();
+                triggerCommand = connection.CreateCommand();
+
+                firstWordCommand.CommandText = "INSERT INTO FirstWordIndex VALUES ($firstWord, $isWholeTrigger, $categoryId)";
+                triggerCommand.CommandText = "INSERT INTO TriggerIndex VALUES ($trigger, $categoryId)";
+                var domainParam = new SqliteParameter("$trigger", DbType.String);
+                var categoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
+                triggerCommand.Parameters.Add(domainParam);
+                triggerCommand.Parameters.Add(categoryIdParam);
+
+                var firstWordParam = new SqliteParameter("$firstWord", DbType.String);
+                var isWholeTriggerParam = new SqliteParameter("$isWholeTrigger", DbType.Int16);
+                var firstWordCategoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
+                firstWordCommand.Parameters.Add(firstWordParam);
+                firstWordCommand.Parameters.Add(isWholeTriggerParam);
+                firstWordCommand.Parameters.Add(firstWordCategoryIdParam);
+            }
+
+            public async Task<bool> StoreTrigger(string line, short categoryId)
+            {
+                string trimmedLine = line.Trim();
+                if (trimmedLine.Length > 0)
+                {
+                    List<string> trimmedLineParts = Split(trimmedLine);
+
+                    triggerCommand.Parameters[0].Value = trimmedLine;
+                    triggerCommand.Parameters[1].Value = categoryId;
+
+                    firstWordCommand.Parameters[0].Value = trimmedLineParts.First();
+                    firstWordCommand.Parameters[1].Value = trimmedLineParts.Count == 1;
+                    firstWordCommand.Parameters[2].Value = categoryId;
+
+                    await triggerCommand.ExecuteNonQueryAsync();
+                    await firstWordCommand.ExecuteNonQueryAsync();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            #region IDisposable Support
+            private bool disposedValue = false; // To detect redundant calls
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        firstWordCommand.Dispose();
+                        triggerCommand.Dispose();
+                    }
+
+                    // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                    // TODO: set large fields to null.
+
+                    disposedValue = true;
+                }
+            }
+
+            // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+            // ~StoreCommands() {
+            //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            //   Dispose(false);
+            // }
+
+            // This code added to correctly implement the disposable pattern.
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+                Dispose(true);
+                // TODO: uncomment the following line if the finalizer is overridden above.
+                // GC.SuppressFinalize(this);
+            }
+            #endregion
+        }
+
+        public async Task<int> LoadStoreFromList(IEnumerable<string> inputList, short categoryId)
+        {
+            int loaded = 0;
+            using (var transaction = m_connection.BeginTransaction())
+            {
+                using (var storeCommands = new StoreCommands(m_connection))
+                {
+                    foreach(string line in inputList)
+                    {
+                        if (await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
+                    }
+                }
+
+                transaction.Commit();
+            }
+
+            m_hasTriggers = loaded > 0;
+
+            return loaded;
+        }
+
         /// <summary>
         /// Loads each line read from the supplied stream as a new trigger and stores it.
         /// </summary>
@@ -293,45 +405,14 @@ namespace FilterProvider.Common.Data.Filtering
             int loaded = 0;
             using(var transaction = m_connection.BeginTransaction())
             {
-                using (var cmd = m_connection.CreateCommand())
-                using (var firstWordCommand = m_connection.CreateCommand())
+                using (var storeCommands = new StoreCommands(m_connection))
                 {
-                    firstWordCommand.CommandText = "INSERT INTO FirstWordIndex VALUES ($firstWord, $isWholeTrigger, $categoryId)";
-                    cmd.CommandText = "INSERT INTO TriggerIndex VALUES ($rigger, $categoryId)";
-                    var domainParam = new SqliteParameter("$rigger", DbType.String);
-                    var categoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
-                    cmd.Parameters.Add(domainParam);
-                    cmd.Parameters.Add(categoryIdParam);
-
-                    var firstWordParam = new SqliteParameter("$firstWord", DbType.String);
-                    var isWholeTriggerParam = new SqliteParameter("$isWholeTrigger", DbType.Int16);
-                    var firstWordCategoryIdParam = new SqliteParameter("$categoryId", DbType.Int16);
-                    firstWordCommand.Parameters.Add(firstWordParam);
-                    firstWordCommand.Parameters.Add(isWholeTriggerParam);
-                    firstWordCommand.Parameters.Add(firstWordCategoryIdParam);
-
                     string line = null;
                     using (var sw = new StreamReader(inputStream))
                     {
                         while ((line = await sw.ReadLineAsync()) != null)
                         {
-                            string trimmedLine = line.Trim();
-                            if (trimmedLine.Length > 0)
-                            {
-                                List<string> trimmedLineParts = Split(trimmedLine);
-
-                                cmd.Parameters[0].Value = trimmedLine;
-                                cmd.Parameters[1].Value = categoryId;
-
-                                firstWordCommand.Parameters[0].Value = trimmedLineParts.First();
-                                firstWordCommand.Parameters[1].Value = trimmedLineParts.Count == 1;
-                                firstWordCommand.Parameters[2].Value = categoryId;
-
-                                await cmd.ExecuteNonQueryAsync();
-                                await firstWordCommand.ExecuteNonQueryAsync();
-
-                                ++loaded;
-                            }
+                            if (await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
                         }
                     }
                 }

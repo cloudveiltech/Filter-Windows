@@ -237,7 +237,7 @@ namespace FilterProvider.Common.Util
             else
             {
                 bool ret = CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal();
-                m_logger.Info("It looks like we're on a captive portal network, but you have internet access.");
+                if(ret) m_logger.Info("It looks like we're on a captive portal network, but you have internet access.");
 
                 OnCaptivePortalMode?.Invoke(ret, active);
                 return ret;

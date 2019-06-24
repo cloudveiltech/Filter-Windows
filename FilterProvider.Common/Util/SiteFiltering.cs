@@ -145,8 +145,11 @@ namespace FilterProvider.Common.Util
                 }
 
                 Uri url = new Uri(args.Request.Url);
-
-                if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
+                if(url.AbsoluteUri.StartsWith(CompileSecrets.ServiceProviderApiPath))
+                {
+                    return;
+                }
+                else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
                     nextAction = ProxyNextAction.DropConnection;
 
