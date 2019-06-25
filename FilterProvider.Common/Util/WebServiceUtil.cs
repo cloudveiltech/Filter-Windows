@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using Te.Citadel.Util;
 using Newtonsoft.Json;
 using Filter.Platform.Common.Data.Models;
+using FilterProvider.Common.Platform;
 
 namespace FilterProvider.Common.Util
 {
@@ -564,9 +565,8 @@ namespace FilterProvider.Common.Util
                 var accessToken = WebServiceUtil.Default.AuthToken;
 
                 //m_logger.Info("RequestResource1: accessToken=" + accessToken);
-
-                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                string version = System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+                IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
+                string version = versionProvider.GetApplicationVersion().ToString();
 
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
@@ -583,8 +583,9 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                if (resource == ServiceResource.UserDataSumCheck)
+                if (resource == ServiceResource.UserDataSumCheck || resource == ServiceResource.UserConfigSumCheck)
                 {
+                    m_logger.Info("Sending version {0} to server", version);
                     parameters.Add("app_version", version);
                 }
 
@@ -602,6 +603,11 @@ namespace FilterProvider.Common.Util
                 if (options.Method == "GET" || options.Method == "DELETE")
                 {
                     resourceUri += "?" + postString;
+
+                    if(postString.Contains("app_version"))
+                    {
+                        m_logger.Info("Sending postString as {0}", resourceUri);
+                    }
                 }
 
                 var request = GetApiBaseRequest(resourceUri, options);
@@ -622,6 +628,11 @@ namespace FilterProvider.Common.Util
 
                 if (options.Method != "GET" && options.Method != "DELETE")
                 {
+                    if (postString.Contains("app_version"))
+                    {
+                        m_logger.Info("Sending {0} to server as {1}", postString, options.Method);
+                    }
+
                     var formData = System.Text.Encoding.UTF8.GetBytes(postString);
                     request.ContentLength = formData.Length;
 

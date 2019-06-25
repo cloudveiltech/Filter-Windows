@@ -120,6 +120,7 @@
     <Compile Include="Services\FilterServiceProvider.cs" />
     <Compile Include="Services\ServiceAccessFlags.cs" />
     <Compile Include="Services\TrustManager.cs" />
+    <Compile Include="Services\VersionProvider.cs" />
     <Compile Include="Util\AppListCheck.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />

@@ -315,17 +315,15 @@ namespace FilterProvider.Common.Services
 
         private ExtensionDelegate m_extensionDelegate;
 
-        private VersionDelegate m_versionDelegate;
         /// <summary>
         /// Default ctor. 
         /// </summary>
-        public CommonFilterServiceProvider(VersionDelegate versionDelegate, ExtensionDelegate extensionDelegate)
+        public CommonFilterServiceProvider(ExtensionDelegate extensionDelegate)
         {
             m_trustManager = PlatformTypes.New<IPlatformTrust>();
             m_platformPaths = PlatformTypes.New<IPathProvider>();
             m_systemServices = PlatformTypes.New<ISystemServices>();
             m_extensionDelegate = extensionDelegate;
-            m_versionDelegate = versionDelegate;
         }
 
         /// <summary>
@@ -386,12 +384,10 @@ namespace FilterProvider.Common.Services
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
-            Version version = null;
-            if(m_versionDelegate != null)
-            {
-                version = m_versionDelegate(this);
-            }
-            else
+            IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
+            Version version = versionProvider?.GetApplicationVersion();
+
+            if(version == null)
             {
                 Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 version = AssemblyName.GetAssemblyName(assembly.Location).Version;

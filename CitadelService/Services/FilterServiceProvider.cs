@@ -313,10 +313,11 @@ namespace CitadelService.Services
             PlatformTypes.Register<IWifiManager>((arr) => new WindowsWifiManager());
             PlatformTypes.Register<IPlatformTrust>((arr) => new TrustManager());
             PlatformTypes.Register<ISystemServices>((arr) => new WindowsSystemServices(this));
+            PlatformTypes.Register<IVersionProvider>((arr) => new VersionProvider());
 
             Citadel.Core.Windows.Platform.Init();
 
-            m_provider = new CommonFilterServiceProvider(VersionFunction, OnExtension);
+            m_provider = new CommonFilterServiceProvider(OnExtension);
 
             if (BitConverter.IsLittleEndian)
             {
@@ -397,13 +398,6 @@ namespace CitadelService.Services
                     m_logger.Warn($"Unable to set proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
                 }
             }
-        }
-
-        private Version VersionFunction(CommonFilterServiceProvider provider)
-        {
-            Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            Version version = AssemblyName.GetAssemblyName(assembly.Location).Version;
-            return version;
         }
 
         private void OnExtension(CommonFilterServiceProvider provider)
