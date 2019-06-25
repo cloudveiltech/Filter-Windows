@@ -199,7 +199,7 @@
                             <local:AdvancedView />
                         </Controls:HamburgerMenuIconItem.Tag>
                     </Controls:HamburgerMenuIconItem>
-                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:FontAwesome Kind=ToolboxSolid}" Label="Diagnostics">
+                    <Controls:HamburgerMenuIconItem Icon="{IconPacks:Material Kind=Stethoscope}" Label="Filter Tests">
                         <Controls:HamburgerMenuIconItem.Tag>
                             <local:DiagnosticsView />
                         </Controls:HamburgerMenuIconItem.Tag>

@@ -42,6 +42,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 </TextBlock>
 
                 <TextBlock HorizontalAlignment="Center"
+                           Margin="0,10,0,0"
+                           TextWrapping="Wrap">
+                    <Hyperlink NavigateUri="https://www.cloudveil.org/cv4w-release-notes/" RequestNavigate="OnHyperlinkClicked">
+                        Release Notes
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock HorizontalAlignment="Center"
                        Margin="0,10,0,0"
                        TextWrapping="Wrap">
                 <Hyperlink NavigateUri="mailto:support@cloudveil.org" RequestNavigate="OnHyperlinkClicked">
