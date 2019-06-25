@@ -145,7 +145,9 @@ namespace FilterProvider.Common.Util
                 }
 
                 Uri url = new Uri(args.Request.Url);
-                if(url.AbsoluteUri.StartsWith(CompileSecrets.ServiceProviderApiPath))
+                Uri serviceProviderPath = new Uri(CompileSecrets.ServiceProviderApiPath);
+
+                if(url.Host == serviceProviderPath.Host)
                 {
                     return;
                 }
@@ -355,7 +357,13 @@ namespace FilterProvider.Common.Util
             // try to classify the content of the response payload, if there is any.
             try
             {
-                var uri = new Uri(args.Request.Url);
+                Uri uri = new Uri(args.Request.Url);
+                Uri serviceProviderPath = new Uri(CompileSecrets.ServiceProviderApiPath);
+
+                if(uri.Host == serviceProviderPath.Host)
+                {
+                    return;
+                }
 
                 // Check our certificate exemptions to see if we should allow this site through or not.
                 if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !m_certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
@@ -404,11 +412,17 @@ namespace FilterProvider.Common.Util
 
                         List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
+                        nextAction = ProxyNextAction.DropConnection;
+
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
                             customBlockResponse = m_templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
-                            nextAction = ProxyNextAction.DropConnection;
+                        }
+                        else if (contentType.IndexOf("application/json", StringComparison.InvariantCultureIgnoreCase) != -1)
+                        {
+                            customBlockResponseContentType = "application/json";
+                            customBlockResponse = new byte[0];
                         }
 
                         RequestBlocked?.Invoke(contentClassResult, blockType, new Uri(args.Request.Url), "");
