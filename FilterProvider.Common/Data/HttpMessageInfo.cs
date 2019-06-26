@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
+using GoproxyWrapper;
 
 namespace FilterProvider.Common.Data
 {

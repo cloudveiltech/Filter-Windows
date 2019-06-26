@@ -66,6 +66,7 @@ namespace FilterProvider.Common.Util
         private NLog.Logger m_logger;
 
         private SqliteConnection m_connection;
+        private object m_connectionLock = new object();
 
         private SqliteConnection openConnection(string dbPath)
         {
@@ -120,6 +121,9 @@ namespace FilterProvider.Common.Util
         }
 
         public void TrustCertificate(string host, string thumbprint)
+            => TrustCertificateInternal(host, thumbprint, 1);
+
+        private void TrustCertificateInternal(string host, string thumbprint, int triesLeft)
         {
             try
             {
@@ -157,37 +161,82 @@ namespace FilterProvider.Common.Util
             catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
+                if (triesLeft > 0)
+                {
+                    attemptConnectionRecovery();
+                    TrustCertificateInternal(host, thumbprint, triesLeft--);
+                }
             }
         }
 
         public bool IsExempted(string host, X509Certificate2 certificate)
+            => IsExemptedInternal(host, certificate, 1);
+
+        private bool IsExemptedInternal(string host, X509Certificate2 certificate, int triesLeft)
         {
             try
             {
-                using (SqliteCommand command = m_connection.CreateCommand())
+                lock (m_connectionLock)
                 {
-                    command.CommandText = "SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
-                    command.Parameters.Add(new SqliteParameter("$certHash", certificate.GetCertHashString()));
-                    command.Parameters.Add(new SqliteParameter("$host", host));
-
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (SqliteCommand command = m_connection.CreateCommand())
                     {
-                        if (reader.Read())
+                        command.CommandText = "SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
+                        command.Parameters.Add(new SqliteParameter("$certHash", certificate.GetCertHashString()));
+                        command.Parameters.Add(new SqliteParameter("$host", host));
+
+                        using (SqliteDataReader reader = command.ExecuteReader())
                         {
-                            if (isReaderRowCurrentlyExempted(reader))
+                            if (reader.Read())
                             {
-                                return true;
+                                if (isReaderRowCurrentlyExempted(reader))
+                                {
+                                    return true;
+                                }
                             }
                         }
-                    }
 
-                    return false;
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
-                return false;
+
+                if (triesLeft > 0)
+                {
+                    attemptConnectionRecovery();
+                    return IsExemptedInternal(host, certificate, triesLeft--);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        private void attemptConnectionRecovery()
+        {
+            lock (m_connectionLock)
+            {
+                try
+                {
+                    m_connection.Dispose();
+                    m_connection = null;
+                }
+                catch
+                {
+
+                }
+
+                try
+                {
+                    m_connection = openConnection(s_dbPath);
+                }
+                catch (Exception ex)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                }
             }
         }
     }

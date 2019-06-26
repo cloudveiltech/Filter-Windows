@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GoproxyWrapper;
+using Filter.Platform.Common.Util;
 
 namespace FilterProvider.Common.Proxy
 {
@@ -34,9 +35,21 @@ namespace FilterProvider.Common.Proxy
         public event GoProxy.OnBeforeRequest BeforeRequest;
         public event GoProxy.OnBeforeResponse BeforeResponse;
 
-        public void OnBeforeRequest(Session session)
+        public ProxyNextAction OnBeforeRequest(Session session)
         {
-            BeforeRequest?.Invoke(session);
+            ProxyNextAction? nextAction = BeforeRequest?.Invoke(session);
+
+            if (nextAction.HasValue)
+            {
+                LoggerUtil.GetAppWideLogger().Info("ProxyNextAction = {0}", (int)nextAction);
+                return nextAction.Value;
+            }
+            else
+            {
+                LoggerUtil.GetAppWideLogger().Info("ProxyNextAction = (nil)");
+                return ProxyNextAction.AllowAndIgnoreContent;
+            }
+
         }
 
         public void OnBeforeResponse(Session session)

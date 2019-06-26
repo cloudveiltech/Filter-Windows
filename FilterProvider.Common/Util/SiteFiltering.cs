@@ -83,7 +83,7 @@ namespace FilterProvider.Common.Util
         /// <summary>
         /// Called when each request is intercepted and has not gone to the server yet.
         /// </summary>
-        internal void OnBeforeRequest(GoproxyWrapper.Session args)
+        internal ProxyNextAction OnBeforeRequest(GoproxyWrapper.Session args)
         {
             int trackId = 0;
             lock (trackIdLock)
@@ -100,7 +100,7 @@ namespace FilterProvider.Common.Util
             // have not logged back in.
             if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
             {
-                return;
+                return ProxyNextAction.AllowAndIgnoreContentAndResponse;
             }
 
             bool readLocked = false;
@@ -149,7 +149,7 @@ namespace FilterProvider.Common.Util
 
                 if(url.Host == serviceProviderPath.Host)
                 {
-                    return;
+                    return ProxyNextAction.AllowAndIgnoreContentAndResponse;
                 }
                 else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
@@ -168,7 +168,7 @@ namespace FilterProvider.Common.Util
                         customBlockResponse = null;
                     }
 
-                    return;
+                    return ProxyNextAction.DropConnection;
                 }
 
                 var filterCollection = m_policyConfiguration.FilterCollection;
@@ -226,7 +226,7 @@ namespace FilterProvider.Common.Util
                             }
 
                             nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                            return;
+                            return nextAction;
                         }
                     } // else domain has no whitelist filters, continue to next check.
 
@@ -246,7 +246,7 @@ namespace FilterProvider.Common.Util
                         }
 
                         nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                        return;
+                        return nextAction;
                     }
 
                     // Since we made it this far, lets check blacklists now.
@@ -278,7 +278,7 @@ namespace FilterProvider.Common.Util
                                 customBlockResponse = null;
                             }
 
-                            return;
+                            return nextAction;
                         }
                     }
 
@@ -305,7 +305,7 @@ namespace FilterProvider.Common.Util
                             customBlockResponse = null;
                         }
 
-                        return;
+                        return nextAction;
                     }
                 }
                 else
@@ -336,6 +336,8 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
+
+            return nextAction;
         }
 
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
