@@ -345,13 +345,11 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Platform)' == 'AnyCPU' Or '$(Platform)' == 'x64'">
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
-</PostBuildEvent>
+  <PropertyGroup Condition="'$(Platform)' == 'AnyCPU'">
+    <Platform>x64</Platform>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)' == 'x86'">
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x86\*.*" "$(TargetDir)"
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) $(Platform)\*.*" "$(TargetDir)"
 xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
 </PostBuildEvent>
   </PropertyGroup>
@@ -368,9 +366,4 @@ xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
       <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'netfx.force.conflicts'" />
     </ItemGroup>
   </Target>
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
-</PostBuildEvent>
-  </PropertyGroup>
 </Project>
