@@ -17,6 +17,7 @@
             <RowDefinition Height="40" />
             <RowDefinition Height="48" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="48" />
         </Grid.RowDefinitions>
 
         <TextBox Grid.Row="1" Grid.Column="1" Margin="8" Text="{Binding NewSelfModerationSite}" />
@@ -34,5 +35,8 @@
             Style="{StaticResource VirtualisedMetroListView}"
             ItemsSource="{Binding SelfModerationSites}"
             />
+
+        <TextBlock Margin="4,4,4,24" Grid.Column="1" Grid.Row="3"><Hyperlink NavigateUri="{Binding SelfModerationSetupUri}" RequestNavigate="OnHyperlinkClicked">Advanced Settings</Hyperlink></TextBlock>
+
     </Grid>
 </local:BaseView>

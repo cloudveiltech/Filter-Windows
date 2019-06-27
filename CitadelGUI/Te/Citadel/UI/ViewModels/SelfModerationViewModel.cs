@@ -21,6 +21,9 @@ namespace Te.Citadel.UI.ViewModels
 {
     public class SelfModerationViewModel : BaseCitadelViewModel
     {
+        public string SelfModerationSetupUri
+            => CloudVeil.CompileSecrets.ServiceProviderUserSelfModerationPath;
+
         private string newSelfModerationSite;
         public string NewSelfModerationSite
         {
