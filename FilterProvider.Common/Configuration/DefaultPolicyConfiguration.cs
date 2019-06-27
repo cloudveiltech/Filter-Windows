@@ -138,22 +138,30 @@ namespace FilterProvider.Common.Configuration
 
         public event EventHandler OnConfigurationLoaded;
         
-        private string getSHA1ForFilePath(string filePath)
+        private string getSHA1ForFilePath(string filePath, bool isEncrypted)
         {
             if(!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
             {
                 return null;
             }
 
+            Stream stream = null;
             try
             {
                 using (var fs = File.OpenRead(filePath))
-                using (var cs = RulesetEncryption.DecryptionStream(fs))
                 {
+                    if(isEncrypted)
+                    {
+                        stream = RulesetEncryption.DecryptionStream(fs);
+                    }
+                    else
+                    {
+                        stream = fs;
+                    }
 
                     using (SHA1 sec = new SHA1CryptoServiceProvider())
                     {
-                        byte[] bt = sec.ComputeHash(cs);
+                        byte[] bt = sec.ComputeHash(stream);
                         var lHash = BitConverter.ToString(bt).Replace("-", "");
 
                         return lHash.ToLower();
@@ -162,8 +170,12 @@ namespace FilterProvider.Common.Configuration
             }
             catch(Exception ex)
             {
-                m_logger.Warn($"Could not calculate file hash: {ex}");
+                m_logger.Warn($"Could not calculate SHA1 for {filePath}: {ex}");
                 return null;
+            }
+            finally
+            {
+                if (isEncrypted) stream?.Dispose();
             }
         }
 
@@ -206,7 +218,7 @@ namespace FilterProvider.Common.Configuration
             foreach(var list in Configuration.ConfiguredLists)
             {
                 string listFilePath = getListFilePath(list);
-                hashes[list.RelativeListPath] = getSHA1ForFilePath(listFilePath);
+                hashes[list.RelativeListPath] = getSHA1ForFilePath(listFilePath, isEncrypted: true);
             }
 
             Dictionary<string, bool?> filterListResults = WebServiceUtil.Default.VerifyLists(hashes);
@@ -247,7 +259,7 @@ namespace FilterProvider.Common.Configuration
                 var rHash = Encoding.UTF8.GetString(rHashBytes);
 
                 bool needsUpdate = false;
-                string filePathSHA1 = getSHA1ForFilePath(configFilePath);
+                string filePathSHA1 = getSHA1ForFilePath(configFilePath, isEncrypted: false);
 
                 if (filePathSHA1 == null)
                 {
