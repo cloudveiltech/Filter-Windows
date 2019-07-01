@@ -84,7 +84,7 @@ namespace FilterProvider.Common.ControlServer
                 .WithLocalSession()
                 .RegisterModule(new WebApiModule());
 
-            server.RegisterModule(new CorsModule("*", "*", "GET,POST"));
+            //server.RegisterModule(new CorsModule("*", "*", "GET,POST"));
 
             var module = server.Module<WebApiModule>();
 

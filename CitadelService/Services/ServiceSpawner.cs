@@ -33,6 +33,7 @@ using Topshelf;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
 using Te.Citadel.Services;
+using CitadelService.Util;
 
 namespace CitadelService.Services
 {
@@ -101,16 +102,48 @@ namespace CitadelService.Services
                     // Compile everything except our base protective service.
                     if(name.IndexOf("Services", StringComparison.OrdinalIgnoreCase) != -1)
                     {
+                        var serviceName = name.Substring(0, name.LastIndexOf('.'));
+                        serviceName = serviceName.Substring(serviceName.LastIndexOf('.') + 1);
+
+                        string fileName = $"{thisAppDir}{serviceName}.exe";
+
                         try
                         {
-                            var serviceName = name.Substring(0, name.LastIndexOf('.'));
-                            serviceName = serviceName.Substring(serviceName.LastIndexOf('.')+1);
-
-                            var res = CompileExe(name, string.Format("{0}{1}.exe", thisAppDir, serviceName));
+                            var res = CompileExe(name, fileName);
 
                             if(res != null && res.Length > 0)
                             {
                                 createdServices.Add(res);
+                            }
+                        }
+                        catch(IOException e)
+                        {
+                            try
+                            {
+                                List<Process> lockingProcesses = FileLockingUtil.WhoIsLocking(fileName);
+
+                                if (lockingProcesses.Count == 0)
+                                {
+                                    m_logger.Warn("IOException occurred, but no locking processes detected.");
+                                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                                }
+                                else
+                                {
+                                    StringBuilder messageBuilder = new StringBuilder();
+                                    messageBuilder.AppendLine($"Could not compile protective service because it was already opened by {(lockingProcesses.Count > 1 ? "other processes" : "another process")}");
+                                    foreach(Process process in lockingProcesses)
+                                    {
+                                        messageBuilder.AppendLine($"\tProcess {process.Id}: {process.ProcessName}");
+                                    }
+
+                                    m_logger.Warn(messageBuilder.ToString());
+                                }
+                            }
+                            catch(Exception fileException)
+                            {
+                                m_logger.Warn("Exception occurred while finding process which locked {0}", fileName);
+                                LoggerUtil.RecursivelyLogException(m_logger, fileException);
+                                LoggerUtil.RecursivelyLogException(m_logger, e);
                             }
                         }
                         catch(Exception e)

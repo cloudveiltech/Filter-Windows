@@ -41,12 +41,10 @@ namespace FilterProvider.Common.Proxy
 
             if (nextAction.HasValue)
             {
-                LoggerUtil.GetAppWideLogger().Info("ProxyNextAction = {0}", (int)nextAction);
                 return nextAction.Value;
             }
             else
             {
-                LoggerUtil.GetAppWideLogger().Info("ProxyNextAction = (nil)");
                 return ProxyNextAction.AllowAndIgnoreContent;
             }
 

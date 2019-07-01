@@ -78,7 +78,7 @@ namespace FilterProvider.Common.Util
                 {
                     string json = reader.ReadToEnd();
                     AppSettings loaded = JsonConvert.DeserializeObject<AppSettings>(json);
-                    return loaded;
+                    return loaded ?? new AppSettings();
                 }
             }
         }
