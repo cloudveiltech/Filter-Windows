@@ -1524,37 +1524,46 @@ namespace FilterProvider.Common.Services
             }
             finally
             {
-                // We don't handle all cases in the switch, because we don't want to set LastSettingsCheck for error states.
-                switch(result)
+                try
                 {
-                    case ConfigUpdateResult.Updated:
-                    case ConfigUpdateResult.UpToDate:
-                        AppSettings.Default.LastSettingsCheck = DateTime.Now;
-                        break;
-                }
-
-                AppSettings.Default.ConfigUpdateResult = result;
-                AppSettings.Default.Save();
-
-                m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
-
-                // Enable the timer again.
-                if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
-                {
-                    // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
-                    this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
-                }
-                else
-                {
-                    var cfg = m_policyConfiguration.Configuration;
-                    if (cfg != null)
+                    // We don't handle all cases in the switch, because we don't want to set LastSettingsCheck for error states.
+                    switch (result)
                     {
-                        this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                        case ConfigUpdateResult.Updated:
+                        case ConfigUpdateResult.UpToDate:
+                            AppSettings.Default.LastSettingsCheck = DateTime.Now;
+                            break;
+                    }
+
+                    AppSettings.Default.ConfigUpdateResult = result;
+                    AppSettings.Default.Save();
+
+                    m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
+
+                    // Enable the timer again.
+                    if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
+                    {
+                        // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
+                        this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
                     }
                     else
                     {
-                        this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                        var cfg = m_policyConfiguration.Configuration;
+                        if (cfg != null)
+                        {
+                            this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                        }
+                        else
+                        {
+                            this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                        }
                     }
+
+                }
+                catch (Exception ex)
+                {
+                    m_logger.Error("Finally block exception");
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
                 }
 
                 m_updateRwLock.ExitWriteLock();

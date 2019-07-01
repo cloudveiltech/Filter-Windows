@@ -175,7 +175,14 @@ namespace FilterProvider.Common.Configuration
             }
             finally
             {
-                if (isEncrypted) stream?.Dispose();
+                try
+                {
+                    if (isEncrypted) stream?.Dispose();
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Warn("Error occurred while disposing stream: {0}", ex);
+                }
             }
         }
 
