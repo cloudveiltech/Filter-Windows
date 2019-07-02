@@ -108,6 +108,8 @@ namespace FilterProvider.Common.Configuration
 
         public event EventHandler OnConfigurationLoaded;
 
+        public event EventHandler ListsReloaded;
+
         public bool? VerifyConfiguration()
         {
             HttpStatusCode code;
@@ -421,6 +423,8 @@ namespace FilterProvider.Common.Configuration
                             m_filterCollection.InitializeBloomFilters();
 
                             m_textTriggers.InitializeBloomFilters();
+
+                            ListsReloaded?.Invoke(this, new EventArgs());
 
                             m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                         }

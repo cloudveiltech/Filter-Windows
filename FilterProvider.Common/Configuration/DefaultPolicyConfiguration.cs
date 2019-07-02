@@ -137,7 +137,9 @@ namespace FilterProvider.Common.Configuration
         public bool AreAnyTimeRestrictionsEnabled { get; private set; }
 
         public event EventHandler OnConfigurationLoaded;
-        
+
+        public event EventHandler ListsReloaded;
+
         private string getSHA1ForFilePath(string filePath, bool isEncrypted)
         {
             if(!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
@@ -695,6 +697,8 @@ namespace FilterProvider.Common.Configuration
 
                     m_textTriggers.FinalizeForRead();
                     m_textTriggers.InitializeBloomFilters();
+
+                    ListsReloaded?.Invoke(this, new EventArgs());
 
                     m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                 }

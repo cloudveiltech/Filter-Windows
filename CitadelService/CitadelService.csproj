@@ -168,10 +168,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.DistillNET">
-      <Version>1.6.1</Version>
+      <Version>1.4.8</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.proxy-native-windows">
-      <Version>0.2.48</Version>
+      <Version>0.2.50</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertSharp">
       <Version>1.4.3.10</Version>

@@ -59,6 +59,8 @@ namespace FilterProvider.Common.Configuration
 
         event EventHandler OnConfigurationLoaded;
 
+        event EventHandler ListsReloaded;
+
         AppConfigModel Configuration { get; set; }
 
         FilterDbCollection FilterCollection { get; }

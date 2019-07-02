@@ -34,7 +34,14 @@ namespace FilterProvider.Common.Util
             m_templates = new Templates(policyConfiguration);
 
             m_certificateExemptions = certificateExemptions;
+
+            m_globalBlacklistFiltersCache = null;
+            m_globalWhitelistFiltersCache = null;
+
+            m_policyConfiguration.ListsReloaded += OnListsReloaded;
         }
+
+        
 
         private ReaderWriterLockSlim m_filteringRwLock;
 
@@ -48,9 +55,29 @@ namespace FilterProvider.Common.Util
 
         private Templates m_templates;
 
+        private ReaderWriterLockSlim m_filterCacheLock = new ReaderWriterLockSlim();
+        private List<UrlFilter> m_globalWhitelistFiltersCache;
+
+        private List<UrlFilter> m_globalBlacklistFiltersCache;
+
         private IPolicyConfiguration m_policyConfiguration;
 
         public event RequestBlockedHandler RequestBlocked;
+
+        private void OnListsReloaded(object sender, EventArgs e)
+        {
+            try
+            {
+                m_filterCacheLock.EnterWriteLock();
+
+                m_globalBlacklistFiltersCache = m_policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
+                m_globalWhitelistFiltersCache = m_policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
+            }
+            finally
+            {
+                m_filterCacheLock.ExitWriteLock();
+            }
+        }
 
         /// <summary>
         /// Builds up a host from hostParts and checks the bloom filter for each entry.
@@ -85,13 +112,12 @@ namespace FilterProvider.Common.Util
         /// </summary>
         internal ProxyNextAction OnBeforeRequest(GoproxyWrapper.Session args)
         {
+            ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
             int trackId = 0;
             lock (trackIdLock)
             {
                 trackId = nextTrackId++;
             }
-
-            ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
 
             string customBlockResponseContentType = null;
             byte[] customBlockResponse = null;
@@ -104,6 +130,8 @@ namespace FilterProvider.Common.Util
             }
 
             bool readLocked = false;
+
+            m_filterCacheLock.EnterReadLock();
 
             try
             {
@@ -147,7 +175,7 @@ namespace FilterProvider.Common.Util
                 Uri url = new Uri(args.Request.Url);
                 Uri serviceProviderPath = new Uri(CompileSecrets.ServiceProviderApiPath);
 
-                if(url.Host == serviceProviderPath.Host)
+                if (url.Host == serviceProviderPath.Host)
                 {
                     return ProxyNextAction.AllowAndIgnoreContentAndResponse;
                 }
@@ -195,6 +223,7 @@ namespace FilterProvider.Common.Util
                         headers.Add(header.Name, header.Value);
                     }
 
+
                     // Check whitelists first.
                     // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
 
@@ -230,7 +259,7 @@ namespace FilterProvider.Common.Util
                         }
                     } // else domain has no whitelist filters, continue to next check.
 
-                    filters = filterCollection.GetWhitelistFiltersForDomain().Result;
+                    filters = m_globalWhitelistFiltersCache ?? new List<UrlFilter>();
 
                     if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
@@ -282,7 +311,7 @@ namespace FilterProvider.Common.Util
                         }
                     }
 
-                    filters = filterCollection.GetFiltersForDomain().Result;
+                    filters = m_globalBlacklistFiltersCache ?? new List<UrlFilter>();
 
                     if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
@@ -308,10 +337,6 @@ namespace FilterProvider.Common.Util
                         return nextAction;
                     }
                 }
-                else
-                {
-                    Console.WriteLine("filterCollection == null");
-                }
             }
             catch (Exception e)
             {
@@ -323,6 +348,8 @@ namespace FilterProvider.Common.Util
                 {
                     m_filteringRwLock.ExitReadLock();
                 }
+
+                m_filterCacheLock.ExitReadLock();
 
                 if (nextAction == ProxyNextAction.DropConnection)
                 {
