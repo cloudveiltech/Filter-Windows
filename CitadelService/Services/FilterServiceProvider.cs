@@ -448,7 +448,8 @@ namespace CitadelService.Services
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error(ex, "Error occurred while starting the diverter.");
+                    m_logger.Error($"Error occurred while starting the diverter.");
+                    LoggerUtil.RecursivelyLogException(m_logger, ex);
                 }
                 
             });
