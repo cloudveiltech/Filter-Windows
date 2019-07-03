@@ -55,7 +55,7 @@ namespace FilterProvider.Common.Util
 
         private Templates m_templates;
 
-        private ReaderWriterLockSlim m_filterCacheLock = new ReaderWriterLockSlim();
+        private object m_filterCacheLock = new object();
         private List<UrlFilter> m_globalWhitelistFiltersCache;
 
         private List<UrlFilter> m_globalBlacklistFiltersCache;
@@ -66,16 +66,15 @@ namespace FilterProvider.Common.Util
 
         private void OnListsReloaded(object sender, EventArgs e)
         {
-            try
-            {
-                m_filterCacheLock.EnterWriteLock();
+            List<UrlFilter> blacklist, whitelist;
 
-                m_globalBlacklistFiltersCache = m_policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
-                m_globalWhitelistFiltersCache = m_policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
-            }
-            finally
+            blacklist = m_policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
+            whitelist = m_policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
+
+            lock (m_filterCacheLock)
             {
-                m_filterCacheLock.ExitWriteLock();
+                m_globalBlacklistFiltersCache = blacklist;
+                m_globalWhitelistFiltersCache = whitelist;
             }
         }
 
@@ -130,8 +129,6 @@ namespace FilterProvider.Common.Util
             }
 
             bool readLocked = false;
-
-            m_filterCacheLock.EnterReadLock();
 
             try
             {
@@ -259,7 +256,10 @@ namespace FilterProvider.Common.Util
                         }
                     } // else domain has no whitelist filters, continue to next check.
 
-                    filters = m_globalWhitelistFiltersCache ?? new List<UrlFilter>();
+                    lock (m_filterCacheLock)
+                    {
+                        filters = m_globalWhitelistFiltersCache?.ToList() ?? new List<UrlFilter>();
+                    }
 
                     if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
@@ -311,7 +311,10 @@ namespace FilterProvider.Common.Util
                         }
                     }
 
-                    filters = m_globalBlacklistFiltersCache ?? new List<UrlFilter>();
+                    lock(m_filterCacheLock)
+                    {
+                        filters = m_globalBlacklistFiltersCache?.ToList() ?? new List<UrlFilter>();
+                    }
 
                     if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
                     {
@@ -348,8 +351,6 @@ namespace FilterProvider.Common.Util
                 {
                     m_filteringRwLock.ExitReadLock();
                 }
-
-                m_filterCacheLock.ExitReadLock();
 
                 if (nextAction == ProxyNextAction.DropConnection)
                 {
