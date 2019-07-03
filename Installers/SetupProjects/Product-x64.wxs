@@ -25,7 +25,8 @@
     <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
     <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
     <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
-    <CustomAction Id="CA.ConfigureUI" Execute="immediate" BinaryKey="B.CustomInstallerActions" DllEntry="ConfigureUI" Impersonate="no" />
+      <CustomAction Id="CA.RemoveWinDivert1_3" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert1_3" Impersonate="no" />
+      
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
@@ -46,6 +47,7 @@
         <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
       </Component>
       <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
+      <Merge Id="Microsoft_VC140_CRT_x64.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0" />
     </Directory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
@@ -74,6 +76,7 @@
       <ComponentGroupRef Id="FileSystemGroup" />
       <ComponentGroupRef Id="RegistryGroup" />
       <MergeRef Id="SetupPayload64.msm" />
+        <MergeRef Id="Microsoft_VC140_CRT_x64.msm"/>
     </Feature>
     <InstallExecuteSequence>
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
@@ -86,6 +89,7 @@
       <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
       <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[Installed]]></Custom>
       <Custom Action="CA.GuardInstall" Before="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
+        <Custom Action="CA.RemoveWinDivert1_3" Before="InstallInitialize" />
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
