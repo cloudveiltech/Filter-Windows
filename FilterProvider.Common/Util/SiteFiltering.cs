@@ -16,6 +16,7 @@ using System.Threading;
 using System.Net;
 using CloudVeil;
 using System.Diagnostics;
+using GoProxyWrapper;
 
 namespace FilterProvider.Common.Util
 {
@@ -66,7 +67,7 @@ namespace FilterProvider.Common.Util
 
         private void OnListsReloaded(object sender, EventArgs e)
         {
-            List<UrlFilter> blacklist, whitelist;
+            /*List<UrlFilter> blacklist, whitelist;
 
             blacklist = m_policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
             whitelist = m_policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
@@ -75,7 +76,7 @@ namespace FilterProvider.Common.Util
             {
                 m_globalBlacklistFiltersCache = blacklist;
                 m_globalWhitelistFiltersCache = whitelist;
-            }
+            }*/
         }
 
         /// <summary>
@@ -196,18 +197,17 @@ namespace FilterProvider.Common.Util
                     return ProxyNextAction.DropConnection;
                 }
 
-                var filterCollection = m_policyConfiguration.FilterCollection;
                 var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
                 var categoryIndex = m_policyConfiguration.CategoryIndex;
 
-                if (filterCollection != null)
+                if(AdBlockMatcherApi.AreListsLoaded())
                 {
                     // Let's check whitelists first.
                     readLocked = true;
                     m_filteringRwLock.EnterReadLock();
 
                     List<UrlFilter> filters;
-                    short matchCategory = -1;
+                    int matchCategory = -1;
                     UrlFilter matchingFilter = null;
 
                     //string host = message.Url.Host;
@@ -220,124 +220,40 @@ namespace FilterProvider.Common.Util
                         headers.Add(header.Name, header.Value);
                     }
 
-
-                    // Check whitelists first.
-                    // We build up hosts to check against the list because CheckIfFiltersApply whitelists all subdomains of a domain as well.
-
-                    // EXAMPLE:
-                    // request for vortex.data.microsoft.com/blah comes in.
-                    // we check for:
-                    //    microsoft.com
-                    //    data.microsoft.com
-                    //    vortex.data.microsoft.com
-                    // skip TLD if there is more than one segment in the host being checked.
-                    // This might have to be changed in the future, but right now we aren't blacklisting whole TLDs.
-                    if (isHostInList(filterCollection, hostParts, true))
-                    {
-                        // domain might have filters, so we want to check for sure here.
-
-                        filters = filterCollection.GetWhitelistFiltersForDomain(url.Host).Result;
-
-                        if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
-                        {
-                            var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
-
-                            if (mappedCategory != null)
-                            {
-                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
-                            }
-                            else
-                            {
-                                m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, matchCategory);
-                            }
-
-                            nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                            return nextAction;
-                        }
-                    } // else domain has no whitelist filters, continue to next check.
-
-                    lock (m_filterCacheLock)
-                    {
-                        filters = m_globalWhitelistFiltersCache?.ToList() ?? new List<UrlFilter>();
-                    }
-
-                    if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
+                    matchCategory = AdBlockMatcherApi.TestUrlMatch(url.ToString(), url.Host);
+                    if (matchCategory != -1)
                     {
                         var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
 
-                        if (mappedCategory != null)
+                        if(mappedCategory != null)
                         {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
-                        }
-                        else
-                        {
-                            m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, matchCategory);
-                        }
-
-                        nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                        return nextAction;
-                    }
-
-                    // Since we made it this far, lets check blacklists now.
-
-                    if (isHostInList(filterCollection, hostParts, false))
-                    {
-                        filters = filterCollection.GetFiltersForDomain(url.Host).Result;
-
-                        if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
-                        {
-                            RequestBlocked?.Invoke(matchCategory, BlockType.Url, url, matchingFilter.OriginalRule);
-                            nextAction = ProxyNextAction.DropConnection;
-
-                            // Instead of going to an external API for information, we should do everything 
-                            // that we can locally.
-                            List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
-                            List<MappedFilterListCategoryModel> resolvedCategories = ResolveCategoriesFromIds(matchingCategories);
-
-                            if (useHtmlBlockPage)
+                            switch(mappedCategory.ListType)
                             {
-                                // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                                // if there is no referer (direct navigation).
-                                customBlockResponseContentType = "text/html";
-                                customBlockResponse = m_templates.ResolveBlockedSiteTemplate(url, matchCategory, resolvedCategories);
+                                case PlainTextFilteringListType.Whitelist:
+                                    m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
+                                    nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                                    return nextAction;
+
+                                case PlainTextFilteringListType.Blacklist:
+                                case PlainTextFilteringListType.BypassList:
+                                    nextAction = ProxyNextAction.DropConnection;
+
+                                    if (useHtmlBlockPage)
+                                    {
+                                        // Only send HTML block page if we know this is a response of HTML we're blocking, or
+                                        // if there is no referer (direct navigation).
+                                        customBlockResponseContentType = "text/html";
+                                        customBlockResponse = m_templates.ResolveBlockedSiteTemplate(url, matchCategory, new List<MappedFilterListCategoryModel>());
+                                    }
+                                    else
+                                    {
+                                        customBlockResponseContentType = string.Empty;
+                                        customBlockResponse = null;
+                                    }
+
+                                    return nextAction;
                             }
-                            else
-                            {
-                                customBlockResponseContentType = string.Empty;
-                                customBlockResponse = null;
-                            }
-
-                            return nextAction;
                         }
-                    }
-
-                    lock(m_filterCacheLock)
-                    {
-                        filters = m_globalBlacklistFiltersCache?.ToList() ?? new List<UrlFilter>();
-                    }
-
-                    if (CheckIfFiltersApply(filters, url, headers, out matchingFilter, out matchCategory))
-                    {
-                        RequestBlocked?.Invoke(matchCategory, BlockType.Url, url, matchingFilter.OriginalRule);
-                        nextAction = ProxyNextAction.DropConnection;
-
-                        List<int> matchingCategories = GetAllCategoriesMatchingUrl(filters, url, headers);
-                        List<MappedFilterListCategoryModel> categories = ResolveCategoriesFromIds(matchingCategories);
-
-                        if (useHtmlBlockPage)
-                        {
-                            // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                            // if there is no referer (direct navigation).
-                            customBlockResponseContentType = "text/html";
-                            customBlockResponse = m_templates.ResolveBlockedSiteTemplate(url, matchCategory, categories);
-                        }
-                        else
-                        {
-                            customBlockResponseContentType = string.Empty;
-                            customBlockResponse = null;
-                        }
-
-                        return nextAction;
                     }
                 }
             }

@@ -63,7 +63,7 @@ namespace FilterProvider.Common.Configuration
 
         AppConfigModel Configuration { get; set; }
 
-        FilterDbCollection FilterCollection { get; }
+        //FilterDbCollection FilterCollection { get; }
 
         BagOfTextTriggers TextTriggers { get; }
        

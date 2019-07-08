@@ -41,7 +41,7 @@ namespace Filter.Platform.Common.Data.Models
         /// <param name="isBypass">
         /// Whether or not this category is a bypassable category.
         /// </param>
-        public MappedBypassListCategoryModel(short categoryId, short categoryIdAsWhitelist, string categoryName, string categoryNameAsWhitelist) : base(categoryId, categoryName)
+        public MappedBypassListCategoryModel(short categoryId, short categoryIdAsWhitelist, string categoryName, string categoryNameAsWhitelist) : base(categoryId, categoryName, PlainTextFilteringListType.BypassList)
         {
             CategoryIdAsWhitelist = categoryIdAsWhitelist;
             CategoryNameAsWhitelist = categoryNameAsWhitelist;

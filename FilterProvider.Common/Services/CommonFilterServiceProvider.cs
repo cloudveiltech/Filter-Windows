@@ -51,6 +51,7 @@ using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
 using HandlebarsDotNet;
 using CloudVeil;
+using GoProxyWrapper;
 
 namespace FilterProvider.Common.Services
 {
@@ -1490,7 +1491,7 @@ namespace FilterProvider.Common.Services
                     result = ConfigUpdateResult.UpToDate;
                 }
 
-                bool doLoadLists = m_policyConfiguration.FilterCollection == null;
+                bool doLoadLists = !AdBlockMatcherApi.AreListsLoaded();
 
                 if (m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
                 {
@@ -1506,7 +1507,7 @@ namespace FilterProvider.Common.Services
 
                 bool? listsDownloaded = m_policyConfiguration.DownloadLists();
 
-                doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && m_policyConfiguration.FilterCollection == null);
+                doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && !AdBlockMatcherApi.AreListsLoaded());
 
                 if (doLoadLists)
                 {

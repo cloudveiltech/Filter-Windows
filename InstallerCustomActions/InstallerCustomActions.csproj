@@ -82,7 +82,7 @@
     <Compile Include="ProcessExtensions.cs" />
     <Compile Include="ServiceStarter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpdateUIConfiguration.cs" />
+    <Compile Include="WinDivertUninstaller.cs" />
     <Content Include="CustomAction.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

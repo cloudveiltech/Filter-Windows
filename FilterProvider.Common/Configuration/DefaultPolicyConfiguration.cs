@@ -36,6 +36,7 @@ using Filter.Platform.Common;
 using System.Text.RegularExpressions;
 using DotNet.Globbing;
 using System.Security.Principal;
+using GoProxyWrapper;
 
 namespace FilterProvider.Common.Configuration
 {
@@ -81,7 +82,7 @@ namespace FilterProvider.Common.Configuration
         // Need to consolidate global stuff some how.
         private ReaderWriterLockSlim m_filteringRwLock;
 
-        private FilterDbCollection m_filterCollection;
+        //private FilterDbCollection m_filterCollection;
 
         private BagOfTextTriggers m_textTriggers;
 
@@ -113,7 +114,7 @@ namespace FilterProvider.Common.Configuration
 
         public AppConfigModel Configuration { get; set; }
 
-        public FilterDbCollection FilterCollection { get { return m_filterCollection; } }
+        //public FilterDbCollection FilterCollection { get { return m_filterCollection; } }
         public BagOfTextTriggers TextTriggers { get { return m_textTriggers; } }
 
         /// <summary>
@@ -188,10 +189,9 @@ namespace FilterProvider.Common.Configuration
             }
         }
 
-        private string getListFolder()
-        {
-            return Path.Combine(s_paths.ApplicationDataFolder, @"rules");
-        }
+        private string getTempFolder() => s_paths.GetPath("temp");
+
+        private string getListFolder() => s_paths.GetPath("rules");
 
         private void createListFolderIfNotExists()
         {
@@ -204,9 +204,9 @@ namespace FilterProvider.Common.Configuration
             }
         }
 
-        private string getListFilePath(string relativePath)
+        private string getListFilePath(string relativePath, string listFolder = null)
         {
-            return Path.Combine(getListFolder(), relativePath.Replace('/', '.'));
+            return Path.Combine(listFolder ?? getListFolder(), relativePath.Replace('/', '.'));
         }
 
         private string getListFilePath(FilteringPlainTextListModel listModel)
@@ -441,6 +441,29 @@ namespace FilterProvider.Common.Configuration
             return true;
         }
 
+        private void decryptLists(string listFolderPath, string tempFolderPath)
+        {
+            if(!Directory.Exists(tempFolderPath))
+            {
+                Directory.CreateDirectory(tempFolderPath);
+            }
+
+            foreach(string path in Directory.EnumerateFiles(listFolderPath))
+            {
+                using (var encryptedStream = File.OpenRead(path))
+                using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
+                using (var output = File.OpenWrite(Path.Combine(tempFolderPath, Path.GetFileName(path))))
+                {
+                    cs.CopyTo(output);
+                }
+            }
+        }
+
+        private void deleteTemporaryLists()
+        {
+            Directory.Delete(getTempFolder());
+        }
+
         public bool LoadLists()
         {
             try
@@ -452,18 +475,13 @@ namespace FilterProvider.Common.Configuration
                 if (Directory.Exists(listFolderPath))
                 {
                     // Recreate our filter collection and reset all categories to be disabled.
-                    if (m_filterCollection != null)
-                    {
-                        m_filterCollection.Dispose();
-                    }
+                    AdBlockMatcherApi.Initialize();
 
                     // Recreate our triggers container.
                     if (m_textTriggers != null)
                     {
                         m_textTriggers.Dispose();
                     }
-
-                    m_filterCollection = new FilterDbCollection();
 
                     m_categoryIndex.SetAll(false);
 
@@ -479,9 +497,13 @@ namespace FilterProvider.Common.Configuration
                     uint totalTriggersLoaded = 0;
 
                     // Load all configured list files.
+                    string tempFolder = getTempFolder();
+
+                    decryptLists(getListFolder(), tempFolder);
+
                     foreach (var listModel in Configuration.ConfiguredLists)
                     {
-                        var rulesetPath = getListFilePath(listModel);
+                        var rulesetPath = getListFilePath(listModel.RelativeListPath, tempFolder);
 
                         if(File.Exists(rulesetPath))
                         {
@@ -493,29 +515,10 @@ namespace FilterProvider.Common.Configuration
                             {
                                 case PlainTextFilteringListType.Blacklist:
                                     {
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
-                                            using (var encryptedStream = File.OpenRead(rulesetPath))
-                                            {
-                                                try
-                                                {
-                                                    using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
-                                                    {
-                                                        var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, categoryModel.CategoryId).Result;
-                                                        totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                        totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                        if (loadedFailedRes.Item1 > 0)
-                                                        {
-                                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                        }
-                                                    }
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    m_logger.Info("CRIPPLED: {0}", ex);
-                                                }
-                                            }
+                                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Blacklist);
+                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                         }
                                     }
                                     break;
@@ -525,22 +528,10 @@ namespace FilterProvider.Common.Configuration
                                         MappedBypassListCategoryModel bypassCategoryModel = null;
 
                                         // Must be loaded twice. Once as a blacklist, once as a whitelist.
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out bypassCategoryModel))
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out bypassCategoryModel))
                                         {
-                                            // Load first as blacklist.
-                                            using (var encryptedStream = File.OpenRead(rulesetPath))
-                                            using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
-                                            {
-                                                var loadedFailedRes = m_filterCollection.ParseStoreRulesFromStream(listStream, bypassCategoryModel.CategoryId).Result;
-                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                if (loadedFailedRes.Item1 > 0)
-                                                {
-                                                    m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
-                                                }
-                                            }
-
+                                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.BypassList);
+                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                             GC.Collect();
                                         }
                                     }
@@ -549,7 +540,7 @@ namespace FilterProvider.Common.Configuration
                                 case PlainTextFilteringListType.TextTrigger:
                                     {
                                         // Always load triggers as blacklists.
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
+                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
                                             using (var encryptedStream = File.OpenRead(rulesetPath))
                                             using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
@@ -578,28 +569,10 @@ namespace FilterProvider.Common.Configuration
 
                                 case PlainTextFilteringListType.Whitelist:
                                     {
-                                        using (var encryptedStream = File.OpenRead(rulesetPath))
-                                        using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
-                                        using (TextReader tr = new StreamReader(listStream))
+                                        if(TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
-                                            if (TryFetchOrCreateCategoryMap(thisListCategoryName, out categoryModel))
-                                            {
-                                                var whitelistRules = new List<string>();
-                                                string line = null;
-                                                while ((line = tr.ReadLine()) != null)
-                                                {
-                                                    whitelistRules.Add("@@" + line.Trim() + "\n");
-                                                }
-
-                                                var loadedFailedRes = m_filterCollection.ParseStoreRules(whitelistRules.ToArray(), categoryModel.CategoryId).Result;
-                                                totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                                                totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                                                if (loadedFailedRes.Item1 > 0)
-                                                {
-                                                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                                                }
-                                            }
+                                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Whitelist);
+                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                         }
 
                                         GC.Collect();
@@ -614,7 +587,7 @@ namespace FilterProvider.Common.Configuration
                         MappedFilterListCategoryModel categoryModel = null;
 
                         // Always load triggers as blacklists.
-                        if(TryFetchOrCreateCategoryMap("/user/trigger_blacklist", out categoryModel))
+                        if(TryFetchOrCreateCategoryMap("/user/trigger_blacklist", PlainTextFilteringListType.TextTrigger, out categoryModel))
                         {
                             var triggersLoaded = m_textTriggers.LoadStoreFromList(Configuration.CustomTriggerBlacklist, categoryModel.CategoryId).Result;
 
@@ -638,25 +611,25 @@ namespace FilterProvider.Common.Configuration
 
                         // The easiest way to do this is to limit the characters to 'safe' characters.
                         Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
-                        foreach(string site in Configuration.CustomWhitelist)
+                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.txt");
+
+                        using (var rulesetStream = File.OpenWrite(rulesetPath))
+                        using (var writer = new StreamWriter(rulesetStream))
                         {
-                            if(isCleanRule.IsMatch(site))
+                            foreach (string site in Configuration.CustomWhitelist)
                             {
-                                sanitizedCustomWhitelist.Add("@@" + site);
+                                if (isCleanRule.IsMatch(site))
+                                {
+                                    writer.WriteLine($"@@{site}");
+                                }
                             }
                         }
-
+                            
                         MappedFilterListCategoryModel categoryModel = null;
-                        if(TryFetchOrCreateCategoryMap("/user/custom_whitelist", out categoryModel))
+                        if(TryFetchOrCreateCategoryMap("/user/custom_whitelist", PlainTextFilteringListType.Whitelist, out categoryModel))
                         {
-                            var loadedFailedRes = m_filterCollection.ParseStoreRules(sanitizedCustomWhitelist.ToArray(), categoryModel.CategoryId).Result;
-                            totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                            totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                            if (loadedFailedRes.Item1 > 0)
-                            {
-                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                            }
+                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Whitelist);
+                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                         }
                     }
 
@@ -669,31 +642,30 @@ namespace FilterProvider.Common.Configuration
 
                         // The easiest way to do this is to limit the characters to 'safe' characters.
                         Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
+                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.txt");
 
-                        foreach(string site in Configuration.SelfModeration)
+                        using (var rulesetStream = File.OpenWrite(rulesetPath))
+                        using (var writer = new StreamWriter(rulesetStream))
                         {
-                            if(isCleanRule.IsMatch(site))
+                            foreach (string site in Configuration.CustomWhitelist)
                             {
-                                sanitizedSelfModerationSites.Add(site);
+                                if (isCleanRule.IsMatch(site))
+                                {
+                                    writer.WriteLine(site);
+                                }
                             }
                         }
 
                         MappedFilterListCategoryModel categoryModel = null;
-                        if (TryFetchOrCreateCategoryMap("/user/self_moderation", out categoryModel))
+                        if (TryFetchOrCreateCategoryMap("/user/self_moderation", PlainTextFilteringListType.Blacklist, out categoryModel))
                         {
-                            var loadedFailedRes = m_filterCollection.ParseStoreRules(sanitizedSelfModerationSites.ToArray(), categoryModel.CategoryId).Result;
-                            totalFilterRulesLoaded += (uint)loadedFailedRes.Item1;
-                            totalFilterRulesFailed += (uint)loadedFailedRes.Item2;
-
-                            if(loadedFailedRes.Item1 > 0)
-                            {
-                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                            }
+                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Blacklist);
+                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                         }
                     }
 
-                    m_filterCollection.FinalizeForRead();
-                    m_filterCollection.InitializeBloomFilters();
+                    //m_filterCollection.FinalizeForRead();
+                    //m_filterCollection.InitializeBloomFilters();
 
                     m_textTriggers.FinalizeForRead();
                     m_textTriggers.InitializeBloomFilters();
@@ -885,7 +857,7 @@ namespace FilterProvider.Common.Configuration
         /// <remarks>
         /// This will always fail if more than 255 categories are created! 
         /// </remarks>
-        private bool TryFetchOrCreateCategoryMap<T>(string categoryName, out T model) where T : MappedFilterListCategoryModel
+        private bool TryFetchOrCreateCategoryMap<T>(string categoryName, PlainTextFilteringListType listType, out T model) where T : MappedFilterListCategoryModel
         {
             m_logger.Info("CATEGORY {0}", categoryName);
 
@@ -904,7 +876,7 @@ namespace FilterProvider.Common.Configuration
                 {
                     MappedFilterListCategoryModel secondCategory = null;
 
-                    if (TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", out secondCategory))
+                    if (TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", PlainTextFilteringListType.Whitelist, out secondCategory))
                     {
                         var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
                         m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
@@ -919,7 +891,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName);
+                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName, PlainTextFilteringListType.Blacklist);
                     m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                     model = newModel;
                     return true;

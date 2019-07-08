@@ -42,21 +42,35 @@ namespace InstallerCustomActions
 
             var filterServiceAssemblyPath = Path.Combine(mainFolder, "FilterServiceProvider.exe");
 
-            // TODO: Not sure if uninstall command is needed any more? Seems like there was a conversation about this not being needed anymore.
-            var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
-            uninstallStartInfo.Arguments = "Uninstall";
-            uninstallStartInfo.UseShellExecute = false;
-            uninstallStartInfo.CreateNoWindow = true;
-            var uninstallProc = Process.Start(uninstallStartInfo);
-            uninstallProc.WaitForExit();
+            try
+            {
+                // TODO: Not sure if uninstall command is needed any more? Seems like there was a conversation about this not being needed anymore.
+                var uninstallStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+                uninstallStartInfo.Arguments = "Uninstall";
+                uninstallStartInfo.UseShellExecute = false;
+                uninstallStartInfo.CreateNoWindow = true;
+                var uninstallProc = Process.Start(uninstallStartInfo);
+                uninstallProc.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                session.Log("ERROR: Exception occurred while running service uninstall command. {0}", ex);
+            }
 
-            var installStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
-            installStartInfo.Arguments = "Install";
-            installStartInfo.UseShellExecute = false;
-            installStartInfo.CreateNoWindow = true;
+            try
+            {
+                var installStartInfo = new ProcessStartInfo(filterServiceAssemblyPath);
+                installStartInfo.Arguments = "Install";
+                installStartInfo.UseShellExecute = false;
+                installStartInfo.CreateNoWindow = true;
 
-            var installProc = Process.Start(installStartInfo);
-            installProc.WaitForExit();
+                var installProc = Process.Start(installStartInfo);
+                installProc.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                session.Log("ERROR: Exception occurred while running service install command. {0}", ex);
+            }
 
             string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
 

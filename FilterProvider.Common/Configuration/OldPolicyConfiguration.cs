@@ -518,7 +518,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName);
+                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName, PlainTextFilteringListType.Blacklist);
                     m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                     model = newModel;
                     return true;

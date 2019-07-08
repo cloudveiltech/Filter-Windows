@@ -46,6 +46,8 @@ namespace Filter.Platform.Common.Data.Models
             }
         }
 
+        public PlainTextFilteringListType ListType { get; private set; }
+
         /// <summary>
         /// Constructs a new MappedFilterListCategoryModel instance.
         /// </summary>
@@ -55,10 +57,11 @@ namespace Filter.Platform.Common.Data.Models
         /// <param name="categoryName">
         /// The category name.
         /// </param>
-        public MappedFilterListCategoryModel(short categoryId, string categoryName)
+        public MappedFilterListCategoryModel(short categoryId, string categoryName, PlainTextFilteringListType listType)
         {
             CategoryId = categoryId;
             CategoryName = categoryName;
+            ListType = listType;
         }
     }
 }

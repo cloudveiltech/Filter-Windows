@@ -167,11 +167,8 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CloudVeil.DistillNET">
-      <Version>1.4.8</Version>
-    </PackageReference>
     <PackageReference Include="CloudVeil.proxy-native-windows">
-      <Version>0.2.50</Version>
+      <Version>0.3.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertSharp">
       <Version>1.4.3.10</Version>
