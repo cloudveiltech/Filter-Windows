@@ -5,7 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using GoProxyWrapper;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -27,5 +28,8 @@ namespace FilterProvider.Common.Data
 
         public GoproxyWrapper.GoProxy.OnBeforeRequest BeforeRequest { get; set; }
         public GoproxyWrapper.GoProxy.OnBeforeResponse BeforeResponse { get; set; }
+
+        public AdBlockMatcherApi.AdBlockCallbackDelegate Whitelisted { get; set; }
+        public AdBlockMatcherApi.AdBlockCallbackDelegate Blacklisted { get; set; }
     }
 }

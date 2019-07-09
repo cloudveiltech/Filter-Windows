@@ -42,8 +42,6 @@ namespace FilterProvider.Common.Util
             m_policyConfiguration.ListsReloaded += OnListsReloaded;
         }
 
-        
-
         private ReaderWriterLockSlim m_filteringRwLock;
 
         private NLog.Logger m_logger;
@@ -119,17 +117,12 @@ namespace FilterProvider.Common.Util
                 trackId = nextTrackId++;
             }
 
-            string customBlockResponseContentType = null;
-            byte[] customBlockResponse = null;
-
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
             if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
             {
                 return ProxyNextAction.AllowAndIgnoreContentAndResponse;
             }
-
-            bool readLocked = false;
 
             try
             {
@@ -141,36 +134,8 @@ namespace FilterProvider.Common.Util
                     todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
                 }
 
-                // We don't know what's coming back from the server, but we can see what the client is expecting by looking at the 'Accept' header.
-
-                Header acceptHeader = args.Request.Headers.GetFirstHeader("Accept");
-
-                bool useHtmlBlockPage = false;
-
-                if (acceptHeader != null)
-                {
-                    foreach (string headerVal in htmlMimeTypes)
-                    {
-                        if (acceptHeader.Value.IndexOf(headerVal, StringComparison.InvariantCultureIgnoreCase) >= 0)
-                        {
-                            useHtmlBlockPage = true;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // We don't know what the client is accepting. Make it obvious what's going on by spitting an error onto the screen.
-                    useHtmlBlockPage = true;
-                }
-
-                if (!args.Request.Headers.HeaderExists("Referer"))
-                {
-                    // Use the HTML block page if this is a direct navigation.
-                    useHtmlBlockPage = true;
-                }
-
-                Uri url = new Uri(args.Request.Url);
+                string urlString = args.Request.Url;
+                Uri url = new Uri(urlString);
                 Uri serviceProviderPath = new Uri(CompileSecrets.ServiceProviderApiPath);
 
                 if (url.Host == serviceProviderPath.Host)
@@ -179,109 +144,122 @@ namespace FilterProvider.Common.Util
                 }
                 else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
-                    nextAction = ProxyNextAction.DropConnection;
-
-                    if (useHtmlBlockPage)
-                    {
-                        // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                        // if there is no referer (direct navigation).
-                        customBlockResponseContentType = "text/html";
-                        customBlockResponse = m_templates.ResolveBlockedSiteTemplate(url, 0, null, BlockType.TimeRestriction);
-                    }
-                    else
-                    {
-                        customBlockResponseContentType = string.Empty;
-                        customBlockResponse = null;
-                    }
-
+                    sendBlockResponse(args, urlString, null, BlockType.TimeRestriction);
                     return ProxyNextAction.DropConnection;
                 }
-
-                var categoriesMap = m_policyConfiguration.GeneratedCategoriesMap;
-                var categoryIndex = m_policyConfiguration.CategoryIndex;
-
-                if(AdBlockMatcherApi.AreListsLoaded())
-                {
-                    // Let's check whitelists first.
-                    readLocked = true;
-                    m_filteringRwLock.EnterReadLock();
-
-                    List<UrlFilter> filters;
-                    int matchCategory = -1;
-                    UrlFilter matchingFilter = null;
-
-                    //string host = message.Url.Host;
-                    string host = url.Host;
-                    string[] hostParts = host.Split('.');
-
-                    NameValueCollection headers = new NameValueCollection();
-                    foreach (var header in args.Request.Headers)
-                    {
-                        headers.Add(header.Name, header.Value);
-                    }
-
-                    matchCategory = AdBlockMatcherApi.TestUrlMatch(url.ToString(), url.Host);
-                    if (matchCategory != -1)
-                    {
-                        var mappedCategory = categoriesMap.Values.Where(xx => xx.CategoryId == matchCategory).FirstOrDefault();
-
-                        if(mappedCategory != null)
-                        {
-                            switch(mappedCategory.ListType)
-                            {
-                                case PlainTextFilteringListType.Whitelist:
-                                    m_logger.Info("Request {0} whitelisted by rule {1} in category {2}.", url.ToString(), matchingFilter.OriginalRule, mappedCategory.CategoryName);
-                                    nextAction = ProxyNextAction.AllowAndIgnoreContentAndResponse;
-                                    return nextAction;
-
-                                case PlainTextFilteringListType.Blacklist:
-                                case PlainTextFilteringListType.BypassList:
-                                    nextAction = ProxyNextAction.DropConnection;
-
-                                    if (useHtmlBlockPage)
-                                    {
-                                        // Only send HTML block page if we know this is a response of HTML we're blocking, or
-                                        // if there is no referer (direct navigation).
-                                        customBlockResponseContentType = "text/html";
-                                        customBlockResponse = m_templates.ResolveBlockedSiteTemplate(url, matchCategory, new List<MappedFilterListCategoryModel>());
-                                    }
-                                    else
-                                    {
-                                        customBlockResponseContentType = string.Empty;
-                                        customBlockResponse = null;
-                                    }
-
-                                    return nextAction;
-                            }
-                        }
-                    }
-                }
+              
             }
             catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
-            finally
+
+            return nextAction;
+        }
+
+        private bool useHtmlBlockPage(Session args)
+        {
+            Header acceptHeader = args.Request.Headers.GetFirstHeader("Accept");
+
+            bool useHtmlBlockPage = false;
+
+            if (acceptHeader != null)
             {
-                if (readLocked)
+                foreach (string headerVal in htmlMimeTypes)
                 {
-                    m_filteringRwLock.ExitReadLock();
-                }
-
-                if (nextAction == ProxyNextAction.DropConnection)
-                {
-                    // There is currently no way to change an HTTP message to a response outside of CitadelCore.
-                    // so, change it to a 204 and then modify the status code to what we want it to be.
-                    //m_logger.Info("Response blocked: {0}", args.Request.Url);
-
-                    if (customBlockResponse != null)
+                    if (acceptHeader.Value.IndexOf(headerVal, StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
-                        args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
+                        useHtmlBlockPage = true;
+                        break;
                     }
                 }
             }
+            else
+            {
+                // We don't know what the client is accepting. Make it obvious what's going on by spitting an error onto the screen.
+                useHtmlBlockPage = true;
+            }
 
-            return nextAction;
+            if (!args.Request.Headers.HeaderExists("Referer"))
+            {
+                // Use the HTML block page if this is a direct navigation.
+                useHtmlBlockPage = true;
+            }
+
+            return useHtmlBlockPage;
+        }
+
+        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.Url, string triggerCategory = "")
+        {
+            bool useHtmlBlockPage = this.useHtmlBlockPage(args);
+
+            if (useHtmlBlockPage)
+            {
+                int matchCategory = (categories != null && categories.Length > 0) ? categories[0] : 0;
+
+                List<MappedFilterListCategoryModel> appliedCategories = null;
+                if(categories == null)
+                {
+                    appliedCategories = null;
+                }
+                else
+                {
+                    appliedCategories = categories
+                        .Skip(1)
+                        .Select(
+                            id => m_policyConfiguration.GeneratedCategoriesMap
+                                        .Select(c => c.Value)
+                                        .FirstOrDefault(c => c.CategoryId == id)
+                        ).ToList();
+                }
+
+                byte[] contentBytes = m_templates.ResolveBlockedSiteTemplate(new Uri(url), matchCategory, appliedCategories, blockType, triggerCategory);
+                string contentType = "text/html";
+
+                args.SendCustomResponse((int)HttpStatusCode.OK, contentType, contentBytes);
+            }
+            else
+            {
+                args.SendCustomResponse((int)HttpStatusCode.NoContent, "", new byte[0]);
+            }
+        }
+
+        public int OnWhitelist(Session session, string url, int[] categories)
+        {
+            try
+            {
+                var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.FirstOrDefault(m => m.Value.CategoryId == categories[0]).Value;
+
+                m_logger.Info("Request {0} whitelisted in category {1} (rule not currently available)", url, mappedCategory?.CategoryName);
+
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                m_logger.Error("Exception occurred while processing whitelist notification.");
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
+
+            return 0;
+        }
+
+        public int OnBlacklist(Session args, string url, int[] categories)
+        {
+            try
+            {
+                m_logger.Info("OnBlacklist {0}", url);
+
+                RequestBlocked?.Invoke((short)categories[0], BlockType.Url, new Uri(url), "NOT AVAILABLE");
+
+                sendBlockResponse(args, url, categories);
+            }
+            catch(Exception ex)
+            {
+                m_logger.Error("Exception occurred while processing blacklist notification.");
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+            }
+
+            return 0;
         }
 
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
@@ -393,47 +371,6 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
-        }
-
-        private bool CheckIfFiltersApply(List<UrlFilter> filters, Uri request, NameValueCollection headers, out UrlFilter matched, out short matchedCategory)
-        {
-            matchedCategory = -1;
-            matched = null;
-
-            var len = filters.Count;
-            for (int i = 0; i < len; ++i)
-            {
-                if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
-                {
-                    matched = filters[i];
-                    matchedCategory = filters[i].CategoryId;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Use this function after you've determined that the filter should block a certain URI.
-        /// </summary>
-        /// <param name="filters"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        private List<int> GetAllCategoriesMatchingUrl(List<UrlFilter> filters, Uri request, NameValueCollection headers)
-        {
-            List<int> matchingCategories = new List<int>();
-
-            var len = filters.Count;
-            for (int i = 0; i < len; i++)
-            {
-                if (m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled(filters[i].CategoryId) && filters[i].IsMatch(request, headers))
-                {
-                    matchingCategories.Add(filters[i].CategoryId);
-                }
-            }
-
-            return matchingCategories;
         }
 
         private List<MappedFilterListCategoryModel> ResolveCategoriesFromIds(List<int> matchingCategories)
