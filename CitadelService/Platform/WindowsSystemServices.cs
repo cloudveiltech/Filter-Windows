@@ -161,6 +161,9 @@ namespace CitadelService.Platform
             server.BeforeRequest += config.BeforeRequest;
             server.BeforeResponse += config.BeforeResponse;
 
+            server.Blacklisted += config.Blacklisted;
+            server.Whitelisted += config.Whitelisted;
+
             server.Start();
 
             OnStartProxy?.Invoke(this, new EventArgs());

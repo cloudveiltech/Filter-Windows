@@ -432,7 +432,7 @@ namespace FilterProvider.Common.Configuration
                                 errorList = true;
                                 continue;
                             }
-                            fileBuilder.AppendLine(line);
+                            fileBuilder.Append($"{line}\n");
                         }
                     }
                 }
@@ -441,27 +441,59 @@ namespace FilterProvider.Common.Configuration
             return true;
         }
 
-        private void decryptLists(string listFolderPath, string tempFolderPath)
+        private bool decryptLists(string listFolderPath, string tempFolderPath)
         {
             if(!Directory.Exists(tempFolderPath))
             {
                 Directory.CreateDirectory(tempFolderPath);
             }
 
-            foreach(string path in Directory.EnumerateFiles(listFolderPath))
+            if(Configuration == null)
             {
-                using (var encryptedStream = File.OpenRead(path))
-                using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
-                using (var output = File.OpenWrite(Path.Combine(tempFolderPath, Path.GetFileName(path))))
+                return false;
+            }
+
+            foreach(var listModel in Configuration.ConfiguredLists)
+            {
+                string path = getListFilePath(listModel.RelativeListPath, listFolderPath);
+
+                const int bufferSize = 8192;
+
+                try
                 {
-                    cs.CopyTo(output);
+                    using (var encryptedStream = File.OpenRead(path))
+                    using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
+                    using (var output = File.OpenWrite(Path.Combine(tempFolderPath, Path.GetFileName(path))))
+                    {
+                        m_logger.Info("input {0}, output {1}", path, Path.Combine(tempFolderPath, Path.GetFileName(path)));
+                        cs.CopyTo(output);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    m_logger.Error($"decryptLists threw exception for {path}: {ex}");
+                    return false;
                 }
             }
+
+            return true;
         }
 
         private void deleteTemporaryLists()
         {
-            Directory.Delete(getTempFolder());
+            try
+            {
+                foreach(string filePath in Directory.EnumerateFiles(getTempFolder()))
+                {
+                    //File.Delete(filePath);
+                }
+
+                //Directory.Delete(getTempFolder());
+            }
+            catch (Exception ex)
+            {
+                m_logger.Error($"Failed to delete temporary ruleset folder. {ex}");
+            }
         }
 
         public bool LoadLists()
@@ -542,8 +574,7 @@ namespace FilterProvider.Common.Configuration
                                         // Always load triggers as blacklists.
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
-                                            using (var encryptedStream = File.OpenRead(rulesetPath))
-                                            using (var listStream = RulesetEncryption.DecryptionStream(encryptedStream))
+                                            using (var listStream = File.OpenRead(rulesetPath))
                                             {
                                                 try
                                                 {
@@ -558,7 +589,7 @@ namespace FilterProvider.Common.Configuration
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    m_logger.Info("Error on LoadStoresFromStream {0}", ex);
+                                                    m_logger.Info($"Error on LoadStoresFromStream {ex}");
                                                 }
                                             }
                                         }
@@ -687,6 +718,8 @@ namespace FilterProvider.Common.Configuration
             finally
             {
                 m_filteringRwLock.ExitWriteLock();
+
+                deleteTemporaryLists();
             }
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using GoproxyWrapper;
 using Filter.Platform.Common.Util;
+using GoProxyWrapper;
 
 namespace FilterProvider.Common.Proxy
 {
@@ -15,6 +16,9 @@ namespace FilterProvider.Common.Proxy
         {
             GoProxy.Instance.BeforeRequest += OnBeforeRequest;
             GoProxy.Instance.BeforeResponse += OnBeforeResponse;
+
+            GoProxy.Instance.Blacklisted += OnBlacklisted;
+            GoProxy.Instance.Whitelisted += OnWhitelisted;
         }
 
         public void Init(int httpPortNumber, int httpsPortNumber, string certFile, string keyFile)
@@ -35,6 +39,9 @@ namespace FilterProvider.Common.Proxy
         public event GoProxy.OnBeforeRequest BeforeRequest;
         public event GoProxy.OnBeforeResponse BeforeResponse;
 
+        public event AdBlockMatcherApi.AdBlockCallbackDelegate Whitelisted;
+        public event AdBlockMatcherApi.AdBlockCallbackDelegate Blacklisted;
+        
         public ProxyNextAction OnBeforeRequest(Session session)
         {
             ProxyNextAction? nextAction = BeforeRequest?.Invoke(session);
@@ -53,6 +60,16 @@ namespace FilterProvider.Common.Proxy
         public void OnBeforeResponse(Session session)
         {
             BeforeResponse?.Invoke(session);
+        }
+
+        public int OnWhitelisted(Session session, string url, int[] categories)
+        {
+            return Whitelisted?.Invoke(session, url, categories) ?? 0;
+        }
+
+        public int OnBlacklisted(Session session, string url, int[] categories)
+        {
+            return Blacklisted?.Invoke(session, url, categories) ?? 0;
         }
 
         #region IDisposable Support
@@ -92,7 +109,6 @@ namespace FilterProvider.Common.Proxy
             // GC.SuppressFinalize(this);
         }
         #endregion
-
 
     }
 }

@@ -977,7 +977,7 @@ namespace FilterProvider.Common.Services
             if (m_policyConfiguration.Configuration != null)
             {
                 // Put the new update frequence into effect.
-                this.m_updateCheckTimer.Change(m_policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                this.m_updateCheckTimer?.Change(m_policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -1043,7 +1043,9 @@ namespace FilterProvider.Common.Services
             {
                 AuthorityName = "CloudVeil for Windows",
                 BeforeRequest = m_siteFiltering.OnBeforeRequest,
-                BeforeResponse = m_siteFiltering.OnBeforeResponse
+                BeforeResponse = m_siteFiltering.OnBeforeResponse,
+                Blacklisted = m_siteFiltering.OnBlacklist,
+                Whitelisted = m_siteFiltering.OnWhitelist
             });
 
             // Setup general info, warning and error events.
