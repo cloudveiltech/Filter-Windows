@@ -530,8 +530,8 @@ namespace FilterProvider.Common.Configuration
                                         // Must be loaded twice. Once as a blacklist, once as a whitelist.
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out bypassCategoryModel))
                                         {
-                                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.BypassList);
-                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, bypassCategoryModel.CategoryId, ListType.BypassList);
+                                            m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
                                             GC.Collect();
                                         }
                                     }
@@ -669,6 +669,8 @@ namespace FilterProvider.Common.Configuration
 
                     m_textTriggers.FinalizeForRead();
                     m_textTriggers.InitializeBloomFilters();
+
+                    AdBlockMatcherApi.Save(s_paths.GetPath("rules.dat"));
 
                     ListsReloaded?.Invoke(this, new EventArgs());
 
@@ -891,7 +893,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName, PlainTextFilteringListType.Blacklist);
+                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName, listType);
                     m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                     model = newModel;
                     return true;

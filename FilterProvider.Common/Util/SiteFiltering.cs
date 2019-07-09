@@ -220,6 +220,8 @@ namespace FilterProvider.Common.Util
                         headers.Add(header.Name, header.Value);
                     }
 
+                    // Tomorrow, figure out header rules
+                    // Tomorrow, remove OnBeforeRequest from GoproxyWrapper API.
                     matchCategory = AdBlockMatcherApi.TestUrlMatch(url.ToString(), url.Host);
                     if (matchCategory != -1)
                     {
@@ -236,6 +238,8 @@ namespace FilterProvider.Common.Util
 
                                 case PlainTextFilteringListType.Blacklist:
                                 case PlainTextFilteringListType.BypassList:
+                                    RequestBlocked?.Invoke(mappedCategory.CategoryId, BlockType.Url, url, "not available in C#");
+
                                     nextAction = ProxyNextAction.DropConnection;
 
                                     if (useHtmlBlockPage)

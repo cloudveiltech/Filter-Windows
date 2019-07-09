@@ -40,6 +40,8 @@ namespace FilterServiceTests.Mocks
 
         public event EventHandler OnConfigurationLoaded;
 
+        public event EventHandler ListsReloaded;
+
         public bool? DownloadConfiguration()
         {
             throw new NotImplementedException();
