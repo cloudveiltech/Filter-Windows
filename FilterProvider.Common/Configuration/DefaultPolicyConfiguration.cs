@@ -644,7 +644,7 @@ namespace FilterProvider.Common.Configuration
 
                         // The easiest way to do this is to limit the characters to 'safe' characters.
                         Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
-                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.txt");
+                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.rules.txt");
 
                         using (var rulesetStream = File.OpenWrite(rulesetPath))
                         using (var writer = new StreamWriter(rulesetStream))
@@ -675,12 +675,12 @@ namespace FilterProvider.Common.Configuration
 
                         // The easiest way to do this is to limit the characters to 'safe' characters.
                         Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
-                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.txt");
+                        string rulesetPath = Path.Combine(tempFolder, ".user.self_moderation.rules.txt");
 
                         using (var rulesetStream = File.OpenWrite(rulesetPath))
                         using (var writer = new StreamWriter(rulesetStream))
                         {
-                            foreach (string site in Configuration.CustomWhitelist)
+                            foreach (string site in Configuration.SelfModeration)
                             {
                                 if (isCleanRule.IsMatch(site))
                                 {
