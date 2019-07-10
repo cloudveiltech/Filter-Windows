@@ -461,9 +461,11 @@ namespace FilterProvider.Common.Configuration
 
                 try
                 {
+                    string tempPath = Path.Combine(tempFolderPath, Path.GetFileName(path));
+
                     using (var encryptedStream = File.OpenRead(path))
                     using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
-                    using (var output = File.OpenWrite(Path.Combine(tempFolderPath, Path.GetFileName(path))))
+                    using (var output = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
                     {
                         m_logger.Info("input {0}, output {1}", path, Path.Combine(tempFolderPath, Path.GetFileName(path)));
                         cs.CopyTo(output);
@@ -485,10 +487,10 @@ namespace FilterProvider.Common.Configuration
             {
                 foreach(string filePath in Directory.EnumerateFiles(getTempFolder()))
                 {
-                    //File.Delete(filePath);
+                    File.Delete(filePath);
                 }
 
-                //Directory.Delete(getTempFolder());
+                Directory.Delete(getTempFolder());
             }
             catch (Exception ex)
             {
