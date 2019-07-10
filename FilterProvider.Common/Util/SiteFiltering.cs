@@ -189,13 +189,15 @@ namespace FilterProvider.Common.Util
             return useHtmlBlockPage;
         }
 
-        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.Url, string triggerCategory = "")
+        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.None, string triggerCategory = "")
         {
             bool useHtmlBlockPage = this.useHtmlBlockPage(args);
 
             if (useHtmlBlockPage)
             {
                 int matchCategory = (categories != null && categories.Length > 0) ? categories[0] : 0;
+
+                m_logger.Info("displaying block page for category {0}, list=({1})", categories[0], string.Join(", ", categories.Select(c => c.ToString())));
 
                 List<MappedFilterListCategoryModel> appliedCategories = null;
                 if(categories == null)
@@ -247,9 +249,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                m_logger.Info("OnBlacklist {0}", url);
-
-                RequestBlocked?.Invoke((short)categories[0], BlockType.Url, new Uri(url), "NOT AVAILABLE");
+                RequestBlocked?.Invoke((short)categories[0], BlockType.None, new Uri(url), "NOT AVAILABLE");
 
                 sendBlockResponse(args, url, categories);
             }
