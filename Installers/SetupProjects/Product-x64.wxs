@@ -21,13 +21,12 @@
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\CloudVeilGUI.WPF\appicon.ico" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-    <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />
+    <!--<CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />
     <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
     <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
-    <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
-      <CustomAction Id="CA.RemoveWinDivert1_3" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert1_3" Impersonate="no" />
-      
-    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\\$(var.Configuration)\InstallerCustomActions.CA.dll" />
+    <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />-->
+    <CustomAction Id="CA.RemoveWinDivert1_3" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert1_3" Impersonate="no" />
+    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
     <!-- The directory tree of the installation package. -->
@@ -76,7 +75,7 @@
       <ComponentGroupRef Id="FileSystemGroup" />
       <ComponentGroupRef Id="RegistryGroup" />
       <MergeRef Id="SetupPayload64.msm" />
-        <MergeRef Id="Microsoft_VC140_CRT_x64.msm"/>
+      <MergeRef Id="Microsoft_VC140_CRT_x64.msm" />
     </Feature>
     <InstallExecuteSequence>
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
@@ -85,12 +84,12 @@
         Are these conditions confusing?
         Check out https://www.firegiant.com/wix/tutorial/com-expression-syntax-miscellanea/expression-syntax/#prefixes for documentation.
         -->
-      <Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
+      <!--<Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
       <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
       <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[Installed]]></Custom>
-      <Custom Action="CA.GuardInstall" Before="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
-        <Custom Action="CA.RemoveWinDivert1_3" Before="InstallInitialize" />
-      <RemoveExistingProducts Before="InstallInitialize" />
+      <Custom Action="CA.GuardInstall" Before="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>-->
+      <Custom Action="CA.RemoveWinDivert1_3" After="RemoveExistingProducts" />
+      <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
       <Custom Action="ERRCA_UIANDADVERTISED" Sequence="5"><![CDATA[ProductState=1]]></Custom>
@@ -100,8 +99,6 @@
       <CCPSearch Sequence="500"><![CDATA[NOT Installed]]></CCPSearch>
       <RMCCPSearch Sequence="600"><![CDATA[NOT Installed]]></RMCCPSearch>
       <ValidateProductID Sequence="700" />
-      <Custom Action="CA.ConfigureUI" Before="CostInitialize">
-      </Custom>
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
       <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
       <CostInitialize Sequence="800" />
