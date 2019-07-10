@@ -85,7 +85,7 @@
       <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
       <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
       <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
-      <Custom Action="CA.RemoveWinDivert1_3" After="RemoveExistingProducts" />
+      <Custom Action="CA.RemoveWinDivert1_3" Before="StartServices" />
       <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
     <InstallUISequence>
