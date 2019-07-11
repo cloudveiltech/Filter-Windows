@@ -652,6 +652,8 @@ namespace FilterProvider.Common.Configuration
                         {
                             foreach (string site in Configuration.CustomWhitelist)
                             {
+                                if (site == null) continue;
+
                                 if (isCleanRule.IsMatch(site))
                                 {
                                     writer.WriteLine($"@@{site}");
@@ -683,6 +685,8 @@ namespace FilterProvider.Common.Configuration
                         {
                             foreach (string site in Configuration.SelfModeration)
                             {
+                                if (site == null) continue;
+
                                 if (isCleanRule.IsMatch(site))
                                 {
                                     writer.WriteLine(site);

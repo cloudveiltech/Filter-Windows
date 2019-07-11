@@ -375,6 +375,8 @@ namespace FilterProvider.Common.Data.Filtering
                 {
                     foreach(string line in inputList)
                     {
+                        if (line == null) continue;
+
                         if (await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
                     }
                 }
