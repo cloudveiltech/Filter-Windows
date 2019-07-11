@@ -12,7 +12,6 @@ using Citadel.IPC;
 using Citadel.IPC.Messages;
 using CitadelCore.Net.Proxy;
 using Filter.Platform.Common.Data.Models;
-using DistillNET;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Newtonsoft.Json;
@@ -142,61 +141,6 @@ namespace CitadelService.Services
 
         #endregion Windows Service API
 
-        private int ConnectedClients
-        {
-            get
-            {
-                return Interlocked.CompareExchange(ref m_connectedClients, m_connectedClients, 0);
-            }
-
-            set
-            {
-                Interlocked.Exchange(ref m_connectedClients, value);
-            }
-        }
-
-        /// <summary>
-        /// Our current filter status. 
-        /// </summary>
-        private FilterStatus m_currentStatus = FilterStatus.Synchronizing;
-
-        /// <summary>
-        /// Our status lock. 
-        /// </summary>
-        private ReaderWriterLockSlim m_currentStatusLock = new ReaderWriterLockSlim();
-
-        /// <summary>
-        /// The number of IPC clients connected to this server. 
-        /// </summary>
-        private int m_connectedClients = 0;
-
-        #region FilteringEngineVars
-
-        /// <summary>
-        /// Used to strip multiple whitespace. 
-        /// </summary>
-        private Regex m_whitespaceRegex;
-
-        /// <summary>
-        /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
-        /// </summary>
-        private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
-
-#if WITH_NLP
-        private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
-#endif
-
-        //private ProxyServer m_filteringEngine;
-
-        private BackgroundWorker m_filterEngineStartupBgWorker;
-        
-        private byte[] m_blockedHtmlPage;
-        private byte[] m_badSslHtmlPage;
-
-        private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
-
-        private static readonly string s_EpochHttpDateTime = s_Epoch.ToString("r");
-
         /// <summary>
         /// Applications we never ever want to filter. Right now, this is just OS binaries. 
         /// </summary>
@@ -222,23 +166,6 @@ namespace CitadelService.Services
         /// </summary>
         private readonly ushort m_httpsAltPort;
 
-#endregion FilteringEngineVars
-
-        private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
-
-        private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
-
-        /// <summary>
-        /// Timer used to cleanup logs every 12 hours.
-        /// </summary>
-        private Timer m_cleanupLogsTimer;
-
-        /// <summary>
-        /// Keep track of the last time we printed the username of the current user so we can output it
-        /// to the diagnostics log.
-        /// </summary>
-        private DateTime m_lastUsernamePrintTime = DateTime.MinValue;
-
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
@@ -254,39 +181,6 @@ namespace CitadelService.Services
         /// Logger. 
         /// </summary>
         private Logger m_logger;
-
-        /// <summary>
-        /// This BackgroundWorker object handles initializing the application off the UI thread.
-        /// Allows the splash screen to function.
-        /// </summary>
-        private BackgroundWorker m_backgroundInitWorker;
-
-        /// <summary>
-        /// This int stores the number of block actions that have elapsed within the given threshold timespan.
-        /// </summary>
-        private long m_thresholdTicks;
-
-        /// <summary>
-        /// This timer resets the threshold tick count. 
-        /// </summary>
-        private Timer m_thresholdCountTimer;
-
-        /// <summary>
-        /// This timer is used when the threshold has been hit. It is used to set an expiry period
-        /// for the internet lockout once the threshold has been hit.
-        /// </summary>
-        private Timer m_thresholdEnforcementTimer;
-
-        /// <summary>
-        /// This timer is used to track a 24 hour cooldown period after the exhaustion of all
-        /// available relaxed policy uses. Once the timer is expired, it will reset the count to the
-        /// config default and then disable itself.
-        /// </summary>
-        private Timer m_relaxedPolicyResetTimer;
-
-        private AppcastUpdater m_updater = null;
-
-        private ApplicationUpdate m_lastFetchedUpdate = null;
 
         private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
 
@@ -555,7 +449,7 @@ namespace CitadelService.Services
 
             try
             {
-                m_filteringRwLock.EnterReadLock();
+                m_provider.PolicyConfiguration.PolicyLock.EnterReadLock();
 
                 if(m_provider.PolicyConfiguration.BlacklistedApplications.Count == 0 && m_provider.PolicyConfiguration.WhitelistedApplications.Count == 0)
                 {
@@ -609,180 +503,10 @@ namespace CitadelService.Services
             }
             finally
             {
-                m_filteringRwLock.ExitReadLock();
+                m_provider?.PolicyConfiguration?.PolicyLock?.ExitReadLock();
             }
         }
-
-        /// <summary>
-        /// Builds up a host from hostParts and checks the bloom filter for each entry.
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="hostParts"></param>
-        /// <param name="isWhitelist"></param>
-        /// <returns>true if any host is discovered in the collection.</returns>
-        private bool isHostInList(FilterDbCollection collection, string[] hostParts, bool isWhitelist)
-        {
-            int i = hostParts.Length > 1 ? hostParts.Length - 2 : hostParts.Length - 1;
-            for (; i >= 0; i--)
-            {
-                string checkHost = string.Join(".", new ArraySegment<string>(hostParts, i, hostParts.Length - i));
-                bool result = collection.PrefetchIsDomainInList(checkHost, isWhitelist);
-
-                if (result)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private byte[] getBlockPageWithResolvedTemplates(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
-        {
-            string blockPageTemplate = UTF8Encoding.Default.GetString(m_blockedHtmlPage);
-            
-            return Encoding.UTF8.GetBytes(blockPageTemplate);
-        }
-
-        private NameValueCollection ParseHeaders(string headers)
-        {
-            var nvc = new NameValueCollection(StringComparer.OrdinalIgnoreCase);
-
-            using(var reader = new StringReader(headers))
-            {
-                string line = null;
-                while((line = reader.ReadLine()) != null)
-                {
-                    if(string.IsNullOrEmpty(line) || string.IsNullOrWhiteSpace(line))
-                    {
-                        continue;
-                    }
-
-                    var firstSplitIndex = line.IndexOf(':');
-                    if(firstSplitIndex == -1)
-                    {
-                        nvc.Add(line.Trim(), string.Empty);
-                    }
-                    else
-                    {
-                        nvc.Add(line.Substring(0, firstSplitIndex).Trim(), line.Substring(firstSplitIndex + 1).Trim());
-                    }
-                }
-            }
-
-            return nvc;
-        }
-
 #endregion EngineCallbacks
-
-        /// <summary>
-        /// Called by the threshold trigger timer whenever it's set time has passed. Here we'll reset
-        /// the current count of block actions we're tracking.
-        /// </summary>
-        /// <param name="state">
-        /// Async state object. Not used. 
-        /// </param>
-        private void OnThresholdTriggerPeriodElapsed(object state)
-        {
-            // Reset count to zero.
-            Interlocked.Exchange(ref m_thresholdTicks, 0);
-
-            var cfg = m_provider.PolicyConfiguration.Configuration;
-
-            this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
-        }
-
-        /// <summary>
-        /// Called whenever the threshold timeout period has elapsed. Here we'll restore internet access. 
-        /// </summary>
-        /// <param name="state">
-        /// Async state object. Not used. 
-        /// </param>
-        private void OnThresholdTimeoutPeriodElapsed(object state)
-        {
-            try
-            {
-                WFPUtility.EnableInternet();
-            }
-            catch(Exception e)
-            {
-                m_logger.Warn("Error when trying to reinstate internet on threshold timeout period elapsed.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-            }
-
-            // Disable the timer before we leave.
-            this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        public const int LogCleanupIntervalInHours = 12;
-        public const int MaxLogAgeInDays = 7;
-
-        private void OnCleanupLogsElapsed(object state)
-        {
-            this.CleanupLogs();
-
-            if(m_cleanupLogsTimer == null)
-            {
-                m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
-            }
-            else
-            {
-                m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        Stopwatch m_logTimeStopwatch = null;
-        /// <summary>
-        /// Logs the amount of time that has passed since the last time this function was called.
-        /// </summary>
-        /// <param name="message"></param>
-        private void LogTime(string message)
-        {
-            string timeInfo = null;
-
-            if (m_logTimeStopwatch == null)
-            {
-                m_logTimeStopwatch = Stopwatch.StartNew();
-                timeInfo = "Initialized:";
-            }
-            else
-            {
-                long ms = m_logTimeStopwatch.ElapsedMilliseconds;
-                timeInfo = string.Format("{0}ms:", ms);
-
-                m_logTimeStopwatch.Restart();
-            }
-
-            m_logger.Info("TIME {0} {1}", timeInfo, message);
-        }
-
-        private void CleanupLogs()
-        {
-            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "logs");
-
-            if(Directory.Exists(directoryPath))
-            {
-                string[] files = Directory.GetFiles(directoryPath);
-                foreach(string filePath in files)
-                {
-                    FileInfo info = new FileInfo(filePath);
-
-                    DateTime expiryDate = info.LastWriteTime.AddDays(MaxLogAgeInDays);
-                    if(expiryDate < DateTime.Now)
-                    {
-                        info.Delete();
-                    }
-                }
-            }
-        }
-
-        public class RelaxedPolicyResponseObject
-        {
-            public bool allowed { get; set; }
-            public string message { get; set; }
-            public int used { get; set; }
-            public int permitted { get; set; }
-        }
 
         /// <summary>
         /// Called whenever the app is shut down with an authorized key, or when the system is

@@ -16,12 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudVeil.DistillNET" Version="1.4.8" />
-    <PackageReference Include="CloudVeil.GoProxyWrapper" Version="0.4.8" />
+    <PackageReference Include="CloudVeil.GoProxyWrapper" Version="0.4.9" />
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
     <PackageReference Include="embedio" Version="2.7.2" />
     <PackageReference Include="Handlebars.Net" Version="1.10.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.2.6" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NodaTime" Version="2.4.4" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.4" />

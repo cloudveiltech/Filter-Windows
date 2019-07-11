@@ -1,6 +1,5 @@
 ﻿using Citadel.IPC;
 using Citadel.IPC.Messages;
-using DistillNET;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
@@ -24,25 +23,19 @@ namespace FilterProvider.Common.Util
 
     public class SiteFiltering
     {
-        public SiteFiltering(IPCServer ipcServer, TimeDetection timeDetection, IPolicyConfiguration policyConfiguration, CertificateExemptions certificateExemptions, ReaderWriterLockSlim filteringRwLock)
+        public SiteFiltering(IPCServer ipcServer, TimeDetection timeDetection, IPolicyConfiguration policyConfiguration, CertificateExemptions certificateExemptions)
         {
             m_ipcServer = ipcServer;
             m_timeDetection = timeDetection;
             m_policyConfiguration = policyConfiguration;
-            m_filteringRwLock = filteringRwLock;
 
             m_logger = LoggerUtil.GetAppWideLogger();
             m_templates = new Templates(policyConfiguration);
 
             m_certificateExemptions = certificateExemptions;
 
-            m_globalBlacklistFiltersCache = null;
-            m_globalWhitelistFiltersCache = null;
-
             m_policyConfiguration.ListsReloaded += OnListsReloaded;
         }
-
-        private ReaderWriterLockSlim m_filteringRwLock;
 
         private NLog.Logger m_logger;
 
@@ -55,9 +48,6 @@ namespace FilterProvider.Common.Util
         private Templates m_templates;
 
         private object m_filterCacheLock = new object();
-        private List<UrlFilter> m_globalWhitelistFiltersCache;
-
-        private List<UrlFilter> m_globalBlacklistFiltersCache;
 
         private IPolicyConfiguration m_policyConfiguration;
 
@@ -75,30 +65,6 @@ namespace FilterProvider.Common.Util
                 m_globalBlacklistFiltersCache = blacklist;
                 m_globalWhitelistFiltersCache = whitelist;
             }*/
-        }
-
-        /// <summary>
-        /// Builds up a host from hostParts and checks the bloom filter for each entry.
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="hostParts"></param>
-        /// <param name="isWhitelist"></param>
-        /// <returns>true if any host is discovered in the collection.</returns>
-        private bool isHostInList(FilterDbCollection collection, string[] hostParts, bool isWhitelist)
-        {
-            int i = hostParts.Length > 1 ? hostParts.Length - 2 : hostParts.Length - 1;
-            for (; i >= 0; i--)
-            {
-                string checkHost = string.Join(".", new ArraySegment<string>(hostParts, i, hostParts.Length - i));
-                bool result = collection.PrefetchIsDomainInList(checkHost, isWhitelist);
-
-                if (result)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static readonly string[] htmlMimeTypes = { "text/html", "text/plain" };
@@ -416,7 +382,7 @@ namespace FilterProvider.Common.Util
 
             try
             {
-                m_filteringRwLock.EnterReadLock();
+                m_policyConfiguration.PolicyLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
                 if (m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
@@ -467,7 +433,7 @@ namespace FilterProvider.Common.Util
             }
             finally
             {
-                m_filteringRwLock.ExitReadLock();
+                m_policyConfiguration.PolicyLock.ExitReadLock();
             }
 
 #if WITH_NLP

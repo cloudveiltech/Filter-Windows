@@ -10,7 +10,6 @@ using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
-using DistillNET;
 using Newtonsoft.Json;
 using NLog;
 using System;
@@ -213,8 +212,6 @@ namespace FilterProvider.Common.Services
 
         #endregion FilteringEngineVars
 
-        private ReaderWriterLockSlim m_filteringRwLock = new ReaderWriterLockSlim();
-
         private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
 
         private UpdateSystem m_updateSystem;
@@ -402,7 +399,7 @@ namespace FilterProvider.Common.Services
             try
             {
                 m_ipcServer = new IPCServer();
-                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger, m_filteringRwLock);
+                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger);
             }
             catch (Exception ex)
             {
@@ -523,7 +520,7 @@ namespace FilterProvider.Common.Services
 
                 m_timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
 
-                m_siteFiltering = new SiteFiltering(m_ipcServer, m_timeDetection, PolicyConfiguration, m_certificateExemptions, m_filteringRwLock);
+                m_siteFiltering = new SiteFiltering(m_ipcServer, m_timeDetection, PolicyConfiguration, m_certificateExemptions);
                 m_siteFiltering.RequestBlocked += OnRequestBlocked;
 
                 m_policyConfiguration.OnConfigurationLoaded += configureThreshold;

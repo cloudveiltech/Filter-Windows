@@ -6,7 +6,6 @@
 */
 
 using Filter.Platform.Common.Data.Models;
-using DistillNET;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,11 +15,14 @@ using System.Threading.Tasks;
 using FilterProvider.Common.Data.Filtering;
 using DotNet.Globbing;
 using Filter.Platform.Common.Data.Models;
+using System.Threading;
 
 namespace FilterProvider.Common.Configuration
 {
     public interface IPolicyConfiguration
     {
+        ReaderWriterLockSlim PolicyLock { get; }
+
         /// <summary>
         /// This method should download the authenticated user's configuration from the server.
         /// </summary>

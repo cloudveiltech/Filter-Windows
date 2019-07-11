@@ -24,7 +24,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO.Compression;
 using Newtonsoft.Json;
-using DistillNET;
 using Te.Citadel.Util;
 using System.Collections.Concurrent;
 using System.Security.AccessControl;
@@ -65,11 +64,11 @@ namespace FilterProvider.Common.Configuration
 
         private static JsonSerializerSettings s_configSerializerSettings;
 
-        public DefaultPolicyConfiguration(IPCServer server, NLog.Logger logger, ReaderWriterLockSlim filteringLock)
+        public DefaultPolicyConfiguration(IPCServer server, NLog.Logger logger)
         {
             m_ipcServer = server;
             m_logger = logger;
-            m_filteringRwLock = filteringLock;
+            m_policyLock = new ReaderWriterLockSlim();
         }
 
         // FIXME: This does not belong in CitadelService.Common. Use an interface instead for implementing this.
@@ -80,7 +79,9 @@ namespace FilterProvider.Common.Configuration
         private NLog.Logger m_logger;
 
         // Need to consolidate global stuff some how.
-        private ReaderWriterLockSlim m_filteringRwLock;
+        private ReaderWriterLockSlim m_policyLock;
+
+        public ReaderWriterLockSlim PolicyLock => m_policyLock;
 
         //private FilterDbCollection m_filterCollection;
 
@@ -502,7 +503,7 @@ namespace FilterProvider.Common.Configuration
         {
             try
             {
-                m_filteringRwLock.EnterWriteLock();
+                m_policyLock.EnterWriteLock();
 
                 var listFolderPath = getListFolder();
 
@@ -719,7 +720,7 @@ namespace FilterProvider.Common.Configuration
             }
             finally
             {
-                m_filteringRwLock.ExitWriteLock();
+                m_policyLock.ExitWriteLock();
 
                 deleteTemporaryLists();
             }
@@ -729,7 +730,7 @@ namespace FilterProvider.Common.Configuration
         {
             try
             {
-                m_filteringRwLock.EnterWriteLock();
+                m_policyLock.EnterWriteLock();
 
                 if(File.Exists(configFilePath))
                 {
@@ -749,7 +750,7 @@ namespace FilterProvider.Common.Configuration
             }
             finally
             {
-                m_filteringRwLock.ExitWriteLock();
+                m_policyLock.ExitWriteLock();
             }
         }
 

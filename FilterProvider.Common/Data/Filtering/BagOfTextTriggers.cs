@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using System.Reflection;
 using NLog;
 using System.Diagnostics;
-using DistillNET;
 using Citadel.Core.Windows.Util;
 
 namespace FilterProvider.Common.Data.Filtering

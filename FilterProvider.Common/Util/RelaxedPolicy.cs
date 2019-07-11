@@ -4,6 +4,7 @@ using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
 using FilterProvider.Common.Services;
+using GoProxyWrapper;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -111,6 +112,18 @@ namespace FilterProvider.Common.Util
             }
         }
 
+        private void enableRelaxedPolicy()
+        {
+            logger.Info("enableRelaxedPolicy");
+            AdBlockMatcherApi.EnableBypass();
+        }
+
+        private void disableRelaxedPolicy()
+        {
+            logger.Info("disableRelaxedPolicy");
+            AdBlockMatcherApi.DisableBypass();
+        }
+
         public bool RequestRelaxedPolicy(string passcode, out string bypassNotification)
         {
             HttpStatusCode statusCode;
@@ -192,14 +205,7 @@ namespace FilterProvider.Common.Util
                     m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                 }
 
-                // Disable every category that is a bypass category.
-                foreach (var entry in policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                    }
-                }
+                enableRelaxedPolicy();
 
                 var cfg = policyConfiguration.Configuration;
                 m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
@@ -218,14 +224,8 @@ namespace FilterProvider.Common.Util
                         m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                     }
 
-                    // Disable every category that is a bypass category.
-                    foreach (var entry in policyConfiguration.GeneratedCategoriesMap.Values)
-                    {
-                        if (entry is MappedBypassListCategoryModel)
-                        {
-                            policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, false);
-                        }
-                    }
+                    enableRelaxedPolicy();
+                    
 
                     var cfg = policyConfiguration.Configuration;
                     m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
@@ -411,14 +411,7 @@ namespace FilterProvider.Common.Util
             {
                 var cfg = policyConfiguration.Configuration;
 
-                // Enable every category that is a bypass category.
-                foreach (var entry in policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        policyConfiguration.CategoryIndex.SetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId, true);
-                    }
-                }
+                disableRelaxedPolicy();
 
                 ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Deactivated);
 
