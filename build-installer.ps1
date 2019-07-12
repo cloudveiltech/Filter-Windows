@@ -92,21 +92,28 @@ $builds = @(
     @("AnyCPU", "CloudVeilInstallerUI\CloudVeilInstallerUI.csproj")
 )
 
+$logFile = Join-Path $currentLocation "build.log"
+if(Test-Path $logFile) {
+    del $logFile
+}
+
 foreach ($build in $builds) {
     $projPath = Join-Path $currentLocation $build[1]
-    echo $projPath
+    echo ("Building " + $build[1] + " " + $build[0])
 
     $platform = $build[0]
 
-    & $msbuildPath /Verbosity:minimal /p:Configuartion=$configuration $projPath /t:Restore
+    & $msbuildPath /Verbosity:minimal /p:Configuartion=$configuration $projPath /t:Restore >> $logFile
 
     if ($platform -eq "Any CPU") {
-        & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration $projPath /t:Clean,Build
+        & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration $projPath /t:Clean,Build >> $logFile
     } else {
-        & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration /p:Platform=$platform $projPath /t:Clean,Build
+        & $msbuildPath /Verbosity:minimal /p:Configuration=$configuration /p:Platform=$platform $projPath /t:Clean,Build >> $logFile
     }
 
     if($LastExitCode -ne 0) {
+        echo "ERRORS OCCURRED WHILE BUILDING!"
+        echo "See build.log for more info."
         exit
     }
 }
@@ -126,36 +133,51 @@ $output64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\
 $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-x64.exe"
 
 <# Sign executable files x64 #>
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\CloudVeil.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe"
+echo "Signing x64 executables"
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\CloudVeil.exe" >> $logFile
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterServiceProvider.exe" >> $logFile
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x64\FilterAgent.Windows.exe" >> $logFile
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64
+echo "Building MSI x64"
+
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build >> $logFile
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi >> $logFile
+
+# echo "Signing MSI x64"
+# & $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output64 >> $logFile
 
 <# Sign executable files x86 #>
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\CloudVeil.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe"
+echo "Signing x86 executables" 
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\CloudVeil.exe" >> $logFile
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterServiceProvider.exe" >> $logFile
+& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a "CitadelGUI\bin\$configuration x86\FilterAgent.Windows.exe" >> $logFile
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
+echo "Building MSI x86"
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build >> $logFile
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi >> $logFile
+
+# & $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
 
 $version = & $wixVerifyPath get $product64 wix.product.version
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build,SignBundleEngine,SignBundle
+echo "Building installer bundle x86"
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build,SignBundleEngine,SignBundle >> $logFile
 
 $finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x86.exe"
 $final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx86.msi"
 Copy-Item $bundle86 -Destination $finalBundle86
 Copy-Item $output86 -Destination $final86
 
-& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build,SignBundleEngine,SignBundle
+echo "Building installer bundle x64"
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build,SignBundleEngine,SignBundle >> $logFile
 
 $finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w1.7-x64.exe"
 $final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx64.msi"
 Copy-Item $bundle64 -Destination $finalBundle64
 Copy-Item $output64 -Destination $final64
 
+$errorMatch = Select-String -Path $logFile -Pattern 'error\s+[A-Za-z0-9]*:'
+if($errorMatch -ne $null) {
+    echo "ERRORS OCCURRED WHILE BUILDING!"
+    echo "See build.log for more info."
+}
