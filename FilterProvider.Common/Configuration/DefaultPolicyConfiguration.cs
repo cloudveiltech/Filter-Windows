@@ -656,7 +656,7 @@ namespace FilterProvider.Common.Configuration
 
                                 if (isCleanRule.IsMatch(site))
                                 {
-                                    writer.WriteLine($"@@{site}");
+                                    writer.WriteLine($"||{site}");
                                 }
                             }
                         }
@@ -689,7 +689,7 @@ namespace FilterProvider.Common.Configuration
 
                                 if (isCleanRule.IsMatch(site))
                                 {
-                                    writer.WriteLine(site);
+                                    writer.WriteLine($"||{site}");
                                 }
                             }
                         }
