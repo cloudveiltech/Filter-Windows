@@ -161,9 +161,9 @@ namespace FilterProvider.Common.Util
 
             if (useHtmlBlockPage)
             {
-                int matchCategory = (categories != null && categories.Length > 0) ? categories[0] : 0;
+                int matchCategory = categories?[0] ?? 0;
 
-                m_logger.Info("displaying block page for category {0}, list=({1})", categories[0], string.Join(", ", categories.Select(c => c.ToString())));
+                m_logger.Info("displaying block page for category {0}, list=({1})", categories?[0], string.Join(", ", categories?.Select(c => c.ToString()) ?? new string[0]));
 
                 List<MappedFilterListCategoryModel> appliedCategories = null;
                 if(categories == null)
