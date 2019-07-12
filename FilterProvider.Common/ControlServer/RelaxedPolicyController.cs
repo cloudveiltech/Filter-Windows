@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Constants;
 using Unosquare.Labs.EmbedIO.Modules;
+using Filter.Platform.Common.Util;
 
 namespace FilterProvider.Common.ControlServer
 {
@@ -48,21 +49,29 @@ namespace FilterProvider.Common.ControlServer
         [WebApiHandler(HttpVerbs.Post, "/api/relaxedpolicy")]
         public async Task<bool> RequestRelaxedPolicy()
         {
-            var data = await HttpContext.ParseJsonAsync<RelaxedPolicyPostBody>();
-
-            string bypassNotification = null;
-            bool ret = relaxedPolicy.RequestRelaxedPolicy(data.passcode, out bypassNotification);
-
-            if(ret)
+            try
             {
-                Response.StatusCode = 200;
-            }
-            else
-            {
-                Response.StatusCode = 401;
-            }
+                var data = await HttpContext.ParseJsonAsync<RelaxedPolicyPostBody>();
 
-            return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = bypassNotification });
+                string bypassNotification = null;
+                bool ret = relaxedPolicy.RequestRelaxedPolicy(data.passcode, out bypassNotification);
+
+                if (ret)
+                {
+                    Response.StatusCode = 200;
+                }
+                else
+                {
+                    Response.StatusCode = 401;
+                }
+
+                return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = bypassNotification });
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.GetAppWideLogger().Error($"Exception occurred while request relaxed policy: {ex}");
+                return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = "Error occurred while requesting relaxed policy. Try again later." });
+            }
         }
     }
 }
