@@ -342,22 +342,7 @@ namespace FilterProvider.Common.Util
 
         private RelaxedPolicyStatus getRelaxedPolicyStatus()
         {
-            bool relaxedInEffect = false;
-
-            if (policyConfiguration.GeneratedCategoriesMap != null)
-            {
-                // Determine if a relaxed policy is currently in effect.
-                foreach (var entry in policyConfiguration.GeneratedCategoriesMap.Values)
-                {
-                    if (entry is MappedBypassListCategoryModel)
-                    {
-                        if (policyConfiguration.CategoryIndex.GetIsCategoryEnabled(((MappedBypassListCategoryModel)entry).CategoryId) == false)
-                        {
-                            relaxedInEffect = true;
-                        }
-                    }
-                }
-            }
+            bool relaxedInEffect = AdBlockMatcherApi.GetBypassEnabled();
 
             if (relaxedInEffect)
             {
