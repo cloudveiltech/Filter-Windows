@@ -468,7 +468,6 @@ namespace FilterProvider.Common.Configuration
                     using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
                     using (var output = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
                     {
-                        m_logger.Info("input {0}, output {1}", path, Path.Combine(tempFolderPath, Path.GetFileName(path)));
                         cs.CopyTo(output);
                     }
                 }
