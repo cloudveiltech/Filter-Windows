@@ -8,6 +8,7 @@
 using CitadelService.Services;
 using Filter.Platform.Common.Util;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using Topshelf;
 

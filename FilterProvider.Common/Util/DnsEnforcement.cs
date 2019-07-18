@@ -415,6 +415,7 @@ namespace FilterProvider.Common.Util
         #region DnsEnforcement.Triggers
 
         private bool isBehindCaptivePortal = false;
+        private bool isCaptivePortalActive = false;
 
         public async void Trigger(bool sendDnsChangeEvents = false)
         {
@@ -436,8 +437,8 @@ namespace FilterProvider.Common.Util
 
                 isBehindCaptivePortal = isCaptivePortal;
                 m_logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
-
-                TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
+                
+		TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
             {
@@ -450,7 +451,11 @@ namespace FilterProvider.Common.Util
 
         public void SetupTimers()
         {
-            int timerTime = isBehindCaptivePortal ? 5000 : 60000;
+            int timerTime = isBehindCaptivePortal ? 30000 : 60000;
+            if(isCaptivePortalActive)
+            {
+                timerTime = 5000;
+            }
 
             lock(m_dnsEnforcementLock)
             {
@@ -497,7 +502,15 @@ namespace FilterProvider.Common.Util
 
         private void TriggerTimer(object state)
         {
-            Trigger();
+            try
+            {
+                Trigger();
+            }
+            catch(Exception ex)
+            {
+                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                m_provider.ErrorsClient?.Capture(new SharpRaven.Data.SentryEvent(ex));
+            }
         }
     }
 }
