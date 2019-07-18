@@ -475,7 +475,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv2-win");
+                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv4w");
             }
             catch (Exception e)
             {

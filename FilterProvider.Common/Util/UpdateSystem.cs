@@ -33,11 +33,11 @@ namespace FilterProvider.Common.Util
             var bitVersionUri = string.Empty;
             if (Environment.Is64BitProcess)
             {
-                bitVersionUri = "/update/cv2-win-x64/update.xml";
+                bitVersionUri = "/update/cv4w-x64/update.xml";
             }
             else
             {
-                bitVersionUri = "/update/cv2-win-x86/update.xml";
+                bitVersionUri = "/update/cv4w-x86/update.xml";
             }
 
             var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);

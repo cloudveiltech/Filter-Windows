@@ -165,7 +165,7 @@ $version = $versionObj.ToString(3)
 echo "Building installer bundle x86"
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build,SignBundleEngine,SignBundle >> $logFile
 
-$finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv2-win-x86.exe"
+$finalBundle86 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w-x86.exe"
 $final86 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx86.msi"
 Copy-Item $bundle86 -Destination $finalBundle86
 Copy-Item $output86 -Destination $final86
@@ -173,7 +173,7 @@ Copy-Item $output86 -Destination $final86
 echo "Building installer bundle x64"
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x64 /t:Clean,Build,SignBundleEngine,SignBundle >> $logFile
 
-$finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv2-win-x64.exe"
+$finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w-x64.exe"
 $final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx64.msi"
 Copy-Item $bundle64 -Destination $finalBundle64
 Copy-Item $output64 -Destination $final64
