@@ -475,7 +475,7 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv4w1.7");
+                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv2-win");
             }
             catch (Exception e)
             {
@@ -485,8 +485,6 @@ namespace FilterProvider.Common.Services
 
                 Environment.Exit(-1);
             }
-
-
 
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
