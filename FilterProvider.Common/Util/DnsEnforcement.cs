@@ -509,7 +509,6 @@ namespace FilterProvider.Common.Util
             catch(Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(m_logger, ex);
-                m_provider.ErrorsClient?.Capture(new SharpRaven.Data.SentryEvent(ex));
             }
         }
     }
