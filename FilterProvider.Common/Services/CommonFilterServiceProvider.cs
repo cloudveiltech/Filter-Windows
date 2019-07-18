@@ -391,7 +391,7 @@ namespace FilterProvider.Common.Services
                 version = AssemblyName.GetAssemblyName(assembly.Location).Version;
             }
 
-            appVerStr += " " + version.ToString();
+            appVerStr += " " + version.ToString(3);
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
             m_logger.Info("CitadelService Version: {0}", appVerStr);

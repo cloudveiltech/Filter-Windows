@@ -566,7 +566,7 @@ namespace FilterProvider.Common.Util
 
                 //m_logger.Info("RequestResource1: accessToken=" + accessToken);
                 IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
-                string version = versionProvider.GetApplicationVersion().ToString();
+                string version = versionProvider.GetApplicationVersion().ToString(3);
 
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);

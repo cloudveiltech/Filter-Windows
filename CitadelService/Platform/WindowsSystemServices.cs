@@ -391,7 +391,7 @@ namespace CitadelService.Platform
             {
                 Version currentVersion = getCV4WVersion();
 
-                text.AppendLine($"CV4W {currentVersion} diagnostics log");
+                text.AppendLine($"CV4W {currentVersion.ToString(3)} diagnostics log");
                 text.AppendLine(mainSeparator);
                 text.AppendLine();
                 text.AppendLine(getIpConfigInfo());

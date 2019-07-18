@@ -158,7 +158,9 @@ echo "Building MSI x86"
 
 # & $signtoolPath sign /fd SHA512 /tr http://timestamp.comodoca.com /a $output86
 
-$version = & $wixVerifyPath get $product64 wix.product.version
+$versionString = & $wixVerifyPath get $product64 wix.product.version
+$versionObj = [System.Version]::Parse($versionString)
+$version = $versionObj.ToString(3)
 
 echo "Building installer bundle x86"
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=x86 /t:Clean,Build,SignBundleEngine,SignBundle >> $logFile

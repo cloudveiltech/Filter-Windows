@@ -33,7 +33,7 @@ namespace Te.Citadel.UI.Windows
                 string title = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
                 System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                title += " - Version " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString();
+                title += " - Version " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString(3);
                 this.Title = title;
             }
             catch(Exception err)
