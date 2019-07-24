@@ -30,6 +30,7 @@
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CustomActions.wxs" />
     <Compile Include="InstallationUi.wxs" />
     <Compile Include="Product-x86.wxs" />
   </ItemGroup>

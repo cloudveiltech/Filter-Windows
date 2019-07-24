@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="StartupEntryRemoval.cs" />
     <Compile Include="InstallGuard.cs" />
     <Compile Include="ProcessExtensions.cs" />
     <Compile Include="ServiceStarter.cs" />

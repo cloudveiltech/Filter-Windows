@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+        <!-- Initialize the 'TARGETDIR' directory property. -->
+        <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
+
+        <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+        <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />
+        <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
+        <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
+        <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
+        <CustomAction Id="CA.RemoveWinDivert1_3" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert1_3" Impersonate="no" />
+        <CustomAction Id="CA.RemoveCloudVeilStartupEntry" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveCloudVeilStartupEntry" Impersonate="no" />
+
+        <InstallExecuteSequence>
+            <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
+            <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
+            <!--
+        Are these conditions confusing?
+        Check out https://www.firegiant.com/wix/tutorial/com-expression-syntax-miscellanea/expression-syntax/#prefixes for documentation.
+        -->
+            <Custom Action="CA.StartServiceOnCommit.SetProperty" Before="CA.StartServiceOnCommit"><![CDATA[$CloudVeilExe > 2]]></Custom>
+            <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
+            <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
+            <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
+            <Custom Action="CA.RemoveWinDivert1_3" Before="StartServices" />
+            <Custom Action="CA.RemoveCloudVeilStartupEntry" Before="CA.RemoveWinDivert1_3" />
+            <RemoveExistingProducts After="InstallInitialize" />
+        </InstallExecuteSequence>
+	</Fragment>
+</Wix>
