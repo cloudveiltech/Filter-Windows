@@ -48,6 +48,8 @@ namespace Filter.Platform.Common.Util
             }
         }
 
+        public static string LoggerName { get; set; } = "Citadel";
+
         /// <summary>
         /// Gets the application wide logger.
         /// </summary>
@@ -61,7 +63,7 @@ namespace Filter.Platform.Common.Util
         /// </remarks>
         public static Logger GetAppWideLogger()
         {
-            return LogManager.GetLogger("Citadel");
+            return LogManager.GetLogger(LoggerName);
         }
     }
 }

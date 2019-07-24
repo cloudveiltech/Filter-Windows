@@ -122,6 +122,8 @@ namespace CloudVeil.Windows
         [STAThread]
         public static void Main(string[] args)
         {
+            LoggerUtil.LoggerName = "CitadelGUI";
+
             bool startMinimized = false;
 
             foreach (string arg in args)
