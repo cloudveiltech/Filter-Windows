@@ -874,7 +874,7 @@ namespace FilterProvider.Common.Configuration
                         if (glob != null)
                             globs.Add(glob);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         m_logger.Warn("Invalid glob '{0}'. Not adding.", app);
                     }

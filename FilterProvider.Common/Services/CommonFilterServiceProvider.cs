@@ -362,9 +362,9 @@ namespace FilterProvider.Common.Services
 
                 consoleOutStatus = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
+                // Swallow exceptions.
             }
 
             try

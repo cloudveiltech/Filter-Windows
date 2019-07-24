@@ -14,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FilterProvider.Common.Data.Filtering;
 using DotNet.Globbing;
-using Filter.Platform.Common.Data.Models;
 using System.Threading;
 
 namespace FilterProvider.Common.Configuration

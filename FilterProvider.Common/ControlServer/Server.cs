@@ -16,7 +16,6 @@ namespace FilterProvider.Common.ControlServer
     {
         private WebServer server = null;
         private Task serverTask = null;
-        private BackgroundWorker worker = null;
 
         private NLog.Logger logger = null;
 

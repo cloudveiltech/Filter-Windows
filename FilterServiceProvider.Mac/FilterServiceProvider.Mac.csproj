@@ -27,9 +27,12 @@
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
-    <HttpClientHandler></HttpClientHandler>
-    <LinkMode></LinkMode>
-    <XamMacArch></XamMacArch>
+    <HttpClientHandler>
+    </HttpClientHandler>
+    <LinkMode>
+    </LinkMode>
+    <XamMacArch>
+    </XamMacArch>
     <MonoBundlingExtraArgs>-v -v -v -v</MonoBundlingExtraArgs>
     <AOTMode>None</AOTMode>
     <LangVersion>7.3</LangVersion>
@@ -37,7 +40,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
-    <DefineConstants></DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <EnableCodeSigning>false</EnableCodeSigning>
@@ -46,9 +50,12 @@
     <IncludeMonoRuntime>true</IncludeMonoRuntime>
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
-    <LinkMode></LinkMode>
-    <HttpClientHandler></HttpClientHandler>
-    <XamMacArch></XamMacArch>
+    <LinkMode>
+    </LinkMode>
+    <HttpClientHandler>
+    </HttpClientHandler>
+    <XamMacArch>
+    </XamMacArch>
     <AOTMode>None</AOTMode>
     <MonoBundlingExtraArgs>--optimize=-trim-architectures</MonoBundlingExtraArgs>
     <LangVersion>7.3</LangVersion>
@@ -65,10 +72,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
     <PackageReference Include="DNS" Version="4.0.0" />
-    <PackageReference Include="NLog" Version="4.5.10" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="4.5.0" />
     <PackageReference Include="Microsoft.Data.Sqlite">
-      <Version>2.1.0</Version>
+      <Version>2.2.6</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -87,8 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="Platform\" />
-    <Folder Include="Services\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

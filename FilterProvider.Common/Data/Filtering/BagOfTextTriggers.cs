@@ -510,12 +510,6 @@ namespace FilterProvider.Common.Data.Filtering
                 return false;
             }
 
-            bool textTriggerDebugging = false;
-            if(input.IndexOf("poke a girl") >= 0 )
-            {
-                textTriggerDebugging = true;
-            }
-
             var split = Split(input);
 
             /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
