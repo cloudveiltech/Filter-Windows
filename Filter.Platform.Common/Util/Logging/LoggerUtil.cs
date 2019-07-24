@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using CloudVeil;
 using NLog;
 using System;
 using System.Diagnostics;
@@ -13,6 +14,21 @@ namespace Filter.Platform.Common.Util
 {
     public static class LoggerUtil
     {
+        static LoggerUtil()
+        {
+            LogManager.Configuration
+                .AddSentry(o =>
+                {
+                    o.MinimumBreadcrumbLevel = LogLevel.Warn;
+                    o.MinimumEventLevel = LogLevel.Error;
+
+                    o.AddTag("logger", "${logger}");
+
+                    o.Dsn = new Sentry.Dsn(CompileSecrets.SentryDsn);
+                    o.InitializeSdk = true;
+                });
+        }
+
         /// <summary>
         /// Recursively logs the given exception to the supplied logger. Steps through all inner
         /// exceptions until there are none left, writting the message and stack strace.
