@@ -340,12 +340,6 @@ namespace CitadelCore.Windows.Diversion
                         recvLength = recvAsyncIoLen;
                     }
 
-                    if (addr.Impostor)
-                    {
-                        m_logger.Warn("Skipping imposter packet.");
-                        continue;
-                    }
-
                     #endregion Packet Reading Code
 
                     WinDivertParseResult parseResult = null;
