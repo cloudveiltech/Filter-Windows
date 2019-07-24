@@ -271,9 +271,6 @@
         <Component Id="comp_43A007AE_E31C" Guid="463D97D3-A5A4-490C-BCE0-F6CD10BE5950" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_3572440B_53BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CitadelGUI\bin\Release x64\Handlebars.dll" KeyPath="yes" />
         </Component>
-        <Component Id="comp_F23A9C16_963E" Guid="0172284E-554B-475D-8112-1980A1310E42" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5C819BB6_F798" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CitadelGUI\bin\Release x64\Sentry.NLog.dll" KeyPath="yes" />
-        </Component>
         <Directory Id="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Name="x64">
           <Component Id="com_dir_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" Guid="32E744EE-CD71-422E-9124-B9D2B5BEDFC2" Transitive="no">
             <CreateFolder Directory="_BF1BBB44_638D_4B42_A3C1_B89E12A99E46" />
