@@ -446,8 +446,15 @@ namespace CloudVeil.Windows
 
                 m_ipcClient.RegisterResponseHandler<string>(IpcCall.ActivationIdentifier, (msg) =>
                 {
-                    var vm = ModelManager.Get<SupportViewModel>();
-                    m_mainWindow.Dispatcher.Invoke(() => vm.ActivationIdentifier = msg.Data);
+                    {
+                        var vm = ModelManager.Get<SupportViewModel>();
+                        m_mainWindow.Dispatcher.Invoke(() => vm.ActivationIdentifier = msg.Data);
+                    }
+
+                    {
+                        var vm = ModelManager.Get<SelfModerationViewModel>();
+                        m_mainWindow.Dispatcher.Invoke(() => vm.ActivationIdentifier = msg.Data);
+                    }
 
                     return true;
                 });
