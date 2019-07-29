@@ -7,6 +7,7 @@
 
 using Citadel.Core.Windows.Util;
 using Filter.Platform.Common.Util;
+using MahApps.Metro.Controls;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -31,11 +32,26 @@ namespace Te.Citadel.UI.Views
             e.Handled = true;
         }
 
-        public void SwitchTab(int tabIdx)
+        public void SwitchTab(Type tabType)
         {
-            MessageBox.Show("Invalid command. Please tell the developer to re-implement SwitchTab");
+            Dispatcher.BeginInvoke((Action)(() =>
+            {
+                var itemsSource = MenuControl.ItemsSource as HamburgerMenuItemCollection;
 
-            //Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = tabIdx));
+                if (itemsSource != null)
+                {
+                    for (int i = 0; i < itemsSource.Count; i++)
+                    {
+                        HamburgerMenuItem item = itemsSource[i];
+
+                        if (tabType.IsAssignableFrom(item.Tag.GetType()))
+                        {
+                            MenuControl.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }));
         }
 
         private void MenuControl_ItemInvoked(object sender, MahApps.Metro.Controls.HamburgerMenuItemInvokedEventArgs e)

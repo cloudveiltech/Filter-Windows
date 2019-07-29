@@ -1024,7 +1024,7 @@ namespace CloudVeil.Windows
         private void TrayIcon_OpenBlockHistory(object sender, EventArgs e)
         {
             BringAppToFocus();
-            viewManager.Get<DashboardView>()?.SwitchTab(1);
+            viewManager.Get<DashboardView>()?.SwitchTab(typeof(RelaxedPolicyView));
         }
 
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
