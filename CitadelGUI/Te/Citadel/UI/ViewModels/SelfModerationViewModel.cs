@@ -22,7 +22,19 @@ namespace Te.Citadel.UI.ViewModels
     public class SelfModerationViewModel : BaseCitadelViewModel
     {
         public string SelfModerationSetupUri
-            => CloudVeil.CompileSecrets.ServiceProviderUserSelfModerationPath;
+            => CloudVeil.CompileSecrets.ServiceProviderUserSelfModerationPath.Replace("{{identifier}}", ActivationIdentifier);
+
+        private string activationIdentifier;
+        public string ActivationIdentifier
+        {
+            get => activationIdentifier;
+            set
+            {
+                activationIdentifier = value;
+                RaisePropertyChanged(nameof(ActivationIdentifier));
+                RaisePropertyChanged(nameof(SelfModerationSetupUri));
+            }
+        }
 
         private string newSelfModerationSite;
         public string NewSelfModerationSite

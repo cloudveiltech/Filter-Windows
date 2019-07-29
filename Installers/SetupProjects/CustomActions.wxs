@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Fragment>
         <!-- Initialize the 'TARGETDIR' directory property. -->
-        <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
+        <CustomActionRef Id="DIRCA_TARGETDIR" />
 
         <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
         <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />

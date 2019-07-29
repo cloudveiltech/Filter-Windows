@@ -40,6 +40,7 @@
       <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
       <Merge Id="Microsoft_VC140_CRT_x64.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0" />
     </Directory>
+      
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
       <ComponentRef Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" />
@@ -70,7 +71,9 @@
       <MergeRef Id="Microsoft_VC140_CRT_x64.msm" />
     </Feature>
     <CustomActionRef Id="CA.StartServiceOnCommit" />
-    <InstallUISequence>
+      <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
+      <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
+      <InstallUISequence>
       <Custom Action="ERRCA_UIANDADVERTISED" Sequence="5"><![CDATA[ProductState=1]]></Custom>
       <AppSearch Sequence="100" />
       <FindRelatedProducts Sequence="200" />
