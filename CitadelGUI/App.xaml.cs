@@ -1010,7 +1010,7 @@ namespace CloudVeil.Windows
 
             var menuItems = new List<System.Windows.Forms.MenuItem>();
             menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
-            menuItems.Add(new System.Windows.Forms.MenuItem("Settings", TrayIcon_OpenSettings));
+            menuItems.Add(new System.Windows.Forms.MenuItem("Block History", TrayIcon_OpenBlockHistory));
             menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
 
             m_trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
@@ -1021,7 +1021,7 @@ namespace CloudVeil.Windows
             BringAppToFocus();
         }
 
-        private void TrayIcon_OpenSettings(object sender, EventArgs e)
+        private void TrayIcon_OpenBlockHistory(object sender, EventArgs e)
         {
             BringAppToFocus();
             viewManager.Get<DashboardView>()?.SwitchTab(1);
