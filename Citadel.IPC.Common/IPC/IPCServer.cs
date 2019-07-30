@@ -708,11 +708,11 @@ namespace Citadel.IPC
         {
             if (handler != null)
             {
-                m_ipcQueue.AddMessage(msg, handler);
+                m_ipcQueue.AddMessage(msg, handler, 0);
             }
         }
 
-        public override void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null)
+        public override void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null, int retryNum = 0)
         {
             if(m_waitingForAuth)
             {

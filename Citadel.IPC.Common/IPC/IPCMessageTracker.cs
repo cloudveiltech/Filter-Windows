@@ -25,6 +25,8 @@ namespace Citadel.IPC
         {
             public BaseMessage Message { get; set; }
             public ReplyHandlerClass Handler { get; set; }
+
+            public int Retries { get; set; } = 0;
         }
 
         private NLog.Logger m_logger;
@@ -46,16 +48,22 @@ namespace Citadel.IPC
         /// </summary>
         /// <param name="message">The message which was sent to the server</param>
         /// <param name="handler">The handler for the reply message.</param>
-        public void AddMessage(BaseMessage message, ReplyHandlerClass handler)
+        public void AddMessage(BaseMessage message, ReplyHandlerClass handler, int retryNum)
         {
             lock (m_lock)
             {
-                m_messageList.Add(new IPCMessageData() { Message = message, Handler = handler });
+                m_messageList.Add(new IPCMessageData() { Message = message, Handler = handler, Retries = retryNum });
             }
         }
 
+        /// <summary>
+        /// Intended to be called when a client disconnects from the IPC server for some reason.
+        /// Makes sure that a server ends up handling a client's message.
+        /// </summary>
         public void RetryMessages()
         {
+            const int MaxRetries = 3;
+
             m_logger.Info("Retrying IPC messages.");
 
             List<IPCMessageData> messageList = null;
@@ -66,7 +74,10 @@ namespace Citadel.IPC
 
             foreach(var message in messageList)
             {
-                m_communicator.PushMessage(message.Message, message.Handler);
+                if (message.Retries < MaxRetries)
+                {
+                    m_communicator.PushMessage(message.Message, message.Handler, message.Retries + 1);
+                }
             }
         }
 

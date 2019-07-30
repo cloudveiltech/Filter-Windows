@@ -178,6 +178,7 @@ namespace Citadel.IPC
         {
             ConnectedToServer?.Invoke();
 
+            // Call RetryMessages() in case a message did not get handled by the IPC server.
             try
             {
                 ipcQueue.RetryMessages();
@@ -490,7 +491,7 @@ namespace Citadel.IPC
             return h;
         }
 
-        public override void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null)
+        public override void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null, int retryNum = 0)
         {
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
@@ -504,11 +505,11 @@ namespace Citadel.IPC
             {
                 if (Default != null)
                 {
-                    Default.ipcQueue.AddMessage(msg, replyHandler);
+                    Default.ipcQueue.AddMessage(msg, replyHandler, retryNum);
                 }
                 else
                 {
-                    ipcQueue.AddMessage(msg, replyHandler);
+                    ipcQueue.AddMessage(msg, replyHandler, retryNum);
                 }
             }
         }
