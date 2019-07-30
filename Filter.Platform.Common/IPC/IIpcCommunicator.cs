@@ -27,6 +27,8 @@ namespace Citadel.IPC
         protected abstract ReplyHandlerClass RequestInternal(IpcCall call, object data, BaseMessage replyTo);
         protected abstract ReplyHandlerClass SendInternal(IpcCall call, object data, BaseMessage replyTo);
 
+        public abstract void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null);
+
         /// <summary>
         /// Use this to send a strongly typed request.
         /// </summary>

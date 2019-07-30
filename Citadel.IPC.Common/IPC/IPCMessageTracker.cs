@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 ﻿using Citadel.IPC.Messages;
+using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
 
@@ -26,13 +27,18 @@ namespace Citadel.IPC
             public ReplyHandlerClass Handler { get; set; }
         }
 
+        private NLog.Logger m_logger;
         private List<IPCMessageData> m_messageList;
         private object m_lock;
 
-        public IPCMessageTracker()
+        private IpcCommunicator m_communicator;
+
+        public IPCMessageTracker(IpcCommunicator communicator)
         {
             m_messageList = new List<IPCMessageData>();
             m_lock = new object();
+            m_logger = LoggerUtil.GetAppWideLogger();
+            m_communicator = communicator;
         }
 
         /// <summary>
@@ -45,6 +51,22 @@ namespace Citadel.IPC
             lock (m_lock)
             {
                 m_messageList.Add(new IPCMessageData() { Message = message, Handler = handler });
+            }
+        }
+
+        public void RetryMessages()
+        {
+            m_logger.Info("Retrying IPC messages.");
+
+            List<IPCMessageData> messageList = null;
+            lock (m_lock)
+            {
+                m_messageList = new List<IPCMessageData>();
+            }
+
+            foreach(var message in messageList)
+            {
+                m_communicator.PushMessage(message.Message, message.Handler);
             }
         }
 

@@ -312,7 +312,7 @@ namespace Citadel.IPC
             m_server.Error += M_server_Error;
 
             // Server is no longer started by constructor. We start the IPCServer after everything else has been set up by the FilterServiceProvider.
-            m_ipcQueue = new IPCMessageTracker();
+            m_ipcQueue = new IPCMessageTracker(this);
 
             m_callbacks.Add(typeof(AddSelfModerationEntryMessage), (msg) =>
             {
@@ -712,7 +712,7 @@ namespace Citadel.IPC
             }
         }
 
-        private void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null)
+        public override void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null)
         {
             if(m_waitingForAuth)
             {

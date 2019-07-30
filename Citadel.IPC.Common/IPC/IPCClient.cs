@@ -146,7 +146,7 @@ namespace Citadel.IPC
         public IPCClient(bool autoReconnect = false)
         {
             logger = LoggerUtil.GetAppWideLogger();
-            ipcQueue = new IPCMessageTracker();
+            ipcQueue = new IPCMessageTracker(this);
 
             var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
 
@@ -177,6 +177,15 @@ namespace Citadel.IPC
         protected void OnConnected()
         {
             ConnectedToServer?.Invoke();
+
+            try
+            {
+                ipcQueue.RetryMessages();
+            }
+            catch(Exception ex)
+            {
+                logger.Error($"Error occurred while retrying messages. {ex}");
+            }
         }
 
         protected void OnDisconnected()
@@ -481,7 +490,7 @@ namespace Citadel.IPC
             return h;
         }
 
-        protected void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null)
+        public override void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null)
         {
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
