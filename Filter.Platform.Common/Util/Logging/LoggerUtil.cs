@@ -14,53 +14,6 @@ namespace Filter.Platform.Common.Util
 {
     public static class LoggerUtil
     {
-        public const string SentryTarget = "sentry";
-
-        static LoggerUtil()
-        {
-            ExtendNLogConfiguration();
-
-            LogManager.ConfigurationChanged += LogManager_ConfigurationChanged;
-        }
-
-        private static void LogManager_ConfigurationChanged(object sender, NLog.Config.LoggingConfigurationChangedEventArgs e)
-        {
-            ExtendNLogConfiguration();
-        }
-
-        private static void ExtendNLogConfiguration()
-        {
-            if(LogManager.Configuration == null)
-            {
-                LogManager.Configuration = new NLog.Config.LoggingConfiguration();
-            }
-
-            LogManager.Configuration
-                .AddSentry(CompileSecrets.SentryDsn, SentryTarget, o =>
-                {
-                    o.MinimumBreadcrumbLevel = LogLevel.Debug;
-                    o.MinimumEventLevel = LogLevel.Error;
-
-                    o.BeforeBreadcrumb = (breadcrumb) =>
-                    {
-                        if (breadcrumb.Message.Contains("Request"))
-                        {
-                            return null;
-                        }
-                        else
-                        {
-                            return breadcrumb;
-                        }
-                    };
-
-                    o.AddTag("logger", "${logger}");
-
-                    o.InitializeSdk = true;
-                });
-
-            LogManager.Configuration.AddRuleForAllLevels(SentryTarget, "*");
-        }
-
         /// <summary>
         /// Recursively logs the given exception to the supplied logger. Steps through all inner
         /// exceptions until there are none left, writting the message and stack strace.

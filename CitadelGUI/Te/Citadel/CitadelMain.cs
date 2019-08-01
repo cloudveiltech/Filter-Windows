@@ -16,6 +16,7 @@ using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Util;
 using NLog;
+using Sentry;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -122,6 +123,23 @@ namespace CloudVeil.Windows
         [STAThread]
         public static void Main(string[] args)
         {
+            var sentry = SentrySdk.Init(o =>
+            {
+                o.Dsn = new Dsn(CompileSecrets.SentryDsn);
+
+                o.BeforeBreadcrumb = (breadcrumb) =>
+                {
+                    if (breadcrumb.Message.Contains("Request"))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return breadcrumb;
+                    }
+                };
+            });
+
             LoggerUtil.LoggerName = "CitadelGUI";
 
             bool startMinimized = false;
@@ -198,6 +216,7 @@ namespace CloudVeil.Windows
             {
                 try
                 {
+                    SentrySdk.CaptureException(e);
                     MainLogger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(MainLogger, e);
                 }
@@ -206,6 +225,8 @@ namespace CloudVeil.Windows
                     // XXX TODO - We can't really log here unless we do a direct to-file write.
                 }
             }
+
+            sentry.Dispose();
 
             // No matter what, always ensure that critical flags are removed from our process before exiting.
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();

@@ -7,6 +7,7 @@
 
 using CitadelService.Services;
 using Filter.Platform.Common.Util;
+using Sentry;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -29,7 +30,25 @@ namespace CitadelService
 
             bool exiting = false;
 
-            if(createdNew)
+            var sentry = SentrySdk.Init(o =>
+            {
+                o.Dsn = new Dsn(CompileSecrets.SentryDsn);
+
+                o.BeforeBreadcrumb = (breadcrumb) =>
+                {
+                    if (breadcrumb.Message.Contains("Request"))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return breadcrumb;
+                    }
+                };
+            });
+
+
+            if (createdNew)
             {
                 // Having problems with the service not starting? Run FilterServiceProvider.exe test-me in admin mode to figure out why.
                 if (args.Length > 0 && args[0] == "test-me")
