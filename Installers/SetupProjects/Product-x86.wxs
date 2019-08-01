@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="d0c44e33-7ba3-469b-8c07-1b769b2f4a35" Name="CloudVeil For Windows" Language="1033" Version="1.7.0.0" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
+  <Product Id="d111b814-8892-4a1a-a27c-53770e786450" Name="CloudVeil For Windows" Language="1033" Version="2.0.1" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x86" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -64,12 +64,12 @@
       <MergeRef Id="Microsoft_VC140_CRT_x86.msm" />
     </Feature>
     <Upgrade Id="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}">
-      <UpgradeVersion Minimum="1.7.0.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
-      <UpgradeVersion Maximum="1.7.0.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
+      <UpgradeVersion Minimum="2.0.1" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
+      <UpgradeVersion Maximum="2.0.1" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
     </Upgrade>
-      <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
-      <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />
-      <CustomActionRef Id="CA.StartServiceOnCommit" />
+    <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
+    <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />
+    <CustomActionRef Id="CA.StartServiceOnCommit" />
     <InstallUISequence>
       <Custom Action="ERRCA_UIANDADVERTISED" Sequence="5"><![CDATA[ProductState=1]]></Custom>
       <AppSearch Sequence="100" />
