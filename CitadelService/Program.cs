@@ -32,7 +32,7 @@ namespace CitadelService
 
             var sentry = SentrySdk.Init(o =>
             {
-                o.Dsn = new Dsn(CompileSecrets.SentryDsn);
+                o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
 
                 o.BeforeBreadcrumb = (breadcrumb) =>
                 {

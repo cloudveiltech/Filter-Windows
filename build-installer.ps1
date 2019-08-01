@@ -1,13 +1,21 @@
-Function Find-MsBuild([int] $MaxVersion = 2017)
+Function Find-MsBuild([int] $MaxVersion = 2019)
 {
-    $agentPath = "$Env:programfiles (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\msbuild.exe"
-    $devPath = "$Env:programfiles (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe"
-    $proPath = "$Env:programfiles (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\msbuild.exe"
-    $communityPath = "$Env:programfiles (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
+    $agentPath2019 = "${Env:programfiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+    $devPath2019 = "${Env:programfiles(x86)}\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+    $proPath2019 = "${Env:programfiles(x86)}\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe"
+    $communityPath2019 = "${Env:programfiles(x86)}\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+    $agentPath = "${Env:programfiles(x86)}\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\msbuild.exe"
+    $devPath = "${Env:programfiles(x86)}\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe"
+    $proPath = "${Env:programfiles(x86)}\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\msbuild.exe"
+    $communityPath = "${Env:programfiles(x86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
     $fallback2015Path = "${Env:ProgramFiles(x86)}\MSBuild\14.0\Bin\MSBuild.exe"
     $fallback2013Path = "${Env:ProgramFiles(x86)}\MSBuild\12.0\Bin\MSBuild.exe"
     $fallbackPath = "C:\Windows\Microsoft.NET\Framework\v4.0.30319"
-        
+
+    If ((2019 -le $MaxVersion) -And (Test-Path $agentPath2019)) { return $agentPath2019 }
+    If ((2019 -le $MaxVersion) -And (Test-Path $devPath2019)) { return $devPath2019 }
+    If ((2019 -le $MaxVersion) -And (Test-Path $proPath2019)) { return $proPath2019 }
+    If ((2019 -le $MaxVersion) -And (Test-Path $communityPath2019)) { return $communityPath2019 }
     If ((2017 -le $MaxVersion) -And (Test-Path $agentPath)) { return $agentPath } 
     If ((2017 -le $MaxVersion) -And (Test-Path $devPath)) { return $devPath } 
     If ((2017 -le $MaxVersion) -And (Test-Path $proPath)) { return $proPath } 

@@ -40,7 +40,6 @@
       <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
       <Merge Id="Microsoft_VC140_CRT_x64.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0" />
     </Directory>
-      
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
       <ComponentRef Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" />
