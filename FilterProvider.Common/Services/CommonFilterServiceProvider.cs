@@ -834,34 +834,6 @@ namespace FilterProvider.Common.Services
                     //CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
                 };
 
-                // Hooks for CitadelCore diagnostics.
-
-                // TODO:X_PLAT
-                /*
-                CitadelCore.Diagnostics.Collector.OnSessionReported += (webSession) =>
-                {
-                    m_logger.Info("OnSessionReported");
-
-                    m_ipcServer.SendDiagnosticsInfo(new DiagnosticsInfoV1()
-                    {
-                        DiagnosticsType = DiagnosticsType.RequestSession,
-
-                        ClientRequestBody = webSession.ClientRequestBody,
-                        ClientRequestHeaders = webSession.ClientRequestHeaders,
-                        ClientRequestUri = webSession.ClientRequestUri,
-
-                        ServerRequestBody = webSession.ServerRequestBody,
-                        ServerRequestHeaders = webSession.ServerRequestHeaders,
-                        ServerRequestUri = webSession.ServerRequestUri,
-
-                        ServerResponseBody = webSession.ServerResponseBody,
-                        ServerResponseHeaders = webSession.ServerResponseHeaders,
-
-                        DateStarted = webSession.DateStarted,
-                        DateEnded = webSession.DateEnded
-                    });
-                };*/
-
                 m_ipcServer.Start();
             }
             catch (Exception ipce)

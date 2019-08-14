@@ -9,11 +9,45 @@ using CloudVeil;
 using NLog;
 using System;
 using System.Diagnostics;
+using Sentry.NLog;
 
 namespace Filter.Platform.Common.Util
 {
     public static class LoggerUtil
     {
+        private const string SentryTarget = "sentry";
+        public static void InitializeSentryIntegration()
+        {
+            LogManager.ConfigurationReloaded += LogManager_ConfigurationReloaded;
+            addSentryLogging();
+        }
+
+        private static void LogManager_ConfigurationReloaded(object sender, NLog.Config.LoggingConfigurationReloadedEventArgs e)
+        {
+            addSentryLogging();
+        }
+        private static void addSentryLogging()
+        {
+            LogManager.Configuration?.AddSentry(null, SentryTarget, o =>
+            {
+                o.Layout = "${message}";
+                o.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
+
+                o.MinimumBreadcrumbLevel = LogLevel.Error; // Debug and higher are stored as breadcrumbs (default is Info)
+                o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
+
+                o.AttachStacktrace = true;
+                o.SendDefaultPii = false; // Send Personal Identifiable information like the username of the user logged in to the device
+
+                o.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
+                o.ShutdownTimeoutSeconds = 5;
+
+                o.AddTag("logger", "${logger}");  // Send the logger name as a tag
+            });
+
+            LogManager.Configuration?.AddRuleForAllLevels(SentryTarget, LoggerName);
+        }
+
         /// <summary>
         /// Recursively logs the given exception to the supplied logger. Steps through all inner
         /// exceptions until there are none left, writting the message and stack strace.
