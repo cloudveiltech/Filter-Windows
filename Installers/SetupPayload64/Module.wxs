@@ -154,6 +154,9 @@
         <Component Id="comp_31E62DAB_4237" Guid="9476306E-A5C4-4DD0-B943-06E2100AD1D3" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2AC10A49_C50D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.pdb" Source="..\..\CitadelGUI\bin\Release x64\NodaTime.pdb" KeyPath="yes" />
         </Component>
+          <Component Id="comp_SentryNLogDll" Guid="474e466c-2c13-462e-b53c-b88535347ec4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+              <File Id="SentryNLogDll" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CitadelGUI\bin\Release x64\Sentry.NLog.dll" KeyPath="yes" />
+          </Component>
         <Component Id="comp_D8C3B125_D057" Guid="2FEC91D8-CDAB-436E-80B2-9C1BA5FDD3A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_FDC6F254_185D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_green.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.batteries_green.dll" KeyPath="yes" />
         </Component>
