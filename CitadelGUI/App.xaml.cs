@@ -562,7 +562,16 @@ namespace CloudVeil.Windows
                             if(args.PolicyInfo != null && rpModel != null)
                             {
                                 rpModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
-                                rpModel.RelaxedDuration = new DateTime(args.PolicyInfo.RelaxDuration.Ticks).ToString("HH:mm");
+
+                                long relaxDurationTicks = args.PolicyInfo.RelaxDuration.Ticks;
+                                if (relaxDurationTicks < DateTime.MinValue.Ticks || relaxDurationTicks > DateTime.MaxValue.Ticks)
+                                {
+                                    rpModel.RelaxedDuration = "(n/a)";
+                                }
+                                else
+                                {
+                                    rpModel.RelaxedDuration = new DateTime(relaxDurationTicks).ToString("HH:mm");
+                                }
 
                                 switch(args.PolicyInfo.Status)
                                 {
