@@ -535,6 +535,12 @@ namespace FilterProvider.Common.Configuration
 
                     decryptLists(getListFolder(), tempFolder);
 
+                    var rulePath = s_paths.GetPath("rules.dat");
+
+                    if (File.Exists(rulePath))
+                    {
+                      //  AdBlockMatcherApi.Load(rulePath);
+                    }
                     foreach (var listModel in Configuration.ConfiguredLists)
                     {
                         var rulesetPath = getListFilePath(listModel.RelativeListPath, tempFolder);
@@ -707,7 +713,7 @@ namespace FilterProvider.Common.Configuration
                     m_textTriggers.FinalizeForRead();
                     m_textTriggers.InitializeBloomFilters();
 
-                    AdBlockMatcherApi.Save(s_paths.GetPath("rules.dat"));
+               //     AdBlockMatcherApi.Save(s_paths.GetPath("rules.dat"));
 
                     ListsReloaded?.Invoke(this, new EventArgs());
 
