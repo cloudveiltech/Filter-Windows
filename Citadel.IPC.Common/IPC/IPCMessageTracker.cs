@@ -29,7 +29,7 @@ namespace Citadel.IPC
             public int Retries { get; set; } = 0;
         }
 
-        private NLog.Logger m_logger;
+        private static NLog.Logger m_logger = LoggerUtil.GetAppWideLogger();
         private List<IPCMessageData> m_messageList;
         private object m_lock;
 
@@ -39,7 +39,6 @@ namespace Citadel.IPC
         {
             m_messageList = new List<IPCMessageData>();
             m_lock = new object();
-            m_logger = LoggerUtil.GetAppWideLogger();
             m_communicator = communicator;
         }
 
