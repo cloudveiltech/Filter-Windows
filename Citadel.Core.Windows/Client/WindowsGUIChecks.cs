@@ -81,7 +81,10 @@ namespace Citadel.Core.Windows.Client
 
         public void UnpublishRunningApp()
         {
-            instanceMutex.ReleaseMutex();
+            if (instanceMutex != null)
+            {
+                instanceMutex.ReleaseMutex();
+            }
         }
     }
 }

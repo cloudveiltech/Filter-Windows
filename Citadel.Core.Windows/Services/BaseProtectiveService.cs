@@ -82,7 +82,9 @@ namespace Te.Citadel.Services
 
             if (ensureRunning)
             {
-                EnsureAlreadyRunning();
+                var t = new Thread(EnsureAlreadyRunning);
+                t.IsBackground = true;
+                t.Start();
             }
         }
 
