@@ -89,6 +89,7 @@ namespace CitadelService
                         x.SetDisplayName(nameof(FilterServiceProvider));
                         x.SetServiceName(nameof(FilterServiceProvider));
                         x.StartAutomatically();
+                        x.EnableSessionChanged();
 
                         x.RunAsLocalSystem();
 
