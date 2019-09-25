@@ -29,7 +29,18 @@ namespace Citadel.IPC
             public int Retries { get; set; } = 0;
         }
 
-        private static NLog.Logger m_logger = LoggerUtil.GetAppWideLogger();
+        private static NLog.Logger logger = LoggerUtil.GetAppWideLogger();
+        private static NLog.Logger Logger
+        {
+            get
+            {
+                if(logger == null)
+                {
+                    logger = LoggerUtil.GetAppWideLogger();
+                }
+                return logger;
+            }
+        }
         private List<IPCMessageData> m_messageList;
         private object m_lock;
 
@@ -63,7 +74,10 @@ namespace Citadel.IPC
         {
             const int MaxRetries = 3;
 
-            m_logger.Info("Retrying IPC messages.");
+            if (Logger != null)
+            {
+                Logger.Info("Retrying IPC messages.");
+            }
 
             List<IPCMessageData> messageList = null;
             lock (m_lock)
