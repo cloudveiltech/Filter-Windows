@@ -170,14 +170,14 @@
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
     </PackageReference>
+    <PackageReference Include="CloudVeil.NamedPipeWrapper">
+      <Version>1.5.6</Version>
+    </PackageReference>
     <PackageReference Include="CloudVeil.proxy-native-windows">
       <Version>0.4.27</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertSharp">
       <Version>1.4.3.10</Version>
-    </PackageReference>
-    <PackageReference Include="Com.TechnikEmpire.NamedPipeWrapper">
-      <Version>1.5.0</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>4.0.0</Version>
