@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudVeil.NamedPipeWrapper" Version="1.5.6" />
+    <PackageReference Include="CloudVeil.NamedPipeWrapper" Version="1.5.7" />
   </ItemGroup>
 
   <ItemGroup>

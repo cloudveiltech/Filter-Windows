@@ -171,7 +171,7 @@
       <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.NamedPipeWrapper">
-      <Version>1.5.6</Version>
+      <Version>1.5.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.proxy-native-windows">
       <Version>0.4.27</Version>
