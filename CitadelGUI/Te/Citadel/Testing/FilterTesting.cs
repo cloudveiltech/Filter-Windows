@@ -222,11 +222,6 @@ namespace Te.Citadel.Testing
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.YoutubeSafeSearchTest, result, details));
 
-                result = doUrlIpsMatch("https://pixabay.com", "https://safesearch.pixabay.com", out ip1, out ip2);
-                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
-
-                OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.PixabaySafeSearchTest, result, details));
-
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }
             catch(Exception ex)

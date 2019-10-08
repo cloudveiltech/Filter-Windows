@@ -7,33 +7,20 @@
 
 using Filter.Platform.Common.Extensions;
 using Citadel.Core.Windows.Util;
-using Citadel.Core.Windows.Util.Update;
 using Citadel.IPC;
-using Citadel.IPC.Messages;
 using CitadelCore.Net.Proxy;
-using Filter.Platform.Common.Data.Models;
 using Microsoft.Win32;
-using murrayju.ProcessExtensions;
-using Newtonsoft.Json;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
-using WindowsFirewallHelper;
 using CitadelService.Util;
-using FilterProvider.Common.Configuration;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using Filter.Platform.Common.Util;
@@ -41,17 +28,12 @@ using FilterProvider.Common.Services;
 using Filter.Platform.Common;
 using CitadelService.Platform;
 using FilterProvider.Common.Platform;
-using Filter.Platform.Common.Net;
-using FilterProvider.Common.Data;
 using Citadel.Core.WinAPI;
 using System.Runtime.InteropServices;
 using FilterNativeWindows;
 using CitadelCore.Windows.Diversion;
-using FilterProvider.Common.Util;
-using Filter.Platform.Common.Types;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.ServiceProcess;
 
 /**
  * TODO:
