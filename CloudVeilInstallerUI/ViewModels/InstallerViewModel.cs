@@ -69,12 +69,9 @@ namespace CloudVeilInstallerUI.ViewModels
 
     public class UgpradeMistypeException : Exception
     {
-        public UgpradeMistypeException(string message, Version myVersion) : base(message)
+        public UgpradeMistypeException(string message) : base(message)
         {
-            MyVersion = myVersion;
         }
-
-        public Version MyVersion { get; }
     }
 
     public class InstallerViewModel : IInstallerViewModel
@@ -461,12 +458,7 @@ namespace CloudVeilInstallerUI.ViewModels
                     ba.Engine.Log(LogLevel.Standard, "Package Detect installed");
                     if (ba.Updating)
                     {
-                        Version myVersion = null;
-                        if (ba.Engine.VersionVariables.Contains("WixBundleVersion"))
-                        {
-                            myVersion = ba.Engine.VersionVariables["WixBundleVersion"];
-                        }
-                        Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Upgrade to current version detected! Switching type from uninstall to update. Version: " + myVersion.ToString(), myVersion));
+                        Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Upgrade to current version detected! Switching type from uninstall to update."));
                         InstallType = CVInstallType.Update;
                     }
                     else

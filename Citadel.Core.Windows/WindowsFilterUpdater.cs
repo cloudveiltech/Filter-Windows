@@ -29,19 +29,21 @@ namespace Citadel.Core.Windows
             }
 
             var systemFolder = Environment.GetFolderPath(Environment.SpecialFolder.System);
-
+            var email = PlatformTypes.New<IAuthenticationStorage>().UserEmail;
+            var fingerPrint = FingerprintService.Default.Value;
+            var userId = email + ":" + fingerPrint;
             string filename, args;
             if (restartApplication)
             {
                 string executingProcess = Process.GetCurrentProcess().MainModule.FileName;
 
                 filename = update.UpdateFileLocalPath;
-                args = $"\"{filename}\" /upgrade /passive /waitforexit"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
+                args = $"\"{filename}\" /upgrade /passive /waitforexit /userid={userId}"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
             }
             else
             {
                 filename = update.UpdateFileLocalPath;
-                args = $"\"{filename}\" /upgrade /passive /waitforexit";
+                args = $"\"{filename}\" /upgrade /passive /waitforexit /userid={userId}";
             }
 
             try

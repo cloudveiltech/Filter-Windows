@@ -59,13 +59,13 @@ namespace CloudVeilInstallerUI
         protected override void Run()
         {
             sentry = SentrySdk.Init(CloudVeil.Windows.CompileSecrets.SentryDsn);
-
             try
             {
                 string[] args = this.Command.GetCommandLineArgs();
 
                 bool runIpc = false;
                 bool showPrompts = true;
+                string userId = "unset";
 
                 Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
                 foreach (string arg in args)
@@ -78,15 +78,25 @@ namespace CloudVeilInstallerUI
                     {
                         showPrompts = false;
                     }
-                    else if(arg == "/waitforexit")
+                    else if (arg == "/waitforexit")
                     {
                         WaitForFilterExit = true;
-                    } else if(arg == "/upgrade")
+                    }
+                    else if (arg == "/upgrade")
                     {
                         Updating = true;
+                    } else if(arg.Contains("/userid="))
+                    {
+                        userId = arg.Replace("/userid=", "");
                     }
                 }
 
+                SentrySdk.ConfigureScope(scope =>
+                {
+                    scope.User = new Sentry.Protocol.User();
+                    scope.User.Id = userId;     
+                });
+               
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
 
                 Application app = new Application();
@@ -112,7 +122,7 @@ namespace CloudVeilInstallerUI
                     server.RegisterObject("SetupUI", setupUi);
 
                     server.MessageReceived += CheckStartCommand; // Wait for the first start command to begin installing.
-                    
+
                     setupUi.Closed += (sender, e) => SignalExit();
 
                     server.ClientConnected += () =>
@@ -147,8 +157,8 @@ namespace CloudVeilInstallerUI
                     model.SetSetupUi(setupUi);
 
                     Engine.Detect();
-                    
-                    if(Command.Display != Display.None && Command.Display != Display.Embedded)
+
+                    if (Command.Display != Display.None && Command.Display != Display.Embedded)
                     {
                         setupUi.Show();
                     }
@@ -159,7 +169,7 @@ namespace CloudVeilInstallerUI
                     this.Engine.Quit(0);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Engine.Log(LogLevel.Error, "A .NET error occurred while running CloudVeilInstallerUI");
                 Engine.Log(LogLevel.Error, $"Error Type: {ex.GetType().Name}");
@@ -171,13 +181,13 @@ namespace CloudVeilInstallerUI
 
         private void CheckStartCommand(NamedPipeConnection<Message, Message> connection, Message message)
         {
-            if(message.Command == IPC.Command.Start)
+            if (message.Command == IPC.Command.Start)
             {
                 Engine.Log(LogLevel.Standard, "Start command received. Starting new thread for dispatcher.");
 
                 Thread t = new Thread(() =>
                 {
-                    while(!IsExiting)
+                    while (!IsExiting)
                     {
                         exitWaitHandle.WaitOne(2000);
                     }
@@ -191,7 +201,7 @@ namespace CloudVeilInstallerUI
 
         private void CheckExit(NamedPipeConnection<Message, Message> connection, Message message)
         {
-            if(message.Command == IPC.Command.Exit)
+            if (message.Command == IPC.Command.Exit)
             {
                 sentry.Dispose();
                 SignalExit();
