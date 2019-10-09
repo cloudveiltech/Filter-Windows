@@ -36,12 +36,12 @@ namespace Citadel.Core.Windows
                 string executingProcess = Process.GetCurrentProcess().MainModule.FileName;
 
                 filename = update.UpdateFileLocalPath;
-                args = $"\"{filename}\" /passive /waitforexit"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
+                args = $"\"{filename}\" /upgrade /passive /waitforexit"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
             }
             else
             {
                 filename = update.UpdateFileLocalPath;
-                args = $"\"{filename}\" /passive /waitforexit";
+                args = $"\"{filename}\" /upgrade /passive /waitforexit";
             }
 
             try

@@ -1,18 +1,11 @@
-﻿using CloudVeilInstallerUI.IPC;
-using CloudVeilInstallerUI.Models;
-using CloudVeilInstallerUI.Views;
+﻿using CloudVeilInstallerUI.Models;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Interop;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
 
@@ -72,6 +65,16 @@ namespace CloudVeilInstallerUI.ViewModels
         string FinishedMessage { get; set; }
 
         string FinishButtonText { get; set; }
+    }
+
+    public class UgpradeMistypeException : Exception
+    {
+        public UgpradeMistypeException(string message, Version myVersion) : base(message)
+        {
+            MyVersion = myVersion;
+        }
+
+        public Version MyVersion { get; }
     }
 
     public class InstallerViewModel : IInstallerViewModel
@@ -455,7 +458,21 @@ namespace CloudVeilInstallerUI.ViewModels
                 }
                 else if (e.State == PackageState.Present && InstallType == CVInstallType.None)
                 {
-                    InstallType = CVInstallType.Uninstall;
+                    ba.Engine.Log(LogLevel.Standard, "Package Detect installed");
+                    if (ba.Updating)
+                    {
+                        Version myVersion = null;
+                        if (ba.Engine.VersionVariables.Contains("WixBundleVersion"))
+                        {
+                            myVersion = ba.Engine.VersionVariables["WixBundleVersion"];
+                        }
+                        Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Upgrade to current version detected! Switching type from uninstall to update. Version: " + myVersion.ToString(), myVersion));
+                        InstallType = CVInstallType.Update;
+                    }
+                    else
+                    {
+                        InstallType = CVInstallType.Uninstall;
+                    }
                 }
             }
         }
@@ -709,16 +726,18 @@ namespace CloudVeilInstallerUI.ViewModels
             switch(InstallType)
             {
                 case CVInstallType.NewInstall:
+                    ba.Engine.Log(LogLevel.Standard, "Action is newinstall");
+
                     installTypeVerb = "install";
                     installTypeVerbPast = "installed";
 
                     WelcomeButtonText = "Install";
                     WelcomeHeader = "Welcome to CloudVeil for Windows";
                     WelcomeText = "Whenever you're ready, just click the 'install' button to install CloudVeil for Windows.";
-
                     break;
 
                 case CVInstallType.Uninstall:
+                    ba.Engine.Log(LogLevel.Standard, "Action is uninstall");
                     installTypeVerb = "remove";
                     installTypeVerbPast = "removed";
 
@@ -726,10 +745,10 @@ namespace CloudVeilInstallerUI.ViewModels
                     WelcomeButtonText = "Remove";
                     WelcomeText = "To remove CloudVeil for Windows, first make sure that you've requested a deactivation\r\nand that your filter is no longer running.\r\n\r\nWhen ready, click 'remove' to uninstall CloudVeil for Windows.";
                     // TODO: This is where we need to check for a running service, and then check for a deactivation request.
-
                     break;
 
                 case CVInstallType.Update:
+                    ba.Engine.Log(LogLevel.Standard, "Action is update");
                     installTypeVerb = "update";
                     installTypeVerbPast = "updated";
 

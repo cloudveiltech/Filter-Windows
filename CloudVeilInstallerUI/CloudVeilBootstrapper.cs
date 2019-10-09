@@ -2,6 +2,7 @@
 using CloudVeilInstallerUI.ViewModels;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
+using Sentry;
 using System;
 using System.Threading;
 using System.Windows;
@@ -42,8 +43,11 @@ namespace CloudVeilInstallerUI
 
         public bool WaitForFilterExit { get; set; } = false;
 
+        public bool Updating { get; private set; } = false;
+
         private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
+        private IDisposable sentry;
         public void SignalExit()
         {
             IsExiting = true;
@@ -54,6 +58,8 @@ namespace CloudVeilInstallerUI
 
         protected override void Run()
         {
+            sentry = SentrySdk.Init(CloudVeil.Windows.CompileSecrets.SentryDsn);
+
             try
             {
                 string[] args = this.Command.GetCommandLineArgs();
@@ -75,6 +81,9 @@ namespace CloudVeilInstallerUI
                     else if(arg == "/waitforexit")
                     {
                         WaitForFilterExit = true;
+                    } else if(arg == "/upgrade")
+                    {
+                        Updating = true;
                     }
                 }
 
@@ -146,6 +155,7 @@ namespace CloudVeilInstallerUI
 
                     Dispatcher.Run();
 
+                    sentry.Dispose();
                     this.Engine.Quit(0);
                 }
             }
@@ -183,6 +193,7 @@ namespace CloudVeilInstallerUI
         {
             if(message.Command == IPC.Command.Exit)
             {
+                sentry.Dispose();
                 SignalExit();
             }
         }
