@@ -45,6 +45,7 @@ namespace CloudVeilInstallerUI
 
         public bool Updating { get; private set; } = false;
 
+        public string UserId { get; private set; } = "unset";
         private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
         private IDisposable sentry;
@@ -65,7 +66,6 @@ namespace CloudVeilInstallerUI
 
                 bool runIpc = false;
                 bool showPrompts = true;
-                string userId = "unset";
 
                 Engine.Log(LogLevel.Standard, $"Arguments: {string.Join(", ", args)}");
                 foreach (string arg in args)
@@ -87,16 +87,10 @@ namespace CloudVeilInstallerUI
                         Updating = true;
                     } else if(arg.Contains("/userid="))
                     {
-                        userId = arg.Replace("/userid=", "");
+                        UserId = arg.Replace("/userid=", "");
                     }
                 }
 
-                SentrySdk.ConfigureScope(scope =>
-                {
-                    scope.User = new Sentry.Protocol.User();
-                    scope.User.Id = userId;     
-                });
-               
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
 
                 Application app = new Application();
