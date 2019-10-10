@@ -708,7 +708,7 @@ namespace FilterProvider.Common.Util
                         code = (HttpStatusCode)intCode;
 
                         // Auth failure means re-log EXCEPT when requesting deactivation.
-                        if((intCode == 401 || intCode == 403) && resource != ServiceResource.DeactivationRequest)
+                        if((intCode == 402 || intCode == 410) && resource != ServiceResource.DeactivationRequest)
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             m_logger.Info("RequestResource2: Authorization failed.");

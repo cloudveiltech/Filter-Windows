@@ -91,9 +91,9 @@
         <Component Id="comp_108A7085_B85C" Guid="39FE7540-7433-4188-86E9-C4EB147036CE" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D47FEB1F_CAAB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe.config" KeyPath="yes" />
         </Component>
-        <Component Id="comp_C719900C_4866" Guid="BA3022A6-5E3B-4E85-AC73-0D3B6154BA66" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <!--<Component Id="comp_C719900C_4866" Guid="BA3022A6-5E3B-4E85-AC73-0D3B6154BA66" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_9E7B6572_46CB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CitadelGUI\bin\Release x64\DistillNET.dll" KeyPath="yes" />
-        </Component>
+        </Component>-->
         <Component Id="comp_1DC9B8F3_1F93" Guid="2612B7D7-752D-40A8-B745-6B85D5078CEC" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_CD633B42_3FCE" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DNS.dll" Source="..\..\CitadelGUI\bin\Release x64\DNS.dll" KeyPath="yes" />
         </Component>

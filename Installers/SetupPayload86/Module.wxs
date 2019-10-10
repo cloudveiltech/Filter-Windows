@@ -110,9 +110,9 @@
         <Component Id="comp_F553F6C4_978D" Guid="2C2587EB-C07E-484B-89DA-95F4B492FBB4" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B9F53AE0_B8A7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe.config" KeyPath="yes" />
         </Component>
-        <Component Id="comp_569B6CDB_42BD" Guid="4F6E53DA-EF53-493B-976A-38C8414F07B8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <!--<Component Id="comp_569B6CDB_42BD" Guid="4F6E53DA-EF53-493B-976A-38C8414F07B8" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D62AF302_CDF8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CitadelGUI\bin\Release x86\DistillNET.dll" KeyPath="yes" />
-        </Component>
+        </Component>-->
         <Component Id="comp_A15EAB2F_8BC6" Guid="3A7D026A-A96C-478B-9EE4-7358A738AD73" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2B6835D2_FEEF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
         </Component>
