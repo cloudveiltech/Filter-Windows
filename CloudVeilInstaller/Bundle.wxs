@@ -58,7 +58,7 @@
     <Fragment>
         <PayloadGroup Id="InstallerPayload">
             <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\BootstrapperCore.config" />
-            <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\CloudVeilInstallerUI.dll" />
+            <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\CloudVeilInstallerUI.dll" /> 
             <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\CloudVeilInstallerUI.dll.config" />
             <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\ControlzEx.dll" />
             <Payload SourceFile="..\CloudVeilInstallerUI\bin\$(var.ProjectConfiguration)\MahApps.Metro.dll" />

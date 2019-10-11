@@ -49,6 +49,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -73,6 +74,8 @@
     <Compile Include="Models\InstallationState.cs" />
     <Compile Include="Models\InstallType.cs" />
     <Compile Include="RebootMethods.cs" />
+    <Compile Include="UserId\GuidUtility.cs" />
+    <Compile Include="UserId\RegistryAuthenticationStorage.cs" />
     <Compile Include="Services.cs" />
     <Compile Include="ViewModels\InstallerViewModel.cs" />
     <Compile Include="ViewModels\IpcInstallerViewModel.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="Views\WelcomeView.xaml.cs">
       <DependentUpon>WelcomeView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserId\WindowsFingerprint.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

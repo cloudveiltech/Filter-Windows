@@ -1,4 +1,5 @@
-﻿using CloudVeilInstallerUI.IPC;
+﻿using Citadel.Core.Windows.Util;
+using CloudVeilInstallerUI.IPC;
 using CloudVeilInstallerUI.ViewModels;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
@@ -45,7 +46,7 @@ namespace CloudVeilInstallerUI
 
         public bool Updating { get; private set; } = false;
 
-        public string UserId { get; private set; } = "unset";
+        public string UserId { get; private set; } = "";
         private EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
         private IDisposable sentry;
@@ -85,10 +86,23 @@ namespace CloudVeilInstallerUI
                     else if (arg == "/upgrade")
                     {
                         Updating = true;
-                    } else if(arg.Contains("/userid="))
+                    }
+                    else if (arg.Contains("/userid="))
                     {
                         UserId = arg.Replace("/userid=", "");
                     }
+                }
+
+                if(Updating == false && WaitForFilterExit == true)
+                {
+                    Updating = true;
+                }
+                if (UserId.Length == 0)
+                {
+                    var email = new RegistryAuthenticationStorage().UserEmail;
+                    var fingerPrint = new WindowsFingerprint().Value;
+                    UserId = email + ":" + fingerPrint;
+                    Engine.Log(LogLevel.Standard, $"My autoset id: {UserId}");
                 }
 
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
