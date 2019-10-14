@@ -321,7 +321,7 @@ namespace CitadelCore.Windows.Diversion
                         // 997 == ERROR_IO_PENDING
                         if (error != 997)
                         {
-                            m_logger.Warn(string.Format("Unknown IO error ID {0} while awaiting overlapped result.", error));
+                            m_logger.Warn(string.Format("Unknown IO error ID {0}while awaiting overlapped result.", error));
                             continue;
                         }
 
