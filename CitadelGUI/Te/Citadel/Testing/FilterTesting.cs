@@ -204,8 +204,10 @@ namespace Te.Citadel.Testing
 
             try
             {
-                string ip1, ip2, details;
+                string ip1, ip2, ip3, details;
                 bool result;
+
+                ip3 = "";
 
                 result = doUrlIpsMatch("https://www.google.com", "https://forcesafesearch.google.com", out ip1, out ip2);
                 details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
@@ -218,10 +220,22 @@ namespace Te.Citadel.Testing
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BingSafeSearchTest, result, details));
 
                 result = doUrlIpsMatch("https://www.youtube.com", "https://restrict.youtube.com", out ip1, out ip2);
-                details = string.Format("IP {0} {1} IP {2}", ip1, result ? "matches" : "does not match expected", ip2);
-
+                if(result)
+                {
+                    details = string.Format("IP {0} {1} IP {2}, type: restrict", ip1, "matches", ip2);
+                }
+                else
+                {
+                    result = doUrlIpsMatch("https://www.youtube.com", "https://restrictmoderate.youtube.com", out ip1, out ip3);
+                    details = string.Format("IP {0} {1} IP {2}, type: restrict/moderate", ip1, "matches", ip3);
+                } 
+                if(!result)
+                {
+                    details = string.Format("IP {0} {1} IP {2} or {3}", ip1, "does not match expected", ip2, ip3);
+                }
+                
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.YoutubeSafeSearchTest, result, details));
-
+                
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }
             catch(Exception ex)
