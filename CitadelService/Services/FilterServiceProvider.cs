@@ -305,7 +305,7 @@ namespace CitadelService.Services
                     WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
                     diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
 
-                    diverter.Start(0, () =>
+                    diverter.Start(1, () =>
                     {
                         m_logger.Info("Diverter was started successfully.");
 

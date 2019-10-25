@@ -314,7 +314,8 @@ namespace CitadelCore.Windows.Diversion
 
                     #region Packet Reading Code
 
-                    if (!WinDivert.WinDivertRecvEx(m_diversionHandle, packet, 0, ref addr, ref recvLength, ref recvOverlapped))
+                    uint addrLen = (uint)sizeof(WinDivertAddress);
+                    if (!WinDivert.WinDivertRecvEx(m_diversionHandle, packet, 0, out recvLength, out addr, ref addrLen, ref recvOverlapped))
                     {
                         var error = Marshal.GetLastWin32Error();
 
@@ -343,7 +344,7 @@ namespace CitadelCore.Windows.Diversion
                     #endregion Packet Reading Code
 
                     WinDivertParseResult parseResult = null;
-                    if (addr.Direction == WinDivertDirection.Outbound)
+                    if (addr.Outbound)
                     {
                         parseResult = WinDivert.WinDivertHelperParsePacket(packet, recvLength);
 
@@ -478,7 +479,7 @@ namespace CitadelCore.Windows.Diversion
                                     modifiedPacket = true;
 
                                     parseResult.TcpHeader->SrcPort = Volatile.Read(ref m_v4ReturnPorts[parseResult.TcpHeader->DstPort]);
-                                    addr.Direction = WinDivertDirection.Inbound;
+                                    addr.Outbound = false;
 
                                     var dstIp = parseResult.IPv4Header->DstAddr;
                                     parseResult.IPv4Header->DstAddr = parseResult.IPv4Header->SrcAddr;
@@ -511,7 +512,7 @@ namespace CitadelCore.Windows.Diversion
                                         parseResult.IPv4Header->DstAddr = parseResult.IPv4Header->SrcAddr;
                                         parseResult.IPv4Header->SrcAddr = dstAddress;
 
-                                        addr.Direction = WinDivertDirection.Inbound;
+                                        addr.Outbound = false;
 
                                         Volatile.Write(ref m_v4ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
@@ -534,7 +535,7 @@ namespace CitadelCore.Windows.Diversion
                                     modifiedPacket = true;
 
                                     parseResult.TcpHeader->SrcPort = Volatile.Read(ref m_v6ReturnPorts[parseResult.TcpHeader->DstPort]);
-                                    addr.Direction = WinDivertDirection.Inbound;
+                                    addr.Outbound = false;
 
                                     var dstIp = parseResult.IPv6Header->DstAddr;
                                     parseResult.IPv6Header->DstAddr = parseResult.IPv6Header->SrcAddr;
@@ -555,7 +556,7 @@ namespace CitadelCore.Windows.Diversion
                                         parseResult.IPv6Header->DstAddr = parseResult.IPv6Header->SrcAddr;
                                         parseResult.IPv6Header->SrcAddr = dstAddress;
 
-                                        addr.Direction = WinDivertDirection.Inbound;
+                                        addr.Outbound = false;
 
                                         Volatile.Write(ref m_v6ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
