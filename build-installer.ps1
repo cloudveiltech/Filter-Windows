@@ -89,6 +89,7 @@ $wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
 $cleanBuild = "Clean,Build"
 
 $builds = @(
+    @("AnyCPU", "InstallGuard\InstallGuard.csproj", $cleanBuild),
     @("x86", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x64", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x86", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
@@ -97,7 +98,6 @@ $builds = @(
     @("x86", "CitadelService\CitadelService.csproj", $cleanBuild),
     @("x64", "CitadelGUI\CitadelGUI.csproj", "Build"),
     @("x86", "CitadelGUI\CitadelGUI.csproj", "Build"),
-    @("AnyCPU", "InstallGuard\InstallGuard.csproj", $cleanBuild),
     @("AnyCPU", "CloudVeilInstallerUI\CloudVeilInstallerUI.csproj", $cleanBuild)
 )
 

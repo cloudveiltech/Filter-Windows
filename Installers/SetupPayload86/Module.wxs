@@ -5,6 +5,7 @@
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\FilterStarter.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\Warden.exe -->
+  <!-- ignore-file:..\..\CitadelGUI\bin\Release x86\WinDivertSharp.xml -->
   <Module Id="CloudVeilPayload" Language="1033" Version="2.0.1" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
@@ -28,25 +29,7 @@
         <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
         </Component>
-        <!-- The 'InstallGuard' project output. -->
-        <!--<Component Id="comp_491404CD_77E2" Guid="146FEE29-459B-44E2-8AE5-BC1272114933" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B9C72077_61E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_2D09051E_2D16" Guid="6053BB54-BF74-462E-A47B-E75E4A67575A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C616D885_312A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.Http.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_9C0D5C71_A45A" Guid="C59C2369-D8C7-410F-9E5E-E0AFF60A0284" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_64635A4B_9AB4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.WebSockets.Client.Managed.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Net.WebSockets.Client.Managed.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_F4697AA8_AFB1" Guid="3E490ADE-258A-408A-B950-BFFAA7DE0371" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_EFB26F07_B76F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_BC7C1623_A381" Guid="78F39F57-ECA0-415B-B729-98B81ED978A4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_EC8AB8A2_5A09" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x86\System.Buffers.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_3756EDF1_AF46" Guid="F44FCF70-0E7D-4E36-BB01-6244472E960E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_E48F3DFE_5597" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
-        </Component>-->
+        <!-- The 'InstallGuard' project output. -->      
         <Component Id="comp_EF162366_80D3" Guid="504F8A7B-1C7A-4EE4-8A2C-DB40ED2A6371" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_0CB4ACAB_798A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CitadelGUI\bin\Release x86\BouncyCastle.Crypto.dll" KeyPath="yes" />
         </Component>
@@ -190,21 +173,6 @@
         </Component>
         <Component Id="comp_41456C02_1DC9" Guid="786E93F9-552B-42D7-8969-1FC247CCAA97" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_0DA7F21B_5E31" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CitadelGUI\bin\Release x86\MahApps.Metro.IconPacks.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_DAE41D10_9258" Guid="ECFC2EB6-B386-463D-AFCB-9C1FA8A26C9D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_5E04FF8E_0C32" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Caching.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Caching.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_2DA80E3F_9F69" Guid="4806C9D6-B94D-4849-807D-009D17409647" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_91C6BBA1_9C86" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_D396F6E5_F3B3" Guid="DD38793A-1DD6-4F88-B333-654CA3FA3174" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_05F2E5D1_B4FF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Caching.Memory.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Caching.Memory.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_C7EDE7D2_D5EB" Guid="DC4D14FD-CC6B-4365-B0CA-E5AE6F3A38AB" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_CC0EC42D_0229" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_B1E28FA3_3780" Guid="5143FEDE-FC7B-4F83-B895-61ACDC015A1A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_DD8EAD1D_8245" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Options.dll" Source="..\..\CitadelGUI\bin\Release x86\Microsoft.Extensions.Options.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_5649A06A_F6BB" Guid="C4A89795-695C-478D-9024-42AABEFC9BBC" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_AC57FC0D_7917" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.config" Source="..\..\CitadelGUI\bin\Release x86\NLog.config" KeyPath="yes" />

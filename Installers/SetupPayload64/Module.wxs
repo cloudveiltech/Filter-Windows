@@ -31,6 +31,7 @@
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
+      <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\WinDivertSharp.xml -->
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
         <Component Id="com_15BA3E04_E955_2942_9625_325577B7C8B6" Guid="12183EB0-B5B7-437B-8908-3C7C8262296E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_15BA3E04_E955_2942_9625_325577B7C8B6" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Topshelf.dll" Source="..\..\CitadelGUI\bin\Release x64\Topshelf.dll" KeyPath="yes" />
