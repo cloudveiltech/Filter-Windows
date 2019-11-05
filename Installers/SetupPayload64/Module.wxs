@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.1" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.20" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -68,12 +68,6 @@
         <Component Id="comp_D7EA2492_9EAA" Guid="9DB1DCEF-2E57-4A28-B5E0-03CA3DE1631D" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Citadel.IPC.Common.pdb" Source="..\..\CitadelGUI\bin\Release x64\Citadel.IPC.Common.pdb" KeyPath="yes" />
         </Component>
-        <Component Id="comp_968AE87E_EE2C" Guid="0E9A0E25-9638-4405-A955-606C7A5207A1" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_206EA336_3746" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_56C7FA05_9129" Guid="F5D8ED70-C1E1-4C19-AE1A-ED36FAE9DDFE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B15DE07F_8AEC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Options.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Options.dll" KeyPath="yes" />
-        </Component>
         <Component Id="comp_0DC0F70F_7F99" Guid="B916D54D-687B-4BCE-A2DD-E0B4A23C7EA6" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C283DB82_A3A9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CitadelGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
         </Component>
@@ -131,9 +125,6 @@
         <Component Id="comp_10E06469_8211" Guid="4B6407FE-5793-4DA6-9BDD-63B1DF0AB46A" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D260A6A1_817D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
         </Component>
-        <Component Id="comp_39ECE5A0_970B" Guid="5ADE4D72-2984-44AB-81AD-68A585FBE066" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_14B407DC_1D6D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Primitives.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Primitives.dll" KeyPath="yes" />
-        </Component>
         <Component Id="comp_10E6C4A9_B927" Guid="D3C46ED4-4EFF-4213-A85B-A0293A34E5D1" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_6A96B849_FE82" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Win32.TaskScheduler.dll" KeyPath="yes" />
         </Component>
@@ -155,9 +146,9 @@
         <Component Id="comp_31E62DAB_4237" Guid="9476306E-A5C4-4DD0-B943-06E2100AD1D3" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2AC10A49_C50D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.pdb" Source="..\..\CitadelGUI\bin\Release x64\NodaTime.pdb" KeyPath="yes" />
         </Component>
-          <Component Id="comp_SentryNLogDll" Guid="474e466c-2c13-462e-b53c-b88535347ec4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-              <File Id="SentryNLogDll" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CitadelGUI\bin\Release x64\Sentry.NLog.dll" KeyPath="yes" />
-          </Component>
+        <Component Id="comp_SentryNLogDll" Guid="474e466c-2c13-462e-b53c-b88535347ec4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="SentryNLogDll" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CitadelGUI\bin\Release x64\Sentry.NLog.dll" KeyPath="yes" />
+        </Component>
         <Component Id="comp_D8C3B125_D057" Guid="2FEC91D8-CDAB-436E-80B2-9C1BA5FDD3A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_FDC6F254_185D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_green.dll" Source="..\..\CitadelGUI\bin\Release x64\SQLitePCLRaw.batteries_green.dll" KeyPath="yes" />
         </Component>
@@ -232,12 +223,6 @@
         </Component>
         <Component Id="comp_8030BF6A_B070" Guid="B4937B94-467F-4CB1-BB27-BB326015B1A4" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2F5EC6F3_4434" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CitadelGUI\bin\Release x64\MahApps.Metro.IconPacks.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_0F0CCF5F_A44D" Guid="06CA6FDF-1B15-475B-9FF7-21C16319AA22" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_3093F408_15FA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Caching.Abstractions.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Caching.Abstractions.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_93F866C0_9F77" Guid="C067BAC6-BE79-48A9-A180-2EE48E4F8C92" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_34F89934_A4D2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Extensions.Caching.Memory.dll" Source="..\..\CitadelGUI\bin\Release x64\Microsoft.Extensions.Caching.Memory.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_0598AD1A_7B94" Guid="DA7B1195-24EF-4B97-81BE-100ACAAAF9A5" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_375A72BC_11C9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.dll" Source="..\..\CitadelGUI\bin\Release x64\Sentry.dll" KeyPath="yes" />
