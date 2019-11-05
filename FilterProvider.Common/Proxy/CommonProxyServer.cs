@@ -42,17 +42,17 @@ namespace FilterProvider.Common.Proxy
         public event AdBlockMatcherApi.AdBlockCallbackDelegate Whitelisted;
         public event AdBlockMatcherApi.AdBlockCallbackDelegate Blacklisted;
         
-        public ProxyNextAction OnBeforeRequest(Session session)
+        public int OnBeforeRequest(Session session)
         {
-            ProxyNextAction? nextAction = BeforeRequest?.Invoke(session);
+            Int32? blocked = BeforeRequest?.Invoke(session);
 
-            if (nextAction.HasValue)
+            if (blocked.HasValue)
             {
-                return nextAction.Value;
+                return blocked.Value;
             }
             else
             {
-                return ProxyNextAction.AllowAndIgnoreContent;
+                return 0;
             }
 
         }
