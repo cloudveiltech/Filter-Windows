@@ -30,6 +30,7 @@ using Te.Citadel.Util;
 using Newtonsoft.Json;
 using Filter.Platform.Common.Data.Models;
 using FilterProvider.Common.Platform;
+using CloudVeil;
 
 namespace FilterProvider.Common.Util
 {
@@ -370,8 +371,31 @@ namespace FilterProvider.Common.Util
 
         }
 
+
+        public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+        {
+            if (sslpolicyerrors != SslPolicyErrors.None)
+            {
+                return false;
+            }
+            
+            LoggerUtil.GetAppWideLogger().Info("Cert " + certificate.Subject + " " + certificate.GetExpirationDateString());
+            string publicKey = Convert.ToBase64String(certificate.GetPublicKey());
+            if (publicKey.Equals(CompileSecrets.PinnedCertKey))
+            {
+                LoggerUtil.GetAppWideLogger().Info("Keys match");
+                return true;
+            }
+            else
+            {
+                LoggerUtil.GetAppWideLogger().Info("Keys don't match. Skipping request");
+            }
+                           
+            return false;
+        }
+
         /// <summary>
-        /// Builds out an HttpWebRequest specifically configured for use with the service provider API. 
+        /// Builds out an HttpWebRequest specifically configured for use with the service provider API. н
         /// </summary>
         /// <param name="route">
         /// The route for the request. 
@@ -384,12 +408,17 @@ namespace FilterProvider.Common.Util
             baseRoute = baseRoute == null ? ServiceProviderApiPath : baseRoute;
             var requestString = baseRoute + route;
             var requestRoute = new Uri(requestString);
-
+            
+            
             // Create a new request. We don't want auto redirect, we don't want the subsystem trying
             // to look up proxy information to configure on our request, we want a 5 second timeout
             // on any and all operations and we want to look like Firefox in a generic way. Here we
             // also set the cookie container, so we can capture session cookies if we're successful.
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestRoute);
+            
+            //Pin public key to avoid MITM attack
+            request.ServerCertificateValidationCallback = ValidiateCertificate;
+
             request.Method = options.Method; //"POST";
             request.Proxy = null;
             request.AllowAutoRedirect = false;
@@ -401,7 +430,8 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-           // request.Proxy = new WebProxy("127.0.0.1:8888", false);
+		//	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+            
             if (options.ETag != null)
             {
                 request.Headers.Add("ETag", options.ETag);
@@ -645,7 +675,7 @@ namespace FilterProvider.Common.Util
                 }
 
                 m_logger.Info("RequestResource: uri={0}", request.RequestUri);
-
+                
                 // Now that our login form data has been POST'ed, get a response.
                 using (var response = (HttpWebResponse)request.GetResponse())
                 {
@@ -698,8 +728,8 @@ namespace FilterProvider.Common.Util
                         if(response == null)
                         {
                             responseReceived = false;
+                            return null;
                         }
-
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
                         m_logger.Error("Error code: {0}", httpResponse.StatusCode);
 
