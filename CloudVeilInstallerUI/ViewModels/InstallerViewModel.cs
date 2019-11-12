@@ -458,13 +458,19 @@ namespace CloudVeilInstallerUI.ViewModels
                     ba.Engine.Log(LogLevel.Standard, "Package Detect installed");
                     if (ba.Updating)
                     {
-                        Sentry.SentrySdk.WithScope(scope =>
+                        try
                         {
-                            scope.User = new Sentry.Protocol.User();
-                            scope.User.Id = ba.UserId;
+                            Sentry.SentrySdk.WithScope(scope =>
+                            {
+                                scope.User = new Sentry.Protocol.User();
+                                scope.User.Id = ba.UserId;
 
-                            Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Upgrade to current version detected! Switching type from uninstall to update."));
-                        });
+                                Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Upgrade to current version detected! Switching type from uninstall to update."));
+                            });
+                        } catch
+                        {
+                            //ignore
+                        }
 
 
                         InstallType = CVInstallType.Update;
