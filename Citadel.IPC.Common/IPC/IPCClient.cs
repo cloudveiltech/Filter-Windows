@@ -148,7 +148,7 @@ namespace Citadel.IPC
             logger = LoggerUtil.GetAppWideLogger();
             ipcQueue = new IPCMessageTracker(this);
 
-            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
+            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value2).ToLower();
 
             client = PlatformTypes.New<IPipeClient>(channel, autoReconnect); // new NamedPipeClient<BaseMessage>(channel);
 

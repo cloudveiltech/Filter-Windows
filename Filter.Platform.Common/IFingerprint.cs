@@ -14,5 +14,6 @@ namespace Filter.Platform.Common
     public interface IFingerprint
     {
         string Value { get; }
+        string Value2 { get; }
     }
 }
