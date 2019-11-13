@@ -299,7 +299,7 @@ namespace Citadel.IPC
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
-            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value).ToLower();
+            var channel = string.Format("{0}.{1}", nameof(Citadel.IPC), FingerprintService.Default.Value2).ToLower();
 
             m_server = PlatformTypes.New<IPipeServer>(channel);
 
