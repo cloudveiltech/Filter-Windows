@@ -20,6 +20,7 @@ namespace Citadel.Core.Windows.Util
             using(var sec = new SHA1CryptoServiceProvider())
             {
                 var sb = new StringBuilder();
+                var sbShort = new StringBuilder();
 
                 ManagementObjectCollection collection = null;
                 ManagementObjectSearcher searcher = null;
@@ -31,12 +32,14 @@ namespace Citadel.Core.Windows.Util
                     try
                     {
                         sb.Append(mo["SerialNumber"].ToString());
+                        sbShort.Append(mo["SerialNumber"].ToString());
                     }
                     catch { }
 
                     try
                     {
                         sb.Append(mo["Manufacturer"].ToString());
+                        sbShort.Append(mo["Manufacturer"].ToString());
                     }
                     catch { }
 
@@ -56,12 +59,14 @@ namespace Citadel.Core.Windows.Util
                     try
                     {
                         sb.Append(mo["SerialNumber"].ToString());
+                        sbShort.Append(mo["SerialNumber"].ToString());
                     }
                     catch { }
 
                     try
                     {
                         sb.Append(mo["Manufacturer"].ToString());
+                        sbShort.Append(mo["Manufacturer"].ToString());
                     }
                     catch { }
 
@@ -74,17 +79,23 @@ namespace Citadel.Core.Windows.Util
                 collection.Dispose();
                 searcher.Dispose();
 
+                LoggerUtil.GetAppWideLogger()?.Info("Fingerprint seed is " + sb.ToString());
+                LoggerUtil.GetAppWideLogger()?.Info("Fingerprint short seed is " + sbShort.ToString());
                 byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
-                s_fingerPrint = BitConverter.ToString(bt).Replace("-", "");
+                s_fingerPrintLong = BitConverter.ToString(bt).Replace("-", "");
+                
+                bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sbShort.ToString()));
+                s_fingerPrintShort = BitConverter.ToString(bt).Replace("-", "");
 
-                LoggerUtil.GetAppWideLogger()?.Info("My fingerprint is {0}", s_fingerPrint);
+                LoggerUtil.GetAppWideLogger()?.Info("My fingerprint is {0} and {1}", s_fingerPrintLong, s_fingerPrintShort);
             }
         }
 
         /// <summary>
         /// Container for the device unique ID.
         /// </summary>
-        private static string s_fingerPrint;
+        private static string s_fingerPrintLong;
+        private static string s_fingerPrintShort;
 
         /// <summary>
         /// Gets a unique identifier for this device based on miscelleneous unique ID's.
@@ -93,7 +104,15 @@ namespace Citadel.Core.Windows.Util
         {
             get
             {
-                return s_fingerPrint;
+                return s_fingerPrintLong;
+            }
+        }
+
+        public string Value2
+        {
+            get
+            {
+                return s_fingerPrintShort;
             }
         }
     }
