@@ -84,6 +84,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -168,7 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.4.30</Version>
+      <Version>0.4.31</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
