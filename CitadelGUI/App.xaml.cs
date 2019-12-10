@@ -844,7 +844,7 @@ namespace CloudVeil.Windows
 
             m_mainWindow.WindowRestoreRequested += (() =>
             {
-                BringAppToFocus();
+        //        BringAppToFocus();
             });
 
             m_mainWindow.Closing += ((object sender, CancelEventArgs e) =>
