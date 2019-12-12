@@ -171,7 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.4.31</Version>
+      <Version>0.4.32</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
