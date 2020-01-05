@@ -23,6 +23,24 @@
         </Component>
       </Directory>
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+        <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_13CA2E4B_0AEB" Guid="173C82B3-FF74-4FE9-AAF5-BC712D9CD962" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_972B1D02_D699" Guid="32035B3C-EEAF-49FD-BECB-476008B21BD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_D397C5B4_697B" Guid="C7D8CA26-C275-42CA-A567-3C179E7FFC8D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_196C8692_F905" Guid="27AC2548-57AF-402C-BEF5-13FD95ED8267" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_EA9F5501_48DD" Guid="A0E6F6F6-A852-4371-823C-6805509FDB4C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
+        </Component>
         <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
           <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
         </Component>
@@ -249,25 +267,7 @@
           </Component>
           <Component Id="comp_86CCE0BD_9963" Guid="1000812B-909D-45E8-977A-D79EA5BE6422" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_06833C0E_57B2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="proxy.dll" Source="..\..\CitadelGUI\bin\Release x86\x86\proxy.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_13CA2E4B_0AEB" Guid="173C82B3-FF74-4FE9-AAF5-BC712D9CD962" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_972B1D02_D699" Guid="32035B3C-EEAF-49FD-BECB-476008B21BD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_D397C5B4_697B" Guid="C7D8CA26-C275-42CA-A567-3C179E7FFC8D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_196C8692_F905" Guid="27AC2548-57AF-402C-BEF5-13FD95ED8267" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
-          </Component>
-          <Component Id="comp_EA9F5501_48DD" Guid="A0E6F6F6-A852-4371-823C-6805509FDB4C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
-          </Component>
+          </Component>          
         </Directory>
         <Directory Id="dir_D03EDAA7_862A" Name="de">
           <Component Id="comp_DE9A8449_785F" Guid="24FB46F2-79D3-412E-BC38-F9A96EA4EA67" Permanent="no" SharedDllRefCount="no" Transitive="no">

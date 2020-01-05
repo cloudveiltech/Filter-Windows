@@ -33,7 +33,6 @@
         <File Id="_5EB6A0B5_4D2A_A347_AB04_F6282687850B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
       </Component>
       <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
-      <Merge Id="Microsoft_VC140_CRT_x86.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x86.msm" DiskId="1" Language="0" />
     </Directory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
@@ -61,7 +60,6 @@
       <ComponentGroupRef Id="FileSystemGroup" />
       <ComponentGroupRef Id="RegistryGroup" />
       <MergeRef Id="SetupPayload86.msm" />
-      <MergeRef Id="Microsoft_VC140_CRT_x86.msm" />
     </Feature>
     <Upgrade Id="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}">
       <UpgradeVersion Minimum="2.0.20" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />

@@ -38,7 +38,6 @@
         <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
       </Component>
       <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
-      <Merge Id="Microsoft_VC140_CRT_x64.msm" SourceFile="External\msms\Microsoft_VC140_CRT_x64.msm" DiskId="1" Language="0" />
     </Directory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
@@ -67,7 +66,7 @@
       <ComponentGroupRef Id="FileSystemGroup" />
       <ComponentGroupRef Id="RegistryGroup" />
       <MergeRef Id="SetupPayload64.msm" />
-      <MergeRef Id="Microsoft_VC140_CRT_x64.msm" />
+    
     </Feature>
     <CustomActionRef Id="CA.StartServiceOnCommit" />
     <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->

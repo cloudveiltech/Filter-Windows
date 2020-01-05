@@ -12,7 +12,7 @@ namespace InstallerCustomActions
     public class WinDivertUninstaller
     {
         [CustomAction]
-        public static ActionResult RemoveWinDivert1_3(Session session)
+        public static ActionResult RemoveWinDivert(Session session)
         {
             ServiceController[] services = null;
 
@@ -28,9 +28,9 @@ namespace InstallerCustomActions
 
             foreach(ServiceController sc in services)
             {
-                if(sc.ServiceName == "WinDivert1.3")
+                if(sc.ServiceName == "WinDivert")
                 {
-                    session.Log("WinDivert1.3 service found.");
+                    session.Log("WinDivert service found.");
 
                     try
                     {
@@ -38,7 +38,7 @@ namespace InstallerCustomActions
                     }
                     catch(Exception ex)
                     {
-                        session.Log($"Failed to stop WinDivert1.3 with {ex}");
+                        session.Log($"Failed to stop WinDivert with {ex}");
                         return ActionResult.NotExecuted;
                     }
 
