@@ -84,6 +84,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -167,14 +170,14 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CloudVeil.goproxy-native-windows">
+      <Version>0.4.32</Version>
+    </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.NamedPipeWrapper">
       <Version>1.5.7</Version>
-    </PackageReference>
-    <PackageReference Include="CloudVeil.proxy-native-windows">
-      <Version>0.4.27</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertDotNet">
       <Version>2.2.0</Version>

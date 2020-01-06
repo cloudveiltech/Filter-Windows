@@ -9,7 +9,7 @@
         <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" BinaryKey="B.CustomInstallerActions" DllEntry="StartServicePostInstall" Impersonate="no" />
         <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
         <CustomAction Id="CA.GuardInstall" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="GuardInstall" Impersonate="no" />
-        <CustomAction Id="CA.RemoveWinDivert1_3" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert1_3" Impersonate="no" />
+        <CustomAction Id="CA.RemoveWinDivert" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveWinDivert" Impersonate="no" />
         <CustomAction Id="CA.RemoveCloudVeilStartupEntry" Execute="deferred" BinaryKey="B.CustomInstallerActions" DllEntry="RemoveCloudVeilStartupEntry" Impersonate="no" />
 
         <InstallExecuteSequence>
@@ -23,8 +23,8 @@
             <Custom Action="CA.StartServiceOnCommit" After="StartServices"><![CDATA[$CloudVeilExe > 2]]></Custom>
             <Custom Action="CA.GuardInstall.SetProperty" Before="CA.GuardInstall"><![CDATA[$CloudVeilExe = 2]]></Custom>
             <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies"><![CDATA[Installed]]></Custom>
-            <Custom Action="CA.RemoveWinDivert1_3" Before="StartServices" />
-            <Custom Action="CA.RemoveCloudVeilStartupEntry" Before="CA.RemoveWinDivert1_3" />
+            <Custom Action="CA.RemoveWinDivert" Before="StartServices" />
+            <Custom Action="CA.RemoveCloudVeilStartupEntry" Before="CA.RemoveWinDivert" />
             <RemoveExistingProducts After="InstallInitialize" />
         </InstallExecuteSequence>
 	</Fragment>

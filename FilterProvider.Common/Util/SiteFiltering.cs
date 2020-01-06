@@ -74,20 +74,13 @@ namespace FilterProvider.Common.Util
         /// <summary>
         /// Called when each request is intercepted and has not gone to the server yet.
         /// </summary>
-        internal ProxyNextAction OnBeforeRequest(GoproxyWrapper.Session args)
+        internal Int32 OnBeforeRequest(GoproxyWrapper.Session args)
         {
-            ProxyNextAction nextAction = ProxyNextAction.AllowAndIgnoreContent;
-            int trackId = 0;
-            lock (trackIdLock)
-            {
-                trackId = nextTrackId++;
-            }
-
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
             if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
             {
-                return ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                return 0;
             }
 
             try
@@ -106,12 +99,12 @@ namespace FilterProvider.Common.Util
 
                 if (url.Host == serviceProviderPath.Host)
                 {
-                    return ProxyNextAction.AllowAndIgnoreContentAndResponse;
+                    return 0;
                 }
                 else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
                     sendBlockResponse(args, urlString, null, BlockType.TimeRestriction);
-                    return ProxyNextAction.DropConnection;
+                    return 1;
                 }
               
             }
@@ -120,7 +113,7 @@ namespace FilterProvider.Common.Util
                 LoggerUtil.RecursivelyLogException(m_logger, e);
             }
 
-            return nextAction;
+            return 0;
         }
 
         private bool useHtmlBlockPage(Session args)
@@ -229,9 +222,7 @@ namespace FilterProvider.Common.Util
         }
 
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
-        {
-            ProxyNextAction nextAction = ProxyNextAction.AllowButRequestContentInspection;
-
+        {             
             bool shouldBlock = false;
             string customBlockResponseContentType = null;
             byte[] customBlockResponse = null;
@@ -260,7 +251,7 @@ namespace FilterProvider.Common.Util
                 {
                     customBlockResponseContentType = "text/html";
                     customBlockResponse = m_templates.ResolveBadSslTemplate(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint);
-                    nextAction = ProxyNextAction.DropConnection;
+                    shouldBlock = true;
                     return;
                 }
 
@@ -302,8 +293,6 @@ namespace FilterProvider.Common.Util
 
                         List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
-                        nextAction = ProxyNextAction.DropConnection;
-
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
@@ -326,7 +315,7 @@ namespace FilterProvider.Common.Util
             }
             finally
             {
-                if (nextAction == ProxyNextAction.DropConnection)
+                if (shouldBlock)
                 {
                     // TODO: Do we really need this as Info?
                     m_logger.Info("Response blocked: {0}", args.Request.Url);

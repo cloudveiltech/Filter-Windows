@@ -60,7 +60,13 @@ namespace CloudVeilInstallerUI
 
         protected override void Run()
         {
-            sentry = SentrySdk.Init(CloudVeil.Windows.CompileSecrets.SentryDsn);
+            try
+            {
+                sentry = SentrySdk.Init(CloudVeil.Windows.CompileSecrets.SentryDsn);
+            } catch
+            {
+                sentry = null;
+            }
             try
             {
                 string[] args = this.Command.GetCommandLineArgs();
@@ -99,10 +105,17 @@ namespace CloudVeilInstallerUI
                 }
                 if (UserId.Length == 0)
                 {
-                    var email = new RegistryAuthenticationStorage().UserEmail;
-                    var fingerPrint = new WindowsFingerprint().Value;
-                    UserId = email + ":" + fingerPrint;
-                    Engine.Log(LogLevel.Standard, $"My autoset id: {UserId}");
+                    try
+                    {
+                        var email = new RegistryAuthenticationStorage().UserEmail;
+                        var fingerPrint = new WindowsFingerprint().Value;
+                        UserId = email + ":" + fingerPrint;
+                        Engine.Log(LogLevel.Standard, $"My autoset id: {UserId}");
+                    } 
+                    catch
+                    {
+                        Engine.Log(LogLevel.Error, "Can't set User id, probably fresh install");
+                    }
                 }
 
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
@@ -173,7 +186,10 @@ namespace CloudVeilInstallerUI
 
                     Dispatcher.Run();
 
-                    sentry.Dispose();
+                    if (sentry != null)
+                    {
+                        sentry.Dispose();
+                    }
                     this.Engine.Quit(0);
                 }
             }

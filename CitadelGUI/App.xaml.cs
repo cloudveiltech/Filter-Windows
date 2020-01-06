@@ -7,7 +7,6 @@
 
 using Filter.Platform.Common.Extensions;
 using Citadel.Core.Windows.Util;
-using Citadel.Core.Windows;
 using Citadel.IPC;
 using Citadel.IPC.Messages;
 using Filter.Platform.Common.Util;
@@ -16,15 +15,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Security.Principal;
-using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using Te.Citadel.Extensions;
 using Te.Citadel.Services;
 using Te.Citadel.UI;
 using Te.Citadel.UI.ViewModels;
@@ -32,14 +26,11 @@ using Te.Citadel.UI.Views;
 using Te.Citadel.UI.Windows;
 using Te.Citadel.Util;
 using Filter.Platform.Common;
-using CloudVeilGUI.Platform.Common;
-using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Data.Models;
 using Citadel.Core.Windows.Util.Update;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.IPC.Messages;
-using System.Reflection;
 using FilterNativeWindows;
 using Te.Citadel;
 
@@ -345,8 +336,6 @@ namespace CloudVeil.Windows
                     {
                         return true;
                     }
-
-                    BringAppToFocus();
 
                     this.BeginUpdateRequest(msg.Data);
 
@@ -855,7 +844,7 @@ namespace CloudVeil.Windows
 
             m_mainWindow.WindowRestoreRequested += (() =>
             {
-                BringAppToFocus();
+        //        BringAppToFocus();
             });
 
             m_mainWindow.Closing += ((object sender, CancelEventArgs e) =>
@@ -870,7 +859,7 @@ namespace CloudVeil.Windows
                 }
 
                 // When the main window closes, go to tray and show notification.
-                MinimizeToTray(true);
+                MinimizeToTray(true);         
             });
 
             BaseCitadelViewModel dashboardVm = ModelManager.Get<DashboardViewModel>();
@@ -1017,6 +1006,8 @@ namespace CloudVeil.Windows
                 m_trayIcon.Visible = true;
             };
 
+            m_trayIcon.BalloonTipClicked += bringAppToFromBallonClicked;
+
             var menuItems = new List<System.Windows.Forms.MenuItem>();
             menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
             menuItems.Add(new System.Windows.Forms.MenuItem("Block History", TrayIcon_OpenBlockHistory));
@@ -1065,6 +1056,11 @@ namespace CloudVeil.Windows
                     }
                 }
             );
+        }
+
+        private void bringAppToFromBallonClicked(object sender, EventArgs e)
+        {
+            BringAppToFocus();
         }
 
 #if CAPTIVE_PORTAL_GUI_ENABLED
@@ -1117,6 +1113,10 @@ namespace CloudVeil.Windows
                 {
                     if (m_mainWindow != null)
                     {
+                        if(m_trayIcon != null)
+                        {
+                            m_trayIcon.ShowBalloonTip(3000, "Update Available", updateAvailableString, System.Windows.Forms.ToolTipIcon.Info);
+                        }
                         var result = await m_mainWindow.AskUserUpdateQuestion("Update Available", updateAvailableString);
                         m_ipcClient.Send<UpdateDialogResult>(IpcCall.UpdateResult, result);
                     }
@@ -1264,6 +1264,7 @@ namespace CloudVeil.Windows
                         {
                             m_trayIcon.ShowBalloonTip(1500, "Still Running", string.Format("{0} will continue running in the background.", Process.GetCurrentProcess().ProcessName), System.Windows.Forms.ToolTipIcon.Info);
                         }
+
                     }
                 }
             );
