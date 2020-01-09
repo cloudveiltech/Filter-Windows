@@ -6,6 +6,7 @@
 */
 
 using Citadel.Core.Extensions;
+using Filter.Platform.Common;
 using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using NLog;
