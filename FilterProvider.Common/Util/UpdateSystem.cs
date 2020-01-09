@@ -15,6 +15,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace FilterProvider.Common.Util
 {
@@ -40,7 +41,7 @@ namespace FilterProvider.Common.Util
                 bitVersionUri = "/update/cv4w-x86/update.xml";
             }
 
-            var appUpdateInfoUrl = string.Format("{0}{1}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri);
+            var appUpdateInfoUrl = string.Format("{0}{1}?acid={2}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri, HttpUtility.UrlEncode(FingerprintService.Default.Value));
 
             m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
 
