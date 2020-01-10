@@ -146,6 +146,7 @@ namespace CloudVeil.Windows
 
             foreach (string arg in args)
             {
+                LoggerUtil.GetAppWideLogger().Info("Start args " + arg);
                 if (arg.IndexOf("StartMinimized") != -1)
                 {
                     startMinimized = true;

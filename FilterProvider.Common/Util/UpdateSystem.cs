@@ -217,7 +217,7 @@ namespace FilterProvider.Common.Util
 
                     if (!isCheckButton && AppSettings.Default.CanUpdate())
                     {
-                        m_systemServices.EnsureGuiRunning();
+                        m_systemServices.EnsureGuiRunning(true);
                         Task.Delay(500).Wait();
 
                         m_ipcServer.Send<ApplicationUpdate>(IpcCall.Update, m_lastFetchedUpdate);
