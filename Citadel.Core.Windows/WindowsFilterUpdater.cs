@@ -48,6 +48,7 @@ namespace Citadel.Core.Windows
 
             try
             {
+                logger.Info("Starting update process " + filename + " " + args);
                 if (!ProcessCreation.CreateElevatedProcessInCurrentSession(filename, args))
                 {
                     logger.Error($"Failed to create elevated process with {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
@@ -77,12 +78,14 @@ namespace Citadel.Core.Windows
                 var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\\msiexec\" /I \"{3}\" {4} && \"{5}\"", systemFolder, secondDelay, systemFolder, update.UpdateFileLocalPath, update.UpdaterArguments, executingProcess);
                 Console.WriteLine(args);
                 updaterStartupInfo = new ProcessStartInfo(args);
+                logger.Info("Starting update process " + args);
             }
             else
             {
                 var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\\msiexec\" /I \"{3}\" {4}", systemFolder, secondDelay, systemFolder, update.UpdateFileLocalPath, update.UpdaterArguments);
                 Console.WriteLine(args);
                 updaterStartupInfo = new ProcessStartInfo(args);
+                logger.Info("Starting update process " + args);
             }
 
             updaterStartupInfo.UseShellExecute = false;
