@@ -302,7 +302,7 @@ namespace CitadelService.Services
 
                 try
                 {
-                    WindowsDiverter diverter = new WindowsDiverter(14300, 14301, 14300, 14301);
+                    WindowsDiverter diverter = new WindowsDiverter(14301, 14301, 14301, 14301);
                     diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
 
                     diverter.Start(1, () =>

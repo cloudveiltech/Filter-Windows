@@ -516,6 +516,9 @@ namespace CitadelCore.Windows.Diversion
 
                                         Volatile.Write(ref m_v4ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
+
+                                        GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(parseResult.TcpHeader->SrcPort, parseResult.TcpHeader->DstPort);
+
                                         // Unless we know for sure this is an encrypted connection via
                                         // the HTTP port, we should always default to sending to the
                                         // non-encrypted listener.
@@ -555,11 +558,11 @@ namespace CitadelCore.Windows.Diversion
 
                                         parseResult.IPv6Header->DstAddr = parseResult.IPv6Header->SrcAddr;
                                         parseResult.IPv6Header->SrcAddr = dstAddress;
-
                                         addr.Outbound = false;
 
                                         Volatile.Write(ref m_v6ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
+                                        GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(parseResult.TcpHeader->SrcPort, parseResult.TcpHeader->DstPort);
                                         // Unless we know for sure this is an encrypted connection via
                                         // the HTTP port, we should always default to sending to the
                                         // non-encrypted listener.

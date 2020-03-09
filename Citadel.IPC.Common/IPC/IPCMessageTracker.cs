@@ -66,8 +66,9 @@ namespace Citadel.IPC
             m_logger.Info("Retrying IPC messages.");
             lock (m_lock)
             {
-                foreach (var message in m_messageList)
+                for(int i=0;i < m_messageList.Count; i++)
                 {
+                    var message = m_messageList[i];
                     if (message.Retries < MaxRetries)
                     {
                         m_communicator.PushMessage(message.Message, message.Handler, message.Retries + 1);
