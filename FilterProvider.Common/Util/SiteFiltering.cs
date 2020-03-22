@@ -374,6 +374,8 @@ namespace FilterProvider.Common.Util
                 m_policyConfiguration.PolicyLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
+                m_logger.Info("Trying to match triggers");
+
                 if (m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
@@ -381,7 +383,6 @@ namespace FilterProvider.Common.Util
                     if (isHtml || isJson)
                     {
                         var dataToAnalyzeStr = Encoding.UTF8.GetString(data.ToArray());
-
                         if (isHtml)
                         {
                             // This doesn't work anymore because google has started sending bad stuff directly
@@ -391,6 +392,7 @@ namespace FilterProvider.Common.Util
                             // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
+                        m_logger.Info("Run trigger matcher");
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = m_policyConfiguration.Configuration;
@@ -410,7 +412,14 @@ namespace FilterProvider.Common.Util
                                 return mappedCategory.CategoryId;
                             }
                         }
+                    } else
+                    {
+
+                        m_logger.Info("Not text respose for triggers l");
                     }
+                } else
+                {
+                    m_logger.Info("No text triggers loaded");
                 }
                 stopwatch.Stop();
 
