@@ -741,6 +741,9 @@ namespace FilterProvider.Common.Data.Filtering
                             while(input[i] != '>')
                             {
                                 i++;
+                                if(i >= len) {
+                                    break;
+                                }
                                 sb.Append(input[i]);
                             }
 
