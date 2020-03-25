@@ -374,7 +374,6 @@ namespace FilterProvider.Common.Util
                 m_policyConfiguration.PolicyLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
-                m_logger.Info("Trying to match triggers");
 
                 if (m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
                 {
@@ -412,11 +411,7 @@ namespace FilterProvider.Common.Util
                                 return mappedCategory.CategoryId;
                             }
                         }
-                    } else
-                    {
-
-                        m_logger.Info("Not text respose for triggers l");
-                    }
+                    } 
                 } else
                 {
                     m_logger.Info("No text triggers loaded");
