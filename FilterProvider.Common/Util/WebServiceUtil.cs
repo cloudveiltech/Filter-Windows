@@ -430,7 +430,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-		//	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+    //	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -602,6 +602,7 @@ namespace FilterProvider.Common.Util
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
                 parameters.Add("device_id", deviceName);
+                parameters.Add("os", "WIN");
 
                 string postString = null;
                 //string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
