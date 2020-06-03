@@ -170,9 +170,6 @@
     <EmbeddedResource Include="Resources\UserLicense.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core">
-      <Version>4.3.1</Version>
-    </PackageReference>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
       <Version>0.4.46</Version>
     </PackageReference>
