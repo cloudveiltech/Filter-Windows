@@ -625,6 +625,16 @@ namespace CitadelCore.Windows.Diversion
             }
         }
 
+        public static bool IsInternalIp(IPAddress toTest)
+        {
+            if(toTest.IsIPv6LinkLocal || toTest.IsIPv6SiteLocal || toTest.IsPrivateIpv4Address() || IPAddress.IsLoopback(toTest))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Handles the process of inspecting a new TCP connection, seeking the user's decision on
         /// what to do with the connection, and then applying that decision in code in such a way as
@@ -674,12 +684,23 @@ namespace CitadelCore.Windows.Diversion
                 }
                 else
                 {
-                    // No need to null check here, because the above IF catches whenever connInfo
-                    // is null.
-                    var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
-                    var firewallRequest = new FirewallRequest(procPath, tcpHeader->SrcPort, tcpHeader->DstPort, connInfo.OwnerPid);
-                    response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
+
+                    if (IsInternalIp(connInfo.RemoteAddress))
+                    {
+                        response = new FirewallResponse(FirewallAction.DontFilterApplication);
+
+                        m_logger.Info("Don't filter internal IPs.");
+                    }
+                    else
+                    {
+                        // No need to null check here, because the above IF catches whenever connInfo
+                        // is null.
+                        var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
+                        var firewallRequest = new FirewallRequest(procPath, tcpHeader->SrcPort, tcpHeader->DstPort, connInfo.OwnerPid);
+                        response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
+                    }
                 }
+
 
                 if (response == null)
                 {
