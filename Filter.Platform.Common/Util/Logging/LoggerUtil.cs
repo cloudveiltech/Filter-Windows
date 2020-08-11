@@ -10,6 +10,7 @@ using NLog;
 using System;
 using System.Diagnostics;
 using Sentry.NLog;
+using System.IO;
 
 namespace Filter.Platform.Common.Util
 {
@@ -99,6 +100,40 @@ namespace Filter.Platform.Common.Util
         public static Logger GetAppWideLogger()
         {
             return LogManager.GetLogger(LoggerName);
+        }
+
+        public static string LogFolderPath
+        {
+            get
+            {
+                // Scan all Nlog log targets
+                var logDir = string.Empty;
+
+                var targets = NLog.LogManager.Configuration.AllTargets;
+
+                foreach (var target in targets)
+                {
+                    if (target is NLog.Targets.FileTarget)
+                    {
+                        var fTarget = (NLog.Targets.FileTarget)target;
+                        var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
+                        var fName = fTarget.FileName.Render(logEventInfo);
+
+                        if (!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
+                        {
+                            logDir = Directory.GetParent(fName).FullName;
+                            break;
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
+                {
+                    // Fallback, just in case.
+                    logDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                }
+                return logDir;
+            }
         }
     }
 }
