@@ -51,6 +51,7 @@ using Filter.Platform.Common.IPC.Messages;
 using HandlebarsDotNet;
 using CloudVeil;
 using GoProxyWrapper;
+using System.Diagnostics.Eventing.Reader;
 
 namespace FilterProvider.Common.Services
 {
@@ -104,12 +105,14 @@ namespace FilterProvider.Common.Services
 
         public bool Stop()
         {
+            m_logger.Info("FilterServiceProvider stop called");
             // We always return false because we don't let anyone tell us that we're going to stop.
             return false;
         }
 
         public bool Shutdown()
         {
+            m_logger.Info("FilterServiceProvider shutdown called");
             // Called on a shutdown event.
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
             return true;
@@ -582,7 +585,41 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.RegisterRequestHandler(IpcCall.Update, m_updateSystem.OnRequestUpdate);
                 m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateResult, m_updateSystem.OnUpdateDialogResult);
+                m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.DumpSystemEventLog, (message) => {
+                    string logSource = "System";
+                    string query = "*[System/Provider/@Name=\"Service Control Manager\"]";
 
+                    var elQuery = new EventLogQuery(logSource, PathType.LogName, query);
+                    using (var elReader = new System.Diagnostics.Eventing.Reader.EventLogReader(elQuery))
+                    {
+                        List<string> eventList = new List<string>();
+                        var eventInstance = elReader.ReadEvent();
+                        try
+                        {
+                            while (null != eventInstance)
+                            {
+                                var description = eventInstance.TimeCreated.ToString() + " " + eventInstance.FormatDescription();
+                                eventList.Add(description);
+                                if (eventInstance != null)
+                                {
+                                    eventInstance.Dispose();
+                                }
+                                eventInstance = elReader.ReadEvent();
+                            }
+                            File.WriteAllLines(LoggerUtil.LogFolderPath + "\\events.txt", eventList);
+                        }
+
+                        finally
+                        {
+                            if (eventInstance != null)
+                            {
+                                eventInstance.Dispose();
+                            }
+                        }
+                    }
+                    return true;
+                });
+                
                 m_ipcServer.DeactivationRequested = (args) =>
                 {
                     Status = FilterStatus.Synchronizing;
@@ -1692,6 +1729,8 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StopFiltering()
         {
+
+            m_logger.Info("Stop filtering");
             if (m_filteringEngine != null && m_filteringEngine.IsRunning)
             {
                 m_filteringEngine.Stop();

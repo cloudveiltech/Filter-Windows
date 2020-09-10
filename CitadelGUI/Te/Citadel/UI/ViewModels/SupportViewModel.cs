@@ -1,10 +1,12 @@
 ﻿using Citadel.IPC;
 using CloudVeil.Windows;
 using Filter.Platform.Common.Data.Models;
+using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -69,32 +71,11 @@ namespace Te.Citadel.UI.ViewModels
                     viewLogsCommand = new RelayCommand(() =>
                     {
                         // Scan all Nlog log targets
-                        var logDir = string.Empty;
+                        var logDir = LoggerUtil.LogFolderPath;
 
-                        var targets = NLog.LogManager.Configuration.AllTargets;
-
-                        foreach (var target in targets)
-                        {
-                            if (target is NLog.Targets.FileTarget)
-                            {
-                                var fTarget = (NLog.Targets.FileTarget)target;
-                                var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
-                                var fName = fTarget.FileName.Render(logEventInfo);
-
-                                if (!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
-                                {
-                                    logDir = Directory.GetParent(fName).FullName;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
-                        {
-                            // Fallback, just in case.
-                            logDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                        }
-
+                        //dump event log 
+                        var app = (CitadelApp.Current as CitadelApp);
+                        app.IpcClient.Request(IpcCall.DumpSystemEventLog);
                         // Call process start with the dir path, explorer will handle it.
                         Process.Start(logDir);
                     });

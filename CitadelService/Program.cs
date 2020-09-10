@@ -7,6 +7,7 @@
 
 using CitadelService.Services;
 using Filter.Platform.Common.Util;
+using NLog;
 using Sentry;
 using System;
 using System.Diagnostics;
@@ -73,11 +74,17 @@ namespace CitadelService
                         {
                             s.ConstructUsing(name => new FilterServiceProvider());
                             s.WhenStarted((fsp, hostCtl) => fsp.Start());
-                            s.WhenStopped((fsp, hostCtl) => fsp.Stop());
+                            s.WhenStopped((fsp, hostCtl) => {
+                                LoggerUtil.GetAppWideLogger().Info("Service stop called");
+
+                                return fsp.Stop(); 
+                            });
                             s.WhenShutdown((fsp, hostCtl) =>
                             {
                                 hostCtl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                                 fsp.Shutdown();
+
+                                LoggerUtil.GetAppWideLogger().Info("Service shutdown called");
                             });
 
                             // When someone logs on, start up a GUI for them.
@@ -107,6 +114,8 @@ namespace CitadelService
                         });
                         */
                     });
+
+                    LoggerUtil.GetAppWideLogger().Info("Service exit code is " + exitCode.ToString() + "(" + exitCode + ")");
                 }
 
                 InstanceMutex.ReleaseMutex();

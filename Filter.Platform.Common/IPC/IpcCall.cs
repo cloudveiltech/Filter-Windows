@@ -24,6 +24,7 @@ namespace Citadel.IPC
         AdministratorStart,
         CollectComputerInfo,
         ActivationIdentifier,
-        AddCustomTextTrigger
+        AddCustomTextTrigger,
+        DumpSystemEventLog
     }
 }

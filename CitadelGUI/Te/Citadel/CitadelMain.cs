@@ -20,6 +20,7 @@ using Sentry;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
@@ -126,7 +127,6 @@ namespace CloudVeil.Windows
             var sentry = SentrySdk.Init(o =>
             {
                 o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
-
                 o.BeforeBreadcrumb = (breadcrumb) =>
                 {
                     if (breadcrumb.Message.Contains("Request"))
