@@ -366,6 +366,7 @@ namespace CitadelService.Services
         /// </returns>
         public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
         {
+            
             if(!IsStandardHttpPort(request.RemotePort))
             {
                 return new FirewallResponse(FirewallAction.DontFilterApplication, null);

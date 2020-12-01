@@ -675,7 +675,7 @@ namespace CitadelCore.Windows.Diversion
                 }
             }
             else
-            {
+            {                
                 FirewallResponse response = null;
                 if (connInfo == null || connInfo.OwnerPid == 4 || connInfo.OwnerPid == 0)
                 {
@@ -688,8 +688,6 @@ namespace CitadelCore.Windows.Diversion
                     if (IsInternalIp(connInfo.RemoteAddress))
                     {
                         response = new FirewallResponse(FirewallAction.DontFilterApplication);
-
-                        m_logger.Info("Don't filter internal IPs.");
                     }
                     else
                     {
