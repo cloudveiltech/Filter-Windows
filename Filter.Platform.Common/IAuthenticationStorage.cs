@@ -16,5 +16,9 @@ namespace Filter.Platform.Common
         string UserEmail { get; set; }
 
         string AuthToken { get; set; }
+
+        string AuthId { get; set; }
+
+        string DeviceId { get; set; }
     }
 }

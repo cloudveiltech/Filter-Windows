@@ -250,5 +250,133 @@ namespace Citadel.Core.Windows.Util
                 }
             }
         }
+        public string DeviceId
+        {
+            get
+            {
+                lock (m_authenticationLock)
+                {
+                    // This key will have the entropy written to it in the registry.
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
+
+                    // Get the name of our process, aka the Executable name.
+                    var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+
+                    // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
+                    using (RegistryKey sub = getAppRegistryKey())
+                    {
+                        // Create or open our application's key.
+
+                        string authToken = null;
+
+                        if (sub != null)
+                        {
+                            authToken = sub.GetValue(keyName) as string;
+
+                            if (authToken == null || authToken.Length == 0)
+                            {
+                                return null;
+                            }
+                        }
+
+                        return authToken;
+                    }
+                }
+            }
+
+            set
+            {
+                Debug.Assert(value != null && value.Length > 0);
+
+                lock (m_authenticationLock)
+                {
+                    // This key will have the entropy written to it in the registry.
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
+
+                    // Get the name of our process, aka the Executable name.
+                    var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+
+                    // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
+                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    {
+                        if (sub != null)
+                        {
+                            try
+                            {
+                                sub.SetValue(keyName, value, RegistryValueKind.String);
+                            }
+                            catch (Exception e)
+                            {
+                                System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public string AuthId
+        {
+            get
+            {
+                lock (m_authenticationLock)
+                {
+                    // This key will have the entropy written to it in the registry.
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows)+  @"\cv4w\auth-id").ToString();
+
+                    // Get the name of our process, aka the Executable name.
+                    var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+
+                    // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
+                    using (RegistryKey sub = getAppRegistryKey())
+                    {
+                        // Create or open our application's key.
+
+                        string authToken = null;
+
+                        if (sub != null)
+                        {
+                            authToken = sub.GetValue(keyName) as string;
+
+                            if (authToken == null || authToken.Length == 0)
+                            {
+                                return null;
+                            }
+                        }
+
+                        return authToken;
+                    }
+                }
+            }
+
+            set
+            {
+                Debug.Assert(value != null && value.Length > 0);
+
+                lock (m_authenticationLock)
+                {
+                    // This key will have the entropy written to it in the registry.
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\auth-id").ToString();
+
+                    // Get the name of our process, aka the Executable name.
+                    var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+
+                    // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
+                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    {
+                        if (sub != null)
+                        {
+                            try
+                            {
+                                sub.SetValue(keyName, value, RegistryValueKind.String);
+                            }
+                            catch (Exception e)
+                            {
+                                System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

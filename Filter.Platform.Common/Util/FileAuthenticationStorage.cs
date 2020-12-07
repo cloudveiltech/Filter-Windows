@@ -108,5 +108,46 @@ namespace Filter.Platform.Common.Util
                 saveDictionary();
             }
         }
+
+        public string AuthId
+        {
+            get
+            {
+                initializeDictionary();
+
+                string value = null;
+                m_authDict.TryGetValue("AuthId", out value);
+
+                return value;
+            }
+
+            set
+            {
+                initializeDictionary();
+
+                m_authDict["AuthId"] = value;
+                saveDictionary();
+            }
+        }
+        public string DeviceId
+        {
+            get
+            {
+                initializeDictionary();
+
+                string value = null;
+                m_authDict.TryGetValue("DeviceId", out value);
+
+                return value;
+            }
+
+            set
+            {
+                initializeDictionary();
+
+                m_authDict["DeviceId"] = value;
+                saveDictionary();
+            }
+        }
     }
 }

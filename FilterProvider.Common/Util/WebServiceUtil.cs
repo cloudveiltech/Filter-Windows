@@ -206,8 +206,8 @@ namespace FilterProvider.Common.Util
                 authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
 
                 // Build out username and password as post form data. We need to ensure that we mop
-                // up any decrypted forms of our password when we're done, and ASAP.
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}", username, FingerprintService.Default.Value, deviceName));
+                // up any decrypted forms of our password when we're done, and ASAP.                
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", username, FingerprintService.Default.Value, deviceName, m_authStorage.DeviceId, m_authStorage.AuthId));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -249,6 +249,9 @@ namespace FilterProvider.Common.Util
                         response.Close();
                         authRequest.Abort();
                         ret.AuthenticationResult = AuthenticationResult.Success;
+
+                        m_authStorage.DeviceId = deviceName;
+                        m_authStorage.AuthId = FingerprintService.Default.Value;
                         return ret;
                     }
                     else
@@ -602,7 +605,9 @@ namespace FilterProvider.Common.Util
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
                 parameters.Add("device_id", deviceName);
-                parameters.Add("os", "WIN");
+                parameters.Add("identifier_2", m_authStorage.AuthId);
+                parameters.Add("device_id_2", m_authStorage.DeviceId);
+                parameters.Add("os", "WIN");                
 
                 string postString = null;
                 //string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
@@ -690,6 +695,9 @@ namespace FilterProvider.Common.Util
                         // Check if response code is considered a success code.
                         if (intCode >= 200 && intCode <= 299)
                         {
+                            m_authStorage.DeviceId = deviceName;
+                            m_authStorage.AuthId = FingerprintService.Default.Value;
+
                             using (var memoryStream = new MemoryStream())
                             {
                                 response.GetResponseStream().CopyTo(memoryStream);
@@ -865,7 +873,7 @@ namespace FilterProvider.Common.Util
                 }
 
                 // Build out post data with username and identifier.
-                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("identifier={0}&device_id={1}&", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName)));
+                var formData = System.Text.Encoding.UTF8.GetBytes(string.Format("identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName)));
 
                 // Merge all data.
                 var finalData = new byte[formData.Length + formEncodedData.Length];
