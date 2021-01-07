@@ -386,9 +386,9 @@ namespace Citadel.IPC
         /// <param name="password">
         /// Password to authorize with.
         /// </param>
-        public void AttemptAuthentication(string username, SecureString password)
+        public void AttemptAuthenticationWithPassword(string username, SecureString password)
         {
-            var msg = new AuthenticationMessage(AuthenticationAction.Requested, username, password);
+            var msg = new AuthenticationMessage(AuthenticationAction.RequestedWithPassword, username, password);
 
             var logger = LoggerUtil.GetAppWideLogger();
 
@@ -397,6 +397,22 @@ namespace Citadel.IPC
                 PushMessage(msg);
             }
             catch(Exception e)
+            {
+                LoggerUtil.RecursivelyLogException(logger, e);
+            }
+        }
+
+        public void AttemptAuthenticationWithEmail(string email)
+        {
+            var msg = new AuthenticationMessage(AuthenticationAction.RequestedWithEmail, email);
+
+            var logger = LoggerUtil.GetAppWideLogger();
+
+            try
+            {
+                PushMessage(msg);
+            }
+            catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }

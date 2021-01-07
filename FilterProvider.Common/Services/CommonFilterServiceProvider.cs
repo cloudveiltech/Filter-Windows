@@ -125,6 +125,8 @@ namespace FilterProvider.Common.Services
 
         #endregion Windows Service API
 
+        const int RETRIEVE_TOKEN_TIMEOUT = 5000;
+
         private FilterStatus Status
         {
             get
@@ -295,6 +297,7 @@ namespace FilterProvider.Common.Services
         /// Allows us to periodically check status of time restrictions.
         /// </summary>
         private Timer m_timeRestrictionsTimer;
+        private Timer m_retrieveTokenTimer;
 
         private SiteFiltering m_siteFiltering;
 
@@ -335,6 +338,38 @@ namespace FilterProvider.Common.Services
         {
             public string authToken { get; set; }
             public string userEmail { get; set; }
+        }
+
+        private void onRetrieveTokenTimeout(object state)
+        {
+            if(RetrieveToken())
+            {
+                onAuthSuccess();
+                m_retrieveTokenTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+        }
+
+        public bool RetrieveToken()
+        {
+            HttpStatusCode status;
+            byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
+            if (tokenResponse != null && status == HttpStatusCode.OK)
+            {
+                try
+                {
+                    string jsonText = Encoding.UTF8.GetString(tokenResponse);
+                    JsonAuthData jsonData = JsonConvert.DeserializeObject<JsonAuthData>(jsonText);
+
+                    WebServiceUtil.Default.AuthToken = jsonData.authToken;
+                    WebServiceUtil.Default.UserEmail = jsonData.userEmail;
+                    return true;
+                }
+                catch
+                {
+
+                }
+            } // else let them continue. They'll have to enter their password if this if isn't taken.
+            return false;
         }
 
         private void OnStartup()
@@ -421,23 +456,7 @@ namespace FilterProvider.Common.Services
             // Load authtoken and email data from files.
             if (WebServiceUtil.Default.AuthToken == null)
             {
-                HttpStatusCode status;
-                byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
-                if (tokenResponse != null && status == HttpStatusCode.OK)
-                {
-                    try
-                    {
-                        string jsonText = Encoding.UTF8.GetString(tokenResponse);
-                        JsonAuthData jsonData = JsonConvert.DeserializeObject<JsonAuthData>(jsonText);
-
-                        WebServiceUtil.Default.AuthToken = jsonData.authToken;
-                        WebServiceUtil.Default.UserEmail = jsonData.userEmail;
-                    }
-                    catch
-                    {
-
-                    }
-                } // else let them continue. They'll have to enter their password if this if isn't taken.
+                RetrieveToken();
             }
 
             // Hook the shutdown/logoff event.
@@ -520,6 +539,7 @@ namespace FilterProvider.Common.Services
                 m_timeDetection.ZoneTamperingDetected += OnZoneTampering;
 
                 m_timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
+                m_retrieveTokenTimer = new Timer(onRetrieveTokenTimeout, null, Timeout.Infinite, Timeout.Infinite);
 
                 m_siteFiltering = new SiteFiltering(m_ipcServer, m_timeDetection, PolicyConfiguration, m_certificateExemptions);
                 m_siteFiltering.RequestBlocked += OnRequestBlocked;
@@ -531,25 +551,36 @@ namespace FilterProvider.Common.Services
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username) && args.Password != null && args.Password.Length > 0)
+                        if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrWhiteSpace(args.Username))
                         {
                             byte[] unencrypedPwordBytes = null;
                             try
                             {
-                                unencrypedPwordBytes = args.Password.SecureStringBytes();
+                                AuthenticationResultObject authResult = AuthenticationResultObject.FailedResult;
+                                bool authOverEmail = args.Action == AuthenticationAction.RequestedWithEmail;
 
-                                var authResult = WebServiceUtil.Default.Authenticate(args.Username, unencrypedPwordBytes);
+                                if (authOverEmail)
+                                {
+                                    authResult = WebServiceUtil.Default.AuthenticateByEmail(args.Username);
+                                } 
+                                else
+                                {
+                                    unencrypedPwordBytes = args.Password.SecureStringBytes();
+                                    authResult = WebServiceUtil.Default.AuthenticateByPassword(args.Username, unencrypedPwordBytes);
+                                }
 
                                 switch (authResult.AuthenticationResult)
                                 {
                                     case AuthenticationResult.Success:
                                         {
-                                            Status = FilterStatus.Running;
-                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
-
-                                            // Probe server for updates now.
-                                            m_updateSystem.ProbeMasterForApplicationUpdates(false);
-                                            OnUpdateTimerElapsed(null);
+                                            if (authOverEmail)
+                                            {
+                                                m_retrieveTokenTimer.Change(RETRIEVE_TOKEN_TIMEOUT, RETRIEVE_TOKEN_TIMEOUT);
+                                            } 
+                                            else
+                                            {
+                                                onAuthSuccess();
+                                            }
                                         }
                                         break;
 
@@ -897,12 +928,23 @@ namespace FilterProvider.Common.Services
             m_backgroundInitWorker.RunWorkerAsync();
         }
 
+        private void onAuthSuccess()
+        {
+            Status = FilterStatus.Running;
+            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
+
+            // Probe server for updates now.
+            m_updateSystem.ProbeMasterForApplicationUpdates(false);
+            OnUpdateTimerElapsed(null);
+        }
+
         // Now why would you code it like this? Because you're lazy.
         private void Terminal_OnLogMessageReceived(object sender, Unosquare.Swan.LogMessageReceivedEventArgs e)
         {
             m_logger.Info($"SWAN: {e.Source}: {e.Message}: {e.Exception?.ToString()}");
         }
 
+    
         private void timeRestrictionsCheck(object state)
         {
             bool? areTimeRestrictionsActive = false;

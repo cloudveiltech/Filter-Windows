@@ -150,6 +150,7 @@ namespace Citadel.IPC
             private set;
         }
 
+        public AuthenticationAction Action { get; set; }
         /// <summary>
         /// Constructs a new AuthenticationRequestArgs instance from the given client message. 
         /// </summary>
@@ -158,6 +159,7 @@ namespace Citadel.IPC
         /// </param>
         public AuthenticationRequestArgs(AuthenticationMessage msg)
         {
+            Action = msg.Action;
             Username = msg.Username;
             Password = new SecureString();
 
@@ -382,12 +384,6 @@ namespace Citadel.IPC
                 if(cast != null)
                 {
                     if(string.IsNullOrEmpty(cast.Username) || string.IsNullOrWhiteSpace(cast.Username))
-                    {
-                        PushMessage(new AuthenticationMessage(AuthenticationAction.InvalidInput));
-                        return;
-                    }
-
-                    if(cast.Password == null || cast.Password.Length <= 0)
                     {
                         PushMessage(new AuthenticationMessage(AuthenticationAction.InvalidInput));
                         return;

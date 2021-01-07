@@ -15,7 +15,7 @@
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:mvvmlight="clr-namespace:GalaSoft.MvvmLight;assembly=GalaSoft.MvvmLight"
                 Width="716"
-                Height="386"
+                Height="416"
                 mc:Ignorable="d" PreviewKeyDown="True">
 
     <!--  Set data context to LoginViewModel.  -->
@@ -56,7 +56,7 @@
                    FontSize="14"
                    FontWeight="UltraLight"
                    Foreground="Black"
-                   Text="Username"
+                   Text="E-mail"
                    TextWrapping="Wrap" />
 
         <TextBox Width="220"
@@ -97,19 +97,28 @@
                                         TabIndex="3" />
 
         <!--  Auth action button bound to auth command.  -->
-        <Button Width="105"
-                Margin="363,289,0,0"
+        <Button Width="120"
+                Margin="348,292,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 IsDefault="True"
-                Command="{Binding AuthenticateCommand}"
+                Command="{Binding AuthenticateWithPasswordCommand}"
                 Content="Sign In"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
 
+        <Button Width="120"
+                Margin="348,325,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                IsDefault="False"
+                Command="{Binding AuthenticateWithEmailCommand}"
+                Content="Sign In With E-Mail"
+                Style="{StaticResource AccentedSquareButtonStyle}" />
+        
         <!--  Error messages.  -->
         <TextBlock Width="420"
                    Height="60"
-                   Margin="148,322,148,0"
+                   Margin="148,362,148,0"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
                    FontFamily="Segoe UI"
@@ -117,6 +126,20 @@
                    FontWeight="Light"
                    Foreground="Red"
                    Text="{Binding Path=ErrorMessage,
+                                  Mode=OneWay}"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap" />
+
+        <TextBlock Width="420"
+                   Height="60"
+                   Margin="148,362,148,0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   FontFamily="Segoe UI"
+                   FontSize="18"
+                   Foreground="Green"
+                   FontWeight="Light"
+                   Text="{Binding Path=Message,
                                   Mode=OneWay}"
                    TextAlignment="Center"
                    TextWrapping="Wrap" />

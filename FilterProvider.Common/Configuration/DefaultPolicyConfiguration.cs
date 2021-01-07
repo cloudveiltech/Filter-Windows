@@ -474,7 +474,7 @@ namespace FilterProvider.Common.Configuration
                 catch(Exception ex)
                 {
                     m_logger.Error($"decryptLists threw exception for {path}: {ex}");
-                    return false;
+                //    return false;
                 }
             }
 

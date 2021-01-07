@@ -36,6 +36,7 @@ namespace Filter.Platform.Common.Util
     [Serializable]
     public class AuthenticationResultObject
     {
+        public static AuthenticationResultObject FailedResult = new AuthenticationResultObject(AuthenticationResult.Failure, "");
         public AuthenticationResult AuthenticationResult { get; set; }
         public string AuthenticationMessage { get; set; }
 

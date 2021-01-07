@@ -22,7 +22,13 @@ namespace Citadel.IPC.Messages
         /// Means that the message represents a client requesting that the service attempt
         /// authorization with the embedded credentials. Credentials must be populated within the message.
         /// </summary>
-        Requested,
+        RequestedWithPassword,
+
+        /// <summary>
+        /// Means that the message represents a client requesting that the service attempt
+        /// authorization with the embedded credentials. Credentials must be populated within the message.
+        /// </summary>
+        RequestedWithEmail,
 
         /// <summary>
         /// Means that the message represents the server notifying the client that they must attempt

@@ -51,6 +51,8 @@ namespace Te.Citadel.UI.Models
             }
         }
 
+        public string Message { get; set; }
+
         public string UserName
         {
             get
@@ -83,7 +85,7 @@ namespace Te.Citadel.UI.Models
         /// <returns>
         /// True if the current state is valid for an authentication request, false otherwise. 
         /// </returns>
-        public bool CanAttemptAuthentication()
+        public bool CanAttemptAuthenticationWithPassword()
         {
             // Can't auth when we're in the middle of it.
             if(m_currentlyAuthenticating)
@@ -105,8 +107,37 @@ namespace Te.Citadel.UI.Models
 
             return true;
         }
+        public bool CanAttemptAuthenticationWithEmail()
+        {
+            // Can't auth when we're in the middle of it.
+            if (m_currentlyAuthenticating)
+            {
+                return false;
+            }
 
-        public async Task Authenticate()
+            // Ensure some sort of username has been supplied.
+            if (!StringExtensions.Valid(UserName))
+            {
+                return false;
+            }
+
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(UserName);
+                if(addr.Address != UserName)
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task AuthenticateWithPassword()
         {
             ErrorMessage = string.Empty;
 
@@ -116,6 +147,7 @@ namespace Te.Citadel.UI.Models
             {
                 // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
                 m_loginViewModel.ErrorMessage = "";
+                m_loginViewModel.Message = "";
 
                 await Task.Run(() =>
                 {
@@ -123,7 +155,7 @@ namespace Te.Citadel.UI.Models
                     {
                         ipcClient.ConnectedToServer = () =>
                         {
-                            ipcClient.AttemptAuthentication(m_userName, m_userPassword);
+                            ipcClient.AttemptAuthenticationWithPassword(m_userName, m_userPassword);
                         };
 
                         ipcClient.AuthenticationResultReceived = (msg) =>
@@ -148,6 +180,40 @@ namespace Te.Citadel.UI.Models
                 }
             }
         }
+
+        public async Task AuthenticateWithEmail()
+        {
+            ErrorMessage = string.Empty;
+
+            // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
+            m_loginViewModel.ErrorMessage = "";
+            m_loginViewModel.Message = "";
+
+            await Task.Run(() =>
+            {
+                using (var ipcClient = new IPCClient())
+                {
+                    ipcClient.ConnectedToServer = () =>
+                    {
+                        ipcClient.AttemptAuthenticationWithEmail(m_userName);
+                        m_loginViewModel.Message = "Request sent. Please check your E-Mail.";
+                    };
+
+                    ipcClient.AuthenticationResultReceived = (msg) =>
+                    {
+                        if (msg.AuthenticationResult.AuthenticationMessage != null)
+                        {
+                            m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                        }
+                        m_loginViewModel.hideProgessView();
+                    };
+
+                    ipcClient.WaitForConnection();
+                    Task.Delay(30000).Wait();
+                }
+            });
+        }
+
 
         public LoginModel(LoginViewModel viewModel)
         {

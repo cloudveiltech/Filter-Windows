@@ -31,7 +31,9 @@ namespace Te.Citadel.UI.ViewModels
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
         /// </summary>
-        private RelayCommand m_authenticateCommand;
+        private RelayCommand m_authenticateWithPasswordCommand;
+
+        private RelayCommand m_authenticateWithEmailCommand;
 
         public LoginViewModel()
         {
@@ -46,29 +48,58 @@ namespace Te.Citadel.UI.ViewModels
         /// CanExecute looks to the model to see if the current state permits execution of this
         /// action. The actual command itself is sent to the model.
         /// </summary>
-        public RelayCommand AuthenticateCommand
+        public RelayCommand AuthenticateWithPasswordCommand
         {
             get
             {
-                if(m_authenticateCommand == null)
+                if(m_authenticateWithPasswordCommand == null)
                 {
-                    m_authenticateCommand = new RelayCommand((Action)(async () =>
+                    m_authenticateWithPasswordCommand = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
                             ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
-                            await m_model.Authenticate();
+                            await m_model.AuthenticateWithPassword();
                             ViewManager?.PopView(typeof(ProgressWait));
                         }
                         catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(m_logger, e);
                         }
-                    }), m_model.CanAttemptAuthentication);
+                    }), m_model.CanAttemptAuthenticationWithPassword);
                 }
 
-                return m_authenticateCommand;
+                return m_authenticateWithPasswordCommand;
             }
+        }
+
+        public RelayCommand AuthenticateWithEmailCommand
+        {
+            get 
+            {
+                if (m_authenticateWithEmailCommand == null)
+                {
+                    m_authenticateWithEmailCommand = new RelayCommand((Action)(async () =>
+                    {
+                        try
+                        {
+                            ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
+                            await m_model.AuthenticateWithEmail();
+                        }
+                        catch (Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                        }
+                    }), m_model.CanAttemptAuthenticationWithEmail);
+                }
+
+                return m_authenticateWithEmailCommand;
+            }
+        }
+
+        public void hideProgessView()
+        {
+            ViewManager?.PopView(typeof(ProgressWait));
         }
 
         /// <summary>
@@ -88,6 +119,21 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        public string Message
+        {
+            get
+            {
+                return m_model.Message;
+            }
+
+            set
+            {
+                m_model.Message = value;
+                RaisePropertyChanged(nameof(Message));
+            }
+        }
+
+
         /// <summary>
         /// Binding path for the username input field.
         /// </summary>
@@ -102,7 +148,8 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(value != null && !value.OIEquals(m_model.UserName))
                 {
-                    m_authenticateCommand.RaiseCanExecuteChanged();
+                    m_authenticateWithPasswordCommand.RaiseCanExecuteChanged();
+                   
                     m_model.UserName = value;
                     RaisePropertyChanged(nameof(UserName));
                 }
@@ -123,7 +170,7 @@ namespace Te.Citadel.UI.ViewModels
             {
                 if(value != null && !value.OEquals(m_model.UserPassword))
                 {
-                    m_authenticateCommand.RaiseCanExecuteChanged();
+                    m_authenticateWithPasswordCommand.RaiseCanExecuteChanged();
 
                     m_model.UserPassword = value;
                     RaisePropertyChanged(nameof(UserPassword));

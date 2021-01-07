@@ -47,6 +47,7 @@ namespace FilterProvider.Common.Util
         GetToken,
         RevokeToken,
         RetrieveToken,
+        ActiveateByEmail,
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
@@ -79,6 +80,7 @@ namespace FilterProvider.Common.Util
             { ServiceResource.GetToken, "/api/v2/user/gettoken" },
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
+            { ServiceResource.ActiveateByEmail, "/api/v2/user/activation/email" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
             { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
@@ -151,9 +153,9 @@ namespace FilterProvider.Common.Util
             m_authStorage = PlatformTypes.New<IAuthenticationStorage>();
         }
 
-        public AuthenticationResultObject Authenticate(string username, byte[] unencryptedPassword)
+        public AuthenticationResultObject AuthenticateByPassword(string username, byte[] unencryptedPassword)
         {
-            m_logger.Error(nameof(Authenticate));
+            m_logger.Error(nameof(AuthenticateByPassword));
 
             AuthenticationResultObject ret = new AuthenticationResultObject();
 
@@ -373,6 +375,199 @@ namespace FilterProvider.Common.Util
             return ret;
 
         }
+        public AuthenticationResultObject AuthenticateByEmail(string email)
+        {
+            m_logger.Error(nameof(AuthenticateByEmail));
+
+            AuthenticationResultObject ret = new AuthenticationResultObject();
+
+            // Enforce parameters are valid.
+            Debug.Assert(StringExtensions.Valid(email));
+
+            if (!StringExtensions.Valid(email))
+            {
+                throw new ArgumentException("Supplied username cannot be null, empty or whitespace.", nameof(email));
+            }
+
+            // Don't bother if we don't have internet.
+            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            if (hasInternet == false)
+            {
+                m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
+                ret.AuthenticationResult = AuthenticationResult.ConnectionFailed;
+                ret.AuthenticationMessage = "Aborting authentication attempt because no internet connection could be detected.";
+                return ret;
+            }
+
+            // Will be set if we get any sort of web exception.
+            bool connectionFailure = false;
+
+            // Try to send the device name as well. Helps distinguish between clients under the same account.
+            string deviceName = string.Empty;
+
+            byte[] formData = null;
+
+            try
+            {
+                deviceName = Environment.MachineName;
+            }
+            catch
+            {
+                deviceName = "Unknown";
+            }
+
+            HttpWebRequest authRequest = null;
+            try
+            {
+                authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
+
+                // Build out username and password as post form data. We need to ensure that we mop
+                // up any decrypted forms of our password when we're done, and ASAP.                
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", email, FingerprintService.Default.Value, deviceName, m_authStorage.DeviceId, m_authStorage.AuthId));
+
+                // Don't forget to the set the content length to the total length of our form POST data!
+                authRequest.ContentLength = formData.Length;
+
+                authRequest.ContentType = "application/x-www-form-urlencoded";
+
+                // Grab the request stream so we can POST our login form data to it.
+                using (var requestStream = authRequest.GetRequestStream())
+                {
+                    // Write and close.
+                    requestStream.Write(formData, 0, formData.Length);
+                    requestStream.Close();
+                }
+
+                // Now that our login form data has been POST'ed, get a response.
+                using (var response = (HttpWebResponse)authRequest.GetResponse())
+                {
+                    // Get the response code as an int so we can range check it.
+                    var code = (int)response.StatusCode;
+
+                    // Check if the response status code is outside the "success" range of codes
+                    // defined in HTTP. If so, we failed. We include redirect codes (3XX) as success,
+                    // since our server side will just redirect us if we're already authed.
+                    if (code > 199 && code < 299)
+                    {
+                        response.Close();
+                        authRequest.Abort();
+                        ret.AuthenticationResult = AuthenticationResult.Success;
+
+                        m_authStorage.DeviceId = deviceName;
+                        m_authStorage.AuthId = FingerprintService.Default.Value;
+                        return ret;
+                    }
+                    else
+                    {
+                        if (code == 401 || code == 403)
+                        {
+                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            WebServiceUtil.Default.AuthToken = string.Empty;
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
+                            return ret;
+                        }
+                        else if (code > 399 && code < 499)
+                        {
+                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
+                            return ret;
+                        }
+                    }
+                }
+            }
+            catch (WebException e)
+            {
+                // XXX TODO - Is this sufficient?
+                if (e.Status == WebExceptionStatus.Timeout)
+                {
+                    m_logger.Info("Authentication failed due to timeout.");
+                    connectionFailure = true;
+                }
+
+                try
+                {
+                    using (WebResponse response = e.Response)
+                    {
+                        HttpWebResponse httpResponse = (HttpWebResponse)response;
+                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+
+                        string errorText = string.Empty;
+
+                        using (Stream data = response.GetResponseStream())
+                        using (var reader = new StreamReader(data))
+                        {
+                            errorText = reader.ReadToEnd();
+
+                            // GS Just cleans up the punctuation at the end of string
+                            string excpList = "$@*!.";
+                            var chRemoved = errorText
+                                .Select(ch => excpList.Contains(ch) ? (char?)null : ch);
+                            errorText = string.Concat(chRemoved.ToArray()) + "!";
+
+                            m_logger.Error("Stream errorText: " + errorText);
+                        }
+
+                        int code = (int)httpResponse.StatusCode;
+
+                        if (code == 401 || code == 403)
+                        {
+                            AuthToken = string.Empty;
+                        }
+
+                        if (code > 399 && code < 499)
+                        {
+                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            m_logger.Info("Athentication failure text: {0}", errorText);
+                            ret.AuthenticationMessage = errorText;
+                            ret.AuthenticationResult = AuthenticationResult.Failure;
+                            return ret;
+                        }
+
+
+                    }
+                }
+                catch (Exception iex)
+                {
+                    LoggerUtil.RecursivelyLogException(m_logger, iex);
+                }
+
+                // Log the exception.
+                m_logger.Error(e.Message);
+                m_logger.Error(e.StackTrace);
+            }
+            catch (Exception e)
+            {
+                while (e != null)
+                {
+                    m_logger.Error(e.Message);
+                    m_logger.Error(e.StackTrace);
+                    e = e.InnerException;
+                }
+
+                m_logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
+                WebServiceUtil.Default.AuthToken = string.Empty;
+                ret.AuthenticationResult = AuthenticationResult.Failure;
+                return ret;
+            }
+            finally
+            {
+                if (formData != null && formData.Length > 0)
+                {
+                    Array.Clear(formData, 0, formData.Length);
+                }
+            }
+
+            m_logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
+
+            // If we had success, we should/would have returned by now.
+            if (!connectionFailure)
+            {
+                WebServiceUtil.Default.AuthToken = string.Empty;
+            }
+
+            ret.AuthenticationResult = connectionFailure ? AuthenticationResult.ConnectionFailed : AuthenticationResult.Failure;
+            return ret;
+        }
 
 
         public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
@@ -433,7 +628,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-    //	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+   //	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
