@@ -33,6 +33,9 @@
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
       <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\WinDivertSharp.xml -->
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+          <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
+              <RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
+          </Component>
         <Component Id="comp_045EFB89_B4C6" Guid="E730CD33-3C4C-4410-B98C-C792AE135A87" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_850C7E93_ED2E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x64\concrt140.dll" KeyPath="yes" />
         </Component>

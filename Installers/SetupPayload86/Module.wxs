@@ -23,6 +23,7 @@
         </Component>
       </Directory>
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+
         <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
         </Component>
@@ -43,6 +44,7 @@
         </Component>
         <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
           <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
+          <RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
         </Component>
         <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
