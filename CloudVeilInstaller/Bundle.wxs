@@ -6,7 +6,7 @@
     </BootstrapperApplicationRef>
     <Chain>
       <PackageGroupRef Id="NetFx462Web" />
-      <MsiPackage Id="CloudVeilForWindows" Cache="no" Compressed="yes" Vital="yes" Name="CloudVeil.msi" SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
+      <MsiPackage ForcePerMachine="yes" Id="CloudVeilForWindows" Cache="no" Compressed="yes" Vital="yes" Name="CloudVeil.msi" SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
     </Chain>
   </Bundle>
   <!-- The following snippet (and the rest of this file) are covered by the following licenses -->
