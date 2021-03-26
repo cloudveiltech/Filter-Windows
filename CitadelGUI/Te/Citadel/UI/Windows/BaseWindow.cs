@@ -67,7 +67,7 @@ namespace Te.Citadel.UI.Windows
             return userQueryResult == MessageDialogResult.Affirmative;
         }
 
-        public async Task<string> PromptUser(string title, string question)
+        public async Task<LoginDialogData> PromptUserForPassword(string title, string question)
         {
             if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
@@ -77,12 +77,14 @@ namespace Te.Citadel.UI.Windows
                 return null;
             }
 
-            MetroDialogSettings settings = new MetroDialogSettings();
+            LoginDialogSettings settings = new LoginDialogSettings();
+            settings.ShouldHideUsername = true;
+            settings.NegativeButtonVisibility = Visibility.Visible;
             settings.AffirmativeButtonText = "OK";
             settings.NegativeButtonText = "Cancel";
             settings.DefaultButtonFocus = MessageDialogResult.Affirmative;
 
-            return await DialogManager.ShowInputAsync(this, title, question, settings);
+            return await DialogManager.ShowLoginAsync(this, title, question, settings);
         }
 
         public async Task<UpdateDialogResult> AskUserUpdateQuestion(string title, string question)

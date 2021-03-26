@@ -33,6 +33,7 @@ using Filter.Platform.Common.Types;
 using Filter.Platform.Common.IPC.Messages;
 using FilterNativeWindows;
 using Te.Citadel;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CloudVeil.Windows
 {
@@ -1187,7 +1188,8 @@ namespace CloudVeil.Windows
         /// </summary>
         private async void OnRelaxedPolicyRequested(bool fromTray)
         {
-            string passcode = null;
+            LoginDialogData passcodeData = null;
+            string passcode = "";
             if(m_appConfig != null && m_appConfig.EnableRelaxedPolicyPasscode)
             {
                 if(fromTray)
@@ -1195,7 +1197,8 @@ namespace CloudVeil.Windows
                     BringAppToFocus();
                 }
 
-                passcode = await m_mainWindow.PromptUser("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
+                passcodeData = await m_mainWindow.PromptUserForPassword("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
+                passcode = passcodeData.Password;
 
                 if(fromTray)
                 {

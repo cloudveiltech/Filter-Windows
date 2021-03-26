@@ -579,6 +579,7 @@ namespace FilterProvider.Common.Util
             
             LoggerUtil.GetAppWideLogger().Info("Cert " + certificate.Subject + " " + certificate.GetExpirationDateString());
             string publicKey = Convert.ToBase64String(certificate.GetPublicKey());
+            LoggerUtil.GetAppWideLogger().Info("Key is " + publicKey);
             if (publicKey.Equals(CompileSecrets.PinnedCertKey))
             {
                 LoggerUtil.GetAppWideLogger().Info("Keys match");
