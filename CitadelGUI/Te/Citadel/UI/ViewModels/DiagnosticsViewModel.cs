@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Te.Citadel.Testing;
 
 namespace Te.Citadel.UI.ViewModels
@@ -76,6 +77,38 @@ namespace Te.Citadel.UI.ViewModels
             }
         }
 
+        private Visibility m_dnsTestButtonVisibility;
+        public Visibility DnsTestButtonVisibility
+        {
+            get
+            {
+                return m_dnsTestButtonVisibility;
+            }
+            set
+            {
+                m_dnsTestButtonVisibility = value;
+                RaisePropertyChanged(nameof(DnsTestButtonVisibility));
+            }
+        }
+
+        public Boolean IsDnsEnforcementEnabled
+        {
+            get
+            {
+                return m_dnsTestButtonVisibility == Visibility.Visible;
+            }
+            set
+            {
+                if(value)
+                {
+                    DnsTestButtonVisibility = Visibility.Visible;
+                } else
+                {
+                    DnsTestButtonVisibility = Visibility.Hidden;
+                }
+            }
+        }
+
         private RelayCommand m_testSafeSearchCommand;
 
         public RelayCommand TestSafeSearchCommand
@@ -92,10 +125,16 @@ namespace Te.Citadel.UI.ViewModels
                         testsPassed = 0;
                         testsTotal = 0;
 
-                        Task.Run(() =>
+                        if (IsDnsEnforcementEnabled)
                         {
-                            test.TestDNSSafeSearch();
-                        });
+                            Task.Run(() =>
+                            {
+                                test.TestDNSSafeSearch();
+                            });
+                        } else
+                        {
+                            Test_OnFilterTestResult(new DiagnosticsEntry(FilterTest.DnsFilterTest, false, "DNS Enforcement is Disabled"));
+                        }
                     });
                 }
 

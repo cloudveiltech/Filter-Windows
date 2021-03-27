@@ -723,6 +723,9 @@ namespace CloudVeil.Windows
                         {
                             viewModel.TriggerBlacklist.Add(site);
                         }
+
+                        var diagnosticsViewModel = ModelManager.Get<DiagnosticsViewModel>();
+                        diagnosticsViewModel.IsDnsEnforcementEnabled = cfg.PrimaryDns.Length != 0 || cfg.SecondaryDns.Length != 0;
                     });
 
                     m_mainWindow.Dispatcher.InvokeAsync(() =>

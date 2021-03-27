@@ -198,7 +198,7 @@ namespace Te.Citadel.Testing
         }
 
         public void TestDNSSafeSearch()
-        {
+        {           
             int testsPassed = 0;
             int testsFailed = 0;
 

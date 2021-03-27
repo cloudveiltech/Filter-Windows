@@ -35,19 +35,20 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                             />
 
         <Button Style="{StaticResource AccentedSquareButtonStyle}"
-                            Content="Test DNS"
+                            Content="Test Safe Search"
                             Grid.Column="0"
                             Grid.Row="2"
                             Margin="4"
-                            Command="{Binding TestDnsCommand}"
+                            Command="{Binding TestSafeSearchCommand}"
                             />
 
         <Button Style="{StaticResource AccentedSquareButtonStyle}"
-                            Content="Test Safe Search"
+                            Content="Test DNS"
                             Grid.Column="0"
                             Grid.Row="3"
                             Margin="4"
-                            Command="{Binding TestSafeSearchCommand}"
+                            Visibility="{Binding DnsTestButtonVisibility}"
+                            Command="{Binding TestDnsCommand}"
                             />
 
         <DataGrid Grid.Column="1"
