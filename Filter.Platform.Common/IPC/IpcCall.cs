@@ -25,6 +25,7 @@ namespace Citadel.IPC
         CollectComputerInfo,
         ActivationIdentifier,
         AddCustomTextTrigger,
-        DumpSystemEventLog
+        DumpSystemEventLog,
+        BugReportConfirmationValue
     }
 }

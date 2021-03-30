@@ -1,4 +1,5 @@
 ﻿using Filter.Platform.Common;
+using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using Newtonsoft.Json;
@@ -20,8 +21,10 @@ namespace FilterProvider.Common.Util
 
         public DateTime? LastSettingsCheck { get; set; }
         public ConfigUpdateResult? ConfigUpdateResult { get; set; }
+        public BugReportSetting BugReportSettings { get; set; } = new BugReportSetting(false, false);
 
         public static AppSettings Default { get; private set; }
+        
 
         static AppSettings()
         {

@@ -122,6 +122,30 @@ namespace Te.Citadel.UI.Windows
 
         }
 
+        public async Task<bool> AskUser(string title, string question)
+        {
+            if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            {
+                m_logger.Info("Failed to AskUser() thanks to existing dialog.");
+                Sentry.SentrySdk.CaptureMessage("Failed to ShowUserMessage() thanks to existing dialog.");
+
+                return false;
+            }
+
+            MetroDialogSettings settings = new MetroDialogSettings();
+            settings.AffirmativeButtonText = "Yes";
+            settings.NegativeButtonText = "No";
+            settings.DefaultButtonFocus = MessageDialogResult.Affirmative;
+
+            var result = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, settings);
+            if(result == MessageDialogResult.Affirmative)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Displays a message to the user as an overlay, that the user can only accept. Caller must
         /// ensure that they're calling from within the UI thread.

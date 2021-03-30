@@ -117,14 +117,9 @@ namespace CloudVeil.Windows
             }
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="args">
-        /// </param>
-        [STAThread]
-        public static void Main(string[] args)
+        public static void StartSentry()
         {
-            var sentry = SentrySdk.Init(o =>
+            SentrySdk.Init(o =>
             {
                 o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
                 o.BeforeBreadcrumb = (breadcrumb) =>
@@ -139,7 +134,22 @@ namespace CloudVeil.Windows
                     }
                 };
             });
+            LoggerUtil.GetAppWideLogger().Info("Start sentry");
+        }
 
+        public static void StopSentry()
+        {            
+            SentrySdk.Close();
+            LoggerUtil.GetAppWideLogger().Info("Stop sentry");
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="args">
+        /// </param>
+        [STAThread]
+        public static void Main(string[] args)
+        {
             LoggerUtil.LoggerName = "CitadelGUI";
 
             bool startMinimized = false;
@@ -227,7 +237,7 @@ namespace CloudVeil.Windows
                 }
             }
 
-            sentry.Dispose();
+            StopSentry();
 
             // No matter what, always ensure that critical flags are removed from our process before exiting.
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();

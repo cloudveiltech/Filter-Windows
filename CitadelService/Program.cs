@@ -7,6 +7,7 @@
 
 using CitadelService.Services;
 using Filter.Platform.Common.Util;
+using FilterProvider.Common.Services;
 using NLog;
 using Sentry;
 using System;
@@ -20,6 +21,7 @@ namespace CitadelService
     {
         private static Mutex InstanceMutex;
 
+
         private static void Main(string[] args)
         {
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -31,23 +33,7 @@ namespace CitadelService
 
             bool exiting = false;
 
-            var sentry = SentrySdk.Init(o =>
-            {
-                o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
-
-                o.BeforeBreadcrumb = (breadcrumb) =>
-                {
-                    if (breadcrumb.Message.Contains("Request"))
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        return breadcrumb;
-                    }
-                };
-            });
-
+            CommonFilterServiceProvider.StartSentry();
 
             if (createdNew)
             {

@@ -34,6 +34,7 @@ using Filter.Platform.Common.IPC.Messages;
 using FilterNativeWindows;
 using Te.Citadel;
 using MahApps.Metro.Controls.Dialogs;
+using Te.Citadel.Properties;
 
 namespace CloudVeil.Windows
 {
@@ -738,6 +739,38 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
+                m_ipcClient.RegisterResponseHandler<BugReportSetting>(IpcCall.BugReportConfirmationValue, (msg) =>
+                {
+                    var advancedViewModel = ModelManager.Get<AdvancedViewModel>();
+                    var data = msg.Data ?? new BugReportSetting(false, false);
+                    advancedViewModel.BugReportSettings = data;
+                    if(!data.DialogShown)
+                    {
+                        Current.Dispatcher.Invoke(
+                            System.Windows.Threading.DispatcherPriority.Normal,
+
+                            (Action)async delegate ()
+                            {
+                                if (m_mainWindow != null)
+                                {
+                                    var result = await m_mainWindow.AskUser("Bug report", "Do you want to share bug reports with CloudVeil?");
+                                    var newSettings = new BugReportSetting(result, true);
+                                    m_ipcClient.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, newSettings);
+                                    advancedViewModel.BugReportSettings = newSettings;
+
+                                    if (data.Allowed != result)
+                                    {
+                                        SwitchSentry(result);
+                                    }
+                                }
+                        });
+                        return true;
+                    }
+                    SwitchSentry(data.Allowed && data.DialogShown);
+                    return true;
+                });
+
+
                 m_ipcClient.CaptivePortalDetectionReceived = (msg) =>
                 {
                     // C# doesn't like cross-thread GUI variable access, so run this on window thread.
@@ -788,6 +821,18 @@ namespace CloudVeil.Windows
             m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             m_backgroundInitWorker.RunWorkerAsync(e);
+        }
+
+        private void SwitchSentry(bool enabled)
+        {
+            if (enabled)
+            {
+                CitadelMain.StartSentry();
+            }
+            else
+            {
+                CitadelMain.StopSentry();
+            }
         }
 
         private void ScheduleAppRestart(int secondDelay = 30)

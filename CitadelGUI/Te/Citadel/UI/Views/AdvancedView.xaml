@@ -22,7 +22,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
             <ColumnDefinition Width="275" />
             <ColumnDefinition Width="320" />
         </Grid.ColumnDefinitions>
-        
+
         <StackPanel Grid.Column="1" Margin="56,0,16,0">
             <StackPanel Margin="0,0,0,16">
                 <Label HorizontalAlignment="Center"
@@ -46,19 +46,19 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
         <StackPanel Margin="16,0,16,0" Grid.Column="0">
             <!-- Check for updates widget -->
-                <StackPanel Orientation="Vertical">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="28"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="{Binding UpdateText}" Style="{StaticResource HeaderStyle}"/>
-                        <Controls:ProgressRing x:Name="requestUpdateProgress"
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="28"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{Binding UpdateText}" Style="{StaticResource HeaderStyle}"/>
+                    <Controls:ProgressRing x:Name="requestUpdateProgress"
                                            Grid.Column="1"
                                            Width="28" Height="28"
                                            Visibility="{Binding Path=CheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                        <IconPacks:PackIconFontAwesome
+                    <IconPacks:PackIconFontAwesome
                         Kind="{Binding UpdateIcon}"
                         Foreground="{Binding UpdateIconForeground}"
                         Grid.Column="1"
@@ -66,32 +66,32 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                         Width="28" Height="28"
                         Visibility="{Binding Path=NotCheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    </Grid>
-                    <Label Content="{Binding UpdateLastCheckedText}" />
-                    <Button Command="{Binding CheckForUpdatesCommand}"
+                </Grid>
+                <Label Content="{Binding UpdateLastCheckedText}" />
+                <Button Command="{Binding CheckForUpdatesCommand}"
                         IsEnabled="{Binding IsUpdateButtonEnabled}"
                         Content="{Binding UpdateButtonText}"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
-                    <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
-                </StackPanel>
+                <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
+            </StackPanel>
 
-                <!-- Synchronize Settings widget -->
-                <StackPanel Orientation="Vertical">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="28"/>
-                        </Grid.ColumnDefinitions>
+            <!-- Synchronize Settings widget -->
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="28"/>
+                    </Grid.ColumnDefinitions>
 
-                        <Label Content="{Binding SyncSettingsText}" Style="{StaticResource HeaderStyle}"/>
-                        <Controls:ProgressRing x:Name="requestSyncSettingsProgress"
+                    <Label Content="{Binding SyncSettingsText}" Style="{StaticResource HeaderStyle}"/>
+                    <Controls:ProgressRing x:Name="requestSyncSettingsProgress"
                                            Width="28" Height="28"
                                            Margin="0,5,0,0"
                                            Grid.Column="1"
                                            Visibility="{Binding Path=SynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                        <IconPacks:PackIconFontAwesome
+                    <IconPacks:PackIconFontAwesome
                         Kind="{Binding SyncSettingsIcon}"
                         Foreground="{Binding SyncSettingsIconForeground}"
                         Margin="0,5,0,0"
@@ -100,16 +100,20 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                         Height="28"
                         Visibility="{Binding Path=NotSynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    </Grid>
-                    <Label Content="{Binding SettingsLastCheckedText}" />
-                    <Button Command="{Binding SyncSettingsCommand}"
+                </Grid>
+                <Label Content="{Binding SettingsLastCheckedText}" />
+                <Button Command="{Binding SyncSettingsCommand}"
                         Content="Synchronize Settings"
                         Style="{StaticResource AccentedSquareButtonStyle}" />
 
 
-                    <Label Style="{StaticResource BaseFontStyle}" Content="{Binding SyncErrorText}" Margin="0,5,0,0" Height="28" />
+                <Label Style="{StaticResource BaseFontStyle}" Content="{Binding SyncErrorText}" Margin="0,5,0,0" Height="28" />
+                <StackPanel Orientation="Horizontal">
+                     <TextBlock TextWrapping="WrapWithOverflow" Width="195" FontSize="20">Send bug reports to CloudVeil Servers</TextBlock>
+                    <Controls:ToggleSwitch IsChecked="{Binding IsSendReportsChecked}" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}" VerticalAlignment="Center" OnLabel="" OffLabel=""/>
                 </StackPanel>
-
             </StackPanel>
+
+        </StackPanel>
     </Grid>
 </UserControl>

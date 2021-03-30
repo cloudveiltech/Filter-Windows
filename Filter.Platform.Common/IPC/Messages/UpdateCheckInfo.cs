@@ -30,4 +30,17 @@ namespace Filter.Platform.Common.IPC.Messages
         public DateTime? LastChecked { get; set; }
         public ConfigUpdateResult? CheckResult { get; set; }
     }
+
+    [Serializable]
+    public class BugReportSetting
+    {
+        public BugReportSetting(bool allowed, bool dialogShown)
+        {
+            Allowed = allowed;
+            DialogShown = dialogShown;
+        }
+
+        public bool Allowed { get; set; }
+        public bool DialogShown { get; set; }
+    }
 }

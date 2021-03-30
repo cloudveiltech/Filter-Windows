@@ -14,6 +14,7 @@ using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.IconPacks;
+using Sentry.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Compilation;
 using System.Windows.Media;
 using Te.Citadel.UI.Views;
 
@@ -79,6 +81,45 @@ namespace Te.Citadel.UI.ViewModels
             {
                 updateIcon = value;
                 RaisePropertyChanged(nameof(UpdateIcon));
+            }
+        }
+
+        private bool isSendReportsChecked;
+        public bool IsSendReportsChecked
+        {
+            get
+            {
+                return isSendReportsChecked;
+            }
+            set
+            {
+                isSendReportsChecked = value;
+                if(IsSendReportsChecked)
+                {
+                    CitadelMain.StartSentry();
+
+                } else
+                {
+                    CitadelMain.StopSentry();
+                }
+
+                bugReportSetting.Allowed = value;
+                IPCClient.Default.Request<BugReportSetting, object>(IpcCall.BugReportConfirmationValue, bugReportSetting);
+                RaisePropertyChanged(nameof(IsSendReportsChecked));
+            }
+        }
+
+        private BugReportSetting bugReportSetting;
+        public BugReportSetting BugReportSettings
+        {
+            get
+            {
+                return bugReportSetting;
+            }
+            set
+            {
+                bugReportSetting = value;
+                IsSendReportsChecked = bugReportSetting.Allowed;
             }
         }
 
@@ -159,7 +200,7 @@ namespace Te.Citadel.UI.ViewModels
                                 {
                                     (CitadelApp.Current as CitadelApp).BeginUpdateRequest(msg.Data);
                                     return true;
-                                });
+                                }); 
                             });
                         }
                         else

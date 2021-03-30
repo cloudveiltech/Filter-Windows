@@ -52,6 +52,7 @@ using HandlebarsDotNet;
 using CloudVeil;
 using GoProxyWrapper;
 using System.Diagnostics.Eventing.Reader;
+using Sentry;
 
 namespace FilterProvider.Common.Services
 {
@@ -117,6 +118,35 @@ namespace FilterProvider.Common.Services
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
             return true;
         }
+
+
+        public static void StartSentry()
+        {
+            var sentry = SentrySdk.Init(o =>
+            {
+                o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
+
+                o.BeforeBreadcrumb = (breadcrumb) =>
+                {
+                    if (breadcrumb.Message.Contains("Request"))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return breadcrumb;
+                    }
+                };
+            });
+            LoggerUtil.GetAppWideLogger().Info("StartSentry");
+        }
+
+        public static void StopSentry()
+        {
+            SentrySdk.Close();
+            LoggerUtil.GetAppWideLogger().Info("StopSentry");
+        }
+
 
         public void OnSessionChanged()
         {
@@ -616,6 +646,29 @@ namespace FilterProvider.Common.Services
 
                 m_ipcServer.RegisterRequestHandler(IpcCall.Update, m_updateSystem.OnRequestUpdate);
                 m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateResult, m_updateSystem.OnUpdateDialogResult);
+                m_ipcServer.RegisterRequestHandler<BugReportSetting>(IpcCall.BugReportConfirmationValue, (message) =>
+                {
+                    var res = message.Data;
+                    var needTrigger = AppSettings.Default.BugReportSettings == null || AppSettings.Default.BugReportSettings.Allowed != res.Allowed;
+                    AppSettings.Default.BugReportSettings = res;
+                    if (!needTrigger)
+                    {
+                        return true;
+                    }
+
+                    AppSettings.Default.Save();
+
+                    if (res.Allowed)
+                    {
+                        StartSentry();
+                    }
+                    else
+                    {
+                        StopSentry();
+                    }
+                    return true;
+                });
+
                 m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.DumpSystemEventLog, (message) => {
                     string logSource = "System";
                     string query = "*[System/Provider/@Name=\"Service Control Manager\"]";
@@ -835,6 +888,7 @@ namespace FilterProvider.Common.Services
 
                             m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
                             m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
+                            m_ipcServer.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, AppSettings.Default.BugReportSettings);
                             m_ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
                         }
                     }
