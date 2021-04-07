@@ -72,7 +72,7 @@ namespace FilterProvider.Common.Util
         private void initializeUpdateEnvironment()
         {
             Task.Delay(200).Wait();
-
+             
             m_logger.Info("Shutting down to update.");
 
             if (m_appcastUpdaterLock.IsWriteLockHeld)

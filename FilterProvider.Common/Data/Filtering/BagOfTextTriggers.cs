@@ -17,6 +17,7 @@ using System.Reflection;
 using NLog;
 using System.Diagnostics;
 using Citadel.Core.Windows.Util;
+using Filter.Platform.Common.Util;
 
 namespace FilterProvider.Common.Data.Filtering
 {
@@ -510,6 +511,8 @@ namespace FilterProvider.Common.Data.Filtering
                 return false;
             }
 
+       //     LoggerUtil.GetAppWideLogger().Info("Triggers for input: " + input);
+
             var split = Split(input);
 
             /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
@@ -736,7 +739,7 @@ namespace FilterProvider.Common.Data.Filtering
 
                         sb.Append('<');
 
-                        if(input[i + 1] == '/')
+                        if(i < len-1 && input[i + 1] == '/')
                         {
                             while(input[i] != '>')
                             {
