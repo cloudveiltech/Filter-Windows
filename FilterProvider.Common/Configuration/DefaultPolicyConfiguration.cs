@@ -643,68 +643,17 @@ namespace FilterProvider.Common.Configuration
 
                     if(Configuration != null && Configuration.CustomWhitelist != null && Configuration.CustomWhitelist.Count > 0)
                     {
-                        List<string> sanitizedCustomWhitelist = new List<string>();
-
-                        // As we are importing directly into an Adblock Plus-style rule engine, we need to make sure
-                        // that the user can't whitelist sites by adding something with a "@@" in front of it.
-
-                        // The easiest way to do this is to limit the characters to 'safe' characters.
-                        Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
-                        string rulesetPath = Path.Combine(tempFolder, ".user.custom_whitelist.rules.txt");
-
-                        using (var rulesetStream = File.OpenWrite(rulesetPath))
-                        using (var writer = new StreamWriter(rulesetStream))
-                        {
-                            foreach (string site in Configuration.CustomWhitelist)
-                            {
-                                if (site == null) continue;
-
-                                if (isCleanRule.IsMatch(site))
-                                {
-                                    writer.WriteLine($"||{site}");
-                                }
-                            }
-                        }
-                            
-                        MappedFilterListCategoryModel categoryModel = null;
-                        if(TryFetchOrCreateCategoryMap("/user/custom_whitelist", PlainTextFilteringListType.Whitelist, out categoryModel))
-                        {
-                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Whitelist);
-                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                        }
+                        AddCustomConfiguredSiteList(Configuration.CustomWhitelist, tempFolder, ".user.custom_whitelist.rules.txt", "/user/custom_whitelist", PlainTextFilteringListType.Whitelist, ListType.Whitelist);
                     }
 
-                    if(Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
+                    if (Configuration != null && Configuration.CustomBypasslist != null && Configuration.CustomBypasslist.Count > 0)
                     {
-                        List<string> sanitizedSelfModerationSites = new List<string>();
+                        AddCustomConfiguredSiteList(Configuration.CustomBypasslist, tempFolder, ".user.custom_bypasslist.rules.txt", "/user/custom_bypasslist", PlainTextFilteringListType.BypassList, ListType.BypassList);
+                    }
 
-                        // As we are importing directly into an Adblock Plus-style rule engine, we need to make sure
-                        // that the user can't whitelist sites by adding something with a "@@" in front of it.
-
-                        // The easiest way to do this is to limit the characters to 'safe' characters.
-                        Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
-                        string rulesetPath = Path.Combine(tempFolder, ".user.self_moderation.rules.txt");
-
-                        using (var rulesetStream = File.OpenWrite(rulesetPath))
-                        using (var writer = new StreamWriter(rulesetStream))
-                        {
-                            foreach (string site in Configuration.SelfModeration)
-                            {
-                                if (site == null) continue;
-
-                                if (isCleanRule.IsMatch(site))
-                                {
-                                    writer.WriteLine($"||{site}");
-                                }
-                            }
-                        }
-
-                        MappedFilterListCategoryModel categoryModel = null;
-                        if (TryFetchOrCreateCategoryMap("/user/self_moderation", PlainTextFilteringListType.Blacklist, out categoryModel))
-                        {
-                            AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Blacklist);
-                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                        }
+                    if (Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
+                    {
+                        AddCustomConfiguredSiteList(Configuration.SelfModeration, tempFolder, ".user.self_moderation.rules.txt", "/user/self_moderation", PlainTextFilteringListType.Blacklist, ListType.Blacklist);
                     }
 
                     //m_filterCollection.FinalizeForRead();
@@ -735,6 +684,49 @@ namespace FilterProvider.Common.Configuration
             }
         }
 
+        private void AddCustomConfiguredSiteList(List<string> ruleSet, string tempFolder, string fileName, string categoryPath, PlainTextFilteringListType plainTextFilteringListType, ListType mappedListType)
+        {
+            // As we are importing directly into an Adblock Plus-style rule engine, we need to make sure
+            // that the user can't whitelist sites by adding something with a "@@" in front of it.
+
+            // The easiest way to do this is to limit the characters to 'safe' characters.
+            Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
+            string rulesetPath = Path.Combine(tempFolder, fileName);
+
+            using (var rulesetStream = File.OpenWrite(rulesetPath))
+            using (var writer = new StreamWriter(rulesetStream))
+            {
+                foreach (string site in ruleSet)
+                {
+                    if (site == null) continue;
+
+                    if (isCleanRule.IsMatch(site))
+                    {
+                        writer.WriteLine($"||{site}");
+                    }
+                }
+            }
+
+            if (mappedListType == ListType.BypassList)
+            {
+                MappedBypassListCategoryModel categoryModel = null;
+                if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
+                {
+                    AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
+                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                }
+            }
+            else
+            {
+                MappedFilterListCategoryModel categoryModel = null;
+                if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
+                {
+                    AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
+                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                }
+            }
+        }
+
         public bool LoadConfiguration()
         {
             try
@@ -750,7 +742,7 @@ namespace FilterProvider.Common.Configuration
                 }
 
                 m_logger.Error("Configuration file does not exist.");
-                return false;
+                return false;          
             }
             catch (Exception e)
             {

@@ -224,6 +224,12 @@ namespace Filter.Platform.Common.Data.Models
         public List<string> CustomWhitelist { get; set; } = new List<string>();
 
         /// <summary>
+        /// List of all sites that the user wants bypassable on their devices.
+        /// </summary>
+        public List<string> CustomBypasslist { get; set; } = new List<string>();
+
+
+        /// <summary>
         /// List of all text triggers that the user wants blocked on their devices.
         /// </summary>
         public List<string> CustomTriggerBlacklist { get; set; } = new List<string>();
