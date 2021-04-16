@@ -334,16 +334,25 @@ namespace CitadelCore.Windows.Diversion
                         if(parseResult.UdpHeader != null)
                         {
                             var connInfo = GetLocalPacketInfo(parseResult.UdpHeader->SrcPort, parseResult.IPv4Header->SrcAddr);
-                            var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
-                            var firewallRequest = new FirewallRequest(procPath, parseResult.UdpHeader->SrcPort, parseResult.UdpHeader->DstPort, connInfo.OwnerPid);
-                            var response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
-                            if(response.Action == FirewallAction.BlockInternetForApplication || response.Action == FirewallAction.FilterApplication)
+                            if (connInfo != null)
                             {
+                                var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
+                                var firewallRequest = new FirewallRequest(procPath, parseResult.UdpHeader->SrcPort, parseResult.UdpHeader->DstPort, connInfo.OwnerPid);
+                                var response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
+                                if (response.Action == FirewallAction.BlockInternetForApplication || response.Action == FirewallAction.FilterApplication)
+                                {
+                                    dropPacket = true;
+                                    m_logger.Info("Blocking UDP traffic from " + connInfo.OwnerProcessPath);
+                                }
+                                else
+                                {
+                                    m_logger.Info("Allowing UDP traffic from " + connInfo.OwnerProcessPath);
+                                }
+                            } 
+                            else
+                            {
+                                m_logger.Info("Blocking UDP traffic from unknown process");
                                 dropPacket = true;
-                                m_logger.Info("Blocking UDP traffic from " + connInfo.OwnerProcessPath);
-                            } else
-                            {
-                                m_logger.Info("Allowing UDP traffic from " + connInfo.OwnerProcessPath);
                             }
                         }
 
