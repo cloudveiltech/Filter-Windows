@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudVeil.goproxy-native-windows" Version="0.4.51" />
-    <PackageReference Include="CloudVeil.GoProxyDotNet" Version="0.4.51" />
+    <PackageReference Include="CloudVeil.goproxy-native-windows" Version="0.4.52" />
+    <PackageReference Include="CloudVeil.GoProxyDotNet" Version="0.4.52" />
     <PackageReference Include="DNS" Version="4.0.0" />
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
     <PackageReference Include="embedio" Version="2.7.2" />
