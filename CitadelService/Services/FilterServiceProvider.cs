@@ -366,8 +366,7 @@ namespace CitadelService.Services
         /// </returns>
         public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
         {
-            
-            if(!IsStandardHttpPort(request.RemotePort))
+            if (!IsStandardHttpPort(request.RemotePort))
             {
                 return new FirewallResponse(FirewallAction.DontFilterApplication, null);
             }
@@ -437,7 +436,6 @@ namespace CitadelService.Services
                 if(m_provider.PolicyConfiguration.BlacklistedApplications.Count == 0 && m_provider.PolicyConfiguration.WhitelistedApplications.Count == 0)
                 {
                     // Just filter anything accessing port 80 and 443.
-                    m_logger.Debug("1Filtering application: {0}", request.BinaryAbsolutePath);
                     return new FirewallResponse(FirewallAction.FilterApplication);
                 }
 
@@ -454,7 +452,6 @@ namespace CitadelService.Services
                     else
                     {
                         // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                        m_logger.Debug("2Filtering application: {0}", request.BinaryAbsolutePath);
                         return new FirewallResponse(FirewallAction.FilterApplication);
                     }
                 }
@@ -465,7 +462,6 @@ namespace CitadelService.Services
 
                     if(inList)
                     {
-                        m_logger.Debug("3Filtering application: {0}", request.BinaryAbsolutePath);
                         return new FirewallResponse(FirewallAction.FilterApplication);
                     }
 
@@ -474,8 +470,6 @@ namespace CitadelService.Services
 
                 // This app was not hit by either an enforced whitelist or blacklist. So, by default
                 // we will filter everything. We should never get here, but just in case.
-
-                m_logger.Debug("4Filtering application: {0}", request.BinaryAbsolutePath);
                 return new FirewallResponse(FirewallAction.FilterApplication);
             }
             catch(Exception e)

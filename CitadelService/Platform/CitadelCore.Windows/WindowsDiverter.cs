@@ -120,12 +120,6 @@ namespace CitadelCore.Windows.Diversion
         private IntPtr m_diversionHandle = IntPtr.Zero;
 
         /// <summary>
-        /// WinDivert handle that simply drops all UDP packets destined for port 80 and 443 in order
-        /// to render QUIC inoperable.
-        /// </summary>
-        private IntPtr m_QUICDropHandle = IntPtr.Zero;
-
-        /// <summary>
         /// Collection of threads running against the WinDivert driver.
         /// </summary>
         private List<Thread> m_diversionThreads;
@@ -223,13 +217,7 @@ namespace CitadelCore.Windows.Diversion
 
                 m_diversionThreads = new List<Thread>();
 
-#if ENGINE_NO_BLOCK_TOR
-                string mainFilterString = "outbound and tcp and ((ip and ip.SrcAddr != 127.0.0.1) or (ipv6 and ipv6.SrcAddr != ::1))";
-#else
-                string mainFilterString = "outbound and tcp";
-#endif
-                string QUICFilterString = "udp and (udp.DstPort == 80 || udp.DstPort == 443)";
-
+                string mainFilterString = "outbound and (tcp or (udp and (udp.DstPort == 80 || udp.DstPort == 443)))";
                 m_diversionHandle = WinDivert.WinDivertOpen(mainFilterString, WinDivertLayer.Network, -1000, 0);
 
                 if (m_diversionHandle == s_InvalidHandleValue || m_diversionHandle == IntPtr.Zero)
@@ -238,17 +226,11 @@ namespace CitadelCore.Windows.Diversion
                     throw new Exception(string.Format("Failed to open main diversion handle. Got Win32 error code {0}.", Marshal.GetLastWin32Error()));
                 }
 
-                m_QUICDropHandle = WinDivert.WinDivertOpen(QUICFilterString, WinDivertLayer.Network, -999, WinDivertOpenFlags.Drop);
-
-                if (m_QUICDropHandle == s_InvalidHandleValue || m_QUICDropHandle == IntPtr.Zero)
-                {
-                    // Invalid handle value.
-                    throw new Exception(string.Format("Failed to open QUIC diversion handle. Got Win32 error code {0}.", Marshal.GetLastWin32Error()));
-                }
+  
 
                 // Set everything to maximum values.
                 WinDivert.WinDivertSetParam(m_diversionHandle, WinDivertParam.QueueLen, 16384);
-                WinDivert.WinDivertSetParam(m_diversionHandle, WinDivertParam.QueueTime, 8000);
+                WinDivert.WinDivertSetParam(m_diversionHandle, WinDivertParam.QueueTime, 8000); 
                 WinDivert.WinDivertSetParam(m_diversionHandle, WinDivertParam.QueueSize, 33554432);
 
                 m_running = true;
@@ -343,13 +325,29 @@ namespace CitadelCore.Windows.Diversion
 
                     #endregion Packet Reading Code
 
+
                     WinDivertParseResult parseResult = null;
                     if (addr.Outbound)
                     {
                         parseResult = WinDivert.WinDivertHelperParsePacket(packet, recvLength);
 
-                        #region New TCP Connection Detection
+                        if(parseResult.UdpHeader != null)
+                        {
+                            var connInfo = GetLocalPacketInfo(parseResult.UdpHeader->SrcPort, parseResult.IPv4Header->SrcAddr);
+                            var procPath = connInfo.OwnerProcessPath.Length > 0 ? connInfo.OwnerProcessPath : "SYSTEM";
+                            var firewallRequest = new FirewallRequest(procPath, parseResult.UdpHeader->SrcPort, parseResult.UdpHeader->DstPort, connInfo.OwnerPid);
+                            var response = ConfirmDenyFirewallAccess?.Invoke(firewallRequest);
+                            if(response.Action == FirewallAction.BlockInternetForApplication || response.Action == FirewallAction.FilterApplication)
+                            {
+                                dropPacket = true;
+                                m_logger.Info("Blocking UDP traffic from " + connInfo.OwnerProcessPath);
+                            } else
+                            {
+                                m_logger.Info("Allowing UDP traffic from " + connInfo.OwnerProcessPath);
+                            }
+                        }
 
+                        #region New TCP Connection Detection
                         if (parseResult.TcpHeader != null && parseResult.TcpHeader->Syn > 0)
                         {
                             // Brand new outbound connection. Grab the PID of the process holding this
@@ -385,7 +383,7 @@ namespace CitadelCore.Windows.Diversion
                         // packet belongs to an existing flow that was marked to be blocked.
 
                         // Check if this packet belongs to an IPV4 flow marked for blocking.
-                        if (parseResult.IPv4Header != null)
+                        if (parseResult.IPv4Header != null && parseResult.TcpHeader != null)
                         {
                             int srcPortAction = Volatile.Read(ref m_v4ShouldFilter[parseResult.TcpHeader->SrcPort]);
 
@@ -397,7 +395,7 @@ namespace CitadelCore.Windows.Diversion
                         }
 
                         // Check if this packet belongs to an IPV6 flow marked for blocking.
-                        if (!dropPacket && parseResult.IPv6Header != null)
+                        if (!dropPacket && parseResult.IPv6Header != null && parseResult.TcpHeader != null)
                         {
                             int srcPortAction = Volatile.Read(ref m_v6ShouldFilter[parseResult.TcpHeader->SrcPort]);
 
@@ -516,7 +514,6 @@ namespace CitadelCore.Windows.Diversion
 
                                         Volatile.Write(ref m_v4ReturnPorts[parseResult.TcpHeader->SrcPort], parseResult.TcpHeader->DstPort);
 
-
                                         GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(parseResult.TcpHeader->SrcPort, parseResult.TcpHeader->DstPort);
 
                                         // Unless we know for sure this is an encrypted connection via
@@ -621,7 +618,6 @@ namespace CitadelCore.Windows.Diversion
                 }
 
                 WinDivert.WinDivertClose(m_diversionHandle);
-                WinDivert.WinDivertClose(m_QUICDropHandle);
             }
         }
 
@@ -651,11 +647,6 @@ namespace CitadelCore.Windows.Diversion
         /// </param>
         private unsafe void HandleNewTcpConnection(ITcpConnectionInfo connInfo, TcpHeader* tcpHeader, bool isIpv6)
         {
-            if(tcpHeader == null)
-            {
-                
-            }
-
             if (connInfo != null && connInfo.OwnerPid == m_thisPid)
             {
                 // This is our process.
