@@ -41,12 +41,13 @@ namespace FilterProvider.Common.Util
 
     public class CaptivePortalHelper
     {
-        private static CaptivePortalHelper s_instance;
-        public static CaptivePortalHelper Default { get { return s_instance; } }
+        private const long CACHE_TIMEOUT_TICKS = 12*TimeSpan.TicksPerHour;
+
+        public static CaptivePortalHelper Default { get; private set; }
 
         static CaptivePortalHelper()
         {
-            s_instance = new CaptivePortalHelper();
+            Default = new CaptivePortalHelper();
         }
 
         private string[] m_currentCaptivePortalSSIDs = null;
@@ -131,12 +132,23 @@ namespace FilterProvider.Common.Util
 
                         m_currentCaptivePortalSSIDs = ssidLine.Split(',').Select(s => Encoding.ASCII.GetString(Convert.FromBase64String(s))).ToArray();
                         m_captivePortalDetectedAt = DateTime.Parse(dateLine);
+
+                        deleteCacheIfExpired();
                     }
                 }
             }
             catch (Exception e)
             {
                 LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
+            }
+        }
+
+        private void deleteCacheIfExpired()
+        {
+            if (m_captivePortalDetectedAt + new TimeSpan(CACHE_TIMEOUT_TICKS) < DateTime.Now)
+            {
+                deleteCaptivePortalSSIDsFile();
+                m_currentCaptivePortalSSIDs = null;
             }
         }
 
@@ -216,7 +228,9 @@ namespace FilterProvider.Common.Util
                     loadCaptivePortalSSIDs();
                 }
 
-                if(m_currentCaptivePortalSSIDs == null)
+                deleteCacheIfExpired();
+
+                if (m_currentCaptivePortalSSIDs == null)
                 {
                     return false;
                 }
@@ -227,7 +241,7 @@ namespace FilterProvider.Common.Util
                     return false;
                 }
 
-                foreach(string currentSSID in currentSSIDs)
+                foreach (string currentSSID in currentSSIDs)
                 {
                     foreach(string SSID in m_currentCaptivePortalSSIDs)
                     {
@@ -236,12 +250,6 @@ namespace FilterProvider.Common.Util
                             return true;
                         }
                     }
-                }
-
-                if (m_captivePortalDetectedAt + new TimeSpan(12, 0, 0) < DateTime.Now)
-                {
-                    deleteCaptivePortalSSIDsFile();
-                    m_currentCaptivePortalSSIDs = null;
                 }
 
                 return false;
