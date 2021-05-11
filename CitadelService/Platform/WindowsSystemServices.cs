@@ -156,7 +156,7 @@ namespace CitadelService.Platform
             trustRootCertificate(cert);
             rootCert = cert;
 
-            server.Init(14300, 14301, certPath, keyPath);
+            server.Init(14500, 14501, certPath, keyPath);
 
             server.BeforeRequest += config.BeforeRequest;
             server.BeforeResponse += config.BeforeResponse;
