@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using NLog;
 using System.Diagnostics;
-using Citadel.Core.Windows.Util;
+using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 
 namespace FilterProvider.Common.Data.Filtering

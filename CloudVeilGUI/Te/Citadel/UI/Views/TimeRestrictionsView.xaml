@@ -1,0 +1,66 @@
+﻿<local:BaseView x:Class="Te.Citadel.UI.Views.TimeRestrictionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Te.Citadel.UI.Views"
+             xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d">
+    <StackPanel MaxWidth="800">
+        <Label Content="{Binding Path=TimeRestrictionsDescription}" />
+        
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[1].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[1].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[1]}"
+            Caption="Monday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[2].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[2].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[2]}"
+            Caption="Tuesday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[3].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[3].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[3]}"
+            Caption="Wednesday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[4].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[4].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[4]}"
+            Caption="Thursday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[5].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[5].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[5]}"
+            Caption="Friday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[6].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[6].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[6]}"
+            Caption="Saturday" />
+
+        <localControls:TimeRestrictionSliderView
+            UpperValue="{Binding Path=TimeRestrictions[0].EnabledThrough[1]}"
+            LowerValue="{Binding Path=TimeRestrictions[0].EnabledThrough[0]}"
+            IndicatorValue="{Binding Path=CurrentTime}"
+            IndicatorVisible="{Binding Path=Visibilities[0]}"
+            Caption="Sunday" />
+
+        <TextBlock Margin="0,20,0,0">
+            <Hyperlink NavigateUri="{Binding Path=TimeRestrictionsUri}" RequestNavigate="Hyperlink_RequestNavigate">Edit</Hyperlink>
+        </TextBlock>
+    </StackPanel>
+</local:BaseView>

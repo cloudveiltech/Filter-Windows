@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// The ServerUpdateQueryMessage class represents an IPC communication between server (Service)

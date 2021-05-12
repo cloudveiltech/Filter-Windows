@@ -1,10 +1,10 @@
-﻿using Citadel.IPC.Messages;
+﻿using CloudVeil.IPC.Messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Citadel.IPC
+namespace CloudVeil.IPC
 {
     public delegate bool OnReplyHandler(ReplyHandlerClass h, IpcMessage message);
     public delegate bool OnReplyHandler<T>(ReplyHandlerClass<T> h, IpcMessage<T> message);

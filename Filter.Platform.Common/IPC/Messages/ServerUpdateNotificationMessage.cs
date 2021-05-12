@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// The ServiceUpdateNotificationMessage class represents an IPC communication between server

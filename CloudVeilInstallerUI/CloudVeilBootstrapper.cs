@@ -1,4 +1,4 @@
-﻿using Citadel.Core.Windows.Util;
+﻿using CloudVeil.Core.Windows.Util;
 using CloudVeilInstallerUI.IPC;
 using CloudVeilInstallerUI.ViewModels;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;

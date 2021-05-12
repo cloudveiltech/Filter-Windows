@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\FilterStarter.exe -->
-  <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Warden.exe -->
-  <!-- ignore-file:..\..\CitadelGUI\bin\Release x64\Sentinel.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\FilterStarter.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
   <Product Id="68166033-80ff-4bca-bea6-d663143297cc" Name="CloudVeil For Windows" Language="1033" Version="2.0.20" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x64" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
@@ -19,7 +19,7 @@
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
-    <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\CloudVeilGUI.WPF\appicon.ico" />
+    <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -32,10 +32,10 @@
         <File Id="_49908EA8_9E0B_A940_A30F_68D4540384F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
       </Component>
       <Component Id="CloudVeilExe" Guid="27D8853E-8599-403F-B925-7E06B800DD50" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
+        <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
       </Component>
       <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
+        <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
       </Component>
       <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
     </Directory>

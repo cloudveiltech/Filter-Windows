@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     [Serializable]
     public class AddSelfModerationEntryMessage : BaseMessage

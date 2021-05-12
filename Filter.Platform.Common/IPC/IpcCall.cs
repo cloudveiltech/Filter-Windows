@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Citadel.IPC
+namespace CloudVeil.IPC
 {
     public enum IpcCall
     {

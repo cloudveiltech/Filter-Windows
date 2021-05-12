@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     [Serializable]
     public enum RelaxedPolicyStatus

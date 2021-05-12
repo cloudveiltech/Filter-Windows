@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using Citadel.Core.Windows.Util;
+﻿using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Platform;

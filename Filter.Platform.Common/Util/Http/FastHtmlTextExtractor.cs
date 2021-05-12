@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.Core.Windows.Util
+namespace CloudVeil.Core.Windows.Util
 {
     /// <summary>
     /// The fast HTML text extractor class is designed to, as quickly and as ignorantly as possible,

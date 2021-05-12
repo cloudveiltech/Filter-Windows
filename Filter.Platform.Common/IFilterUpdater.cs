@@ -1,4 +1,4 @@
-﻿using Citadel.Core.Windows.Util.Update;
+﻿using CloudVeil.Core.Windows.Util.Update;
 using System;
 using System.Collections.Generic;
 using System.Text;

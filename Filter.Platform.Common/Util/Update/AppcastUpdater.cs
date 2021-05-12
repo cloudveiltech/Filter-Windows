@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Extensions;
+using CloudVeil.Core.Extensions;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
@@ -20,7 +20,7 @@ using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Citadel.Core.Windows.Util.Update
+namespace CloudVeil.Core.Windows.Util.Update
 {
     /// <summary>
     /// The AppcastUpdater class checks for application updates at a URI supplied at the construction

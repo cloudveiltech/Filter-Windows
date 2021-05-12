@@ -1,6 +1,0 @@
-<!-- This is used by MSBuild to compile our native project and copy it into Filter.Platform.Mac's build folder. -->
-<Project>
-	<Target Name="CompileNative" BeforeTargets="BeforeBuild">
-		<Exec Command="cd $(MSBuildThisFileDirectory); xcodebuild -target Filter.Platform.Mac.Native -config $(Configuration); cd -" ConsoleToMsbuild="true" />
-	</Target>
-</Project>

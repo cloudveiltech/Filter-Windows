@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// Used by server to send detected state of captive portal.

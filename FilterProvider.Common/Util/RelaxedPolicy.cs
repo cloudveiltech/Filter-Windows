@@ -1,5 +1,5 @@
-﻿using Citadel.IPC;
-using Citadel.IPC.Messages;
+﻿using CloudVeil.IPC;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;

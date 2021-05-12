@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Util;
+using CloudVeil.Core.Windows.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Te.Citadel.Util;
 
-namespace Citadel.Core.Extensions
+namespace CloudVeil.Core.Extensions
 {
     public static class NameValueCollectionExtensions
     {

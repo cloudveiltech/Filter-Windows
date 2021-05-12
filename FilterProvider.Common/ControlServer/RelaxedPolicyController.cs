@@ -1,8 +1,8 @@
 ﻿using FilterProvider.Common.Configuration;
 using FilterProvider.Common.Services;
 using FilterProvider.Common.Util;
-using Citadel.IPC.Messages;
-using Citadel.IPC;
+using CloudVeil.IPC.Messages;
+using CloudVeil.IPC;
 using System;
 using System.Collections.Generic;
 using System.Text;

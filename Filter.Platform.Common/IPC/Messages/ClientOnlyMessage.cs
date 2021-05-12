@@ -9,7 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// The purpose of the ClientOnlyMessage class is to give a base that IPC messages designed

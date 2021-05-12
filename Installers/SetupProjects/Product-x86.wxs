@@ -12,7 +12,7 @@
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
-    <Icon Id="_1FCD93CB6069" SourceFile="..\..\CitadelGUI\appicon.ico" />
+    <Icon Id="_1FCD93CB6069" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <!-- TODO: Split this into its own shared CustomActions.wxs -->
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x86\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->
@@ -24,13 +24,13 @@
         <File Id="_2DC1A1F2_F79C_4E47_8D9C_0D5085B01B98" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
       </Component>-->
       <Component Id="com_2DD664B4_B604_1744_B2C5_1FCD93CB6069" Guid="96103AD0-1E9E-45D0-B8CE-85C399B36BFA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_2DD664B4_B604_1744_B2C5_1FCD93CB6069" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CitadelGUI\appicon.ico" KeyPath="yes" />
+        <File Id="_2DD664B4_B604_1744_B2C5_1FCD93CB6069" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
       </Component>
       <Component Id="com_46B30685_E331_4947_B24F_F6C77769D09A" Guid="73784EEB-B551-4390-BBC0-8FA20370C191" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_46B30685_E331_4947_B24F_F6C77769D09A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
       </Component>
       <Component Id="CloudVeilExe" Guid="E88A277E-747A-43B2-AB30-6A538E47778F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_5EB6A0B5_4D2A_A347_AB04_F6282687850B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CitadelGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
+        <File Id="_5EB6A0B5_4D2A_A347_AB04_F6282687850B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
       </Component>
       <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
     </Directory>

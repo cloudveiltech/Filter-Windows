@@ -22,7 +22,7 @@ namespace CloudVeil.Windows
         {
             base.OnStartup(e);
 
-            Citadel.Core.Windows.Platform.Init();
+            CloudVeil.Core.Windows.Platform.Init();
 
             PlatformTypes.Register<IFilterStarter>((arr) => new WindowsFilterStarter());
             PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());

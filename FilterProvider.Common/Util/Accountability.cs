@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Citadel.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using FilterProvider.Common.Data.Filtering;
 using Newtonsoft.Json;
 using System.Net;

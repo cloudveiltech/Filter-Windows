@@ -91,9 +91,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
+    <ProjectReference Include="..\CloudVeil.Core.Windows\Cloudveil.Core.Windows.csproj">
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
-      <Name>Citadel.Core.Windows</Name>
+      <Name>Cloudveil.Core.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>

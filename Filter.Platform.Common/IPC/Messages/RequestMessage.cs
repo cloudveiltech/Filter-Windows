@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     [Serializable]
     [Obsolete("Use Send/Request APIs instead (IIpcCommunicator)")]

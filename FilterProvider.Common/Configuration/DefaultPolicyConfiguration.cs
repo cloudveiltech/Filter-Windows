@@ -9,8 +9,8 @@
 
 using Filter.Platform.Common.Extensions;
 
-using Citadel.IPC;
-using Citadel.IPC.Messages;
+using CloudVeil.IPC;
+using CloudVeil.IPC.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;

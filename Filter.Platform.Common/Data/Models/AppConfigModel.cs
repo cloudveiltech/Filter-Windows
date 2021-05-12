@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Data.Serialization;
+using CloudVeil.Core.Data.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

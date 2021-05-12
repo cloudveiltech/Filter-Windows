@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{620ADC88-B91D-4FDA-A791-8B92473E927A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CitadelService</RootNamespace>
+    <AssemblyName>FilterServiceProvider</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <OutputPath>bin\Debug x64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release x64\</OutputPath>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug x64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\Release x64\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug x86\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\Release x86\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Platform\CitadelCore.Windows\ByteArrayExtensions.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallAction.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallRequest.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\FirewallResponse.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\IPAddressExtensions.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\ProxyCallbacks.cs" />
+    <Compile Include="Platform\CitadelCore.Windows\WindowsDiverter.cs" />
+    <Compile Include="Platform\WinAPI\Iphlpapi.cs" />
+    <Compile Include="Platform\WinAPI\Kernel32.cs" />
+    <Compile Include="Platform\WinAPI\NetworkTables.cs" />
+    <Compile Include="Platform\WinAPI\ProcessUtilities.cs" />
+    <Compile Include="Platform\WindowsDns.cs" />
+    <Compile Include="Platform\WindowsPipeServer.cs" />
+    <Compile Include="Platform\WindowsSystemServices.cs" />
+    <Compile Include="Platform\WindowsWifiManager.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="CompileSecrets.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\FilterServiceProvider.cs" />
+    <Compile Include="Services\ServiceAccessFlags.cs" />
+    <Compile Include="Services\TrustManager.cs" />
+    <Compile Include="Services\VersionProvider.cs" />
+    <Compile Include="Util\AppListCheck.cs" />
+    <Compile Include="Util\ConsoleLog.cs" />
+    <Compile Include="Util\ConsoleLogWriter.cs" />
+    <Compile Include="Util\FileLockingUtil.cs" />
+    <Compile Include="Util\InstalledPrograms.cs" />
+    <Compile Include="Util\ResourceStreams.cs" />
+    <Compile Include="Util\UriInfo.cs" />
+    <EmbeddedResource Include="Services\Sentinel.cs" />
+    <Compile Include="Services\ServiceSpawner.cs" />
+    <EmbeddedResource Include="Services\Warden.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CloudVeil.Core.Windows\Cloudveil.Core.Windows.csproj">
+      <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
+      <Name>Cloudveil.Core.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj">
+      <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
+      <Name>CloudVeil.IPC.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
+      <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>
+      <Name>Filter.Native.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
+      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FilterProvider.Common\FilterProvider.Common.csproj">
+      <Project>{c5cf6d3f-967f-4bb2-bac9-5a47c6c1867b}</Project>
+      <Name>FilterProvider.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\appicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BlockedPage.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\FireFoxUserCFG.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\UserLicense.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CloudVeil.goproxy-native-windows">
+      <Version>0.4.54</Version>
+    </PackageReference>
+    <PackageReference Include="CloudVeil.GoProxyDotNet">
+      <Version>0.4.54</Version>
+    </PackageReference>
+    <PackageReference Include="CloudVeil.ManagedWifi">
+      <Version>1.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="CloudVeil.NamedPipeWrapper">
+      <Version>1.5.7</Version>
+    </PackageReference>
+    <PackageReference Include="CloudVeil.WinDivertDotNet">
+      <Version>2.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="DNS">
+      <Version>4.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+      <Version>2.6.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Data.Sqlite">
+      <Version>2.2.6</Version>
+    </PackageReference>
+    <PackageReference Include="NETStandard.Library">
+      <Version>2.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="NLog">
+      <Version>4.6.7</Version>
+    </PackageReference>
+    <PackageReference Include="NodaTime">
+      <Version>2.4.4</Version>
+    </PackageReference>
+    <PackageReference Include="Portable.BouncyCastle">
+      <Version>1.8.4</Version>
+    </PackageReference>
+    <PackageReference Include="Sentry">
+      <Version>1.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.IO.Compression">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.IO.Compression.ZipFile">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="TaskScheduler">
+      <Version>2.8.4</Version>
+    </PackageReference>
+    <PackageReference Include="Topshelf">
+      <Version>4.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="WindowsFirewallHelper">
+      <Version>1.4.6592.8627</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\BadCertPage.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\FilterAgent.Windows\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"
+
+xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x64" "$(TargetDir)x64"
+xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x86" "$(TargetDir)x86"
+</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Import Project="CompileSecrets.targets" />
+  <Target Name="RemoveNetFxForceConflicts" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'netfx.force.conflicts'" />
+    </ItemGroup>
+  </Target>
+</Project>

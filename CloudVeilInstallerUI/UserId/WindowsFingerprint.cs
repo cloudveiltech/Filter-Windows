@@ -9,7 +9,7 @@ using System.Management;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Citadel.Core.Windows.Util
+namespace CloudVeil.Core.Windows.Util
 {
     public class WindowsFingerprint
     {   

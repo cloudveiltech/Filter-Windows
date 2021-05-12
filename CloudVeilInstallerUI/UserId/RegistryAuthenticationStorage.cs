@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using Te.Citadel.Util;
 
-namespace Citadel.Core.Windows.Util
+namespace CloudVeil.Core.Windows.Util
 {
     public class RegistryAuthenticationStorage
     {

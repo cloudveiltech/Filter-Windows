@@ -10,7 +10,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using Citadel.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Util;
 
 namespace Filter.Platform.Common.IPC

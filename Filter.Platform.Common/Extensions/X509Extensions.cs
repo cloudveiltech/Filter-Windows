@@ -9,7 +9,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace Citadel.Core.Extensions
+namespace CloudVeil.Core.Extensions
 {
     public static class X509Extensions
     {

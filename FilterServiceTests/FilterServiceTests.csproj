@@ -112,13 +112,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
+    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj">
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
-      <Name>Citadel.IPC.Common</Name>
+      <Name>CloudVeil.IPC.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CitadelService\CitadelService.csproj">
+    <ProjectReference Include="..\CitadelService\CloudVeilService.csproj">
       <Project>{620adc88-b91d-4fda-a791-8b92473e927a}</Project>
-      <Name>CitadelService</Name>
+      <Name>CloudVeilService</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>

@@ -8,7 +8,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// Enum of the different block action types that a notify block action message can represent. 

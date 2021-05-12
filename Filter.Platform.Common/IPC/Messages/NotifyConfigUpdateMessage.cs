@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     [Serializable]
     public class NotifyConfigUpdateMessage : BaseMessage

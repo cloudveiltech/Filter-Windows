@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Te.Citadel.UI.Controls.TimeRestrictionSliderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Te.Citadel.UI.Controls"
+             xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="local:TimeRestrictionSlider">
+            <Setter Property="MinHeight" Value="10" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Maximum" Value="24" />
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Orientation" Value="Horizontal" />
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid x:Name="LayoutRoot">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="110" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="230" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Column="0" Content="{Binding Path=Caption}" />
+
+        <local:TimeRestrictionSlider
+            Grid.Column="1"
+            LowerValue="{Binding Path=LowerValue}"
+            UpperValue="{Binding Path=UpperValue}"
+            IndicatorVisible="{Binding Path=IndicatorVisible}"
+            AutoToolTipPlacement="{Binding Path=ToolTipPlacement}"
+            Value="{Binding Path=IndicatorValue}" />
+
+        <Label Grid.Column="2" Content="{Binding Path=AllowedDescription}" />
+    </Grid>
+</UserControl>

@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// Enum of the different status states that a filter status message can represent. 

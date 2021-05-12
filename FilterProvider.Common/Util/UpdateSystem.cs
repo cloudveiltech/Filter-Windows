@@ -1,7 +1,7 @@
-﻿using Citadel.Core.Extensions;
-using Citadel.Core.Windows.Util.Update;
-using Citadel.IPC;
-using Citadel.IPC.Messages;
+﻿using CloudVeil.Core.Extensions;
+using CloudVeil.Core.Windows.Util.Update;
+using CloudVeil.IPC;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.IPC.Messages;

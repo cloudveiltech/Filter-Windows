@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Threading;
 
-namespace Citadel.Core.Data.Serialization
+namespace CloudVeil.Core.Data.Serialization
 {
     /// <summary>
     /// This class is passed to JSON.NET for the purpose of deserializing integer values into

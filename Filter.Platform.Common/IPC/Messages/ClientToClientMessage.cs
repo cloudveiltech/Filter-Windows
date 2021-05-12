@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// Delegate for the handler of client to client commands. 

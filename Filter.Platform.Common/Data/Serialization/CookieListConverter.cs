@@ -14,7 +14,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Citadel.Core.Data.Serialization
+namespace CloudVeil.Core.Data.Serialization
 {
     public class CookieListConverter : JsonConverter
     {

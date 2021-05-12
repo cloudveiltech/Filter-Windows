@@ -150,17 +150,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Citadel.Core.Windows\Citadel.Core.Windows.csproj">
+    <ProjectReference Include="..\CloudVeil.Core.Windows\Cloudveil.Core.Windows.csproj">
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
-      <Name>Citadel.Core.Windows</Name>
+      <Name>Cloudveil.Core.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Citadel.IPC.Common\Citadel.IPC.Common.csproj">
+    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj">
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
-      <Name>Citadel.IPC.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CloudVeilGUI.Common\CloudVeilGUI.Common.csproj">
-      <Project>{02DA72B6-7608-4304-929D-1A447D87774D}</Project>
-      <Name>CloudVeilGUI.Common</Name>
+      <Name>CloudVeil.IPC.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
@@ -180,7 +176,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CitadelService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
+    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CloudVeilService\bin\$(Configuration) x64\*.*" "$(TargetDir)"
 xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

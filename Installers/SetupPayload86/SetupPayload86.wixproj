@@ -111,6 +111,6 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)\wix-verify-bin\wix-verify.exe" check-output "$(SolutionDir)\CitadelGUI\bin\Release x86" "$(SolutionDir)\Installers\SetupProjects\Product-x86.wxs" "$(SolutionDir)\Installers\SetupPayload86\Module.wxs"</PreBuildEvent>
+    <PreBuildEvent>"$(SolutionDir)\wix-verify-bin\wix-verify.exe" check-output "$(SolutionDir)\CloudVeilGUI\bin\Release x86" "$(SolutionDir)\Installers\SetupProjects\Product-x86.wxs" "$(SolutionDir)\Installers\SetupPayload86\Module.wxs"</PreBuildEvent>
   </PropertyGroup>
 </Project>

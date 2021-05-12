@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Filter.Platform.Common;
 
-namespace Citadel.Core.Windows.Util.Update
+namespace CloudVeil.Core.Windows.Util.Update
 {
     [Serializable]
     public enum UpdateKind

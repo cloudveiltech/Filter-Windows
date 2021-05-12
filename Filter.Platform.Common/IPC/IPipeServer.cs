@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using Citadel.IPC.Messages;
+﻿using CloudVeil.IPC.Messages;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -10,7 +10,7 @@ using Filter.Platform.Common.Util;
 using System;
 using System.Security;
 
-namespace Citadel.IPC.Messages
+namespace CloudVeil.IPC.Messages
 {
     /// <summary>
     /// Enum of the types of authentication actions that an authentication message can represent. 

@@ -5,10 +5,10 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Util;
-using Citadel.Core.Windows.Util.Update;
-using Citadel.IPC;
-using Citadel.IPC.Messages;
+using CloudVeil.Core.Windows.Util;
+using CloudVeil.Core.Windows.Util.Update;
+using CloudVeil.IPC;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
 using Newtonsoft.Json;
 using NLog;
@@ -541,7 +541,7 @@ namespace FilterProvider.Common.Services
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
                 m_systemServices.EnsureGuiRunning();
-                m_ipcServer.NotifyAuthenticationStatus(Citadel.IPC.Messages.AuthenticationAction.Required);
+                m_ipcServer.NotifyAuthenticationStatus(CloudVeil.IPC.Messages.AuthenticationAction.Required);
             };
 
             try

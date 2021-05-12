@@ -5,8 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using Citadel.IPC;
-using Citadel.IPC.Messages;
+﻿using CloudVeil.IPC;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Microsoft.Data.Sqlite;
 using System;
@@ -64,7 +64,7 @@ namespace DiagnosticsCollector
 
         static void Main(string[] args)
         {
-            Citadel.Core.Windows.Platform.Init();
+            CloudVeil.Core.Windows.Platform.Init();
 
             Console.WriteLine("This program was designed to be a diagnostics collector for CloudVeil for Windows.");
             Console.WriteLine("Use this program when you want to collect data on sites that aren't behaving properly while the filter is running.");
@@ -235,8 +235,8 @@ namespace DiagnosticsCollector
             {
                 switch(msg.ObjectVersion)
                 {
-                    case Citadel.IPC.Messages.DiagnosticsVersion.V1:
-                        var info = msg.Info as Citadel.IPC.Messages.DiagnosticsInfoV1;
+                    case CloudVeil.IPC.Messages.DiagnosticsVersion.V1:
+                        var info = msg.Info as CloudVeil.IPC.Messages.DiagnosticsInfoV1;
 
                         AddDiagnosticsEntryV1(connection, info);
 
