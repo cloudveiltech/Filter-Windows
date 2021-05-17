@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Te.Citadel.Platform
+namespace Gui.CloudVeil.Platform
 {
     public class WindowsPipeClient : IPipeClient
     {

@@ -61,6 +61,7 @@ namespace FilterProvider.Common.Util
             pageTemplate = pageTemplate.Replace("{{host}}", requestUri.Host);
             pageTemplate = pageTemplate.Replace("{{certThumbprintExists}}", certThumbprint == null ? "false" : "true");
             pageTemplate = pageTemplate.Replace("{{certThumbprint}}", certThumbprint);
+            pageTemplate = pageTemplate.Replace("{{serverPort}}", AppSettings.Default.ConfigServerPort.ToString());
 
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
@@ -142,6 +143,7 @@ namespace FilterProvider.Common.Util
             blockPageContext.Add("unblockRequest", unblockRequest);
             blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
             blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);
+            blockPageContext.Add("serverPort", AppSettings.Default.ConfigServerPort);
 
             return Encoding.UTF8.GetBytes(m_blockedHtmlPage(blockPageContext));
         }

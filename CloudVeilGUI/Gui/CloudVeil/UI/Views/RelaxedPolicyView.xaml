@@ -1,0 +1,105 @@
+﻿<!--
+Copyright © 2018 Jesse Nicholson, Cloudveil Technology Inc.
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+<local:BaseView x:Class="Gui.CloudVeil.UI.Views.RelaxedPolicyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Gui.CloudVeil.UI.Views"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextBlockStyle}" />
+        <Style TargetType="Label" BasedOn="{StaticResource BaseFontStyle}" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    <StackPanel MaxWidth="800">
+        <TextBlock
+            HorizontalAlignment="Center"
+            TextWrapping="Wrap">
+            <Run Text="If your administrator has configured your policy to include the ability to temporarily relax restrictions on certain websites, you can use the relaxed filtering rules for the given time span below." />
+            <Run />
+        </TextBlock>
+
+        <!--  Shows the last time that we synced with the server that gives us filtering data.  -->
+        <!--<TextBlock
+            HorizontalAlignment="Center"
+            TextAlignment="Right"
+            TextWrapping="Wrap">
+            <Run Text="{Binding Path=LastSyncStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Run />
+        </TextBlock>-->
+
+        <TextBlock
+            Visibility="{Binding Path=IsRelaxedPolicyInEffect, Converter={StaticResource BoolToVis}}"
+            HorizontalAlignment="Center"
+            TextAlignment="Right"
+            TextWrapping="Wrap">
+            <Run Text="You may now access sites that are in the relaxed policy." />
+        </TextBlock>
+
+        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+            <Label FontSize="12"
+                   Content="Uses Available:" />
+
+            <TextBlock Margin="10,0,0,0"
+                       FontSize="12"
+                       Text="{Binding Path=AvailableRelaxedRequests, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                       TextAlignment="Right"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+            <Label 
+                   FontSize="12"
+                   Content="Time Permitted:"/>
+
+            <TextBlock
+                       Margin="10,0,0,0"
+                       FontSize="12"
+                       Text="{Binding Path=RelaxedDuration, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                       TextAlignment="Right" />
+        </StackPanel>
+
+        <Button Content="Use Relaxed Policy"
+                Style="{StaticResource AccentedSquareButtonStyle}"
+                Command="{Binding UseRelaxedPolicyCommand}"
+                Margin="0,10,0,0"
+                Width="180"
+                />
+
+        <Button Content="Relinquish Relaxed Policy"
+                Style="{StaticResource AccentedSquareButtonStyle}"
+                Command="{Binding RelinquishRelaxedPolicyCommand}"
+                Margin="0,10,0,0"
+                Width="180"
+                />
+
+        <TextBlock Margin="0,10,0,0"><Hyperlink NavigateUri="{Binding RelaxedPolicySetupUri}" RequestNavigate="OnHyperlinkClicked">Edit Relaxed Policy Passcode</Hyperlink></TextBlock>
+        <StackPanel
+            x:Name="m_disabledInternetGrid"
+            x:FieldModifier="private"
+            Visibility="Hidden">
+            <Label Style="{StaticResource HeaderStyle}"
+                   HorizontalAlignment="Center"
+                   Content="Internet Disabled" />
+
+            <TextBlock
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap">
+                <Run Text="Your internet has been disabled because a high volume of block actions have taken place. This threshold is configured by your account administrator. Please contact them for assistance." />
+                <LineBreak />
+                <LineBreak />
+                <Run Text="Your internet will be restored at the date and time given below." />
+            </TextBlock>
+
+            <Label x:Name="m_internetRestorationTimeLabel"
+                   HorizontalAlignment="Stretch"
+                   Content=""
+                   FontSize="18" />
+
+        </StackPanel>
+    </StackPanel>
+</local:BaseView>

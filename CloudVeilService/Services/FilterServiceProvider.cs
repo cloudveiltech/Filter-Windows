@@ -19,7 +19,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 using CitadelService.Util;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
@@ -34,6 +34,7 @@ using FilterNativeWindows;
 using CitadelCore.Windows.Diversion;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using FilterProvider.Common.Util;
 
 /**
  * TODO:
@@ -302,8 +303,13 @@ namespace CitadelService.Services
 
                 try
                 {
-                    WindowsDiverter diverter = new WindowsDiverter(15301, 15301, 15301, 15301);
+                    WindowsDiverter diverter = new WindowsDiverter();
+                    diverter.UpdatePorts(AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort);
                     diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
+                    m_provider.OnPortsChanged += () =>
+                    {
+                        diverter.UpdatePorts(AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort);
+                    };
 
                     diverter.Start(1, () =>
                     {

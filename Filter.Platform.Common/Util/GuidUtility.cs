@@ -35,7 +35,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Te.Citadel.Util
+namespace Gui.CloudVeil.Util
 {
     /// <summary>
     /// Helper methods for working with <see cref="Guid"/>.

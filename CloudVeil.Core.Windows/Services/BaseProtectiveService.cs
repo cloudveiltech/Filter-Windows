@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Te.Citadel.Services
+namespace Gui.CloudVeil.Services
 {
     /// <summary>
     /// This class is a base service designed with the sole focus to monitor a process and restart it

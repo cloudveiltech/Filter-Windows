@@ -9,7 +9,7 @@ using NLog;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Windows.Util
 {

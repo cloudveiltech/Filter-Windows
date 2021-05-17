@@ -8,7 +8,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Te.Citadel.Util
+namespace Gui.CloudVeil.Util
 {
     /// <summary>
     /// Class responsible for exposing undocumented functionality making the host process unkillable.

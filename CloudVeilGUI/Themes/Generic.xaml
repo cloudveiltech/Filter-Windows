@@ -1,10 +1,10 @@
 ﻿ <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Te.Citadel.Themes"
-                    xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls">
+                    xmlns:local="clr-namespace:Gui.CloudVeil.Themes"
+                    xmlns:localControls="clr-namespace:Gui.CloudVeil.UI.Controls">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/CloudVeil;component/Themes/TimeRestrictionSlider.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style BasedOn="{StaticResource Te.Citadel.Styles.TimeRestrictionSlider}" TargetType="{x:Type localControls:TimeRestrictionSlider}" />
+    <Style BasedOn="{StaticResource Gui.CloudVeil.Styles.TimeRestrictionSlider}" TargetType="{x:Type localControls:TimeRestrictionSlider}" />
 </ResourceDictionary>

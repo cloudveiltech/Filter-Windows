@@ -188,7 +188,7 @@ The line below is used by the filter tester to determine whether the filter is w
                     var xhr = new XMLHttpRequest();
 
                     // Panic not, {{certThumbprint}} gets replaced during template building. Same with {{host}}
-                    xhr.open("GET", "https://127.0.0.1:14299/api/exempt/{{certThumbprint}}?host={{host}}");
+                    xhr.open("GET", "https://127.0.0.1:{{serverPort}}/api/exempt/{{certThumbprint}}?host={{host}}");
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {
                             var json = null;

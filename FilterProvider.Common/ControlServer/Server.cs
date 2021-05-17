@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Modules;
+using Unosquare.Swan;
 
 namespace FilterProvider.Common.ControlServer
 {
@@ -91,7 +92,7 @@ namespace FilterProvider.Common.ControlServer
             {
                 module.RegisterController(factory.Item1, factory.Item2);
             }
-
+            
             serverTask = server.RunAsync(cts.Token);
         }
 

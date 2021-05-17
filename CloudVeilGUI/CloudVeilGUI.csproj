@@ -7,7 +7,7 @@
     <ProjectGuid>{887416CD-1C73-4AFE-8FA3-A0DA4E7F20DD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Te.Citadel</RootNamespace>
+    <RootNamespace>Gui.CloudVeil</RootNamespace>
     <AssemblyName>CloudVeil</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -24,7 +24,7 @@
   </ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>CloudVeil.Windows.CitadelMain</StartupObject>
+    <StartupObject>CloudVeil.Windows.CloudVeilGuiMain</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -111,52 +111,52 @@
   <ItemGroup>
     <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
-    <Compile Include="Te\Citadel\CitadelMain.cs" />
+    <Compile Include="Gui\CloudVeil\CloudVeilGuiMain.cs" />
     <Compile Include="CompileSecrets.cs" />
-    <Compile Include="Te\Citadel\ConflictInfo.cs" />
-    <Compile Include="Te\Citadel\ConflictReasonInformation.cs" />
-    <Compile Include="Te\Citadel\Extensions\ApplicationExtensions.cs" />
-    <Compile Include="Te\Citadel\PostInstallCommand.cs">
+    <Compile Include="Gui\CloudVeil\ConflictInfo.cs" />
+    <Compile Include="Gui\CloudVeil\ConflictReasonInformation.cs" />
+    <Compile Include="Gui\CloudVeil\Extensions\ApplicationExtensions.cs" />
+    <Compile Include="Gui\CloudVeil\PostInstallCommand.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Te\Citadel\PostInstallCommand.Designer.cs">
+    <Compile Include="Gui\CloudVeil\PostInstallCommand.Designer.cs">
       <DependentUpon>PostInstallCommand.cs</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\Testing\FilterTesting.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\RangeParameterChangedEventArgs.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\RangeSelectionChangedEventArgs.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\SliderHelper.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\TimeRestrictionSlider.cs" />
-    <Compile Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\Testing\FilterTesting.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Controls\RangeParameterChangedEventArgs.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Controls\RangeSelectionChangedEventArgs.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Controls\SliderHelper.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSliderView.xaml.cs">
       <DependentUpon>TimeRestrictionSliderView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\ModelManager.cs" />
-    <Compile Include="Te\Citadel\UI\Models\DashboardModel.cs" />
-    <Compile Include="Te\Citadel\UI\Models\MainWindowModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewManager.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\AdvancedViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\CaptivePortalViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\CollectDiagnosticsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\DashboardViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\DiagnosticsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\HistoryViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\SelfModerationViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\SettingsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\SupportViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\TimeRestrictionsViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\Views\AdvancedView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\ModelManager.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Models\DashboardModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Models\MainWindowModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewManager.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\AdvancedViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\CaptivePortalViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\CollectDiagnosticsViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\DashboardViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\DiagnosticsEntryViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\DiagnosticsViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\HistoryViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\SelfModerationViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\SettingsViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\SupportViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\TimeRestrictionsViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Views\AdvancedView.xaml.cs">
       <DependentUpon>AdvancedView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\BaseView.cs" />
-    <Compile Include="Te\Citadel\UI\Views\CaptivePortalView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\BaseView.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Views\CaptivePortalView.xaml.cs">
       <DependentUpon>CaptivePortalView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\CollectDiagnosticsView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\CollectDiagnosticsView.xaml.cs">
       <DependentUpon>CollectDiagnosticsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\DashboardView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
     </Compile>
     <Page Include="App.xaml">
@@ -167,11 +167,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Controls\TimeRestrictionSliderView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSliderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\CollectDiagnosticsView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\CollectDiagnosticsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -183,55 +183,55 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Controls\SecureInputBox.xaml">
+    <Page Include="Gui\CloudVeil\UI\Controls\SecureInputBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\AdvancedView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\AdvancedView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\CaptivePortalView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\CaptivePortalView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\DashboardView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\DashboardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\HistoryView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\HistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\ProgressWait.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\ProgressWait.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\LoginView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\LoginView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\RelaxedPolicyView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\RelaxedPolicyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\DiagnosticsView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\DiagnosticsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\SupportView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\SupportView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\SelfModerationView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\SelfModerationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Te\Citadel\UI\Views\TimeRestrictionsView.xaml">
+    <Page Include="Gui\CloudVeil\UI\Views\TimeRestrictionsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Te\Citadel\UI\Windows\MainWindow.xaml">
+    <Page Include="Gui\CloudVeil\UI\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -239,38 +239,38 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Controls\SecureInputBox.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Controls\SecureInputBox.xaml.cs">
       <DependentUpon>SecureInputBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Models\LoginModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\BaseCitadelViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\ViewModels\LoginViewModel.cs" />
-    <Compile Include="Te\Citadel\UI\Views\HistoryView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Models\LoginModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\BaseCitadelViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\LoginViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Views\HistoryView.xaml.cs">
       <DependentUpon>HistoryView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\ProgressWait.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\ProgressWait.xaml.cs">
       <DependentUpon>ProgressWait.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\LoginView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\RelaxedPolicyView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\RelaxedPolicyView.xaml.cs">
       <DependentUpon>RelaxedPolicyView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\DiagnosticsView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\DiagnosticsView.xaml.cs">
       <DependentUpon>DiagnosticsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\SupportView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\SupportView.xaml.cs">
       <DependentUpon>SupportView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\SelfModerationView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\SelfModerationView.xaml.cs">
       <DependentUpon>SelfModerationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Views\TimeRestrictionsView.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Views\TimeRestrictionsView.xaml.cs">
       <DependentUpon>TimeRestrictionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Te\Citadel\UI\Windows\BaseWindow.cs" />
-    <Compile Include="Te\Citadel\UI\Windows\MainWindow.xaml.cs">
+    <Compile Include="Gui\CloudVeil\UI\Windows\BaseWindow.cs" />
+    <Compile Include="Gui\CloudVeil\UI\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

@@ -26,7 +26,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 
 using Filter.Platform.Common.Util;
 using Filter.Platform.Common.Extensions;
@@ -62,6 +62,8 @@ namespace FilterProvider.Common.Services
     /// </summary>
     /// <param name="provider"></param>
     public delegate void ExtensionDelegate(CommonFilterServiceProvider provider);
+    
+    public delegate void PortsChangedDelegate();
 
     /// <summary>
     /// This is an optional delegate that the common filter services provider can call to determine the version of the program that is running it.
@@ -348,6 +350,9 @@ namespace FilterProvider.Common.Services
         private ISystemServices m_systemServices;
 
         private ExtensionDelegate m_extensionDelegate;
+        private PortsChangedDelegate portChangedDelegate;
+
+        public event PortsChangedDelegate OnPortsChanged;
 
         /// <summary>
         /// Default ctor. 
@@ -400,6 +405,13 @@ namespace FilterProvider.Common.Services
                 }
             } // else let them continue. They'll have to enter their password if this if isn't taken.
             return false;
+        }
+
+        private void RestartFiltering()
+        {
+            StopFiltering();
+            m_controlServer.Dispose(); 
+            InitEngine();
         }
 
         private void OnStartup()
@@ -509,7 +521,7 @@ namespace FilterProvider.Common.Services
                         new GeneralName(GeneralName.IPAddress, "::1")
                         });
 
-                    m_controlServer = new Server(14299, cert);
+                    m_controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
                     m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
                     m_controlServer.RegisterController(typeof(RelaxedPolicyController), (context) => new RelaxedPolicyController(m_relaxedPolicy, context));
                     m_controlServer.Start();
@@ -668,6 +680,36 @@ namespace FilterProvider.Common.Services
                     }
                     return true;
                 });
+
+
+                m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.RandomizePortsValue, (message) =>
+                {
+                    if (AppSettings.Default.RandomizePorts != message.Data)
+                    {
+                        AppSettings.Default.RandomizePorts = message.Data;
+                        if (AppSettings.Default.RandomizePorts)
+                        {
+                            AppSettings.Default.ShufflePorts();
+                        } 
+                        else
+                        {
+                            AppSettings.Default.SetDefaultPorts();
+                        }
+
+                        RestartFiltering();
+                        OnPortsChanged?.Invoke();
+
+                        m_ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
+                        AppSettings.Default.Save();
+                        message.SendReply<bool>(m_ipcServer, IpcCall.RandomizePortsValue, true);                        
+                    } 
+                    else
+                    {
+                        message.SendReply<bool>(m_ipcServer, IpcCall.RandomizePortsValue, true);
+                    }
+
+                    return true;
+                } );
 
                 m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.DumpSystemEventLog, (message) => {
                     string logSource = "System";
@@ -890,6 +932,8 @@ namespace FilterProvider.Common.Services
                             m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
                             m_ipcServer.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, AppSettings.Default.BugReportSettings);
                             m_ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
+                            m_ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
+                            m_ipcServer.Send<bool>(IpcCall.RandomizePortsValue, AppSettings.Default.RandomizePorts);
                         }
                     }
                     catch (Exception ex)

@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Te.Citadel.UI.Views;
+using Gui.CloudVeil.UI.Views;
 
 namespace CloudVeil.Windows.Platform
 {

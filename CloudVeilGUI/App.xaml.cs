@@ -19,12 +19,12 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Te.Citadel.Services;
-using Te.Citadel.UI;
-using Te.Citadel.UI.ViewModels;
-using Te.Citadel.UI.Views;
-using Te.Citadel.UI.Windows;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Services;
+using Gui.CloudVeil.UI;
+using Gui.CloudVeil.UI.ViewModels;
+using Gui.CloudVeil.UI.Views;
+using Gui.CloudVeil.UI.Windows;
+using Gui.CloudVeil.Util;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Data.Models;
@@ -32,9 +32,9 @@ using CloudVeil.Core.Windows.Util.Update;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.IPC.Messages;
 using FilterNativeWindows;
-using Te.Citadel;
+using Gui.CloudVeil;
 using MahApps.Metro.Controls.Dialogs;
-using Te.Citadel.Properties;
+using Gui.CloudVeil.Properties;
 
 namespace CloudVeil.Windows
 {
@@ -739,6 +739,23 @@ namespace CloudVeil.Windows
                     return true;
                 });
 
+
+                m_ipcClient.RegisterResponseHandler<ushort[]>(IpcCall.PortsValue, (msg) =>
+                {
+                    var advancedViewModel = ModelManager.Get<AdvancedViewModel>();
+                    var data = msg.Data;
+                    advancedViewModel.Ports = data;
+                    return true;
+                });
+
+                m_ipcClient.RegisterResponseHandler<bool>(IpcCall.RandomizePortsValue, (msg) =>
+                {
+                    var advancedViewModel = ModelManager.Get<AdvancedViewModel>();
+                    var data = msg.Data;
+                    advancedViewModel.IsPortsRandomized = data;
+                    return true;
+                });
+
                 m_ipcClient.RegisterResponseHandler<BugReportSetting>(IpcCall.BugReportConfirmationValue, (msg) =>
                 {
                     var advancedViewModel = ModelManager.Get<AdvancedViewModel>();
@@ -827,11 +844,11 @@ namespace CloudVeil.Windows
         {
             if (enabled)
             {
-                CitadelMain.StartSentry();
+                CloudVeilGuiMain.StartSentry();
             }
             else
             {
-                CitadelMain.StopSentry();
+                CloudVeilGuiMain.StopSentry();
             }
         }
 
@@ -872,7 +889,7 @@ namespace CloudVeil.Windows
         /// </summary>
         private void InitViews()
         {
-            m_mainWindow = new Te.Citadel.UI.Windows.MainWindow();
+            m_mainWindow = new Gui.CloudVeil.UI.Windows.MainWindow();
 
             ModelManager = new ModelManager();
             viewManager = new ViewManager(m_mainWindow);

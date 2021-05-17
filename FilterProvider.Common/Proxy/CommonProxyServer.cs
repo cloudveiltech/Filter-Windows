@@ -5,6 +5,7 @@ using System.Text;
 using GoproxyWrapper;
 using Filter.Platform.Common.Util;
 using GoProxyWrapper;
+using System.Net.NetworkInformation;
 
 namespace FilterProvider.Common.Proxy
 {
@@ -29,6 +30,46 @@ namespace FilterProvider.Common.Proxy
         public void Start()
         {
             GoProxy.Instance.Start();
+        }
+
+        public void Restart()
+        {
+            GoProxy.Instance.Start();
+        }
+
+
+        private static Random random = new Random();
+        public static ushort GetRandomFreePort(ushort minPortRange, ushort maxPortRange)
+        {
+            ushort port = (ushort)random.Next(minPortRange, maxPortRange);
+            while (!IsPortAvailable(port))
+            {
+                port = (ushort)random.Next(minPortRange, maxPortRange);
+            }
+            return port;
+        }
+
+        public static bool IsPortAvailable(ushort port)
+        {
+            bool isAvailable = true;
+
+            // Evaluate current system tcp connections. This is the same information provided
+            // by the netstat command line application, just in .Net strongly-typed object
+            // form.  We will look through the list, and if our port we would like to use
+            // in our TcpClient is occupied, we will set isAvailable to false.
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+
+            foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+            {
+                if (tcpi.LocalEndPoint.Port == port)
+                {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            return isAvailable;
         }
 
         public void Stop()

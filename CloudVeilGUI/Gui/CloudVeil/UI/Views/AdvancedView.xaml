@@ -1,0 +1,128 @@
+﻿<!--
+Copyright © 2018 Cloudveil Technology Inc., Jesse Nicholson
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+<UserControl x:Class="Gui.CloudVeil.UI.Views.AdvancedView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Gui.CloudVeil.UI.Views"
+             xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextBlockStyle}" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="275" />
+            <ColumnDefinition Width="320" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="1" Margin="56,0,16,0">
+            <StackPanel Margin="0,0,0,16">
+                <Label HorizontalAlignment="Center"
+                   Style="{StaticResource HeaderStyle}"
+                   Content="Request Deactivation" />
+
+                <TextBlock Margin="0,20,0,0"
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap">
+                <Run Text="To disable the filter for diagnostics or removal, you must submit a request by clicking the button below. CloudVeil will see your request and verify the action." />
+                        <LineBreak /><Run />
+                        <LineBreak /><Run Text="Once approved, click" /><Run Text="ing" /><Run Text=" deactivate " /><Run Text="will" /><Run Text=" stop the filter." />
+                </TextBlock>
+
+                <Button Margin="0,20,0,0"
+                    Command="{Binding RequestDeactivateCommand}"
+                    Content="Deactivate"
+                    Style="{StaticResource AccentedSquareButtonStyle}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Margin="16,0,16,0" Grid.Column="0">
+            <!-- Check for updates widget -->
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="28"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{Binding UpdateText}" Style="{StaticResource HeaderStyle}"/>
+                    <Controls:ProgressRing x:Name="requestUpdateProgress"
+                                           Grid.Column="1"
+                                           Width="28" Height="28"
+                                           Visibility="{Binding Path=CheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <IconPacks:PackIconFontAwesome
+                        Kind="{Binding UpdateIcon}"
+                        Foreground="{Binding UpdateIconForeground}"
+                        Grid.Column="1"
+                        Margin="0,5,0,0"
+                        Width="28" Height="28"
+                        Visibility="{Binding Path=NotCheckingForUpdates, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                </Grid>
+                <Label Content="{Binding UpdateLastCheckedText}" />
+                <Button Command="{Binding CheckForUpdatesCommand}"
+                        IsEnabled="{Binding IsUpdateButtonEnabled}"
+                        Content="{Binding UpdateButtonText}"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+                <Label Style="{StaticResource BaseFontStyle}" Content="{Binding ErrorText}" Margin="0,5,0,0" Height="28" />
+            </StackPanel>
+
+            <!-- Synchronize Settings widget -->
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="28"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="{Binding SyncSettingsText}" Style="{StaticResource HeaderStyle}"/>
+                    <Controls:ProgressRing x:Name="requestSyncSettingsProgress"
+                                           Width="28" Height="28"
+                                           Margin="0,5,0,0"
+                                           Grid.Column="1"
+                                           Visibility="{Binding Path=SynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <IconPacks:PackIconFontAwesome
+                        Kind="{Binding SyncSettingsIcon}"
+                        Foreground="{Binding SyncSettingsIconForeground}"
+                        Margin="0,5,0,0"
+                        Grid.Column="1"
+                        Width="28"
+                        Height="28"
+                        Visibility="{Binding Path=NotSynchronizingSettings, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                </Grid>
+                <Label Content="{Binding SettingsLastCheckedText}" />
+                <Button Command="{Binding SyncSettingsCommand}"
+                        Content="Synchronize Settings"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
+
+
+                <Label Style="{StaticResource BaseFontStyle}" Content="{Binding SyncErrorText}" Margin="0,5,0,0" Height="28" />
+                <StackPanel Orientation="Horizontal">
+                     <TextBlock TextWrapping="WrapWithOverflow" Width="195" FontSize="20">Send bug reports to CloudVeil Servers</TextBlock>
+                    <Controls:ToggleSwitch IsChecked="{Binding IsSendReportsChecked}" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}" VerticalAlignment="Center" OnLabel="" OffLabel=""/>
+                </StackPanel>
+
+                <TextBlock TextWrapping="WrapWithOverflow" Margin="0,25,0,0" FontSize="20">
+                    Ports in use: 
+                    <TextBlock TextWrapping="WrapWithOverflow" FontSize="15" Text="{Binding CurrentPortsText}"/>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <TextBlock TextWrapping="WrapWithOverflow" Width="195" FontSize="15">Use alternative ports</TextBlock>
+                    <Controls:ToggleSwitch IsEnabled="{Binding IsPortsSwitchEnabled}" IsChecked="{Binding IsPortsRandomized}" Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}" VerticalAlignment="Center" OnLabel="" OffLabel=""/>
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

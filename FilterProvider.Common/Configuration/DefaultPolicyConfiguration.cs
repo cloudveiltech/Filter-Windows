@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO.Compression;
 using Newtonsoft.Json;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 using System.Collections.Concurrent;
 using System.Security.AccessControl;
 

@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NLog;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 using System.Diagnostics;
 using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 
@@ -32,7 +32,7 @@ using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 using Topshelf;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
-using Te.Citadel.Services;
+using Gui.CloudVeil.Services;
 using CitadelService.Util;
 
 namespace CitadelService.Services

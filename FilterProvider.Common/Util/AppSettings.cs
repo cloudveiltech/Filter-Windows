@@ -2,6 +2,7 @@
 using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
+using FilterProvider.Common.Proxy;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,13 @@ namespace FilterProvider.Common.Util
 { 
     public class AppSettings
     {
+        private const ushort MIN_PORT_VALUE = 10000; 
+        private const ushort MAX_PORT_VALUE = 20000;
+        private const ushort DEFAULT_HTTP_PORT = 15300;
+        private const ushort DEFAULT_HTTPS_PORT = 15301;
+        private const ushort DEFAULT_CONFIG_PORT = 14299;
+
+
         private static object appSettingsLock = new object();
 
         public DateTime? RemindLater { get; set; }
@@ -22,6 +30,11 @@ namespace FilterProvider.Common.Util
         public DateTime? LastSettingsCheck { get; set; }
         public ConfigUpdateResult? ConfigUpdateResult { get; set; }
         public BugReportSetting BugReportSettings { get; set; } = new BugReportSetting(false, false);
+        
+        public ushort ConfigServerPort { get; set; } = DEFAULT_CONFIG_PORT;
+        public ushort HttpsPort { get; set; } = DEFAULT_HTTPS_PORT;
+        public ushort HttpPort { get; set; } = DEFAULT_HTTP_PORT;
+        public bool RandomizePorts { get; set; } = false;
 
         public static AppSettings Default { get; private set; }
         
@@ -29,6 +42,29 @@ namespace FilterProvider.Common.Util
         static AppSettings()
         {
             Default = Load();
+        }
+
+        public void ShufflePorts()
+        {
+            while (!TryShufflePorts()) { }
+        }
+
+        public void SetDefaultPorts()
+        {
+            ConfigServerPort = DEFAULT_CONFIG_PORT;
+            HttpsPort = DEFAULT_HTTPS_PORT;
+            HttpPort = DEFAULT_HTTP_PORT;
+        }
+
+        private bool TryShufflePorts()
+        {            
+            ConfigServerPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
+            HttpPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
+            HttpsPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
+
+            return ConfigServerPort != HttpPort && 
+                ConfigServerPort != HttpsPort && 
+                HttpPort != HttpsPort;
         }
 
         public void Save()

@@ -14,6 +14,8 @@ namespace FilterProvider.Common.Platform
     public interface IProxyServer
     {
         void Start();
+        
+        void Restart();
 
         void Stop();
 

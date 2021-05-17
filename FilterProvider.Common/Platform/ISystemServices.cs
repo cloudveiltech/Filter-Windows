@@ -88,6 +88,7 @@ namespace FilterProvider.Common.Platform
         /// </remarks>
         event EventHandler OnStartProxy;
 
+
         // TODO: Rename IAntitampering stuff to something different.
     }
 }

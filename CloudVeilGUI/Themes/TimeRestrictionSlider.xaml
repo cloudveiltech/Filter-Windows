@@ -10,14 +10,14 @@ With modifications by Kent Friesen
     
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Te.Citadel.Styles.Themes"
+                    xmlns:local="clr-namespace:Gui.CloudVeil.Styles.Themes"
                     xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-                    xmlns:localControls="clr-namespace:Te.Citadel.UI.Controls"
+                    xmlns:localControls="clr-namespace:Gui.CloudVeil.UI.Controls"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
     <System:Double x:Key="HorizontalThumbHeight">16</System:Double>
     <System:Double x:Key="HorizontalThumbWidth">10</System:Double>
     
-    <Style x:Key="Te.Citadel.Styles.Slider.Thumb" TargetType="Thumb">
+    <Style x:Key="Gui.CloudVeil.Styles.Slider.Thumb" TargetType="Thumb">
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -32,7 +32,7 @@ With modifications by Kent Friesen
         </Setter>
     </Style>
     
-    <Style x:Key="Te.Citadel.Styles.TimeRestrictionSlider.HorizontalTrack" TargetType="{x:Type RepeatButton}">
+    <Style x:Key="Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalTrack" TargetType="{x:Type RepeatButton}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Focusable" Value="False" />
         <Setter Property="IsTabStop" Value="False" />
@@ -48,7 +48,7 @@ With modifications by Kent Friesen
         </Setter>
     </Style>
     
-    <Style x:Key="Te.Citadel.Styles.TimeRestrictionSlider.HorizontalMiddleThumb" TargetType="{x:Type RepeatButton}">
+    <Style x:Key="Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalMiddleThumb" TargetType="{x:Type RepeatButton}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -63,7 +63,7 @@ With modifications by Kent Friesen
         </Setter>
     </Style>
     
-    <ControlTemplate x:Key="Te.Citadel.Styles.TimeRestrictionSlider.HorizontalTemplate" TargetType="{x:Type localControls:TimeRestrictionSlider}">
+    <ControlTemplate x:Key="Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalTemplate" TargetType="{x:Type localControls:TimeRestrictionSlider}">
         <Grid x:Name="PART_Container"
               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
               Background="{TemplateBinding Background}">
@@ -80,7 +80,7 @@ With modifications by Kent Friesen
                     Background="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(localControls:SliderHelper.ThumbFillBrush)}"
                     Canvas.Top="0"
                     Canvas.Left="0"
-                    Style="{DynamicResource Te.Citadel.Styles.Slider.Thumb}"
+                    Style="{DynamicResource Gui.CloudVeil.Styles.Slider.Thumb}"
                     />
             </Canvas>
             <StackPanel x:Name="PART_SliderContainer"
@@ -91,7 +91,7 @@ With modifications by Kent Friesen
                 <!-- This is the gray track before the left thumb. -->
                 <RepeatButton x:Name="PART_LeftEdge"
                               Foreground="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(localControls:SliderHelper.TrackFillBrush)}"
-                              Style="{DynamicResource Te.Citadel.Styles.TimeRestrictionSlider.HorizontalTrack}" />
+                              Style="{DynamicResource Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalTrack}" />
                 
                 <!-- I think this is the first thumb. I don't think this one will be needed in our slider. -->
                 <!-- <Controls:MetroThumb x:Name="PART_LeftThumb" - LEAVE THIS OUT -->
@@ -99,26 +99,26 @@ With modifications by Kent Friesen
                 <RepeatButton x:Name="PART_MiddleThumb"
                                      MinWidth="{TemplateBinding MinRangeWidth}"
                                      Foreground="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(localControls:SliderHelper.TrackValueFillBrush)}"
-                                     Style="{DynamicResource Te.Citadel.Styles.TimeRestrictionSlider.HorizontalMiddleThumb}" />
+                                     Style="{DynamicResource Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalMiddleThumb}" />
                 
                 <!-- Leaving out PART_RightThumb -->
 
                 <RepeatButton x:Name="PART_RightEdge"
                               Foreground="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(localControls:SliderHelper.TrackFillBrush)}"
-                              Style="{DynamicResource Te.Citadel.Styles.TimeRestrictionSlider.HorizontalTrack}" />
+                              Style="{DynamicResource Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalTrack}" />
             </StackPanel>
         </Grid>
         <!-- In the reference implementation, there's a big list of triggers that I don't think we need for a read only-->
     </ControlTemplate>
 
-    <Style x:Key="Te.Citadel.Styles.TimeRestrictionSlider" TargetType="{x:Type localControls:TimeRestrictionSlider}">
+    <Style x:Key="Gui.CloudVeil.Styles.TimeRestrictionSlider" TargetType="{x:Type localControls:TimeRestrictionSlider}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="localControls:SliderHelper.ThumbFillBrush" Value="{DynamicResource GrayBrush2}" />
         <Setter Property="localControls:SliderHelper.TrackFillBrush" Value="{DynamicResource GrayBrush3}" />
         <Setter Property="localControls:SliderHelper.TrackValueFillBrush" Value="{DynamicResource AccentColorBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource GrayBrush1}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="Template" Value="{StaticResource Te.Citadel.Styles.TimeRestrictionSlider.HorizontalTemplate}" />
+        <Setter Property="Template" Value="{StaticResource Gui.CloudVeil.Styles.TimeRestrictionSlider.HorizontalTemplate}" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
 </ResourceDictionary>

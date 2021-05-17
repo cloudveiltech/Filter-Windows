@@ -116,7 +116,7 @@
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
       <Name>CloudVeil.IPC.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CitadelService\CloudVeilService.csproj">
+    <ProjectReference Include="..\CloudVeilService\CloudVeilService.csproj">
       <Project>{620adc88-b91d-4fda-a791-8b92473e927a}</Project>
       <Name>CloudVeilService</Name>
     </ProjectReference>

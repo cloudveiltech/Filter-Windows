@@ -26,7 +26,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 using Newtonsoft.Json;
 using Filter.Platform.Common.Data.Models;
 using FilterProvider.Common.Platform;

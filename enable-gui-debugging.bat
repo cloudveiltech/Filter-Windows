@@ -1,7 +1,7 @@
 @echo off
 
-IF EXIST "CitadelGUI\bin\Debug x86\" (
-	touch "CitadelGUI\bin\Debug x86\debug-cloudveil"
+IF EXIST "CloudVeilGUI\bin\Debug x86\" (
+	touch "CloudVeilGUI\bin\Debug x86\debug-cloudveil"
 ) ELSE (
-	echo "Please build CitadelGUI x86 (Debug) and try again."
+	echo "Please build CloudVeilGUI x86 (Debug) and try again."
 )

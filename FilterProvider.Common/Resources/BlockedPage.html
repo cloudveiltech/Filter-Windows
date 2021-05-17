@@ -283,7 +283,7 @@ The line below is used by the filter tester to determine whether the filter is w
                     passcode = null;
                 }
 
-                xhr.open("POST", "https://127.0.0.1:14299/api/relaxedpolicy");
+                xhr.open("POST", "https://127.0.0.1:{{serverPort}}/api/relaxedpolicy");
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
                         if (xhr.status == 200) {

@@ -7,7 +7,7 @@
     <ProjectGuid>{A3CBB1A7-DD10-4C69-87DE-BD0A80C639BA}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Te.Citadel</RootNamespace>
+    <RootNamespace>Gui.CloudVeil</RootNamespace>
     <AssemblyName>CloudVeil</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

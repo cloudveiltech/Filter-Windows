@@ -36,6 +36,7 @@ using Filter.Platform.Common.Data.Models;
 using System.Reflection;
 using CitadelService.Util;
 using System.ComponentModel;
+using FilterProvider.Common.Util;
 
 namespace CitadelService.Platform
 {
@@ -156,7 +157,7 @@ namespace CitadelService.Platform
             trustRootCertificate(cert);
             rootCert = cert;
 
-            server.Init(15300, 15301, certPath, keyPath);
+            server.Init(AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort, certPath, keyPath);
 
             server.BeforeRequest += config.BeforeRequest;
             server.BeforeResponse += config.BeforeResponse;

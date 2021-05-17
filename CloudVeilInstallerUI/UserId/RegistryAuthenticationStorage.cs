@@ -8,7 +8,7 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Windows.Util
 {

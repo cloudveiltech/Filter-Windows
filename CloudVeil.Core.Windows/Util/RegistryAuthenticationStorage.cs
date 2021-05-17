@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Windows.Util
 {

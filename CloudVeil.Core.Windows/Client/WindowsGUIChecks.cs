@@ -10,7 +10,7 @@ using System.Linq;
 using System.Diagnostics;
 using CloudVeil.Core.WinAPI;
 using System.Threading;
-using Te.Citadel.Util;
+using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Windows.Client
 {

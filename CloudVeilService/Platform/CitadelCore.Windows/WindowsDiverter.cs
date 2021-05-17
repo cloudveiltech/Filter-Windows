@@ -28,22 +28,22 @@ namespace CitadelCore.Windows.Diversion
         /// <summary>
         /// The local IPV4 port that the filtering proxy server is listening for HTTP connections on.
         /// </summary>
-        private readonly ushort m_v4HttpProxyPort;
+        private ushort m_v4HttpProxyPort;
 
         /// <summary>
         /// The local IPV4 port that the filtering proxy server is listening for HTTPS connections on.
         /// </summary>
-        private readonly ushort m_v4HttpsProxyPort;
+        private ushort m_v4HttpsProxyPort;
 
         /// <summary>
         /// The local IPV6 port that the filtering proxy server is listening for HTTP connections on.
         /// </summary>
-        private readonly ushort m_v6HttpProxyPort;
+        private ushort m_v6HttpProxyPort;
 
         /// <summary>
         /// The local IPV6 port that the filtering proxy server is listening for HTTPS connections on.
         /// </summary>
-        private readonly ushort m_v6HttpsProxyPort;
+        private ushort m_v6HttpsProxyPort;
 
         /// <summary>
         /// Used for tracking which IPV4 TCP connections ought to be forced through the proxy server.
@@ -162,14 +162,8 @@ namespace CitadelCore.Windows.Diversion
         /// <param name="v6httpsProxyPort">
         /// The IPV6 port that the filtering proxy server is listening for HTTPS connections on.
         /// </param>
-        public WindowsDiverter(ushort v4httpProxyPort, ushort v4httpsProxyPort, ushort v6httpProxyPort, ushort v6httpsProxyPort)
+        public WindowsDiverter()
         {
-            m_v4HttpProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v4httpProxyPort);
-            m_v4HttpsProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v4httpsProxyPort);
-
-            m_v6HttpProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v6httpProxyPort);
-            m_v6HttpsProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v6httpsProxyPort);
-
             m_logger = LoggerUtil.GetAppWideLogger();
 
             // WinDivertSharp does not do automatic byte order swapping like our old build-in version
@@ -186,6 +180,15 @@ namespace CitadelCore.Windows.Diversion
                 m_httpsAltPort = ((ushort)8443);
                 m_httpsStandardPort = ((ushort)443);
             }
+        }
+
+        public void UpdatePorts(ushort v4httpProxyPort, ushort v4httpsProxyPort, ushort v6httpProxyPort, ushort v6httpsProxyPort)
+        {
+            m_v4HttpProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v4httpProxyPort);
+            m_v4HttpsProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v4httpsProxyPort);
+
+            m_v6HttpProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v6httpProxyPort);
+            m_v6HttpsProxyPort = (ushort)IPAddress.HostToNetworkOrder((short)v6httpsProxyPort);
         }
 
         public delegate void StartEventHandler();
