@@ -6,7 +6,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.20" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.48" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -23,24 +23,23 @@
         </Component>
       </Directory>
       <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
-
         <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
+          <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_13CA2E4B_0AEB" Guid="173C82B3-FF74-4FE9-AAF5-BC712D9CD962" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
+          <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_972B1D02_D699" Guid="32035B3C-EEAF-49FD-BECB-476008B21BD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
+          <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_D397C5B4_697B" Guid="C7D8CA26-C275-42CA-A567-3C179E7FFC8D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
+          <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_196C8692_F905" Guid="27AC2548-57AF-402C-BEF5-13FD95ED8267" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
+          <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_EA9F5501_48DD" Guid="A0E6F6F6-A852-4371-823C-6805509FDB4C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
+          <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
           <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
@@ -254,9 +253,9 @@
         <Component Id="comp_62917226_1225" Guid="61E3C210-3A21-4CCD-AF7A-3C08F5FDC164" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_2242D901_48C6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Handlebars.dll" KeyPath="yes" />
         </Component>
-          <Component Id="comp_BE9658E0" Guid="BE9658E0-56F6-410E-87F0-A9494EFD48F5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-              <File Id="_comp_BE9658E056F6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DebugController.exe" Source="..\..\DebugController\x64\DebugController.exe" KeyPath="yes" />
-          </Component>
+        <Component Id="comp_BE9658E0" Guid="BE9658E0-56F6-410E-87F0-A9494EFD48F5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_comp_BE9658E056F6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DebugController.exe" Source="..\..\DebugController\x64\DebugController.exe" KeyPath="yes" />
+        </Component>
         <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
           <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_05620AE3_DE01_7943_8FA3_2D2F1316643A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert64.sys" KeyPath="yes" />
@@ -272,7 +271,7 @@
           </Component>
           <Component Id="comp_86CCE0BD_9963" Guid="1000812B-909D-45E8-977A-D79EA5BE6422" Permanent="no" SharedDllRefCount="no" Transitive="no">
             <File Id="_06833C0E_57B2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="proxy.dll" Source="..\..\CloudVeilGUI\bin\Release x86\x86\proxy.dll" KeyPath="yes" />
-          </Component>          
+          </Component>
         </Directory>
         <Directory Id="dir_D03EDAA7_862A" Name="de">
           <Component Id="comp_DE9A8449_785F" Guid="24FB46F2-79D3-412E-BC38-F9A96EA4EA67" Permanent="no" SharedDllRefCount="no" Transitive="no">

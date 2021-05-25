@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
@@ -91,7 +92,6 @@ namespace CloudVeilInstallerUI.ViewModels
             ba.PlanRelatedBundle += PlanRelatedBundle;
 
             ba.PlanComplete += PlanComplete;
-
             ba.ApplyBegin += ApplyBegin;
             ba.Progress += OnProgress;
             ba.ExecuteProgress += OnExecuteProgress;
@@ -513,7 +513,7 @@ namespace CloudVeilInstallerUI.ViewModels
         private void DetectRelatedBundle(object sender, DetectRelatedBundleEventArgs e)
         {
             ba.Engine.Log(LogLevel.Standard, e.ProductCode);
-
+            
             RequestState defaultBundleState = ba.Command.Action == LaunchAction.Uninstall ? RequestState.None : RequestState.Absent;
 
             if (e.RelationType == RelationType.Update || e.RelationType == RelationType.Upgrade)
@@ -531,7 +531,7 @@ namespace CloudVeilInstallerUI.ViewModels
             }
         }
 
-
+        
         private void PlanRelatedBundle(object sender, PlanRelatedBundleEventArgs e)
         {
             Tuple<RequestState, DetectRelatedBundleEventArgs> stateTuple;
@@ -611,7 +611,14 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private void ResolveSource(object sender, ResolveSourceEventArgs e)
         {
-            
+            if (!File.Exists(e.LocalSource) && !string.IsNullOrEmpty(e.DownloadSource))
+            {
+                e.Result = Result.Download;
+            }
+            else
+            {
+                e.Result = Result.Ok;
+            }
         }
 
         private void OnProgress(object sender, ProgressEventArgs e)
