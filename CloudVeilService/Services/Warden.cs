@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Citadel.Core.Windows.Util;
+using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Te.Citadel.Services;
+using Gui.CloudVeil.Services;
 using Topshelf;
 
 namespace CitadelService.Services

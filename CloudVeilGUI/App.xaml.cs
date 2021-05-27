@@ -34,7 +34,6 @@ using Filter.Platform.Common.IPC.Messages;
 using FilterNativeWindows;
 using Gui.CloudVeil;
 using MahApps.Metro.Controls.Dialogs;
-using Gui.CloudVeil.Properties;
 
 namespace CloudVeil.Windows
 {
