@@ -62,7 +62,7 @@ namespace CloudVeilInstallerUI
         {
             try
             {
-                sentry = SentrySdk.Init(CloudVeil.Windows.CompileSecrets.SentryDsn);
+                sentry = SentrySdk.Init(CloudVeil.CompileSecrets.SentryDsn);
             } catch
             {
                 sentry = null;

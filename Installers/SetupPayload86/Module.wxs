@@ -6,7 +6,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.72" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.80" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="6bd7a724-8949-4fe6-96be-53c8d4def7c4" Name="CloudVeil For Windows" Language="1033" Version="2.0.72" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
+  <Product Id="4c1180a1-4861-4797-90a7-c4b7c1af9166" Name="CloudVeil For Windows" Language="1033" Version="2.0.80" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x86" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -62,8 +62,8 @@
       <MergeRef Id="SetupPayload86.msm" />
     </Feature>
     <Upgrade Id="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}">
-      <UpgradeVersion Minimum="2.0.72" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.0.72" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Minimum="2.0.80" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Maximum="2.0.80" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
     </Upgrade>
     <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />

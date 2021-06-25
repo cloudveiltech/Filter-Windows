@@ -1,11 +1,13 @@
 ﻿using CloudVeilInstallerUI.Models;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
@@ -122,6 +124,7 @@ namespace CloudVeilInstallerUI.ViewModels
         public void TriggerWelcome()
         {
             ba.Engine.Log(LogLevel.Standard, $"TriggerWelcome {ba.Command.Display}");
+      
 
             try
             {
@@ -143,7 +146,12 @@ namespace CloudVeilInstallerUI.ViewModels
         {
             ba.Engine.Log(LogLevel.Standard, $"TriggerInstall {ba.Command.Display}");
 
-            if(ba.Command.Display != Display.None && ba.Command.Display != Display.Embedded)
+            if (ba.Updating)
+            {
+         //       CheckAndRestoreCache();
+            }
+
+            if (ba.Command.Display != Display.None && ba.Command.Display != Display.Embedded)
             {
                 SetupUi.ShowInstall();
             }
@@ -508,7 +516,88 @@ namespace CloudVeilInstallerUI.ViewModels
                 InstallType = CVInstallType.Update;
             }
         }
+        private void CheckAndRestoreCache()
+        {
+            List<Cv4wInstaledVersion> list = GetInstalledCv4WVersions();
 
+            foreach (var installedProduct in list)
+            {
+                var versionParts = installedProduct.Version.Split(new char[] { '.' });
+                if (versionParts.Length < 3)
+                {
+                    continue;
+                }
+                var version = versionParts[0] + "." + versionParts[1] + "." + versionParts[2];
+                var cacheDir = GetCacheDir(installedProduct.PackageId, version);
+                var cacheFile = cacheDir + @"\CloudVeil.msi";
+                if (!Directory.Exists(cacheDir))
+                {
+                    Directory.CreateDirectory(cacheDir);
+                }
+                if (!File.Exists(cacheFile))
+                {
+                    DownloadPackageCache(cacheFile, version);
+                }
+            }
+        }
+
+        private void DownloadPackageCache(string outputPath, string version)
+        {
+            WebClient client = new WebClient();
+            var platform = Environment.Is64BitOperatingSystem ? "winx64" : "winx86";
+            var url = CloudVeil.CompileSecrets.ServiceProviderApiPath + "/releases/" + "CloudVeil-" + version + "-" + platform + ".msi";
+            try
+            {
+                ba.Engine.Log(LogLevel.Standard, "Downloading from " + url);
+                client.DownloadFile(url, outputPath);
+            }
+            catch (Exception ex)
+            {
+                ba.Engine.Log(LogLevel.Standard, "Skip exception " + ex);
+            }
+        }
+
+        private string GetCacheDir(string productId, string version)
+        {
+            var cacheDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            cacheDir = cacheDir + @"\Package Cache\" + productId + "v" + version;
+            return cacheDir;
+        }
+
+        public struct Cv4wInstaledVersion
+        {
+            public Cv4wInstaledVersion(string packageId, string version) : this()
+            {
+                this.PackageId = packageId;
+                Version = version;
+            }
+
+            public string PackageId { get; set; }
+            public string Version { get; set; }
+        }
+
+        private List<Cv4wInstaledVersion> GetInstalledCv4WVersions()
+        {
+            var result = new List<Cv4wInstaledVersion>();
+            RegistryKey localKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32);
+            using (RegistryKey key = localKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall", false))
+            {
+                foreach (var subkeyName in key.GetSubKeyNames())
+                {
+                    using (RegistryKey subKey = key.OpenSubKey(subkeyName))
+                    {
+                        string version = (string)subKey.GetValue("DisplayVersion");
+                        string name = (string)subKey.GetValue("DisplayName");
+                        if (name == "CloudVeil For Windows")
+                        {
+                            result.Add(new Cv4wInstaledVersion(subkeyName, version));
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
         private Dictionary<string, Tuple<RequestState, DetectRelatedBundleEventArgs>> relatedBundles = new Dictionary<string, Tuple<RequestState, DetectRelatedBundleEventArgs>>();
         private void DetectRelatedBundle(object sender, DetectRelatedBundleEventArgs e)
         {

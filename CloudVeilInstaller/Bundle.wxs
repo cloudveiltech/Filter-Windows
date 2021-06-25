@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-  <Bundle DisableRepair="yes" Name="CloudVeil for Windows" Version="2.0.72" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948" IconSourceFile="..\CloudVeilGUI\appicon.ico">
+  <Bundle DisableRepair="yes" Name="CloudVeil for Windows" Version="2.0.80" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948" IconSourceFile="..\CloudVeilGUI\appicon.ico">
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <PayloadGroupRef Id="InstallerPayload" />
     </BootstrapperApplicationRef>
     <Chain>
       <PackageGroupRef Id="NetFx462Web" />
-      <ExePackage Compressed="yes" PerMachine="yes" InstallCondition="True" SourceFile="..\InstallerCheckPackageCache\bin\Release\InstallerCheckPackageCache.exe" />
+      <ExePackage Compressed="yes" PerMachine="yes" InstallCondition="1" DetectCondition="0" SourceFile="..\InstallerCheckPackageCache\bin\Release\InstallerCheckPackageCache.exe" />
       <MsiPackage DisplayInternalUI="no" ForcePerMachine="yes" Id="CloudVeilForWindows" Cache="yes" Compressed="yes" Vital="yes" Name="CloudVeil.msi" SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
     </Chain>
   </Bundle>
