@@ -43,6 +43,7 @@
     <Compile Include="..\Filter.Platform.Common\CompileSecrets.cs">
       <Link>CompileSecrets.cs</Link>
     </Compile>
+    <Compile Include="InstallerCacheChecker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

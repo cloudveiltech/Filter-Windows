@@ -3,7 +3,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\FilterStarter.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
-  <Product Id="e55e2534-6d5a-4a3c-8212-7408f74a6056" Name="CloudVeil For Windows" Language="1033" Version="2.0.80" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
+  <Product Id="b0805f27-b39c-4b91-b584-68eee9adb840" Name="CloudVeil For Windows" Language="1033" Version="2.0.82" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x64" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -13,8 +13,8 @@
     <Property Id="ARPURLINFOABOUT" Value="https://cloudveil.org" />
     <Property Id="ARPPRODUCTICON">_D1707FE3B808</Property>
     <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="2.0.80" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.0.80" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Minimum="2.0.82" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Maximum="2.0.82" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
     </Upgrade>
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />

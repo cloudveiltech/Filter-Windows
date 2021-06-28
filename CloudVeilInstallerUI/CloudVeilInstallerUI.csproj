@@ -68,6 +68,9 @@
     <Compile Include="..\Filter.Platform.Common\CompileSecrets.cs">
       <Link>CompileSecrets.cs</Link>
     </Compile>
+    <Compile Include="..\InstallerCheckPackageCache\InstallerCacheChecker.cs">
+      <Link>InstallerCacheChecker.cs</Link>
+    </Compile>
     <Compile Include="IpcWindow.cs" />
     <Compile Include="IPC\Message.cs" />
     <Compile Include="IPC\UpdateIPCClient.cs" />
