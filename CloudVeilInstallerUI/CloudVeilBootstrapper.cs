@@ -118,6 +118,12 @@ namespace CloudVeilInstallerUI
                     }
                 }
 
+                if (Updating)
+                {
+                    var checker = new InstallerCheckPackageCache.InstallerCacheChecker();
+                    checker.CheckAndRestoreCache();
+                }
+
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
 
                 Application app = new Application();

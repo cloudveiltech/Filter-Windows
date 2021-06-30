@@ -147,12 +147,6 @@ namespace CloudVeilInstallerUI.ViewModels
         {
             ba.Engine.Log(LogLevel.Standard, $"TriggerInstall {ba.Command.Display}");
 
-            if (ba.Updating)
-            {
-                var checker = new InstallerCacheChecker();
-                checker.CheckAndRestoreCache();
-            }
-
             if (ba.Command.Display != Display.None && ba.Command.Display != Display.Embedded)
             {
                 SetupUi.ShowInstall();
