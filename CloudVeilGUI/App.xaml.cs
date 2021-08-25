@@ -1262,7 +1262,10 @@ namespace CloudVeil.Windows
                 }
 
                 passcodeData = await m_mainWindow.PromptUserForPassword("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
-                passcode = passcodeData.Password;
+                if(passcodeData != null)
+                {
+                    passcode = passcodeData.Password;
+                }
 
                 if(fromTray)
                 {
