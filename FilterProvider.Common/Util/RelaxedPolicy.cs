@@ -287,6 +287,10 @@ namespace FilterProvider.Common.Util
                 // Reset our bypasses at 8:15 UTC.
                 var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
 
+                if(resetTime < DateTime.UtcNow)
+                {
+                    resetTime = resetTime.AddDays(1);
+                }
                 var span = resetTime - DateTime.UtcNow;
 
                 if (m_relaxedPolicyResetTimer == null)
