@@ -16,6 +16,8 @@ using System.Net;
 using CloudVeil;
 using System.Diagnostics;
 using GoProxyWrapper;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace FilterProvider.Common.Util
 {
@@ -221,11 +223,14 @@ namespace FilterProvider.Common.Util
             return 0;
         }
 
+        static byte[] blockedImageBytes = File.ReadAllBytes("./blocked.png");
+
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
         {             
             bool shouldBlock = false;
             string customBlockResponseContentType = null;
             byte[] customBlockResponse = null;
+            string redirectUrl = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
@@ -263,14 +268,14 @@ namespace FilterProvider.Common.Util
                     bool isHtml = contentType.IndexOf("html") != -1;
                     bool isJson = contentType.IndexOf("json") != -1;
                     bool isTextPlain = contentType.IndexOf("text/plain") != -1;
-
+                    bool isImage = contentType.IndexOf("image") != -1;
                     // Is the response content type text/html or application/json? Inspect it, otherwise return before we do content classification.
                     // Why enforce content classification on only these two? There are only a few MIME types which have a high risk of "carrying" explicit content.
                     // Those are:
                     // text/plain
                     // text/html
                     // application/json
-                    if (!(isHtml || isJson || isTextPlain))
+                    if (!(isHtml || isJson || isTextPlain || isImage))
                     {
                         return;
                     }
@@ -284,8 +289,10 @@ namespace FilterProvider.Common.Util
                     string textTrigger;
                     string textCategory;
 
+                    
                     byte[] responseBody = args.Response.Body;
-                    var contentClassResult = OnClassifyContent(responseBody, contentType, out blockType, out textTrigger, out textCategory);
+                    string url = args.Request.Url;
+                    var contentClassResult = OnClassifyContent(url, responseBody, contentType, out blockType, out textTrigger, out textCategory);
 
                     if (contentClassResult > 0)
                     {
@@ -302,6 +309,10 @@ namespace FilterProvider.Common.Util
                         {
                             customBlockResponseContentType = "application/json";
                             customBlockResponse = new byte[0];
+                        } else if(contentType.IndexOf("image") != -1)
+                        {
+                            customBlockResponseContentType = "image/png";
+                            customBlockResponse = blockedImageBytes;// Encoding.UTF8.GetBytes("blocked");//response;// m_templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
                         }
 
                         RequestBlocked?.Invoke(contentClassResult, blockType, new Uri(args.Request.Url), "");
@@ -322,7 +333,15 @@ namespace FilterProvider.Common.Util
 
                     if (customBlockResponse != null)
                     {
-                        args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
+                        if (redirectUrl != null)
+                        {
+                            args.SendCustomResponse((int)HttpStatusCode.Found, customBlockResponseContentType, customBlockResponse);
+                            args.Response.Headers.SetHeader("Location", redirectUrl);
+                        }
+                        else
+                        {
+                            args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
+                        }
                     }
                 }
             }
@@ -365,7 +384,7 @@ namespace FilterProvider.Common.Util
         /// the content is not deemed to be part of any known category, which is a general indication
         /// to the engine that the content should not be blocked.
         /// </returns>
-        private short OnClassifyContent(Memory<byte> data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
+        private short OnClassifyContent(string url, Memory<byte> data, string contentType, out BlockType blockedBecause, out string textTrigger, out string triggerCategory)
         {
             Stopwatch stopwatch = null;
 
@@ -379,6 +398,7 @@ namespace FilterProvider.Common.Util
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
+                    var isImage = contentType.IndexOf("image") != -1;
                     if (isHtml || isJson)
                     {
                         var dataToAnalyzeStr = Encoding.UTF8.GetString(data.ToArray());
@@ -411,8 +431,31 @@ namespace FilterProvider.Common.Util
                                 return mappedCategory.CategoryId;
                             }
                         }
-                    } 
-                } else
+                    } else if(isImage)
+                    {
+                        var webClient = new WebClient();
+
+                        string boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
+                        webClient.Headers.Add("Content-Type", "multipart/form-data; boundary=" + boundary);
+                        var fileData = webClient.Encoding.GetString(data.ToArray());
+                        var package = string.Format("--{0}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{1}\"\r\nContent-Type: {2}\r\n\r\n{3}\r\n--{0}\r\nContent-Disposition: form-data; name=\"url\"\r\n\r\n{4}\r\n--{0}--\r\n", boundary, "picture", contentType, fileData, url);
+
+                        var encodedData = webClient.Encoding.GetBytes(package);
+
+                        var response = webClient.UploadData("http://127.0.0.1:8994/api/check", "POST", encodedData);
+                        var stringResponse = webClient.Encoding.GetString(response);
+                        var values = JsonConvert.DeserializeObject<Dictionary<string, bool>>(stringResponse);
+                        bool allowed;
+                        if (values.TryGetValue("allowed", out allowed) && !allowed) {
+                            blockedBecause = BlockType.ImageClassification;
+                            triggerCategory = "NSFW";
+                            textTrigger = null;
+                            return 1;
+                        }
+
+                    }
+                }
+                else
                 {
                     m_logger.Info("No text triggers loaded");
                 }

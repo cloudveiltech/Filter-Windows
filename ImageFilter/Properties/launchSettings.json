@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ImageFilter": {
+      "commandName": "Project",
+      "commandLineArgs": "test"
+    }
+  }
+}
