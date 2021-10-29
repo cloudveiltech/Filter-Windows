@@ -571,12 +571,18 @@ namespace FilterProvider.Common.Util
 
 
         public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-        {
+        {            
             if (sslpolicyerrors != SslPolicyErrors.None)
             {
                 return false;
             }
-            
+            if(CompileSecrets.PinnedCertKey.Length == 0)
+            {
+                LoggerUtil.GetAppWideLogger().Info("Cert pinning is disabled");
+                return true;
+            }
+
+
             LoggerUtil.GetAppWideLogger().Info("Cert " + certificate.Subject + " " + certificate.GetExpirationDateString());
             string publicKey = Convert.ToBase64String(certificate.GetPublicKey());
             LoggerUtil.GetAppWideLogger().Info("Key is " + publicKey);
