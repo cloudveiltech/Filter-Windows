@@ -231,7 +231,7 @@ namespace CloudVeil.Windows
                     MainLogger = LoggerUtil.GetAppWideLogger();
                     LoggerUtil.RecursivelyLogException(MainLogger, e);
                 }
-                catch(Exception be)
+                catch(Exception)
                 {
                     // XXX TODO - We can't really log here unless we do a direct to-file write.
                 }

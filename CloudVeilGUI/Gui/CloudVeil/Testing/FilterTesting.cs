@@ -198,10 +198,7 @@ namespace Gui.CloudVeil.Testing
         }
 
         public void TestDNSSafeSearch()
-        {           
-            int testsPassed = 0;
-            int testsFailed = 0;
-
+        {   
             try
             {
                 string ip1, ip2, ip3, details;

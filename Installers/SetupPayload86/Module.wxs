@@ -6,7 +6,10 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.83" Codepage="1252">
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\ImageFilter\onnxruntime.lib -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\ImageFilter\onnxruntime_providers_shared.lib -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\ImageFilter\*.pdb -->
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.0.93" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -74,7 +77,7 @@
           <File Id="_93D7D845_87E2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ServiceModel.Syndication.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_E90CE504_C634" Guid="52D957D7-0BF1-4DB9-864A-70CC01EC9FA3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_7295443B_1C47" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
+          <File Id="_7295443B_1C47" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_732D7F26_9393" Guid="3BB09023-BB2C-4319-ADF7-D818DAB3ECA2" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D70BAA7F_C522" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.IPC.Common.dll" KeyPath="yes" />
@@ -239,10 +242,10 @@
           <File Id="_55F20CDA_7EEB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.provider.e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.provider.e_sqlite3.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_D94B5152_9FA6" Guid="F04F0B99-CB06-42E1-83E3-FD5B6B8800BA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_4B378F92_C994" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Labs.EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Unosquare.Labs.EmbedIO.dll" KeyPath="yes" />
+          <File Id="_4B378F92_C994" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x86\EmbedIO.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_5182EBDA_13B5" Guid="BEDA89C3-EBF6-4D2D-B8E4-E2A8A23C2AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Unosquare.Swan.Lite.dll" KeyPath="yes" />
+          <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Swan.Lite.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_58F5F8AC_E43A" Guid="28BE5B7E-9065-4D47-85F3-5B99B1F2E397" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_A34F805F_BA3C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DotNet.Glob.dll" KeyPath="yes" />
@@ -308,6 +311,71 @@
             <File Id="_61BF38B2_EBBA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\zh-CN\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
           </Component>
         </Directory>
+        <Directory Id="IMAGEFILTER" Name="ImageFilter">
+          <Component Id="EMBEDIO.DLL" DiskId="1" Guid="25A972D6-3156-4809-B243-2ADDB5FF09AC">
+            <File Id="EMBEDIO.DLL" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\EmbedIO.dll" />
+          </Component>
+          <Component Id="HTTPMULTIPARTPARSER.DLL" DiskId="1" Guid="5EF22C9E-9497-4A5A-A1CA-96CD9985CC03">
+            <File Id="HTTPMULTIPARTPARSER.DLL" Name="HttpMultipartParser.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\HttpMultipartParser.dll" />
+          </Component>
+          <Component Id="IMAGEFILTER.EXE" DiskId="1" Guid="C28A00B1-E999-4C69-813F-CBCA04C55C6C">
+            <File Id="IMAGEFILTER.EXE" Name="ImageFilter.exe" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\ImageFilter.exe" />
+          </Component>
+          <Component Id="IMAGEFILTER.EXE.CONFIG" DiskId="1" Guid="D6E3D299-EF61-4964-B60D-B3B6B6D1C09F">
+            <File Id="IMAGEFILTER.EXE.CONFIG" Name="ImageFilter.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\ImageFilter.exe.config" />
+          </Component>
+          <Component Id="MICROSOFT.IO.RECYCLABLEMEMORYSTREAM.DLL" DiskId="1" Guid="8E81E0D4-AA13-4285-BCAF-6CFB736221A1">
+            <File Id="MICROSOFT.IO.RECYCLABLEMEMORYSTREAM.DLL" Name="Microsoft.IO.RecyclableMemoryStream.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\Microsoft.IO.RecyclableMemoryStream.dll" />
+          </Component>
+          <Component Id="MICROSOFT.ML.ONNXRUNTIME.DLL" DiskId="1" Guid="1FEAF5E3-4A2D-4A7A-B762-E9D475CE846F">
+            <File Id="MICROSOFT.ML.ONNXRUNTIME.DLL" Name="Microsoft.ML.OnnxRuntime.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\Microsoft.ML.OnnxRuntime.dll" />
+          </Component>
+          <Component Id="MICROSOFT.ML.ONNXRUNTIME.PDB" DiskId="1" Guid="A70B6B20-17CE-446A-9E09-EDFF0836638F">
+            <File Id="MICROSOFT.ML.ONNXRUNTIME.PDB" Name="Microsoft.ML.OnnxRuntime.pdb" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\Microsoft.ML.OnnxRuntime.pdb" />
+          </Component>
+          <Component Id="MODEL.ONNX" DiskId="1" Guid="915AE807-6A71-42F6-A186-8FD5478F38B2">
+            <File Id="MODEL.ONNX" Name="model.onnx" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\model.onnx" />
+          </Component>
+          <Component Id="NLOG.CONFIG" DiskId="1" Guid="F6147ED1-87A4-4350-97EA-4941F7C837AC">
+            <File Id="NLOG.CONFIG" Name="NLog.config" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\NLog.config" />
+          </Component>
+          <Component Id="NLOG.DLL" DiskId="1" Guid="90B936B9-BA38-4499-A500-7A1283D314CD">
+            <File Id="NLOG.DLL" Name="NLog.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\NLog.dll" />
+          </Component>
+          <Component Id="ONNXRUNTIME.DLL" DiskId="1" Guid="67E5079E-DC31-4118-B5CE-E9EDEFC045DB">
+            <File Id="ONNXRUNTIME.DLL" Name="onnxruntime.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\onnxruntime.dll" />
+          </Component>
+          <Component Id="ONNXRUNTIME_PROVIDERS_SHARED.DLL" DiskId="1" Guid="D7EDB60A-BC74-4A2D-A637-128050606F1E">
+            <File Id="ONNXRUNTIME_PROVIDERS_SHARED.DLL" Name="onnxruntime_providers_shared.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\onnxruntime_providers_shared.dll" />
+          </Component>
+          <Component Id="SIXLABORS.IMAGESHARP.DLL" DiskId="1" Guid="ABF84E01-C7C1-4498-BB6A-FDF7A69779AD">
+            <File Id="SIXLABORS.IMAGESHARP.DLL" Name="SixLabors.ImageSharp.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\SixLabors.ImageSharp.dll" />
+          </Component>
+          <Component Id="SWAN.LITE.DLL" DiskId="1" Guid="253C64DD-E665-47E9-9ADF-F551A865F34E">
+            <File Id="SWAN.LITE.DLL" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\Swan.Lite.dll" />
+          </Component>
+          <Component Id="SYSTEM.BUFFERS.DLL" DiskId="1" Guid="981B2B12-8F77-4D25-A6D3-B3FBC35FF039">
+            <File Id="SYSTEM.BUFFERS.DLL" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\System.Buffers.dll" />
+          </Component>
+          <Component Id="SYSTEM.MEMORY.DLL" DiskId="1" Guid="4C465DB3-D02B-458A-B126-68BA767C2AE3">
+            <File Id="SYSTEM.MEMORY.DLL" Name="System.Memory.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\System.Memory.dll" />
+          </Component>
+          <Component Id="SYSTEM.NUMERICS.VECTORS.DLL" DiskId="1" Guid="2E985777-CA74-48A1-B67E-BDA72CD4618A">
+            <File Id="SYSTEM.NUMERICS.VECTORS.DLL" Name="System.Numerics.Vectors.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\System.Numerics.Vectors.dll" />
+          </Component>
+          <Component Id="SYSTEM.RUNTIME.COMPILERSERVICES.UNSAFE.DLL" DiskId="1" Guid="BE15A510-EA26-46AD-939D-8069D281C48B">
+            <File Id="SYSTEM.RUNTIME.COMPILERSERVICES.UNSAFE.DLL" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\System.Runtime.CompilerServices.Unsafe.dll" />
+          </Component>
+          <Component Id="comp_E90CE504_C635" Guid="52D957D7-0BF1-4DB9-864A-70CC01EC9FA4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_7295443B_1C48" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\System.ValueTuple.dll" KeyPath="yes" />
+          </Component>
+          <Component Id="TOPSHELF.DLL" DiskId="1" Guid="1278244F-2E54-45F9-A27F-7DBC3A2ABE56">
+            <File Id="TOPSHELF.DLL" Name="Topshelf.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ImageFilter\Topshelf.dll" />
+          </Component>
+        </Directory>
+        <Component Id="BLOCKED.WEBP" DiskId="1" Guid="EED6C8A4-8471-4208-B558-33A50691AA44">
+          <File Id="BLOCKED.WEBP" Name="blocked.webp" Source="..\..\CloudVeilGUI\bin\Release x86\blocked.webp" />
+        </Component>
       </Directory>
       <Directory Id="DesktopFolder" Name="Desktop">
         <Component Id="com_dirDesktopFolder" Guid="ECF8735E-6532-4704-BD49-264D8AC217A4" Transitive="no">
@@ -332,5 +400,6 @@
     <AdminUISequence>
       <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize"><![CDATA[NEWRETARGETABLEPROPERTY1 = ""]]></Custom>
     </AdminUISequence>
+    <UI />
   </Module>
 </Wix>

@@ -64,7 +64,7 @@ namespace CloudVeil.Core.Windows
                         break;
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 mainServiceViable = false;
             }

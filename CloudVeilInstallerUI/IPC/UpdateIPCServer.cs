@@ -173,7 +173,7 @@ namespace CloudVeilInstallerUI.IPC
                         {
                             propInfo.SetValue(obj, message.Data);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             Error(connection);
                         }
@@ -218,7 +218,7 @@ namespace CloudVeilInstallerUI.IPC
                                 Data = ret
                             });
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             Error(connection);
                         }

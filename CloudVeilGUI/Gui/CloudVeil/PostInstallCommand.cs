@@ -495,6 +495,23 @@ namespace Gui.CloudVeil
             var installProc = Process.Start(installStartInfo);
             installProc.WaitForExit();
 
+            var imageServiceAssemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ImageFilter\\ImageFilter.exe");
+
+            uninstallStartInfo = new ProcessStartInfo(imageServiceAssemblyPath);
+            uninstallStartInfo.Arguments = "Uninstall";
+            uninstallStartInfo.UseShellExecute = false;
+            uninstallStartInfo.CreateNoWindow = true;
+            uninstallProc = Process.Start(uninstallStartInfo);
+            uninstallProc.WaitForExit();
+
+            installStartInfo = new ProcessStartInfo(imageServiceAssemblyPath);
+            installStartInfo.Arguments = "Install";
+            installStartInfo.UseShellExecute = false;
+            installStartInfo.CreateNoWindow = true;
+
+            installProc = Process.Start(installStartInfo);
+            installProc.WaitForExit();
+
             string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
 
             // 'norestart' not defined in Context.Parameters, so we can't use Context.IsParameterTrue.
@@ -518,6 +535,7 @@ namespace Gui.CloudVeil
             }
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
+            EnsureStartServicePostInstall(imageServiceAssemblyPath);
 
             Environment.Exit(0);
 

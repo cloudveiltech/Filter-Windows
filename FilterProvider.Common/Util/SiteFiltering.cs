@@ -3,19 +3,15 @@ using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
-using FilterProvider.Common.Data;
 using GoproxyWrapper;
 using NodaTime;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
 using System.Linq;
-using System.Threading;
 using System.Net;
 using CloudVeil;
 using System.Diagnostics;
-using GoProxyWrapper;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -39,6 +35,7 @@ namespace FilterProvider.Common.Util
             m_policyConfiguration.ListsReloaded += OnListsReloaded;
         }
 
+        const int MIN_IMAGE_SIZE_TO_FILTER = 10480;
         private NLog.Logger m_logger;
 
         private IPCServer m_ipcServer;
@@ -223,7 +220,7 @@ namespace FilterProvider.Common.Util
             return 0;
         }
 
-        static byte[] blockedImageBytes = File.ReadAllBytes("./blocked.png");
+        static byte[] blockedImageBytes = File.ReadAllBytes("./blocked.webp");
 
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
         {             
@@ -311,7 +308,7 @@ namespace FilterProvider.Common.Util
                             customBlockResponse = new byte[0];
                         } else if(contentType.IndexOf("image") != -1)
                         {
-                            customBlockResponseContentType = "image/png";
+                            customBlockResponseContentType = "image/webp";
                             customBlockResponse = blockedImageBytes;// Encoding.UTF8.GetBytes("blocked");//response;// m_templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
                         }
 
@@ -398,7 +395,10 @@ namespace FilterProvider.Common.Util
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
-                    var isImage = contentType.IndexOf("image") != -1;
+                    var isImage = contentType.IndexOf("image/png") != -1 
+                        || contentType.IndexOf("image/jpeg") != -1
+                        || contentType.IndexOf("image/webp") != -1
+                        || contentType.IndexOf("image/jpg") != -1;
                     if (isHtml || isJson)
                     {
                         var dataToAnalyzeStr = Encoding.UTF8.GetString(data.ToArray());
@@ -431,10 +431,9 @@ namespace FilterProvider.Common.Util
                                 return mappedCategory.CategoryId;
                             }
                         }
-                    } else if(isImage)
+                    } else if(isImage && data.Length > MIN_IMAGE_SIZE_TO_FILTER) 
                     {
                         var webClient = new WebClient();
-
                         string boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
                         webClient.Headers.Add("Content-Type", "multipart/form-data; boundary=" + boundary);
                         var fileData = webClient.Encoding.GetString(data.ToArray());
@@ -446,13 +445,13 @@ namespace FilterProvider.Common.Util
                         var stringResponse = webClient.Encoding.GetString(response);
                         var values = JsonConvert.DeserializeObject<Dictionary<string, bool>>(stringResponse);
                         bool allowed;
-                        if (values.TryGetValue("allowed", out allowed) && !allowed) {
+                        if (values.TryGetValue("allowed", out allowed) && !allowed)
+                        {
                             blockedBecause = BlockType.ImageClassification;
                             triggerCategory = "NSFW";
                             textTrigger = null;
                             return 1;
                         }
-
                     }
                 }
                 else

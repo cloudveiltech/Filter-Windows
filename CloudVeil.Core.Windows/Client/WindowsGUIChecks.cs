@@ -43,7 +43,7 @@ namespace CloudVeil.Core.Windows.Client
                 var instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
                 instanceMutex.ReleaseMutex();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // We can get access denied if SYSTEM is running this.
                 createdNew = false;

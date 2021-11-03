@@ -1,16 +1,10 @@
-﻿using FilterProvider.Common.Configuration;
-using FilterProvider.Common.Services;
-using FilterProvider.Common.Util;
-using CloudVeil.IPC.Messages;
-using CloudVeil.IPC;
+﻿using FilterProvider.Common.Util;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Unosquare.Labs.EmbedIO;
-using Unosquare.Labs.EmbedIO.Constants;
-using Unosquare.Labs.EmbedIO.Modules;
 using Filter.Platform.Common.Util;
+using EmbedIO.WebApi;
+using EmbedIO.Routing;
+using EmbedIO;
 
 namespace FilterProvider.Common.ControlServer
 {
@@ -19,7 +13,7 @@ namespace FilterProvider.Common.ControlServer
         public string passcode { get; set; }
     }
 
-    class RelaxedPolicyPostResponse
+    public class RelaxedPolicyPostResponse
     {
         public string message { get; set; }
     }
@@ -28,16 +22,16 @@ namespace FilterProvider.Common.ControlServer
     {
         private RelaxedPolicy relaxedPolicy;
 
-        public RelaxedPolicyController(RelaxedPolicy relaxedPolicy, IHttpContext context) : base(context)
+        public RelaxedPolicyController(RelaxedPolicy relaxedPolicy)
         {
             this.relaxedPolicy = relaxedPolicy;
         }
 
-        [WebApiHandler(HttpVerbs.Get, "/api/relaxedpolicy")]
-        public Task<bool> GetRelaxedPolicyInformation()
+        [Route(HttpVerbs.Get, "/api/relaxedpolicy")]
+        public BypassInformation GetRelaxedPolicyInformation()
         {
             BypassInformation info = relaxedPolicy.GetInfo();
-            return HttpContext.JsonResponseAsync(info);
+            return info;
         }
 
         /// <summary>
@@ -46,12 +40,12 @@ namespace FilterProvider.Common.ControlServer
         /// 'passcode' is the only property which must be passed. passcode may be null, or a string.
         /// </summary>
         /// <returns></returns>
-        [WebApiHandler(HttpVerbs.Post, "/api/relaxedpolicy")]
-        public async Task<bool> RequestRelaxedPolicy()
+        [Route(HttpVerbs.Post, "/api/relaxedpolicy")]
+        public async Task<RelaxedPolicyPostResponse> RequestRelaxedPolicy()
         {
             try
             {
-                var data = await HttpContext.ParseJsonAsync<RelaxedPolicyPostBody>();
+                var data = await HttpContext.GetRequestDataAsync<RelaxedPolicyPostBody>();
 
                 string bypassNotification = null;
                 bool ret = relaxedPolicy.RequestRelaxedPolicy(data.passcode, out bypassNotification);
@@ -65,12 +59,12 @@ namespace FilterProvider.Common.ControlServer
                     Response.StatusCode = 401;
                 }
 
-                return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = bypassNotification });
+                return new RelaxedPolicyPostResponse() { message = bypassNotification };
             }
             catch(Exception ex)
             {
                 LoggerUtil.GetAppWideLogger().Error($"Exception occurred while request relaxed policy: {ex}");
-                return await HttpContext.JsonResponseAsync(new RelaxedPolicyPostResponse() { message = "Error occurred while requesting relaxed policy. Try again later." });
+                return new RelaxedPolicyPostResponse() { message = "Error occurred while requesting relaxed policy. Try again later." };
             }
         }
     }

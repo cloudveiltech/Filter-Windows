@@ -596,7 +596,6 @@ namespace Gui.CloudVeil.UI.Controls
         private Direction _direction;
         private ButtonType _bType;
         private Point _position;
-        private Point _basePoint;
         private Double _currenValue;
         private Double _density;
         private ToolTip _autoToolTip;

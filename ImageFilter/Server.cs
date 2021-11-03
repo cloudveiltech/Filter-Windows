@@ -5,11 +5,13 @@ using EmbedIO.WebApi;
 using HttpMultipartParser;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using NLog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,11 +26,19 @@ namespace ImageFilter
         const string MODEL_PATH = "./model.onnx";
 
         static InferenceSession session;
-        static Dictionary<String, bool> cache = new Dictionary<String, bool>();
 
         private WebServer server;
+        private static Logger logger;
+        private static CachedMemory cache;
+
+        const int CACHE_SIZE_ITEMS = 100000;
         public bool Start(int port)
         {
+            logger = LogManager.GetLogger("ImageFilter");
+
+            var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil");
+            cache = new CachedMemory(CACHE_SIZE_ITEMS, appDataFolder + "\\cache.db", logger);
+
             server = new WebServer(o => o
                   .WithUrlPrefix($"http://127.0.0.1:{port}")
                   .WithMode(HttpListenerMode.EmbedIO))
@@ -37,17 +47,19 @@ namespace ImageFilter
 
 
             var sessionOptions = new SessionOptions();
-            sessionOptions.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE;
-            sessionOptions.ExecutionMode = ExecutionMode.ORT_PARALLEL;
+            SessionOptions options = new SessionOptions();
+            options.AppendExecutionProvider_CPU(1);
 
             session = new InferenceSession(MODEL_PATH, sessionOptions);
             server.RunAsync();
+            logger.Info($"Server started at {port}");
             return true;
         }
 
         public bool Stop()
         {
             server.Dispose();
+            cache.Persist();
             return true;
         }
 
@@ -62,6 +74,8 @@ namespace ImageFilter
             [Route(HttpVerbs.Post, "/check")]
             public async Task<Dictionary<string, bool>> UploadFile()
             {
+                var watch = new Stopwatch();
+                watch.Start();
                 var resultDict = new Dictionary<String, bool>();
                 var parser = await MultipartFormDataParser.ParseAsync(Request.InputStream);
 
@@ -69,13 +83,13 @@ namespace ImageFilter
                 if (parser.HasParameter("url"))
                 {                    
                     url = parser.GetParameterValue("url");
-                    Console.WriteLine("URL IS " + url);
                     bool blocked;
                     if (cache.TryGetValue(url, out blocked))
                     {
-                        Console.WriteLine("URL cached " + blocked);
                         resultDict.Add("cached", true);
                         resultDict.Add("allowed", blocked);
+
+                        logger.Info($"Cached {url} to {blocked}");
                         return resultDict;
                     }
                 }
@@ -85,7 +99,8 @@ namespace ImageFilter
 
                 bool res = await isImageAllowed(imageData);
                 resultDict.Add("allowed", res);
-                Console.WriteLine("URL processed " + res);
+                watch.Stop();
+                logger.Info($"Url: {url}, Res: {res}, Time: " + watch.Elapsed.TotalMilliseconds);
                 if (url != "")
                 {
                     cache.Add(url, res);
@@ -96,19 +111,22 @@ namespace ImageFilter
             private async Task<bool> isImageAllowed(Stream imageData)
             {
                 var image = await Image.LoadAsync<Rgb24>(imageData);
-                image.Mutate(x => x.Resize(256, 256));
+                image.Mutate(x => x.Resize(224, 224));
 
                 var inputTensor = PreprocessImage(image);
+
                 var input = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input_1", inputTensor) };
 
                 // Create an InferenceSession from the Model Path.
                 var outputResults = session.Run(input);
+
                 if (outputResults != null && outputResults.Count > 0) {
                     var output = (DenseTensor<float>)outputResults.ToList()[0].Value;
 
                     var isSafe = output.GetValue(0) < output.GetValue(1);
                     return isSafe;
                 }
+
                 return false;
             }
 

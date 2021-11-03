@@ -164,7 +164,7 @@ int SearchConflictReason(int** myConflictsArray) {
     }
 
     if (recvDriverListSize > driverListSize) {
-        delete driverList;
+        delete[] driverList;
         driverList = (LPVOID*)new unsigned char[recvDriverListSize];
         driverListSize = recvDriverListSize;
 

@@ -72,6 +72,38 @@ namespace InstallerCustomActions
                 session.Log("ERROR: Exception occurred while running service install command. {0}", ex);
             }
 
+            var imageFilterAssemblyPath = Path.Combine(mainFolder, "ImageFilter\\ImageFilter.exe");
+
+            try
+            {
+                // TODO: Not sure if uninstall command is needed any more? Seems like there was a conversation about this not being needed anymore.
+                var uninstallStartInfo = new ProcessStartInfo(imageFilterAssemblyPath);
+                uninstallStartInfo.Arguments = "Uninstall";
+                uninstallStartInfo.UseShellExecute = false;
+                uninstallStartInfo.CreateNoWindow = true;
+                var uninstallProc = Process.Start(uninstallStartInfo);
+                uninstallProc.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                session.Log("ERROR: Exception occurred while running service uninstall command. {0}", ex);
+            }
+
+            try
+            {
+                var installStartInfo = new ProcessStartInfo(imageFilterAssemblyPath);
+                installStartInfo.Arguments = "Install";
+                installStartInfo.UseShellExecute = false;
+                installStartInfo.CreateNoWindow = true;
+
+                var installProc = Process.Start(installStartInfo);
+                installProc.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                session.Log("ERROR: Exception occurred while running service install command. {0}", ex);
+            }
+
             string restartFlagPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "restart.flag");
 
             // 'norestart' not defined in Context.Parameters, so we can't use Context.IsParameterTrue.
@@ -83,6 +115,7 @@ namespace InstallerCustomActions
             }
 
             EnsureStartServicePostInstall(filterServiceAssemblyPath);
+            EnsureStartServicePostInstall(imageFilterAssemblyPath);
 
             // Wait until after service is started to start GUI so that we don't get a UAC prompt from FilterAgent.Windows.
             string appPath = Path.Combine(mainFolder, "CloudVeil.exe");

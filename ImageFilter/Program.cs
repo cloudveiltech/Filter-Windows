@@ -18,7 +18,6 @@ namespace ImageFilter
 
             if (createdNew)
             {
-                // Having problems with the service not starting? Run FilterServiceProvider.exe test-me in admin mode to figure out why.
                 if (args.Length > 0 && args[0] == "test")
                 {
                     var server = new Server();
@@ -44,17 +43,17 @@ namespace ImageFilter
                             s.ConstructUsing(name => new Server());
                             s.WhenStarted((server, hostCtl) => server.Start(Server.PORT));
                             s.WhenStopped((server, hostCtl) => {
-                                return server.Stop();
+                                return false;
                             });
                         });
 
                         x.EnableShutdown();
                         x.SetDescription("Image Filtering Service");
-                        x.SetDisplayName(nameof(Server));
-                        x.SetServiceName(nameof(Server));
+                        x.SetDisplayName("ImageFilter");
+                        x.SetServiceName("ImageFilter");
                         x.StartAutomatically();
 
-                        x.RunAsLocalSystem();
+                        x.RunAsLocalSystem();                        
                     });
                 }
 

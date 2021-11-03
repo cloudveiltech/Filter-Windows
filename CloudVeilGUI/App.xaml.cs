@@ -42,23 +42,6 @@ namespace CloudVeil.Windows
     /// </summary>
     public partial class CitadelApp : Application
     {
-        private class ServiceRunner : BaseProtectiveService
-        {
-            public ServiceRunner() : base("FilterServiceProvider", true)
-            {
-            }
-
-            public override void Shutdown(ExitCodes code)
-            {
-                // If our service has exited cleanly while we're running, lets assume that we should
-                // exit WITH safeguards. XXX TODO.
-                Current.Dispatcher.BeginInvoke((Action)delegate ()
-                {
-                    Application.Current.Shutdown((int)code);
-                });
-            }
-        }
-
         /// <summary>
         /// Used for synchronization when creating run at startup task. 
         /// </summary>
@@ -132,11 +115,6 @@ namespace CloudVeil.Windows
         private IPCClient m_ipcClient;
 
         public IPCClient IpcClient => m_ipcClient;
-        /// <summary>
-        /// Tracks whether the captive portal tool tip has been displayed for the given network. Will
-        /// be set back to false when captive portal detection goes back to false.
-        /// </summary>
-        private bool m_captivePortalShownToUser;
 
         #endregion Views
 

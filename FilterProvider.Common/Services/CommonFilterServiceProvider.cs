@@ -5,8 +5,6 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Windows.Util;
-using CloudVeil.Core.Windows.Util.Update;
 using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
@@ -14,7 +12,6 @@ using Newtonsoft.Json;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -23,10 +20,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
 
 using Filter.Platform.Common.Util;
 using Filter.Platform.Common.Extensions;
@@ -39,17 +34,13 @@ using Filter.Platform.Common.Net;
 using Filter.Platform.Common.Types;
 using NodaTime;
 using GoproxyWrapper;
-using FilterProvider.Common.Data.Filtering;
 using FilterProvider.Common.ControlServer;
 using FilterProvider.Common.Proxy.Certificate;
 using Org.BouncyCastle.Crypto;
 using System.Security.Cryptography.X509Certificates;
-using LogMessageType = Unosquare.Swan.LogMessageType;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
-using HandlebarsDotNet;
-using CloudVeil;
 using GoProxyWrapper;
 using System.Diagnostics.Eventing.Reader;
 using Sentry;
@@ -522,8 +513,8 @@ namespace FilterProvider.Common.Services
                         });
 
                     m_controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
-                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
-                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), (context) => new RelaxedPolicyController(m_relaxedPolicy, context));
+                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), () => new CertificateExemptionsController(m_certificateExemptions));
+                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), () => new RelaxedPolicyController(m_relaxedPolicy));
                     m_controlServer.Start();
                 }
                 catch(Exception ex)
@@ -531,8 +522,6 @@ namespace FilterProvider.Common.Services
                     m_logger.Error(ex, "An error occurred while attempting to start the control server.");
                 }
             };
-
-            Unosquare.Swan.Terminal.OnLogMessageReceived += Terminal_OnLogMessageReceived;
 
             // Hook app exiting function. This must be done on this main app thread.
             AppDomain.CurrentDomain.ProcessExit += OnApplicationExiting;
@@ -1035,13 +1024,6 @@ namespace FilterProvider.Common.Services
             m_updateSystem.ProbeMasterForApplicationUpdates(false);
             OnUpdateTimerElapsed(null);
         }
-
-        // Now why would you code it like this? Because you're lazy.
-        private void Terminal_OnLogMessageReceived(object sender, Unosquare.Swan.LogMessageReceivedEventArgs e)
-        {
-            m_logger.Info($"SWAN: {e.Source}: {e.Message}: {e.Exception?.ToString()}");
-        }
-
     
         private void timeRestrictionsCheck(object state)
         {

@@ -97,6 +97,8 @@ $builds = @(
     @("x64", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
     @("x86", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
+    @("x64", "ImageFilter\ImageFilter.csproj", "Build"),
+    @("x86", "ImageFilter\ImageFilter.csproj", "Build"),
     @("x64", "CloudVeilGUI\CloudVeilGUI.csproj", "Build"),
     @("x86", "CloudVeilGUI\CloudVeilGUI.csproj", "Build"),
     @("AnyCPU", "CloudVeilInstallerUI\CloudVeilInstallerUI.csproj", $cleanBuild)

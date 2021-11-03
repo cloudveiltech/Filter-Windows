@@ -1,4 +1,6 @@
-﻿using Filter.Platform.Common.Util;
+﻿using EmbedIO;
+using EmbedIO.WebApi;
+using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,9 +9,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Unosquare.Labs.EmbedIO;
-using Unosquare.Labs.EmbedIO.Modules;
-using Unosquare.Swan;
 
 namespace FilterProvider.Common.ControlServer
 {
@@ -62,36 +61,35 @@ namespace FilterProvider.Common.ControlServer
                 logger.Error(ex);
             }
 
-            server = new WebServer(new WebServerOptions(new string[] { $"https://127.0.0.1:{port}/" })
-            {
-                AutoRegisterCertificate = true,
-                Certificate = cert,
-                Mode = HttpListenerMode.EmbedIO
-            });
+
+            server = new WebServer(o => o
+                  .WithUrlPrefix($"https://127.0.0.1:{port}")
+                  .WithMode(HttpListenerMode.EmbedIO)
+                  .WithCertificate(cert)
+                  .WithAutoRegisterCertificate());
         }
 
-        public List<Tuple<Type, Func<IHttpContext, object>>> ControllerFactories { get; set; } = new List<Tuple<Type, Func<IHttpContext, object>>>();
+        public List<Tuple<Type, Func<WebApiController>>> ControllerFactories { get; set; } = new List<Tuple<Type, Func<WebApiController>>>();
 
-        public void RegisterController(Type controllerType, Func<IHttpContext, object> fn)
+        public void RegisterController(Type controllerType, Func<WebApiController> fn)
         {
-            ControllerFactories.Add(new Tuple<Type, Func<IHttpContext, object>>(controllerType, fn));
+            ControllerFactories.Add(new Tuple<Type, Func<WebApiController>>(controllerType, fn));
         }
 
         public void Start()
         {
             server
-                .EnableCors()
-                .WithLocalSession()
-                .RegisterModule(new WebApiModule());
+                .WithCors()
+                .WithLocalSessionManager()
+                .WithWebApi("/api", m => {
+
+                        foreach (var factory in ControllerFactories)
+                        {
+                            m.RegisterController(factory.Item1, factory.Item2);
+                        }
+                    });
 
             //server.RegisterModule(new CorsModule("*", "*", "GET,POST"));
-
-            var module = server.Module<WebApiModule>();
-
-            foreach (var factory in ControllerFactories)
-            {
-                module.RegisterController(factory.Item1, factory.Item2);
-            }
             
             serverTask = server.RunAsync(cts.Token);
         }

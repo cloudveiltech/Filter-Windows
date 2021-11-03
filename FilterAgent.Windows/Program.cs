@@ -24,9 +24,6 @@ namespace FilterAgent.Windows
     /// </summary>
     class Program
     {
-        private static string s_mutexName;
-        private static string s_processBinaryAbsPath;
-
         private static readonly HashSet<char> s_toRemoveFromPath = new HashSet<char>
         {
             Path.DirectorySeparatorChar,
@@ -56,10 +53,10 @@ namespace FilterAgent.Windows
             return null;
         }
 
-        private static void startService(string serviceName)
+        private static void startService(string serviceName, string mutexName, string processBinaryPath)
         {
             int numTries = 0;
-            while(!resuscitate(serviceName) && numTries < 60)
+            while(!resuscitate(serviceName, mutexName, processBinaryPath) && numTries < 60)
             {
                 Thread.Sleep(1000);
                 ++numTries;
@@ -71,29 +68,29 @@ namespace FilterAgent.Windows
             }
         }
 
-        private static bool resuscitate(string serviceName)
+        private static bool resuscitate(string serviceName, string mutexName, string processBinaryPath)
         {
             Console.WriteLine("Attempting start of service {0}", serviceName);
 
             bool success = false;
 
             bool createdNew = true;
-            var mutex = new Mutex(true, string.Format(@"Global\{0}", s_mutexName), out createdNew);
+            var mutex = new Mutex(true, string.Format(@"Global\{0}", mutexName), out createdNew);
 
             try
             {
-                if(File.Exists(s_processBinaryAbsPath))
+                if(File.Exists(processBinaryPath))
                 {
                     if(createdNew)
                     {
-                        var uninstallStartInfo = new ProcessStartInfo(s_processBinaryAbsPath);
+                        var uninstallStartInfo = new ProcessStartInfo(processBinaryPath);
                         uninstallStartInfo.Arguments = "Uninstall";
                         uninstallStartInfo.UseShellExecute = false;
                         uninstallStartInfo.CreateNoWindow = true;
                         var uninstallProc = Process.Start(uninstallStartInfo);
                         uninstallProc.WaitForExit();
 
-                        var installStartInfo = new ProcessStartInfo(s_processBinaryAbsPath);
+                        var installStartInfo = new ProcessStartInfo(processBinaryPath);
                         installStartInfo.Arguments = "Install";
                         installStartInfo.UseShellExecute = false;
                         installStartInfo.CreateNoWindow = true;
@@ -107,7 +104,7 @@ namespace FilterAgent.Windows
 
                         foreach(var service in ServiceController.GetServices())
                         {
-                            if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(s_processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
+                            if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(processBinaryPath), StringComparison.OrdinalIgnoreCase) != -1)
                             {
                                 if(service.Status == ServiceControllerStatus.StartPending)
                                 {
@@ -130,7 +127,7 @@ namespace FilterAgent.Windows
                     }
                 } else
                 {
-                    Console.WriteLine("File does not exist '{0}'", s_processBinaryAbsPath);
+                    Console.WriteLine("File does not exist '{0}'", processBinaryPath);
                 }
             }
             catch
@@ -192,19 +189,9 @@ namespace FilterAgent.Windows
                 Console.WriteLine("FilterAgent.Windows all systems go");
 
                 // FilterServiceProvider.exe exists, so start it.
-                string processName = "FilterServiceProvider";
-                string baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Program)).Location);
-                string processBinaryPath = Path.Combine(baseDirectory, $"{processName}.exe");
-
-                s_mutexName = string.Join("", processBinaryPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
-                s_processBinaryAbsPath = processBinaryPath;
-
-                if (getRunningProcess("FilterServiceProvider") != null)
-                {
-                    Environment.Exit(0);
-                }
-
-                startService("FilterServiceProvider");
+                startProcess("FilterServiceProvider");
+                
+                startProcess("ImageFilter", "\\ImageFilter");
             }
             else if(args[0] == "check")
             {
@@ -215,6 +202,22 @@ namespace FilterAgent.Windows
                 usage();
                 Environment.Exit(1);
             }
+        }
+
+        private static void startProcess(string processName, string subdir = "")
+        {
+            string baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Program)).Location) + subdir;
+            string processBinaryPath = Path.Combine(baseDirectory, $"{processName}.exe");
+
+            var mutexName = string.Join("", processBinaryPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
+            var processBinaryAbsPath = processBinaryPath;
+
+            if (getRunningProcess(processName) != null)
+            {
+                Environment.Exit(0);
+            }
+
+            startService(processName, mutexName, processBinaryPath);
         }
     }
 }

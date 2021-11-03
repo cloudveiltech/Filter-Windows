@@ -289,6 +289,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Resources\blocked.webp" />
     <Resource Include="Resources\UserLicense.txt" />
     <Resource Include="Resources\appicon.ico" />
     <Resource Include="Resources\NLog.config" />
@@ -351,8 +352,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CloudVeilService\bin\$(Configuration) $(Platform)\*.*" "$(TargetDir)"
+xcopy /E /Y /C "$(ProjectDir)\Resources\blocked.webp" "$(TargetDir)"
 xcopy /E /Y /C "$(ProjectDir)..\InstallGuard\bin\Release\*.*" "$(TargetDir)"
-</PostBuildEvent>
+xcopy /E /Y /C /I "$(ProjectDir)..\ImageFilter\bin\$(Configuration) $(Platform)\*.*" "$(TargetDir)\ImageFilter\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

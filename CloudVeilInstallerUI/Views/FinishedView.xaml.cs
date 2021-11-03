@@ -42,7 +42,7 @@ namespace CloudVeilInstallerUI.Views
             {
                 RebootMethods.Reboot(ShutdownReason.MajorApplication | ShutdownReason.MinorInstallation | ShutdownReason.FlagPlanned);
             }
-            catch(Exception ex)
+            catch (Exception)
             {
                 viewModel.FinishedMessage = "Failed to restart the computer. Please restart manually before trying again.";
             }

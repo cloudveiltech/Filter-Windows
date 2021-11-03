@@ -121,7 +121,7 @@ namespace CloudVeil.IPC
                     return false;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

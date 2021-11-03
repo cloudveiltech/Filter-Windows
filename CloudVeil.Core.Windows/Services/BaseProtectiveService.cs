@@ -257,7 +257,7 @@ namespace Gui.CloudVeil.Services
                     }
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 success = false;
             }
