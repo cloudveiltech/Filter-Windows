@@ -69,25 +69,14 @@ namespace FilterProvider.Common.ControlServer
                   .WithAutoRegisterCertificate());
         }
 
-        public List<Tuple<Type, Func<WebApiController>>> ControllerFactories { get; set; } = new List<Tuple<Type, Func<WebApiController>>>();
-
-        public void RegisterController(Type controllerType, Func<WebApiController> fn)
-        {
-            ControllerFactories.Add(new Tuple<Type, Func<WebApiController>>(controllerType, fn));
-        }
-
-        public void Start()
+        public void Start(Func<WebApiModule, bool> controllerFactory)
         {
             server
                 .WithCors()
                 .WithLocalSessionManager()
-                .WithWebApi("/api", m => {
-
-                        foreach (var factory in ControllerFactories)
-                        {
-                            m.RegisterController(factory.Item1, factory.Item2);
-                        }
-                    });
+                .WithWebApi("/", m => {
+                        controllerFactory.Invoke(m);
+                });
 
             //server.RegisterModule(new CorsModule("*", "*", "GET,POST"));
             
@@ -104,9 +93,11 @@ namespace FilterProvider.Common.ControlServer
                 if (disposing)
                 {
                     cts.Cancel();
+                    if(serverTask != null) { 
                     serverTask.Wait();
 
                     serverTask.Dispose();
+                        }
                     server.Dispose();
                     cts.Dispose();
                 }

@@ -44,6 +44,7 @@ using Filter.Platform.Common.IPC.Messages;
 using GoProxyWrapper;
 using System.Diagnostics.Eventing.Reader;
 using Sentry;
+using EmbedIO.WebApi;
 
 namespace FilterProvider.Common.Services
 {
@@ -513,9 +514,12 @@ namespace FilterProvider.Common.Services
                         });
 
                     m_controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
-                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), () => new CertificateExemptionsController(m_certificateExemptions));
-                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), () => new RelaxedPolicyController(m_relaxedPolicy));
-                    m_controlServer.Start();
+                    m_controlServer.Start((m) =>
+                    {
+                        m.RegisterController(() => new CertificateExemptionsController(m_certificateExemptions));
+                        m.RegisterController(() => new RelaxedPolicyController(m_relaxedPolicy));
+                        return true;
+                    });
                 }
                 catch(Exception ex)
                 {

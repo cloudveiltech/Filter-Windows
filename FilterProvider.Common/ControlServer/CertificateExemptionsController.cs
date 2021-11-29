@@ -12,8 +12,7 @@ namespace FilterProvider.Common.ControlServer
         private CertificateExemptions exemptions;
 
         public CertificateExemptionsController(CertificateExemptions exemptions)
-        {
-          
+        {          
             this.exemptions = exemptions;
         }
 
