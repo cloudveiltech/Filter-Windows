@@ -47,7 +47,9 @@ namespace ImageFilter
               .WithWebApi("/api", m => m
                   .WithController<UploadController>());
 
-            config = Config.Load(appDataFolder + "\\image_config.json", logger);
+            config = new Config(appDataFolder + "\\image_config.json", logger);
+            config.Reload();
+
             var sessionOptions = new SessionOptions();
             SessionOptions options = new SessionOptions();
             options.AppendExecutionProvider_CPU(1);
@@ -76,6 +78,8 @@ namespace ImageFilter
             [Route(HttpVerbs.Post, "/check")]
             public async Task<Dictionary<string, bool>> UploadFile()
             {
+                config.CheckAndReload();
+
                 var watch = new Stopwatch();
                 watch.Start();
                 var resultDict = new Dictionary<String, bool>();

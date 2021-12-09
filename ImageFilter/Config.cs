@@ -13,25 +13,72 @@ namespace ImageFilter
     class Config
     {
         const float DEFAULT_SAFE = 0.9f;
-        const float DEFAULT_UNSAFE = 0.6f;
+        const float DEFAULT_UNSAFE = 0.2f;
+        DateTime lastLoadTime = DateTime.Now;
+        private string filePath;
+        private Logger logger;
+
+        public Config(string filePath, Logger logger)
+        {
+            this.filePath = filePath;
+            this.logger = logger;
+        }
+
         public float SafeThreshold { get; set; } = DEFAULT_SAFE;
 
         public float UnsafeThreshold { get; set; } = DEFAULT_UNSAFE;
 
-        public static Config Load(string filePath, Logger logger)
+        public async void CheckAndReload()
         {
-            Config config = new Config();
-            if (File.Exists(filePath)) { 
-                string jsonString = File.ReadAllText(filePath);
-                dynamic parsed = JsonConvert.DeserializeObject(jsonString);
-                config.SafeThreshold = parsed.safeThreshold;
-                config.UnsafeThreshold = parsed.unsafeThreshold;
-                logger.Info("Config loaded from file: safe (" + config.SafeThreshold+ "), unsafe(" + config.UnsafeThreshold + ")");
-            } else
+            await Task.Run(() =>
             {
-                logger.Info("Can't find config, use default values");
+                if (File.Exists(filePath))
+                {
+                    if (File.GetLastWriteTime(filePath) > lastLoadTime)
+                    {
+                        Reload();
+                    }
+                }
+            });            
+        }
+        public void Reload()
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    string jsonString = File.ReadAllText(filePath);
+                    dynamic parsed = JsonConvert.DeserializeObject(jsonString);
+                    SafeThreshold = parsed.safeThreshold;
+                    UnsafeThreshold = parsed.unsafeThreshold;
+                    lastLoadTime = DateTime.Now;
+                    checkValid();
+                    logger.Info("Config loaded from file: safe (" + SafeThreshold + "), unsafe(" + UnsafeThreshold + ")");
+                }
+                else
+                {
+                    logger.Info("Can't find config, use default values");
+                }
+            } 
+            catch(Exception e)
+            {
+                logger.Info("Can't load config");
+                logger.Info(e);
             }
-            return config;
+        }
+
+        private void checkValid()
+        {
+            if(SafeThreshold <= 0 || SafeThreshold >= 1)
+            {
+                logger.Info("SafeThreshold should be between 0 and 1");
+                SafeThreshold = DEFAULT_SAFE;
+            }
+            if (UnsafeThreshold <= 0 || UnsafeThreshold >= 1)
+            {
+                logger.Info("UnsafeThreshold should be between 0 and 1");
+                UnsafeThreshold = DEFAULT_UNSAFE;
+            }
         }
     }
 }
