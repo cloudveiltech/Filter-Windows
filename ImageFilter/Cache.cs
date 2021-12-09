@@ -23,7 +23,7 @@ namespace ImageFilter
 
         private void log(string msg)
         {
-            if(Logger != null)
+            if (Logger != null)
             {
                 Logger.Info(msg);
             }
@@ -56,11 +56,13 @@ namespace ImageFilter
                         log("Cache loaded " + cache.Keys.Count);
                         fileStream.Close();
                     }
-                } catch(Exception e) {
+                }
+                catch (Exception e)
+                {
                     log(e.ToString());
                 }
             }
-            
+
 
             if (this.cache.Keys.Count > this.cacheSizeLimit)
             {
@@ -81,9 +83,9 @@ namespace ImageFilter
         public void Add(string key, bool value)
         {
             this.cache.Add(key, value);
-            if(DateTime.UtcNow - lastPersistTime > TimeSpan.FromSeconds(SAVE_CACHE_TIMEOUT_SEC))
+            if (DateTime.UtcNow - lastPersistTime > TimeSpan.FromSeconds(SAVE_CACHE_TIMEOUT_SEC))
             {
-                Persist(); 
+                Persist();
             }
         }
 

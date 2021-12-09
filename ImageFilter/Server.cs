@@ -30,6 +30,8 @@ namespace ImageFilter
         private WebServer server;
         private static Logger logger;
         private static CachedMemory cache;
+        private static Config config;
+
 
         const int CACHE_SIZE_ITEMS = 100000;
         public bool Start(int port)
@@ -45,7 +47,7 @@ namespace ImageFilter
               .WithWebApi("/api", m => m
                   .WithController<UploadController>());
 
-
+            config = Config.Load(appDataFolder + "\\image_config.json", logger);
             var sessionOptions = new SessionOptions();
             SessionOptions options = new SessionOptions();
             options.AppendExecutionProvider_CPU(1);
@@ -123,7 +125,10 @@ namespace ImageFilter
                 if (outputResults != null && outputResults.Count > 0) {
                     var output = (DenseTensor<float>)outputResults.ToList()[0].Value;
 
-                    var isSafe = output.GetValue(0) < output.GetValue(1);
+                    var unsafeRate = output.GetValue(0);
+                    var safeRate = output.GetValue(1);
+                    logger.Info($"Safe {safeRate}, Unsafe {unsafeRate}");
+                    var isSafe = safeRate > config.SafeThreshold && unsafeRate < config.UnsafeThreshold;
                     return isSafe;
                 }
 

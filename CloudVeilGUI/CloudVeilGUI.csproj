@@ -345,6 +345,11 @@
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ImageFilter\ImageFilter.csproj">
+      <Project>{8d2c462e-1d9a-4797-a863-c854f3a87960}</Project>
+      <Name>ImageFilter</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Platform)' == 'AnyCPU'">

@@ -148,6 +148,10 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
             set 
             {
+                if(isPortsRandomized == value)
+                {
+                    return;
+                }
                 isPortsRandomized = value;
                 RaisePropertyChanged(nameof(IsPortsRandomized));
                 IsPortsSwitchEnabled = false;
