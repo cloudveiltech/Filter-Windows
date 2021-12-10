@@ -35,7 +35,7 @@ namespace FilterProvider.Common.Util
             m_policyConfiguration.ListsReloaded += OnListsReloaded;
         }
 
-        const int MIN_IMAGE_SIZE_TO_FILTER = 10480;
+        const int MIN_IMAGE_SIZE_TO_FILTER = 1024;
         private NLog.Logger m_logger;
 
         private IPCServer m_ipcServer;
