@@ -23,14 +23,13 @@
     <PackageReference Include="embedio" Version="3.4.3" />
     <PackageReference Include="Handlebars.Net" Version="1.10.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="2.2.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NodaTime" Version="2.4.4" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.4" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj" />
+    <ProjectReference Include="..\CloudVeil.IPC\CloudVeil.IPC.csproj" />
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
   </ItemGroup>
 

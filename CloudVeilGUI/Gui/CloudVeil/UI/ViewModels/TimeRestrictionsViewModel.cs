@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class TimeRestrictionsViewModel : BaseCitadelViewModel
+    public class TimeRestrictionsViewModel : BaseCloudVeilViewModel
     {
         public TimeRestrictionsViewModel() : this(null)
         {

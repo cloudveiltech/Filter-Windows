@@ -21,7 +21,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CitadelService.Services
+namespace CloudVeilService.Services
 {
     public class TrustManager : IPlatformTrust
     {

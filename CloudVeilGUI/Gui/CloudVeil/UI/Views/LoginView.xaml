@@ -7,8 +7,8 @@
 <local:BaseView x:Class="Gui.CloudVeil.UI.Views.LoginView"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:CitadelControls="clr-namespace:Gui.CloudVeil.UI.Controls"
-                xmlns:CitadelViewModels="clr-namespace:Gui.CloudVeil.UI.ViewModels"
+                xmlns:CloudVeilControls="clr-namespace:Gui.CloudVeil.UI.Controls"
+                xmlns:CloudVeilViewModels="clr-namespace:Gui.CloudVeil.UI.ViewModels"
                 xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:local="clr-namespace:Gui.CloudVeil.UI.Views"
@@ -20,7 +20,7 @@
 
     <!--  Set data context to LoginViewModel.  -->
     <UserControl.DataContext>
-        <CitadelViewModels:LoginViewModel />
+        <CloudVeilViewModels:LoginViewModel />
     </UserControl.DataContext>
 
     <Grid>
@@ -84,7 +84,7 @@
                    Text="Password"
                    TextWrapping="Wrap" />
 
-        <CitadelControls:SecureInputBox Width="220"
+        <CloudVeilControls:SecureInputBox Width="220"
                                         Height="26"
                                         Margin="248,248,248,0"
                                         HorizontalAlignment="Center"

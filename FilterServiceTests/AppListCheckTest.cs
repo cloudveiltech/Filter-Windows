@@ -8,7 +8,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using CitadelService.Util;
+using CloudVeilService.Util;
 using DotNet.Globbing;
 using FilterServiceTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

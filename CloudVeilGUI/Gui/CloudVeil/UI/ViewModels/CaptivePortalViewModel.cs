@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class CaptivePortalViewModel : BaseCitadelViewModel
+    public class CaptivePortalViewModel : BaseCloudVeilViewModel
     {
         private RelayCommand m_helpMeConnect;
 

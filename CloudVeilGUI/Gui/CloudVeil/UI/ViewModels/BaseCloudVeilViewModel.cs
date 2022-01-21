@@ -5,23 +5,18 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Windows.Util;
 using CloudVeil.Windows;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
 using NLog;
-using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
     /// <summary>
     /// Serves as the base class for all ViewModels.
     /// </summary>
-    public class BaseCitadelViewModel : ObservableObject
+    public class BaseCloudVeilViewModel : ObservableObject
     {
 
         /// <summary>
@@ -65,13 +60,13 @@ namespace Gui.CloudVeil.UI.ViewModels
         protected readonly Logger m_logger;
 
         /// <summary>
-        /// Constructs a new BaseCitadelViewModel instance. 
+        /// Constructs a new BaseCloudVeilViewModel instance. 
         /// </summary>        
-        public BaseCitadelViewModel()
+        public BaseCloudVeilViewModel()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
-            ViewManager = ((CitadelApp)CitadelApp.Current).ViewManager;
+            ViewManager = ((CloudVeilApp)CloudVeilApp.Current).ViewManager;
         }
 
         protected ViewManager ViewManager { get; set; }

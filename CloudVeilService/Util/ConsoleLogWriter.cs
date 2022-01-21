@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
     class ConsoleLogWriter : TextWriter
     {

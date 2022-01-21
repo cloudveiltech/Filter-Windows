@@ -16,7 +16,7 @@ using static Gui.CloudVeil.UI.Models.DashboardModel;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class RelaxedPolicyViewModel : BaseCitadelViewModel
+    public class RelaxedPolicyViewModel : BaseCloudVeilViewModel
     {
         public event RelaxedPolicyRequestDelegate RelaxedPolicyRequested;
 

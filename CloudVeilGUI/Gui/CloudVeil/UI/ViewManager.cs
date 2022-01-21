@@ -38,7 +38,7 @@ namespace Gui.CloudVeil.UI
             {
                 var context = (view as BaseView).DataContext;
 
-                if(context is BaseCitadelViewModel)
+                if(context is BaseCloudVeilViewModel)
                 {
                     viewModelAction?.Invoke(view as BaseView);
                 }

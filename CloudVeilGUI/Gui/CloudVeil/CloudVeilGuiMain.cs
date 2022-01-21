@@ -150,7 +150,7 @@ namespace CloudVeil.Windows
         [STAThread]
         public static void Main(string[] args)
         {
-            LoggerUtil.LoggerName = "CitadelGUI";
+            LoggerUtil.LoggerName = "CloudVeilGUI";
 
             bool startMinimized = false;
 
@@ -216,7 +216,7 @@ namespace CloudVeil.Windows
 
             try
             {
-                var app = new CitadelApp();
+                var app = new CloudVeilApp();
                 app.InitializeComponent();
                 app.Run();
                 

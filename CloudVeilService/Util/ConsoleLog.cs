@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
     public static class ConsoleLog
     {

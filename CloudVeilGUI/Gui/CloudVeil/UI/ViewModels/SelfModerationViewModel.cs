@@ -19,7 +19,7 @@ using Gui.CloudVeil.UI.Windows;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class SelfModerationViewModel : BaseCitadelViewModel
+    public class SelfModerationViewModel : BaseCloudVeilViewModel
     {
         public string SelfModerationSetupUri
             => global::CloudVeil.CompileSecrets.ServiceProviderUserSelfModerationPath.Replace("{{identifier}}", ActivationIdentifier);
@@ -98,9 +98,9 @@ namespace Gui.CloudVeil.UI.ViewModels
                 {
                     addNewSiteCommand = new RelayCommand<string>(async (site) =>
                     {
-                        var window = (CitadelApp.Current.MainWindow as BaseWindow);
+                        var window = (CloudVeilApp.Current.MainWindow as BaseWindow);
 
-                        bool result = await (CitadelApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?");
+                        bool result = await (CloudVeilApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?");
 
                         if (!result)
                             return;
@@ -108,7 +108,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         IPCClient.Default.RequestAddSelfModeratedSite(site)
                             .OnReply((context, msg) =>
                             {
-                                CitadelApp.Current.Dispatcher.Invoke(() =>
+                                CloudVeilApp.Current.Dispatcher.Invoke(() =>
                                 {
                                     SelfModerationSites = new ObservableCollection<string>(msg.DataObject as List<string>);
                                 });

@@ -11,7 +11,7 @@ using Gui.CloudVeil.UI.Views;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class CollectDiagnosticsViewModel : BaseCitadelViewModel
+    public class CollectDiagnosticsViewModel : BaseCloudVeilViewModel
     {
         private RelayCommand saveToFileCommand;
         public RelayCommand SaveToFileCommand

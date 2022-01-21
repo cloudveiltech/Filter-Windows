@@ -15,7 +15,7 @@ using Gui.CloudVeil.UI.Views;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class SupportViewModel : BaseCitadelViewModel
+    public class SupportViewModel : BaseCloudVeilViewModel
     {
         private string activationIdentifier;
         public string ActivationIdentifier
@@ -37,7 +37,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 {
                     collectDiagnosticsCommand = new RelayCommand(() =>
                     {
-                        var app = (CitadelApp.Current as CitadelApp);
+                        var app = (CloudVeilApp.Current as CloudVeilApp);
                         var vm = app.ModelManager.Get<CollectDiagnosticsViewModel>();
 
                         app.IpcClient.Request(IpcCall.CollectComputerInfo).OnReply((h, msg) =>
@@ -74,7 +74,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         var logDir = LoggerUtil.LogFolderPath;
 
                         //dump event log 
-                        var app = (CitadelApp.Current as CitadelApp);
+                        var app = (CloudVeilApp.Current as CloudVeilApp);
                         app.IpcClient.Request(IpcCall.DumpSystemEventLog);
                         // Call process start with the dir path, explorer will handle it.
                         Process.Start(logDir);

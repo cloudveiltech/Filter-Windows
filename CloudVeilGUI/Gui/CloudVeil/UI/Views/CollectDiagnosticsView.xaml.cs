@@ -26,7 +26,7 @@ namespace Gui.CloudVeil.UI.Views
         {
             InitializeComponent();
 
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<CollectDiagnosticsViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<CollectDiagnosticsViewModel>();
         }
     }
 }

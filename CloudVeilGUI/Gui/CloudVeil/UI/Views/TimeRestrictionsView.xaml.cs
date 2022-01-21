@@ -26,7 +26,7 @@ namespace Gui.CloudVeil.UI.Views
         public TimeRestrictionsView()
         {
             InitializeComponent();
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<TimeRestrictionsViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<TimeRestrictionsViewModel>();
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)

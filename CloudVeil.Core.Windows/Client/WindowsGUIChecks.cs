@@ -8,9 +8,9 @@
 using System;
 using System.Linq;
 using System.Diagnostics;
-using CloudVeil.Core.WinAPI;
 using System.Threading;
 using Gui.CloudVeil.Util;
+using CloudVeil.Core.Windows.WinAPI;
 
 namespace CloudVeil.Core.Windows.Client
 {

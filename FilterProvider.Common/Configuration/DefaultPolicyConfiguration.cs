@@ -9,7 +9,6 @@
 
 using Filter.Platform.Common.Extensions;
 
-using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
 using System;
 using System.Collections.Generic;
@@ -18,15 +17,11 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Filter.Platform.Common.Data.Models;
 using System.Diagnostics;
 using System.Threading;
-using System.IO.Compression;
 using Newtonsoft.Json;
-using Gui.CloudVeil.Util;
 using System.Collections.Concurrent;
-using System.Security.AccessControl;
 
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data.Filtering;
@@ -34,8 +29,8 @@ using FilterProvider.Common.Util;
 using Filter.Platform.Common;
 using System.Text.RegularExpressions;
 using DotNet.Globbing;
-using System.Security.Principal;
 using GoProxyWrapper;
+using CloudVeil.IPC;
 
 namespace FilterProvider.Common.Configuration
 {

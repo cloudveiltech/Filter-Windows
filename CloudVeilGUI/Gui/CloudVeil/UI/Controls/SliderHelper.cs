@@ -18,7 +18,7 @@ namespace Gui.CloudVeil.UI.Controls
 {
     public class SliderHelper
     {
-        public const string CategoryName = "CitadelGUI";
+        public const string CategoryName = "CloudVeilGUI";
 
         /// <summary>
         /// Gets or sets the brush of the thumb.

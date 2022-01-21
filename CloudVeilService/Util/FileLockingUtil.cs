@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 // The code in this file came from https://stackoverflow.com/questions/317071/how-do-i-find-out-which-process-is-locking-a-file-using-net
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
 
 

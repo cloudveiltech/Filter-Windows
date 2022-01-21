@@ -20,13 +20,13 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Gui.CloudVeil.Util;
-using CitadelService.Util;
+using CloudVeilService.Util;
 
 using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Services;
 using Filter.Platform.Common;
-using CitadelService.Platform;
+using CloudVeilService.Platform;
 using FilterProvider.Common.Platform;
 using CloudVeil.Core.WinAPI;
 using System.Runtime.InteropServices;
@@ -51,7 +51,7 @@ using FilterProvider.Common.Util;
  * 
  * 
  */
-namespace CitadelService.Services
+namespace CloudVeilService.Services
 {
     public class FilterServiceProvider
     {

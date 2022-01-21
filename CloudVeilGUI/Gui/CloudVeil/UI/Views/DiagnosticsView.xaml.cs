@@ -30,7 +30,7 @@ namespace Gui.CloudVeil.UI.Views
     {
         public DiagnosticsView()
         {
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<DiagnosticsViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<DiagnosticsViewModel>();
 
             InitializeComponent();
         }

@@ -32,7 +32,7 @@ namespace Gui.CloudVeil.UI.Views
         public RelaxedPolicyView()
         {
             InitializeComponent();
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<RelaxedPolicyViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<RelaxedPolicyViewModel>();
         }
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)

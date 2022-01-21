@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Win32;
 
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
     public class InstalledProgram
     {

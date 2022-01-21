@@ -109,6 +109,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IPCClient.cs" />
+    <Compile Include="Platform\Common\IGuiServices.cs" />
+    <Compile Include="Platform\Common\ITrayIcon.cs" />
+    <Compile Include="Platform\Common\StatusIconMenuItem.cs" />
     <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
     <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Gui\CloudVeil\CloudVeilGuiMain.cs" />
@@ -243,7 +247,7 @@
       <DependentUpon>SecureInputBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Gui\CloudVeil\UI\Models\LoginModel.cs" />
-    <Compile Include="Gui\CloudVeil\UI\ViewModels\BaseCitadelViewModel.cs" />
+    <Compile Include="Gui\CloudVeil\UI\ViewModels\BaseCloudVeilViewModel.cs" />
     <Compile Include="Gui\CloudVeil\UI\ViewModels\LoginViewModel.cs" />
     <Compile Include="Gui\CloudVeil\UI\Views\HistoryView.xaml.cs">
       <DependentUpon>HistoryView.xaml</DependentUpon>
@@ -292,7 +296,6 @@
     <None Include="Resources\blocked.webp" />
     <Resource Include="Resources\UserLicense.txt" />
     <Resource Include="Resources\appicon.ico" />
-    <Resource Include="Resources\NLog.config" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -329,13 +332,9 @@
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Cloudveil.Core.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj">
+    <ProjectReference Include="..\CloudVeil.IPC\CloudVeil.IPC.csproj">
       <Project>{61a1bdf1-6a28-4383-aca6-74510a1f0e76}</Project>
-      <Name>CloudVeil.IPC.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CloudVeilGUI.Common\CloudVeilGUI.Common.csproj">
-      <Project>{325c7368-ab9e-4c87-bbed-5a46b3d9a9eb}</Project>
-      <Name>CloudVeilGUI.Common</Name>
+      <Name>CloudVeil.IPC</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
       <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>

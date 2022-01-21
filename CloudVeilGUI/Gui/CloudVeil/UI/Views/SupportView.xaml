@@ -11,12 +11,12 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Gui.CloudVeil.UI.Views"
              xmlns:cloudveil="clr-namespace:CloudVeil;assembly=Filter.Platform.Common"
-             xmlns:citadelgui="clr-namespace:CloudVeil.Windows"
+             xmlns:cloudveilgui="clr-namespace:CloudVeil.Windows"
              mc:Ignorable="d">
     <UserControl.Resources>
         <Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextBlockStyle}" />
         <cloudveil:CompileSecrets x:Key="CommonCompileSecrets" />
-        <citadelgui:CompileSecrets x:Key="GuiCompileSecrets" />
+        <cloudveilgui:CompileSecrets x:Key="GuiCompileSecrets" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -34,32 +34,32 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 <TextBlock HorizontalAlignment="Center"
                        Margin="0,10,0,0"
                        TextWrapping="Wrap">
-                <Hyperlink NavigateUri="{x:Static citadelgui:CompileSecrets.HomePageUrl}" RequestNavigate="OnHyperlinkClicked">
-                    <Run Text="{x:Static citadelgui:CompileSecrets.HomePageCaption}" />
+                <Hyperlink NavigateUri="{x:Static cloudveilgui:CompileSecrets.HomePageUrl}" RequestNavigate="OnHyperlinkClicked">
+                    <Run Text="{x:Static cloudveilgui:CompileSecrets.HomePageCaption}" />
                 </Hyperlink>
                 </TextBlock>
 
                 <TextBlock HorizontalAlignment="Center"
                        Margin="0,10,0,0"
                        TextWrapping="Wrap">
-                <Hyperlink NavigateUri="{x:Static citadelgui:CompileSecrets.KnowledgeBaseUrl}" RequestNavigate="OnHyperlinkClicked">
-                    <Run Text="{x:Static citadelgui:CompileSecrets.KnowledgeBaseCaption}" />
+                <Hyperlink NavigateUri="{x:Static cloudveilgui:CompileSecrets.KnowledgeBaseUrl}" RequestNavigate="OnHyperlinkClicked">
+                    <Run Text="{x:Static cloudveilgui:CompileSecrets.KnowledgeBaseCaption}" />
                 </Hyperlink>
                 </TextBlock>
 
                 <TextBlock HorizontalAlignment="Center"
                            Margin="0,10,0,0"
                            TextWrapping="Wrap">
-                    <Hyperlink NavigateUri="{x:Static citadelgui:CompileSecrets.ReleaseNotesUrl}" RequestNavigate="OnHyperlinkClicked">
-                        <Run Text="{x:Static citadelgui:CompileSecrets.ReleaseNotesCaption}" />
+                    <Hyperlink NavigateUri="{x:Static cloudveilgui:CompileSecrets.ReleaseNotesUrl}" RequestNavigate="OnHyperlinkClicked">
+                        <Run Text="{x:Static cloudveilgui:CompileSecrets.ReleaseNotesCaption}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <TextBlock HorizontalAlignment="Center"
                        Margin="0,10,0,0"
                        TextWrapping="Wrap">
-                <Hyperlink NavigateUri="{x:Static citadelgui:CompileSecrets.MailtoUrl}" RequestNavigate="OnHyperlinkClicked">
-                    <Run Text="{x:Static citadelgui:CompileSecrets.MailtoCaption}" />
+                <Hyperlink NavigateUri="{x:Static cloudveilgui:CompileSecrets.MailtoUrl}" RequestNavigate="OnHyperlinkClicked">
+                    <Run Text="{x:Static cloudveilgui:CompileSecrets.MailtoCaption}" />
                 </Hyperlink>
                 <LineBreak />
                 <Run>

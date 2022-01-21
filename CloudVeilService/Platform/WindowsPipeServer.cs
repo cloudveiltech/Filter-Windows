@@ -16,7 +16,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CitadelService.Platform
+namespace CloudVeilService.Platform
 {
     public class WindowsPipeServer : IPipeServer
     {

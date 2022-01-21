@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 
-namespace CitadelService.Platform
+namespace CloudVeilService.Platform
 {
     public class WindowsDns : IPlatformDns
     {

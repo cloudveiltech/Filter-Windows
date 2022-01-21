@@ -55,7 +55,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         }
     }
 
-    public class HistoryViewModel : BaseCitadelViewModel
+    public class HistoryViewModel : BaseCloudVeilViewModel
     {
 
 

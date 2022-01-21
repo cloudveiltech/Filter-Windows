@@ -7,7 +7,7 @@
 
 ﻿using CloudVeil.Core.Windows.Util;
 using CitadelCore.Windows.Diversion;
-using CitadelService.Services;
+using CloudVeilService.Services;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using Filter.Platform.Common.Extensions;
@@ -34,11 +34,11 @@ using FilterNativeWindows;
 using CloudVeil.Core.Windows.WinAPI;
 using Filter.Platform.Common.Data.Models;
 using System.Reflection;
-using CitadelService.Util;
+using CloudVeilService.Util;
 using System.ComponentModel;
 using FilterProvider.Common.Util;
 
-namespace CitadelService.Platform
+namespace CloudVeilService.Platform
 {
     public class WindowsSystemServices : ISystemServices
     {

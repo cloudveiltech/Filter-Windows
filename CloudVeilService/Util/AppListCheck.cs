@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
     public class AppListCheck
     {

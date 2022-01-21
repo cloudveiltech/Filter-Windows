@@ -13,12 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace CloudVeil.IPC
 {   

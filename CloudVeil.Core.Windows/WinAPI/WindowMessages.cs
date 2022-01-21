@@ -17,7 +17,7 @@
 
 using System;
 
-namespace CloudVeil.Core.WinAPI
+namespace CloudVeil.Core.Windows.WinAPI
 {
     public enum WindowMessages : int
     {
