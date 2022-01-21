@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CitadelService.Platform
+namespace CloudVeilService.Platform
 {
     public class WindowsWifiManager : IWifiManager
     {

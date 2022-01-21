@@ -33,7 +33,7 @@ namespace Gui.CloudVeil.UI.Views
         {
             InitializeComponent();
 
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SupportViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<SupportViewModel>();
         }
 
         private void OnHyperlinkClicked(object sender, RequestNavigateEventArgs e)

@@ -19,7 +19,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Gui.CloudVeil.Services;
 using Gui.CloudVeil.UI;
 using Gui.CloudVeil.UI.ViewModels;
 using Gui.CloudVeil.UI.Views;
@@ -34,13 +33,14 @@ using Filter.Platform.Common.IPC.Messages;
 using FilterNativeWindows;
 using Gui.CloudVeil;
 using MahApps.Metro.Controls.Dialogs;
+using CloudVeil.Core.Windows.Services;
 
 namespace CloudVeil.Windows
 {
     /// <summary>
     /// Interaction logic for App.xaml 
     /// </summary>
-    public partial class CitadelApp : Application
+    public partial class CloudVeilApp : Application
     {
         private class ServiceRunner : BaseProtectiveService
         {
@@ -145,7 +145,7 @@ namespace CloudVeil.Windows
         /// <summary>
         /// Default ctor. 
         /// </summary>
-        public CitadelApp()
+        public CloudVeilApp()
         {
             m_logger = LoggerUtil.GetAppWideLogger();
 
@@ -154,12 +154,12 @@ namespace CloudVeil.Windows
             appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString(3);
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
-            m_logger.Info("CitadelGUI Version: {0}", appVerStr);
+            m_logger.Info("CloudVeilGUI Version: {0}", appVerStr);
 
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
 
-            this.Startup += CitadelOnStartup;
+            this.Startup += CloudVeilOnStartup;
         }
 
         private void RunGuiChecks()
@@ -240,7 +240,7 @@ namespace CloudVeil.Windows
             }
         }
 
-        private void CitadelOnStartup(object sender, StartupEventArgs e)
+        private void CloudVeilOnStartup(object sender, StartupEventArgs e)
         {
             CloudVeil.Core.Windows.Platform.Init();
 
@@ -927,7 +927,7 @@ namespace CloudVeil.Windows
                 MinimizeToTray(true);         
             });
 
-            BaseCitadelViewModel dashboardVm = ModelManager.Get<DashboardViewModel>();
+            BaseCloudVeilViewModel dashboardVm = ModelManager.Get<DashboardViewModel>();
             if(dashboardVm != null)
             {
                 dashboardVm.UserNotificationRequest = OnNotifyUserRequest;

@@ -20,7 +20,7 @@ namespace Gui.CloudVeil.UI.Views
     {
         public AdvancedView()
         {
-            DataContext = (Application.Current as CitadelApp).ModelManager.Get<AdvancedViewModel>();
+            DataContext = (Application.Current as CloudVeilApp).ModelManager.Get<AdvancedViewModel>();
 
             InitializeComponent();
         }

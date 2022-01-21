@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CitadelService.Services;
+using CloudVeilService.Services;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Services;
 using NLog;
@@ -15,7 +15,7 @@ using System.Diagnostics;
 using System.Threading;
 using Topshelf;
 
-namespace CitadelService
+namespace CloudVeilService
 {
     internal class Program
     {

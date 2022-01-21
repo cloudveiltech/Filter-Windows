@@ -32,7 +32,7 @@ namespace Gui.CloudVeil.UI.Views
         {
             InitializeComponent();
 
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<HistoryViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<HistoryViewModel>();
 
             NameScope.SetNameScope(contextMenu, NameScope.GetNameScope(this));
         }

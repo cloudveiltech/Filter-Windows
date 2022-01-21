@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CitadelService.Util
+namespace CloudVeilService.Util
 {
     public static class ResourceStreams
     {

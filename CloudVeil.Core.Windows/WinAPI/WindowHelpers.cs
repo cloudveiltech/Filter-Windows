@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace CloudVeil.Core.WinAPI
+namespace CloudVeil.Core.Windows.WinAPI
 {
     public static class WindowHelpers
     {

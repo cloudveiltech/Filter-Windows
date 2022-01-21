@@ -112,9 +112,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CloudVeil.IPC.Common\CloudVeil.IPC.Common.csproj">
+    <ProjectReference Include="..\CloudVeil.IPC\CloudVeil.IPC.csproj">
       <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
-      <Name>CloudVeil.IPC.Common</Name>
+      <Name>CloudVeil.IPC</Name>
     </ProjectReference>
     <ProjectReference Include="..\CloudVeilService\CloudVeilService.csproj">
       <Project>{620adc88-b91d-4fda-a791-8b92473e927a}</Project>

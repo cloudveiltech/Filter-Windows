@@ -84,10 +84,10 @@
           <File Id="_84BCA417_832A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Filter.Platform.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_159D67FB_7D2E" Guid="EFC41DC3-1954-4EDD-ABFF-05FFA73DAAD6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C855A854_27E0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.Common.dll" KeyPath="yes" />
+          <File Id="_C855A854_27E0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.dll" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_D7EA2492_9EAA" Guid="9DB1DCEF-2E57-4A28-B5E0-03CA3DE1631D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.Common.pdb" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.Common.pdb" KeyPath="yes" />
+          <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.pdb" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.pdb" KeyPath="yes" />
         </Component>
         <Component Id="comp_0DC0F70F_7F99" Guid="B916D54D-687B-4BCE-A2DD-E0B4A23C7EA6" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C283DB82_A3A9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
@@ -100,9 +100,6 @@
         </Component>
         <Component Id="comp_A08573E3_AAA3" Guid="5850308D-09D4-476C-B432-23DD07BA53CB" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_1B4FFBDB_DE96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_808C4327_E9BD" Guid="8D6F2FE8-97F6-435F-8050-7329881D4CCC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_1317AA89_0D43" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeilGUI.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeilGUI.Common.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_108A7085_B85C" Guid="39FE7540-7433-4188-86E9-C4EB147036CE" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D47FEB1F_CAAB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe.config" KeyPath="yes" />

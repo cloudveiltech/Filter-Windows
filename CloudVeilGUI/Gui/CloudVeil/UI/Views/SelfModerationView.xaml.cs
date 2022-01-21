@@ -25,7 +25,7 @@ namespace Gui.CloudVeil.UI.Views
     {
         public SelfModerationView()
         {
-            DataContext = (CitadelApp.Current as CitadelApp).ModelManager.Get<SelfModerationViewModel>();
+            DataContext = (CloudVeilApp.Current as CloudVeilApp).ModelManager.Get<SelfModerationViewModel>();
             InitializeComponent();
         }
 

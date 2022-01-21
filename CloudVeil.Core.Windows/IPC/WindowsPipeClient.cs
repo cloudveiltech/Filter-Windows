@@ -8,7 +8,7 @@
 using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.IPC;
 
-namespace Gui.CloudVeil.Platform
+namespace CloudVeil.Core.Windows.IPC
 {
     public class WindowsPipeClient : IPipeClient
     {

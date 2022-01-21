@@ -14,7 +14,7 @@ using Gui.CloudVeil.UI.Models;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class MainWindowViewModel : BaseCitadelViewModel
+    public class MainWindowViewModel : BaseCloudVeilViewModel
     {
         private MainWindowModel m_model;
 

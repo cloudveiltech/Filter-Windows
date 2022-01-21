@@ -21,7 +21,7 @@ using System.Windows.Media;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class AdvancedViewModel : BaseCitadelViewModel
+    public class AdvancedViewModel : BaseCloudVeilViewModel
     {
 
         public AdvancedViewModel() : base()
@@ -247,7 +247,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                             {
                                 IPCClient.Default.Request<object, ApplicationUpdate>(IpcCall.Update, null).OnReply((h, msg) =>
                                 {
-                                    (CitadelApp.Current as CitadelApp).BeginUpdateRequest(msg.Data);
+                                    (CloudVeilApp.Current as CloudVeilApp).BeginUpdateRequest(msg.Data);
                                     return true;
                                 }); 
                             });

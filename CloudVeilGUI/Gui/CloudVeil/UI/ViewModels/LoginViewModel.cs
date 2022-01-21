@@ -21,7 +21,7 @@ namespace Gui.CloudVeil.UI.ViewModels
     /// <summary>
     /// The LoginViewModel class serves as the ViewModel for the LoginView UserControl.
     /// </summary>
-    public class LoginViewModel : BaseCitadelViewModel
+    public class LoginViewModel : BaseCloudVeilViewModel
     {
         /// <summary>
         /// The model.

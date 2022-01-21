@@ -5,19 +5,13 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 ﻿using CloudVeil.Core.Windows.Client;
+using CloudVeil.Core.Windows.IPC;
 using CloudVeil.Core.Windows.Util;
 using CloudVeil.Core.Windows.Util.Net;
-using CitadelService.Platform;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.IPC;
 using Filter.Platform.Common.Net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Gui.CloudVeil.Platform;
 
 namespace CloudVeil.Core.Windows
 {

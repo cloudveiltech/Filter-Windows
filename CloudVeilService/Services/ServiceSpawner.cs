@@ -32,10 +32,10 @@ using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 using Topshelf;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
-using Gui.CloudVeil.Services;
-using CitadelService.Util;
+using CloudVeilService.Util;
+using CloudVeil.Core.Windows.Services;
 
-namespace CitadelService.Services
+namespace CloudVeilService.Services
 {
     internal class ServiceSpawner
     {

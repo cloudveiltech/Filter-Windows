@@ -17,7 +17,7 @@ using Gui.CloudVeil.Testing;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class DiagnosticsViewModel : BaseCitadelViewModel 
+    public class DiagnosticsViewModel : BaseCloudVeilViewModel 
     {
         public DiagnosticsViewModel()
         {
@@ -161,9 +161,9 @@ namespace Gui.CloudVeil.UI.ViewModels
 
             if (entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
             {
-                CitadelApp.Current.Dispatcher.InvokeAsync(() =>
+                CloudVeilApp.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    (CitadelApp.Current.MainWindow as Windows.MainWindow).ShowUserMessage("Test Details", entry.Details);
+                    (CloudVeilApp.Current.MainWindow as Windows.MainWindow).ShowUserMessage("Test Details", entry.Details);
                 });
             }
 
@@ -172,10 +172,9 @@ namespace Gui.CloudVeil.UI.ViewModels
                 return;
             }
 
-            CitadelApp.Current.Dispatcher.InvokeAsync(() =>
+            CloudVeilApp.Current.Dispatcher.InvokeAsync(() =>
             {
-                // FIXME: Don't do CitadelApp.Current.MainWindow as Windows.MainWindow, pass it instead.
-                DiagnosticsEntries.Add(new DiagnosticsEntryViewModel(CitadelApp.Current.MainWindow as Windows.MainWindow, entry));
+                DiagnosticsEntries.Add(new DiagnosticsEntryViewModel(CloudVeilApp.Current.MainWindow as Windows.MainWindow, entry));
             });
         }
 

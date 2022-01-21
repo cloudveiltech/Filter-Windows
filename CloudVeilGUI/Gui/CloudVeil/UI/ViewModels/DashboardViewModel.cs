@@ -28,7 +28,7 @@ using Gui.CloudVeil.Util;
 namespace Gui.CloudVeil.UI.ViewModels
 { 
 
-    public class DashboardViewModel : BaseCitadelViewModel
+    public class DashboardViewModel : BaseCloudVeilViewModel
     {
 
         /// <summary>

@@ -56,35 +56,15 @@ namespace CloudVeil.Windows.Platform
 
         public void ShowLoginScreen()
         {
-            app.Dispatcher.BeginInvoke((Action)delegate ()
-            {
-                if(app is CitadelApp)
-                {
-                    //(app as CitadelApp).ChangeViewRequest(typeof(LoginView));
-                }
-            });
         }
 
         public void ShowWaitingScreen()
         {
-            app.Dispatcher.BeginInvoke((Action)delegate ()
-            {
-                if (app is CitadelApp)
-                {
-                    //(app as CitadelApp).ChangeViewRequest(typeof(ProgressWait));
-                }
-            });
+        
         }
         
         public void ShowMainScreen()
         {
-            app.Dispatcher.BeginInvoke((Action)delegate ()
-            {
-                if (app is CitadelApp)
-                {
-                    //(app as CitadelApp).ChangeViewRequest(typeof(DashboardView));
-                }
-            });
         }
 
         public void ShowCertificateErrorsScreen()

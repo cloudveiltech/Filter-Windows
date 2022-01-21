@@ -11,9 +11,4 @@
   <ItemGroup>
     <PackageReference Include="NodaTime" Version="2.4.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Citadel.IPC.Common\CloudVeil.IPC.Common.csproj" />
-  </ItemGroup>
-
 </Project>

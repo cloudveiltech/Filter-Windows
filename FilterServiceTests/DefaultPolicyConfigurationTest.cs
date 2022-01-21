@@ -6,7 +6,7 @@ using Filter.Platform.Common.Data.Models;
 using Newtonsoft.Json;
 using System.IO;
 using FilterProvider.Common.Configuration;
-using CitadelService.Util;
+using CloudVeilService.Util;
 using Filter.Platform.Common;
 using Moq;
 

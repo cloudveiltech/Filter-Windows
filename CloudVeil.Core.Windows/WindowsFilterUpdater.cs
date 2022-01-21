@@ -3,10 +3,6 @@ using Filter.Platform.Common;
 using System;
 using System.IO;
 using FilterNativeWindows;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace CloudVeil.Core.Windows
