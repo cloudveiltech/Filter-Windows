@@ -5,32 +5,25 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Filter.Platform.Common.Extensions;
-using Filter.Platform.Common;
-using Filter.Platform.Common.Net;
-using Filter.Platform.Common.Util;
-using Microsoft.Win32;
-using NLog;
-using NodaTime;
-using NodaTime.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Net.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
-using Newtonsoft.Json;
-using Filter.Platform.Common.Data.Models;
-using FilterProvider.Common.Platform;
 using CloudVeil;
+using Filter.Platform.Common;
+using Filter.Platform.Common.Data.Models;
+using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.Net;
+using Filter.Platform.Common.Util;
+using FilterProvider.Common.Platform;
+using NLog;
+using NodaTime;
+using NodaTime.Text;
 
 namespace FilterProvider.Common.Util
 {
@@ -65,6 +58,9 @@ namespace FilterProvider.Common.Util
     /// </summary>
     internal class WebServiceUtil
     {
+        private DateTime tokenRejectedFirstDateTime = DateTime.MinValue;
+        private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1);
+
         public event GenericWebServiceUtilDelegate AuthTokenRejected;
 
         private static readonly Dictionary<ServiceResource, string> m_namedResourceMap = new Dictionary<ServiceResource, string>
@@ -860,7 +856,8 @@ namespace FilterProvider.Common.Util
                 else if (resource != ServiceResource.RetrieveToken)
                 {
                     m_logger.Info("RequestResource1: Authorization failed.");
-                    AuthTokenRejected?.Invoke();
+
+                    reportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
                     return null;
                 }
@@ -926,6 +923,8 @@ namespace FilterProvider.Common.Util
                         request.Abort();
                     }
                 }
+
+                reportTokenAccepted();
             }
             catch(WebException e)
             {
@@ -953,10 +952,11 @@ namespace FilterProvider.Common.Util
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             m_logger.Info("RequestResource2: Authorization failed.");
-                            AuthTokenRejected?.Invoke();
+                            reportTokenRejected();
                         }
                         else if(intCode > 399 && intCode <= 499 && resource != ServiceResource.DeactivationRequest)
                         {
+                            reportTokenAccepted();
                             m_logger.Info("Error occurred in RequestResource: {0}", intCode);
                         }
 
@@ -1024,6 +1024,23 @@ namespace FilterProvider.Common.Util
             }
         }
 
+        private void reportTokenRejected()
+        {
+            if (tokenRejectedFirstDateTime == DateTime.MinValue)
+            {
+                tokenRejectedFirstDateTime = DateTime.Now;
+            } 
+            else if(DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT)
+            {
+                AuthTokenRejected?.Invoke();
+            }
+        }
+
+        private void reportTokenAccepted()
+        {
+            tokenRejectedFirstDateTime = DateTime.MinValue;
+        }
+
         /// <summary>
         /// Attempts to post the given form-encoded data to the service API. 
         /// </summary>
@@ -1069,7 +1086,7 @@ namespace FilterProvider.Common.Util
                 else
                 {
                     m_logger.Info("SendResource1: Authorization failed.");
-                    AuthTokenRejected?.Invoke();
+                    reportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
                     return false;
                 }
@@ -1116,6 +1133,8 @@ namespace FilterProvider.Common.Util
                         request.Abort();
                     }
                 }
+
+                reportTokenAccepted();
             }
             catch(WebException e)
             {
@@ -1135,10 +1154,11 @@ namespace FilterProvider.Common.Util
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             m_logger.Info("SendResource2: Authorization failed.");
-                            AuthTokenRejected?.Invoke();
+                            reportTokenRejected();
                         }
                         else if(intCode > 399 && intCode < 499)
                         {
+                            reportTokenAccepted();
                             m_logger.Info("SendResource2: Failed with client code {0}", intCode);
                         }
 

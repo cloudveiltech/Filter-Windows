@@ -1600,6 +1600,8 @@ namespace CloudVeil.Core.Windows.WinAPI
         /// <summary>
         /// A top-level window is being replaced. The window exists when the system calls this hook. 
         /// </summary>
-        HSHELL_WINDOWREPLACED = 13
+        HSHELL_WINDOWREPLACED = 13,
+
+        CV_SHOW_WINDOW = USER + 1
     }
 }

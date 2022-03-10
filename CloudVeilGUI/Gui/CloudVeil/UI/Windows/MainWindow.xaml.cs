@@ -10,6 +10,10 @@ using Filter.Platform.Common.Util;
 using System;
 using System.Diagnostics;
 using Gui.CloudVeil.UI.ViewModels;
+using System.Windows.Interop;
+using System.Windows;
+using CloudVeil.Core.Windows.WinAPI;
+using CloudVeil.Windows;
 
 namespace Gui.CloudVeil.UI.Windows
 {
@@ -42,6 +46,8 @@ namespace Gui.CloudVeil.UI.Windows
             }
         }
 
+
+
         public void SwitchDashboardViewTab(int tabIdx)
         {
             
@@ -53,5 +59,23 @@ namespace Gui.CloudVeil.UI.Windows
         {
             Process.Start(e.Uri.ToString());
         }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.AddHook(WndProc);
+        }
+
+        IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if(msg == (int)WindowMessages.CV_SHOW_WINDOW)
+            {
+                (Application.Current as CloudVeilApp).BringAppToFocus();
+            }
+
+            return IntPtr.Zero;
+        }
+
     }
 }

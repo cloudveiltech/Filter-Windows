@@ -75,5 +75,11 @@ namespace CloudVeil.Core.Windows.WinAPI
 
         [DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Ansi)]
         public static extern bool SendMessage(IntPtr hwnd, uint wMsg, uint wParam, long lParam);
+
+        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow", CharSet = CharSet.Ansi)]
+        public static extern bool SetForegroundWindow(IntPtr hwnd);
+
+        [DllImport("user32.dll", EntryPoint = "ShowWindow", CharSet = CharSet.Ansi)]
+        public static extern bool ShowWindow(IntPtr hwnd, int cmdShow);
     }
 }

@@ -26,7 +26,7 @@ namespace CloudVeil.Core.Windows.Client
                 foreach (var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
                 {
                     // Send window show.
-                    WindowHelpers.SendMessage(handle, (uint)WindowMessages.SHOWWINDOW, 9, 0);
+                    WindowHelpers.SendMessage(handle, (int)WindowMessages.CV_SHOW_WINDOW, 0, 0);
                 }
             }
         }

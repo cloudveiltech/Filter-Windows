@@ -553,7 +553,7 @@ namespace FilterProvider.Common.Services
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
                 m_systemServices.EnsureGuiRunning();
-                m_ipcServer.NotifyAuthenticationStatus(CloudVeil.IPC.Messages.AuthenticationAction.Required);
+                m_ipcServer.NotifyAuthenticationStatus(CloudVeil.IPC.Messages.AuthenticationAction.Required);                
             };
 
             try
