@@ -44,7 +44,6 @@ using FilterProvider.Common.ControlServer;
 using FilterProvider.Common.Proxy.Certificate;
 using Org.BouncyCastle.Crypto;
 using System.Security.Cryptography.X509Certificates;
-using LogMessageType = Unosquare.Swan.LogMessageType;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Filter.Platform.Common.IPC.Messages;
@@ -414,12 +413,37 @@ namespace FilterProvider.Common.Services
             InitEngine();
         }
 
+        bool exiting = false;
+        private void MonitoringThread()
+        {
+            var process = Process.GetCurrentProcess();
+            while(!exiting)
+            {
+                PerformanceCounter pc = new PerformanceCounter();
+                pc.CategoryName = "Process";
+                pc.CounterName = "Working Set - Private";
+                pc.InstanceName = process.ProcessName;
+                var memsize = Convert.ToInt32(pc.NextValue()) / (int)(1024);
+                pc.Close();
+                pc.Dispose();
+
+                if(m_logger != null)
+                {
+                    m_logger.Info("MEMORY CONSUMPTION IS " + memsize + "KB");
+                }
+                Thread.Sleep(30000);
+            }
+        }
+
         private void OnStartup()
         {
             if (File.Exists("debug-filterserviceprovider"))
             {
                 Debugger.Launch();
             }
+
+            exiting = false;
+            new Thread(MonitoringThread).Start();
 
             // We spawn a new thread to initialize all this code so that we can start the service and return control to the Service Control Manager.
             bool consoleOutStatus = false;
@@ -532,7 +556,7 @@ namespace FilterProvider.Common.Services
                 }
             };
 
-            Unosquare.Swan.Terminal.OnLogMessageReceived += Terminal_OnLogMessageReceived;
+//            Swan.Terminal. += Terminal_OnLogMessageReceived;
 
             // Hook app exiting function. This must be done on this main app thread.
             AppDomain.CurrentDomain.ProcessExit += OnApplicationExiting;
@@ -1036,13 +1060,7 @@ namespace FilterProvider.Common.Services
             OnUpdateTimerElapsed(null);
         }
 
-        // Now why would you code it like this? Because you're lazy.
-        private void Terminal_OnLogMessageReceived(object sender, Unosquare.Swan.LogMessageReceivedEventArgs e)
-        {
-            m_logger.Info($"SWAN: {e.Source}: {e.Message}: {e.Exception?.ToString()}");
-        }
-
-    
+         
         private void timeRestrictionsCheck(object state)
         {
             bool? areTimeRestrictionsActive = false;
@@ -1143,6 +1161,8 @@ namespace FilterProvider.Common.Services
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             var antitampering = PlatformTypes.New<IAntitampering>();
             antitampering.DisableProcessProtection();
+
+            exiting = true;
 
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }

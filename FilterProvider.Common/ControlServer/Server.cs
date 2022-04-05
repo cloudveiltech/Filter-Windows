@@ -9,8 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Modules;
-using Unosquare.Swan;
-
 namespace FilterProvider.Common.ControlServer
 {
     public class Server : IDisposable

@@ -123,6 +123,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 </StackPanel>
             </StackPanel>
 
+            <TextBlock TextWrapping="WrapWithOverflow" Margin="0,25,0,0" FontSize="20">
+                    Friendly Name: 
+                    <TextBlock TextWrapping="WrapWithOverflow" FontSize="15" Text="{Binding FriendlyName}"/>
+            </TextBlock>
+
+            <Button Command="{Binding OpenEditLinkCommand}"  Margin="0,10,0,0"
+                        Content="Edit"
+                        Style="{StaticResource AccentedSquareButtonStyle}" />
         </StackPanel>
     </Grid>
 </UserControl>

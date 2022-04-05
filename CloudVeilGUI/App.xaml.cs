@@ -726,6 +726,10 @@ namespace CloudVeil.Windows
 
                         var diagnosticsViewModel = ModelManager.Get<DiagnosticsViewModel>();
                         diagnosticsViewModel.IsDnsEnforcementEnabled = cfg.PrimaryDns.Length != 0 || cfg.SecondaryDns.Length != 0;
+
+
+                        var advancedViewModel = ModelManager.Get<AdvancedViewModel>();
+                        advancedViewModel.FriendlyName = cfg.FriendlyName;
                     });
 
                     m_mainWindow.Dispatcher.InvokeAsync(() =>

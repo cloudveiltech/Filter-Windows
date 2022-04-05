@@ -143,7 +143,7 @@ namespace CloudVeilService.Platform
             AsymmetricCipherKeyPair pair = BCCertificateMaker.CreateKeyPair(2048);
 
             using (StreamWriter writer = new StreamWriter(new FileStream(keyPath, FileMode.Create, FileAccess.Write)))
-            {
+            { 
                 BCCertificateMaker.ExportPrivateKey(pair.Private, writer);
             }
 

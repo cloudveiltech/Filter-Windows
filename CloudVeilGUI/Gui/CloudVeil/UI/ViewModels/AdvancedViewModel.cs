@@ -426,6 +426,34 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
+        private string friendlyName;
+        public string FriendlyName
+        {
+            get => friendlyName;
+            set
+            {
+                friendlyName = value;
+                RaisePropertyChanged(nameof(FriendlyName));
+            }
+        }
+
+        private RelayCommand openEditLinkCommand;
+        public RelayCommand OpenEditLinkCommand
+        {
+            get
+            {
+                if (openEditLinkCommand == null)
+                {
+                    openEditLinkCommand = new RelayCommand(() =>
+                    {
+                        System.Diagnostics.Process.Start(global::CloudVeil.CompileSecrets.ServiceProviderUserActivationsPath);
+                    });
+                }
+
+                return openEditLinkCommand;
+            }
+        }
+
         private RelayCommand syncSettingsCommand;
         public RelayCommand SyncSettingsCommand
         {

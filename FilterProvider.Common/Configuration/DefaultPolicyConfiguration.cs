@@ -663,7 +663,8 @@ namespace FilterProvider.Common.Configuration
 
                     m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                 }
-                
+                AdBlockMatcherApi.LoadingFinished();
+
                 return true;
             }
             catch(Exception ex)

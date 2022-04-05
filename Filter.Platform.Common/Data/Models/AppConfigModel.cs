@@ -262,6 +262,12 @@ namespace Filter.Platform.Common.Data.Models
             set;
         } = string.Empty;
 
+        public string FriendlyName
+        {
+            get;
+            set;
+        } = string.Empty;
+
         public AppConfigModel()
         {
             

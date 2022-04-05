@@ -182,7 +182,7 @@ namespace CloudVeilService.Services
                 }
                 else
                 {
-                    File.WriteAllText("filterserviceprovider-unhandled-exception.log", $"Exception occurred: {((Exception)e.ExceptionObject).Message}");
+                    File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FatalCrashLog.log"), $"Fatal crash. {e.ExceptionObject}");
                 }
             };
 
