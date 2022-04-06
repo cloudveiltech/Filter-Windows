@@ -25,6 +25,7 @@
           </Shortcut>
         </Component>
       </Directory>
+      <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\System.ValueTuple.dll -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\e_sqlite3.dll -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\x86\* -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\*.pdb -->
@@ -267,7 +268,7 @@
           <File Id="_D5156E61_E31F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Labs.EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Unosquare.Labs.EmbedIO.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_F51E2DAA_6755" Guid="9C63FC78-06E2-4F46-849B-C7D1647FF59C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_9CA8FDC4_DA0B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Unosquare.Swan.Lite.dll" KeyPath="yes" />
+          <File Id="_9CA8FDC4_DA0B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Swan.Lite.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_5FBF3063_6114" Guid="2D24DD28-DC6C-4317-8012-A014CD3C8DB8" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_1A161782_DAFC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CloudVeilGUI\bin\Release x64\DotNet.Glob.dll" KeyPath="yes" />
