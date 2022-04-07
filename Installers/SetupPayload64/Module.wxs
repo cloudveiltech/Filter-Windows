@@ -25,7 +25,6 @@
           </Shortcut>
         </Component>
       </Directory>
-      <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\System.ValueTuple.dll -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\e_sqlite3.dll -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\x86\* -->
       <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\*.pdb -->
@@ -66,6 +65,9 @@
         </Component>
         <Component Id="com_B146E0A9_6068_C741_AC20_ECC2A0B0E1DA" Guid="25C27E60-2847-446D-A8F9-F7FA9E33B0BD" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B146E0A9_6068_C741_AC20_ECC2A0B0E1DA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
+        </Component>
+        <Component Id="com_E0263D25_7800_4353_A5A3_861E14A9BCCD" Guid="E0263D25-7800-4353-A5A3-861E14A9BCCD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_B71AA335_0E78_E443_82DB_7AE818845593" Guid="4B61DA14-93CD-48C6-8073-707B4CCAA30C" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B71AA335_0E78_E443_82DB_7AE818845593" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
@@ -230,9 +232,6 @@
         </Component>
         <Component Id="comp_F424AA6D_22F2" Guid="E4E50C6E-046E-41A4-9E31-535A930B8F7E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_E045A4F5_372C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_BAC2C81A_3ECA" Guid="F96D12AC-CAFC-47B8-B4BC-987CF051714F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_0B092F91_E781" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_169332B8_7850" Guid="771EFA10-C53F-4EE2-8B49-7F8F321DE7B2" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C2DDF9EF_0F87" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.dll" Source="..\..\CloudVeilGUI\bin\Release x64\MahApps.Metro.dll" KeyPath="yes" />

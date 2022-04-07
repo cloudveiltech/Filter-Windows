@@ -6,7 +6,6 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
-  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\System.ValueTuple.dll -->
   <Module Id="CloudVeilPayload" Language="1033" Version="2.1.3" Codepage="1252">
     <Package Id="620CD2DC407F43B9916732C473EF22AC" Description="SetupPayload86" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x86" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
@@ -46,6 +45,10 @@
           <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
           <RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
         </Component>
+
+        <Component Id="com_E0263D25_7800_4353_A5A3_861E14A9BCCD" Guid="E0263D25-7800-4353-A5A3-861E14A9BCCD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ValueTuple.dll" KeyPath="yes" />
+        </Component>
         <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
         </Component>
@@ -73,9 +76,6 @@
         </Component>
         <Component Id="comp_41A4A9DE_0456" Guid="E6E45B6E-3D09-48C4-AD4D-E9E88B9B6FF4" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_93D7D845_87E2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ServiceModel.Syndication.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_E90CE504_C634" Guid="52D957D7-0BF1-4DB9-864A-70CC01EC9FA3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_7295443B_1C47" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ValueTuple.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.ValueTuple\v4.0_4.0.0.0__cc7b13ffcd2ddd51\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_732D7F26_9393" Guid="3BB09023-BB2C-4319-ADF7-D818DAB3ECA2" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D70BAA7F_C522" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.dll" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.IPC.dll" KeyPath="yes" />
