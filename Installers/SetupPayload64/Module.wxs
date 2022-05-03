@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.1.3" Codepage="1252">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.4.3" Codepage="1252">
     <Package Id="0862028596DF4668AB1D736D2B40424F" Description="SetupPayload64" InstallerVersion="300" Languages="1033" Manufacturer="CloudVeil Technologies Inc." Platform="x64" ReadOnly="no" ShortNames="no" />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -67,7 +67,7 @@
           <File Id="_B146E0A9_6068_C741_AC20_ECC2A0B0E1DA" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
         </Component>
         <Component Id="com_E0263D25_7800_4353_A5A3_861E14A9BCCD" Guid="E0263D25-7800-4353-A5A3-861E14A9BCCD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.ValueTuple.dll" KeyPath="yes" />
+          <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
         <Component Id="com_B71AA335_0E78_E443_82DB_7AE818845593" Guid="4B61DA14-93CD-48C6-8073-707B4CCAA30C" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_B71AA335_0E78_E443_82DB_7AE818845593" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
@@ -264,7 +264,7 @@
           <File Id="_BE10F67F_DD62" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe.config" Source="..\..\CloudVeilGUI\bin\Release x64\InstallGuard.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_E518DA81_1B6B" Guid="6B34D0FB-235A-4D7C-A21C-65F78C89C230" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D5156E61_E31F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Unosquare.Labs.EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Unosquare.Labs.EmbedIO.dll" KeyPath="yes" />
+          <File Id="_D5156E61_E31F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x64\EmbedIO.dll" KeyPath="yes" />
         </Component>
         <Component Id="comp_F51E2DAA_6755" Guid="9C63FC78-06E2-4F46-849B-C7D1647FF59C" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_9CA8FDC4_DA0B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Swan.Lite.dll" KeyPath="yes" />
