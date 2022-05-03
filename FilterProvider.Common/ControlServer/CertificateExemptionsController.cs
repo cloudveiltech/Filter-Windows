@@ -1,42 +1,41 @@
-﻿using FilterProvider.Common.Services;
+﻿using EmbedIO;
+using EmbedIO.Routing;
+using EmbedIO.WebApi;
 using FilterProvider.Common.Util;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Unosquare.Labs.EmbedIO;
-using Unosquare.Labs.EmbedIO.Constants;
-using Unosquare.Labs.EmbedIO.Modules;
-
 namespace FilterProvider.Common.ControlServer
 {
     public class CertificateExemptionsController : WebApiController
     {
         private CertificateExemptions exemptions;
 
-        public CertificateExemptionsController(CertificateExemptions exemptions, IHttpContext context)
-            : base(context)
-        {
-          
+        public CertificateExemptionsController(CertificateExemptions exemptions)
+        {          
             this.exemptions = exemptions;
         }
 
-        [WebApiHandler(HttpVerbs.Get, "/api/exempt/{thumbprint}")]
-        public Task<bool> Exempt(string thumbprint)
+        public struct SuccessResponse
         {
-            string host = HttpContext.QueryString("host");
+            public int success;
+        }
+
+        [Route(HttpVerbs.Get, "/api/exempt/{thumbprint}")]
+        public SuccessResponse Exempt(string thumbprint, [QueryData] NameValueCollection parameters)
+        {
+            string host = parameters["host"];
             if(host != null)
             {
                 exemptions.TrustCertificate(host, thumbprint);
             }
 
-            return HttpContext.JsonResponseAsync("{ \"success\": 1 }");
+            return new SuccessResponse { success = 1 };
         }
 
-        [WebApiHandler(HttpVerbs.Get, "/api/testme")]
-        public Task<bool> TestMe()
+        [Route(HttpVerbs.Get, "/api/testme")]
+        public string TestMe()
         {
-            return HttpContext.HtmlResponseAsync("<html><head><title>Test</title></head><body>This is my body</body></html>");
+            return "<html><head><title>Test</title></head><body>This is my body</body></html>";
         }
     }
 }

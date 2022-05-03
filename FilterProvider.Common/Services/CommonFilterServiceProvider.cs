@@ -435,6 +435,15 @@ namespace FilterProvider.Common.Services
             }
         }
 
+        private CertificateExemptionsController createControlServerCertificateExemptionsController()
+        {
+            return new CertificateExemptionsController(m_certificateExemptions);
+        }
+        private RelaxedPolicyController createControlServerRelaxedPolicyController()
+        {
+            return new RelaxedPolicyController(m_relaxedPolicy);
+        }
+
         private void OnStartup()
         {
             if (File.Exists("debug-filterserviceprovider"))
@@ -546,13 +555,13 @@ namespace FilterProvider.Common.Services
                         });
 
                     m_controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
-                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), (context) => new CertificateExemptionsController(m_certificateExemptions, context));
-                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), (context) => new RelaxedPolicyController(m_relaxedPolicy, context));
+                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), createControlServerCertificateExemptionsController);
+                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), createControlServerRelaxedPolicyController);
                     m_controlServer.Start();
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error(ex, "An error occurred while attempting to start the control server.");
+                    m_logger.Error(ex, "An error occurred while attempting to start the control server. " + ex.Message);
                 }
             };
 

@@ -453,8 +453,6 @@ namespace FilterProvider.Common.Configuration
             {
                 string path = getListFilePath(listModel.RelativeListPath, listFolderPath);
 
-                const int bufferSize = 8192;
-
                 try
                 {
                     string tempPath = Path.Combine(tempFolderPath, Path.GetFileName(path));

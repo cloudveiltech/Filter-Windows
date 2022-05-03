@@ -17,7 +17,7 @@ namespace FilterProvider.Common.Util
     /// <summary>
     /// object for JSON response for /api/relaxedpolicy on local server.
     /// </summary>
-    class BypassInformation
+    public class BypassInformation
     {
         internal int BypassesPermitted { get; set; }
         internal int BypassesUsed { get; set; }
