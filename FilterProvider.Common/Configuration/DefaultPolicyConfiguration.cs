@@ -55,32 +55,30 @@ namespace FilterProvider.Common.Configuration
 
         private static string configFilePath;
         private static string listDataFilePath;
-        private static IPathProvider s_paths;
+        private static IPathProvider paths;
 
-        private static JsonSerializerSettings s_configSerializerSettings;
+        private static JsonSerializerSettings configSerializerSettings;
 
         public DefaultPolicyConfiguration(IPCServer server, NLog.Logger logger)
         {
-            m_ipcServer = server;
-            m_logger = logger;
-            m_policyLock = new ReaderWriterLockSlim();
+            ipcServer = server;
+            this.logger = logger;
+            policyLock = new ReaderWriterLockSlim();
         }
 
-        // FIXME: This does not belong in CitadelService.Common. Use an interface instead for implementing this.
-        // IPlatformServices implemented by WindowsPlatformServices
-        private IPCServer m_ipcServer;
+        private IPCServer ipcServer;
 
         // Not sure yet whether this will be provided by WindowsPlatformServices or a common service provider.
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         // Need to consolidate global stuff some how.
-        private ReaderWriterLockSlim m_policyLock;
+        private ReaderWriterLockSlim policyLock;
 
-        public ReaderWriterLockSlim PolicyLock => m_policyLock;
+        public ReaderWriterLockSlim PolicyLock => policyLock;
 
         //private FilterDbCollection m_filterCollection;
 
-        private BagOfTextTriggers m_textTriggers;
+        private BagOfTextTriggers textTriggers;
 
         /// <summary>
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
@@ -98,20 +96,20 @@ namespace FilterProvider.Common.Configuration
             serverListDataFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "server-a.dat");
 #endif
 
-            s_paths = PlatformTypes.New<IPathProvider>();
+            paths = PlatformTypes.New<IPathProvider>();
 
-            configFilePath = Path.Combine(s_paths.ApplicationDataFolder, "cfg.json");
-            listDataFilePath = Path.Combine(s_paths.ApplicationDataFolder, "a.dat");
+            configFilePath = Path.Combine(paths.ApplicationDataFolder, "cfg.json");
+            listDataFilePath = Path.Combine(paths.ApplicationDataFolder, "a.dat");
 
             // Setup json serialization settings.
-            s_configSerializerSettings = new JsonSerializerSettings();
-            s_configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            configSerializerSettings = new JsonSerializerSettings();
+            configSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
         }
 
         public AppConfigModel Configuration { get; set; }
 
         //public FilterDbCollection FilterCollection { get { return m_filterCollection; } }
-        public BagOfTextTriggers TextTriggers { get { return m_textTriggers; } }
+        public BagOfTextTriggers TextTriggers { get { return textTriggers; } }
 
         /// <summary>
         /// Stores all, if any, applications that should be forced through the filter. 
@@ -169,7 +167,7 @@ namespace FilterProvider.Common.Configuration
             }
             catch(Exception ex)
             {
-                m_logger.Warn($"Could not calculate SHA1 for {filePath}: {ex}");
+                logger.Warn($"Could not calculate SHA1 for {filePath}: {ex}");
                 return null;
             }
             finally
@@ -180,14 +178,14 @@ namespace FilterProvider.Common.Configuration
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Warn("Error occurred while disposing stream: {0}", ex);
+                    logger.Warn("Error occurred while disposing stream: {0}", ex);
                 }
             }
         }
 
-        private string getTempFolder() => s_paths.GetPath("temp");
+        private string getTempFolder() => paths.GetPath("temp");
 
-        private string getListFolder() => s_paths.GetPath("rules");
+        private string getListFolder() => paths.GetPath("rules");
 
         private void createListFolderIfNotExists()
         {
@@ -259,7 +257,7 @@ namespace FilterProvider.Common.Configuration
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
                 // back, so we just directly issue this msg.
-                m_ipcServer?.NotifyStatus(FilterStatus.Synchronized);
+                ipcServer?.NotifyStatus(FilterStatus.Synchronized);
 
                 var rHash = Encoding.UTF8.GetString(rHashBytes);
 
@@ -307,7 +305,7 @@ namespace FilterProvider.Common.Configuration
                 return false;
             }
 
-            m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
+            logger.Info("Updating filtering rules, rules missing or integrity violation.");
             var configBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserConfigRequest, out code);
 
             if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
@@ -318,7 +316,7 @@ namespace FilterProvider.Common.Configuration
             else
             {
                 Debug.WriteLine("Failed to download configuration data.");
-                m_logger.Error("Failed to download configuration data.");
+                logger.Error("Failed to download configuration data.");
                 return null;
             }
 #endif
@@ -352,7 +350,7 @@ namespace FilterProvider.Common.Configuration
 
             createListFolderIfNotExists();
 
-            m_logger.Info("Updating filtering rules, rules missing or integrity violation.");
+            logger.Info("Updating filtering rules, rules missing or integrity violation.");
 
             List<FilteringPlainTextListModel> listsToFetch = new List<FilteringPlainTextListModel>();
             foreach(var list in Configuration.ConfiguredLists)
@@ -416,7 +414,7 @@ namespace FilterProvider.Common.Configuration
                                 }
                                 catch(Exception ex)
                                 {
-                                    m_logger.Error($"Failed to write to rule path {getListFilePath(currentList)} {ex}");
+                                    logger.Error($"Failed to write to rule path {getListFilePath(currentList)} {ex}");
                                 }
                             }
                         }
@@ -424,7 +422,7 @@ namespace FilterProvider.Common.Configuration
                         {
                             if(line == "http-result 404")
                             {
-                                m_logger.Error($"404 Error was returned for category {currentList}");
+                                logger.Error($"404 Error was returned for category {currentList}");
                                 errorList = true;
                                 continue;
                             }
@@ -466,7 +464,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error($"decryptLists threw exception for {path}: {ex}");
+                    logger.Error($"decryptLists threw exception for {path}: {ex}");
                 //    return false;
                 }
             }
@@ -487,7 +485,7 @@ namespace FilterProvider.Common.Configuration
             }
             catch (Exception ex)
             {
-                m_logger.Error($"Failed to delete temporary ruleset folder. {ex}");
+                logger.Error($"Failed to delete temporary ruleset folder. {ex}");
             }
         }
 
@@ -495,7 +493,7 @@ namespace FilterProvider.Common.Configuration
         {
             try
             {
-                m_policyLock.EnterWriteLock();
+                policyLock.EnterWriteLock();
 
                 var listFolderPath = getListFolder();
 
@@ -505,16 +503,16 @@ namespace FilterProvider.Common.Configuration
                     AdBlockMatcherApi.Initialize();
 
                     // Recreate our triggers container.
-                    if (m_textTriggers != null)
+                    if (textTriggers != null)
                     {
-                        m_textTriggers.Dispose();
+                        textTriggers.Dispose();
                     }
 
                     m_categoryIndex.SetAll(false);
 
                     // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                     // be an in-memory DB or not.
-                    m_textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, m_logger);
+                    textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, logger);
 
                     // Now clear all generated categories. These will be re-generated as needed.
                     m_generatedCategoriesMap.Clear();
@@ -528,7 +526,7 @@ namespace FilterProvider.Common.Configuration
 
                     decryptLists(getListFolder(), tempFolder);
 
-                    var rulePath = s_paths.GetPath("rules.dat");
+                    var rulePath = paths.GetPath("rules.dat");
 
                     if (File.Exists(rulePath))
                     {
@@ -579,7 +577,7 @@ namespace FilterProvider.Common.Configuration
                                             {
                                                 try
                                                 {
-                                                    var triggersLoaded = m_textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
+                                                    var triggersLoaded = textTriggers.LoadStoreFromStream(listStream, categoryModel.CategoryId).Result;
 
                                                     totalTriggersLoaded += (uint)triggersLoaded;
 
@@ -590,7 +588,7 @@ namespace FilterProvider.Common.Configuration
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    m_logger.Info($"Error on LoadStoresFromStream {ex}");
+                                                    logger.Info($"Error on LoadStoresFromStream {ex}");
                                                 }
                                             }
                                         }
@@ -621,7 +619,7 @@ namespace FilterProvider.Common.Configuration
                         // Always load triggers as blacklists.
                         if(TryFetchOrCreateCategoryMap("/user/trigger_blacklist", PlainTextFilteringListType.TextTrigger, out categoryModel))
                         {
-                            var triggersLoaded = m_textTriggers.LoadStoreFromList(Configuration.CustomTriggerBlacklist, categoryModel.CategoryId).Result;
+                            var triggersLoaded = textTriggers.LoadStoreFromList(Configuration.CustomTriggerBlacklist, categoryModel.CategoryId).Result;
 
                             totalTriggersLoaded += (uint)triggersLoaded;
 
@@ -630,7 +628,7 @@ namespace FilterProvider.Common.Configuration
                                 m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
 
-                            m_logger.Info("Number of triggers loaded for CustomTriggerBlacklist {0}", triggersLoaded);
+                            logger.Info("Number of triggers loaded for CustomTriggerBlacklist {0}", triggersLoaded);
                         }
                     }
 
@@ -652,14 +650,14 @@ namespace FilterProvider.Common.Configuration
                     //m_filterCollection.FinalizeForRead();
                     //m_filterCollection.InitializeBloomFilters();
 
-                    m_textTriggers.FinalizeForRead();
-                    m_textTriggers.InitializeBloomFilters();
+                    textTriggers.FinalizeForRead();
+                    textTriggers.InitializeBloomFilters();
 
                //     AdBlockMatcherApi.Save(s_paths.GetPath("rules.dat"));
 
                     ListsReloaded?.Invoke(this, new EventArgs());
 
-                    m_logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
+                    logger.Info("Loaded {0} rules, {1} rules failed most likely due to being malformed, and {2} text triggers loaded.", totalFilterRulesLoaded, totalFilterRulesFailed, totalTriggersLoaded);
                 }
                 AdBlockMatcherApi.LoadingFinished();
 
@@ -667,12 +665,12 @@ namespace FilterProvider.Common.Configuration
             }
             catch(Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
                 return false;
             }
             finally
             {
-                m_policyLock.ExitWriteLock();
+                policyLock.ExitWriteLock();
 
                 deleteTemporaryLists();
             }
@@ -725,7 +723,7 @@ namespace FilterProvider.Common.Configuration
         {
             try
             {
-                m_policyLock.EnterWriteLock();
+                policyLock.EnterWriteLock();
 
                 if(File.Exists(configFilePath))
                 {
@@ -735,17 +733,17 @@ namespace FilterProvider.Common.Configuration
                     }
                 }
 
-                m_logger.Error("Configuration file does not exist.");
+                logger.Error("Configuration file does not exist.");
                 return false;          
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
             }
             finally
             {
-                m_policyLock.ExitWriteLock();
+                policyLock.ExitWriteLock();
             }
         }
 
@@ -769,19 +767,19 @@ namespace FilterProvider.Common.Configuration
 
                     if(!StringExtensions.Valid(cfgJson))
                     {
-                        m_logger.Error("Could not find valid JSON config for filter.");
+                        logger.Error("Could not find valid JSON config for filter.");
                         return false;
                     }
 
                     try
                     {
-                        LoadConfigFromJson(cfgJson, s_configSerializerSettings);
-                        m_logger.Info("Configuration loaded from JSON.");
+                        LoadConfigFromJson(cfgJson, configSerializerSettings);
+                        logger.Info("Configuration loaded from JSON.");
                     }
                     catch(Exception deserializationError)
                     {
-                        m_logger.Error("Failed to deserialize JSON config.");
-                        LoggerUtil.RecursivelyLogException(m_logger, deserializationError);
+                        logger.Error("Failed to deserialize JSON config.");
+                        LoggerUtil.RecursivelyLogException(logger, deserializationError);
                         return false;
                     }
 
@@ -826,7 +824,7 @@ namespace FilterProvider.Common.Configuration
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
             }
 
@@ -868,7 +866,7 @@ namespace FilterProvider.Common.Configuration
                     }
                     catch (Exception)
                     {
-                        m_logger.Warn("Invalid glob '{0}'. Not adding.", app);
+                        logger.Warn("Invalid glob '{0}'. Not adding.", app);
                     }
                 }
             }
@@ -892,7 +890,7 @@ namespace FilterProvider.Common.Configuration
         /// </remarks>
         private bool TryFetchOrCreateCategoryMap<T>(string categoryName, PlainTextFilteringListType listType, out T model) where T : MappedFilterListCategoryModel
         {
-            m_logger.Info("CATEGORY {0}", categoryName);
+            logger.Info("CATEGORY {0}", categoryName);
 
             MappedFilterListCategoryModel existingCategory = null;
             if (!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
@@ -900,7 +898,7 @@ namespace FilterProvider.Common.Configuration
                 // We can't generate anymore categories. Sorry, but the rest get ignored.
                 if (m_generatedCategoriesMap.Count >= short.MaxValue)
                 {
-                    m_logger.Error("The maximum number of filtering categories has been exceeded.");
+                    logger.Error("The maximum number of filtering categories has been exceeded.");
                     model = null;
                     return false;
                 }

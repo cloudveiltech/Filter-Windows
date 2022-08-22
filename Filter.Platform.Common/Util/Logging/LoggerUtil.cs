@@ -84,7 +84,7 @@ namespace Filter.Platform.Common.Util
             }
         }
 
-        public static string LoggerName { get; set; } = "Citadel";
+        public static string LoggerName { get; set; } = "CloudVeil";
 
         /// <summary>
         /// Gets the application wide logger.

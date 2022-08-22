@@ -10,12 +10,12 @@ using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following set of attributes.
 // Change these attribute values to modify the information associated with an assembly.
-[assembly: AssemblyTitle("CitadelService")]
+[assembly: AssemblyTitle("CloudVeilService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Technik Empire")]
-[assembly: AssemblyProduct("CitadelService")]
-[assembly: AssemblyCopyright("Copyright © 2017-2018 Cloudveil Technology Inc., Licensed under the Mozilla Public License V2.0")]
+[assembly: AssemblyCompany("Cloudveil Technology Inc")]
+[assembly: AssemblyProduct("CloudVeilService")]
+[assembly: AssemblyCopyright("Copyright © 2017-2022 Cloudveil Technology Inc., Licensed under the Mozilla Public License V2.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 // Major Version Minor Version Build Number Revision
 //
 // You can specify all the values or you can default the Build and Revision Numbers by using the '*'
-// as shown below: [assembly: AssemblyVersion("2.1.3")]
-[assembly: AssemblyVersion("2.1.3")]
-[assembly: AssemblyFileVersion("2.1.3")]
+// as shown below: [assembly: AssemblyVersion("2.4.3")]
+[assembly: AssemblyVersion("2.4.3")]
+[assembly: AssemblyFileVersion("2.4.3")]

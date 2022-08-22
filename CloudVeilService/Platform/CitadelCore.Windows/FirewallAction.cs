@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-namespace CitadelCore.Net.Proxy
+namespace CloudVeilCore.Net.Proxy
 {
     /// <summary>
     /// This enum provides greater control over internet access on a per-application basis to library

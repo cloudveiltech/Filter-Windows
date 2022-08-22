@@ -101,7 +101,7 @@ namespace CloudVeil.Core.Windows.Util
                 fwpFilter.action.type = FWP_ACTION_TYPE.FWP_ACTION_BLOCK;
                 fwpFilter.weight.type = FWP_DATA_TYPE_.FWP_EMPTY; // auto-weight.
                 fwpFilter.numFilterConditions = 0; // this applies to all application traffic                
-                fwpFilter.displayData.name = "Citadel INet Block";
+                fwpFilter.displayData.name = "CloudVeil INet Block";
                 fwpFilter.displayData.description = "Enforce filter use for internet access.";
 
                 ulong runtimeId = 0;

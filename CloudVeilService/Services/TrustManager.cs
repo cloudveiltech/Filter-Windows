@@ -220,7 +220,7 @@ namespace CloudVeilService.Services
 
             var valuesThatNeedToBeSet = new Dictionary<string, string>();
 
-            var firefoxUserCfgValuesUri = "CitadelService.Resources.FireFoxUserCFG.txt";
+            var firefoxUserCfgValuesUri = "CloudVeilService.Resources.FireFoxUserCFG.txt";
             using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(firefoxUserCfgValuesUri))
             {
                 if (resourceStream != null && resourceStream.CanRead)

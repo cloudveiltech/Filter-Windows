@@ -7,7 +7,7 @@
 
 using System;
 
-namespace CitadelCore.Net.Proxy
+namespace CloudVeilCore.Net.Proxy
 {
     /// <summary>
     /// Callback used to make filtering and internet-access decisions for a new traffic flow based on

@@ -3,9 +3,7 @@
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
-
-using Microsoft.CodeAnalysis;
+*/using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System;
@@ -34,6 +32,7 @@ using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
 using CloudVeilService.Util;
 using CloudVeil.Core.Windows.Services;
+
 
 namespace CloudVeilService.Services
 {
@@ -391,11 +390,7 @@ namespace CloudVeilService.Services
                 }
                 catch
                 {
-                    // Rather than discriminate against which DLL's we load here, we'll just do
-                    // this gross try/catch. That way, mixed managed assemblies or assemblies that
-                    // have custom resolution processes for their dependencies will just fail
-                    // and we'll ignore them. We only really want standard libraries and
-                    // common citadel libs so this is fine for our use.
+                   
                 }
             }
 

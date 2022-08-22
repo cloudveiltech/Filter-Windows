@@ -56,39 +56,5 @@ namespace FilterServiceTests
 
             return mock;
         }
-
-        [TestMethod]
-        public void TestBlacklistedApplications()
-        {
-            AppListCheck alc = new AppListCheck(getConfig());
-
-            Func<string, bool> isAppInBlacklist = (path) => alc.IsAppInBlacklist(path, System.IO.Path.GetFileName(path));
-
-            Assert.IsTrue(alc.IsAppInBlacklist(@"C:\Program Files\Google\Chrome\chrome.exe", "chrome.exe"));
-            Assert.IsTrue(alc.IsAppInBlacklist(@"C:\Program Files (x86)\Google\Chrome\chrome.exe", "chrome.exe"));
-
-            Assert.IsTrue(alc.IsAppInBlacklist(@"C:\testme.exe", "testme.exe"));
-
-            Assert.IsTrue(alc.IsAppInBlacklist(@"C:\Program Files\java\jre.exe", "jre.exe"));
-            Assert.IsFalse(isAppInBlacklist(@"C:\Program Files\eclipse\java\jre.exe"));
-            Assert.IsFalse(isAppInBlacklist(@"C:\Apps\java\jre.exe"));
-
-            Assert.IsTrue(isAppInBlacklist(@"C:\Windows\MicrosoftEdge.exe"));
-            Assert.IsFalse(isAppInBlacklist(@"C:\Program Files\MicrosoftEdge.exe"));
-        }
-
-        [TestMethod]
-        public void TestWhitelistedApplications()
-        {
-            AppListCheck alc = new AppListCheck(getConfig());
-
-            Func<string, bool> isAppInWhitelist = (path) => alc.IsAppInWhitelist(path, System.IO.Path.GetFileName(path));
-
-            Assert.IsTrue(isAppInWhitelist(@"C:\Program Files\Dropbox\dropbox.exe"));
-            Assert.IsTrue(isAppInWhitelist(@"C:\Program Files\eclipse\java\jre.exe"));
-            Assert.IsTrue(isAppInWhitelist(@"C:\Program Files\IDrive\backup-v300.exe"));
-
-            Assert.IsFalse(isAppInWhitelist(@"C:\Program Files\IDrive\backup\invalid.exe"));
-        }
     }
 }

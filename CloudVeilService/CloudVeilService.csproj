@@ -7,7 +7,7 @@
     <ProjectGuid>{620ADC88-B91D-4FDA-A791-8B92473E927A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CitadelService</RootNamespace>
+    <RootNamespace>CloudVeilService</RootNamespace>
     <AssemblyName>FilterServiceProvider</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -124,7 +124,6 @@
     <Compile Include="Services\ServiceAccessFlags.cs" />
     <Compile Include="Services\TrustManager.cs" />
     <Compile Include="Services\VersionProvider.cs" />
-    <Compile Include="Util\AppListCheck.cs" />
     <Compile Include="Util\ConsoleLog.cs" />
     <Compile Include="Util\ConsoleLogWriter.cs" />
     <Compile Include="Util\FileLockingUtil.cs" />
@@ -171,10 +170,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.4.77</Version>
+      <Version>0.4.78</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.GoProxyDotNet">
-      <Version>0.4.77</Version>
+      <Version>0.4.78</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
@@ -183,7 +182,7 @@
       <Version>1.5.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertDotNet">
-      <Version>2.2.0</Version>
+      <Version>2.2.1</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>4.0.0</Version>
@@ -226,6 +225,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="WinDivertSharp.dll" />
     <None Include="app.config" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

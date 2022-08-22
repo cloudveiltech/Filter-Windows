@@ -7,7 +7,7 @@
 
 using System.Net;
 
-namespace CitadelCore.Extensions
+namespace CloudVeilCore.Extensions
 {
     /// <summary>
     /// IPAddressExtensions provides some convenience functions, such as the ability to more

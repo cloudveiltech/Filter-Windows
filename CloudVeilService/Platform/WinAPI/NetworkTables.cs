@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Runtime.InteropServices;
 
-namespace CitadelCore.Windows.WinAPI
+namespace CloudVeilCore.Windows.WinAPI
 {
     internal enum TcpConnectionOffloadState : uint
     {

@@ -14,10 +14,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Gui.CloudVeil.Services;
 using Topshelf;
+using CloudVeil.Core.Windows.Services;
 
-namespace CitadelService.Services
+namespace CloudVeilService.Services
 {
     internal class Warden : BaseProtectiveService
     {

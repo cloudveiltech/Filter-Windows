@@ -48,6 +48,6 @@ using System.Windows;
 // Major Version Minor Version Build Number Revision
 //
 // You can specify all the values or you can default the Build and Revision Numbers by using the '*'
-// as shown below: [assembly: AssemblyVersion("2.1.3")]
-[assembly: AssemblyVersion("2.1.3")]
-[assembly: AssemblyFileVersion("2.1.3")]
+// as shown below: [assembly: AssemblyVersion("2.4.3")]
+[assembly: AssemblyVersion("2.4.3")]
+[assembly: AssemblyFileVersion("2.4.3")]

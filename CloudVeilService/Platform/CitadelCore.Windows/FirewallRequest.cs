@@ -7,7 +7,7 @@
 
 using System;
 
-namespace CitadelCore.Net.Proxy
+namespace CloudVeilCore.Net.Proxy
 {
     /// <summary>
     /// A reques tto a firewall inquiry for a specific traffic flow.
