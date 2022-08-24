@@ -171,8 +171,8 @@ namespace Gui.CloudVeil
 
         public class RegistryUtil
         {
-            private object m_emailLock = new object();
-            private object m_authenticationLock = new object();
+            private object emailLock = new object();
+            private object authenticationLock = new object();
 
             /// <summary>
             /// Abstracts the creation of our app's registry key away from the two properties.
@@ -234,7 +234,7 @@ namespace Gui.CloudVeil
             {
                 get
                 {
-                    lock (m_emailLock)
+                    lock (emailLock)
                     {
                         string machineName = string.Empty;
 
@@ -273,7 +273,7 @@ namespace Gui.CloudVeil
                 {
                     Debug.Assert(value != null && value.Length > 0);
 
-                    lock (m_emailLock)
+                    lock (emailLock)
                     {
                         string machineName = string.Empty;
 
@@ -320,7 +320,7 @@ namespace Gui.CloudVeil
             {
                 get
                 {
-                    lock (m_authenticationLock)
+                    lock (authenticationLock)
                     {
                         string machineName = string.Empty;
 
@@ -365,7 +365,7 @@ namespace Gui.CloudVeil
                 {
                     Debug.Assert(value != null && value.Length > 0);
 
-                    lock (m_authenticationLock)
+                    lock (authenticationLock)
                     {
                         string machineName = string.Empty;
 

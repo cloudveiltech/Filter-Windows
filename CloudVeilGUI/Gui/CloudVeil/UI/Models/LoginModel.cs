@@ -20,21 +20,21 @@ namespace Gui.CloudVeil.UI.Models
 {
     internal class LoginModel : ObservableObject
     {
-        private volatile bool m_currentlyAuthenticating = false;
+        private volatile bool currentlyAuthenticating = false;
 
-        private string m_errorMessage;
+        private string errorMessage;
 
-        private string m_userName;
+        private string userName;
 
-        private LoginViewModel m_loginViewModel;
+        private LoginViewModel loginViewModel;
 
-        private SecureString m_userPassword;
+        private SecureString userPassword;
 
         public bool CurrentlyAuthenticating
         {
             get
             {
-                return m_currentlyAuthenticating;
+                return currentlyAuthenticating;
             }
         }
 
@@ -42,12 +42,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_errorMessage;
+                return errorMessage;
             }
 
             set
             {
-                m_errorMessage = value;
+                errorMessage = value;
             }
         }
 
@@ -57,12 +57,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_userName;
+                return userName;
             }
 
             set
             {
-                m_userName = value;
+                userName = value;
             }
         }
 
@@ -70,12 +70,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_userPassword;
+                return userPassword;
             }
 
             set
             {
-                m_userPassword = value;
+                userPassword = value;
             }
         }
 
@@ -88,7 +88,7 @@ namespace Gui.CloudVeil.UI.Models
         public bool CanAttemptAuthenticationWithPassword()
         {
             // Can't auth when we're in the middle of it.
-            if(m_currentlyAuthenticating)
+            if(currentlyAuthenticating)
             {
                 return false;
             }
@@ -110,7 +110,7 @@ namespace Gui.CloudVeil.UI.Models
         public bool CanAttemptAuthenticationWithEmail()
         {
             // Can't auth when we're in the middle of it.
-            if (m_currentlyAuthenticating)
+            if (currentlyAuthenticating)
             {
                 return false;
             }
@@ -141,13 +141,13 @@ namespace Gui.CloudVeil.UI.Models
         {
             ErrorMessage = string.Empty;
 
-            var unencrypedPwordBytes = this.m_userPassword.SecureStringBytes();
+            var unencrypedPwordBytes = this.userPassword.SecureStringBytes();
 
             try
             {
                 // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
-                m_loginViewModel.ErrorMessage = "";
-                m_loginViewModel.Message = "";
+                loginViewModel.ErrorMessage = "";
+                loginViewModel.Message = "";
 
                 await Task.Run(() =>
                 {
@@ -155,14 +155,14 @@ namespace Gui.CloudVeil.UI.Models
                     {
                         ipcClient.ConnectedToServer = () =>
                         {
-                            ipcClient.AttemptAuthenticationWithPassword(m_userName, m_userPassword);
+                            ipcClient.AttemptAuthenticationWithPassword(userName, userPassword);
                         };
 
                         ipcClient.AuthenticationResultReceived = (msg) =>
                         {
                             if (msg.AuthenticationResult.AuthenticationMessage != null)
                             {
-                                m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                                loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
                             }
                         };
 
@@ -186,8 +186,8 @@ namespace Gui.CloudVeil.UI.Models
             ErrorMessage = string.Empty;
 
             // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
-            m_loginViewModel.ErrorMessage = "";
-            m_loginViewModel.Message = "";
+            loginViewModel.ErrorMessage = "";
+            loginViewModel.Message = "";
 
             await Task.Run(() =>
             {
@@ -195,17 +195,17 @@ namespace Gui.CloudVeil.UI.Models
                 {
                     ipcClient.ConnectedToServer = () =>
                     {
-                        ipcClient.AttemptAuthenticationWithEmail(m_userName);
-                        m_loginViewModel.Message = "Request sent. Please check your E-Mail.";
+                        ipcClient.AttemptAuthenticationWithEmail(userName);
+                        loginViewModel.Message = "Request sent. Please check your E-Mail.";
                     };
 
                     ipcClient.AuthenticationResultReceived = (msg) =>
                     {
                         if (msg.AuthenticationResult.AuthenticationMessage != null)
                         {
-                            m_loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                            loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
                         }
-                        m_loginViewModel.hideProgessView();
+                        loginViewModel.hideProgessView();
                     };
 
                     ipcClient.WaitForConnection();
@@ -219,7 +219,7 @@ namespace Gui.CloudVeil.UI.Models
         {
             UserName = string.Empty;
             UserPassword = new SecureString();
-            m_loginViewModel = viewModel;
+            loginViewModel = viewModel;
         }
     }
 }

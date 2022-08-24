@@ -16,62 +16,62 @@ namespace Gui.CloudVeil.UI.ViewModels
 {
     public class MainWindowViewModel : BaseCloudVeilViewModel
     {
-        private MainWindowModel m_model;
+        private MainWindowModel model;
 
-        public bool InternetIsConnected => m_model.InternetIsConnected;
+        public bool InternetIsConnected => model.InternetIsConnected;
 
         public MahApps.Metro.IconPacks.PackIconFontAwesomeKind InternetIconKind
             => InternetIsConnected ? MahApps.Metro.IconPacks.PackIconFontAwesomeKind.CheckCircleSolid : MahApps.Metro.IconPacks.PackIconFontAwesomeKind.ExclamationCircleSolid;
 
         public string InternetToolTip => InternetIsConnected ? "Internet Connected" : "No Internet Connection";
 
-        private bool m_isUserLoggedIn;
+        private bool isUserLoggedIn;
         public bool IsUserLoggedIn
         {
             get
             {
-                return m_isUserLoggedIn;
+                return isUserLoggedIn;
             }
 
             set
             {
-                m_isUserLoggedIn = value;
+                isUserLoggedIn = value;
                 RaisePropertyChanged(nameof(IsUserLoggedIn));
             }
         }
 
-        private string m_loggedInUser;
+        private string loggedInUser;
         public string LoggedInUser
         {
             get
             {
-                return m_loggedInUser;
+                return loggedInUser;
             }
 
             set
             {
-                m_loggedInUser = value;
+                loggedInUser = value;
                 RaisePropertyChanged(nameof(LoggedInUser));
             }
         }
 
-        private bool m_showGuestNetwork;
+        private bool showGuestNetwork;
 
         public bool ShowIsGuestNetwork
         {
             get
             {
-                return m_showGuestNetwork;
+                return showGuestNetwork;
             }
 
             set
             {
-                m_showGuestNetwork = value;
+                showGuestNetwork = value;
                 RaisePropertyChanged(nameof(ShowIsGuestNetwork));
             }
         }
 
-        private bool m_isCaptivePortalActive;
+        private bool isCaptivePortalActive;
 
         /// <summary>
         /// If this is true, we show guest network window command.
@@ -80,12 +80,12 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_isCaptivePortalActive;
+                return isCaptivePortalActive;
             }
 
             set
             {
-                m_isCaptivePortalActive = value;
+                isCaptivePortalActive = value;
                 RaisePropertyChanged(nameof(IsCaptivePortalActive));
             }
         }
@@ -140,38 +140,38 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        private RelayCommand m_openGuestNetwork;
+        private RelayCommand openGuestNetwork;
         
         public RelayCommand OpenGuestNetwork
         {
             get
             {
-                if(m_openGuestNetwork == null)
+                if(openGuestNetwork == null)
                 {
-                    m_openGuestNetwork = new RelayCommand((Action)(() =>
+                    openGuestNetwork = new RelayCommand((Action)(() =>
                     {
                         ShowIsGuestNetwork = true;
                     }));
                 }
 
-                return m_openGuestNetwork;
+                return openGuestNetwork;
             }
         }
 
-        private RelayCommand m_openConflictsFlyout;
+        private RelayCommand openConflictsFlyout;
         public RelayCommand OpenConflictsFlyout
         {
             get
             {
-                if(m_openConflictsFlyout == null)
+                if(openConflictsFlyout == null)
                 {
-                    m_openConflictsFlyout = new RelayCommand(() =>
+                    openConflictsFlyout = new RelayCommand(() =>
                     {
                         ConflictsFlyoutIsOpen = true;
                     });
                 }
 
-                return m_openConflictsFlyout;
+                return openConflictsFlyout;
             }
         }
 
@@ -193,8 +193,8 @@ namespace Gui.CloudVeil.UI.ViewModels
 
         public MainWindowViewModel()
         {
-            m_model = new MainWindowModel();
-            m_model.PropertyChanged += OnModelChange;
+            model = new MainWindowModel();
+            model.PropertyChanged += OnModelChange;
 
             conflictReasons.CollectionChanged += OnConflictReasonsChanged;
         }

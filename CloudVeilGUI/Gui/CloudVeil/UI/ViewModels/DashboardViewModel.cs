@@ -34,7 +34,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// <summary>
         /// The model.
         /// </summary>
-        private DashboardModel m_model = new DashboardModel();
+        private DashboardModel model = new DashboardModel();
 
         /// <summary>
         /// List of observable block actions that the user can view.
@@ -53,7 +53,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model;
+                return model;
             }
         }
 

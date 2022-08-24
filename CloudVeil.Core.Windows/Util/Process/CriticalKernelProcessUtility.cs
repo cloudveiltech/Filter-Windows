@@ -21,12 +21,12 @@ namespace Gui.CloudVeil.Util
         /// <summary>
         /// Flag for maintaining the state of protection.
         /// </summary>
-        private static volatile bool s_isProtected = false;
+        private static volatile bool isProtected = false;
 
         /// <summary>
         /// For synchronizing our current state.
         /// </summary>
-        private static ReaderWriterLockSlim s_isProtectedLock = new ReaderWriterLockSlim();
+        private static ReaderWriterLockSlim isProtectedLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Gets whether or not the host process is currently protected.
@@ -37,13 +37,13 @@ namespace Gui.CloudVeil.Util
             {
                 try
                 {
-                    s_isProtectedLock.EnterReadLock();
+                    isProtectedLock.EnterReadLock();
 
-                    return s_isProtected;
+                    return isProtected;
                 }
                 finally
                 {
-                    s_isProtectedLock.ExitReadLock();
+                    isProtectedLock.ExitReadLock();
                 }
             }
         }
@@ -56,18 +56,18 @@ namespace Gui.CloudVeil.Util
         {
             try
             {
-                s_isProtectedLock.EnterWriteLock();
+                isProtectedLock.EnterWriteLock();
 
-                if(!s_isProtected)
+                if(!isProtected)
                 {
                     System.Diagnostics.Process.EnterDebugMode();
                     RtlSetProcessIsCritical(1, 0, 0);
-                    s_isProtected = true;
+                    isProtected = true;
                 }
             }
             finally
             {
-                s_isProtectedLock.ExitWriteLock();
+                isProtectedLock.ExitWriteLock();
             }
         }
 
@@ -79,17 +79,17 @@ namespace Gui.CloudVeil.Util
         {
             try
             {
-                s_isProtectedLock.EnterWriteLock();
+                isProtectedLock.EnterWriteLock();
 
-                if(s_isProtected)
+                if(isProtected)
                 {
                     RtlSetProcessIsCritical(0, 0, 0);
-                    s_isProtected = false;
+                    isProtected = false;
                 }
             }
             finally
             {
-                s_isProtectedLock.ExitWriteLock();
+                isProtectedLock.ExitWriteLock();
             }
         }
     }

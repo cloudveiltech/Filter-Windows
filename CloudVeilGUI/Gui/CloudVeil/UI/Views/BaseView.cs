@@ -24,13 +24,13 @@ namespace Gui.CloudVeil.UI.Views
         /// <summary>
         /// Expose the application logging system to each view out of the box.
         /// </summary>
-        protected readonly Logger m_logger;
+        protected readonly Logger logger;
 
         /// <summary>
         /// Keeps a reference to the parent window even when our view is pulled from the display
         /// list. Allows posting of window modals and such without being currently in view.
         /// </summary>
-        private MetroWindow m_parentWindow = null;
+        private MetroWindow parentWindow = null;
 
         public virtual ScrollBarVisibility ShouldViewScroll => ScrollBarVisibility.Auto;
 
@@ -39,7 +39,7 @@ namespace Gui.CloudVeil.UI.Views
         /// </summary>
         public BaseView()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         protected override void OnVisualParentChanged(DependencyObject oldParent)
@@ -48,7 +48,7 @@ namespace Gui.CloudVeil.UI.Views
 
             if(this.Parent != null)
             {
-                m_parentWindow = this.TryFindParent<BaseWindow>();
+                parentWindow = this.TryFindParent<BaseWindow>();
             }
         }
 
@@ -69,20 +69,20 @@ namespace Gui.CloudVeil.UI.Views
             MetroDialogSettings mds = new MetroDialogSettings();
             mds.AffirmativeButtonText = acceptButtonText;
 
-            if(m_parentWindow == null)
+            if(parentWindow == null)
             {
-                m_parentWindow = this.TryFindParent<BaseWindow>();
+                parentWindow = this.TryFindParent<BaseWindow>();
             }
 
-            if(m_parentWindow != null)
+            if(parentWindow != null)
             {
-                var result = await DialogManager.ShowMessageAsync(m_parentWindow, title, message, MessageDialogStyle.Affirmative, mds);
+                var result = await DialogManager.ShowMessageAsync(parentWindow, title, message, MessageDialogStyle.Affirmative, mds);
                 return result;
             }
             else
             {
                 Debug.WriteLine("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
-                m_logger.Error("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
+                logger.Error("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
                 return MessageDialogResult.Affirmative;
             }
         }
@@ -108,20 +108,20 @@ namespace Gui.CloudVeil.UI.Views
             mds.AffirmativeButtonText = acceptButtonText;
             mds.NegativeButtonText = noButtonText;
 
-            if(m_parentWindow == null)
+            if(parentWindow == null)
             {
-                m_parentWindow = this.TryFindParent<BaseWindow>();
+                parentWindow = this.TryFindParent<BaseWindow>();
             }
 
-            if(m_parentWindow != null)
+            if(parentWindow != null)
             {
-                var result = await DialogManager.ShowMessageAsync(m_parentWindow, title, question, MessageDialogStyle.AffirmativeAndNegative, mds);
+                var result = await DialogManager.ShowMessageAsync(parentWindow, title, question, MessageDialogStyle.AffirmativeAndNegative, mds);
                 return result;
             }
             else
             {
                 Debug.WriteLine("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
-                m_logger.Error("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
+                logger.Error("In BaseView.DisplayDialogToUser(...) - Could not find parent window.");
                 return MessageDialogResult.Affirmative;
             }
         }

@@ -29,17 +29,17 @@ namespace CloudVeil.IPC
             public int Retries { get; set; } = 0;
         }
 
-        private static NLog.Logger m_logger = LoggerUtil.GetAppWideLogger();
-        private List<IPCMessageData> m_messageList;
-        private object m_lock;
+        private static NLog.Logger logger = LoggerUtil.GetAppWideLogger();
+        private List<IPCMessageData> messageList;
+        private object lockobj;
 
-        private IpcCommunicator m_communicator;
+        private IpcCommunicator communicator;
 
         public IPCMessageTracker(IpcCommunicator communicator)
         {
-            m_messageList = new List<IPCMessageData>();
-            m_lock = new object();
-            m_communicator = communicator;
+            messageList = new List<IPCMessageData>();
+            lockobj = new object();
+            this.communicator = communicator;
         }
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace CloudVeil.IPC
         /// <param name="handler">The handler for the reply message.</param>
         public void AddMessage(BaseMessage message, ReplyHandlerClass handler, int retryNum)
         {
-            lock (m_lock)
+            lock (lockobj)
             {
-                m_messageList.Add(new IPCMessageData() { Message = message, Handler = handler, Retries = retryNum });
+                messageList.Add(new IPCMessageData() { Message = message, Handler = handler, Retries = retryNum });
             }
         }
 
@@ -63,15 +63,15 @@ namespace CloudVeil.IPC
         {
             const int MaxRetries = 3;
 
-            m_logger.Info("Retrying IPC messages.");
-            lock (m_lock)
+            logger.Info("Retrying IPC messages.");
+            lock (lockobj)
             {
-                for(int i=0;i < m_messageList.Count; i++)
+                for(int i=0;i < messageList.Count; i++)
                 {
-                    var message = m_messageList[i];
+                    var message = messageList[i];
                     if (message.Retries < MaxRetries)
                     {
-                        m_communicator.PushMessage(message.Message, message.Handler, message.Retries + 1);
+                        communicator.PushMessage(message.Message, message.Handler, message.Retries + 1);
                     }
                 }
             }
@@ -88,23 +88,23 @@ namespace CloudVeil.IPC
         {
             try
             {
-                lock (m_lock)
+                lock (lockobj)
                 {
-                    for (int i = 0; i < m_messageList.Count; i++)
+                    for (int i = 0; i < messageList.Count; i++)
                     {
                         IPCMessageData data = null;
-                        data = m_messageList[i];
+                        data = messageList[i];
 
                         if(data.Handler.DisposeIfDiscarded())
                         {
-                            m_messageList.RemoveAt(i);
+                            messageList.RemoveAt(i);
                             i--;
                             continue;
                         }
 
                         if (data.Message.Id == message.ReplyToId)
                         {
-                            m_messageList.Remove(data);
+                            messageList.Remove(data);
 
                             if (data.Handler != null)
                             {

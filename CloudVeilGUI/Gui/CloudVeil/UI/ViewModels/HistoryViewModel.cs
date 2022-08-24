@@ -62,7 +62,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// <summary>
         /// The model.
         /// </summary>
-        private DashboardModel m_model = new DashboardModel();
+        private DashboardModel model = new DashboardModel();
 
         /// <summary>
         /// List of observable block actions that the user can view.
@@ -82,22 +82,22 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model;
+                return model;
             }
         }
 
-        private ViewableBlockedRequest m_selectedItem;
+        private ViewableBlockedRequest selectedItem;
         public ViewableBlockedRequest SelectedItem
         {
-            get => m_selectedItem;
+            get => selectedItem;
             set
             {
-                m_selectedItem = value;
+                selectedItem = value;
                 RaisePropertyChanged(nameof(SelectedItem));
             }
         }
 
-        private RelayCommand m_sidebarButtonCommand;
+        private RelayCommand sidebarButtonCommand;
 
         /// <summary>
         /// Generic handler for all of the sidebar buttons.
@@ -106,26 +106,26 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (m_sidebarButtonCommand == null)
+                if (sidebarButtonCommand == null)
                 {
-                    m_sidebarButtonCommand = new RelayCommand((Action)(() =>
+                    sidebarButtonCommand = new RelayCommand((Action)(() =>
                     {
 
                     }));
                 }
 
-                return m_sidebarButtonCommand;
+                return sidebarButtonCommand;
             }
         }
 
-        private RelayCommand<ViewableBlockedRequest> m_copySelectedUrlCommand;
+        private RelayCommand<ViewableBlockedRequest> copySelectedUrlCommand;
         public RelayCommand<ViewableBlockedRequest> CopySelectedUrlCommand
         {
             get
             {
-                if(m_copySelectedUrlCommand == null)
+                if(copySelectedUrlCommand == null)
                 {
-                    m_copySelectedUrlCommand = new RelayCommand<ViewableBlockedRequest>((args) =>
+                    copySelectedUrlCommand = new RelayCommand<ViewableBlockedRequest>((args) =>
                     {
                         try
                         {
@@ -136,16 +136,16 @@ namespace Gui.CloudVeil.UI.ViewModels
                         }
                         catch(Exception ex)
                         {
-                            m_logger.Error(ex);
+                            logger.Error(ex);
                         }
                     });
                 }
 
-                return m_copySelectedUrlCommand;
+                return copySelectedUrlCommand;
             }
         }
 
-        private RelayCommand<ViewableBlockedRequest> m_requestBlockActionReviewCommand;
+        private RelayCommand<ViewableBlockedRequest> requestBlockActionReviewCommand;
 
         /// <summary>
         /// Command to request the review of a logged block action.
@@ -154,9 +154,9 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (m_requestBlockActionReviewCommand == null)
+                if (requestBlockActionReviewCommand == null)
                 {
-                    m_requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequest>((Action<ViewableBlockedRequest>)((args) =>
+                    requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequest>((Action<ViewableBlockedRequest>)((args) =>
                     {
                         if (args == null) { return; }
 
@@ -181,12 +181,12 @@ namespace Gui.CloudVeil.UI.ViewModels
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }));
                 }
 
-                return m_requestBlockActionReviewCommand;
+                return requestBlockActionReviewCommand;
             }
         }
 
@@ -206,7 +206,7 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
     }

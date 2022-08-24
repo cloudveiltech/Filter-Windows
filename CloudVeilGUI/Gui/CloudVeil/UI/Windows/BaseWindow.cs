@@ -23,14 +23,14 @@ namespace Gui.CloudVeil.UI.Windows
     {
         public BaseWindow()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public delegate void OnWindowRestoreRequested();
 
         public event OnWindowRestoreRequested WindowRestoreRequested;
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         /// <summary>
         /// Post a yes no question to the user in a dialogue. Caller must ensure that they're calling

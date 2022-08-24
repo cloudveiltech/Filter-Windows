@@ -50,16 +50,16 @@ namespace FilterProvider.Common.Util
             Default = new CaptivePortalHelper();
         }
 
-        private string[] m_currentCaptivePortalSSIDs = null;
-        private DateTime m_captivePortalDetectedAt = DateTime.MinValue;
+        private string[] currentCaptivePortalSSIDs = null;
+        private DateTime captivePortalDetectedAt = DateTime.MinValue;
 
-        private IWifiManager m_wifiManager;
+        private IWifiManager wifiManager;
 
         public CaptivePortalHelper()
         {
             try
             {
-                m_wifiManager = PlatformTypes.New<IWifiManager>();
+                wifiManager = PlatformTypes.New<IWifiManager>();
             }
             catch(Exception ex)
             {
@@ -74,10 +74,10 @@ namespace FilterProvider.Common.Util
         /// <returns>List of any SSIDs that the computer is connected to. The count of this list will most likely be 1.</returns>
         private string[] detectCurrentSSIDs()
         {
-            return m_wifiManager?.DetectCurrentSsids()?.ToArray() ?? new string[0];
+            return wifiManager?.DetectCurrentSsids()?.ToArray() ?? new string[0];
         }
 
-        private object m_captivePortalSettingsLock = new object();
+        private object captivePortalSettingsLock = new object();
 
         private IPathProvider paths = PlatformTypes.New<IPathProvider>();
 
@@ -90,7 +90,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (m_captivePortalSettingsLock)
+                lock (captivePortalSettingsLock)
                 {
                     if (File.Exists(portalSettingsPath))
                     {
@@ -111,7 +111,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (m_captivePortalSettingsLock)
+                lock (captivePortalSettingsLock)
                 {
                     if(!File.Exists(portalSettingsPath))
                     {
@@ -126,12 +126,12 @@ namespace FilterProvider.Common.Util
 
                         if (ssidLine == null || dateLine == null)
                         {
-                            m_currentCaptivePortalSSIDs = null;
+                            currentCaptivePortalSSIDs = null;
                             return;
                         }
 
-                        m_currentCaptivePortalSSIDs = ssidLine.Split(',').Select(s => Encoding.ASCII.GetString(Convert.FromBase64String(s))).ToArray();
-                        m_captivePortalDetectedAt = DateTime.Parse(dateLine);
+                        currentCaptivePortalSSIDs = ssidLine.Split(',').Select(s => Encoding.ASCII.GetString(Convert.FromBase64String(s))).ToArray();
+                        captivePortalDetectedAt = DateTime.Parse(dateLine);
 
                         deleteCacheIfExpired();
                     }
@@ -145,10 +145,10 @@ namespace FilterProvider.Common.Util
 
         private void deleteCacheIfExpired()
         {
-            if (m_captivePortalDetectedAt + new TimeSpan(CACHE_TIMEOUT_TICKS) < DateTime.Now)
+            if (captivePortalDetectedAt + new TimeSpan(CACHE_TIMEOUT_TICKS) < DateTime.Now)
             {
                 deleteCaptivePortalSSIDsFile();
-                m_currentCaptivePortalSSIDs = null;
+                currentCaptivePortalSSIDs = null;
             }
         }
 
@@ -156,7 +156,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (m_captivePortalSettingsLock)
+                lock (captivePortalSettingsLock)
                 {
                     using (Stream fileStream = File.Open(portalSettingsPath, FileMode.Create))
                     {
@@ -197,10 +197,10 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                m_currentCaptivePortalSSIDs = detectCurrentSSIDs();
-                m_captivePortalDetectedAt = DateTime.Now;
+                currentCaptivePortalSSIDs = detectCurrentSSIDs();
+                captivePortalDetectedAt = DateTime.Now;
 
-                saveCaptivePortalSSIDs(m_currentCaptivePortalSSIDs, m_captivePortalDetectedAt);
+                saveCaptivePortalSSIDs(currentCaptivePortalSSIDs, captivePortalDetectedAt);
             }
             catch(Exception e)
             {
@@ -223,14 +223,14 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                if (m_currentCaptivePortalSSIDs == null)
+                if (currentCaptivePortalSSIDs == null)
                 {
                     loadCaptivePortalSSIDs();
                 }
 
                 deleteCacheIfExpired();
 
-                if (m_currentCaptivePortalSSIDs == null)
+                if (currentCaptivePortalSSIDs == null)
                 {
                     return false;
                 }
@@ -243,7 +243,7 @@ namespace FilterProvider.Common.Util
 
                 foreach (string currentSSID in currentSSIDs)
                 {
-                    foreach(string SSID in m_currentCaptivePortalSSIDs)
+                    foreach(string SSID in currentCaptivePortalSSIDs)
                     {
                         if(currentSSID == SSID)
                         {

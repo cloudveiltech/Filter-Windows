@@ -25,31 +25,31 @@ namespace FilterProvider.Common.Util
     {
         public SiteFiltering(IPCServer ipcServer, TimeDetection timeDetection, IPolicyConfiguration policyConfiguration, CertificateExemptions certificateExemptions)
         {
-            m_ipcServer = ipcServer;
-            m_timeDetection = timeDetection;
-            m_policyConfiguration = policyConfiguration;
+            this.ipcServer = ipcServer;
+            this.timeDetection = timeDetection;
+            this.policyConfiguration = policyConfiguration;
 
-            m_logger = LoggerUtil.GetAppWideLogger();
-            m_templates = new Templates(policyConfiguration);
+            logger = LoggerUtil.GetAppWideLogger();
+            templates = new Templates(policyConfiguration);
 
-            m_certificateExemptions = certificateExemptions;
+            this.certificateExemptions = certificateExemptions;
 
-            m_policyConfiguration.ListsReloaded += OnListsReloaded;
+            policyConfiguration.ListsReloaded += OnListsReloaded;
         }
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
-        private IPCServer m_ipcServer;
+        private IPCServer ipcServer;
 
-        private CertificateExemptions m_certificateExemptions;
+        private CertificateExemptions certificateExemptions;
 
-        private TimeDetection m_timeDetection;
+        private TimeDetection timeDetection;
 
-        private Templates m_templates;
+        private Templates templates;
 
-        private object m_filterCacheLock = new object();
+        private object filterCacheLock = new object();
 
-        private IPolicyConfiguration m_policyConfiguration;
+        private IPolicyConfiguration policyConfiguration;
 
         public event RequestBlockedHandler RequestBlocked;
 
@@ -57,13 +57,13 @@ namespace FilterProvider.Common.Util
         {
             /*List<UrlFilter> blacklist, whitelist;
 
-            blacklist = m_policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
-            whitelist = m_policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
+            blacklist = policyConfiguration?.FilterCollection?.GetFiltersForDomain()?.Result;
+            whitelist = policyConfiguration?.FilterCollection?.GetWhitelistFiltersForDomain()?.Result;
 
-            lock (m_filterCacheLock)
+            lock (filterCacheLock)
             {
-                m_globalBlacklistFiltersCache = blacklist;
-                m_globalWhitelistFiltersCache = whitelist;
+                globalBlacklistFiltersCache = blacklist;
+                globalWhitelistFiltersCache = whitelist;
             }*/
         }
 
@@ -77,19 +77,19 @@ namespace FilterProvider.Common.Util
         {
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
-            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            if (ipcServer != null && ipcServer.WaitingForAuth)
             {
                 return 0;
             }
 
             try
             {
-                ZonedDateTime date = m_timeDetection.GetRealTime();
+                ZonedDateTime date = timeDetection.GetRealTime();
                 TimeRestrictionModel todayRestriction = null;
 
-                if (m_policyConfiguration != null && m_policyConfiguration.TimeRestrictions != null && date != null)
+                if (policyConfiguration != null && policyConfiguration.TimeRestrictions != null && date != null)
                 {
-                    todayRestriction = m_policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
+                    todayRestriction = policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
                 }
 
                 string urlString = args.Request.Url;
@@ -100,7 +100,7 @@ namespace FilterProvider.Common.Util
                 {
                     return 0;
                 }
-                else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !m_timeDetection.IsDateTimeAllowed(date, todayRestriction))
+                else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
                     sendBlockResponse(args, urlString, null, BlockType.TimeRestriction);
                     return 1;
@@ -109,7 +109,7 @@ namespace FilterProvider.Common.Util
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
 
             return 0;
@@ -155,7 +155,7 @@ namespace FilterProvider.Common.Util
             {
                 int matchCategory = categories?[0] ?? 0;
 
-                m_logger.Info("displaying block page for category {0}, list=({1})", categories?[0], string.Join(", ", categories?.Select(c => c.ToString()) ?? new string[0]));
+                logger.Info("displaying block page for category {0}, list=({1})", categories?[0], string.Join(", ", categories?.Select(c => c.ToString()) ?? new string[0]));
 
                 List<MappedFilterListCategoryModel> appliedCategories = null;
                 if(categories == null)
@@ -167,13 +167,13 @@ namespace FilterProvider.Common.Util
                     appliedCategories = categories
                         .Skip(1)
                         .Select(
-                            id => m_policyConfiguration.GeneratedCategoriesMap
+                            id => policyConfiguration.GeneratedCategoriesMap
                                         .Select(c => c.Value)
                                         .FirstOrDefault(c => c.CategoryId == id)
                         ).ToList();
                 }
 
-                byte[] contentBytes = m_templates.ResolveBlockedSiteTemplate(new Uri(url), matchCategory, appliedCategories, blockType, triggerCategory);
+                byte[] contentBytes = templates.ResolveBlockedSiteTemplate(new Uri(url), matchCategory, appliedCategories, blockType, triggerCategory);
                 string contentType = "text/html";
 
                 args.SendCustomResponse((int)HttpStatusCode.OK, contentType, contentBytes);
@@ -188,16 +188,16 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.FirstOrDefault(m => m.Value.CategoryId == categories[0]).Value;
+                var mappedCategory = policyConfiguration.GeneratedCategoriesMap.FirstOrDefault(m => m.Value.CategoryId == categories[0]).Value;
 
-                m_logger.Info("Request {0} whitelisted in category {1} (rule not currently available)", url, mappedCategory?.CategoryName);
+                logger.Info("Request {0} whitelisted in category {1} (rule not currently available)", url, mappedCategory?.CategoryName);
 
                 return 0;
             }
             catch(Exception ex)
             {
-                m_logger.Error("Exception occurred while processing whitelist notification.");
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                logger.Error("Exception occurred while processing whitelist notification.");
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
             return 0;
@@ -213,8 +213,8 @@ namespace FilterProvider.Common.Util
             }
             catch(Exception ex)
             {
-                m_logger.Error("Exception occurred while processing blacklist notification.");
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                logger.Error("Exception occurred while processing blacklist notification.");
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
             return 0;
@@ -228,7 +228,7 @@ namespace FilterProvider.Common.Util
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
-            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            if (ipcServer != null && ipcServer.WaitingForAuth)
             {
                 return;
             }
@@ -246,10 +246,10 @@ namespace FilterProvider.Common.Util
                 }
 
                 // Check our certificate exemptions to see if we should allow this site through or not.
-                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !m_certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
+                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
                 {
                     customBlockResponseContentType = "text/html";
-                    customBlockResponse = m_templates.ResolveBadSslTemplate(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint);
+                    customBlockResponse = templates.ResolveBadSslTemplate(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint);
                     shouldBlock = true;
                     return;
                 }
@@ -295,7 +295,7 @@ namespace FilterProvider.Common.Util
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = m_templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
+                            customBlockResponse = templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
                         }
                         else if (contentType.IndexOf("application/json", StringComparison.InvariantCultureIgnoreCase) != -1)
                         {
@@ -304,20 +304,20 @@ namespace FilterProvider.Common.Util
                         }
 
                         RequestBlocked?.Invoke(contentClassResult, blockType, new Uri(args.Request.Url), "");
-                        m_logger.Info("Response blocked by content classification.");
+                        logger.Info("Response blocked by content classification.");
                     }
                 }
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
                 if (shouldBlock)
                 {
                     // TODO: Do we really need this as Info?
-                    m_logger.Info("Response blocked: {0}", args.Request.Url);
+                    logger.Info("Response blocked: {0}", args.Request.Url);
 
                     if (customBlockResponse != null)
                     {
@@ -332,7 +332,7 @@ namespace FilterProvider.Common.Util
             List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
             int length = matchingCategories.Count;
-            var categoryValues = m_policyConfiguration.GeneratedCategoriesMap.Values;
+            var categoryValues = policyConfiguration.GeneratedCategoriesMap.Values;
             foreach (var category in categoryValues)
             {
                 for (int i = 0; i < length; i++)
@@ -370,11 +370,11 @@ namespace FilterProvider.Common.Util
 
             try
             {
-                m_policyConfiguration.PolicyLock.EnterReadLock();
+                policyConfiguration.PolicyLock.EnterReadLock();
 
                 stopwatch = Stopwatch.StartNew();
 
-                if (m_policyConfiguration.TextTriggers != null && m_policyConfiguration.TextTriggers.HasTriggers)
+                if (policyConfiguration.TextTriggers != null && policyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
@@ -390,20 +390,20 @@ namespace FilterProvider.Common.Util
                             // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
-                        m_logger.Info("Run trigger matcher");
+                        logger.Info("Run trigger matcher");
                         short matchedCategory = -1;
                         string trigger = null;
-                        var cfg = m_policyConfiguration.Configuration;
+                        var cfg = policyConfiguration.Configuration;
 
-                        if (m_policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, m_policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if (policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
-                            m_logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
+                            logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
 
-                            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
+                            var mappedCategory = policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
                             if (mappedCategory != null)
                             {
-                                m_logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
+                                logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
                                 triggerCategory = mappedCategory.CategoryName;
                                 textTrigger = trigger;
@@ -413,30 +413,30 @@ namespace FilterProvider.Common.Util
                     } 
                 } else
                 {
-                    m_logger.Info("No text triggers loaded");
+                    logger.Info("No text triggers loaded");
                 }
                 stopwatch.Stop();
 
-                //m_logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
+                //logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
-                m_policyConfiguration.PolicyLock.ExitReadLock();
+                policyConfiguration.PolicyLock.ExitReadLock();
             }
 
 #if WITH_NLP
             try
             {
-                m_doccatSlimLock.EnterReadLock();
+                doccatSlimLock.EnterReadLock();
 
                 contentType = contentType.ToLower();
 
                 // Only attempt text classification if we have a text classifier, silly.
-                if(m_documentClassifiers != null && m_documentClassifiers.Count > 0)
+                if(documentClassifiers != null && documentClassifiers.Count > 0)
                 {
                     var textToClassifyBuilder = new StringBuilder();
 
@@ -448,7 +448,7 @@ namespace FilterProvider.Common.Util
                         var extractor = new FastHtmlTextExtractor();
 
                         var extractedText = extractor.Extract(rawText);
-                        m_logger.Info("From HTML: Classify this string: {0}", extractedText);
+                        logger.Info("From HTML: Classify this string: {0}", extractedText);
                         textToClassifyBuilder.Append(extractedText);
                     }
                     else if(contentType.IndexOf("json") != -1)
@@ -470,46 +470,46 @@ namespace FilterProvider.Common.Util
                             }
                         }
 
-                        m_logger.Info("From Json: Classify this string: {0}", m_whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
+                        logger.Info("From Json: Classify this string: {0}", whitespaceRegex.Replace(textToClassifyBuilder.ToString(), " "));
                     }
 
                     var textToClassify = textToClassifyBuilder.ToString();
 
                     if(textToClassify.Length > 0)
                     {
-                        foreach(var classifier in m_documentClassifiers)
+                        foreach(var classifier in documentClassifiers)
                         {
-                            m_logger.Info("Got text to classify of length {0}.", textToClassify.Length);
+                            logger.Info("Got text to classify of length {0}.", textToClassify.Length);
 
                             // Remove all multi-whitespace, newlines etc.
-                            textToClassify = m_whitespaceRegex.Replace(textToClassify, " ");
+                            textToClassify = whitespaceRegex.Replace(textToClassify, " ");
 
                             var classificationResult = classifier.ClassifyText(textToClassify);
 
                             MappedFilterListCategoryModel categoryNumber = null;
 
-                            if(m_generatedCategoriesMap.TryGetValue(classificationResult.BestCategoryName, out categoryNumber))
+                            if(generatedCategoriesMap.TryGetValue(classificationResult.BestCategoryName, out categoryNumber))
                             {
-                                if(categoryNumber.CategoryId > 0 && m_categoryIndex.GetIsCategoryEnabled(categoryNumber.CategoryId))
+                                if(categoryNumber.CategoryId > 0 && categoryIndex.GetIsCategoryEnabled(categoryNumber.CategoryId))
                                 {
-                                    var cfg = m_policyConfiguration.Configuration;
+                                    var cfg = policyConfiguration.Configuration;
                                     var threshold = cfg != null ? cfg.NlpThreshold : 0.9f;
 
                                     if(classificationResult.BestCategoryScore < threshold)
                                     {
-                                        m_logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", classificationResult.BestCategoryName, threshold, classificationResult.BestCategoryScore);
+                                        logger.Info("Rejected {0} classification because score was less than threshold of {1}. Returned score was {2}.", classificationResult.BestCategoryName, threshold, classificationResult.BestCategoryScore);
                                         blockedBecause = BlockType.OtherContentClassification;
                                         return 0;
                                     }
 
-                                    m_logger.Info("Classified text content as {0}.", classificationResult.BestCategoryName);
+                                    logger.Info("Classified text content as {0}.", classificationResult.BestCategoryName);
                                     blockedBecause = BlockType.TextClassification;
                                     return categoryNumber.CategoryId;
                                 }
                             }
                             else
                             {
-                                m_logger.Info("Did not find category registered: {0}.", classificationResult.BestCategoryName);
+                                logger.Info("Did not find category registered: {0}.", classificationResult.BestCategoryName);
                             }
                         }
                     }
@@ -517,11 +517,11 @@ namespace FilterProvider.Common.Util
             }
             catch(Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
-                m_doccatSlimLock.ExitReadLock();
+                doccatSlimLock.ExitReadLock();
             }
 
 #endif

@@ -19,7 +19,7 @@ namespace Gui.CloudVeil.UI.Models
 {
     internal class MainWindowModel : ObservableObject
     {
-        private volatile bool m_internetIsConnected = false;
+        private volatile bool internetIsConnected = false;
         
         public MainWindowModel()
         {
@@ -40,12 +40,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_internetIsConnected;
+                return internetIsConnected;
             }
 
             private set
             {
-                m_internetIsConnected = value;
+                internetIsConnected = value;
                 RaisePropertyChanged(nameof(InternetIsConnected));
             }
         }

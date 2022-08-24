@@ -10,31 +10,31 @@ namespace Gui.CloudVeil.UI.ViewModels
 {
     public class CaptivePortalViewModel : BaseCloudVeilViewModel
     {
-        private RelayCommand m_helpMeConnect;
+        private RelayCommand helpMeConnect;
 
         /*
          * public RelayCommand AuthenticateCommand
         {
             get
             {
-                if(m_authenticateCommand == null)
+                if(authenticateCommand == null)
                 {
-                    m_authenticateCommand = new RelayCommand((Action)(async () =>
+                    authenticateCommand = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
                             RequestViewChange(typeof(ProgressWait)); 
-                            await m_model.Authenticate();
+                            await model.Authenticate();
 
                         }
                         catch(Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
-                    }), m_model.CanAttemptAuthentication);
+                    }), model.CanAttemptAuthentication);
                 }
 
-                return m_authenticateCommand;
+                return authenticateCommand;
             }
         }
         */
@@ -43,9 +43,9 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if(m_helpMeConnect == null)
+                if(helpMeConnect == null)
                 {
-                    m_helpMeConnect = new RelayCommand((Action)(async () =>
+                    helpMeConnect = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
@@ -53,12 +53,12 @@ namespace Gui.CloudVeil.UI.ViewModels
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }));
                 }
 
-                return m_helpMeConnect;
+                return helpMeConnect;
             }
         }
     }

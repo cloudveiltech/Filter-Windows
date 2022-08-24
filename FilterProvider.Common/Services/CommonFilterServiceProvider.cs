@@ -195,12 +195,12 @@ namespace FilterProvider.Common.Services
         {
             get
             {
-                return Interlocked.CompareExchange(ref m_connectedClients, m_connectedClients, 0);
+                return Interlocked.CompareExchange(ref connectedClients, connectedClients, 0);
             }
 
             set
             {
-                Interlocked.Exchange(ref m_connectedClients, value);
+                Interlocked.Exchange(ref connectedClients, value);
             }
         }
 
@@ -217,7 +217,7 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// The number of IPC clients connected to this server. 
         /// </summary>
-        private int m_connectedClients = 0;
+        private int connectedClients = 0;
 
         #region FilteringEngineVars
 
@@ -227,24 +227,24 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
         /// </summary>
-        private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim doccatSlimLock = new ReaderWriterLockSlim();
 
 #if WITH_NLP
-        private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
+        private List<CategoryMappedDocumentCategorizerModel> documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 #endif
 
-        private IProxyServer m_filteringEngine;
+        private IProxyServer filteringEngine;
 
-        private BackgroundWorker m_filterEngineStartupBgWorker;
+        private BackgroundWorker filterEngineStartupBgWorker;
 
-        private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
+        private static readonly DateTime epoch = new DateTime(1970, 1, 1);
 
-        private static readonly string s_EpochHttpDateTime = s_Epoch.ToString("r");
+        private static readonly string epochHttpDateTime = epoch.ToString("r");
 
         /// <summary>
         /// Applications we never ever want to filter. Right now, this is just OS binaries. 
         /// </summary>
-        private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         #endregion FilteringEngineVars
 
@@ -272,12 +272,12 @@ namespace FilterProvider.Common.Services
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
-        private volatile bool m_cleanShutdownComplete = false;
+        private volatile bool cleanShutdownComplete = false;
 
         /// <summary>
         /// Used to ensure clean shutdown once. 
         /// </summary>
-        private Object m_cleanShutdownLock = new object();
+        private Object cleanShutdownLock = new object();
 
         /// <summary>
         /// Logger. 
@@ -1200,10 +1200,10 @@ namespace FilterProvider.Common.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            //filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // TODO: Code smell. Do we instantiate types with special functions, or do we use PlatformTypes.New<T>() ?
-            m_filteringEngine = systemServices.StartProxyServer(new ProxyConfiguration()
+            filteringEngine = systemServices.StartProxyServer(new ProxyConfiguration()
             {
                 AuthorityName = "CloudVeil for Windows",
                 BeforeRequest = siteFiltering.OnBeforeRequest,
@@ -1215,15 +1215,15 @@ namespace FilterProvider.Common.Services
             // Setup general info, warning and error events.
 
             // Start filtering, always.
-            if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            if (filteringEngine != null && !filteringEngine.IsRunning)
             {
-                m_filterEngineStartupBgWorker = new BackgroundWorker();
-                m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
+                filterEngineStartupBgWorker = new BackgroundWorker();
+                filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
                 {
                     StartFiltering();
                 });
 
-                m_filterEngineStartupBgWorker.RunWorkerAsync();
+                filterEngineStartupBgWorker.RunWorkerAsync();
             }
 
             // Now establish trust with FireFox. XXX TODO - This can actually be done elsewhere. We
@@ -1246,7 +1246,7 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Used to strip multiple whitespace. 
         /// </summary>
-        private Regex m_whitespaceRegex;
+        private Regex whitespaceRegex;
 
         /// <summary>
         /// Loads the given NLP model and list of categories from within the model that we'll
@@ -1269,14 +1269,14 @@ namespace FilterProvider.Common.Services
         {
             try
             {
-                m_doccatSlimLock.EnterWriteLock();
+                doccatSlimLock.EnterWriteLock();
 
                 var selectedCategoriesHashset = new HashSet<string>(nlpConfig.SelectedCategoryNames, StringComparer.OrdinalIgnoreCase);
 
                 var mappedAllCategorySet = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 // Init our regexes
-                m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
+                whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
                 // Init Document classifier.
                 var doccatModel = new DoccatModel(new java.io.ByteArrayInputStream(nlpModelBytes));
@@ -1299,26 +1299,26 @@ namespace FilterProvider.Common.Services
 
                     if(selectedCategoriesHashset.Contains(modelCategory))
                     {
-                        m_logger.Info("Setting up NLP classification category: {0}", modelCategory);
+                        logger.Info("Setting up NLP classification category: {0}", modelCategory);
 
                         MappedFilterListCategoryModel existingCategory = null;
                         if(TryFetchOrCreateCategoryMap(mappedModelCategory, out existingCategory))
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(existingCategory.CategoryId, true);
+                            categoryIndex.SetIsCategoryEnabled(existingCategory.CategoryId, true);
                         }
                         else
                         {
-                            m_logger.Error("Failed to get category map for NLP model.");
+                            logger.Error("Failed to get category map for NLP model.");
                         }
                     }
                 }
 
                 // Push this classifier to our list of classifiers.
-                m_documentClassifiers.Add(new CategoryMappedDocumentCategorizerModel(classifier, mappedAllCategorySet));
+                documentClassifiers.Add(new CategoryMappedDocumentCategorizerModel(classifier, mappedAllCategorySet));
             }
             finally
             {
-                m_doccatSlimLock.ExitWriteLock();
+                doccatSlimLock.ExitWriteLock();
             }
         }
 #endif
@@ -1784,7 +1784,7 @@ namespace FilterProvider.Common.Services
             }
         }
 
-        Stopwatch m_logTimeStopwatch = null;
+        Stopwatch logTimeStopwatch = null;
         /// <summary>
         /// Logs the amount of time that has passed since the last time this function was called.
         /// </summary>
@@ -1793,17 +1793,17 @@ namespace FilterProvider.Common.Services
         {
             string timeInfo = null;
 
-            if (m_logTimeStopwatch == null)
+            if (logTimeStopwatch == null)
             {
-                m_logTimeStopwatch = Stopwatch.StartNew();
+                logTimeStopwatch = Stopwatch.StartNew();
                 timeInfo = "Initialized:";
             }
             else
             {
-                long ms = m_logTimeStopwatch.ElapsedMilliseconds;
+                long ms = logTimeStopwatch.ElapsedMilliseconds;
                 timeInfo = string.Format("{0}ms:", ms);
 
-                m_logTimeStopwatch.Restart();
+                logTimeStopwatch.Restart();
             }
 
             logger.Info("TIME {0} {1}", timeInfo, message);
@@ -1865,12 +1865,12 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                if (filteringEngine != null && !filteringEngine.IsRunning)
                 {
                     logger.Info("Start engine.");
 
                     // Start the engine right away, to ensure the atomic bool IsRunning is set.
-                    m_filteringEngine.Start();
+                    filteringEngine.Start();
                 }
             }
             catch (Exception e)
@@ -1891,9 +1891,9 @@ namespace FilterProvider.Common.Services
         {
 
             logger.Info("Stop filtering");
-            if (m_filteringEngine != null && m_filteringEngine.IsRunning)
+            if (filteringEngine != null && filteringEngine.IsRunning)
             {
-                m_filteringEngine.Stop();
+                filteringEngine.Stop();
             }
 
             try
@@ -1922,9 +1922,9 @@ namespace FilterProvider.Common.Services
             // immediately shut down, because we, the service, are shutting down.
             systemServices.KillAllGuis();
 
-            lock (m_cleanShutdownLock)
+            lock (cleanShutdownLock)
             {
-                if (!m_cleanShutdownComplete)
+                if (!cleanShutdownComplete)
                 {
                     ipcServer.Dispose();
 
@@ -1991,7 +1991,7 @@ namespace FilterProvider.Common.Services
                     }
 
                     // Flag that clean shutdown was completed already.
-                    m_cleanShutdownComplete = true;
+                    cleanShutdownComplete = true;
                 }
             }
         }

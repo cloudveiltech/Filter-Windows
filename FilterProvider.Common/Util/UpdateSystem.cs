@@ -23,13 +23,13 @@ namespace FilterProvider.Common.Util
     {
         public UpdateSystem(IPolicyConfiguration configuration, IPCServer server, string platformId)
         {
-            m_platformPaths = PlatformTypes.New<IPathProvider>();
-            m_systemServices = PlatformTypes.New<ISystemServices>();
+            platformPaths = PlatformTypes.New<IPathProvider>();
+            systemServices = PlatformTypes.New<ISystemServices>();
 
-            m_ipcServer = server;
-            m_policyConfiguration = configuration;
+            ipcServer = server;
+            policyConfiguration = configuration;
 
-            m_platformId = platformId;
+            this.platformId = platformId;
 
             var bitVersionUri = string.Empty;
             if (Environment.Is64BitProcess)
@@ -43,28 +43,28 @@ namespace FilterProvider.Common.Util
 
             var appUpdateInfoUrl = string.Format("{0}{1}?acid={2}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri, HttpUtility.UrlEncode(FingerprintService.Default.Value));
 
-            m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
+            updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
 
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
-        private string m_platformId;
+        private string platformId;
 
-        private NLog.Logger m_logger = null;
+        private NLog.Logger logger = null;
 
-        private IPCServer m_ipcServer = null;
+        private IPCServer ipcServer = null;
 
-        private IPolicyConfiguration m_policyConfiguration = null;
+        private IPolicyConfiguration policyConfiguration = null;
 
-        private AppcastUpdater m_updater = null;
+        private AppcastUpdater updater = null;
 
-        private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim appcastUpdaterLock = new ReaderWriterLockSlim();
 
-        private ApplicationUpdate m_lastFetchedUpdate = null;
+        private ApplicationUpdate lastFetchedUpdate = null;
 
-        private IPathProvider m_platformPaths = null;
+        private IPathProvider platformPaths = null;
 
-        private ISystemServices m_systemServices = null;
+        private ISystemServices systemServices = null;
 
         /// <summary>
         /// Initializes the update environment. DOES NOT start CloudVeilUpdater.
@@ -73,16 +73,16 @@ namespace FilterProvider.Common.Util
         {
             Task.Delay(200).Wait();
              
-            m_logger.Info("Shutting down to update.");
+            logger.Info("Shutting down to update.");
 
-            if (m_appcastUpdaterLock.IsWriteLockHeld)
+            if (appcastUpdaterLock.IsWriteLockHeld)
             {
-                m_appcastUpdaterLock.ExitWriteLock();
+                appcastUpdaterLock.ExitWriteLock();
             }
 
-            if (m_lastFetchedUpdate.IsRestartRequired)
+            if (lastFetchedUpdate.IsRestartRequired)
             {
-                string restartFlagPath = Path.Combine(m_platformPaths.ApplicationDataFolder, "restart.flag");
+                string restartFlagPath = Path.Combine(platformPaths.ApplicationDataFolder, "restart.flag");
                 using (StreamWriter writer = File.CreateText(restartFlagPath))
                 {
                     writer.Write("# This file left intentionally blank (tee-hee)\n");
@@ -90,7 +90,7 @@ namespace FilterProvider.Common.Util
             }
 
             // Save auth token when shutting down for update.
-            string appDataPath = m_platformPaths.ApplicationDataFolder;
+            string appDataPath = platformPaths.ApplicationDataFolder;
 
             try
             {
@@ -116,14 +116,14 @@ namespace FilterProvider.Common.Util
             }
             catch (Exception e)
             {
-                m_logger.Warn("Could not save authtoken or email before update.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Warn("Could not save authtoken or email before update.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
         public bool OnRequestUpdate(IpcMessage msg)
         {
-            msg.SendReply<ApplicationUpdate>(m_ipcServer, IpcCall.Update, m_lastFetchedUpdate);
+            msg.SendReply<ApplicationUpdate>(ipcServer, IpcCall.Update, lastFetchedUpdate);
             return true;
         }
 
@@ -131,7 +131,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                m_appcastUpdaterLock.EnterWriteLock();
+                appcastUpdaterLock.EnterWriteLock();
 
                 if (msg.Data == UpdateDialogResult.RemindLater)
                 {
@@ -144,25 +144,25 @@ namespace FilterProvider.Common.Util
                     return true;
                 }
 
-                if (m_lastFetchedUpdate != null)
+                if (lastFetchedUpdate != null)
                 {
-                    m_ipcServer.Send<object>(IpcCall.InstallerDownloadStarted, null);
+                    ipcServer.Send<object>(IpcCall.InstallerDownloadStarted, null);
 
-                    m_lastFetchedUpdate.DownloadUpdate((sender, e) =>
+                    lastFetchedUpdate.DownloadUpdate((sender, e) =>
                     {
-                        m_ipcServer.Send<int>(IpcCall.InstallerDownloadProgress, e.ProgressPercentage);
+                        ipcServer.Send<int>(IpcCall.InstallerDownloadProgress, e.ProgressPercentage);
                     }).ContinueWith((task) =>
                     {
                         bool updateDownloadResult = task.Result;
 
-                        m_ipcServer.Send<bool>(IpcCall.InstallerDownloadFinished, updateDownloadResult);
+                        ipcServer.Send<bool>(IpcCall.InstallerDownloadFinished, updateDownloadResult);
 
                         if(!updateDownloadResult)
                         {
                             return;
                         }
 
-                        m_lastFetchedUpdate.BeginInstallUpdate();
+                        lastFetchedUpdate.BeginInstallUpdate();
 
                         initializeUpdateEnvironment();
                         Environment.Exit((int)ExitCodes.ShutdownForUpdate);
@@ -171,13 +171,13 @@ namespace FilterProvider.Common.Util
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
-                if (m_appcastUpdaterLock.IsWriteLockHeld)
+                if (appcastUpdaterLock.IsWriteLockHeld)
                 {
-                    m_appcastUpdaterLock.ExitWriteLock();
+                    appcastUpdaterLock.ExitWriteLock();
                 }
             }
 
@@ -197,49 +197,49 @@ namespace FilterProvider.Common.Util
 
             try
             {
-                m_appcastUpdaterLock.EnterWriteLock();
+                appcastUpdaterLock.EnterWriteLock();
 
-                if (m_policyConfiguration.Configuration != null)
+                if (policyConfiguration.Configuration != null)
                 {
-                    var config = m_policyConfiguration.Configuration;
-                    m_lastFetchedUpdate = m_updater.GetLatestUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
+                    var config = policyConfiguration.Configuration;
+                    lastFetchedUpdate = updater.GetLatestUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
                 }
                 else
                 {
-                    m_logger.Info("No configuration downloaded yet. Skipping application update checks.");
+                    logger.Info("No configuration downloaded yet. Skipping application update checks.");
                 }
 
                 result = UpdateCheckResult.UpToDate;
 
-                if (m_lastFetchedUpdate?.IsNewerThan(m_lastFetchedUpdate?.CurrentVersion) == true)
+                if (lastFetchedUpdate?.IsNewerThan(lastFetchedUpdate?.CurrentVersion) == true)
                 {
-                    m_logger.Info("Found update. Asking clients to accept update.");
+                    logger.Info("Found update. Asking clients to accept update.");
 
                     if (!isCheckButton && AppSettings.Default.CanUpdate())
                     {
-                        m_systemServices.EnsureGuiRunning(true);
+                        systemServices.EnsureGuiRunning(true);
                         Task.Delay(500).Wait();
 
-                        m_ipcServer.Send<ApplicationUpdate>(IpcCall.Update, m_lastFetchedUpdate);
-                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
+                        ipcServer.Send<ApplicationUpdate>(IpcCall.Update, lastFetchedUpdate);
+                        ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
                     }
 
                     result = UpdateCheckResult.UpdateAvailable;
                 }
-                else if (m_lastFetchedUpdate != null)
+                else if (lastFetchedUpdate != null)
                 {
                     result = UpdateCheckResult.UpToDate;
 
                     // We send an update check response here for only !isCheckButton because the other case returns a reply directly to its request message.
                     if (!isCheckButton)
                     {
-                        m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
+                        ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
                     }
                 }
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
                 hadError = true;
             }
             finally
@@ -259,10 +259,10 @@ namespace FilterProvider.Common.Util
                 }
                 catch (Exception ex)
                 {
-                    m_logger.Error(ex, "AppSettings update threw.");
+                    logger.Error(ex, "AppSettings update threw.");
                 }
 
-                m_appcastUpdaterLock.ExitWriteLock();
+                appcastUpdaterLock.ExitWriteLock();
             }
 
             if (!hadError)
@@ -270,7 +270,7 @@ namespace FilterProvider.Common.Util
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
                 // back, so we just directly issue this msg.
-                m_ipcServer.NotifyStatus(FilterStatus.Synchronized);
+                ipcServer.NotifyStatus(FilterStatus.Synchronized);
             }
 
             return result;

@@ -41,7 +41,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                 catch(Exception ex)
                                 {
                                     MessageBox.Show("Could not save the computer information file to the location you specified. Please try again.");
-                                    m_logger.Error($"Could not save the computer info file: {ex}");
+                                    logger.Error($"Could not save the computer info file: {ex}");
                                 }
                             });
                         }

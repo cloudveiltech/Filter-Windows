@@ -81,7 +81,7 @@ namespace CloudVeilService.Services
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
                 }
 
-                //LoggerUtil.RecursivelyLogException(m_logger, e);
+                //LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
             }
         }
@@ -122,7 +122,7 @@ namespace CloudVeilService.Services
         /// </summary>
         private Logger logger;
 
-        private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim appcastUpdaterLock = new ReaderWriterLockSlim();
 
         private TrustManager trustManager = new TrustManager();
 

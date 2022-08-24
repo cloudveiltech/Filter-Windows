@@ -65,11 +65,11 @@ namespace FilterProvider.Common.Proxy.Certificate
         internal static readonly Regex CNRemoverRegex =
             new Regex(@"^CN\s*=\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         public BCCertificateMaker()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         /// <summary>

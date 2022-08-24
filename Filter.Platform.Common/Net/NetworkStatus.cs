@@ -24,22 +24,22 @@ namespace Filter.Platform.Common.Net
     {
         public event ConnectionStateChangeHandler ConnectionStateChanged;
 
-        private static NetworkStatus s_instance;
+        private static NetworkStatus instance;
 
         static NetworkStatus()
         {
-            s_instance = new NetworkStatus();
+            instance = new NetworkStatus();
         }
 
         public static NetworkStatus Default
         {
             get
             {
-                return s_instance;
+                return instance;
             }
         }
 
-        private INetworkInfo m_nListUtil;
+        private INetworkInfo nListUtil;
 
         /// <summary>
         /// Gets whether or not the device has internet access that is not proxied nor behind a
@@ -61,7 +61,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.BehindIPv4CaptivePortal;
+                return nListUtil.BehindIPv4CaptivePortal;
             }
         }
 
@@ -73,7 +73,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.BehindIPv6CaptivePortal;
+                return nListUtil.BehindIPv6CaptivePortal;
             }
         }
 
@@ -85,7 +85,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.BehindIPv4Proxy;
+                return nListUtil.BehindIPv4Proxy;
             }
         }
 
@@ -97,7 +97,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.BehindIPv6Proxy;
+                return nListUtil.BehindIPv6Proxy;
             }
         }
 
@@ -109,7 +109,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.HasIPv4InetConnection;
+                return nListUtil.HasIPv4InetConnection;
             }
         }
 
@@ -121,7 +121,7 @@ namespace Filter.Platform.Common.Net
         {
             get
             {
-                return m_nListUtil.HasIPv6InetConnection;
+                return nListUtil.HasIPv6InetConnection;
             }
         }
 
@@ -130,9 +130,9 @@ namespace Filter.Platform.Common.Net
         /// </summary>
         private NetworkStatus()
         {
-            m_nListUtil = PlatformTypes.New<INetworkInfo>();
+            nListUtil = PlatformTypes.New<INetworkInfo>();
 
-            m_nListUtil.ConnectionStateChanged += () =>
+            nListUtil.ConnectionStateChanged += () =>
             {
                 ConnectionStateChanged?.Invoke();
             };

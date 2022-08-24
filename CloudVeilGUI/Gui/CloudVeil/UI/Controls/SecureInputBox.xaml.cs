@@ -41,7 +41,7 @@ namespace Gui.CloudVeil.UI.Controls
             InitializeComponent();
 
             // Update DependencyProperty whenever the password changes
-            m_passwordBox.PasswordChanged += (sender, args) =>
+            passwordBox.PasswordChanged += (sender, args) =>
             {
                 Password = ((PasswordBox)sender).SecurePassword;
             };

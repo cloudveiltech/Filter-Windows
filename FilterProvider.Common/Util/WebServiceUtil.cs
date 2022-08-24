@@ -63,7 +63,7 @@ namespace FilterProvider.Common.Util
 
         public event GenericWebServiceUtilDelegate AuthTokenRejected;
 
-        private static readonly Dictionary<ServiceResource, string> m_namedResourceMap = new Dictionary<ServiceResource, string>
+        private static readonly Dictionary<ServiceResource, string> namedResourceMap = new Dictionary<ServiceResource, string>
         {
             { ServiceResource.UserConfigRequest, "/api/v2/me/config/get" },
             { ServiceResource.UserConfigSumCheck, "/api/v2/me/config/check" },
@@ -83,20 +83,20 @@ namespace FilterProvider.Common.Util
             { ServiceResource.ServerTime, "/api/v2/time" }
         };
 
-        private readonly Logger m_logger;
+        private readonly Logger logger;
 
-        private IAuthenticationStorage m_authStorage;
+        private IAuthenticationStorage authStorage;
 
         public string AuthToken
         {
             get
             {
-                return m_authStorage.AuthToken;
+                return authStorage.AuthToken;
             }
 
             set
             {
-                m_authStorage.AuthToken = value;
+                authStorage.AuthToken = value;
             }
         }
 
@@ -104,12 +104,12 @@ namespace FilterProvider.Common.Util
         {
             get
             {
-                return m_authStorage.UserEmail;
+                return authStorage.UserEmail;
             }
 
             set
             {
-                m_authStorage.UserEmail = value;
+                authStorage.UserEmail = value;
             }
         }
 
@@ -127,30 +127,30 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        private static WebServiceUtil s_instance;
+        private static WebServiceUtil instance;
 
         static WebServiceUtil()
         {
-            s_instance = new WebServiceUtil();
+            instance = new WebServiceUtil();
         }
 
         public static WebServiceUtil Default
         {
             get
             {
-                return s_instance;
+                return instance;
             }
         }
 
         private WebServiceUtil()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
-            m_authStorage = PlatformTypes.New<IAuthenticationStorage>();
+            logger = LoggerUtil.GetAppWideLogger();
+            authStorage = PlatformTypes.New<IAuthenticationStorage>();
         }
 
         public AuthenticationResultObject AuthenticateByPassword(string username, byte[] unencryptedPassword)
         {
-            m_logger.Error(nameof(AuthenticateByPassword));
+            logger.Error(nameof(AuthenticateByPassword));
 
             AuthenticationResultObject ret = new AuthenticationResultObject();
 
@@ -174,7 +174,7 @@ namespace FilterProvider.Common.Util
             var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
             if(hasInternet == false)
             {
-                m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
+                logger.Info("Aborting authentication attempt because no internet connection could be detected.");
                 ret.AuthenticationResult = AuthenticationResult.ConnectionFailed;
                 ret.AuthenticationMessage = "Aborting authentication attempt because no internet connection could be detected.";
                 return ret;
@@ -200,11 +200,11 @@ namespace FilterProvider.Common.Util
             HttpWebRequest authRequest = null;
             try
             {
-                authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
+                authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.GetToken], new ResourceOptions());
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", username, FingerprintService.Default.Value, deviceName, m_authStorage.DeviceId, m_authStorage.AuthId));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", username, FingerprintService.Default.Value, deviceName, authStorage.DeviceId, authStorage.AuthId));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -247,22 +247,22 @@ namespace FilterProvider.Common.Util
                         authRequest.Abort();
                         ret.AuthenticationResult = AuthenticationResult.Success;
 
-                        m_authStorage.DeviceId = deviceName;
-                        m_authStorage.AuthId = FingerprintService.Default.Value;
+                        authStorage.DeviceId = deviceName;
+                        authStorage.AuthId = FingerprintService.Default.Value;
                         return ret;
                     }
                     else
                     {
                         if(code == 401 || code == 403)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Authentication failed with code: {0}.", code);
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
                         else if(code > 399 && code < 499)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Authentication failed with code: {0}.", code);
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
@@ -274,7 +274,7 @@ namespace FilterProvider.Common.Util
                 // XXX TODO - Is this sufficient?
                 if(e.Status == WebExceptionStatus.Timeout)
                 {
-                    m_logger.Info("Authentication failed due to timeout.");
+                    logger.Info("Authentication failed due to timeout.");
                     connectionFailure = true;
                 }
 
@@ -283,7 +283,7 @@ namespace FilterProvider.Common.Util
                     using(WebResponse response = e.Response)
                     {
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        logger.Error("Error code: {0}", httpResponse.StatusCode);
 
                         string errorText = string.Empty;
 
@@ -298,7 +298,7 @@ namespace FilterProvider.Common.Util
                                 .Select(ch => excpList.Contains(ch) ? (char?)null : ch);
                             errorText = string.Concat(chRemoved.ToArray()) + "!";
 
-                            m_logger.Error("Stream errorText: " + errorText);
+                            logger.Error("Stream errorText: " + errorText);
                         }
 
                         int code = (int)httpResponse.StatusCode;
@@ -310,8 +310,8 @@ namespace FilterProvider.Common.Util
 
                         if (code > 399 && code < 499)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
-                            m_logger.Info("Athentication failure text: {0}", errorText);
+                            logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Athentication failure text: {0}", errorText);
                             ret.AuthenticationMessage = errorText;
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
@@ -322,23 +322,23 @@ namespace FilterProvider.Common.Util
                 }
                 catch(Exception iex)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, iex);
+                    LoggerUtil.RecursivelyLogException(logger, iex);
                 }
 
                 // Log the exception.
-                m_logger.Error(e.Message);
-                m_logger.Error(e.StackTrace);
+                logger.Error(e.Message);
+                logger.Error(e.StackTrace);
             }
             catch(Exception e)
             {
                 while(e != null)
                 {
-                    m_logger.Error(e.Message);
-                    m_logger.Error(e.StackTrace);
+                    logger.Error(e.Message);
+                    logger.Error(e.StackTrace);
                     e = e.InnerException;
                 }
 
-                m_logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
+                logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
                 WebServiceUtil.Default.AuthToken = string.Empty;
                 ret.AuthenticationResult = AuthenticationResult.Failure;
                 return ret;
@@ -358,7 +358,7 @@ namespace FilterProvider.Common.Util
                 }
             }
 
-            m_logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
+            logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
 
             // If we had success, we should/would have returned by now.
             if(!connectionFailure)
@@ -372,7 +372,7 @@ namespace FilterProvider.Common.Util
         }
         public AuthenticationResultObject AuthenticateByEmail(string email)
         {
-            m_logger.Error(nameof(AuthenticateByEmail));
+            logger.Error(nameof(AuthenticateByEmail));
 
             AuthenticationResultObject ret = new AuthenticationResultObject();
 
@@ -388,7 +388,7 @@ namespace FilterProvider.Common.Util
             var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
             if (hasInternet == false)
             {
-                m_logger.Info("Aborting authentication attempt because no internet connection could be detected.");
+                logger.Info("Aborting authentication attempt because no internet connection could be detected.");
                 ret.AuthenticationResult = AuthenticationResult.ConnectionFailed;
                 ret.AuthenticationMessage = "Aborting authentication attempt because no internet connection could be detected.";
                 return ret;
@@ -414,11 +414,11 @@ namespace FilterProvider.Common.Util
             HttpWebRequest authRequest = null;
             try
             {
-                authRequest = GetApiBaseRequest(m_namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
+                authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", email, FingerprintService.Default.Value, deviceName, m_authStorage.DeviceId, m_authStorage.AuthId));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", email, FingerprintService.Default.Value, deviceName, authStorage.DeviceId, authStorage.AuthId));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -448,22 +448,22 @@ namespace FilterProvider.Common.Util
                         authRequest.Abort();
                         ret.AuthenticationResult = AuthenticationResult.Success;
 
-                        m_authStorage.DeviceId = deviceName;
-                        m_authStorage.AuthId = FingerprintService.Default.Value;
+                        authStorage.DeviceId = deviceName;
+                        authStorage.AuthId = FingerprintService.Default.Value;
                         return ret;
                     }
                     else
                     {
                         if (code == 401 || code == 403)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Authentication failed with code: {0}.", code);
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
                         else if (code > 399 && code < 499)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Authentication failed with code: {0}.", code);
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
@@ -475,7 +475,7 @@ namespace FilterProvider.Common.Util
                 // XXX TODO - Is this sufficient?
                 if (e.Status == WebExceptionStatus.Timeout)
                 {
-                    m_logger.Info("Authentication failed due to timeout.");
+                    logger.Info("Authentication failed due to timeout.");
                     connectionFailure = true;
                 }
 
@@ -484,7 +484,7 @@ namespace FilterProvider.Common.Util
                     using (WebResponse response = e.Response)
                     {
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        logger.Error("Error code: {0}", httpResponse.StatusCode);
 
                         string errorText = string.Empty;
 
@@ -499,7 +499,7 @@ namespace FilterProvider.Common.Util
                                 .Select(ch => excpList.Contains(ch) ? (char?)null : ch);
                             errorText = string.Concat(chRemoved.ToArray()) + "!";
 
-                            m_logger.Error("Stream errorText: " + errorText);
+                            logger.Error("Stream errorText: " + errorText);
                         }
 
                         int code = (int)httpResponse.StatusCode;
@@ -511,8 +511,8 @@ namespace FilterProvider.Common.Util
 
                         if (code > 399 && code < 499)
                         {
-                            m_logger.Info("Authentication failed with code: {0}.", code);
-                            m_logger.Info("Athentication failure text: {0}", errorText);
+                            logger.Info("Authentication failed with code: {0}.", code);
+                            logger.Info("Athentication failure text: {0}", errorText);
                             ret.AuthenticationMessage = errorText;
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
@@ -523,23 +523,23 @@ namespace FilterProvider.Common.Util
                 }
                 catch (Exception iex)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, iex);
+                    LoggerUtil.RecursivelyLogException(logger, iex);
                 }
 
                 // Log the exception.
-                m_logger.Error(e.Message);
-                m_logger.Error(e.StackTrace);
+                logger.Error(e.Message);
+                logger.Error(e.StackTrace);
             }
             catch (Exception e)
             {
                 while (e != null)
                 {
-                    m_logger.Error(e.Message);
-                    m_logger.Error(e.StackTrace);
+                    logger.Error(e.Message);
+                    logger.Error(e.StackTrace);
                     e = e.InnerException;
                 }
 
-                m_logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
+                logger.Info("Authentication failed due to a failure to process the request and response. Attempted URL {0}", authRequest?.RequestUri);
                 WebServiceUtil.Default.AuthToken = string.Empty;
                 ret.AuthenticationResult = AuthenticationResult.Failure;
                 return ret;
@@ -552,7 +552,7 @@ namespace FilterProvider.Common.Util
                 }
             }
 
-            m_logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
+            logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
 
             // If we had success, we should/would have returned by now.
             if (!connectionFailure)
@@ -680,7 +680,7 @@ namespace FilterProvider.Common.Util
 
             if(ret == null)
             {
-                m_logger.Warn("No response text returned from {0}. Status code = {1}, Response received = {2}", m_namedResourceMap[ServiceResource.RuleDataSumCheck], code, responseReceived);
+                logger.Warn("No response text returned from {0}. Status code = {1}, Response received = {2}", namedResourceMap[ServiceResource.RuleDataSumCheck], code, responseReceived);
                 return null;
             }
 
@@ -748,7 +748,7 @@ namespace FilterProvider.Common.Util
 
         public byte[] RequestResource(ServiceResource resource, out HttpStatusCode code, out bool responseReceived, ResourceOptions options = null)
         {
-            return RequestResource(m_namedResourceMap[resource], out code, out responseReceived, options, resource);
+            return RequestResource(namedResourceMap[resource], out code, out responseReceived, options, resource);
         }
 
         /// <summary>
@@ -795,15 +795,15 @@ namespace FilterProvider.Common.Util
 
                 var accessToken = WebServiceUtil.Default.AuthToken;
 
-                //m_logger.Info("RequestResource1: accessToken=" + accessToken);
+                //logger.Info("RequestResource1: accessToken=" + accessToken);
                 IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
                 string version = versionProvider.GetApplicationVersion().ToString(3);
 
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
                 parameters.Add("device_id", deviceName);
-                parameters.Add("identifier_2", m_authStorage.AuthId);
-                parameters.Add("device_id_2", m_authStorage.DeviceId);
+                parameters.Add("identifier_2", authStorage.AuthId);
+                parameters.Add("device_id_2", authStorage.DeviceId);
                 parameters.Add("os", "WIN");                
 
                 string postString = null;
@@ -819,7 +819,7 @@ namespace FilterProvider.Common.Util
 
                 if (resource == ServiceResource.UserDataSumCheck || resource == ServiceResource.UserConfigSumCheck)
                 {
-                    m_logger.Info("Sending version {0} to server", version);
+                    logger.Info("Sending version {0} to server", version);
                     parameters.Add("app_version", version);
                 }
 
@@ -840,13 +840,13 @@ namespace FilterProvider.Common.Util
 
                     if(postString.Contains("app_version"))
                     {
-                        m_logger.Info("Sending postString as {0}", resourceUri);
+                        logger.Info("Sending postString as {0}", resourceUri);
                     }
                 }
 
                 var request = GetApiBaseRequest(resourceUri, options);
 
-                m_logger.Debug("WebServiceUtil.Request {0}", request.RequestUri);
+                logger.Debug("WebServiceUtil.Request {0}", request.RequestUri);
 
                 if (StringExtensions.Valid(accessToken))
                 {
@@ -854,7 +854,7 @@ namespace FilterProvider.Common.Util
                 }
                 else if (resource != ServiceResource.RetrieveToken)
                 {
-                    m_logger.Info("RequestResource1: Authorization failed.");
+                    logger.Info("RequestResource1: Authorization failed.");
 
                     reportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
@@ -865,7 +865,7 @@ namespace FilterProvider.Common.Util
                 {
                     if (postString.Contains("app_version"))
                     {
-                        m_logger.Info("Sending {0} to server as {1}", postString, options.Method);
+                        logger.Info("Sending {0} to server as {1}", postString, options.Method);
                     }
 
                     var formData = System.Text.Encoding.UTF8.GetBytes(postString);
@@ -878,7 +878,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                m_logger.Info("RequestResource: uri={0}", request.RequestUri);
+                logger.Info("RequestResource: uri={0}", request.RequestUri);
                 
                 // Now that our login form data has been POST'ed, get a response.
                 using (var response = (HttpWebResponse)request.GetResponse())
@@ -893,8 +893,8 @@ namespace FilterProvider.Common.Util
                         // Check if response code is considered a success code.
                         if (intCode >= 200 && intCode <= 299)
                         {
-                            m_authStorage.DeviceId = deviceName;
-                            m_authStorage.AuthId = FingerprintService.Default.Value;
+                            authStorage.DeviceId = deviceName;
+                            authStorage.AuthId = FingerprintService.Default.Value;
 
                             using (var memoryStream = new MemoryStream())
                             {
@@ -913,7 +913,7 @@ namespace FilterProvider.Common.Util
                         }
                         else
                         {
-                            m_logger.Info("When requesting resource, got unexpected response code of {0}.", code);
+                            logger.Info("When requesting resource, got unexpected response code of {0}.", code);
                         }
                     }
                     finally
@@ -940,7 +940,7 @@ namespace FilterProvider.Common.Util
                             return null;
                         }
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        logger.Error("Error code: {0}", httpResponse.StatusCode);
 
                         int intCode = (int)httpResponse.StatusCode;
 
@@ -950,20 +950,20 @@ namespace FilterProvider.Common.Util
                         if((intCode == 401 || intCode == 403) && resource != ServiceResource.DeactivationRequest)
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
-                            m_logger.Info("RequestResource2: Authorization failed.");
+                            logger.Info("RequestResource2: Authorization failed.");
                             reportTokenRejected();
                         }
                         else if(intCode > 399 && intCode <= 499 && resource != ServiceResource.DeactivationRequest)
                         {
                             reportTokenAccepted();
-                            m_logger.Info("Error occurred in RequestResource: {0}", intCode);
+                            logger.Info("Error occurred in RequestResource: {0}", intCode);
                         }
 
                         using(Stream data = response.GetResponseStream())
                         using(var reader = new StreamReader(data))
                         {
                             string text = reader.ReadToEnd();
-                            m_logger.Error(text);
+                            logger.Error(text);
                         }
                     }
                 }
@@ -971,8 +971,8 @@ namespace FilterProvider.Common.Util
 
                 if(!options.NoLogging)
                 {
-                    m_logger.Error(e.Message);
-                    m_logger.Error(e.StackTrace);
+                    logger.Error(e.Message);
+                    logger.Error(e.StackTrace);
                 }
             }
             catch(Exception e)
@@ -984,8 +984,8 @@ namespace FilterProvider.Common.Util
                 {
                     while(e != null)
                     {
-                        m_logger.Error(e.Message);
-                        m_logger.Error(e.StackTrace);
+                        logger.Error(e.Message);
+                        logger.Error(e.StackTrace);
                         e = e.InnerException;
                     }
                 }
@@ -1074,7 +1074,7 @@ namespace FilterProvider.Common.Util
                     deviceName = "Unknown";
                 }
 
-                var request = GetApiBaseRequest(m_namedResourceMap[resource], new ResourceOptions());
+                var request = GetApiBaseRequest(namedResourceMap[resource], new ResourceOptions());
 
                 var accessToken = WebServiceUtil.Default.AuthToken;
 
@@ -1084,7 +1084,7 @@ namespace FilterProvider.Common.Util
                 }
                 else
                 {
-                    m_logger.Info("SendResource1: Authorization failed.");
+                    logger.Info("SendResource1: Authorization failed.");
                     reportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
                     return false;
@@ -1145,27 +1145,27 @@ namespace FilterProvider.Common.Util
                     using(WebResponse response = e.Response)
                     {
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        m_logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        logger.Error("Error code: {0}", httpResponse.StatusCode);
 
                         int intCode = (int)httpResponse.StatusCode;
 
                         if(intCode == 401 || intCode == 403)
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
-                            m_logger.Info("SendResource2: Authorization failed.");
+                            logger.Info("SendResource2: Authorization failed.");
                             reportTokenRejected();
                         }
                         else if(intCode > 399 && intCode < 499)
                         {
                             reportTokenAccepted();
-                            m_logger.Info("SendResource2: Failed with client code {0}", intCode);
+                            logger.Info("SendResource2: Failed with client code {0}", intCode);
                         }
 
                         using(Stream data = response.GetResponseStream())
                         using(var reader = new StreamReader(data))
                         {
                             string text = reader.ReadToEnd();
-                            m_logger.Error(text);
+                            logger.Error(text);
                         }
                     }
                 }
@@ -1173,8 +1173,8 @@ namespace FilterProvider.Common.Util
 
                 if(noLogging == false)
                 {
-                    m_logger.Error(e.Message);
-                    m_logger.Error(e.StackTrace);
+                    logger.Error(e.Message);
+                    logger.Error(e.StackTrace);
                 }
             }
             catch(Exception e)
@@ -1186,8 +1186,8 @@ namespace FilterProvider.Common.Util
                 {
                     while(e != null)
                     {
-                        m_logger.Error(e.Message);
-                        m_logger.Error(e.StackTrace);
+                        logger.Error(e.Message);
+                        logger.Error(e.StackTrace);
                         e = e.InnerException;
                     }
                 }

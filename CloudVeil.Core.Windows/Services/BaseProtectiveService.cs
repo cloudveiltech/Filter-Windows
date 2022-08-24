@@ -26,28 +26,28 @@ namespace CloudVeil.Core.Windows.Services
         /// <summary>
         /// The base directory where we are to launch the process we're protecting from if we need to. 
         /// </summary>
-        private readonly string m_baseDirectory;
+        private readonly string baseDirectory;
 
         /// <summary>
         /// The absolute path to the binary for the process that we're watching. 
         /// </summary>
-        private readonly string m_processBinaryAbsPath;
+        private readonly string processBinaryAbsPath;
 
         /// <summary>
         /// The process name of the process we are to keep alive. 
         /// </summary>
-        private readonly string m_processToWatch;
+        private readonly string processToWatch;
 
         /// <summary>
         /// Whether or not our target is a service. 
         /// </summary>
-        private readonly bool m_isTargetService;
+        private readonly bool isTargetService;
 
-        private Process m_processHandle = null;
+        private Process processHandle = null;
 
-        private string m_mutexName = string.Empty;
+        private string mutexName = string.Empty;
 
-        private static readonly HashSet<char> s_toRemoveFromPath = new HashSet<char>
+        private static readonly HashSet<char> toRemoveFromPath = new HashSet<char>
         {
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar,
@@ -72,13 +72,13 @@ namespace CloudVeil.Core.Windows.Services
         /// </param>
         public BaseProtectiveService(string processNameToObserve, bool isService, bool ensureRunning = true)
         {
-            m_processToWatch = processNameToObserve;
-            m_baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(BaseProtectiveService)).Location);
-            m_processBinaryAbsPath = Path.Combine(m_baseDirectory, string.Format("{0}.exe", processNameToObserve));
+            processToWatch = processNameToObserve;
+            baseDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(BaseProtectiveService)).Location);
+            processBinaryAbsPath = Path.Combine(baseDirectory, string.Format("{0}.exe", processNameToObserve));
 
-            m_mutexName = string.Join("", m_processBinaryAbsPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
+            mutexName = string.Join("", processBinaryAbsPath.Where(x => !toRemoveFromPath.Contains(x)).ToList());
 
-            m_isTargetService = isService;
+            isTargetService = isService;
 
             if (ensureRunning)
             {
@@ -90,11 +90,11 @@ namespace CloudVeil.Core.Windows.Services
 
         public void EnsureAlreadyRunning()
         {
-            Console.WriteLine($"EnsureAlreadyRunning {m_processToWatch}");
+            Console.WriteLine($"EnsureAlreadyRunning {processToWatch}");
 
             foreach(var proc in Process.GetProcesses())
             {
-                if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase) && !proc.HasExited)
+                if(proc.ProcessName.Equals(processToWatch, StringComparison.OrdinalIgnoreCase) && !proc.HasExited)
                 {
                     // Found the process already alive. Return and do nothing.
                     Console.WriteLine($"Process was alive {proc.HasExited}");
@@ -110,21 +110,21 @@ namespace CloudVeil.Core.Windows.Services
 
         private void SetProcessHandle(Process proc)
         {
-            if(m_processHandle != null)
+            if(processHandle != null)
             {
                 try
                 {
-                    m_processHandle.Exited -= OnProcExit;
+                    processHandle.Exited -= OnProcExit;
                 }
                 catch { }
             }
 
-            m_processHandle = proc;
+            processHandle = proc;
 
             try
             {
-                m_processHandle.EnableRaisingEvents = true;
-                m_processHandle.Exited += OnProcExit;
+                processHandle.EnableRaisingEvents = true;
+                processHandle.Exited += OnProcExit;
             }
             catch(Exception ex)
             {
@@ -150,9 +150,9 @@ namespace CloudVeil.Core.Windows.Services
         private void OnProcExit(object sender, EventArgs e)
         {
             var exitCode = -1;
-            if(m_processHandle != null)
+            if(processHandle != null)
             {
-                exitCode = m_processHandle.ExitCode;
+                exitCode = processHandle.ExitCode;
             }
 
             if(exitCode < (int)ExitCodes.ShutdownWithSafeguards)
@@ -170,26 +170,26 @@ namespace CloudVeil.Core.Windows.Services
             bool success = false;
 
             bool createdNew = true;
-            var mutex = new Mutex(true, string.Format(@"Global\{0}", m_mutexName), out createdNew);
+            var mutex = new Mutex(true, string.Format(@"Global\{0}", mutexName), out createdNew);
 
             try
             {
-                if(File.Exists(m_processBinaryAbsPath))
+                if(File.Exists(processBinaryAbsPath))
                 {
                     if(createdNew)
                     {
-                        switch(m_isTargetService)
+                        switch(isTargetService)
                         {
                             case true:
                             {
-                                var uninstallStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                var uninstallStartInfo = new ProcessStartInfo(processBinaryAbsPath);
                                 uninstallStartInfo.Arguments = "Uninstall";
                                 uninstallStartInfo.UseShellExecute = false;
                                 uninstallStartInfo.CreateNoWindow = true;
                                 var uninstallProc = Process.Start(uninstallStartInfo);
                                 uninstallProc.WaitForExit();
 
-                                var installStartInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                var installStartInfo = new ProcessStartInfo(processBinaryAbsPath);
                                 installStartInfo.Arguments = "Install";
                                 installStartInfo.UseShellExecute = false;
                                 installStartInfo.CreateNoWindow = true;
@@ -201,7 +201,7 @@ namespace CloudVeil.Core.Windows.Services
 
                                 foreach(var service in ServiceController.GetServices())
                                 {
-                                    if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(m_processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
+                                    if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
                                     {
                                         if(service.Status == ServiceControllerStatus.StartPending)
                                         {
@@ -224,7 +224,7 @@ namespace CloudVeil.Core.Windows.Services
                             {
                                 try
                                 {
-                                    var startInfo = new ProcessStartInfo(m_processBinaryAbsPath);
+                                    var startInfo = new ProcessStartInfo(processBinaryAbsPath);
                                     startInfo.LoadUserProfile = true;
                                     startInfo.UseShellExecute = false;
                                     startInfo.CreateNoWindow = false;
@@ -276,7 +276,7 @@ namespace CloudVeil.Core.Windows.Services
             {
                 foreach(var proc in Process.GetProcesses())
                 {
-                    if(proc.ProcessName.Equals(m_processToWatch, StringComparison.OrdinalIgnoreCase))
+                    if(proc.ProcessName.Equals(processToWatch, StringComparison.OrdinalIgnoreCase))
                     {
                         SetProcessHandle(proc);
                         break;

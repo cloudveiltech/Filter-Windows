@@ -14,29 +14,29 @@ namespace Gui.CloudVeil.UI.ViewModels
     {
         public DiagnosticsEntryViewModel(MainWindow mainWindow, DiagnosticsEntry entry)
         {
-            m_mainWindow = mainWindow;
+            this.mainWindow = mainWindow;
 
             Entry = entry;
         }
 
         public DiagnosticsEntry Entry { get; set; }
 
-        private MainWindow m_mainWindow;
+        private MainWindow mainWindow;
 
-        private RelayCommand m_viewTestDetails;
+        private RelayCommand viewTestDetails;
         public RelayCommand ViewTestDetails
         {
             get
             {
-                if (m_viewTestDetails == null)
+                if (viewTestDetails == null)
                 {
-                    m_viewTestDetails = new RelayCommand(() =>
+                    viewTestDetails = new RelayCommand(() =>
                     {
-                        m_mainWindow.ShowUserMessage("Test Details", Entry.Details == null ? "No details available." : Entry.Details);
+                        mainWindow.ShowUserMessage("Test Details", Entry.Details == null ? "No details available." : Entry.Details);
                     });
                 }
 
-                return m_viewTestDetails;
+                return viewTestDetails;
             }
         }
 

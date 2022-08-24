@@ -76,7 +76,7 @@ namespace FilterProvider.Common.Configuration
 
         public ReaderWriterLockSlim PolicyLock => policyLock;
 
-        //private FilterDbCollection m_filterCollection;
+        //private FilterDbCollection filterCollection;
 
         private BagOfTextTriggers textTriggers;
 
@@ -84,9 +84,9 @@ namespace FilterProvider.Common.Configuration
         /// Whenever we load filtering rules, we simply make up numbers for categories as we go
         /// along. We use this object to store what strings we map to numbers.
         /// </summary>
-        private ConcurrentDictionary<string, MappedFilterListCategoryModel> m_generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
+        private ConcurrentDictionary<string, MappedFilterListCategoryModel> generatedCategoriesMap = new ConcurrentDictionary<string, MappedFilterListCategoryModel>(StringComparer.OrdinalIgnoreCase);
 
-        private CategoryIndex m_categoryIndex = new CategoryIndex(short.MaxValue);
+        private CategoryIndex categoryIndex = new CategoryIndex(short.MaxValue);
 
         static DefaultPolicyConfiguration()
         {
@@ -108,7 +108,7 @@ namespace FilterProvider.Common.Configuration
 
         public AppConfigModel Configuration { get; set; }
 
-        //public FilterDbCollection FilterCollection { get { return m_filterCollection; } }
+        //public FilterDbCollection FilterCollection { get { return filterCollection; } }
         public BagOfTextTriggers TextTriggers { get { return textTriggers; } }
 
         /// <summary>
@@ -124,9 +124,9 @@ namespace FilterProvider.Common.Configuration
         public HashSet<Glob> BlacklistedApplicationGlobs { get; private set; } = new HashSet<Glob>();
         public HashSet<Glob> WhitelistedApplicationGlobs { get; private set; } = new HashSet<Glob>();
 
-        public CategoryIndex CategoryIndex { get { return m_categoryIndex; } }
+        public CategoryIndex CategoryIndex { get { return categoryIndex; } }
 
-        public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get { return m_generatedCategoriesMap; } }
+        public ConcurrentDictionary<string, MappedFilterListCategoryModel> GeneratedCategoriesMap { get { return generatedCategoriesMap; } }
 
         public TimeRestrictionModel[] TimeRestrictions { get; private set; }
         public bool AreAnyTimeRestrictionsEnabled { get; private set; }
@@ -508,14 +508,14 @@ namespace FilterProvider.Common.Configuration
                         textTriggers.Dispose();
                     }
 
-                    m_categoryIndex.SetAll(false);
+                    categoryIndex.SetAll(false);
 
                     // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                     // be an in-memory DB or not.
                     textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, logger);
 
                     // Now clear all generated categories. These will be re-generated as needed.
-                    m_generatedCategoriesMap.Clear();
+                    generatedCategoriesMap.Clear();
 
                     uint totalFilterRulesLoaded = 0;
                     uint totalFilterRulesFailed = 0;
@@ -549,7 +549,7 @@ namespace FilterProvider.Common.Configuration
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
                                             AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Blacklist);
-                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                            categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                         }
                                     }
                                     break;
@@ -562,7 +562,7 @@ namespace FilterProvider.Common.Configuration
                                         if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out bypassCategoryModel))
                                         {
                                             AdBlockMatcherApi.ParseRuleFile(rulesetPath, bypassCategoryModel.CategoryId, ListType.BypassList);
-                                            m_categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
+                                            categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
                                             GC.Collect();
                                         }
                                     }
@@ -583,7 +583,7 @@ namespace FilterProvider.Common.Configuration
 
                                                     if (triggersLoaded > 0)
                                                     {
-                                                        m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                                        categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                                     }
                                                 }
                                                 catch(Exception ex)
@@ -602,7 +602,7 @@ namespace FilterProvider.Common.Configuration
                                         if(TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
                                             AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Whitelist);
-                                            m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                            categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                         }
 
                                         GC.Collect();
@@ -625,7 +625,7 @@ namespace FilterProvider.Common.Configuration
 
                             if (triggersLoaded > 0)
                             {
-                                m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                                categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
 
                             logger.Info("Number of triggers loaded for CustomTriggerBlacklist {0}", triggersLoaded);
@@ -634,12 +634,12 @@ namespace FilterProvider.Common.Configuration
 
                     if(Configuration != null && Configuration.CustomWhitelist != null && Configuration.CustomWhitelist.Count > 0)
                     {
-                        AddCustomConfiguredSiteList(Configuration.CustomWhitelist, tempFolder, ".user.custom_whitelist.rules.txt", "/user/custom_whitelist", PlainTextFilteringListType.Whitelist, ListType.Whitelist);
+                        AddCustomConfiguredSiteList(Configuration.CustomWhitelist, tempFolder, ".user.custowhitelist.rules.txt", "/user/custowhitelist", PlainTextFilteringListType.Whitelist, ListType.Whitelist);
                     }
 
                     if (Configuration != null && Configuration.CustomBypasslist != null && Configuration.CustomBypasslist.Count > 0)
                     {
-                        AddCustomConfiguredSiteList(Configuration.CustomBypasslist, tempFolder, ".user.custom_bypasslist.rules.txt", "/user/custom_bypasslist", PlainTextFilteringListType.BypassList, ListType.BypassList);
+                        AddCustomConfiguredSiteList(Configuration.CustomBypasslist, tempFolder, ".user.custobypasslist.rules.txt", "/user/custobypasslist", PlainTextFilteringListType.BypassList, ListType.BypassList);
                     }
 
                     if (Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
@@ -647,8 +647,8 @@ namespace FilterProvider.Common.Configuration
                         AddCustomConfiguredSiteList(Configuration.SelfModeration, tempFolder, ".user.self_moderation.rules.txt", "/user/self_moderation", PlainTextFilteringListType.Blacklist, ListType.Blacklist);
                     }
 
-                    //m_filterCollection.FinalizeForRead();
-                    //m_filterCollection.InitializeBloomFilters();
+                    //filterCollection.FinalizeForRead();
+                    //filterCollection.InitializeBloomFilters();
 
                     textTriggers.FinalizeForRead();
                     textTriggers.InitializeBloomFilters();
@@ -705,7 +705,7 @@ namespace FilterProvider.Common.Configuration
                 if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
                 {
                     AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
-                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                    categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                 }
             }
             else
@@ -714,7 +714,7 @@ namespace FilterProvider.Common.Configuration
                 if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
                 {
                     AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
-                    m_categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
+                    categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                 }
             }
         }
@@ -893,10 +893,10 @@ namespace FilterProvider.Common.Configuration
             logger.Info("CATEGORY {0}", categoryName);
 
             MappedFilterListCategoryModel existingCategory = null;
-            if (!m_generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+            if (!generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
             {
                 // We can't generate anymore categories. Sorry, but the rest get ignored.
-                if (m_generatedCategoriesMap.Count >= short.MaxValue)
+                if (generatedCategoriesMap.Count >= short.MaxValue)
                 {
                     logger.Error("The maximum number of filtering categories has been exceeded.");
                     model = null;
@@ -909,8 +909,8 @@ namespace FilterProvider.Common.Configuration
 
                     if (TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", PlainTextFilteringListType.Whitelist, out secondCategory))
                     {
-                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
-                        m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
+                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
+                        generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                         model = newModel;
                         return true;
                     }
@@ -922,8 +922,8 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((m_generatedCategoriesMap.Count) + 1), categoryName, listType);
-                    m_generatedCategoriesMap.GetOrAdd(categoryName, newModel);
+                    var newModel = (T)new MappedFilterListCategoryModel((byte)((generatedCategoriesMap.Count) + 1), categoryName, listType);
+                    generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                     model = newModel;
                     return true;
                 }

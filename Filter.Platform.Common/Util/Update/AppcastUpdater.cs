@@ -30,9 +30,9 @@ namespace CloudVeil.Core.Windows.Util.Update
     /// </summary>
     public class AppcastUpdater
     {
-        private Uri m_appcastLocationUri;
+        private Uri appcastLocationUri;
 
-        private Logger m_logger;
+        private Logger logger;
 
         /// <summary>
         /// Constructs a new AppcastUpdater with the given URI, a URI to an appcast this class will
@@ -43,9 +43,9 @@ namespace CloudVeil.Core.Windows.Util.Update
         /// </param>
         public AppcastUpdater(Uri appcastLocation)
         {
-            m_appcastLocationUri = appcastLocation;
+            appcastLocationUri = appcastLocation;
 
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace CloudVeil.Core.Windows.Util.Update
                     string appInfoPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil", @"update.xml");
                     if(!File.Exists(appInfoPath))
                     {
-                        appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+                        appInfo = await cli.GetStringAsync(appcastLocationUri);
                     }
                     else
                     {
@@ -89,7 +89,7 @@ namespace CloudVeil.Core.Windows.Util.Update
                         }
                     }
 #else
-                    appInfo = await cli.GetStringAsync(m_appcastLocationUri);
+                    appInfo = await cli.GetStringAsync(appcastLocationUri);
 #endif
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
@@ -106,7 +106,7 @@ namespace CloudVeil.Core.Windows.Util.Update
 
                             if (StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
-                                m_logger.Info($"Skipping app update in channel {updateChannel} because it doesn't match required channel {myUpdateChannel}.", updateChannel, myUpdateChannel);
+                                logger.Info($"Skipping app update in channel {updateChannel} because it doesn't match required channel {myUpdateChannel}.", updateChannel, myUpdateChannel);
                                 continue;
                             }
 
@@ -129,13 +129,13 @@ namespace CloudVeil.Core.Windows.Util.Update
             {
                 // Failed to load. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
-                LoggerUtil.RecursivelyLogException(m_logger, we);
+                LoggerUtil.RecursivelyLogException(logger, we);
             }
             catch (Exception e)
             {
                 // Other unknown failure. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
 
             return bestAvailableUpdate;

@@ -159,11 +159,11 @@ namespace CloudVeilCore.Windows.WinAPI
 
     internal class Tcp4ConnectionInfo : ITcpConnectionInfo
     {
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         public Tcp4ConnectionInfo()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public ushort LocalPort
@@ -206,7 +206,7 @@ namespace CloudVeilCore.Windows.WinAPI
                 }
                 catch(Exception e)
                 {
-                    m_logger.Error(e);
+                    logger.Error(e);
                 }
 
                 return string.Empty;

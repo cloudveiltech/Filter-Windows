@@ -40,7 +40,7 @@ namespace CloudVeil.Core.Windows.Util
             INSTALLED_FILTER_ID = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName);
         }
 
-        public static readonly Logger s_logger = LoggerUtil.GetAppWideLogger();
+        public static readonly Logger logger = LoggerUtil.GetAppWideLogger();
 
         /// <summary>
         /// Disables all outbound traffic from this device persistently until this action is
@@ -56,17 +56,17 @@ namespace CloudVeil.Core.Windows.Util
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to open filter engine handle: " + result);
+                        logger.Info("Failed to open filter engine handle: " + result);
                     }
 
                     return;
                 }
 
-                if(s_logger != null)
+                if(logger != null)
                 {
-                    s_logger.Info("Filter engine handle opened successfully.");
+                    logger.Info("Filter engine handle opened successfully.");
                 }
 
                 FWPM_FILTER0_ fwpFilter = new FWPM_FILTER0_();
@@ -109,27 +109,27 @@ namespace CloudVeil.Core.Windows.Util
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to add filter: " + result);
+                        logger.Info("Failed to add filter: " + result);
                     }
 
                     NativeMethods.FwpmEngineClose0(engineHandle);
                     return;
                 }
 
-                if(s_logger != null)
+                if(logger != null)
                 {
-                    s_logger.Info("Filter added successfully.");
+                    logger.Info("Filter added successfully.");
                 }
 
                 result = NativeMethods.FwpmEngineClose0(engineHandle);
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to close install handle: " + result);
+                        logger.Info("Failed to close install handle: " + result);
                     }
 
                     return;
@@ -137,7 +137,7 @@ namespace CloudVeil.Core.Windows.Util
             }
             catch(Exception e)
             {
-                LoggerUtil.RecursivelyLogException(s_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
@@ -154,17 +154,17 @@ namespace CloudVeil.Core.Windows.Util
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to open filter engine handle: " + result);
+                        logger.Info("Failed to open filter engine handle: " + result);
                     }
 
                     return;
                 }
 
-                if(s_logger != null)
+                if(logger != null)
                 {
-                    s_logger.Info("Filter engine handle opened successfully.");
+                    logger.Info("Filter engine handle opened successfully.");
                 }
 
                 var nativeGuid = new GUID();
@@ -182,27 +182,27 @@ namespace CloudVeil.Core.Windows.Util
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to delete old installed filter: " + result);
+                        logger.Info("Failed to delete old installed filter: " + result);
                     }
 
                     NativeMethods.FwpmEngineClose0(engineHandle);
                     return;
                 }
 
-                if(s_logger != null)
+                if(logger != null)
                 {
-                    s_logger.Info("Old handle uninstalled successfully successfully.");
+                    logger.Info("Old handle uninstalled successfully successfully.");
                 }
 
                 result = NativeMethods.FwpmEngineClose0(engineHandle);
 
                 if(result != 0)
                 {
-                    if(s_logger != null)
+                    if(logger != null)
                     {
-                        s_logger.Info("Failed to close uninstall handle: " + result);
+                        logger.Info("Failed to close uninstall handle: " + result);
                     }
 
                     return;
@@ -210,7 +210,7 @@ namespace CloudVeil.Core.Windows.Util
             }
             catch(Exception e)
             {
-                LoggerUtil.RecursivelyLogException(s_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
     }

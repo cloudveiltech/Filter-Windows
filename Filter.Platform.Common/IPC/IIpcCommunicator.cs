@@ -14,11 +14,11 @@ namespace CloudVeil.IPC
     /// </summary>
     public abstract class IpcCommunicator
     {
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         public IpcCommunicator()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         protected Dictionary<IpcCall, IpcMessageHandler> responseHandlers = new Dictionary<IpcCall, IpcMessageHandler>();

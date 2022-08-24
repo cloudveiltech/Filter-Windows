@@ -17,13 +17,13 @@ namespace Filter.Platform.Common.Util
 
         }
 
-        private Dictionary<string, string> m_authDict;
+        private Dictionary<string, string> authDict;
 
         private void initializeDictionary()
         {
-            if (m_authDict == null)
+            if (authDict == null)
             {
-                m_authDict = new Dictionary<string, string>();
+                authDict = new Dictionary<string, string>();
 
 
             }
@@ -48,7 +48,7 @@ namespace Filter.Platform.Common.Util
                 {
                     string[] lineParts = line.Split(new char[] { '=' }, 1);
 
-                    m_authDict[lineParts[0]] = lineParts[1];
+                    authDict[lineParts[0]] = lineParts[1];
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace Filter.Platform.Common.Util
             using (FileStream stream = new FileStream(fileName, FileMode.Create))
             using (StreamWriter writer = new StreamWriter(stream))
             {
-                foreach (var pair in m_authDict)
+                foreach (var pair in authDict)
                 {
                     writer.WriteLine($"{pair.Key}={pair.Value}");
                 }
@@ -74,7 +74,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 string value = null;
-                m_authDict.TryGetValue("AuthToken", out value);
+                authDict.TryGetValue("AuthToken", out value);
 
                 return value;
             }
@@ -83,7 +83,7 @@ namespace Filter.Platform.Common.Util
             {
                 initializeDictionary();
 
-                m_authDict["AuthToken"] = value;
+                authDict["AuthToken"] = value;
                 saveDictionary();
             }
         }
@@ -95,7 +95,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 string value = null;
-                m_authDict.TryGetValue("UserEmail", out value);
+                authDict.TryGetValue("UserEmail", out value);
 
                 return value;
             }
@@ -104,7 +104,7 @@ namespace Filter.Platform.Common.Util
             {
                 initializeDictionary();
 
-                m_authDict["UserEmail"] = value;
+                authDict["UserEmail"] = value;
                 saveDictionary();
             }
         }
@@ -116,7 +116,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 string value = null;
-                m_authDict.TryGetValue("AuthId", out value);
+                authDict.TryGetValue("AuthId", out value);
 
                 return value;
             }
@@ -125,7 +125,7 @@ namespace Filter.Platform.Common.Util
             {
                 initializeDictionary();
 
-                m_authDict["AuthId"] = value;
+                authDict["AuthId"] = value;
                 saveDictionary();
             }
         }
@@ -136,7 +136,7 @@ namespace Filter.Platform.Common.Util
                 initializeDictionary();
 
                 string value = null;
-                m_authDict.TryGetValue("DeviceId", out value);
+                authDict.TryGetValue("DeviceId", out value);
 
                 return value;
             }
@@ -145,7 +145,7 @@ namespace Filter.Platform.Common.Util
             {
                 initializeDictionary();
 
-                m_authDict["DeviceId"] = value;
+                authDict["DeviceId"] = value;
                 saveDictionary();
             }
         }

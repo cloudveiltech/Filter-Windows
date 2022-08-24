@@ -26,21 +26,21 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// <summary>
         /// The model.
         /// </summary>
-        private LoginModel m_model = null;
+        private LoginModel model = null;
 
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
         /// </summary>
-        private RelayCommand m_authenticateWithPasswordCommand;
+        private RelayCommand authenticateWithPasswordCommand;
 
-        private RelayCommand m_authenticateWithEmailCommand;
+        private RelayCommand authenticateWithEmailCommand;
 
         public LoginViewModel()
         {
             // We have to pass the LoginViewModel into our LoginModel so that changes to the LoginModel can RaisePropertyChanged() on the view model.
             // TODO It would be cleaner to not have two layers of properties like this. Maybe change LoginModel into more of a "function container"
             // and make it do all variable edits directly to LoginViewModel.
-            m_model = new LoginModel(this);
+            model = new LoginModel(this);
         }
 
         /// <summary>
@@ -52,24 +52,24 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if(m_authenticateWithPasswordCommand == null)
+                if(authenticateWithPasswordCommand == null)
                 {
-                    m_authenticateWithPasswordCommand = new RelayCommand((Action)(async () =>
+                    authenticateWithPasswordCommand = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
                             ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
-                            await m_model.AuthenticateWithPassword();
+                            await model.AuthenticateWithPassword();
                             ViewManager?.PopView(typeof(ProgressWait));
                         }
                         catch(Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
-                    }), m_model.CanAttemptAuthenticationWithPassword);
+                    }), model.CanAttemptAuthenticationWithPassword);
                 }
 
-                return m_authenticateWithPasswordCommand;
+                return authenticateWithPasswordCommand;
             }
         }
 
@@ -77,23 +77,23 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get 
             {
-                if (m_authenticateWithEmailCommand == null)
+                if (authenticateWithEmailCommand == null)
                 {
-                    m_authenticateWithEmailCommand = new RelayCommand((Action)(async () =>
+                    authenticateWithEmailCommand = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
                             ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
-                            await m_model.AuthenticateWithEmail();
+                            await model.AuthenticateWithEmail();
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
-                    }), m_model.CanAttemptAuthenticationWithEmail);
+                    }), model.CanAttemptAuthenticationWithEmail);
                 }
 
-                return m_authenticateWithEmailCommand;
+                return authenticateWithEmailCommand;
             }
         }
 
@@ -109,12 +109,12 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model.ErrorMessage;
+                return model.ErrorMessage;
             }
 
             set
             {
-                m_model.ErrorMessage = value;
+                model.ErrorMessage = value;
                 RaisePropertyChanged(nameof(ErrorMessage));
             }
         }
@@ -123,12 +123,12 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model.Message;
+                return model.Message;
             }
 
             set
             {
-                m_model.Message = value;
+                model.Message = value;
                 RaisePropertyChanged(nameof(Message));
             }
         }
@@ -141,16 +141,16 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model.UserName;
+                return model.UserName;
             }
 
             set
             {
-                if(value != null && !value.OIEquals(m_model.UserName))
+                if(value != null && !value.OIEquals(model.UserName))
                 {
-                    m_authenticateWithPasswordCommand.RaiseCanExecuteChanged();
+                    authenticateWithPasswordCommand.RaiseCanExecuteChanged();
                    
-                    m_model.UserName = value;
+                    model.UserName = value;
                     RaisePropertyChanged(nameof(UserName));
                 }
             }
@@ -163,16 +163,16 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_model.UserPassword;
+                return model.UserPassword;
             }
 
             set
             {
-                if(value != null && !value.OEquals(m_model.UserPassword))
+                if(value != null && !value.OEquals(model.UserPassword))
                 {
-                    m_authenticateWithPasswordCommand.RaiseCanExecuteChanged();
+                    authenticateWithPasswordCommand.RaiseCanExecuteChanged();
 
-                    m_model.UserPassword = value;
+                    model.UserPassword = value;
                     RaisePropertyChanged(nameof(UserPassword));
                 }
             }

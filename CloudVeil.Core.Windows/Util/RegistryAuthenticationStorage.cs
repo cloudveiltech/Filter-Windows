@@ -19,8 +19,8 @@ namespace CloudVeil.Core.Windows.Util
 {
     public class RegistryAuthenticationStorage : IAuthenticationStorage
     {
-        private object m_emailLock = new object();
-        private object m_authenticationLock = new object();
+        private object emailLock = new object();
+        private object authenticationLock = new object();
 
         /// <summary>
         /// Abstracts the creation of our app's registry key away from the two properties.
@@ -82,7 +82,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (m_emailLock)
+                lock (emailLock)
                 {
                     string machineName = string.Empty;
 
@@ -121,7 +121,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (m_emailLock)
+                lock (emailLock)
                 {
                     string machineName = string.Empty;
 
@@ -168,7 +168,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     string machineName = string.Empty;
 
@@ -213,7 +213,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     string machineName = string.Empty;
 
@@ -254,7 +254,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
@@ -288,7 +288,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
@@ -318,7 +318,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows)+  @"\cv4w\auth-id").ToString();
@@ -352,7 +352,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (m_authenticationLock)
+                lock (authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\auth-id").ToString();

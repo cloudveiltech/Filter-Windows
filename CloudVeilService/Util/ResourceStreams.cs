@@ -32,7 +32,7 @@ namespace CloudVeilService.Util
                     }
                     else
                     {
-                        //m_logger.Error("Cannot read from packed block page file.");
+                        //logger.Error("Cannot read from packed block page file.");
                         return null;
                     }
                 }

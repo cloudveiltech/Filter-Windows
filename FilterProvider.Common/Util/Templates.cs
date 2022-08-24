@@ -15,39 +15,39 @@ namespace FilterProvider.Common.Util
     {
         public Templates(IPolicyConfiguration configuration)
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
-            m_policyConfiguration = configuration;
+            policyConfiguration = configuration;
 
             // Get our blocked HTML page
             byte[] htmlBytes = ResourceStreams.Get("FilterProvider.Common.Resources.BlockedPage.html");
-            m_blockedHtmlPage = Handlebars.Compile(Encoding.UTF8.GetString(htmlBytes));
+            blockedHtmlPage = Handlebars.Compile(Encoding.UTF8.GetString(htmlBytes));
 
-            m_badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
+            badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
-            if (m_blockedHtmlPage == null)
+            if (blockedHtmlPage == null)
             {
-                m_logger.Error("Could not load packed HTML block page.");
+                logger.Error("Could not load packed HTML block page.");
             }
 
-            if (m_badSslHtmlPage == null)
+            if (badSslHtmlPage == null)
             {
-                m_logger.Error("Could not load packed HTML bad SSL page.");
+                logger.Error("Could not load packed HTML bad SSL page.");
             }
         }
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         // Uses Handlebars.Net for compilation of this template function.
-        private Func<object, string> m_blockedHtmlPage;
+        private Func<object, string> blockedHtmlPage;
 
-        private byte[] m_badSslHtmlPage;
+        private byte[] badSslHtmlPage;
 
-        private IPolicyConfiguration m_policyConfiguration;
+        private IPolicyConfiguration policyConfiguration;
 
         public byte[] ResolveBadSslTemplate(Uri requestUri, string certThumbprint)
         {
-            string pageTemplate = Encoding.UTF8.GetString(m_badSslHtmlPage);
+            string pageTemplate = Encoding.UTF8.GetString(badSslHtmlPage);
 
             // Produces something that looks like "www.badsite.com/example?arg=0" instead of "http://www.badsite.com/example?arg=0"
             // IMO this looks slightly more friendly to a user than the entire URI.
@@ -81,7 +81,7 @@ namespace FilterProvider.Common.Util
             string message = "was blocked because it was in the following category:";
 
             // Collect category information: Blocked category, other categories, and whether the blocked category is in the relaxed policy.
-            MappedFilterListCategoryModel matchingCategoryModel = m_policyConfiguration.GeneratedCategoriesMap.Values.FirstOrDefault(m => m.CategoryId == matchingCategory);
+            MappedFilterListCategoryModel matchingCategoryModel = policyConfiguration.GeneratedCategoriesMap.Values.FirstOrDefault(m => m.CategoryId == matchingCategory);
             string matching_category = matchingCategoryModel?.ShortCategoryName;
 
             List<string> otherCategories = appliedCategories?
@@ -142,10 +142,10 @@ namespace FilterProvider.Common.Util
             blockPageContext.Add("passcodeSetupUrl", CompileSecrets.ServiceProviderUserRelaxedPolicyPath);
             blockPageContext.Add("unblockRequest", unblockRequest);
             blockPageContext.Add("isRelaxedPolicy", isRelaxedPolicy);
-            blockPageContext.Add("isRelaxedPolicyPasscodeRequired", m_policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);
+            blockPageContext.Add("isRelaxedPolicyPasscodeRequired", policyConfiguration?.Configuration?.EnableRelaxedPolicyPasscode);
             blockPageContext.Add("serverPort", AppSettings.Default.ConfigServerPort);
 
-            return Encoding.UTF8.GetBytes(m_blockedHtmlPage(blockPageContext));
+            return Encoding.UTF8.GetBytes(blockedHtmlPage(blockPageContext));
         }
 
         private static string getUnblockRequestUrl(string urlText)

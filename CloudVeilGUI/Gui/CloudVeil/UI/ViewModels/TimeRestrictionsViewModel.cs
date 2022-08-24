@@ -29,7 +29,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error(ex, "Error occurred while attempting to UpdateCurrentTime()");
+                    logger.Error(ex, "Error occurred while attempting to UpdateCurrentTime()");
                 }
             }, null, 0, 1000);
 

@@ -20,10 +20,10 @@ namespace CloudVeilService.Platform
 {
     public class WindowsDns : IPlatformDns
     {
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
         public WindowsDns()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
@@ -72,7 +72,7 @@ namespace CloudVeilService.Platform
 
                             if (changed)
                             {
-                                m_logger.Info("Changed DNS settings for NIC {0}", nicName);
+                                logger.Info("Changed DNS settings for NIC {0}", nicName);
 
                                 newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
                                 managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
@@ -98,11 +98,11 @@ namespace CloudVeilService.Platform
 
                         if (ret != 0)
                         {
-                            m_logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
+                            logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
                         }
                         else
                         {
-                            m_logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
+                            logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
                         }
                     }
                 }
