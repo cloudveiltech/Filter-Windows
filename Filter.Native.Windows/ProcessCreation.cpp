@@ -9,7 +9,7 @@ unsigned int GetActiveSessionId() {
     DWORD sessionCount = 0;
 
     if (WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE, 0, 1, &pSessionInfo, &sessionCount) != 0) {
-        for (int i = 0; i < sessionCount; i++) {
+        for (DWORD i = 0; i < sessionCount; i++) {
             if (pSessionInfo[i].State == WTSActive) {
                 activeSessionId = pSessionInfo[i].SessionId;
             }

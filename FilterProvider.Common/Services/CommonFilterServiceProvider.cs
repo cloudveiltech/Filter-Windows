@@ -349,7 +349,6 @@ namespace FilterProvider.Common.Services
         private ISystemServices systemServices;
 
         private ExtensionDelegate extensionDelegate;
-        private PortsChangedDelegate portChangedDelegate;
 
         public event PortsChangedDelegate OnPortsChanged;
 
@@ -601,11 +600,6 @@ namespace FilterProvider.Common.Services
                 dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
                 {
                     ipcServer.SendCaptivePortalState(isCaptivePortal, isActive);
-                };
-
-                dnsEnforcement.OnDnsEnforcementUpdate += (isEnforcementActive) =>
-                {
-
                 };
 
                 accountability = new Accountability();

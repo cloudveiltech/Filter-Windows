@@ -363,8 +363,8 @@ namespace FilterProvider.Common.Util
                 // a) the network is still initializing
                 // b) we have no internet.
                 // Schedule a Trigger() for 1.5 second in the future to handle (a)
-                
-                Task.Delay(1500).ContinueWith((task) =>
+
+                _ = Task.Delay(1500).ContinueWith((task) =>
                 {
                     Trigger();
                 });
@@ -496,7 +496,6 @@ namespace FilterProvider.Common.Util
         #endregion
 
         #region DnsEnforcement.Events
-        public event DnsEnforcementHandler OnDnsEnforcementUpdate;
         public event CaptivePortalModeHandler OnCaptivePortalMode;
         #endregion
 

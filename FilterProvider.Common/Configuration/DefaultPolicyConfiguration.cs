@@ -178,7 +178,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 catch(Exception ex)
                 {
-                    logger.Warn("Error occurred while disposing stream: {0}", ex);
+                    logger.Warn(ex, "Error occurred while disposing stream");
                 }
             }
         }

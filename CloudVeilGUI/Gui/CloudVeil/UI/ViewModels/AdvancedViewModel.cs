@@ -33,13 +33,6 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// </summary>
         private RelayCommand m_deactivationCommand;
 
-        /// <summary>
-        /// Private data member for the public ViewLogsCommand property.
-        /// </summary>
-        private RelayCommand m_viewLogsCommand;
-
-        private RelayCommand m_viewSslExemptionsCommand;
-
         private string updateText;
         public string UpdateText
         {

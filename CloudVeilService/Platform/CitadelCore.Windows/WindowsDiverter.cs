@@ -101,6 +101,15 @@ namespace CloudVeilCore.Windows.Diversion
                 startHandler?.Invoke();
             }
         }
+        
+        public void CleanApplist()
+        {
+            if (IsRunning)
+            {
+                logger.Info("Cleaning app list");
+                WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.CleanApps, 0);
+            }
+        }
 
         public void AddWhiteListedApp(string appName)
         {

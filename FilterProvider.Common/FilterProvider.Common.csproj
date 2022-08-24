@@ -30,7 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloudVeil.IPC\CloudVeil.IPC.csproj" />
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj" />
   </ItemGroup>
 

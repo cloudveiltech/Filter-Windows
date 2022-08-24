@@ -164,7 +164,7 @@ int SearchConflictReason(int** myConflictsArray) {
     }
 
     if (recvDriverListSize > driverListSize) {
-        delete driverList;
+        delete[] driverList;
         driverList = (LPVOID*)new unsigned char[recvDriverListSize];
         driverListSize = recvDriverListSize;
 
@@ -181,9 +181,8 @@ int SearchConflictReason(int** myConflictsArray) {
 
     TCHAR driverName[ARRAY_SIZE];
 
-    // Now that we got our list of device drivers, enumerate them to find the conflicting drivers.
-    int i = 0;
-    for (i = 0; i < driverListSize; i++) {
+    // Now that we got our list of device drivers, enumerate them to find the conflicting drivers.    
+    for (DWORD i = 0; i < driverListSize; i++) {
         if (GetDeviceDriverBaseName(driverList[i], driverName, sizeof(driverName) / sizeof(driverName[0]))) {
             int j = 0;
             for (j = 0; j < conflictsArrayLength; j++) {

@@ -68,7 +68,6 @@ namespace FilterProvider.Common.Util
         }
 
         private static readonly string[] htmlMimeTypes = { "text/html", "text/plain" };
-        private static int nextTrackId = 1;
         private static object trackIdLock = new object();
 
         /// <summary>

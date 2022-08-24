@@ -139,10 +139,6 @@
       <Project>{21feed3b-6e82-4fed-874e-2eec12c4b28c}</Project>
       <Name>Cloudveil.Core.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CloudVeil.IPC\CloudVeil.IPC.csproj">
-      <Project>{61A1BDF1-6A28-4383-ACA6-74510A1F0E76}</Project>
-      <Name>CloudVeil.IPC</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Filter.Native.Windows\Filter.Native.Windows.vcxproj">
       <Project>{d408bc68-1372-4760-bc98-d2dfe86b2704}</Project>
       <Name>Filter.Native.Windows</Name>
@@ -182,7 +178,7 @@
       <Version>1.5.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertDotNet">
-      <Version>2.2.1</Version>
+      <Version>2.2.2</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>4.0.0</Version>

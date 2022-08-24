@@ -36,9 +36,6 @@ namespace Gui.CloudVeil.UI.ViewModels
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
-
                         Task.Run(() =>
                         {
                             test.TestFilter();
@@ -63,8 +60,6 @@ namespace Gui.CloudVeil.UI.ViewModels
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
 
                         Task.Run(() =>
                         {
@@ -122,8 +117,6 @@ namespace Gui.CloudVeil.UI.ViewModels
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
 
                         if (IsDnsEnforcementEnabled)
                         {
@@ -141,9 +134,6 @@ namespace Gui.CloudVeil.UI.ViewModels
                 return m_testSafeSearchCommand;
             }
         }
-
-        private int testsPassed = 0;
-        private int testsTotal = 0;
 
         /// <summary>
         /// Used by filter test to propagate results back to the UI.

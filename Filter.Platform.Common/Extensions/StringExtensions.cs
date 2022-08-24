@@ -139,7 +139,7 @@ namespace Filter.Platform.Common.Extensions
                     arr[i] = Convert.ToChar(0);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }

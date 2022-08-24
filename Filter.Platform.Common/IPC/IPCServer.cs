@@ -14,9 +14,6 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Security;
-using System.Security.AccessControl;
-using System.Security.Principal;
-
 namespace CloudVeil.IPC
 {
     /// <summary>

@@ -132,12 +132,6 @@ namespace CloudVeil.Windows
         private IPCClient m_ipcClient;
 
         public IPCClient IpcClient => m_ipcClient;
-        /// <summary>
-        /// Tracks whether the captive portal tool tip has been displayed for the given network. Will
-        /// be set back to false when captive portal detection goes back to false.
-        /// </summary>
-        private bool m_captivePortalShownToUser;
-
         #endregion Views
 
         public Dictionary<string, CertificateExemptionMessage> SslExemptions { get; set; }

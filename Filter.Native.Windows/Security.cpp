@@ -12,7 +12,7 @@ namespace FilterNativeWindows {
         return c_str;
     }
 
-    int Security::SetObjectAsSystemOnly(String^ objectName, SeObjectType objectType) {
+    void Security::SetObjectAsSystemOnly(String^ objectName, SeObjectType objectType) {
         if (objectName == nullptr) {
             throw gcnew ArgumentNullException("objectName");
         }

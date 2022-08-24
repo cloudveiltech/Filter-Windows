@@ -38,9 +38,6 @@ namespace CloudVeilService.Services
             EstablishTrustWithFirefox();
         }
 
-        /// <summary>
-        /// Searches for git installations and adds CitadelCore certificate to the CA certificate bundle.
-        /// </summary>
         public void EstablishTrustWithGit()
         {
             // 1. We search in three places for git installation.

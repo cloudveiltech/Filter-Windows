@@ -257,7 +257,7 @@ namespace CloudVeil.Core.Windows.Services
                     }
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 success = false;
             }

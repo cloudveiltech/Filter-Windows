@@ -56,14 +56,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Command="{Binding RequestBlockActionReviewCommand}"
-            CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+            CommandParameter="{Binding ElementName=blockEventsDataGrid, Path=SelectedItem}"
             Content="Request Review">
             <Button.Style>
                 <!--  This style makes it so that the button is only enabled whenever there is a selected item in our datagrid.  -->
                 <Style BasedOn="{StaticResource SquareButtonStyle}" TargetType="Button">
                     <Setter Property="IsEnabled" Value="True" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ElementName=blockEventsDataGrid, Path=SelectedItem}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -76,7 +76,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            x:Name="m_blockEventsDataGrid"
+            x:Name="blockEventsDataGrid"
             x:FieldModifier="private"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
@@ -86,13 +86,13 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 <ContextMenu x:Name="contextMenu">
                     <MenuItem
                         Command="{Binding RequestBlockActionReviewCommand}"
-                        CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                        CommandParameter="{Binding ElementName=blockEventsDataGrid, Path=SelectedItem}"
                         Header="Request Review"
                         IsCheckable="False" />
                     
                     <MenuItem
                         Command="{Binding CopySelectedUrlCommand}"
-                        CommandParameter="{Binding ElementName=m_blockEventsDataGrid, Path=SelectedItem}"
+                        CommandParameter="{Binding ElementName=blockEventsDataGrid, Path=SelectedItem}"
                         Header="Copy URL" IsCheckable="False" />
                     
                 </ContextMenu>

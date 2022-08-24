@@ -128,7 +128,6 @@ namespace FilterProvider.Common.Util
         }
 
         private static WebServiceUtil s_instance;
-        private static NLog.Logger s_logger;
 
         static WebServiceUtil()
         {
