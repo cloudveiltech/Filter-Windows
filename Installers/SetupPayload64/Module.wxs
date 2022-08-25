@@ -86,12 +86,6 @@
         <Component Id="comp_5346A521_981B" Guid="64735ED0-0320-4F2C-8EE5-85F8940DB75B" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_84BCA417_832A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x64\Filter.Platform.Common.dll" KeyPath="yes" />
         </Component>
-        <Component Id="comp_159D67FB_7D2E" Guid="EFC41DC3-1954-4EDD-ABFF-05FFA73DAAD6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_C855A854_27E0" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.dll" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.dll" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_D7EA2492_9EAA" Guid="9DB1DCEF-2E57-4A28-B5E0-03CA3DE1631D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_B79A043A_DE40" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.IPC.pdb" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.IPC.pdb" KeyPath="yes" />
-        </Component>
         <Component Id="comp_0DC0F70F_7F99" Guid="B916D54D-687B-4BCE-A2DD-E0B4A23C7EA6" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_C283DB82_A3A9" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Buffers.dll" KeyPath="yes" />
         </Component>
@@ -256,12 +250,6 @@
         </Component>
         <Component Id="comp_4A7B40AC_F6D5" Guid="F1F69B7A-C855-4164-BB57-1F9E5CBADCDF" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_E8AC86C3_12A8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.Core.Windows.pdb" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.Core.Windows.pdb" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_47257075_A0FB" Guid="B21A1DEC-F89E-4467-B409-F13535FF60DA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_D8306A74_2BCD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe" Source="..\..\CloudVeilGUI\bin\Release x64\InstallGuard.exe" KeyPath="yes" />
-        </Component>
-        <Component Id="comp_EEC56972_6DBD" Guid="7BB44707-7B92-4AC8-A89A-DBD76E1A18DF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-          <File Id="_BE10F67F_DD62" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="InstallGuard.exe.config" Source="..\..\CloudVeilGUI\bin\Release x64\InstallGuard.exe.config" KeyPath="yes" />
         </Component>
         <Component Id="comp_E518DA81_1B6B" Guid="6B34D0FB-235A-4D7C-A21C-65F78C89C230" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D5156E61_E31F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x64\EmbedIO.dll" KeyPath="yes" />

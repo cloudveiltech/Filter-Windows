@@ -714,7 +714,7 @@ namespace Gui.CloudVeil.UI.Controls
                         if (x.Width > x.MinWidth)
                         {
                             if (x.Width + change < x.MinWidth)
-                            {
+                            { 
                                 var dif = x.Width - x.MinWidth;
                                 x.Width = x.MinWidth;
                                 y.Width += dif;
