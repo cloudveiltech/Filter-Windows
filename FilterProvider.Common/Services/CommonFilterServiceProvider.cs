@@ -534,8 +534,6 @@ namespace FilterProvider.Common.Services
             }
 
             // Hook the shutdown/logoff event.
-
-            // TODO:X_PLAT
             systemServices.SessionEnding += OnAppSessionEnding;
             //SystemEvents.SessionEnding += OnAppSessionEnding;
 

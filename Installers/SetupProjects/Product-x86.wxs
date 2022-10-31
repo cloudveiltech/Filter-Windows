@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="15f7136a-b6bb-44a9-867e-73a19114691b" Name="CloudVeil For Windows" Language="1033" Version="2.4.3" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
+  <Product Id="8d1e3eae-d53f-4bb0-9788-b94b17f183ff" Name="CloudVeil For Windows" Language="1033" Version="2.1.0" Manufacturer="CloudVeil" UpgradeCode="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x86" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -62,8 +62,8 @@
       <MergeRef Id="SetupPayload86.msm" />
     </Feature>
     <Upgrade Id="{c5f0b4f0-8e1c-4f3b-ac5c-7007ad946367}">
-      <UpgradeVersion Minimum="2.4.3" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.4.3" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Minimum="2.1.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Maximum="2.1.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
     </Upgrade>
     <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFilesFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />

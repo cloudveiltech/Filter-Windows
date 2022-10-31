@@ -17,9 +17,11 @@ namespace InstallerCustomActions
 {
     public class InstallGuard
     {
+
         [CustomAction]
         public static ActionResult GuardInstall(Session session)
         {
+            Debugger.Break();
             try
             {
                 string installDir = null;

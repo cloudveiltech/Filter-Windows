@@ -3,7 +3,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\FilterStarter.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
-  <Product Id="536bd960-3d65-470f-bd92-8ded58f3e994" Name="CloudVeil For Windows" Language="1033" Version="2.4.3" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
+  <Product Id="ff99ebbc-4769-4235-aae9-22be4c314bd4" Name="CloudVeil For Windows" Language="1033" Version="2.1.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
     <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x64" ReadOnly="no" ShortNames="no" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -13,14 +13,14 @@
     <Property Id="ARPURLINFOABOUT" Value="https://cloudveil.org" />
     <Property Id="ARPPRODUCTICON">_D1707FE3B808</Property>
     <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="2.4.3" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.4.3" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Minimum="2.1.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Maximum="2.1.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
     </Upgrade>
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
-    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
+    <Binary Id="B.CustomInstallerActions"  SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="DesktopFolder" Name="Desktop" />
