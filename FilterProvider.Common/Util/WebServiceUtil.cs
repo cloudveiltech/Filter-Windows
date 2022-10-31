@@ -12,6 +12,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using CloudVeil;
@@ -630,7 +632,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-   //	request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+            //request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -751,6 +753,38 @@ namespace FilterProvider.Common.Util
             return RequestResource(namedResourceMap[resource], out code, out responseReceived, options, resource);
         }
 
+        [DllImport("ntdll.dll", SetLastError = true)]
+        internal static extern uint RtlGetVersion(out OsVersionInfo versionInformation); // return type should be the NtStatus enum
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct OsVersionInfo
+        {
+            private readonly uint OsVersionInfoSize;
+
+            internal readonly uint MajorVersion;
+            internal readonly uint MinorVersion;
+
+            private readonly uint BuildNumber;
+
+            private readonly uint PlatformId;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            private readonly string CSDVersion;
+
+            public string ToString()
+            {
+                return MajorVersion + "." + MinorVersion + "." + BuildNumber;
+            }
+        }
+
+        public static string GetOsVersion()
+        {
+            var osVersionInfo = new OsVersionInfo();
+
+            RtlGetVersion(out osVersionInfo);
+            return osVersionInfo.ToString();
+        }
+
         /// <summary>
         /// Request a generic resource from the service server(s). 
         /// </summary>
@@ -799,12 +833,15 @@ namespace FilterProvider.Common.Util
                 IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
                 string version = versionProvider.GetApplicationVersion().ToString(3);
 
+          
+
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
                 parameters.Add("device_id", deviceName);
                 parameters.Add("identifier_2", authStorage.AuthId);
                 parameters.Add("device_id_2", authStorage.DeviceId);
-                parameters.Add("os", "WIN");                
+                parameters.Add("os", "WIN");
+                parameters.Add("os_version", GetOsVersion());
 
                 string postString = null;
                 //string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
