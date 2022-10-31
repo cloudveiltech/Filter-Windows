@@ -12,6 +12,7 @@ using FilterProvider.Common.Platform;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,12 @@ namespace FilterProvider.Common.Util
                 bitVersionUri = "/update/cv4w-x86/update.xml";
             }
 
-            var appUpdateInfoUrl = string.Format("{0}{1}?acid={2}", WebServiceUtil.Default.ServiceProviderApiPath, bitVersionUri, HttpUtility.UrlEncode(FingerprintService.Default.Value));
+            var appUpdateInfoUrl = string.Format("{0}{1}?acid={2}&v={3}&os={4}",
+                WebServiceUtil.Default.ServiceProviderApiPath,
+                bitVersionUri,
+                HttpUtility.UrlEncode(FingerprintService.Default.Value),
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                WebServiceUtil.GetOsVersion());
 
             m_updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
 
