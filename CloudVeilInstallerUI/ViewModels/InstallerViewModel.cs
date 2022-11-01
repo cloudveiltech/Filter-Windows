@@ -455,7 +455,7 @@ namespace CloudVeilInstallerUI.ViewModels
             RtlGetVersion(out version);
             if(version.MajorVersion < 10)
             {
-                TriggerFailed("Only Win 10 or newer is supported.", "Old OS version");
+                TriggerFailed("Only Win 10 or newer is supported.", "Unsupported OS version");
                 return;
             }
 
