@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
@@ -414,6 +415,25 @@ namespace CloudVeilInstallerUI.ViewModels
             State = InstallationState.Initializing;
         }
 
+        [DllImport("ntdll.dll", SetLastError = true)]
+        internal static extern uint RtlGetVersion(out OsVersionInfo versionInformation); // return type should be the NtStatus enum
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct OsVersionInfo
+        {
+            private readonly uint OsVersionInfoSize;
+
+            internal readonly uint MajorVersion;
+            internal readonly uint MinorVersion;
+
+            private readonly uint BuildNumber;
+
+            private readonly uint PlatformId;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            private readonly string CSDVersion;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -428,6 +448,14 @@ namespace CloudVeilInstallerUI.ViewModels
             if(isOlderVersionThanInstalled)
             {
                 TriggerFailed("A newer version of CloudVeil for Windows is already installed on this system. Please uninstall that version before installing this.", "Newer Version Installed");
+                return;
+            }
+
+            var version = new OsVersionInfo();
+            RtlGetVersion(out version);
+            if(version.MajorVersion < 10)
+            {
+                TriggerFailed("Only Win 10 or newer is supported.", "Old OS version");
                 return;
             }
 
@@ -501,7 +529,7 @@ namespace CloudVeilInstallerUI.ViewModels
             {
                 isOlderVersionThanInstalled = true;
             }
-
+            
             if (e.Operation == RelatedOperation.MajorUpgrade)
             {
                 var installedPackage = new ProductInstallation(e.ProductCode);

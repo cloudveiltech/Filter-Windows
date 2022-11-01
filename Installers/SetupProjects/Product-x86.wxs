@@ -12,7 +12,10 @@
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
-    <Icon Id="_1FCD93CB6069" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
+    <Condition Message="Required OS is Win10 or higher">
+        <![CDATA[Installed OR (VersionNT >= 603) OR (VersionNT64 >= 603)]]>
+    </Condition>
+      <Icon Id="_1FCD93CB6069" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <!-- TODO: Split this into its own shared CustomActions.wxs -->
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x86\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- Initialize the 'TARGETDIR' directory property. -->

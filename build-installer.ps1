@@ -97,8 +97,8 @@ $cleanBuild = "Clean,Build"
 $builds = @(
     @("AnyCPU", "InstallGuard\InstallGuard.csproj", $cleanBuild),
     @("AnyCPU", "InstallerCheckPackageCache\InstallerCheckPackageCache.csproj", $cleanBuild),
-    @("AnyCPU", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
-    @("AnyCPU", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
+    @("x86", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
+    @("x64", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x86", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
