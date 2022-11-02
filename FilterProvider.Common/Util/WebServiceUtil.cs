@@ -1062,6 +1062,12 @@ namespace FilterProvider.Common.Util
 
         private void reportTokenRejected()
         {
+            var neverAuthorized = UserEmail == null || UserEmail.Length == 0;
+            logger.Info("reportTokenRejected " + UserEmail + " " + neverAuthorized);
+            if (neverAuthorized) {
+                AuthTokenRejected?.Invoke();
+                return;
+            }
             if (tokenRejectedFirstDateTime == DateTime.MinValue)
             {
                 tokenRejectedFirstDateTime = DateTime.Now;
