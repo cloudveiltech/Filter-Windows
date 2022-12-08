@@ -6,7 +6,7 @@
 
   <Import Project="CompileSecrets.targets" />
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NLog" Version="4.6.7" />
     <PackageReference Include="Sentry.NLog" Version="1.2.0" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="4.5.0" />
