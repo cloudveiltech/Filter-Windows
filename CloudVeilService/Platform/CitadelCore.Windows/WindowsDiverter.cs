@@ -196,21 +196,23 @@ namespace CloudVeilCore.Windows.Diversion
                     var remotePort = (int)IPAddress.HostToNetworkOrder((short)addr.RemotePort);
 
                     List<byte> ipBytes = new List<byte>();
-                    if (addr.RemoteAddr1 != 0) {
+                    if (addr.RemoteAddr1 != 0 || addr.RemoteAddr2 != 0 || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0) 
+                    {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr1));
                     }
-                    if (addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue)
+                    if ((addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue) || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr2));
                     }
-                    if (addr.RemoteAddr3 != 0 && addr.RemoteAddr2 != UInt16.MaxValue)
+                    if (addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr3));
                     }
-                    if (addr.RemoteAddr4 != 0 && addr.RemoteAddr2 != UInt16.MaxValue)
+                    if (addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr4));
                     }
+
                     ipBytes.Reverse();
                     var ip = new IPAddress(ipBytes.ToArray());
                     GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(localPort, remotePort, ip.ToString());
