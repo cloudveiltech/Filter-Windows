@@ -73,7 +73,7 @@ namespace CloudVeilCore.Windows.Diversion
                     return;
                 }
 
-                string mainFilterString = "(tcp or udp) and remotePort == 80 or remotePort == 443 or remotePort == 8080 or remotePort == 8443";
+                string mainFilterString = "!loopback and (tcp or udp) and (remotePort == 80 or remotePort == 443 or remotePort == 8080 or remotePort == 8443)";
                 diversionHandle = WinDivert.WinDivertOpen(mainFilterString, WinDivertLayer.Redirect, -1000, 0);
 
                 if (diversionHandle == s_InvalidHandleValue || diversionHandle == IntPtr.Zero)
