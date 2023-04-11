@@ -646,6 +646,7 @@ namespace FilterProvider.Common.Services
                                             } 
                                             else
                                             {
+                                                WebServiceUtil.Default.UserEmail = args.Username;
                                                 onAuthSuccess();
                                             }
                                         }
@@ -1051,7 +1052,7 @@ namespace FilterProvider.Common.Services
         private void onAuthSuccess()
         {
             Status = FilterStatus.Running;
-            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
+            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
 
             // Probe server for updates now.
             updateSystem.ProbeMasterForApplicationUpdates(false);

@@ -699,23 +699,11 @@ namespace FilterProvider.Common.Configuration
                 }
             }
 
-            if (mappedListType == ListType.BypassList)
+            MappedBypassListCategoryModel categoryModel = null;
+            if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
             {
-                MappedBypassListCategoryModel categoryModel = null;
-                if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
-                {
-                    AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
-                    categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                }
-            }
-            else
-            {
-                MappedFilterListCategoryModel categoryModel = null;
-                if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
-                {
-                    AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
-                    categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
-                }
+                AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
+                categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
             }
         }
 
