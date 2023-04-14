@@ -292,6 +292,7 @@ namespace CloudVeilService.Services
                 return;
             }
 
+            diverter.CleanApplist();
             foreach(var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
             {
                 diverter.AddBlackListedApp(app);
