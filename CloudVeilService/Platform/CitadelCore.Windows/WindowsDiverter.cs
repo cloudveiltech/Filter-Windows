@@ -9,6 +9,8 @@ using CloudVeilCore.Extensions;
 using CloudVeilCore.Net.Proxy;
 using CloudVeilCore.Windows.WinAPI;
 using Filter.Platform.Common.Util;
+using Sentry.Protocol;
+using Swan;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -116,6 +118,13 @@ namespace CloudVeilCore.Windows.Diversion
             if (IsRunning)
             {
                 logger.Info("Whitelisted: " + appName);
+                var appNameTruncated = appName.ToLower().Replace(".exe", "");
+                var processes = Process.GetProcessesByName(appNameTruncated);
+                foreach (var process in processes)
+                {
+                    logger.Info("Whitelisted: id " + process.Id);
+                    WinDivert.WinDivertAddWhitelistedPID(diversionHandle, (ulong)process.Id);
+                }
                 WinDivert.WinDivertAddWhitelistedApp(diversionHandle, appName);
             }
         }
@@ -124,6 +133,12 @@ namespace CloudVeilCore.Windows.Diversion
             if (IsRunning)
             {
                 logger.Info("Blacklisted: " + appName);
+                var appNameTruncated = appName.ToLower().Replace(".exe", "");
+                var processes = Process.GetProcessesByName(appNameTruncated);
+                foreach (var process in processes)
+                {
+                    WinDivert.WinDivertAddBlacklistedPID(diversionHandle, (ulong)process.Id);
+                }
                 WinDivert.WinDivertAddBlacklistedApp(diversionHandle, appName);
             }
         }

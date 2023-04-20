@@ -178,7 +178,7 @@
       <Version>1.5.7</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.WinDivertDotNet">
-      <Version>2.2.2</Version>
+      <Version>2.2.4</Version>
     </PackageReference>
     <PackageReference Include="DNS">
       <Version>4.0.0</Version>

@@ -299,6 +299,11 @@ namespace CloudVeilService.Services
             }
             foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
             {
+                var processes = Process.GetProcessesByName(app);
+                foreach (var process in processes)
+                {
+                    logger.Info("App: {0}, PID={1}", app, process.Id);
+                }
                 diverter.AddWhiteListedApp(app);
             }
             diverter.AddWhiteListedApp("windows\\system32"); //everything from that folder
