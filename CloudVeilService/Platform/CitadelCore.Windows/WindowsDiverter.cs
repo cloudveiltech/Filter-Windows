@@ -215,8 +215,7 @@ namespace CloudVeilCore.Windows.Diversion
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr1));
                     }
-                    if ((addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue) || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
-                    {
+                    if ((addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue) || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0) {                     
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr2));
                     }
                     if (addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
