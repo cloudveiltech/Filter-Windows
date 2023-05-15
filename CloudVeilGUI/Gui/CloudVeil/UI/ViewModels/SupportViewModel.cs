@@ -12,6 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Gui.CloudVeil.UI.Views;
+using System.Windows.Input;
+using System.Windows;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -84,6 +86,5 @@ namespace Gui.CloudVeil.UI.ViewModels
                 return viewLogsCommand;
             }
         }
-
     }
 }

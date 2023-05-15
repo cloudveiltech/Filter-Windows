@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Gui.CloudVeil.UI.ViewModels;
+using System.Windows.Forms;
 
 namespace Gui.CloudVeil.UI.Views
 {
@@ -40,6 +41,12 @@ namespace Gui.CloudVeil.UI.Views
         {
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
+        }
+
+
+        public void Identifier_Mouse_Down(object sender, MouseButtonEventArgs e)
+        {
+            System.Windows.Clipboard.SetText((DataContext as SupportViewModel).ActivationIdentifier);
         }
     }
 }
