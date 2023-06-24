@@ -128,6 +128,7 @@ namespace CloudVeilCore.Windows.Diversion
                 WinDivert.WinDivertAddWhitelistedApp(diversionHandle, appName);
             }
         }
+
         public void AddBlackListedApp(string appName)
         {
             if (IsRunning)
@@ -143,6 +144,21 @@ namespace CloudVeilCore.Windows.Diversion
             }
         }
 
+        public void AddBlockedApp(string appName)
+        {
+            if (IsRunning)
+            {
+                logger.Info("Blocked: " + appName);
+                var appNameTruncated = appName.ToLower().Replace(".exe", "");
+                var processes = Process.GetProcessesByName(appNameTruncated);
+                foreach (var process in processes)
+                {
+                    WinDivert.WinDivertAddBlockedPID(diversionHandle, (ulong)process.Id);
+                }
+                WinDivert.WinDivertAddBlockedApp(diversionHandle, appName);
+            }
+        }
+        
 
         private unsafe void RunDiversion()
         {

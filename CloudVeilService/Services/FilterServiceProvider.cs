@@ -307,6 +307,15 @@ namespace CloudVeilService.Services
                 diverter.AddWhiteListedApp(app);
             }
             diverter.AddWhiteListedApp("windows\\system32"); //everything from that folder
+
+            foreach (var app in provider.PolicyConfiguration.Configuration.BlockedApplications)
+            {
+                diverter.AddBlockedApp(app);
+            }
+            foreach (var app in provider.PolicyConfiguration.Configuration.CustomBlockedApps)
+            {
+                diverter.AddBlockedApp(app);
+            }
         }
 
         private void OnAppSessionEnding(object sender, SessionEndingEventArgs e)
