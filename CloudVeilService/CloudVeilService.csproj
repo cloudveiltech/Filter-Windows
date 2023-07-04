@@ -166,7 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.4.91</Version>
+      <Version>0.4.92</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.GoProxyDotNet">
       <Version>0.4.90</Version>
