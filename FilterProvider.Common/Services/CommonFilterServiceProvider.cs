@@ -1138,6 +1138,7 @@ namespace FilterProvider.Common.Services
             if (policyConfiguration.Configuration != null)
             {
                 // Put the new update frequence into effect.
+                logger.Info($"updateTimerFrequency Setting update timer to {policyConfiguration.Configuration.UpdateFrequency}"); ;
                 this.updateCheckTimer?.Change(policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
             }
         }
@@ -1717,10 +1718,12 @@ namespace FilterProvider.Common.Services
                         var cfg = policyConfiguration.Configuration;
                         if (cfg != null)
                         {
+                            logger.Info($"UpdateAndWriteList Setting update timer to {policyConfiguration.Configuration.UpdateFrequency}"); ;
                             this.updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
                         }
                         else
                         {
+                            logger.Info($"Setting update timer to fallback"); ;
                             this.updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
                         }
                     }

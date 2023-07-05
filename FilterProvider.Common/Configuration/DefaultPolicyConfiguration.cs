@@ -771,9 +771,10 @@ namespace FilterProvider.Common.Configuration
                         return false;
                     }
 
-                    if (Configuration.UpdateFrequency.Minutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
+                    if (Configuration.UpdateFrequency.TotalMinutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
                     {
                         // Just to ensure that we enforce a minimum value here.
+                        logger.Info($"UpdateFrequency set to fallback because response can't be parsed"); ;
                         Configuration.UpdateFrequency = TimeSpan.FromMinutes(5);
                     }
 
