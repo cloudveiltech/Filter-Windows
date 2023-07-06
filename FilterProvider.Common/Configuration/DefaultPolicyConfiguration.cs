@@ -270,7 +270,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    if (!filePathSHA1.OIEquals(rHash))
+                    if(!rHash.Contains(filePathSHA1))
                     {
                         needsUpdate = true;
                     }
@@ -381,11 +381,6 @@ namespace FilterProvider.Common.Configuration
                     string line = null;
                     while((line = reader.ReadLine()) != null)
                     {
-                        if(string.IsNullOrWhiteSpace(line))
-                        {
-                            continue;
-                        }
-
                         if(line.Contains("--startlist"))
                         {
                             currentList = line.Substring("--startlist".Length).TrimStart();
@@ -398,6 +393,7 @@ namespace FilterProvider.Common.Configuration
                             }
                             else
                             {
+                                fileBuilder.Replace("\n", "", fileBuilder.Length-1, 1);
                                 rulesets[currentList] = fileBuilder.ToString();
                                 fileBuilder.Clear();
                                 
@@ -426,7 +422,7 @@ namespace FilterProvider.Common.Configuration
                                 errorList = true;
                                 continue;
                             }
-                            fileBuilder.Append($"{line}\n");
+                            fileBuilder.Append($"{line}\n");//need to preserve empty lines for hash calculations                            
                         }
                     }
                 }
