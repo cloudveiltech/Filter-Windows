@@ -632,7 +632,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-       //    request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+         //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -686,9 +686,17 @@ namespace FilterProvider.Common.Util
                 return null;
             }
 
-            Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
 
-            return responseDict;
+            try
+            {
+                Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
+                return responseDict;
+            } catch(Exception ex)
+            {
+
+            }
+
+            return new Dictionary<string, bool?>();
         }
 
         public byte[] GetFilterLists(List<FilteringPlainTextListModel> toFetch, out HttpStatusCode code, out bool responseReceived)
