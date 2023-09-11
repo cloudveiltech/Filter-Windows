@@ -354,8 +354,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CloudVeilService\bin\$(Configuration) $(Platform)\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\Warden\bin\$(Configuration)\*.*" "$(TargetDir)"
-xcopy /E /Y /C "$(ProjectDir)..\Sentinel\bin\$(Configuration)\*.*" "$(TargetDir)"</PostBuildEvent>
+xcopy /E /Y /C "$(ProjectDir)..\Warden\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"
+xcopy /E /Y /C "$(ProjectDir)..\Sentinel\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
