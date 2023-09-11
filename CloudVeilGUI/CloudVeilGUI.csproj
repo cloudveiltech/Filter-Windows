@@ -84,6 +84,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -338,6 +339,14 @@
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Sentinel\Sentinel.csproj">
+      <Project>{0e495b33-f43f-48d6-82cd-ece35ba8f529}</Project>
+      <Name>Sentinel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Warden\Warden.csproj">
+      <Project>{bd5ad48c-8575-42aa-b246-1906d89b164b}</Project>
+      <Name>Warden</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Platform)' == 'AnyCPU'">
@@ -345,7 +354,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\CloudVeilService\bin\$(Configuration) $(Platform)\*.*" "$(TargetDir)"
-</PostBuildEvent>
+xcopy /E /Y /C "$(ProjectDir)..\Warden\bin\$(Configuration)\*.*" "$(TargetDir)"
+xcopy /E /Y /C "$(ProjectDir)..\Sentinel\bin\$(Configuration)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

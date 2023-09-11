@@ -75,6 +75,12 @@
         <Component Id="com_CF59B35B_53F0_0D47_961D_74CE487FCCCB" Guid="7B353703-B680-4538-A8DD-3D2FCDE9D99E" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_CF59B35B_53F0_0D47_961D_74CE487FCCCB" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
         </Component>
+        <Component Id="com_E8117332_911F_4BDA_8E78_8629CBF78857" Guid="E8117332-911F-4BDA-8E78-8629CBF78857" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_E8117332_911F_4BDA_8E78_8629CBF78857" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Warden.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Warden.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="com_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" Guid="100E89F0-A6E7-49B6-AB34-3AA80C101F2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Sentinel.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe" KeyPath="yes" />
+        </Component>
         <!-- The 'InstallGuard' project output. -->
         <!--<Component Id="comp_4DF2BCC6_189C" Guid="CE192BB4-A8BC-41F4-9829-291107227FE7" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_1DE9226C_55B1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Net.Http.dll" Source="..\..\CloudVeilGUI\bin\Release x64\System.Net.Http.dll" KeyPath="yes" />

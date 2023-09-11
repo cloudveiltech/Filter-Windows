@@ -130,9 +130,7 @@
     <Compile Include="Util\InstalledPrograms.cs" />
     <Compile Include="Util\ResourceStreams.cs" />
     <Compile Include="Util\UriInfo.cs" />
-    <EmbeddedResource Include="Services\Sentinel.cs" />
     <Compile Include="Services\ServiceSpawner.cs" />
-    <EmbeddedResource Include="Services\Warden.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CloudVeil.Core.Windows\Cloudveil.Core.Windows.csproj">
