@@ -60,8 +60,18 @@ namespace CloudVeilService.Services
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var baseDirectory = Path.GetDirectoryName(assembly.Location);
+                var dllFolderName = "x64";
+                var procAcrchitecture = RuntimeInformation.ProcessArchitecture;
+                if(procAcrchitecture == Architecture.X86)
+                {
+                    dllFolderName = "x86";
+                } 
+                else if(procAcrchitecture == Architecture.Arm64)
+                {
+                    dllFolderName = "arm64";
+                }
 
-                var dllDirectory = Path.Combine(baseDirectory, Environment.Is64BitProcess ? "x64" : "x86");
+                var dllDirectory = Path.Combine(baseDirectory, dllFolderName);
                 SetDllDirectory(dllDirectory);
 
                 logger = LoggerUtil.GetAppWideLogger();

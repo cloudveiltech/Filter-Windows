@@ -24,6 +24,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Gui.CloudVeil.Util;
+using System.Windows.Forms;
 
 namespace CloudVeil.Windows
 {
@@ -166,7 +167,7 @@ namespace CloudVeil.Windows
 
             try
             {
-                if(Process.GetCurrentProcess().SessionId <= 0)
+                if (Process.GetCurrentProcess().SessionId <= 0)
                 {
                     try
                     {
@@ -187,8 +188,9 @@ namespace CloudVeil.Windows
                 PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
                 PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
             }
-            catch
+            catch(Exception e)
             {
+                LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                 // Lets assume that if we can't even read our session ID, that we're in session 0.
                 Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                 return;

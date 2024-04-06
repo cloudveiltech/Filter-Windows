@@ -34,6 +34,7 @@ using FilterNativeWindows;
 using Gui.CloudVeil;
 using MahApps.Metro.Controls.Dialogs;
 using CloudVeil.Core.Windows.Services;
+using System.Runtime.InteropServices;
 
 namespace CloudVeil.Windows
 {
@@ -146,7 +147,7 @@ namespace CloudVeil.Windows
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             appVerStr += " " + System.Reflection.AssemblyName.GetAssemblyName(assembly.Location).Version.ToString(3);
-            appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
+            appVerStr += " " + RuntimeInformation.ProcessArchitecture.ToString();
 
             logger.Info("CloudVeilGUI Version: {0}", appVerStr);
 

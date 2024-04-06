@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,13 +34,17 @@ namespace FilterProvider.Common.Util
             this.platformId = platformId;
 
             var bitVersionUri = string.Empty;
-            if (Environment.Is64BitProcess)
+            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
             {
-                bitVersionUri = "/update/cv4w-x64/update.xml";
+                bitVersionUri = "/update/cv4w-arm64/update.xml";
+            }
+            else if(RuntimeInformation.ProcessArchitecture == Architecture.X86)
+            {
+                bitVersionUri = "/update/cv4w-x86/update.xml";
             }
             else
             {
-                bitVersionUri = "/update/cv4w-x86/update.xml";
+                bitVersionUri = "/update/cv4w-x64/update.xml";
             }
 
             var appUpdateInfoUrl = string.Format("{0}{1}?acid={2}&v={3}&os={4}",
