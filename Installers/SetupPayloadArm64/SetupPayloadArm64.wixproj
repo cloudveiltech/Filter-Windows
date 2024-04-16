@@ -1,49 +1,31 @@
-<Project>
+﻿<Project>
   <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.0" />
   <PropertyGroup>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-  <PropertyGroup>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <Name>Setup x64</Name>
+    <Platform Condition=" '$(Platform)' == '' ">ARM64</Platform>
+    <OutputType>Module</OutputType>
+    <Name>SetupPayload64</Name>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <SignOutput>true</SignOutput>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants />
-    <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
+    <DefineConstants>Debug</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM64' ">
     <OutputPath>$(Configuration)\</OutputPath>
-    <DefineConstants />
-    <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' ">
-    <DefineConstants />
-    <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="InstallationUi.wxs" />
-    <Compile Include="CustomActions.wxs" />
-    <Compile Include="InstallGuardDialog.wxs" />
-    <Compile Include="Product-x64.wxs" />
+    <Content Include="XSLT\RegisterForCOM.xml" />
+    <Content Include="XSLT\XslFile.xslt" />
+    <Content Include="XSLT\XslRegisterForCOM.xslt" />
+    <Content Include="XSLT\XslProjectOutput.xslt" />
+    <Content Include="XSLT\readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.NetFx.wixext" Version="4.0.0" />
     <PackageReference Include="WixToolset.Heat" Version="4.0.0" />
   </ItemGroup>
-  <Target Name="UsesFrameworkSdk">
-    <GetFrameworkSdkPath>
-      <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
-    </GetFrameworkSdkPath>
-    <PropertyGroup>
-      <WinSDK>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0@InstallationFolder)</WinSDK>
-      <WinSDK Condition="('@(WinSDK)'=='')">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots@KitsRoot10)</WinSDK>
-      <Win10SDKBinPath>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@InstallationFolder)bin\</Win10SDKBinPath>
-      <Win10SDKVersion>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@ProductVersion).0\</Win10SDKVersion>
-      <Win10SDKVerBinPath>$(Win10SDKBinPath)$(Win10SDKVersion)</Win10SDKVerBinPath>
-    </PropertyGroup>
-  </Target>
+  <ItemGroup>
+    <Folder Include="XSLT\" />
+  </ItemGroup>
   <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="4.0.0" />
   <Target Name="BeforeBuild">
     <!-- Create temporary directory for XML files -->
@@ -95,32 +77,20 @@
     </CreateItem>
   </Target>
   <Target Name="AfterBuild">
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
       <!-- Add bootstrapper items here -->
       <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
-        <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
+        <ProductName>Microsoft .NET Framework 4.6.1 (x86 and ARM64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM64' ">
       <!-- Add bootstrapper items here -->
       <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
-        <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
+        <ProductName>Microsoft .NET Framework 4.6.1 (x86 and ARM64)</ProductName>
       </BootstrapperFile>
     </ItemGroup>
-    <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' ">
-      <!-- Add bootstrapper items here -->
-      <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
-        <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
-      </BootstrapperFile>
-    </ItemGroup>
-    <!--<GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />-->
   </Target>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="&quot;$(ProjectDir)add_reinstall_prop.vbs&quot; &quot;$(TargetDir)$(TargetFileName)&quot;" />
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="&quot;$(SolutionDir)\wix-verify-bin\wix-verify.exe&quot; check-output &quot;$(SolutionDir)\CloudVeilGUI\bin\Release ARM64&quot; &quot;$(SolutionDir)\Installers\SetupProjects\Product-ARM64.wxs&quot; &quot;$(SolutionDir)\Installers\SetupPayloadARM64\Module.wxs&quot;" />
   </Target>
-  <ItemGroup>
-    <EmbeddedResource Remove="XSLT\**" />
-  </ItemGroup>
 </Project>

@@ -1,47 +1,44 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\FilterStarter.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
-  <Product Id="ff99ebbc-4769-4235-aae9-22be4c314bd4" Name="CloudVeil For Windows" Language="1033" Version="2.1.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252">
-    <Package AdminImage="no" Comments="Internet Content Filter" Compressed="yes" Description="CloudVeil For Windows Setup" InstallerVersion="405" InstallScope="perMachine" Keywords="internet content filter" Languages="1033" Manufacturer="CloudVeil" Platform="x64" ReadOnly="no" ShortNames="no" />
+  <Package Name="CloudVeil For Windows" Language="1033" Version="2.2.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="82c9f49d-aded-41c6-8411-a16e6b0ee945"><SummaryInformation Description="CloudVeil For Windows Setup" Keywords="internet content filter" Manufacturer="CloudVeil" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
     <Property Id="ARPCOMMENTS" Value="Internet Content Filter" />
     <Property Id="ARPCONTACT" Value="CloudVeil" />
     <Property Id="ARPHELPLINK" Value="https://cloudveil.org" />
     <Property Id="ARPURLINFOABOUT" Value="https://cloudveil.org" />
-    <Property Id="ARPPRODUCTICON">_D1707FE3B808</Property>
+    <Property Id="ARPPRODUCTICON" Value="_D1707FE3B808" />
     <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="2.1.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.1.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Minimum="2.2.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
+      <UpgradeVersion Maximum="2.2.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
     </Upgrade>
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
-    <Condition Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED]]></Condition>
-    <Condition Message="Required OS is Win10 or higher">
-          <![CDATA[Installed OR (VersionNT >= 603) OR (VersionNT64 >= 603)]]>
-    </Condition>
+    <Launch Condition="Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again." />
+    <Launch Condition="Installed OR (VersionNT &gt;= 603) OR (VersionNT64 &gt;= 603)" Message="Required OS is Win10 or higher" />
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
-    <Binary Id="B.CustomInstallerActions"  SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
+    <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="DesktopFolder" Name="Desktop" />
-      <Directory Id="ProgramMenuFolder" Name="Program Menu" />
-      <Component Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" Guid="40C9E382-65A8-441D-80AC-122FC1CEB5A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_0B11E4D1_56DD_7B46_9870_4EAA895D317A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
-      </Component>
-      <Component Id="com_49908EA8_9E0B_A940_A30F_68D4540384F8" Guid="DCEDF250-82C7-42CA-A038-FF4BC16992C5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_49908EA8_9E0B_A940_A30F_68D4540384F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
-      </Component>
-      <Component Id="CloudVeilExe" Guid="27D8853E-8599-403F-B925-7E06B800DD50" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
-      </Component>
-      <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
-      </Component>
-      <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
-    </Directory>
+      <!-- The directory tree of the installation package. -->
+      <StandardDirectory Id="DesktopFolder"/>
+      <StandardDirectory Id="ProgramMenuFolder"/>
+      <StandardDirectory Id="TARGETDIR">
+        <Component Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" Guid="40C9E382-65A8-441D-80AC-122FC1CEB5A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_0B11E4D1_56DD_7B46_9870_4EAA895D317A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
+        </Component>      
+        <Component Id="com_49908EA8_9E0B_A940_A30F_68D4540384F8" Guid="DCEDF250-82C7-42CA-A038-FF4BC16992C5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_49908EA8_9E0B_A940_A30F_68D4540384F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
+        </Component>
+        <Component Id="CloudVeilExe" Guid="27D8853E-8599-403F-B925-7E06B800DD50" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
+        </Component>
+        <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+            <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
+        </Component>
+        <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
+    </StandardDirectory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
       <ComponentRef Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" />
@@ -74,42 +71,42 @@
     <!-- Need to separate DIRCA_TARGETDIR custom actions from CustomActions.wxs since it differs between 64-bit and 32-bit. -->
     <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[ProgramFiles64Folder][Manufacturer]\[ProductName]" Execute="firstSequence" />
     <InstallUISequence>
-      <Custom Action="ERRCA_UIANDADVERTISED" Sequence="5"><![CDATA[ProductState=1]]></Custom>
+      <Custom Action="ERRCA_UIANDADVERTISED" Sequence="5" Condition="ProductState=1" />
       <AppSearch Sequence="100" />
       <FindRelatedProducts Sequence="200" />
-      <LaunchConditions Sequence="400"><![CDATA[NOT Installed]]></LaunchConditions>
-      <CCPSearch Sequence="500"><![CDATA[NOT Installed]]></CCPSearch>
-      <RMCCPSearch Sequence="600"><![CDATA[NOT Installed]]></RMCCPSearch>
+      <LaunchConditions Sequence="400" Condition="NOT Installed" />
+      <CCPSearch Sequence="500" Condition="NOT Installed" />
+      <RMCCPSearch Sequence="600" Condition="NOT Installed" />
       <ValidateProductID Sequence="700" />
-      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
-      <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
+      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize" Condition="TARGETDIR = &quot;&quot;" />
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts" Condition="NEWPRODUCTFOUND" />
       <CostInitialize Sequence="800" />
       <FileCost Sequence="900" />
-      <IsolateComponents Sequence="950"><![CDATA[RedirectedDllSupport]]></IsolateComponents>
+      <IsolateComponents Sequence="950" Condition="RedirectedDllSupport" />
       <CostFinalize Sequence="1000" />
       <ExecuteAction Sequence="1300" />
-      <Show Dialog="WelcomeForm" Sequence="1001"><![CDATA[Installed="" AND NOT RESUME]]></Show>
+      <Show Dialog="WelcomeForm" Sequence="1001" Condition="Installed=&quot;&quot; AND NOT RESUME" />
       <Show Dialog="ProgressForm" Sequence="1299" />
-      <Show Dialog="FatalErrorForm" OnExit="error"><![CDATA[NOT HideFatalErrorForm]]></Show>
+      <Show Dialog="FatalErrorForm" OnExit="error" Condition="NOT HideFatalErrorForm" />
       <Show Dialog="UserExitForm" OnExit="cancel" />
       <Show Dialog="FinishedForm" OnExit="success" />
-      <Custom Action="VSDCA_FolderForm_AllUsers" Sequence="997"><![CDATA[Installed="" AND NOT RESUME AND ALLUSERS=1]]></Custom>
-      <Show Dialog="ResumeForm" Sequence="998"><![CDATA[Installed="" AND RESUME]]></Show>
-      <Show Dialog="MaintenanceForm" Sequence="999"><![CDATA[Installed<>""]]></Show>
+      <Custom Action="VSDCA_FolderForm_AllUsers" Sequence="997" Condition="Installed=&quot;&quot; AND NOT RESUME AND ALLUSERS=1" />
+      <Show Dialog="ResumeForm" Sequence="998" Condition="Installed=&quot;&quot; AND RESUME" />
+      <Show Dialog="MaintenanceForm" Sequence="999" Condition="Installed&lt;&gt;&quot;&quot;" />
     </InstallUISequence>
     <AdminUISequence>
-      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR = ""]]></Custom>
+      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize" Condition="TARGETDIR = &quot;&quot;" />
       <CostInitialize Sequence="800" />
       <FileCost Sequence="900" />
       <CostFinalize Sequence="1000" />
       <ExecuteAction Sequence="1300" />
-      <Show Dialog="AdminWelcomeForm" Sequence="1001"><![CDATA[Installed="" AND NOT RESUME]]></Show>
+      <Show Dialog="AdminWelcomeForm" Sequence="1001" Condition="Installed=&quot;&quot; AND NOT RESUME" />
       <Show Dialog="AdminProgressForm" Sequence="1299" />
       <Show Dialog="AdminFatalErrorForm" OnExit="error" />
       <Show Dialog="AdminUserExitForm" OnExit="cancel" />
       <Show Dialog="AdminFinishedForm" OnExit="success" />
-      <Show Dialog="AdminResumeForm" Sequence="998"><![CDATA[Installed="" AND RESUME]]></Show>
-      <Show Dialog="AdminMaintenanceForm" Sequence="999"><![CDATA[Installed<>""]]></Show>
+      <Show Dialog="AdminResumeForm" Sequence="998" Condition="Installed=&quot;&quot; AND RESUME" />
+      <Show Dialog="AdminMaintenanceForm" Sequence="999" Condition="Installed&lt;&gt;&quot;&quot;" />
     </AdminUISequence>
     <UIRef Id="Base" />
     <UIRef Id="UserInterface" />
@@ -127,54 +124,51 @@
     <UI Id="AdminWelcomeDlg">
       <Dialog Id="AdminWelcomeForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="NextButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Next &gt;" TabSkip="no" Default="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[AdminWelcomeForm_NextArgs=""]]></Publish>
-          <Publish Event="NewDialog" Value="[AdminWelcomeForm_NextArgs]"><![CDATA[AdminWelcomeForm_NextArgs<>""]]></Publish>
+          <Publish Event="EndDialog" Value="Return" Condition="AdminWelcomeForm_NextArgs=&quot;&quot;" />
+          <Publish Event="NewDialog" Value="[AdminWelcomeForm_NextArgs]" Condition="AdminWelcomeForm_NextArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Cancel="yes">
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
-        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no">
-          <Condition Action="disable"><![CDATA[AdminWelcomeForm_PrevArgs=""]]></Condition>
-          <Condition Action="enable"><![CDATA[AdminWelcomeForm_PrevArgs<>""]]></Condition>
-          <Publish Event="NewDialog" Value="[AdminWelcomeForm_PrevArgs]"><![CDATA[AdminWelcomeForm_PrevArgs<>""]]></Publish>
+        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminWelcomeForm_PrevArgs=&quot;&quot;" EnableCondition="AdminWelcomeForm_PrevArgs&lt;&gt;&quot;&quot;">
+          
+          
+          <Publish Event="NewDialog" Value="[AdminWelcomeForm_PrevArgs]" Condition="AdminWelcomeForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
         <Control Id="BannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Welcome to the [ProductName] Network Setup Wizard" TabSkip="yes" Transparent="yes" NoPrefix="yes" />
         <Control Id="Line2" Type="Line" X="0" Y="252" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="Line1" Type="Line" X="0" Y="52" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="CopyrightWarningText" Type="Text" X="9" Y="186" Width="354" Height="66" Text="{\RegularTextStyle}WARNING: This computer program is protected by copyright law and international treaties. Unauthorized duplication or distribution of this program, or any portion of it, may result in severe civil or criminal penalties, and will be prosecuted to the maximum extent possible under the law." TabSkip="yes" NoPrefix="yes" />
-        <Control Id="WelcomeText" Type="Text" X="9" Y="63" Width="354" Height="114" Text="{\RegularTextStyle}The installer will guide you through the steps required to create a network image of [ProductName].&#xD;&#xA;&#xD;&#xA;Click &quot;Next&quot; to continue." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[Installed="" AND NOT RESUME]]></Condition>
-          <Condition Action="hide"><![CDATA[Installed<>"" OR RESUME]]></Condition>
-        </Control>
+        <Control Id="WelcomeText" Type="Text" X="9" Y="63" Width="354" Height="114" Text="{\RegularTextStyle}The installer will guide you through the steps required to create a network image of [ProductName].&#xD;&#xA;&#xD;&#xA;Click &quot;Next&quot; to continue." TabSkip="yes" NoPrefix="yes" ShowCondition="Installed=&quot;&quot; AND NOT RESUME" HideCondition="Installed&lt;&gt;&quot;&quot; OR RESUME" />
       </Dialog>
     </UI>
     <UI Id="AdminFolderDlg">
       <Dialog Id="AdminFolderForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]" TrackDiskSpace="yes">
         <Control Id="NextButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Next &gt;" TabSkip="no" Default="yes">
-          <Publish Event="SetTargetPath" Value="TARGETDIR"><![CDATA[1]]></Publish>
-          <Publish Event="SpawnDialog" Value="DiskCost"><![CDATA[OutOfDiskSpace=1]]></Publish>
-          <Publish Event="EndDialog" Value="Return"><![CDATA[AdminFolderForm_NextArgs="" AND OutOfDiskSpace<>1]]></Publish>
-          <Publish Event="NewDialog" Value="[AdminFolderForm_NextArgs]"><![CDATA[AdminFolderForm_NextArgs<>"" AND OutOfDiskSpace<>1]]></Publish>
-          <Publish Property="ALLUSERS" Value="2"><![CDATA[AdminFolderForm_AllUsers="ALL"]]></Publish>
+          <Publish Event="SetTargetPath" Value="TARGETDIR" />
+          <Publish Event="SpawnDialog" Value="DiskCost" Condition="OutOfDiskSpace=1" />
+          <Publish Event="EndDialog" Value="Return" Condition="AdminFolderForm_NextArgs=&quot;&quot; AND OutOfDiskSpace&lt;&gt;1" />
+          <Publish Event="NewDialog" Value="[AdminFolderForm_NextArgs]" Condition="AdminFolderForm_NextArgs&lt;&gt;&quot;&quot; AND OutOfDiskSpace&lt;&gt;1" />
+          <Publish Property="ALLUSERS" Value="2" Condition="AdminFolderForm_AllUsers=&quot;ALL&quot;" />
         </Control>
         <Control Id="FolderLabel" Type="Text" X="18" Y="114" Width="348" Height="12" Text="{\RegularTextStyle}&amp;Folder:" TabSkip="no" />
         <Control Id="FolderEdit" Type="PathEdit" X="18" Y="126" Width="258" Height="18" Property="TARGETDIR" Text="{\RegularTextStyle}MsiPathEdit" TabSkip="no" Sunken="yes" />
         <Control Id="BrowseButton" Type="PushButton" X="282" Y="126" Width="84" Height="18" Text="{\RegularTextStyle}B&amp;rowse..." TabSkip="no">
-          <Publish Property="SelectFolderDialog_Property" Value="TARGETDIR"><![CDATA[1]]></Publish>
-          <Publish Event="SpawnDialog" Value="SelectFolderDialog"><![CDATA[1]]></Publish>
+          <Publish Property="SelectFolderDialog_Property" Value="TARGETDIR" />
+          <Publish Event="SpawnDialog" Value="SelectFolderDialog" />
         </Control>
         <Control Id="DiskCostButton" Type="PushButton" X="282" Y="150" Width="84" Height="18" Text="{\RegularTextStyle}&amp;Disk Cost..." TabSkip="no">
-          <Publish Event="SetTargetPath" Value="TARGETDIR"><![CDATA[1]]></Publish>
-          <Publish Event="SpawnDialog" Value="DiskCost"><![CDATA[1]]></Publish>
+          <Publish Event="SetTargetPath" Value="TARGETDIR" />
+          <Publish Event="SpawnDialog" Value="DiskCost" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Cancel="yes">
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
-        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no">
-          <Condition Action="disable"><![CDATA[AdminFolderForm_PrevArgs=""]]></Condition>
-          <Condition Action="enable"><![CDATA[AdminFolderForm_PrevArgs<>""]]></Condition>
-          <Publish Event="NewDialog" Value="[AdminFolderForm_PrevArgs]"><![CDATA[AdminFolderForm_PrevArgs<>""]]></Publish>
+        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminFolderForm_PrevArgs=&quot;&quot;" EnableCondition="AdminFolderForm_PrevArgs&lt;&gt;&quot;&quot;">
+          
+          
+          <Publish Event="NewDialog" Value="[AdminFolderForm_PrevArgs]" Condition="AdminFolderForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
         <Control Id="Line1" Type="Line" X="0" Y="52" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
@@ -186,16 +180,16 @@
     <UI Id="AdminConfirmDlg">
       <Dialog Id="AdminConfirmInstallForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="NextButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Next &gt;" TabSkip="no" Default="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[AdminConfirmInstallForm_NextArgs=""]]></Publish>
-          <Publish Event="NewDialog" Value="[AdminConfirmInstallForm_NextArgs]"><![CDATA[AdminConfirmInstallForm_NextArgs<>""]]></Publish>
+          <Publish Event="EndDialog" Value="Return" Condition="AdminConfirmInstallForm_NextArgs=&quot;&quot;" />
+          <Publish Event="NewDialog" Value="[AdminConfirmInstallForm_NextArgs]" Condition="AdminConfirmInstallForm_NextArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Cancel="yes">
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
-        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no">
-          <Condition Action="disable"><![CDATA[AdminConfirmInstallForm_PrevArgs=""]]></Condition>
-          <Condition Action="enable"><![CDATA[AdminConfirmInstallForm_PrevArgs<>""]]></Condition>
-          <Publish Event="NewDialog" Value="[AdminConfirmInstallForm_PrevArgs]"><![CDATA[AdminConfirmInstallForm_PrevArgs<>""]]></Publish>
+        <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminConfirmInstallForm_PrevArgs=&quot;&quot;" EnableCondition="AdminConfirmInstallForm_PrevArgs&lt;&gt;&quot;&quot;">
+          
+          
+          <Publish Event="NewDialog" Value="[AdminConfirmInstallForm_PrevArgs]" Condition="AdminConfirmInstallForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
         <Control Id="BannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Confirm Installation" TabSkip="yes" Transparent="yes" NoPrefix="yes" />
@@ -229,22 +223,10 @@
         </Control>
         <Control Id="Line2" Type="Line" X="0" Y="252" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="ProgressLabel" Type="Text" X="18" Y="96" Width="336" Height="12" Text="{\RegularTextStyle}Please wait..." TabSkip="yes" />
-        <Control Id="InstalledBody" Type="Text" X="9" Y="63" Width="354" Height="12" Text="{\RegularTextStyle}[ProductName] is being installed." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE=""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE<>""]]></Condition>
-        </Control>
-        <Control Id="RemovedBody" Type="Text" X="18" Y="63" Width="336" Height="12" Text="{\RegularTextStyle}[ProductName] is being removed." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE<>""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE=""]]></Condition>
-        </Control>
-        <Control Id="RemoveBannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Removing [ProductName]" TabSkip="yes" Transparent="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE<>""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE=""]]></Condition>
-        </Control>
-        <Control Id="InstalledBannerText" Type="Text" X="9" Y="9" Width="255" Height="33" Text="{\HeaderTextStyle}Installing [ProductName]" TabSkip="yes" Transparent="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE=""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE<>""]]></Condition>
-        </Control>
+        <Control Id="InstalledBody" Type="Text" X="9" Y="63" Width="354" Height="12" Text="{\RegularTextStyle}[ProductName] is being installed." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE=&quot;&quot;" HideCondition="REMOVE&lt;&gt;&quot;&quot;" />
+        <Control Id="RemovedBody" Type="Text" X="18" Y="63" Width="336" Height="12" Text="{\RegularTextStyle}[ProductName] is being removed." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE&lt;&gt;&quot;&quot;" HideCondition="REMOVE=&quot;&quot;" />
+        <Control Id="RemoveBannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Removing [ProductName]" TabSkip="yes" Transparent="yes" NoPrefix="yes" ShowCondition="REMOVE&lt;&gt;&quot;&quot;" HideCondition="REMOVE=&quot;&quot;" />
+        <Control Id="InstalledBannerText" Type="Text" X="9" Y="9" Width="255" Height="33" Text="{\HeaderTextStyle}Installing [ProductName]" TabSkip="yes" Transparent="yes" NoPrefix="yes" ShowCondition="REMOVE=&quot;&quot;" HideCondition="REMOVE&lt;&gt;&quot;&quot;" />
       </Dialog>
     </UI>
     <UI Id="AdminFinishedDlg">
@@ -255,7 +237,7 @@
       </RadioButtonGroup>
       <Dialog Id="AdminFinishedForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="CloseButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Close" TabSkip="no" Default="yes" Cancel="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[1]]></Publish>
+          <Publish Event="EndDialog" Value="Return" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Disabled="yes" />
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" Disabled="yes" />
@@ -263,18 +245,12 @@
         <Control Id="Line1" Type="Line" X="0" Y="52" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="Line2" Type="Line" X="0" Y="252" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="BannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Installation Complete" TabSkip="yes" Transparent="yes" NoPrefix="yes" />
-        <Control Id="BodyTextInstall" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}A network image of [ProductName] has been successfully created.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE=""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE<>""]]></Condition>
-        </Control>
-        <Control Id="BodyText" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}[ProductName] has been successfully removed.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE<>""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE=""]]></Condition>
-        </Control>
+        <Control Id="BodyTextInstall" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}A network image of [ProductName] has been successfully created.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE=&quot;&quot;" HideCondition="REMOVE&lt;&gt;&quot;&quot;" />
+        <Control Id="BodyText" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}[ProductName] has been successfully removed.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE&lt;&gt;&quot;&quot;" HideCondition="REMOVE=&quot;&quot;" />
       </Dialog>
       <Dialog Id="AdminUserExitForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="CloseButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Close" TabSkip="no" Default="yes" Cancel="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[1]]></Publish>
+          <Publish Event="EndDialog" Value="Return" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Disabled="yes" />
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" Disabled="yes" />
@@ -282,18 +258,12 @@
         <Control Id="Line1" Type="Line" X="0" Y="52" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="Line2" Type="Line" X="0" Y="252" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="BannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Installation Interrupted" TabSkip="yes" Transparent="yes" NoPrefix="yes" />
-        <Control Id="BodyTextInstall" Type="Text" X="18" Y="63" Width="342" Height="24" Text="{\RegularTextStyle}The installation was interrupted before [ProductName] could be installed. You need to restart the installer to try again." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE=""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE<>""]]></Condition>
-        </Control>
-        <Control Id="BodyTextRemove" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be removed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE<>""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE=""]]></Condition>
-        </Control>
+        <Control Id="BodyTextInstall" Type="Text" X="18" Y="63" Width="342" Height="24" Text="{\RegularTextStyle}The installation was interrupted before [ProductName] could be installed. You need to restart the installer to try again." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE=&quot;&quot;" HideCondition="REMOVE&lt;&gt;&quot;&quot;" />
+        <Control Id="BodyTextRemove" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be removed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE&lt;&gt;&quot;&quot;" HideCondition="REMOVE=&quot;&quot;" />
       </Dialog>
       <Dialog Id="AdminFatalErrorForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="CloseButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Close" TabSkip="no" Default="yes" Cancel="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[1]]></Publish>
+          <Publish Event="EndDialog" Value="Return" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Disabled="yes" />
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" Disabled="yes" />
@@ -301,22 +271,16 @@
         <Control Id="Line1" Type="Line" X="0" Y="52" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="Line2" Type="Line" X="0" Y="252" Width="375" Height="6" Text="{\RegularTextStyle}MsiHorizontalLine" TabSkip="yes" Disabled="yes" />
         <Control Id="BannerText" Type="Text" X="9" Y="9" Width="306" Height="33" Text="{\HeaderTextStyle}Installation Incomplete" TabSkip="yes" Transparent="yes" NoPrefix="yes" />
-        <Control Id="BodyTextInstall" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be installed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE<>""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE=""]]></Condition>
-        </Control>
-        <Control Id="BodyTextRemove" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be removed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes">
-          <Condition Action="show"><![CDATA[REMOVE=""]]></Condition>
-          <Condition Action="hide"><![CDATA[REMOVE<>""]]></Condition>
-        </Control>
+        <Control Id="BodyTextInstall" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be installed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE&lt;&gt;&quot;&quot;" HideCondition="REMOVE=&quot;&quot;" />
+        <Control Id="BodyTextRemove" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer was interrupted before [ProductName] could be removed. You need to restart the installer to try again.&#xD;&#xA;&#xD;&#xA;Click &quot;Close&quot; to exit." TabSkip="yes" NoPrefix="yes" ShowCondition="REMOVE=&quot;&quot;" HideCondition="REMOVE&lt;&gt;&quot;&quot;" />
       </Dialog>
       <Dialog Id="AdminMaintenanceForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="FinishButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Finish" TabSkip="no" Default="yes">
-          <Publish Property="REINSTALL" Value="ALL"><![CDATA[AdminMaintenanceForm_Action="Repair"]]></Publish>
-          <Publish Event="Reinstall" Value="ALL"><![CDATA[AdminMaintenanceForm_Action="Repair"]]></Publish>
-          <Publish Property="REMOVE" Value="ALL"><![CDATA[AdminMaintenanceForm_Action="Remove"]]></Publish>
-          <Publish Event="Remove" Value="ALL"><![CDATA[AdminMaintenanceForm_Action="Remove"]]></Publish>
-          <Publish Event="EndDialog" Value="Return"><![CDATA[1]]></Publish>
+          <Publish Property="REINSTALL" Value="ALL" Condition="AdminMaintenanceForm_Action=&quot;Repair&quot;" />
+          <Publish Event="Reinstall" Value="ALL" Condition="AdminMaintenanceForm_Action=&quot;Repair&quot;" />
+          <Publish Property="REMOVE" Value="ALL" Condition="AdminMaintenanceForm_Action=&quot;Remove&quot;" />
+          <Publish Event="Remove" Value="ALL" Condition="AdminMaintenanceForm_Action=&quot;Remove&quot;" />
+          <Publish Event="EndDialog" Value="Return" />
         </Control>
         <Control Id="RepairRadioGroup" Type="RadioButtonGroup" X="18" Y="108" Width="348" Height="48" Property="AdminMaintenanceForm_Action" Text="{\RegularTextStyle}MsiRadioButtonGroup" TabSkip="no" />
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Cancel="yes">
@@ -331,7 +295,7 @@
       </Dialog>
       <Dialog Id="AdminResumeForm" X="50" Y="50" Width="373" Height="287" Title="[ProductName]">
         <Control Id="FinishButton" Type="PushButton" X="300" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&amp;Finish" TabSkip="no" Default="yes">
-          <Publish Event="EndDialog" Value="Return"><![CDATA[1]]></Publish>
+          <Publish Event="EndDialog" Value="Return" />
         </Control>
         <Control Id="CancelButton" Type="PushButton" X="156" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}Cancel" TabSkip="no" Cancel="yes">
           <Publish Event="SpawnDialog" Value="Cancel" />
@@ -344,5 +308,5 @@
         <Control Id="BodyText" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer will resume the installation of [ProductName] on your computer.&#xD;&#xA;&#xD;&#xA;Click &quot;Finish&quot; to continue." TabSkip="yes" NoPrefix="yes" />
       </Dialog>
     </UI>
-  </Product>
+    </Package>
 </Wix>
