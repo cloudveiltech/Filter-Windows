@@ -88,19 +88,19 @@
         </CreateItem>
     </Target>
     <Target Name="AfterBuild">
-        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
             <!-- Add bootstrapper items here -->
             <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
                 <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
             </BootstrapperFile>
         </ItemGroup>
-        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM64' ">
             <!-- Add bootstrapper items here -->
             <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
                 <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
             </BootstrapperFile>
         </ItemGroup>
-        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' ">
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|ARM64' ">
             <!-- Add bootstrapper items here -->
             <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
                 <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>

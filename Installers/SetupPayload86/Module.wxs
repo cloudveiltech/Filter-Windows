@@ -1,348 +1,346 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\*.pdb -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\arm64\* -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\x64\* -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\FilterStarter.exe -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
-    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
-    <Module Id="CloudVeilPayload" Language="1033" Version="2.2.0" Codepage="1252" Guid="620CD2DC407F43B9916732C473EF22AC" InstallerVersion="300">
-        <SummaryInformation Description="SetupPayload86" Manufacturer="CloudVeil Technologies Inc."/>
-        <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-        <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
-        <CustomAction Id="DIRCA_NEWRETARGETABLEPROPERTY1" Property="NEWRETARGETABLEPROPERTY1" Value="[TARGETDIR]" Execute="firstSequence" />
-        <!-- The directory tree of the installation package. -->
-        
-        <!-- The reference to the component group of the 'InstallGuard' project output. -->
-        <InstallExecuteSequence>
-            <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
-        </InstallExecuteSequence>
-        <InstallUISequence>
-            <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
-        </InstallUISequence>
-        <AdminExecuteSequence>
-            <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
-        </AdminExecuteSequence>
-        <AdminUISequence>
-            <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
-        </AdminUISequence>
-        <UI />
-    
-            <StandardDirectory Id="ProgramMenuFolder">
-                <Component Id="com_dirProgramMenuFolder" Guid="10BC5CE4-32BD-4CE8-85A2-6A4264343516" Transitive="no">
-                    <RemoveFolder Id="_E3E03A75_EC55_4AA7_B6C3_9329504754CE" On="uninstall" />
-                    <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirProgramMenuFolder" Type="string" Value="Program Menu directory" KeyPath="yes" />
-                    <Shortcut Id="_4A6DB1AA_F22F_F74C_AF30_BC7C9FD28C1A" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
-                        <Icon Id="_BC7C9FD28C1A" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
-                    </Shortcut>
-                </Component>
-            </StandardDirectory>
-            <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
-                <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_13CA2E4B_0AEB" Guid="173C82B3-FF74-4FE9-AAF5-BC712D9CD962" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_972B1D02_D699" Guid="32035B3C-EEAF-49FD-BECB-476008B21BD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_D397C5B4_697B" Guid="C7D8CA26-C275-42CA-A567-3C179E7FFC8D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_196C8692_F905" Guid="27AC2548-57AF-402C-BEF5-13FD95ED8267" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_EA9F5501_48DD" Guid="A0E6F6F6-A852-4371-823C-6805509FDB4C" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
-                    <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
-                    <RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
-                </Component>
-                <Component Id="com_E0263D25_7800_4353_A5A3_861E14A9BCCD" Guid="E0263D25-7800-4353-A5A3-861E14A9BCCD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ValueTuple.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
-                </Component>
-                <!-- The 'InstallGuard' project output. -->
-                <Component Id="comp_EF162366_80D3" Guid="504F8A7B-1C7A-4EE4-8A2C-DB40ED2A6371" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_0CB4ACAB_798A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CloudVeilGUI\bin\Release x86\BouncyCastle.Crypto.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_C14A7C74_B0DE" Guid="4FAD08CF-75C1-4EDD-8E5B-EB61AC0EED12" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_BE2E43F6_1DA6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.Core.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.Core.Windows.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_173D0B9F_2B91" Guid="CAB9910A-71C3-443C-98C6-30E7B50E3FD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_1610BB99_92A7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Filter.Platform.Common.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_BE84D96B_46DC" Guid="7F11C3A7-DD7D-4474-AF08-FC3B5DD6F4C8" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_803B0BC7_19FC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NamedPipeWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NamedPipeWrapper.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_AC21C739_CC12" Guid="63E72BAA-C40D-47ED-89F7-DFA0D4E170A5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_5E1F1763_635D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_E8EA7A86_32A4" Guid="806FBF09-92EB-43C1-A131-BCA3C7BAAF85" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_39BC3670_3B6C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Newtonsoft.Json.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Newtonsoft.Json.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_08CE5021_700A" Guid="48957704-9550-45C2-9F1B-2B579F797181" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_E9C66B8F_FD4F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NLog.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_41A4A9DE_0456" Guid="E6E45B6E-3D09-48C4-AD4D-E9E88B9B6FF4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_93D7D845_87E2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ServiceModel.Syndication.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_8AEFC971_2815" Guid="9A5EAAF3-F746-40A2-B8DA-1CCBBA0BA986" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_64C02E63_B903" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_EA4BBE59_4E70" Guid="A32092ED-7320-422F-9EE3-27DE169C6536" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_89FD8302_3C5D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ControlzEx.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ControlzEx.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_CEEDE97A_0E66" Guid="473A727F-46A6-41AF-90BD-D0DC665D848B" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_7D90E0D6_F358" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_1B93F17C_F2A6" Guid="06E7E91D-DFCA-465A-B03F-7D56B92C7739" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_44185F8B_50F3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.Platform.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.Platform.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_0B352183_6AF9" Guid="E3296839-C6FF-4481-9BE4-65C94B5A6210" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_90F51959_A6B8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.dll" Source="..\..\CloudVeilGUI\bin\Release x86\MahApps.Metro.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_69EC694A_4834" Guid="53C416C6-63A3-4789-833F-A71BE4DD5A2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_FF684355_FBA5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_57C769A7_984E" Guid="A29C19D0-2F9B-405D-B97F-1132FB5431BE" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_B2B45FDD_97C8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.PlatformAbstractions.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.PlatformAbstractions.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_0989CA55_278C" Guid="311321E2-AD78-48E3-A2F4-1034B3F9A3F3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_D8C5E58B_CB93" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.Protocol.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.Protocol.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_A841F7F9_5EAB" Guid="C6CA5880-90F7-42CC-8BF2-A6105205B909" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_BC994C64_1710" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Windows.Interactivity.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Windows.Interactivity.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_F553F6C4_978D" Guid="2C2587EB-C07E-484B-89DA-95F4B492FBB4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_B9F53AE0_B8A7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.exe.config" KeyPath="yes" />
-                </Component>
-                <!--<Component Id="comp_569B6CDB_42BD" Guid="4F6E53DA-EF53-493B-976A-38C8414F07B8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\*.pdb -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\arm64\* -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\x64\* -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\FilterStarter.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
+  <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.xml -->
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.3.0" Codepage="1252" Guid="620CD2DC407F43B9916732C473EF22AC" InstallerVersion="300">
+    <SummaryInformation Description="SetupPayload86" Manufacturer="CloudVeil Technologies Inc." />
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+    <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
+    <CustomAction Id="DIRCA_NEWRETARGETABLEPROPERTY1" Property="NEWRETARGETABLEPROPERTY1" Value="[TARGETDIR]" Execute="firstSequence" />
+    <!-- The directory tree of the installation package. -->
+    <!-- The reference to the component group of the 'InstallGuard' project output. -->
+    <InstallExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </InstallUISequence>
+    <AdminExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </AdminExecuteSequence>
+    <AdminUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </AdminUISequence>
+    <UI />
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="com_dirProgramMenuFolder" Guid="10BC5CE4-32BD-4CE8-85A2-6A4264343516" Transitive="no">
+        <RemoveFolder Id="_E3E03A75_EC55_4AA7_B6C3_9329504754CE" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirProgramMenuFolder" Type="string" Value="Program Menu directory" KeyPath="yes" />
+        <Shortcut Id="_4A6DB1AA_F22F_F74C_AF30_BC7C9FD28C1A" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+          <Icon Id="_BC7C9FD28C1A" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
+        </Shortcut>
+      </Component>
+    </StandardDirectory>
+    <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+      <Component Id="comp_50A09E56_4B56" Guid="EE65CD15-F5FB-464A-9650-B9A4D8566A02" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_732E3D99_E192" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="concrt140.dll" Source="..\SetupProjects\External\x86\concrt140.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_13CA2E4B_0AEB" Guid="173C82B3-FF74-4FE9-AAF5-BC712D9CD962" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_F953D0F4_C69B" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140.dll" Source="..\SetupProjects\External\x86\msvcp140.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_972B1D02_D699" Guid="32035B3C-EEAF-49FD-BECB-476008B21BD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_F0FA9085_5389" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_1.dll" Source="..\SetupProjects\External\x86\msvcp140_1.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_D397C5B4_697B" Guid="C7D8CA26-C275-42CA-A567-3C179E7FFC8D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_F8BA4911_546E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="msvcp140_2.dll" Source="..\SetupProjects\External\x86\msvcp140_2.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_196C8692_F905" Guid="27AC2548-57AF-402C-BEF5-13FD95ED8267" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_AAEE7D6F_7054" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vccorlib140.dll" Source="..\SetupProjects\External\x86\vccorlib140.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_EA9F5501_48DD" Guid="A0E6F6F6-A852-4371-823C-6805509FDB4C" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_3DDB6E85_F8E1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="vcruntime140.dll" Source="..\SetupProjects\External\x86\vcruntime140.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="com_dirNEWRETARGETABLEPROPERTY1" Guid="7FCC187A-2F9F-475E-B4A9-7F69518D88D3" Transitive="yes">
+        <RemoveFolder Id="_D19CDDBE_1A6F_429B_BB94_2FD7A2D43D4D" On="uninstall" />
+        <RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
+      </Component>
+      <Component Id="com_E0263D25_7800_4353_A5A3_861E14A9BCCD" Guid="E0263D25-7800-4353-A5A3-861E14A9BCCD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_E0263D25_7800_4353_A5A3_861E14A9BCCD" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ValueTuple.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="com_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" Guid="82EEDA46-1F25-42C2-9643-06FDEC67E9CF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_8D44B0FA_BD11_7D45_A5A4_35A256C6C38D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
+      </Component>
+      <!-- The 'InstallGuard' project output. -->
+      <Component Id="comp_EF162366_80D3" Guid="504F8A7B-1C7A-4EE4-8A2C-DB40ED2A6371" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_0CB4ACAB_798A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="BouncyCastle.Crypto.dll" Source="..\..\CloudVeilGUI\bin\Release x86\BouncyCastle.Crypto.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_C14A7C74_B0DE" Guid="4FAD08CF-75C1-4EDD-8E5B-EB61AC0EED12" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_BE2E43F6_1DA6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.Core.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.Core.Windows.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_173D0B9F_2B91" Guid="CAB9910A-71C3-443C-98C6-30E7B50E3FD4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_1610BB99_92A7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Filter.Platform.Common.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_BE84D96B_46DC" Guid="7F11C3A7-DD7D-4474-AF08-FC3B5DD6F4C8" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_803B0BC7_19FC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NamedPipeWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NamedPipeWrapper.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_AC21C739_CC12" Guid="63E72BAA-C40D-47ED-89F7-DFA0D4E170A5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_5E1F1763_635D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="netstandard.dll" Source="C:\Windows\Microsoft.Net\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_E8EA7A86_32A4" Guid="806FBF09-92EB-43C1-A131-BCA3C7BAAF85" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_39BC3670_3B6C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Newtonsoft.Json.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Newtonsoft.Json.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_08CE5021_700A" Guid="48957704-9550-45C2-9F1B-2B579F797181" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_E9C66B8F_FD4F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NLog.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_41A4A9DE_0456" Guid="E6E45B6E-3D09-48C4-AD4D-E9E88B9B6FF4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_93D7D845_87E2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.ServiceModel.Syndication.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_8AEFC971_2815" Guid="9A5EAAF3-F746-40A2-B8DA-1CCBBA0BA986" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_64C02E63_B903" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_EA4BBE59_4E70" Guid="A32092ED-7320-422F-9EE3-27DE169C6536" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_89FD8302_3C5D" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ControlzEx.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ControlzEx.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_CEEDE97A_0E66" Guid="473A727F-46A6-41AF-90BD-D0DC665D848B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_7D90E0D6_F358" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_1B93F17C_F2A6" Guid="06E7E91D-DFCA-465A-B03F-7D56B92C7739" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_44185F8B_50F3" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.Platform.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.Platform.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_0B352183_6AF9" Guid="E3296839-C6FF-4481-9BE4-65C94B5A6210" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_90F51959_A6B8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.dll" Source="..\..\CloudVeilGUI\bin\Release x86\MahApps.Metro.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_69EC694A_4834" Guid="53C416C6-63A3-4789-833F-A71BE4DD5A2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_FF684355_FBA5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_57C769A7_984E" Guid="A29C19D0-2F9B-405D-B97F-1132FB5431BE" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_B2B45FDD_97C8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.PlatformAbstractions.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.PlatformAbstractions.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_0989CA55_278C" Guid="311321E2-AD78-48E3-A2F4-1034B3F9A3F3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_D8C5E58B_CB93" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.Protocol.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.Protocol.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_A841F7F9_5EAB" Guid="C6CA5880-90F7-42CC-8BF2-A6105205B909" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_BC994C64_1710" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Windows.Interactivity.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Windows.Interactivity.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_F553F6C4_978D" Guid="2C2587EB-C07E-484B-89DA-95F4B492FBB4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_B9F53AE0_B8A7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="CloudVeil.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\CloudVeil.exe.config" KeyPath="yes" />
+      </Component>
+      <!--<Component Id="comp_569B6CDB_42BD" Guid="4F6E53DA-EF53-493B-976A-38C8414F07B8" Permanent="no" SharedDllRefCount="no" Transitive="no">
           <File Id="_D62AF302_CDF8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DistillNET.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DistillNET.dll" KeyPath="yes" />
         </Component>-->
-                <Component Id="comp_A15EAB2F_8BC6" Guid="3A7D026A-A96C-478B-9EE4-7358A738AD73" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_2B6835D2_FEEF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_341BA2CC_B43F" Guid="34E67FBF-4347-45C4-A46F-67A83C36719A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_0FD42643_7021" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.core.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.core.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_29ED6F09_AD69" Guid="58BD49B6-5319-441B-8FC6-C1DAE8338344" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_0CFCC739_A651" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DNS.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DNS.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_670EBB4D_69F7" Guid="E373C342-627F-4851-A259-19222368F8E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_1091E62A_4573" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\e_sqlite3.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_85321290_734B" Guid="753099C7-92D4-4A7E-8A9D-FE936BAE20E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_5A74B317_0252" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.exe" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_047D59F2_DF6A" Guid="3E318C43-B34D-4641-BB1A-2BFD0D0C473A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_74896282_273E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.exe.config" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_25FAB24E_01FD" Guid="35D6CF62-B1E7-40C8-B084-E44050AE0DFB" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_8D8A1D30_0B8F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.pdb" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.pdb" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_433B0172_53B2" Guid="B4FD4B16-CF61-4D87-BC09-F9070E4B6FFC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_62FBC406_4FF4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x86\FilterProvider.Common.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_776666C3_01DF" Guid="5CE794B3-BDDB-4115-A927-D94F6EA0559F" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_FB1B8B8B_29A2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GoProxyWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GoProxyWrapper.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_4CC0519D_42CD" Guid="705E1D00-718C-4AE6-ACA8-E95678371246" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_74F9D10E_15F5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Buffers.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_4054393F_116C" Guid="603097BE-5E5C-4A2B-BBF8-F4746B028CFD" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_6CC11365_0C50" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Memory.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Memory.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_2134E698_9249" Guid="5039EAE0-0715-4545-A857-F79049F91B25" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_EE1079FF_CACD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe" Source="..\..\CloudVeilGUI\bin\Release x86\FilterServiceProvider.exe" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_5A383466_4948" Guid="98453123-4D21-4672-9642-D9F6AA699C29" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_4B6BF802_27C5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Interop.NetFwTypeLib.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Interop.NetFwTypeLib.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_E3A21AA0_5F0E" Guid="F4AFABAD-744A-4BED-8566-127F145BACCF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_693783B9_4464" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ManagedWifi.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ManagedWifi.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_B82A58F7_4BBE" Guid="8902EB95-76AF-4BAD-A1BC-CCE084EF25C3" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_1D6BBE7B_DFCC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_BBC9747C_950E" Guid="0E14A5BE-E9F3-4397-8221-EEB4E4DF7E22" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_3D0A3036_CECC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_3B0341D1_EFB7" Guid="489640CD-10AE-43D5-82F9-63CEEB8E70DC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_A3CCBFAF_E243" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Win32.TaskScheduler.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_812662A5_36F6" Guid="58837283-0595-4FC7-B51B-AD5DB69807E0" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_51889367_DF15" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Topshelf.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Topshelf.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_C4C5978D_6DBB" Guid="DAC15704-B5DA-413A-A948-2287CB1B1276" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_BDE1C9B4_E1B6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.dll" Source="..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_2D533EEF_E401" Guid="1B6486B7-9C7B-4366-A2C0-ACF6B9888A21" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_A1085291_C56F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WindowsFirewallHelper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\WindowsFirewallHelper.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_CF1B08EE_EAC6" Guid="D841E4FE-8B4C-4687-8F5A-475CD5CBABE5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_30B4E348_A434" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\FilterServiceProvider.exe.config" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_3F9F23A1_9C55" Guid="CABFCBB3-ACC4-4A4E-80C2-B887D3E58002" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_CE206D78_B9B7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.Extras.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.Extras.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_3E4AC7FA_B347" Guid="13F0E824-5059-4C45-9FF6-6EA536001132" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_23E9B7B6_ED96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Practices.ServiceLocation.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Practices.ServiceLocation.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_41456C02_1DC9" Guid="786E93F9-552B-42D7-8969-1FC247CCAA97" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_0DA7F21B_5E31" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CloudVeilGUI\bin\Release x86\MahApps.Metro.IconPacks.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_5649A06A_F6BB" Guid="C4A89795-695C-478D-9024-42AABEFC9BBC" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_AC57FC0D_7917" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.config" Source="..\..\CloudVeilGUI\bin\Release x86\NLog.config" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_2CC4C6BB_2517" Guid="74BB1A7A-4873-4970-9675-B9790D389F44" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_D065D2B2_FBBD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NodaTime.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_SentryNLogDll" Guid="474e466c-2c13-462e-b53c-b88535347ec4" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="SentryNLogDll" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.NLog.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_84738283_20BE" Guid="6E15B8EF-7068-45DB-9D26-F378E9217793" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_6749260A_F055" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_B2FEA926_1351" Guid="033E5011-DA64-4CAA-858A-FAF877D421BF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_B02103CC_5BD8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Collections.Immutable.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Collections.Immutable.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_9DCD41AD_DF5F" Guid="B6A9A050-4E74-48FD-95FB-1E10ECC079AB" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_207828A9_E582" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.IO.Pipes.AccessControl.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_5737FFF7_43F8" Guid="C5C377CF-CAD1-4954-AC2C-EE1CC698391E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_682D1867_C68F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Numerics.Vectors.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Numerics.Vectors.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_6ED7B4EA_E5B4" Guid="CF4FC702-EDB9-4A83-A404-B9DB35FFC890" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_EF69B521_C62C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.Metadata.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Reflection.Metadata.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_A139CF7A_510B" Guid="23EAF837-B7AB-4400-B0D5-FF57AD7055F7" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_7ECAFD8D_1BE1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Reflection.TypeExtensions.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_6AB3269F_CA5A" Guid="F711A2BC-FAC2-4798-83F3-87EDDA25F471" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_B2DB74E6_B813" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_BA4514E6_5046" Guid="3A1A653F-805E-4A9E-A368-21801E811BF6" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_6DDEF887_C813" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Security.AccessControl.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_55338F53_8EBF" Guid="936C230A-84C5-4D46-AB9A-B8124F6FCC7E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_A978A7B4_FF11" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Principal.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Security.Principal.Windows.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_2AF1BD6A_47A7" Guid="BFBBADC1-2244-4CB6-8760-CC834BE8F809" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_E8EF3FD9_47FF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_D94B5152_9FA6" Guid="F04F0B99-CB06-42E1-83E3-FD5B6B8800BA" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_4B378F92_C994" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x86\EmbedIO.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_5182EBDA_13B5" Guid="BEDA89C3-EBF6-4D2D-B8E4-E2A8A23C2AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Swan.Lite.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_58F5F8AC_E43A" Guid="28BE5B7E-9065-4D47-85F3-5B99B1F2E397" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_A34F805F_BA3C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DotNet.Glob.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_6CC0A7EA_9D35" Guid="FC7321BD-14D6-4E92-83DB-510A19123839" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_16C274F8_3E3E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Native.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Filter.Native.Windows.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_62917226_1225" Guid="61E3C210-3A21-4CCD-AF7A-3C08F5FDC164" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_2242D901_48C6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Handlebars.dll" KeyPath="yes" />
-                </Component>
-                <Component Id="comp_BE9658E0" Guid="BE9658E0-56F6-410E-87F0-A9494EFD48F5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_comp_BE9658E056F6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DebugController.exe" Source="..\..\DebugController\x64\DebugController.exe" KeyPath="yes" />
-                </Component>
-                <Component Id="com_E8117332_911F_4BDA_8E78_8629CBF78857" Guid="E8117332-911F-4BDA-8E78-8629CBF78857" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_E8117332_911F_4BDA_8E78_8629CBF78857" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Warden.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Warden.exe" KeyPath="yes" />
-                </Component>
-                <Component Id="com_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" Guid="100E89F0-A6E7-49B6-AB34-3AA80C101F2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                    <File Id="_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Sentinel.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe" KeyPath="yes" />
-                </Component>
-                <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
-                    <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_05620AE3_DE01_7943_8FA3_2D2F1316643A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert64.sys" KeyPath="yes" />
-                    </Component>
-                    <Component Id="com_718AED2B_984F_A94E_B378_099D87D01F2B" Guid="429DF4C4-B7CA-4AB4-822A-D63AA24CE06E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_718AED2B_984F_A94E_B378_099D87D01F2B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert.dll" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert.dll" KeyPath="yes" />
-                    </Component>
-                    <Component Id="com_D9947A0C_D56A_F242_A11B_17D75BA3D672" Guid="9B86E71B-60AD-4155-ABBD-36CEBF45A9EF" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_D9947A0C_D56A_F242_A11B_17D75BA3D672" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert32.sys" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert32.sys" KeyPath="yes" />
-                    </Component>
-                    <Component Id="comp_86CCE0BD_9963" Guid="1000812B-909D-45E8-977A-D79EA5BE6422" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_06833C0E_57B2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="proxy.dll" Source="..\..\CloudVeilGUI\bin\Release x86\x86\proxy.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_D03EDAA7_862A" Name="de">
-                    <Component Id="comp_DE9A8449_785F" Guid="24FB46F2-79D3-412E-BC38-F9A96EA4EA67" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_2ED77426_F0BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\de\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_2F21F039_1444" Name="es">
-                    <Component Id="comp_0FD07455_476B" Guid="C2695375-66D1-48B5-8D74-967E95819B3A" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_0CAE5480_C079" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\es\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_2F21F039_1443" Name="fr">
-                    <Component Id="comp_BBCE5A46_FEF2" Guid="6A2C2642-6679-4F30-9A38-29EB76A79173" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_C306F962_B873" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\fr\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_2F21F039_1442" Name="it">
-                    <Component Id="comp_94819F55_C271" Guid="A469B670-0167-4C98-B8E9-8BE95EDD419E" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_3A6DFF47_BF86" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\it\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_2F21F039_1441" Name="pl">
-                    <Component Id="comp_9DF3F4D5_21D5" Guid="ADF10A52-BB5F-4A63-9FA4-71B1BF49FE9B" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_A01D4F6C_D718" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\pl\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_2F21F039_1440" Name="ru">
-                    <Component Id="comp_C6689CC5_75C1" Guid="9C146E33-B43C-42A2-82F5-C56ACF226EB5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_903784F9_9BA4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ru\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="dir_AC64573A_8635" Name="zh-CN">
-                    <Component Id="comp_CB56750F_37F6" Guid="E5FF43EC-6B32-4FD0-B4EC-502EC9043112" Permanent="no" SharedDllRefCount="no" Transitive="no">
-                        <File Id="_61BF38B2_EBBA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\zh-CN\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
-                    </Component>
-                </Directory>
-                <Directory Id="RUNTIMES" Name="runtimes">
-                    <Directory Id="WIN_ARM" Name="win-arm">
-                        <Directory Id="NATIVE" Name="native">
-                            <Component Id="E_SQLITE3.DLL" DiskId="1" Guid="B80C7AC2-3C95-4310-ACC0-E033AA865265">
-                                <File Id="E_SQLITE3.DLL" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-arm\native\e_sqlite3.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                    <Directory Id="WIN_X64" Name="win-x64">
-                        <Directory Id="NATIVE_1" Name="native">
-                            <Component Id="E_SQLITE3.DLL_1" DiskId="1" Guid="9167C67A-AD75-46EC-9B29-26234C540D78">
-                                <File Id="E_SQLITE3.DLL_1" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-x64\native\e_sqlite3.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                    <Directory Id="WIN_X86" Name="win-x86">
-                        <Directory Id="NATIVE_2" Name="native">
-                            <Component Id="E_SQLITE3.DLL_2" DiskId="1" Guid="F4EFA6EB-CF9A-47BE-8216-A1ABBAFEC7CA">
-                                <File Id="E_SQLITE3.DLL_2" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-x86\native\e_sqlite3.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Component Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" DiskId="1" Guid="301632B7-9456-4330-9117-39C2217F1B90">
-                    <File Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" Name="SQLitePCLRaw.provider.dynamic_cdecl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.provider.dynamic_cdecl.dll" />
-                </Component>
-            </Directory>
-            <StandardDirectory Id="DesktopFolder">
-                <Component Id="com_dirDesktopFolder" Guid="ECF8735E-6532-4704-BD49-264D8AC217A4" Transitive="no">
-                    <RemoveFolder Id="_82A8D763_ED34_4973_869D_C9705AE674EE" On="uninstall" />
-                    <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirDesktopFolder" Type="string" Value="Desktop directory" KeyPath="yes" />
-                    <Shortcut Id="_0A497A29_03B8_754E_810F_1B5BF4D19870" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
-                        <Icon Id="_1B5BF4D19870" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
-                    </Shortcut>
-                </Component>
-            </StandardDirectory>
-        </Module>
+      <Component Id="comp_A15EAB2F_8BC6" Guid="3A7D026A-A96C-478B-9EE4-7358A738AD73" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_2B6835D2_FEEF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Data.Sqlite.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_341BA2CC_B43F" Guid="34E67FBF-4347-45C4-A46F-67A83C36719A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_0FD42643_7021" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.core.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.core.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_29ED6F09_AD69" Guid="58BD49B6-5319-441B-8FC6-C1DAE8338344" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_0CFCC739_A651" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DNS.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DNS.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_670EBB4D_69F7" Guid="E373C342-627F-4851-A259-19222368F8E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_1091E62A_4573" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\e_sqlite3.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_85321290_734B" Guid="753099C7-92D4-4A7E-8A9D-FE936BAE20E3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_5A74B317_0252" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_047D59F2_DF6A" Guid="3E318C43-B34D-4641-BB1A-2BFD0D0C473A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_74896282_273E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.exe.config" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_25FAB24E_01FD" Guid="35D6CF62-B1E7-40C8-B084-E44050AE0DFB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_8D8A1D30_0B8F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterAgent.Windows.pdb" Source="..\..\CloudVeilGUI\bin\Release x86\FilterAgent.Windows.pdb" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_433B0172_53B2" Guid="B4FD4B16-CF61-4D87-BC09-F9070E4B6FFC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_62FBC406_4FF4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterProvider.Common.dll" Source="..\..\CloudVeilGUI\bin\Release x86\FilterProvider.Common.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_776666C3_01DF" Guid="5CE794B3-BDDB-4115-A927-D94F6EA0559F" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_FB1B8B8B_29A2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GoProxyWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GoProxyWrapper.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_4CC0519D_42CD" Guid="705E1D00-718C-4AE6-ACA8-E95678371246" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_74F9D10E_15F5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Buffers.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_4054393F_116C" Guid="603097BE-5E5C-4A2B-BBF8-F4746B028CFD" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_6CC11365_0C50" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Memory.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Memory.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_2134E698_9249" Guid="5039EAE0-0715-4545-A857-F79049F91B25" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_EE1079FF_CACD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe" Source="..\..\CloudVeilGUI\bin\Release x86\FilterServiceProvider.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_5A383466_4948" Guid="98453123-4D21-4672-9642-D9F6AA699C29" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_4B6BF802_27C5" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Interop.NetFwTypeLib.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Interop.NetFwTypeLib.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_E3A21AA0_5F0E" Guid="F4AFABAD-744A-4BED-8566-127F145BACCF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_693783B9_4464" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="ManagedWifi.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ManagedWifi.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_B82A58F7_4BBE" Guid="8902EB95-76AF-4BAD-A1BC-CCE084EF25C3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_1D6BBE7B_DFCC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.CodeAnalysis.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_BBC9747C_950E" Guid="0E14A5BE-E9F3-4397-8221-EEB4E4DF7E22" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_3D0A3036_CECC" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_3B0341D1_EFB7" Guid="489640CD-10AE-43D5-82F9-63CEEB8E70DC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_A3CCBFAF_E243" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Win32.TaskScheduler.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_812662A5_36F6" Guid="58837283-0595-4FC7-B51B-AD5DB69807E0" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_51889367_DF15" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Topshelf.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Topshelf.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_C4C5978D_6DBB" Guid="DAC15704-B5DA-413A-A948-2287CB1B1276" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_BDE1C9B4_E1B6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WinDivertSharp.dll" Source="..\..\CloudVeilGUI\bin\Release x86\WinDivertSharp.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_2D533EEF_E401" Guid="1B6486B7-9C7B-4366-A2C0-ACF6B9888A21" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_A1085291_C56F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="WindowsFirewallHelper.dll" Source="..\..\CloudVeilGUI\bin\Release x86\WindowsFirewallHelper.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_CF1B08EE_EAC6" Guid="D841E4FE-8B4C-4687-8F5A-475CD5CBABE5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_30B4E348_A434" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="FilterServiceProvider.exe.config" Source="..\..\CloudVeilGUI\bin\Release x86\FilterServiceProvider.exe.config" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_3F9F23A1_9C55" Guid="CABFCBB3-ACC4-4A4E-80C2-B887D3E58002" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_CE206D78_B9B7" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="GalaSoft.MvvmLight.Extras.dll" Source="..\..\CloudVeilGUI\bin\Release x86\GalaSoft.MvvmLight.Extras.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_3E4AC7FA_B347" Guid="13F0E824-5059-4C45-9FF6-6EA536001132" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_23E9B7B6_ED96" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Practices.ServiceLocation.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Microsoft.Practices.ServiceLocation.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_41456C02_1DC9" Guid="786E93F9-552B-42D7-8969-1FC247CCAA97" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_0DA7F21B_5E31" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CloudVeilGUI\bin\Release x86\MahApps.Metro.IconPacks.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_5649A06A_F6BB" Guid="C4A89795-695C-478D-9024-42AABEFC9BBC" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_AC57FC0D_7917" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NLog.config" Source="..\..\CloudVeilGUI\bin\Release x86\NLog.config" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_2CC4C6BB_2517" Guid="74BB1A7A-4873-4970-9675-B9790D389F44" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_D065D2B2_FBBD" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="NodaTime.dll" Source="..\..\CloudVeilGUI\bin\Release x86\NodaTime.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_SentryNLogDll" Guid="474e466c-2c13-462e-b53c-b88535347ec4" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="SentryNLogDll" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Sentry.NLog.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Sentry.NLog.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_84738283_20BE" Guid="6E15B8EF-7068-45DB-9D26-F378E9217793" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_6749260A_F055" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.batteries_v2.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_B2FEA926_1351" Guid="033E5011-DA64-4CAA-858A-FAF877D421BF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_B02103CC_5BD8" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Collections.Immutable.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Collections.Immutable.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_9DCD41AD_DF5F" Guid="B6A9A050-4E74-48FD-95FB-1E10ECC079AB" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_207828A9_E582" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.IO.Pipes.AccessControl.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_5737FFF7_43F8" Guid="C5C377CF-CAD1-4954-AC2C-EE1CC698391E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_682D1867_C68F" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Numerics.Vectors.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Numerics.Vectors.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_6ED7B4EA_E5B4" Guid="CF4FC702-EDB9-4A83-A404-B9DB35FFC890" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_EF69B521_C62C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.Metadata.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Reflection.Metadata.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_A139CF7A_510B" Guid="23EAF837-B7AB-4400-B0D5-FF57AD7055F7" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_7ECAFD8D_1BE1" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Reflection.TypeExtensions.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_6AB3269F_CA5A" Guid="F711A2BC-FAC2-4798-83F3-87EDDA25F471" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_B2DB74E6_B813" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Runtime.CompilerServices.Unsafe.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_BA4514E6_5046" Guid="3A1A653F-805E-4A9E-A368-21801E811BF6" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_6DDEF887_C813" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Security.AccessControl.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_55338F53_8EBF" Guid="936C230A-84C5-4D46-AB9A-B8124F6FCC7E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_A978A7B4_FF11" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Security.Principal.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Security.Principal.Windows.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_2AF1BD6A_47A7" Guid="BFBBADC1-2244-4CB6-8760-CC834BE8F809" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_E8EF3FD9_47FF" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\bin\Release x86\System.Text.Encoding.CodePages.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_D94B5152_9FA6" Guid="F04F0B99-CB06-42E1-83E3-FD5B6B8800BA" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_4B378F92_C994" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release x86\EmbedIO.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_5182EBDA_13B5" Guid="BEDA89C3-EBF6-4D2D-B8E4-E2A8A23C2AD9" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_09ABADF5_107A" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Swan.Lite.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_58F5F8AC_E43A" Guid="28BE5B7E-9065-4D47-85F3-5B99B1F2E397" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_A34F805F_BA3C" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DotNet.Glob.dll" Source="..\..\CloudVeilGUI\bin\Release x86\DotNet.Glob.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_6CC0A7EA_9D35" Guid="FC7321BD-14D6-4E92-83DB-510A19123839" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_16C274F8_3E3E" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Filter.Native.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Filter.Native.Windows.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_62917226_1225" Guid="61E3C210-3A21-4CCD-AF7A-3C08F5FDC164" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_2242D901_48C6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Handlebars.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="comp_BE9658E0" Guid="BE9658E0-56F6-410E-87F0-A9494EFD48F5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_comp_BE9658E056F6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DebugController.exe" Source="..\..\DebugController\x64\DebugController.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="com_E8117332_911F_4BDA_8E78_8629CBF78857" Guid="E8117332-911F-4BDA-8E78-8629CBF78857" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_E8117332_911F_4BDA_8E78_8629CBF78857" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Warden.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Warden.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="com_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" Guid="100E89F0-A6E7-49B6-AB34-3AA80C101F2D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_100E89F0_A6E7_49B6_AB34_3AA80C101F2D" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Sentinel.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe" KeyPath="yes" />
+      </Component>
+      <Directory Id="_DA169FAD_C46F_0842_9773_4E1EE5FCC534" Name="x86">
+        <Component Id="com_05620AE3_DE01_7943_8FA3_2D2F1316643A" Guid="984E12AF-02AA-4BD0-890B-B93D5CB8D22E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_05620AE3_DE01_7943_8FA3_2D2F1316643A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert64.sys" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert64.sys" KeyPath="yes" />
+        </Component>
+        <Component Id="com_718AED2B_984F_A94E_B378_099D87D01F2B" Guid="429DF4C4-B7CA-4AB4-822A-D63AA24CE06E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_718AED2B_984F_A94E_B378_099D87D01F2B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert.dll" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="com_D9947A0C_D56A_F242_A11B_17D75BA3D672" Guid="9B86E71B-60AD-4155-ABBD-36CEBF45A9EF" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_D9947A0C_D56A_F242_A11B_17D75BA3D672" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="WinDivert32.sys" Source="..\..\CloudVeilGUI\bin\Release x86\x86\WinDivert32.sys" KeyPath="yes" />
+        </Component>
+        <Component Id="comp_86CCE0BD_9963" Guid="1000812B-909D-45E8-977A-D79EA5BE6422" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_06833C0E_57B2" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="proxy.dll" Source="..\..\CloudVeilGUI\bin\Release x86\x86\proxy.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_D03EDAA7_862A" Name="de">
+        <Component Id="comp_DE9A8449_785F" Guid="24FB46F2-79D3-412E-BC38-F9A96EA4EA67" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_2ED77426_F0BB" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\de\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_2F21F039_1444" Name="es">
+        <Component Id="comp_0FD07455_476B" Guid="C2695375-66D1-48B5-8D74-967E95819B3A" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_0CAE5480_C079" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\es\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_2F21F039_1443" Name="fr">
+        <Component Id="comp_BBCE5A46_FEF2" Guid="6A2C2642-6679-4F30-9A38-29EB76A79173" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_C306F962_B873" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\fr\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_2F21F039_1442" Name="it">
+        <Component Id="comp_94819F55_C271" Guid="A469B670-0167-4C98-B8E9-8BE95EDD419E" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_3A6DFF47_BF86" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\it\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_2F21F039_1441" Name="pl">
+        <Component Id="comp_9DF3F4D5_21D5" Guid="ADF10A52-BB5F-4A63-9FA4-71B1BF49FE9B" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_A01D4F6C_D718" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\pl\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_2F21F039_1440" Name="ru">
+        <Component Id="comp_C6689CC5_75C1" Guid="9C146E33-B43C-42A2-82F5-C56ACF226EB5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_903784F9_9BA4" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\ru\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="dir_AC64573A_8635" Name="zh-CN">
+        <Component Id="comp_CB56750F_37F6" Guid="E5FF43EC-6B32-4FD0-B4EC-502EC9043112" Permanent="no" SharedDllRefCount="no" Transitive="no">
+          <File Id="_61BF38B2_EBBA" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release x86\zh-CN\Microsoft.Win32.TaskScheduler.resources.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="RUNTIMES" Name="runtimes">
+        <Directory Id="WIN_ARM" Name="win-arm">
+          <Directory Id="NATIVE" Name="native">
+            <Component Id="E_SQLITE3.DLL" DiskId="1" Guid="B80C7AC2-3C95-4310-ACC0-E033AA865265">
+              <File Id="E_SQLITE3.DLL" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-arm\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="WIN_X64" Name="win-x64">
+          <Directory Id="NATIVE_1" Name="native">
+            <Component Id="E_SQLITE3.DLL_1" DiskId="1" Guid="9167C67A-AD75-46EC-9B29-26234C540D78">
+              <File Id="E_SQLITE3.DLL_1" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="WIN_X86" Name="win-x86">
+          <Directory Id="NATIVE_2" Name="native">
+            <Component Id="E_SQLITE3.DLL_2" DiskId="1" Guid="F4EFA6EB-CF9A-47BE-8216-A1ABBAFEC7CA">
+              <File Id="E_SQLITE3.DLL_2" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release x86\runtimes\win-x86\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Component Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" DiskId="1" Guid="301632B7-9456-4330-9117-39C2217F1B90">
+        <File Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" Name="SQLitePCLRaw.provider.dynamic_cdecl.dll" Source="..\..\CloudVeilGUI\bin\Release x86\SQLitePCLRaw.provider.dynamic_cdecl.dll" />
+      </Component>
+    </Directory>
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="com_dirDesktopFolder" Guid="ECF8735E-6532-4704-BD49-264D8AC217A4" Transitive="no">
+        <RemoveFolder Id="_82A8D763_ED34_4973_869D_C9705AE674EE" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirDesktopFolder" Type="string" Value="Desktop directory" KeyPath="yes" />
+        <Shortcut Id="_0A497A29_03B8_754E_810F_1B5BF4D19870" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+          <Icon Id="_1B5BF4D19870" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
+        </Shortcut>
+      </Component>
+    </StandardDirectory>
+  </Module>
 </Wix>

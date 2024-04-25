@@ -1,8 +1,9 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\FilterStarter.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
-  <Package Name="CloudVeil For Windows" Language="1033" Version="2.2.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="82c9f49d-aded-41c6-8411-a16e6b0ee945"><SummaryInformation Description="CloudVeil For Windows Setup" Keywords="internet content filter" Manufacturer="CloudVeil" />
+  <Package Name="CloudVeil For Windows" Language="1033" Version="2.3.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="82c9f49d-aded-41c6-8411-a16e6b0ee945">
+    <SummaryInformation Description="CloudVeil For Windows Setup" Keywords="internet content filter" Manufacturer="CloudVeil" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
     <Property Id="ARPCOMMENTS" Value="Internet Content Filter" />
@@ -21,23 +22,23 @@
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->
-      <!-- The directory tree of the installation package. -->
-      <StandardDirectory Id="DesktopFolder"/>
-      <StandardDirectory Id="ProgramMenuFolder"/>
-      <StandardDirectory Id="TARGETDIR">
-        <Component Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" Guid="40C9E382-65A8-441D-80AC-122FC1CEB5A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_0B11E4D1_56DD_7B46_9870_4EAA895D317A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
-        </Component>      
-        <Component Id="com_49908EA8_9E0B_A940_A30F_68D4540384F8" Guid="DCEDF250-82C7-42CA-A038-FF4BC16992C5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_49908EA8_9E0B_A940_A30F_68D4540384F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
-        </Component>
-        <Component Id="CloudVeilExe" Guid="27D8853E-8599-403F-B925-7E06B800DD50" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
-        </Component>
-        <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
-            <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
-        </Component>
-        <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
+    <!-- The directory tree of the installation package. -->
+    <StandardDirectory Id="DesktopFolder" />
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="TARGETDIR">
+      <Component Id="com_0B11E4D1_56DD_7B46_9870_4EAA895D317A" Guid="40C9E382-65A8-441D-80AC-122FC1CEB5A2" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_0B11E4D1_56DD_7B46_9870_4EAA895D317A" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="InstallGuard.exe" Source="..\..\InstallGuard\bin\Release\InstallGuard.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="com_49908EA8_9E0B_A940_A30F_68D4540384F8" Guid="DCEDF250-82C7-42CA-A038-FF4BC16992C5" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_49908EA8_9E0B_A940_A30F_68D4540384F8" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="MOZILLA_PUBLIC_LICENSE.rtf" Source="..\..\MOZILLA_PUBLIC_LICENSE.rtf" KeyPath="yes" />
+      </Component>
+      <Component Id="CloudVeilExe" Guid="27D8853E-8599-403F-B925-7E06B800DD50" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_766CB6F4_1A26_0243_8EC1_3AABA25DA095" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release x64\CloudVeil.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
+      </Component>
+      <Merge Id="SetupPayload64.msm" SourceFile="..\SetupPayload64\Release\SetupPayload64.msm" DiskId="1" Language="1033" />
     </StandardDirectory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
@@ -131,8 +132,6 @@
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminWelcomeForm_PrevArgs=&quot;&quot;" EnableCondition="AdminWelcomeForm_PrevArgs&lt;&gt;&quot;&quot;">
-          
-          
           <Publish Event="NewDialog" Value="[AdminWelcomeForm_PrevArgs]" Condition="AdminWelcomeForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
@@ -166,8 +165,6 @@
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminFolderForm_PrevArgs=&quot;&quot;" EnableCondition="AdminFolderForm_PrevArgs&lt;&gt;&quot;&quot;">
-          
-          
           <Publish Event="NewDialog" Value="[AdminFolderForm_PrevArgs]" Condition="AdminFolderForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
@@ -187,8 +184,6 @@
           <Publish Event="SpawnDialog" Value="Cancel" />
         </Control>
         <Control Id="PreviousButton" Type="PushButton" X="228" Y="261" Width="66" Height="18" Text="{\RegularTextStyle}&lt; &amp;Back" TabSkip="no" DisableCondition="AdminConfirmInstallForm_PrevArgs=&quot;&quot;" EnableCondition="AdminConfirmInstallForm_PrevArgs&lt;&gt;&quot;&quot;">
-          
-          
           <Publish Event="NewDialog" Value="[AdminConfirmInstallForm_PrevArgs]" Condition="AdminConfirmInstallForm_PrevArgs&lt;&gt;&quot;&quot;" />
         </Control>
         <Control Id="BannerBmp" Type="Bitmap" X="0" Y="0" Width="375" Height="52" Text="DefBannerBitmap" TabSkip="no" Disabled="yes" />
@@ -308,5 +303,5 @@
         <Control Id="BodyText" Type="Text" X="9" Y="63" Width="354" Height="180" Text="{\RegularTextStyle}The installer will resume the installation of [ProductName] on your computer.&#xD;&#xA;&#xD;&#xA;Click &quot;Finish&quot; to continue." TabSkip="yes" NoPrefix="yes" />
       </Dialog>
     </UI>
-    </Package>
+  </Package>
 </Wix>

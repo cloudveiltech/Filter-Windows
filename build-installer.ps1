@@ -90,8 +90,6 @@ $msbuildPath = Find-MsBuild
 $signtoolPath = Find-SignTool
 $currentLocation = Get-Location
 
-$wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
-
 $cleanBuild = "Clean,Build"
 
 $builds = @(
@@ -99,7 +97,7 @@ $builds = @(
     @("AnyCPU", "InstallerCheckPackageCache\InstallerCheckPackageCache.csproj", $cleanBuild),
     @("x86", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x64", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
-    @("ARM64", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
+    @("AnyCPU", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x86", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("AnyCPU", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
@@ -215,7 +213,8 @@ echo "Building MSI x86"
 
 # & $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a $output86
 
-$versionString = & $wixVerifyPath get $product64 wix.product.version
+[xml]$xmlElm = Get-Content $product64
+$versionString = $xmlElm.Wix.Package.Version
 $versionObj = [System.Version]::Parse($versionString)
 $version = $versionObj.ToString(3)
 
