@@ -74,8 +74,7 @@ namespace CloudVeilCore.Windows.Diversion
                 {
                     return;
                 }
-
-                string mainFilterString = "!loopback and (tcp or udp) and (remotePort == 80 or remotePort == 443 or remotePort == 8080 or remotePort == 8443)";
+                string mainFilterString = "outbound and !loopback and (tcp or (udp and (remotePort == 80 or remotePort == 443)))";
                 diversionHandle = WinDivert.WinDivertOpen(mainFilterString, WinDivertLayer.Redirect, -1000, 0);
 
                 if (diversionHandle == s_InvalidHandleValue || diversionHandle == IntPtr.Zero)
@@ -211,7 +210,7 @@ namespace CloudVeilCore.Windows.Diversion
                         // 258 == WAIT_TIMEOUT
                         while (isRunning && WinDivertSharp.WinAPI.Kernel32.WaitForSingleObject(recvEvent, 1000) == (uint)WaitForSingleObjectResult.WaitTimeout)
                         {
-
+                           // logger.Info("Diverter: wait");
                         }
 
                         if (!WinDivertSharp.WinAPI.Kernel32.GetOverlappedResult(diversionHandle, ref recvOverlapped, ref recvAsyncIoLen, false))
@@ -245,6 +244,8 @@ namespace CloudVeilCore.Windows.Diversion
 
                     ipBytes.Reverse();
                     var ip = new IPAddress(ipBytes.ToArray());
+                    var port = (int)IPAddress.HostToNetworkOrder((short)remotePort);
+
                     GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(localPort, remotePort, ip.ToString());
                 }
                 catch (Exception loopException)
