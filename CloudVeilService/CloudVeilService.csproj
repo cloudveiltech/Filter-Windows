@@ -186,10 +186,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.5.3</Version>
+      <Version>0.5.4</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.GoProxyDotNet">
-      <Version>0.5.3</Version>
+      <Version>0.5.4</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
@@ -267,11 +267,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /E /Y /C "$(ProjectDir)..\FilterAgent.Windows\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"
+    <PostBuildEvent>%25systemroot%25\System32\xcopy /E /Y /C "$(ProjectDir)..\FilterAgent.Windows\bin\$(Platform)\$(Configuration)\*.*" "$(TargetDir)"
 
-xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x64" "$(TargetDir)x64"
-xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x86" "$(TargetDir)x86"
-xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\arm64\*" "$(TargetDir)arm64\"
+%25systemroot%25\System32\xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x64" "$(TargetDir)x64"
+%25systemroot%25\System32\xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\x86" "$(TargetDir)x86"
+%25systemroot%25\System32\xcopy /E /Y /C "$(ProjectDir)..\WinDivertLibraries\arm64\*" "$(TargetDir)arm64\"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
