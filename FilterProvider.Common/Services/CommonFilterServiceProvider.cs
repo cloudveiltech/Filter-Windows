@@ -1633,6 +1633,11 @@ namespace FilterProvider.Common.Services
         public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
         {
             LogTime("UpdateAndWriteList");
+            if (!NetworkStatus.Default.HasConnection)
+            {
+                NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
+                return ConfigUpdateResult.NoInternet;
+            }
 
             ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
 
@@ -1708,10 +1713,9 @@ namespace FilterProvider.Common.Services
                     ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
 
                     // Enable the timer again.
-                    if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
+                    if (!NetworkStatus.Default.HasConnection)
                     {
-                        // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
-                        this.updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
+                        NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
                     }
                     else
                     {
@@ -1739,6 +1743,15 @@ namespace FilterProvider.Common.Services
             }
 
             return result;
+        }
+
+        private void Default_ConnectionStateChanged()
+        {
+            if (NetworkStatus.Default.HasConnection)
+            {
+                OnUpdateTimerElapsed(null);
+                NetworkStatus.Default.ConnectionStateChanged -= Default_ConnectionStateChanged;
+            }
         }
 
         /// <summary>

@@ -101,6 +101,14 @@ namespace Filter.Platform.Common.Net
             }
         }
 
+        public bool HasConnection
+        {
+            get
+            {
+                return HasIpv6InetConnection || HasIpv4InetConnection;
+            }
+        }
+
         /// <summary>
         /// Gets whether or not any of the device IPV4 connections have been determined to be capable
         /// of reaching the internet.

@@ -336,7 +336,7 @@ namespace FilterProvider.Common.Util
         /// </summary>
         private async Task<bool> IsCaptivePortalActive()
         {
-            if (!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
+            if (!NetworkStatus.Default.HasConnection)
             {
                 // No point in checking further if no internet available.
                 try
@@ -419,6 +419,11 @@ namespace FilterProvider.Common.Util
 
         public async void Trigger(bool sendDnsChangeEvents = false)
         {
+            if(!NetworkStatus.Default.HasConnection)
+            {
+                return;
+            }
+
             logger.Info("Triggering DNS Enforcement Code (sendDnsChangeEvents={0})", sendDnsChangeEvents);
 
             try

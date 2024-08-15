@@ -28,11 +28,11 @@ namespace Gui.CloudVeil.UI.Models
 
         private void InitInetMonitoring()
         {
-            this.InternetIsConnected = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            this.InternetIsConnected = NetworkStatus.Default.HasConnection;
 
             NetworkStatus.Default.ConnectionStateChanged += () =>
             {
-                this.InternetIsConnected = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+                this.InternetIsConnected = NetworkStatus.Default.HasConnection;
             };
         }
 

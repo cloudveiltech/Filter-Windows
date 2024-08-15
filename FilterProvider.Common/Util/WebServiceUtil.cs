@@ -173,7 +173,7 @@ namespace FilterProvider.Common.Util
             //
 
             // Don't bother if we don't have internet.
-            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            var hasInternet = NetworkStatus.Default.HasConnection;
             if(hasInternet == false)
             {
                 logger.Info("Aborting authentication attempt because no internet connection could be detected.");
@@ -387,7 +387,7 @@ namespace FilterProvider.Common.Util
             }
 
             // Don't bother if we don't have internet.
-            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            var hasInternet = NetworkStatus.Default.HasConnection;
             if (hasInternet == false)
             {
                 logger.Info("Aborting authentication attempt because no internet connection could be detected.");
