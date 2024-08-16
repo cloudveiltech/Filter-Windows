@@ -173,11 +173,11 @@ $bundleArm64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration
 
 <# Sign executable files x64 #>
 echo "Signing x64 executables"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\CloudVeil.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration x64\FilterServiceProvider.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\FilterAgent.Windows.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Warden.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Sentinel.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration x64\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Sentinel.exe"
 
 echo "Building MSI x64"
 
@@ -188,11 +188,11 @@ echo "Building MSI x64"
 
 <# Sign executable files arm64 #>
 echo "Signing arm64 executables"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\CloudVeil.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration arm64\FilterServiceProvider.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\FilterAgent.Windows.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Warden.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Sentinel.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration arm64\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Sentinel.exe"
 
 echo "Building MSI arm64"
 
@@ -202,11 +202,11 @@ echo "Building MSI arm64"
 
 <# Sign executable files x86 #>
 echo "Signing x86 executables" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\CloudVeil.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterServiceProvider.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterAgent.Windows.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Warden.exe"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Sentinel.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Sentinel.exe"
 echo "Building MSI x86"
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi 
