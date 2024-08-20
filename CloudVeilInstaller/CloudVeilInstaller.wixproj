@@ -65,9 +65,9 @@
     </PropertyGroup>
   </Target>
   <Target Name="SignBundleEngine" DependsOnTargets="UsesSignTool">
-    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot;CloudVeil for Windows Setup&quot; /n &quot;CloudVeil Technology, Inc.&quot; /tr http://timestamp.digicert.com /a &quot;@(SignBundleEngine)&quot;" />
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /td sha256 /fd SHA512 /d &quot;CloudVeil for Windows Setup&quot; /n &quot;CloudVeil Technology, Inc.&quot; /tr http://timestamp.digicert.com /a &quot;@(SignBundleEngine)&quot;" />
   </Target>
   <Target Name="SignBundle" DependsOnTargets="UsesSignTool">
-    <Exec Command="&quot;$(SignToolPath)&quot; sign /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /n &quot;CloudVeil Technology, Inc.&quot; /tr http://timestamp.digicert.com /a &quot;@(SignBundle)&quot;" />
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /td sha256 /fd SHA512 /d &quot; CloudVeil for Windows Setup &quot; /n &quot;CloudVeil Technology, Inc.&quot; /tr http://timestamp.digicert.com /a &quot;@(SignBundle)&quot;" />
   </Target>
 </Project>
