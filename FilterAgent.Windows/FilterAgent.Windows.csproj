@@ -118,7 +118,7 @@
       <Name>Cloudveil.Core.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
-      <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
+      <Project>{F72DAC71-B748-4D81-B7F6-51F6DC4449F2}</Project>
       <Name>Filter.Platform.Common</Name>
     </ProjectReference>
   </ItemGroup>

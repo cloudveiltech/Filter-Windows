@@ -248,9 +248,6 @@
       <Component Id="comp_62917226_1225" Guid="61E3C210-3A21-4CCD-AF7A-3C08F5FDC164" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_2242D901_48C6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="Handlebars.dll" Source="..\..\CloudVeilGUI\bin\Release x86\Handlebars.dll" KeyPath="yes" />
       </Component>
-      <Component Id="comp_BE9658E0" Guid="BE9658E0-56F6-410E-87F0-A9494EFD48F5" Permanent="no" SharedDllRefCount="no" Transitive="no">
-        <File Id="_comp_BE9658E056F6" DiskId="1" Hidden="no" ReadOnly="no" TrueType="no" System="no" Vital="yes" Name="DebugController.exe" Source="..\..\DebugController\x64\DebugController.exe" KeyPath="yes" />
-      </Component>
       <Component Id="com_E8117332_911F_4BDA_8E78_8629CBF78857" Guid="E8117332-911F-4BDA-8E78-8629CBF78857" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_E8117332_911F_4BDA_8E78_8629CBF78857" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Warden.exe" Source="..\..\CloudVeilGUI\bin\Release x64\Warden.exe" KeyPath="yes" />
       </Component>
