@@ -189,7 +189,7 @@
       <Version>0.5.5</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.GoProxyDotNet">
-      <Version>0.5.5</Version>
+      <Version>0.5.6</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>

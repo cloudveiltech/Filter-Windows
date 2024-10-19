@@ -57,6 +57,7 @@ namespace FilterProvider.Common.Util
             updater = new AppcastUpdater(new Uri(appUpdateInfoUrl));
 
             logger = LoggerUtil.GetAppWideLogger();
+            logger.Error("UPDATE XML: " + appUpdateInfoUrl);
         }
 
         private string platformId;
