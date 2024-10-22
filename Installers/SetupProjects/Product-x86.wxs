@@ -38,7 +38,7 @@
       <Component Id="com_8F25177B_9FB1_F044_8B35_D1707FE3B808" Guid="9FDCFE87-3CC7-4CC2-8929-FF0DAAB1C55D" Permanent="no" SharedDllRefCount="no" Transitive="no">
         <File Id="_8F25177B_9FB1_F044_8B35_D1707FE3B808" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="appicon.ico" Source="..\..\CloudVeilGUI\appicon.ico" KeyPath="yes" />
       </Component>
-      <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
+      <Merge Id="SetupPayload86.msm" SourceFile="..\SetupPayload86\bin\Release\SetupPayload86.msm" DiskId="1" Language="1033" />
     </StandardDirectory>
     <!-- The FileSystem group of the installation package. -->
     <ComponentGroup Id="FileSystemGroup">
