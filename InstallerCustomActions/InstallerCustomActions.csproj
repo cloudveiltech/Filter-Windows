@@ -103,6 +103,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RemoveUninstallEntry.cs" />
     <Compile Include="StartupEntryRemoval.cs" />
     <Compile Include="InstallGuard.cs" />
     <Compile Include="ProcessExtensions.cs" />

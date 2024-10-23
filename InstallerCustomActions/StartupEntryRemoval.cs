@@ -63,7 +63,6 @@ namespace InstallerCustomActions
                     userKey.Close();
                 }
             }
-
             if (finalResult == ActionResult.Success)
             {
                 session.Log($"RemoveCloudVeilStartupEntry {finalResult}");

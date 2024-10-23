@@ -10,6 +10,7 @@
         <CustomAction Id="CA.GuardInstall" Execute="deferred" DllEntry="GuardInstall" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.RemoveWinDivert" Execute="deferred" DllEntry="RemoveWinDivert" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.RemoveCloudVeilStartupEntry" Execute="deferred" DllEntry="RemoveCloudVeilStartupEntry" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
+        <CustomAction Id="CA.RemoveCloudVeilUninstallEntry" Execute="deferred" DllEntry="RemoveCloudVeilUninstallEntry" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
 
         <InstallExecuteSequence>
             <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize" Condition="TARGETDIR = &quot;&quot;" />
@@ -24,7 +25,7 @@
             <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies" Condition="Installed" />
             <Custom Action="CA.RemoveWinDivert" Before="StartServices" />
             <Custom Action="CA.RemoveCloudVeilStartupEntry" Before="CA.RemoveWinDivert" />
-            <RemoveExistingProducts After="InstallInitialize" />
+            <Custom Action="CA.RemoveCloudVeilUninstallEntry" After="StartServices"/>
         </InstallExecuteSequence>
 	</Fragment>
 </Wix>

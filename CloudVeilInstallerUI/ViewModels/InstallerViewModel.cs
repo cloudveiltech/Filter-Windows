@@ -569,7 +569,15 @@ namespace CloudVeilInstallerUI.ViewModels
             Tuple<RequestState, DetectRelatedBundleEventArgs> stateTuple;
             if(relatedBundles.TryGetValue(e.BundleId, out stateTuple))
             {
-                e.State = stateTuple.Item1;
+                
+                if(stateTuple.Item2.Operation == RelatedOperation.MajorUpgrade || stateTuple.Item2.Operation == RelatedOperation.MinorUpdate)
+                {
+                    e.State = RequestState.ForceAbsent;
+                } 
+                else
+                {
+                    e.State = stateTuple.Item1;
+                }
             }
         }
 

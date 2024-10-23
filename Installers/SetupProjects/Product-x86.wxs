@@ -2,7 +2,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\FilterStarter.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x86\Sentinel.exe -->
-  <Package Name="CloudVeil For Windows" Language="1033" Version="2.3.0" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="82c9f49d-aded-41c6-8411-a16e6b0ee945">
+  <Package Name="CloudVeil For Windows" Language="1033" Version="2.4.3" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="*">
     <SummaryInformation Description="CloudVeil For Windows Setup" Keywords="internet content filter" Manufacturer="CloudVeil" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -11,10 +11,7 @@
     <Property Id="ARPHELPLINK" Value="https://cloudveil.org" />
     <Property Id="ARPURLINFOABOUT" Value="https://cloudveil.org" />
     <Property Id="ARPPRODUCTICON" Value="_D1707FE3B808" />
-    <Upgrade Id="{57058EEC-162C-4D48-993E-4AE6095F66CA}">
-      <UpgradeVersion Minimum="2.2.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" IgnoreRemoveFailure="yes" />
-      <UpgradeVersion Maximum="2.2.0" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" IgnoreRemoveFailure="yes" />
-    </Upgrade>
+    <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Launch Condition="Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again." />

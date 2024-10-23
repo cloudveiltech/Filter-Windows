@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Module Id="CloudVeilPayload" Language="1033" Version="2.3.0" Codepage="1252" Guid="433B312B470946BCB84F97D922EAD9E1" InstallerVersion="500">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.4.3" Codepage="1252" Guid="433B312B470946BCB84F97D922EAD9E1" InstallerVersion="500">
     <SummaryInformation Description="SetupPayloadArm64" Manufacturer="CloudVeil Technologies Inc." />
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
     <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
@@ -167,7 +167,7 @@
       <Component Id="SENTRY.PROTOCOL.DLL" DiskId="1" Guid="CF1F1326-CC72-4DDA-8E6C-6A4C16B4A098">
         <File Id="SENTRY.PROTOCOL.DLL" Name="Sentry.Protocol.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentry.Protocol.dll" />
       </Component>
-           <Component Id="SQLITEPCLRAW.BATTERIES_V2.DLL" DiskId="1" Guid="D06B0056-938F-4B6B-9BD2-F27FBD3907D3">
+      <Component Id="SQLITEPCLRAW.BATTERIES_V2.DLL" DiskId="1" Guid="D06B0056-938F-4B6B-9BD2-F27FBD3907D3">
         <File Id="SQLITEPCLRAW.BATTERIES_V2.DLL" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\SQLitePCLRaw.batteries_v2.dll" />
       </Component>
       <Component Id="SQLITEPCLRAW.CORE.DLL" DiskId="1" Guid="DDACCFFB-63C9-462B-BE50-E23FB82041DE">
@@ -175,7 +175,7 @@
       </Component>
       <Component Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" DiskId="1" Guid="604BB427-D1BE-4014-9AD9-440273F418B8">
         <File Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" Name="SQLitePCLRaw.provider.dynamic_cdecl.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\SQLitePCLRaw.provider.dynamic_cdecl.dll" />
-      </Component>     
+      </Component>
       <Component Id="SWAN.LITE.DLL" DiskId="1" Guid="E721C348-FBB1-4B44-81D4-7B2BFD4613B3">
         <File Id="SWAN.LITE.DLL" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Swan.Lite.dll" />
       </Component>
