@@ -175,6 +175,7 @@ namespace FilterProvider.Common.Util
                         }
 
                         lastFetchedUpdate.BeginInstallUpdate();
+                        ipcServer.Send<object>(IpcCall.ShutdownForUpdate, null);
 
                         initializeUpdateEnvironment();
                         Environment.Exit((int)ExitCodes.ShutdownForUpdate);

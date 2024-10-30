@@ -11,6 +11,8 @@
         <CustomAction Id="CA.RemoveWinDivert" Execute="deferred" DllEntry="RemoveWinDivert" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.RemoveCloudVeilStartupEntry" Execute="deferred" DllEntry="RemoveCloudVeilStartupEntry" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.RemoveCloudVeilUninstallEntry" Execute="deferred" DllEntry="RemoveCloudVeilUninstallEntry" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
+        <CustomAction Id="CA.StopCloudVeilGui.SetProperty" Property="CA.StopCloudVeilGui" Value="TargetDirectory=[TARGETDIR]" />
+        <CustomAction Id="CA.StopCloudVeilGui" Execute="deferred" DllEntry="StopCloudVeilGui" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
 
         <InstallExecuteSequence>
             <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize" Condition="TARGETDIR = &quot;&quot;" />
@@ -25,6 +27,8 @@
             <Custom Action="CA.GuardInstall" After="MsiUnpublishAssemblies" Condition="Installed" />
             <Custom Action="CA.RemoveWinDivert" Before="StartServices" />
             <Custom Action="CA.RemoveCloudVeilStartupEntry" Before="CA.RemoveWinDivert" />
+            <Custom Action="CA.StopCloudVeilGui.SetProperty" Before="CA.RemoveWinDivert"/>
+            <Custom Action="CA.StopCloudVeilGui" Before="CA.RemoveWinDivert" />
             <Custom Action="CA.RemoveCloudVeilUninstallEntry" After="StartServices"/>
         </InstallExecuteSequence>
 	</Fragment>
