@@ -5,6 +5,7 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
 using Sentry;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -122,6 +123,7 @@ namespace CloudVeilInstallerUI
                 {
                     var checker = new InstallerCheckPackageCache.InstallerCacheChecker();
                     checker.CheckAndRestoreCache();
+                    tryCloseGuiClient();
                 }
 
                 BootstrapperDispatcher = Dispatcher.CurrentDispatcher;
@@ -235,6 +237,17 @@ namespace CloudVeilInstallerUI
             {
                 sentry.Dispose();
                 SignalExit();
+            }
+        }
+
+        private void tryCloseGuiClient()
+        {
+            Engine.Log(LogLevel.Error, "tryCloseGuiClient");
+
+            foreach (Process process in Process.GetProcessesByName("CloudVeil"))
+            {
+                Engine.Log(LogLevel.Error, "found, try to kill");
+                process.Kill();
             }
         }
     }
