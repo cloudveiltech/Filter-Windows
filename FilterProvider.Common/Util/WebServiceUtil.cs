@@ -1074,6 +1074,7 @@ namespace FilterProvider.Common.Util
             logger.Info("reportTokenRejected " + UserEmail + " " + neverAuthorized);
             if (neverAuthorized) {
                 AuthTokenRejected?.Invoke();
+                dropUserLoginData();
                 return;
             }
             if (tokenRejectedFirstDateTime == DateTime.MinValue)
@@ -1083,7 +1084,14 @@ namespace FilterProvider.Common.Util
             else if(DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT)
             {
                 AuthTokenRejected?.Invoke();
+                dropUserLoginData();
             }
+        }
+
+        private void dropUserLoginData()
+        {
+            AuthToken = "";
+            UserEmail = "";
         }
 
         private void reportTokenAccepted()
