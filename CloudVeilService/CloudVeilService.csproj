@@ -186,10 +186,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CloudVeil.goproxy-native-windows">
-      <Version>0.5.13</Version>
+      <Version>0.5.14</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.GoProxyDotNet">
-      <Version>0.5.13</Version>
+      <Version>0.5.14</Version>
     </PackageReference>
     <PackageReference Include="CloudVeil.ManagedWifi">
       <Version>1.1.1</Version>
