@@ -2,7 +2,8 @@
 
 Fixes an issue with Google websites  
 Fixes SSL errors on localhost addresses  
-Fixes an issue on https://www.womenshealthmag.com
+Fixes an issue where old installers aren't removed  
+Fixes issues on multiple websites
 
 #public
 
