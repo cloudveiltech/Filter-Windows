@@ -1,7 +1,7 @@
 # v2.2.52 - 9 Dec 2024
 
-Fixes an issue with Google websites
-Fixes SSL errors on localhost addresses
+Fixes an issue with Google websites  
+Fixes SSL errors on localhost addresses  
 Fixes an issue on https://www.womenshealthmag.com
 
 #public
@@ -34,7 +34,7 @@ Fixes an issue with installations
 
 # v2.2.46 - 12 Nov 2024
 
-Fixes a crash
+Fixes a crash  
 Fixes and issue with websockets
 
 #alpha
@@ -47,7 +47,7 @@ Fixes an issue with TLS
 
 # v2.2.44 - 24 Oct 2024
 
-Fixes an issue where apps are not properly whitelisted on Business settings
+Fixes an issue where apps are not properly whitelisted on Business settings  
 Cleans old versions of the filter when upgrading
 
 #alpha
