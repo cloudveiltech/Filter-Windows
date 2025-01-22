@@ -96,6 +96,7 @@
     <Compile Include="Models\ApplyStatus.cs" />
     <Compile Include="Models\InstallationState.cs" />
     <Compile Include="Models\InstallType.cs" />
+    <Compile Include="Models\WebUtil.cs" />
     <Compile Include="RebootMethods.cs" />
     <Compile Include="UserId\GuidUtility.cs" />
     <Compile Include="UserId\RegistryAuthenticationStorage.cs" />

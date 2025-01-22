@@ -199,6 +199,25 @@ namespace CloudVeilInstallerUI.ViewModels
                 FinishButtonText = "Exit";
 
                 SetupUi.ShowFinish();
+
+                try
+                {
+                    if (ba.Updating)
+                    { 
+                        Sentry.SentrySdk.WithScope(scope =>
+                        {
+                            scope.User = new Sentry.Protocol.User();
+                            scope.User.Id = ba.UserId;
+
+                            Sentry.SentrySdk.CaptureException(new UgpradeMistypeException("Failed update."));
+                        });
+                    }
+                }
+                catch
+                {
+                    //ignore
+                }
+
             }
             finally
             {
