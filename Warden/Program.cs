@@ -14,14 +14,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Gui.CloudVeil.Services;
 using Topshelf;
+using CloudVeil.Core.Windows.Services;
 
-namespace CitadelService.Services
+namespace CloudVeilService.Services
 {
-    internal class Sentinel : BaseProtectiveService
+    internal class Warden : BaseProtectiveService
     {
-        public Sentinel() : base("TARGET_APPLICATION_NAME", true)
+        public Warden() : base("Sentinel", true)
         {
 
         }
@@ -44,7 +44,7 @@ namespace CitadelService.Services
         }
     }
 
-    public class SentinelProgram
+    public class WardenProgram
     {
         private static Mutex InstanceMutex;
 
@@ -58,45 +58,27 @@ namespace CitadelService.Services
             bool createdNew;
             InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", appVerStr.Replace(" ", "")), out createdNew);
 
-            if(createdNew)
+            if (createdNew)
             {
                 var exitCode = HostFactory.Run(x =>
                 {
-                    x.Service<Sentinel>(s =>
+                    x.Service<Warden>(s =>
                     {
-                        s.ConstructUsing(name => new Sentinel());
+                        s.ConstructUsing(name => new Warden());
                         s.WhenStarted((guardian, hostCtl) => guardian.Start());
                         s.WhenStopped((guardian, hostCtl) => guardian.Stop());
-                        
+
                         s.WhenShutdown((guardian, hostCtl) =>
                         {
                             hostCtl.RequestAdditionalTime(TimeSpan.FromSeconds(30));
                             guardian.Shutdown(ExitCodes.ShutdownWithSafeguards);
                         });
-
                     });
-
-                    x.EnableShutdown();
                     x.SetDescription("Content Filtering Enforcement Service");
-                    x.SetDisplayName(nameof(Sentinel));
-                    x.SetServiceName(nameof(Sentinel));
+                    x.SetDisplayName(nameof(Warden));
+                    x.SetServiceName(nameof(Warden));
                     x.StartAutomatically();
-
                     x.RunAsLocalSystem();
-
-                    // We don't need recovery options, because there will be multiple
-                    // services all watching eachother that will all record eachother
-                    // in the event of a failure or forced termination.
-                    /*
-                    //http://docs.topshelf-project.com/en/latest/configuration/config_api.html#id1
-                    x.EnableServiceRecovery(rc =>
-                    {
-                        rc.OnCrashOnly();
-                        rc.RestartService(0);
-                        rc.RestartService(0);
-                        rc.RestartService(0);                        
-                    });
-                    */
                 });
             }
             else
@@ -110,5 +92,6 @@ namespace CitadelService.Services
                 Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
             }
         }
+        
     }
 }

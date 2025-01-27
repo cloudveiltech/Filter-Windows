@@ -31,9 +31,9 @@ namespace CloudVeil.Core.Windows.Util
         private readonly char[] COMMENT_CLOSE_TAG = new char[3] { '-', '-', '>' };
 
 #if FAST_BIT_ARRAY
-        private FBitArray m_deletionDictionary;
+        private FBitArray deletionDictionary;
 #else
-        private int[] m_deletionDictionary;
+        private int[] deletionDictionary;
 #endif
 
         public string Extract(char[] input, bool stripComments = false)
@@ -42,9 +42,9 @@ namespace CloudVeil.Core.Windows.Util
             int next = 0;
 
 #if FAST_BIT_ARRAY
-        m_deletionDictionary = new FBitArray((uint)len);
+        deletionDictionary = new FBitArray((uint)len);
 #else
-            m_deletionDictionary = new int[len];
+            deletionDictionary = new int[len];
 #endif
 
             // Whipe out all text content between style and script tags.
@@ -69,7 +69,7 @@ namespace CloudVeil.Core.Windows.Util
                     if(closeNext < len)
                     {
 #if !FAST_BIT_ARRAY
-                        m_deletionDictionary[next] = (closeNext + 1) - next;
+                        deletionDictionary[next] = (closeNext + 1) - next;
 #endif
 
                         WipeRange(next, closeNext + 1, input);
@@ -89,14 +89,14 @@ namespace CloudVeil.Core.Windows.Util
             for(next = 0; next < len; ++next)
             {
 #if !FAST_BIT_ARRAY
-                if(m_deletionDictionary[next] > 0)
+                if(deletionDictionary[next] > 0)
                 {
-                    next += m_deletionDictionary[next] - 1;
+                    next += deletionDictionary[next] - 1;
                     continue;
                 }
 
 #else
-                if(m_deletionDictionary[next])
+                if(deletionDictionary[next])
                 {
                     continue;
                 }
@@ -159,7 +159,7 @@ namespace CloudVeil.Core.Windows.Util
                     if(closenext < len)
                     {
 #if !FAST_BIT_ARRAY
-                        m_deletionDictionary[pos - openingTag.Length] = closenext - (pos - openingTag.Length);
+                        deletionDictionary[pos - openingTag.Length] = closenext - (pos - openingTag.Length);
 #endif
                         WipeRange(pos - openingTag.Length, closenext, input);
                     }
@@ -240,7 +240,7 @@ namespace CloudVeil.Core.Windows.Util
             //Console.WriteLine(start);
             //Console.WriteLine(end - start);
             //Console.WriteLine(start + (end - start));
-            m_deletionDictionary.SetRange(start, end - start, true);
+            deletionDictionary.SetRange(start, end - start, true);
 #endif
         }
 

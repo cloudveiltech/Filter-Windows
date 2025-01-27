@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Module Id="CloudVeilPayload" Language="1033" Version="2.4.3" Codepage="1252" Guid="433B312B470946BCB84F97D922EAD9E1" InstallerVersion="500">
+    <SummaryInformation Description="SetupPayloadArm64" Manufacturer="CloudVeil Technologies Inc." />
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+    <!-- Initialize the 'NEWRETARGETABLEPROPERTY1' directory property. -->
+    <CustomAction Id="DIRCA_NEWRETARGETABLEPROPERTY1" Property="NEWRETARGETABLEPROPERTY1" Value="[TARGETDIR]" Execute="firstSequence" />
+    <!-- The directory tree of the installation package. -->
+    <!-- The reference to the component group of the 'InstallGuard' project output. -->
+    <!--<ComponentGroupRef Id="InstallGuard.Binaries" />-->
+    <InstallExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </InstallUISequence>
+    <AdminExecuteSequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </AdminExecuteSequence>
+    <AdminUISequence>
+      <Custom Action="DIRCA_NEWRETARGETABLEPROPERTY1" Before="CostInitialize" Condition="NEWRETARGETABLEPROPERTY1 = &quot;&quot;" />
+    </AdminUISequence>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="com_dirProgramMenuFolder" Guid="8F5FB6D0-DB07-4CEB-8A0A-98950B3D8D75" Transitive="no">
+        <RemoveFolder Id="_FCE7416C_CE92_4491_A271_1B726198A8A5" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirProgramMenuFolder" Type="string" Value="Program Menu directory" KeyPath="yes" />
+        <Shortcut Id="_46A870C2_B263_4992_A6B8_EC684CB9C481" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+          <Icon Id="_FA878F87960F" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
+        </Shortcut>
+      </Component>
+    </StandardDirectory>
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="com_dirDesktopFolder" Guid="B00169FB-FCB1-4297-B527-48B7B2DF7313" Transitive="no">
+        <RemoveFolder Id="_D1F07986_FD5E_49DE_966C_4512D2C83820" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]\Installer" Name="com_dirDesktopFolder" Type="string" Value="Desktop directory" KeyPath="yes" />
+        <Shortcut Id="_DE873283_A8DD_427E_A7EA_8EB4E9DAE8F0" Name="CloudVeil For Windows" Show="normal" WorkingDirectory="NEWRETARGETABLEPROPERTY1" Target="[NEWRETARGETABLEPROPERTY1]CloudVeil.exe">
+          <Icon Id="_E671A35B9011" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
+        </Shortcut>
+      </Component>
+    </StandardDirectory>
+    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release ARM64\x86\* -->
+    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release ARM64\x64\* -->
+    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release ARM64\*.pdb -->
+    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release ARM64\FilterStarter.exe -->
+    <!-- ignore-file:..\..\CloudVeilGUI\bin\Release ARM64\WinDivertSharp.xml -->
+    <Directory Id="NEWRETARGETABLEPROPERTY1" Name="Module Retargetable Folder">
+      <Component Id="BOUNCYCASTLE.CRYPTO.DLL" DiskId="1" Guid="963F8170-E75E-47EB-B380-356F21D18D69">
+        <File Id="BOUNCYCASTLE.CRYPTO.DLL" Name="BouncyCastle.Crypto.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\BouncyCastle.Crypto.dll" />
+      </Component>
+      <Component Id="CLOUDVEIL.CORE.WINDOWS.DLL" DiskId="1" Guid="53DF63DC-4C2D-4C8B-BA3F-CD509078EF24">
+        <File Id="CLOUDVEIL.CORE.WINDOWS.DLL" Name="Cloudveil.Core.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Cloudveil.Core.Windows.dll" />
+      </Component>
+      <Component Id="CLOUDVEIL.EXE" DiskId="1" Guid="7996F40A-4AFF-4FF3-90F7-1088A85D6353">
+        <File Id="CLOUDVEIL.EXE" Name="CloudVeil.exe" Source="..\..\CloudVeilGUI\bin\Release Arm64\CloudVeil.exe" />
+      </Component>
+      <Component Id="CLOUDVEIL.EXE.CONFIG" DiskId="1" Guid="7ABA729E-EAB8-4A7D-AE59-2E1B03B0D313">
+        <File Id="CLOUDVEIL.EXE.CONFIG" Name="CloudVeil.exe.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\CloudVeil.exe.config" />
+      </Component>
+      <Component Id="CONTROLZEX.DLL" DiskId="1" Guid="BAAF99C9-DCEB-4ABE-B752-563CC7BAAF13">
+        <File Id="CONTROLZEX.DLL" Name="ControlzEx.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\ControlzEx.dll" />
+      </Component>
+      <Component Id="DNS.DLL" DiskId="1" Guid="CD749267-9CAF-4A51-BD09-2D5954C47E85">
+        <File Id="DNS.DLL" Name="DNS.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\DNS.dll" />
+      </Component>
+      <Component Id="DOTNET.GLOB.DLL" DiskId="1" Guid="8855DD0D-1E50-46E1-94DD-F7EEC2DBACBA">
+        <File Id="DOTNET.GLOB.DLL" Name="DotNet.Glob.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\DotNet.Glob.dll" />
+      </Component>
+      <Component Id="E_SQLITE3.DLL" DiskId="1" Guid="940B2543-6D0F-4398-9499-76E1FD9E0733">
+        <File Id="E_SQLITE3.DLL" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\e_sqlite3.dll" />
+      </Component>
+      <Component Id="EMBEDIO.DLL" DiskId="1" Guid="38CC2F47-6A6A-471F-9519-CAB1F853C335">
+        <File Id="EMBEDIO.DLL" Name="EmbedIO.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\EmbedIO.dll" />
+      </Component>
+      <Component Id="FILTER.NATIVE.WINDOWS.DLL" DiskId="1" Guid="96FC338B-F062-4DE2-AEDC-DA39BAA4BA97">
+        <File Id="FILTER.NATIVE.WINDOWS.DLL" Name="Filter.Native.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Filter.Native.Windows.dll" />
+      </Component>
+      <Component Id="FILTER.PLATFORM.COMMON.DLL" DiskId="1" Guid="8576B2D0-AA52-4926-A450-8B65E4B4CFD1">
+        <File Id="FILTER.PLATFORM.COMMON.DLL" Name="Filter.Platform.Common.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Filter.Platform.Common.dll" />
+      </Component>
+      <Component Id="FILTERAGENT.WINDOWS.EXE" DiskId="1" Guid="FF5137FD-AEB8-45EB-A7A4-900B0EB16B63">
+        <File Id="FILTERAGENT.WINDOWS.EXE" Name="FilterAgent.Windows.exe" Source="..\..\CloudVeilGUI\bin\Release Arm64\FilterAgent.Windows.exe" />
+      </Component>
+      <Component Id="FILTERAGENT.WINDOWS.EXE.CONFIG" DiskId="1" Guid="D1FE5984-A809-4ABF-9A7B-586BD43C22BB">
+        <File Id="FILTERAGENT.WINDOWS.EXE.CONFIG" Name="FilterAgent.Windows.exe.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\FilterAgent.Windows.exe.config" />
+      </Component>
+      <Component Id="FILTERPROVIDER.COMMON.DLL" DiskId="1" Guid="D54CDEFC-CA25-4EF2-98C6-90DECADDF09F">
+        <File Id="FILTERPROVIDER.COMMON.DLL" Name="FilterProvider.Common.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\FilterProvider.Common.dll" />
+      </Component>
+      <Component Id="FILTERSERVICEPROVIDER.EXE" DiskId="1" Guid="4494C7FB-6E82-4087-B14F-24EEE2332336">
+        <File Id="FILTERSERVICEPROVIDER.EXE" Name="FilterServiceProvider.exe" Source="..\..\CloudVeilGUI\bin\Release Arm64\FilterServiceProvider.exe" />
+      </Component>
+      <Component Id="FILTERSERVICEPROVIDER.EXE.CONFIG" DiskId="1" Guid="ABD16143-9B7A-48F1-8E95-332BB7B45D1C">
+        <File Id="FILTERSERVICEPROVIDER.EXE.CONFIG" Name="FilterServiceProvider.exe.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\FilterServiceProvider.exe.config" />
+      </Component>
+      <Component Id="GALASOFT.MVVMLIGHT.DLL" DiskId="1" Guid="B54F3229-4B41-4933-981B-6A10468573F7">
+        <File Id="GALASOFT.MVVMLIGHT.DLL" Name="GalaSoft.MvvmLight.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\GalaSoft.MvvmLight.dll" />
+      </Component>
+      <Component Id="GALASOFT.MVVMLIGHT.EXTRAS.DLL" DiskId="1" Guid="9E2A7B19-28CA-4D2B-AFB0-5F1A185BF182">
+        <File Id="GALASOFT.MVVMLIGHT.EXTRAS.DLL" Name="GalaSoft.MvvmLight.Extras.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\GalaSoft.MvvmLight.Extras.dll" />
+      </Component>
+      <Component Id="GALASOFT.MVVMLIGHT.PLATFORM.DLL" DiskId="1" Guid="01F3B75F-15DD-48EB-8CB3-44B07E3DAB63">
+        <File Id="GALASOFT.MVVMLIGHT.PLATFORM.DLL" Name="GalaSoft.MvvmLight.Platform.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\GalaSoft.MvvmLight.Platform.dll" />
+      </Component>
+      <Component Id="GOPROXYWRAPPER.DLL" DiskId="1" Guid="8F4B5D5E-F27C-4842-9231-3FAC93A34960">
+        <File Id="GOPROXYWRAPPER.DLL" Name="GoProxyWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\GoProxyWrapper.dll" />
+      </Component>
+      <Component Id="HANDLEBARS.DLL" DiskId="1" Guid="169D0948-38C2-4B9C-8455-DE63E441832A">
+        <File Id="HANDLEBARS.DLL" Name="Handlebars.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Handlebars.dll" />
+      </Component>
+      <Component Id="INTEROP.NETFWTYPELIB.DLL" DiskId="1" Guid="1C01E476-D66E-4C01-AA7C-88F26DB46AC0">
+        <File Id="INTEROP.NETFWTYPELIB.DLL" Name="Interop.NetFwTypeLib.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Interop.NetFwTypeLib.dll" />
+      </Component>
+      <Component Id="MAHAPPS.METRO.DLL" DiskId="1" Guid="C8CB4044-F250-44FF-9AEA-38AA597271CF">
+        <File Id="MAHAPPS.METRO.DLL" Name="MahApps.Metro.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\MahApps.Metro.dll" />
+      </Component>
+      <Component Id="MAHAPPS.METRO.ICONPACKS.DLL" DiskId="1" Guid="52F6843D-4FD2-47C3-8AC7-56E4E450F9BE">
+        <File Id="MAHAPPS.METRO.ICONPACKS.DLL" Name="MahApps.Metro.IconPacks.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\MahApps.Metro.IconPacks.dll" />
+      </Component>
+      <Component Id="MANAGEDWIFI.DLL" DiskId="1" Guid="FD10D629-0888-42B3-B625-F2E646923E21">
+        <File Id="MANAGEDWIFI.DLL" Name="ManagedWifi.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\ManagedWifi.dll" />
+      </Component>
+      <Component Id="MICROSOFT.CODEANALYSIS.CSHARP.DLL" DiskId="1" Guid="544350B7-7ECD-4F21-93C1-2AD60FEC5B1F">
+        <File Id="MICROSOFT.CODEANALYSIS.CSHARP.DLL" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Microsoft.CodeAnalysis.CSharp.dll" />
+      </Component>
+      <Component Id="MICROSOFT.CODEANALYSIS.DLL" DiskId="1" Guid="1D4D9BD9-861F-4DBE-9CB9-C46C94919F96">
+        <File Id="MICROSOFT.CODEANALYSIS.DLL" Name="Microsoft.CodeAnalysis.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Microsoft.CodeAnalysis.dll" />
+      </Component>
+      <Component Id="MICROSOFT.DATA.SQLITE.DLL" DiskId="1" Guid="5A7A0899-545A-4803-B2D2-9E26D8CC1E9F">
+        <File Id="MICROSOFT.DATA.SQLITE.DLL" Name="Microsoft.Data.Sqlite.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Microsoft.Data.Sqlite.dll" />
+      </Component>
+      <Component Id="MICROSOFT.PRACTICES.SERVICELOCATION.DLL" DiskId="1" Guid="4A73FACD-D69C-49B7-9A62-B21B42669FA5">
+        <File Id="MICROSOFT.PRACTICES.SERVICELOCATION.DLL" Name="Microsoft.Practices.ServiceLocation.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Microsoft.Practices.ServiceLocation.dll" />
+      </Component>
+      <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.DLL" DiskId="1" Guid="C677FBC0-AACC-40D8-8BD0-485E73ECCB6F">
+        <File Id="MICROSOFT.WIN32.TASKSCHEDULER.DLL" Name="Microsoft.Win32.TaskScheduler.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Microsoft.Win32.TaskScheduler.dll" />
+      </Component>
+      <Component Id="NAMEDPIPEWRAPPER.DLL" DiskId="1" Guid="21C7E4B2-7F42-4855-8F0B-6ACA118DC7CD">
+        <File Id="NAMEDPIPEWRAPPER.DLL" Name="NamedPipeWrapper.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\NamedPipeWrapper.dll" />
+      </Component>
+      <Component Id="NEWTONSOFT.JSON.DLL" DiskId="1" Guid="F699DE82-6C05-4320-8746-B3B3CE82272F">
+        <File Id="NEWTONSOFT.JSON.DLL" Name="Newtonsoft.Json.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Newtonsoft.Json.dll" />
+      </Component>
+      <Component Id="NLOG.CONFIG" DiskId="1" Guid="35715D8A-1764-4EE2-867A-4E9EBCDDF905">
+        <File Id="NLOG.CONFIG" Name="NLog.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\NLog.config" />
+      </Component>
+      <Component Id="NLOG.DLL" DiskId="1" Guid="BC70D90C-9780-4A06-BE6A-5FF7027C9964">
+        <File Id="NLOG.DLL" Name="NLog.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\NLog.dll" />
+      </Component>
+      <Component Id="NODATIME.DLL" DiskId="1" Guid="D288943E-A1B7-4268-AC26-CAD1365F9223">
+        <File Id="NODATIME.DLL" Name="NodaTime.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\NodaTime.dll" />
+      </Component>
+      <Component Id="SENTINEL.EXE" DiskId="1" Guid="24E55FFE-D3A3-44D2-BB1A-2E22CE3C6BD0">
+        <File Id="SENTINEL.EXE" Name="Sentinel.exe" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentinel.exe" />
+      </Component>
+      <Component Id="SENTINEL.EXE.CONFIG" DiskId="1" Guid="4A4FDC09-89F0-4F11-A604-0213A5B12BC2">
+        <File Id="SENTINEL.EXE.CONFIG" Name="Sentinel.exe.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentinel.exe.config" />
+      </Component>
+      <Component Id="SENTRY.DLL" DiskId="1" Guid="F2FF5BC2-A274-406D-8C77-2A3C9A166557">
+        <File Id="SENTRY.DLL" Name="Sentry.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentry.dll" />
+      </Component>
+      <Component Id="SENTRY.NLOG.DLL" DiskId="1" Guid="198339B5-F391-4CCB-81D7-610D625E3485">
+        <File Id="SENTRY.NLOG.DLL" Name="Sentry.NLog.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentry.NLog.dll" />
+      </Component>
+      <Component Id="SENTRY.PLATFORMABSTRACTIONS.DLL" DiskId="1" Guid="7D87B75A-7E9E-4083-897C-D25D7635DA8C">
+        <File Id="SENTRY.PLATFORMABSTRACTIONS.DLL" Name="Sentry.PlatformAbstractions.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentry.PlatformAbstractions.dll" />
+      </Component>
+      <Component Id="SENTRY.PROTOCOL.DLL" DiskId="1" Guid="CF1F1326-CC72-4DDA-8E6C-6A4C16B4A098">
+        <File Id="SENTRY.PROTOCOL.DLL" Name="Sentry.Protocol.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Sentry.Protocol.dll" />
+      </Component>
+      <Component Id="SQLITEPCLRAW.BATTERIES_V2.DLL" DiskId="1" Guid="D06B0056-938F-4B6B-9BD2-F27FBD3907D3">
+        <File Id="SQLITEPCLRAW.BATTERIES_V2.DLL" Name="SQLitePCLRaw.batteries_v2.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\SQLitePCLRaw.batteries_v2.dll" />
+      </Component>
+      <Component Id="SQLITEPCLRAW.CORE.DLL" DiskId="1" Guid="DDACCFFB-63C9-462B-BE50-E23FB82041DE">
+        <File Id="SQLITEPCLRAW.CORE.DLL" Name="SQLitePCLRaw.core.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\SQLitePCLRaw.core.dll" />
+      </Component>
+      <Component Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" DiskId="1" Guid="604BB427-D1BE-4014-9AD9-440273F418B8">
+        <File Id="SQLITEPCLRAW.PROVIDER.DYNAMIC_CDECL.DLL" Name="SQLitePCLRaw.provider.dynamic_cdecl.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\SQLitePCLRaw.provider.dynamic_cdecl.dll" />
+      </Component>
+      <Component Id="SWAN.LITE.DLL" DiskId="1" Guid="E721C348-FBB1-4B44-81D4-7B2BFD4613B3">
+        <File Id="SWAN.LITE.DLL" Name="Swan.Lite.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Swan.Lite.dll" />
+      </Component>
+      <Component Id="SYSTEM.BUFFERS.DLL" DiskId="1" Guid="6555695E-77E6-4BED-9108-70A6426E67B1">
+        <File Id="SYSTEM.BUFFERS.DLL" Name="System.Buffers.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Buffers.dll" />
+      </Component>
+      <Component Id="SYSTEM.COLLECTIONS.IMMUTABLE.DLL" DiskId="1" Guid="95696ABC-7655-4BF2-A30B-1F616B0E32CB">
+        <File Id="SYSTEM.COLLECTIONS.IMMUTABLE.DLL" Name="System.Collections.Immutable.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Collections.Immutable.dll" />
+      </Component>
+      <Component Id="SYSTEM.IO.PIPES.ACCESSCONTROL.DLL" DiskId="1" Guid="EA4C00BF-5A70-4F81-8263-E2A732183B28">
+        <File Id="SYSTEM.IO.PIPES.ACCESSCONTROL.DLL" Name="System.IO.Pipes.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.IO.Pipes.AccessControl.dll" />
+      </Component>
+      <Component Id="SYSTEM.MEMORY.DLL" DiskId="1" Guid="BF774E1F-9B0A-4719-9013-6479919A4D43">
+        <File Id="SYSTEM.MEMORY.DLL" Name="System.Memory.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Memory.dll" />
+      </Component>
+      <Component Id="SYSTEM.NUMERICS.VECTORS.DLL" DiskId="1" Guid="B8F96B65-AAA8-4686-9163-B055ADBD6098">
+        <File Id="SYSTEM.NUMERICS.VECTORS.DLL" Name="System.Numerics.Vectors.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Numerics.Vectors.dll" />
+      </Component>
+      <Component Id="SYSTEM.REFLECTION.METADATA.DLL" DiskId="1" Guid="1757C1A7-D47A-4E0C-A6B2-407509E605AB">
+        <File Id="SYSTEM.REFLECTION.METADATA.DLL" Name="System.Reflection.Metadata.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Reflection.Metadata.dll" />
+      </Component>
+      <Component Id="SYSTEM.REFLECTION.TYPEEXTENSIONS.DLL" DiskId="1" Guid="0DFCE9E5-72BF-49C2-A876-541F43834136">
+        <File Id="SYSTEM.REFLECTION.TYPEEXTENSIONS.DLL" Name="System.Reflection.TypeExtensions.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Reflection.TypeExtensions.dll" />
+      </Component>
+      <Component Id="SYSTEM.RUNTIME.COMPILERSERVICES.UNSAFE.DLL" DiskId="1" Guid="CAE66672-2E31-4F80-AE29-18EA410CEBDA">
+        <File Id="SYSTEM.RUNTIME.COMPILERSERVICES.UNSAFE.DLL" Name="System.Runtime.CompilerServices.Unsafe.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Runtime.CompilerServices.Unsafe.dll" />
+      </Component>
+      <Component Id="SYSTEM.SECURITY.ACCESSCONTROL.DLL" DiskId="1" Guid="36831ADE-177E-4C6C-B18D-EF9D79DC3B54">
+        <File Id="SYSTEM.SECURITY.ACCESSCONTROL.DLL" Name="System.Security.AccessControl.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Security.AccessControl.dll" />
+      </Component>
+      <Component Id="SYSTEM.SECURITY.PRINCIPAL.WINDOWS.DLL" DiskId="1" Guid="377E9993-D13D-42E6-BFF5-78398D66C6FD">
+        <File Id="SYSTEM.SECURITY.PRINCIPAL.WINDOWS.DLL" Name="System.Security.Principal.Windows.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Security.Principal.Windows.dll" />
+      </Component>
+      <Component Id="SYSTEM.SERVICEMODEL.SYNDICATION.DLL" DiskId="1" Guid="DF0C5ED8-9513-46E9-B3A8-FBB7E59B7A4F">
+        <File Id="SYSTEM.SERVICEMODEL.SYNDICATION.DLL" Name="System.ServiceModel.Syndication.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.ServiceModel.Syndication.dll" />
+      </Component>
+      <Component Id="SYSTEM.TEXT.ENCODING.CODEPAGES.DLL" DiskId="1" Guid="B73C0510-7423-4FA5-A01A-AA34D14CFBF7">
+        <File Id="SYSTEM.TEXT.ENCODING.CODEPAGES.DLL" Name="System.Text.Encoding.CodePages.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Text.Encoding.CodePages.dll" />
+      </Component>
+      <Component Id="SYSTEM.VALUETUPLE.DLL" DiskId="1" Guid="0C136708-70A3-45FC-8CE8-330D13EBD1F7">
+        <File Id="SYSTEM.VALUETUPLE.DLL" Name="System.ValueTuple.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.ValueTuple.dll" />
+      </Component>
+      <Component Id="SYSTEM.WINDOWS.INTERACTIVITY.DLL" DiskId="1" Guid="6087CE9E-3594-44B1-B528-3BB08CB64DCC">
+        <File Id="SYSTEM.WINDOWS.INTERACTIVITY.DLL" Name="System.Windows.Interactivity.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\System.Windows.Interactivity.dll" />
+      </Component>
+      <Component Id="TOPSHELF.DLL" DiskId="1" Guid="20ADF61F-E845-4D0F-AB7B-C91D0D707013">
+        <File Id="TOPSHELF.DLL" Name="Topshelf.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\Topshelf.dll" />
+      </Component>
+      <Component Id="WARDEN.EXE" DiskId="1" Guid="562CD218-1480-4574-AD55-045EBE3ABE36">
+        <File Id="WARDEN.EXE" Name="Warden.exe" Source="..\..\CloudVeilGUI\bin\Release Arm64\Warden.exe" />
+      </Component>
+      <Component Id="WARDEN.EXE.CONFIG" DiskId="1" Guid="D518BA3A-D088-44B9-9959-2CB2B3C41B8E">
+        <File Id="WARDEN.EXE.CONFIG" Name="Warden.exe.config" Source="..\..\CloudVeilGUI\bin\Release Arm64\Warden.exe.config" />
+      </Component>
+      <Component Id="WINDIVERTSHARP.DLL" DiskId="1" Guid="4CB2EC38-241D-4E31-A257-32E005BBF50B">
+        <File Id="WINDIVERTSHARP.DLL" Name="WinDivertSharp.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\WinDivertSharp.dll" />
+      </Component>
+      <Component Id="WINDOWSFIREWALLHELPER.DLL" DiskId="1" Guid="0166F0FA-474D-48D7-9C33-5C7495C5EDEB">
+        <File Id="WINDOWSFIREWALLHELPER.DLL" Name="WindowsFirewallHelper.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\WindowsFirewallHelper.dll" />
+      </Component>
+      <Directory Id="ARM64" Name="arm64">
+        <Component Id="PROXY.DLL" DiskId="1" Guid="C258C478-C54C-45A8-990F-1FBB9CAC6528">
+          <File Id="PROXY.DLL" Name="proxy.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\arm64\proxy.dll" />
+        </Component>
+        <Component Id="WINDIVERT.DLL" DiskId="1" Guid="166FC7E2-9A1B-4679-847A-023D16D116E4">
+          <File Id="WINDIVERT.DLL" Name="WinDivert.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\arm64\WinDivert.dll" />
+        </Component>
+        <Component Id="WINDIVERTARM64.SYS" DiskId="1" Guid="909D8CC4-F571-4E89-858A-BEBFBAAD9194">
+          <File Id="WINDIVERTARM64.SYS" Name="WinDivertARM64.sys" Source="..\..\CloudVeilGUI\bin\Release Arm64\arm64\WinDivertARM64.sys" />
+        </Component>
+      </Directory>
+      <Directory Id="DE" Name="de">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL" DiskId="1" Guid="0AB11C36-B1A1-4521-880C-3664C096CD3E">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\de\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="ES" Name="es">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_1" DiskId="1" Guid="32891297-2610-46C5-B678-83B44120AC90">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_1" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\es\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="FR" Name="fr">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_2" DiskId="1" Guid="F3F5404A-9479-4846-AC79-A0F307278F5F">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_2" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\fr\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="IT" Name="it">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_3" DiskId="1" Guid="2B11BDBE-8DC4-41A1-9D94-0EE33AB824D0">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_3" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\it\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="PL" Name="pl">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_4" DiskId="1" Guid="41178FDB-7110-48ED-ABC7-12CF136BC2CB">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_4" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\pl\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="RU" Name="ru">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_5" DiskId="1" Guid="CEA304F0-3575-4D3D-85FC-560DCBB68904">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_5" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\ru\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+      <Directory Id="RUNTIMES" Name="runtimes">
+        <Directory Id="WIN_ARM" Name="win-arm">
+          <Directory Id="NATIVE" Name="native">
+            <Component Id="E_SQLITE3.DLL_1" DiskId="1" Guid="E42EE74F-8FBA-446A-A4DF-AC9FB761D4FF">
+              <File Id="E_SQLITE3.DLL_1" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\runtimes\win-arm\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="WIN_X64" Name="win-x64">
+          <Directory Id="NATIVE_1" Name="native">
+            <Component Id="E_SQLITE3.DLL_2" DiskId="1" Guid="693A39E5-DD78-4D04-9E3E-B621A0CFF897">
+              <File Id="E_SQLITE3.DLL_2" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+        <Directory Id="WIN_X86" Name="win-x86">
+          <Directory Id="NATIVE_2" Name="native">
+            <Component Id="E_SQLITE3.DLL_3" DiskId="1" Guid="0C2FEF8D-560E-4EAF-8A56-CEB52DC2E89A">
+              <File Id="E_SQLITE3.DLL_3" Name="e_sqlite3.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\runtimes\win-x86\native\e_sqlite3.dll" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="ZH_CN" Name="zh-CN">
+        <Component Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_6" DiskId="1" Guid="094D007B-42CD-43A6-8B12-6F3EE5BADAAB">
+          <File Id="MICROSOFT.WIN32.TASKSCHEDULER.RESOURCES.DLL_6" Name="Microsoft.Win32.TaskScheduler.resources.dll" Source="..\..\CloudVeilGUI\bin\Release Arm64\zh-CN\Microsoft.Win32.TaskScheduler.resources.dll" />
+        </Component>
+      </Directory>
+    </Directory>
+  </Module>
+</Wix>

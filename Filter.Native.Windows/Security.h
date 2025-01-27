@@ -9,7 +9,7 @@ using namespace System::Runtime::InteropServices;
 namespace FilterNativeWindows {
     public ref class Security {
     public:
-        static int SetObjectAsSystemOnly(String^ objectName, SeObjectType objectType);
+        static void SetObjectAsSystemOnly(String^ objectName, SeObjectType objectType);
         
         static bool GetServiceSecurity(String^ serviceName, [Out] RawSecurityDescriptor^% securityDescriptor);
         static bool SetServiceSecurity(String^ serviceName, RawSecurityDescriptor^ securityDescriptor);

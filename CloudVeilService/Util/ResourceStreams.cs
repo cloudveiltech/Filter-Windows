@@ -21,7 +21,6 @@ namespace CloudVeilService.Util
         {
             try
             {
-                //var blockedPagePackURI = "CitadelService.Resources.BlockedPage.html";
                 using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
                 {
                     if (resourceStream != null && resourceStream.CanRead)
@@ -33,7 +32,7 @@ namespace CloudVeilService.Util
                     }
                     else
                     {
-                        //m_logger.Error("Cannot read from packed block page file.");
+                        //logger.Error("Cannot read from packed block page file.");
                         return null;
                     }
                 }

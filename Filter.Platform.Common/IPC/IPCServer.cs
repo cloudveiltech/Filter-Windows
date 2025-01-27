@@ -14,9 +14,6 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Security;
-using System.Security.AccessControl;
-using System.Security.Principal;
-
 namespace CloudVeil.IPC
 {
     /// <summary>
@@ -211,10 +208,10 @@ namespace CloudVeil.IPC
         /// <summary>
         /// Actual named pipe server wrapper. 
         /// </summary>
-        private IPipeServer m_server;
+        private IPipeServer server;
 
         // XXX FIXME Currently not used in IPCServer.
-        private IPCMessageTracker m_ipcQueue;
+        private IPCMessageTracker ipcQueue;
 
         /// <summary>
         /// Delegate to be called when a client requests a relaxed policy. 
@@ -281,17 +278,17 @@ namespace CloudVeil.IPC
         /// <summary>
         /// Our logger. 
         /// </summary>
-        private readonly Logger m_logger;
+        private readonly Logger logger;
 
         public bool WaitingForAuth
         {
             get
             {
-                return m_waitingForAuth;
+                return waitingForAuth;
             }
         }
 
-        private volatile bool m_waitingForAuth = false;
+        private volatile bool waitingForAuth = false;
 
         /// <summary>
         /// Constructs a new named pipe server for IPC, with a channel name derived from the class
@@ -299,51 +296,51 @@ namespace CloudVeil.IPC
         /// </summary>
         public IPCServer()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
             var channel = string.Format("{0}.{1}", nameof(CloudVeil.IPC), FingerprintService.Default.Value2).ToLower();
 
-            m_server = PlatformTypes.New<IPipeServer>(channel);
+            server = PlatformTypes.New<IPipeServer>(channel);
 
-            //m_server = new NamedPipeServer<BaseMessage>(channel, security);
+            //server = new NamedPipeServer<BaseMessage>(channel, security);
             
-            m_server.ClientConnected += OnClientConnected;
-            m_server.ClientDisconnected += OnClientDisconnected;
-            m_server.ClientMessage += OnClientMessage;
+            server.ClientConnected += OnClientConnected;
+            server.ClientDisconnected += OnClientDisconnected;
+            server.ClientMessage += OnClientMessage;
 
-            m_server.Error += M_server_Error;
+            server.Error += M_server_Error;
 
             // Server is no longer started by constructor. We start the IPCServer after everything else has been set up by the FilterServiceProvider.
-            m_ipcQueue = new IPCMessageTracker(this);
+            ipcQueue = new IPCMessageTracker(this);
 
-            m_callbacks.Add(typeof(AddSelfModerationEntryMessage), (msg) =>
+            callbacks.Add(typeof(AddSelfModerationEntryMessage), (msg) =>
             {
                 AddSelfModerationEntry?.Invoke(msg as AddSelfModerationEntryMessage);
             });
 
-            m_callbacks.Add(typeof(IpcMessage), (msg) =>
+            callbacks.Add(typeof(IpcMessage), (msg) =>
             {
                 // The new IPC message Request/Send API handles
                 HandleIpcMessage(msg);
             });
         }
 
-        private Dictionary<Type, Action<BaseMessage>> m_callbacks = new Dictionary<Type, Action<BaseMessage>>();
+        private Dictionary<Type, Action<BaseMessage>> callbacks = new Dictionary<Type, Action<BaseMessage>>();
 
         private void M_server_Error(Exception exception)
         {
-            LoggerUtil.RecursivelyLogException(m_logger, exception);
+            LoggerUtil.RecursivelyLogException(logger, exception);
         }
 
         private void OnClientConnected(IPipeServer server)
         {
-            m_logger.Debug("Client connected.");
+            logger.Debug("Client connected.");
             ClientConnected?.Invoke();
         }
 
         private void OnClientDisconnected(IPipeServer server)
         {
-            m_logger.Debug("Client disconnected.");
+            logger.Debug("Client disconnected.");
             ClientDisconnected?.Invoke();
         }
 
@@ -361,9 +358,9 @@ namespace CloudVeil.IPC
             // This is so gross, but unfortuantely we can't just switch on a type. We can come up
             // with a nice mapping system so we can do a switch, but this can wait.
 
-            m_logger.Debug("Got IPC message from client.");
+            logger.Debug("Got IPC message from client.");
 
-            if(m_ipcQueue.HandleMessage(message))
+            if(ipcQueue.HandleMessage(message))
             {
                 return;
             }
@@ -371,14 +368,14 @@ namespace CloudVeil.IPC
             var msgRealType = message.GetType();
 
             Action<BaseMessage> callback = null;
-            if(m_callbacks.TryGetValue(msgRealType, out callback))
+            if(callbacks.TryGetValue(msgRealType, out callback))
             {
-                m_logger.Debug("Client message is {0}", msgRealType.Name);
+                logger.Debug("Client message is {0}", msgRealType.Name);
                 callback?.Invoke(message);
             }
             if(msgRealType == typeof(Messages.AuthenticationMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.AuthenticationMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.AuthenticationMessage));
                 var cast = (Messages.AuthenticationMessage)message;
 
                 if(cast != null)
@@ -396,7 +393,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.DeactivationMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.DeactivationMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.DeactivationMessage));
 
                 var cast = (Messages.DeactivationMessage)message;
 
@@ -412,7 +409,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.RelaxedPolicyMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.RelaxedPolicyMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.RelaxedPolicyMessage));
 
                 var cast = (Messages.RelaxedPolicyMessage)message;
 
@@ -424,7 +421,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.ClientToClientMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.ClientToClientMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.ClientToClientMessage));
 
                 var cast = (Messages.ClientToClientMessage)message;
 
@@ -436,7 +433,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.FilterStatusMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.FilterStatusMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.FilterStatusMessage));
 
                 var cast = (Messages.FilterStatusMessage)message;
 
@@ -447,7 +444,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.ClientUpdateResponseMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.ClientUpdateResponseMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.ClientUpdateResponseMessage));
 
                 var cast = (Messages.ClientUpdateResponseMessage)message;
 
@@ -455,14 +452,14 @@ namespace CloudVeil.IPC
                 {
                     if(cast.Accepted)
                     {
-                        m_logger.Debug("Client has accepted update.");
+                        logger.Debug("Client has accepted update.");
                         ClientAcceptedPendingUpdate?.Invoke();
                     }                    
                 }
             }
             else if(msgRealType == typeof(Messages.BlockActionReviewRequestMessage))
             {
-                m_logger.Debug("Client message is {0}", nameof(Messages.BlockActionReviewRequestMessage));
+                logger.Debug("Client message is {0}", nameof(Messages.BlockActionReviewRequestMessage));
 
                 var cast = (Messages.BlockActionReviewRequestMessage)message;
 
@@ -476,13 +473,13 @@ namespace CloudVeil.IPC
                     }
                     else
                     {
-                        m_logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
+                        logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
                     }                    
                 }
             }
             else if (msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
                 var cast = (Messages.CaptivePortalDetectionMessage)message;
                 if (cast != null)
                 {
@@ -491,7 +488,7 @@ namespace CloudVeil.IPC
             }
             else if(msgRealType == typeof(Messages.CertificateExemptionMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.CertificateExemptionMessage));
                 var cast = (Messages.CertificateExemptionMessage)message;
                 if(cast != null)
                 {
@@ -500,7 +497,7 @@ namespace CloudVeil.IPC
             }
             else if (msgRealType == typeof(Messages.DiagnosticsMessage))
             {
-                m_logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsMessage));
+                logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsMessage));
                 var cast = (Messages.DiagnosticsMessage)message;
                 if (cast != null)
                 {
@@ -515,8 +512,8 @@ namespace CloudVeil.IPC
 
         public void Start()
         {
-            m_logger.Info("IPC Server Started");
-            m_server.Start();
+            logger.Info("IPC Server Started");
+            server.Start();
         }
 
         /// <summary>
@@ -590,17 +587,17 @@ namespace CloudVeil.IPC
         public void NotifyAuthenticationStatus(AuthenticationAction action, string username = null, AuthenticationResultObject authenticationResult = null)
         {
             // KF - I edited this function to take two arguments instead of one and then refactored all the code that calls it to pass in an AuthenticationResultObject
-            switch (m_waitingForAuth)
+            switch (waitingForAuth)
             {
                 case true:
                 {
-                    m_waitingForAuth = action == AuthenticationAction.Authenticated ? false : true;
+                    waitingForAuth = action == AuthenticationAction.Authenticated ? false : true;
                 }
                 break;
 
                 case false:
                 {
-                    m_waitingForAuth = action == AuthenticationAction.Required;
+                    waitingForAuth = action == AuthenticationAction.Required;
                 }
                 break;
             }
@@ -648,7 +645,7 @@ namespace CloudVeil.IPC
 
         public void NotifyAddCertificateExemption(string host, string certHash, bool isTrusted)
         {
-            m_logger.Info("Sending certificate exemption");
+            logger.Info("Sending certificate exemption");
 
             var msg = new CertificateExemptionMessage(host, certHash, isTrusted);
             PushMessage(msg);
@@ -704,35 +701,35 @@ namespace CloudVeil.IPC
         {
             if (handler != null)
             {
-                m_ipcQueue.AddMessage(msg, handler, 0);
+                ipcQueue.AddMessage(msg, handler, 0);
             }
         }
 
         public override void PushMessage(BaseMessage msg, ReplyHandlerClass handler = null, int retryNum = 0)
         {
-            if(m_waitingForAuth)
+            if(waitingForAuth)
             {
                 // We'll only allow auth messages through until authentication has
                 // been confirmed.
                 if(msg.GetType() == typeof(AuthenticationMessage))
                 {
-                    m_server.PushMessage(msg);
+                    server.PushMessage(msg);
                     addMessageHandler(msg, handler);
                 }
                 else if(msg.GetType() == typeof(RelaxedPolicyMessage))
                 {
-                    m_server.PushMessage(msg);
+                    server.PushMessage(msg);
                     addMessageHandler(msg, handler);
                 }
                 else if(msg.GetType() == typeof(NotifyBlockActionMessage))
                 {
-                    m_server.PushMessage(msg);
+                    server.PushMessage(msg);
                     addMessageHandler(msg, handler);
                 }
             }
             else
             {
-                m_server.PushMessage(msg);
+                server.PushMessage(msg);
             }
         }
 
@@ -746,14 +743,14 @@ namespace CloudVeil.IPC
             {
                 if(disposing)
                 {
-                    if(m_server != null)
+                    if(server != null)
                     {
 #if CLIFTON
-                        m_server.Close();
+                        server.Close();
 #else
-                        m_server.Stop();
+                        server.Stop();
 #endif
-                        m_server = null;
+                        server = null;
                     }
                 }
 

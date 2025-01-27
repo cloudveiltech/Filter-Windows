@@ -5,38 +5,32 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.Core.Windows.Util;
-using CitadelCore.Windows.Diversion;
+using CloudVeil.Core.Windows.Util;
+using CloudVeil.Core.Windows.WinAPI;
 using CloudVeilService.Services;
+using CloudVeilService.Util;
 using Filter.Platform.Common;
-using Filter.Platform.Common.Util;
+using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data;
 using FilterProvider.Common.Platform;
 using FilterProvider.Common.Proxy;
 using FilterProvider.Common.Proxy.Certificate;
+using FilterProvider.Common.Util;
 using Microsoft.Win32;
 using murrayju.ProcessExtensions;
 using Org.BouncyCastle.Crypto;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFirewallHelper;
-using FilterNativeWindows;
-using CloudVeil.Core.Windows.WinAPI;
-using Filter.Platform.Common.Data.Models;
-using System.Reflection;
-using CloudVeilService.Util;
-using System.ComponentModel;
-using FilterProvider.Common.Util;
 
 namespace CloudVeilService.Platform
 {
@@ -44,9 +38,9 @@ namespace CloudVeilService.Platform
     {
         public event EventHandler SessionEnding;
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
-        private FilterServiceProvider m_provider;
+        private FilterServiceProvider provider;
 
         private X509Certificate2 rootCert;
         public X509Certificate2 RootCertificate => rootCert;
@@ -54,9 +48,9 @@ namespace CloudVeilService.Platform
         public WindowsSystemServices(FilterServiceProvider provider)
         {
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
-            m_provider = provider;
+            this.provider = provider;
         }
 
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
@@ -102,8 +96,8 @@ namespace CloudVeilService.Platform
             }
             catch (Exception e)
             {
-                m_logger.Error("Error while attempting to configure firewall application exception.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Error while attempting to configure firewall application exception.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
@@ -174,13 +168,13 @@ namespace CloudVeilService.Platform
 
         public void EnableInternet()
         {
-            m_logger.Info("Enabling internet.");
+            logger.Info("Enabling internet.");
             WFPUtility.EnableInternet();
         }
 
         public void DisableInternet()
         {
-            m_logger.Info("Disabling internet.");
+            logger.Info("Disabling internet.");
             WFPUtility.DisableInternet();
         }
 
@@ -195,7 +189,7 @@ namespace CloudVeilService.Platform
                 {
                     try
                     {
-                        m_logger.Info("Checking exe : {0}", exe);
+                        logger.Info("Checking exe : {0}", exe);
                         // Try to get the exe file metadata.
                         var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
 
@@ -208,14 +202,14 @@ namespace CloudVeilService.Platform
                     }
                     catch (Exception le)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, le);
+                        LoggerUtil.RecursivelyLogException(logger, le);
                     }
                 }
             }
             catch (Exception e)
             {
-                m_logger.Error("Error enumerating sibling files.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Error enumerating sibling files.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
 
             fullGuiExePath = string.Empty;
@@ -244,8 +238,8 @@ namespace CloudVeilService.Platform
             }
             catch (Exception e)
             {
-                m_logger.Error("Error enumerating processes when trying to kill all GUI instances.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Error enumerating processes when trying to kill all GUI instances.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
@@ -253,7 +247,7 @@ namespace CloudVeilService.Platform
         {
             string reportPath = url.ToString();
 
-            m_logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
+            logger.Info("Starting process: {0}", AppAssociationHelper.PathToDefaultBrowser);
             var sanitizedArgs = "\"" + Regex.Replace(reportPath, @"(\\+)$", @"$1$1") + "\"";
 
             var sanitizedPath = "\"" + Regex.Replace(AppAssociationHelper.PathToDefaultBrowser, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
@@ -449,7 +443,7 @@ namespace CloudVeilService.Platform
                 string guiExePath;
                 if (TryGetGuiFullPath(out guiExePath))
                 {
-                    m_logger.Info("Starting external GUI executable : {0}", guiExePath);
+                    logger.Info("Starting external GUI executable : {0}", guiExePath);
 
                     if (runInTray)
                     {
@@ -469,8 +463,8 @@ namespace CloudVeilService.Platform
             }
             catch (Exception e)
             {
-                m_logger.Error("Error enumerating all files.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Error enumerating all files.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 

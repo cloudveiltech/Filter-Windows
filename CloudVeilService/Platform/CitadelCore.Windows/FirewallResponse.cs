@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-namespace CitadelCore.Net.Proxy
+namespace CloudVeilCore.Net.Proxy
 {
     /// <summary>
     /// A response to a firewall inquiry for a specific traffic flow.

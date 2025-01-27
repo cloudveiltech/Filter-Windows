@@ -3,9 +3,7 @@
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
-
-using Microsoft.CodeAnalysis;
+*/using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System;
@@ -35,6 +33,7 @@ using Microsoft.Win32.TaskScheduler;
 using CloudVeilService.Util;
 using CloudVeil.Core.Windows.Services;
 
+
 namespace CloudVeilService.Services
 {
     internal class ServiceSpawner
@@ -44,7 +43,7 @@ namespace CloudVeilService.Services
         // using statement.
         private class TopshelfDummy
         {
-            private Topshelf.Credentials m_dummy;
+            private Topshelf.Credentials dummy;
             private TopshelfDummy()
             {
 
@@ -53,11 +52,11 @@ namespace CloudVeilService.Services
 
         private class Governor : BaseProtectiveService
         {
-            private Logger m_logger;
+            private Logger logger;
 
             public Governor() : base("warden", true)
             {
-                m_logger = LoggerUtil.GetAppWideLogger();    
+                logger = LoggerUtil.GetAppWideLogger();    
             }
 
             public override void Shutdown(ExitCodes code)
@@ -66,9 +65,9 @@ namespace CloudVeilService.Services
             }
         }
 
-        private Logger m_logger;
+        private Logger logger;
 
-        private Governor m_governor;
+        private Governor governor;
 
         private static ServiceSpawner s_instance;
 
@@ -93,7 +92,7 @@ namespace CloudVeilService.Services
             var createdServices = new List<string>();
             try
             {
-                m_logger = LoggerUtil.GetAppWideLogger();
+                logger = LoggerUtil.GetAppWideLogger();
 
                 var thisAppDir = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -124,8 +123,8 @@ namespace CloudVeilService.Services
 
                                 if (lockingProcesses.Count == 0)
                                 {
-                                    m_logger.Warn("IOException occurred, but no locking processes detected.");
-                                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                                    logger.Warn("IOException occurred, but no locking processes detected.");
+                                    LoggerUtil.RecursivelyLogException(logger, e);
                                 }
                                 else
                                 {
@@ -136,21 +135,21 @@ namespace CloudVeilService.Services
                                         messageBuilder.AppendLine($"\tProcess {process.Id}: {process.ProcessName}");
                                     }
 
-                                    m_logger.Warn(messageBuilder.ToString());
+                                    logger.Warn(messageBuilder.ToString());
                                 }
                             }
                             catch(Exception fileException)
                             {
-                                m_logger.Warn("Exception occurred while finding process which locked {0}", fileName);
-                                LoggerUtil.RecursivelyLogException(m_logger, fileException);
-                                LoggerUtil.RecursivelyLogException(m_logger, e);
+                                logger.Warn("Exception occurred while finding process which locked {0}", fileName);
+                                LoggerUtil.RecursivelyLogException(logger, fileException);
+                                LoggerUtil.RecursivelyLogException(logger, e);
                             }
                         }
                         catch(Exception e)
                         {
-                            if(m_logger != null)
+                            if(logger != null)
                             {
-                                LoggerUtil.RecursivelyLogException(m_logger, e);
+                                LoggerUtil.RecursivelyLogException(logger, e);
                             }
                         }
                     }
@@ -158,9 +157,9 @@ namespace CloudVeilService.Services
             }
             catch(Exception e)
             {
-                if(m_logger != null)
+                if(logger != null)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                    LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
 
@@ -169,13 +168,13 @@ namespace CloudVeilService.Services
                 // Start the governor. This will run a background thread
                 // that will ensure our chain of protective processes are
                 // run.
-                m_governor = new Governor();
+                governor = new Governor();
             }
             catch(Exception e)
             {
-                if(m_logger != null)
+                if(logger != null)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                    LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
 
@@ -206,9 +205,9 @@ namespace CloudVeilService.Services
             }
             catch(Exception e)
             {
-                if(m_logger != null)
+                if(logger != null)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                    LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
         }
@@ -231,7 +230,7 @@ namespace CloudVeilService.Services
         /// </param>
         private string CompileExe(string sourceResourcePath, string absOutputPath)
         {
-            m_logger.Info("Compiling internal service: {0} to output {1}.", sourceResourcePath, absOutputPath);
+            logger.Info("Compiling internal service: {0} to output {1}.", sourceResourcePath, absOutputPath);
             string scriptContents = string.Empty;
             
             using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(sourceResourcePath))
@@ -244,7 +243,7 @@ namespace CloudVeilService.Services
 
             if(scriptContents == null || scriptContents.Length == 0)
             {
-                m_logger.Warn("When compiling internal service {0}, failed to load source code.", sourceResourcePath);
+                logger.Warn("When compiling internal service {0}, failed to load source code.", sourceResourcePath);
                 return string.Empty;
             }
 
@@ -320,17 +319,17 @@ namespace CloudVeilService.Services
                 if(result.Success)
                 {
                     File.WriteAllBytes(absOutputPath, ms.ToArray());
-                    m_logger.Info("Generated service assembly {0} for service {1}.", absOutputPath, Path.GetFileNameWithoutExtension(absOutputPath));
+                    logger.Info("Generated service assembly {0} for service {1}.", absOutputPath, Path.GetFileNameWithoutExtension(absOutputPath));
                     return absOutputPath;
                 }
                 else
                 {
                     // Compilation failed.
-                    m_logger.Error("Failed to generate service assembly for service {0}.", Path.GetFileNameWithoutExtension(absOutputPath));
+                    logger.Error("Failed to generate service assembly for service {0}.", Path.GetFileNameWithoutExtension(absOutputPath));
 
                     foreach(var diag in result.Diagnostics)
                     {   
-                        m_logger.Error(diag.GetMessage());
+                        logger.Error(diag.GetMessage());
                     }
                 }
             }
@@ -391,11 +390,7 @@ namespace CloudVeilService.Services
                 }
                 catch
                 {
-                    // Rather than discriminate against which DLL's we load here, we'll just do
-                    // this gross try/catch. That way, mixed managed assemblies or assemblies that
-                    // have custom resolution processes for their dependencies will just fail
-                    // and we'll ignore them. We only really want standard libraries and
-                    // common citadel libs so this is fine for our use.
+                   
                 }
             }
 

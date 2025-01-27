@@ -37,19 +37,19 @@ namespace FilterProvider.Common.Util
         /// This timer is used to monitor local NIC cards and enforce DNS settings when they are
         /// configured in the application config.
         /// </summary>
-        private Timer m_dnsEnforcementTimer;
+        private Timer dnsEnforcementTimer;
 
         internal DnsEnforcement(IPolicyConfiguration configuration, NLog.Logger logger)
         {
-            m_logger = logger;
-            m_policyConfiguration = configuration;
-            m_platformDns = PlatformTypes.New<IPlatformDns>();
+            this.logger = logger;
+            policyConfiguration = configuration;
+            platformDns = PlatformTypes.New<IPlatformDns>();
         }
 
-        private object m_dnsEnforcementLock = new object();
-        private NLog.Logger m_logger;
-        private IPolicyConfiguration m_policyConfiguration;
-        private IPlatformDns m_platformDns;
+        private object dnsEnforcementLock = new object();
+        private NLog.Logger logger;
+        private IPolicyConfiguration policyConfiguration;
+        private IPlatformDns platformDns;
 
         #region DnsEnforcement.Enforce
         
@@ -62,25 +62,25 @@ namespace FilterProvider.Common.Util
         /// <param name="enableDnsFiltering">If true, this function enables DNS filtering with entries in the configuration.</param>
         public void TryEnforce(bool sendDnsChangeEvents, bool enableDnsFiltering = true)
         {
-            m_logger.Info("TryEnforce DNS {0}, {1}", sendDnsChangeEvents, enableDnsFiltering);
+            logger.Info("TryEnforce DNS {0}, {1}", sendDnsChangeEvents, enableDnsFiltering);
 
-            lock (m_dnsEnforcementLock)
+            lock (dnsEnforcementLock)
             {
                 try
                 {
                     if(!enableDnsFiltering)
                     {
-                        if (m_policyConfiguration.Configuration == null)
+                        if (policyConfiguration.Configuration == null)
                         {
                             EventHandler fn = null;
 
                             fn = (sender, e) =>
                             {
                                 this.SetDnsToDhcp(sendDnsChangeEvents);
-                                m_policyConfiguration.OnConfigurationLoaded -= fn;
+                                policyConfiguration.OnConfigurationLoaded -= fn;
                             };
 
-                            m_policyConfiguration.OnConfigurationLoaded += fn;
+                            policyConfiguration.OnConfigurationLoaded += fn;
                         }
                         else
                         {
@@ -92,7 +92,7 @@ namespace FilterProvider.Common.Util
                         IPAddress primaryDns = null;
                         IPAddress secondaryDns = null;
 
-                        var cfg = m_policyConfiguration.Configuration;
+                        var cfg = policyConfiguration.Configuration;
 
                         // Check if any DNS servers are defined, and if so, set them.
                         if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
@@ -107,7 +107,7 @@ namespace FilterProvider.Common.Util
 
                         if (primaryDns != null || secondaryDns != null)
                         {
-                            bool ranUpdate = m_platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
+                            bool ranUpdate = platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
 
                             if(areDnsServersChanging(primaryDns, secondaryDns))
                             {
@@ -128,7 +128,7 @@ namespace FilterProvider.Common.Util
                 }
                 catch (Exception e)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, e);
+                    LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
         }
@@ -179,13 +179,13 @@ namespace FilterProvider.Common.Util
 
         private void SetDnsToDhcp(bool sendDnsChangeEvents)
         {
-            m_logger.Info("Setting DNS to DHCP.");
+            logger.Info("Setting DNS to DHCP.");
 
             // Is configuration loaded?
             IPAddress primaryDns = null;
             IPAddress secondaryDns = null;
 
-            var cfg = m_policyConfiguration.Configuration;
+            var cfg = policyConfiguration.Configuration;
 
             // Check if any DNS servers are defined, and if so, set them.
             if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
@@ -198,12 +198,12 @@ namespace FilterProvider.Common.Util
                 IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
             }
 
-            m_logger.Info("Stored DNS in configuration {0}, {1}", primaryDns, secondaryDns);
+            logger.Info("Stored DNS in configuration {0}, {1}", primaryDns, secondaryDns);
 
             if (lastPrimary == null && lastSecondary == null && primaryDns == null && secondaryDns == null)
             {
                 // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
-                m_logger.Info("Primary and Secondary DNS servers are both null.");
+                logger.Info("Primary and Secondary DNS servers are both null.");
 
                 return;
             }
@@ -213,7 +213,7 @@ namespace FilterProvider.Common.Util
                 OnDnsChanging(sendDnsChangeEvents);
             }
 
-            m_platformDns.SetDnsForAllInterfacesToDHCP();
+            platformDns.SetDnsForAllInterfacesToDHCP();
         }
         #endregion
 
@@ -228,7 +228,7 @@ namespace FilterProvider.Common.Util
 
             if (active)
             {
-                m_logger.Info("Active captive portal detected");
+                logger.Info("Active captive portal detected");
 
                 CaptivePortalHelper.Default.OnCaptivePortalDetected();
                 OnCaptivePortalMode?.Invoke(true, true);
@@ -237,7 +237,7 @@ namespace FilterProvider.Common.Util
             else
             {
                 bool ret = CaptivePortalHelper.Default.IsCurrentNetworkCaptivePortal();
-                if(ret) m_logger.Info("It looks like we're on a captive portal network, but you have internet access.");
+                if(ret) logger.Info("It looks like we're on a captive portal network, but you have internet access.");
 
                 OnCaptivePortalMode?.Invoke(ret, active);
                 return ret;
@@ -272,14 +272,14 @@ namespace FilterProvider.Common.Util
 
             bool ret = false;
 
-            if(m_policyConfiguration.Configuration == null)
+            if(policyConfiguration.Configuration == null)
             {
                 // We can't really make a decision on enforcement here, but just return true anyway.
                 return true;
             }
 
-            string primaryDns = m_policyConfiguration.Configuration.PrimaryDns;
-            string secondaryDns = m_policyConfiguration.Configuration.SecondaryDns;
+            string primaryDns = policyConfiguration.Configuration.PrimaryDns;
+            string secondaryDns = policyConfiguration.Configuration.SecondaryDns;
 
             if (string.IsNullOrWhiteSpace(primaryDns) && string.IsNullOrWhiteSpace(secondaryDns))
             {
@@ -321,8 +321,8 @@ namespace FilterProvider.Common.Util
                     catch (Exception ex)
                     {
                         failedDnsServers++;
-                        m_logger.Error($"Failed to contact DNS server {dnsServer}");
-                        LoggerUtil.RecursivelyLogException(m_logger, ex);
+                        logger.Error($"Failed to contact DNS server {dnsServer}");
+                        LoggerUtil.RecursivelyLogException(logger, ex);
                     }
                 }
             }
@@ -336,7 +336,7 @@ namespace FilterProvider.Common.Util
         /// </summary>
         private async Task<bool> IsCaptivePortalActive()
         {
-            if (!NetworkStatus.Default.HasIpv4InetConnection && !NetworkStatus.Default.HasIpv6InetConnection)
+            if (!NetworkStatus.Default.HasConnection)
             {
                 // No point in checking further if no internet available.
                 try
@@ -345,8 +345,8 @@ namespace FilterProvider.Common.Util
                 }
                 catch (Exception ex)
                 {
-                    m_logger.Info("No DNS servers detected as up by captive portal.");
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    logger.Info("No DNS servers detected as up by captive portal.");
+                    LoggerUtil.RecursivelyLogException(logger, ex);
 
                     return false;
                 }
@@ -357,14 +357,14 @@ namespace FilterProvider.Common.Util
             CaptivePortalDetected ret = checkCaptivePortalState();
             if (ret == CaptivePortalDetected.NoResponseReturned)
             {
-                m_logger.Info("Captive Portal no response returned.");
+                logger.Info("Captive Portal no response returned.");
 
                 // If no response is returned, this may mean that 
                 // a) the network is still initializing
                 // b) we have no internet.
                 // Schedule a Trigger() for 1.5 second in the future to handle (a)
-                
-                Task.Delay(1500).ContinueWith((task) =>
+
+                _ = Task.Delay(1500).ContinueWith((task) =>
                 {
                     Trigger();
                 });
@@ -373,7 +373,7 @@ namespace FilterProvider.Common.Util
             }
             else if (ret == CaptivePortalDetected.Yes)
             {
-                m_logger.Info("Captive portal detected.");
+                logger.Info("Captive portal detected.");
                 return true;
             }
             else
@@ -419,7 +419,12 @@ namespace FilterProvider.Common.Util
 
         public async void Trigger(bool sendDnsChangeEvents = false)
         {
-            m_logger.Info("Triggering DNS Enforcement Code (sendDnsChangeEvents={0})", sendDnsChangeEvents);
+            if(!NetworkStatus.Default.HasConnection)
+            {
+                return;
+            }
+
+            logger.Info("Triggering DNS Enforcement Code (sendDnsChangeEvents={0})", sendDnsChangeEvents);
 
             try
             {
@@ -427,7 +432,7 @@ namespace FilterProvider.Common.Util
 
                 if(!isDnsUp)
                 {
-                    m_logger.Info("DNS is down.");
+                    logger.Info("DNS is down.");
 
                     TryEnforce(sendDnsChangeEvents, enableDnsFiltering: false);
                     return;
@@ -436,14 +441,14 @@ namespace FilterProvider.Common.Util
                 bool isCaptivePortal = await IsBehindCaptivePortal();
 
                 isBehindCaptivePortal = isCaptivePortal;
-                m_logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
+                logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
                 
 		TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
             {
-                m_logger.Error("Failed to trigger DnsEnforcement");
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                logger.Error("Failed to trigger DnsEnforcement");
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
             SetupTimers();
@@ -457,15 +462,15 @@ namespace FilterProvider.Common.Util
                 timerTime = 5000;
             }
 
-            lock(m_dnsEnforcementLock)
+            lock(dnsEnforcementLock)
             {
-                if (m_dnsEnforcementTimer == null)
+                if (dnsEnforcementTimer == null)
                 {
-                    m_dnsEnforcementTimer = new Timer(TriggerTimer, null, timerTime, timerTime);
+                    dnsEnforcementTimer = new Timer(TriggerTimer, null, timerTime, timerTime);
                 }
                 else
                 {
-                    m_dnsEnforcementTimer.Change(TimeSpan.FromMilliseconds(timerTime), TimeSpan.FromMilliseconds(timerTime));
+                    dnsEnforcementTimer.Change(TimeSpan.FromMilliseconds(timerTime), TimeSpan.FromMilliseconds(timerTime));
                 }
             }
             
@@ -473,19 +478,19 @@ namespace FilterProvider.Common.Util
 
         public void OnNetworkChange(object sender, EventArgs e)
         {
-            m_logger.Info("Network Change Detected");
+            logger.Info("Network Change Detected");
 
-            if (m_policyConfiguration.Configuration == null)
+            if (policyConfiguration.Configuration == null)
             {
                 EventHandler fn = null;
 
                 fn = (_s, args) =>
                 {
                     Trigger();
-                    m_policyConfiguration.OnConfigurationLoaded -= fn;
+                    policyConfiguration.OnConfigurationLoaded -= fn;
                 };
 
-                m_policyConfiguration.OnConfigurationLoaded += fn;
+                policyConfiguration.OnConfigurationLoaded += fn;
             }
             else
             {
@@ -496,7 +501,6 @@ namespace FilterProvider.Common.Util
         #endregion
 
         #region DnsEnforcement.Events
-        public event DnsEnforcementHandler OnDnsEnforcementUpdate;
         public event CaptivePortalModeHandler OnCaptivePortalMode;
         #endregion
 
@@ -508,7 +512,7 @@ namespace FilterProvider.Common.Util
             }
             catch(Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
         }
     }

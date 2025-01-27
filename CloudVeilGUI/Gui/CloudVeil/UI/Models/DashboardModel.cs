@@ -22,17 +22,17 @@ namespace Gui.CloudVeil.UI.Models
 
         
 
-        private readonly Logger m_logger;
+        private readonly Logger logger;
 
-        private int m_availableRelaxedRequests = 0;
+        private int availableRelaxedRequests = 0;
 
-        private string m_relaxedDuration = "0";
+        private string relaxedDuration = "0";
 
-        private DateTime m_lastSync = DateTime.Now;
+        private DateTime lastSync = DateTime.Now;
 
         public DashboardModel()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public async Task<bool> RequestAppDeactivation()
@@ -52,7 +52,7 @@ namespace Gui.CloudVeil.UI.Models
             }
             catch(Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
 
             return false;
@@ -62,12 +62,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_availableRelaxedRequests;
+                return availableRelaxedRequests;
             }
 
             set
             {
-                m_availableRelaxedRequests = value;
+                availableRelaxedRequests = value;
             }
         }
 
@@ -75,12 +75,12 @@ namespace Gui.CloudVeil.UI.Models
         {
             get
             {
-                return m_relaxedDuration;
+                return relaxedDuration;
             }
 
             set
             {
-                m_relaxedDuration = value;
+                relaxedDuration = value;
             }
         }
 

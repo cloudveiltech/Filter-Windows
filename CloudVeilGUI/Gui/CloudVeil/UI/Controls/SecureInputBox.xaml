@@ -14,7 +14,7 @@
              d:DesignWidth="100"
              mc:Ignorable="d">
     <Grid>
-        <PasswordBox x:Name="m_passwordBox"
+        <PasswordBox x:Name="passwordBox"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch"
                      x:FieldModifier="private" />

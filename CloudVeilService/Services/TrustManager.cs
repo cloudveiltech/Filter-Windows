@@ -25,11 +25,11 @@ namespace CloudVeilService.Services
 {
     public class TrustManager : IPlatformTrust
     {
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         public TrustManager()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public void EstablishTrust()
@@ -38,9 +38,6 @@ namespace CloudVeilService.Services
             EstablishTrustWithFirefox();
         }
 
-        /// <summary>
-        /// Searches for git installations and adds CitadelCore certificate to the CA certificate bundle.
-        /// </summary>
         public void EstablishTrustWithGit()
         {
             // 1. We search in three places for git installation.
@@ -92,7 +89,7 @@ namespace CloudVeilService.Services
                 if(File.Exists(gitPath))
                 {
                     installedGits.Add(gitPath);
-                    m_logger.Info("Found git.exe at {0}", gitPath);
+                    logger.Info("Found git.exe at {0}", gitPath);
                 }
             }
 
@@ -120,7 +117,7 @@ namespace CloudVeilService.Services
                 {
                     if(cert.SubjectName.Decode(X500DistinguishedNameFlags.None) ==  "CN=CloudVeil Core")
                     {
-                        m_logger.Info("Found CloudVeil Core certificate, adding to bundle.");
+                        logger.Info("Found CloudVeil Core certificate, adding to bundle.");
                         bundleBuilder.Append(cert.ExportToPem());
                         bundleBuilder.Append("\r\n");
                     }
@@ -145,7 +142,7 @@ namespace CloudVeilService.Services
             var dirInfo = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory));
             string usersDirectory = dirInfo?.Parent?.Parent?.FullName;
 
-            m_logger.Info("usersDirectory = {0}", usersDirectory);
+            logger.Info("usersDirectory = {0}", usersDirectory);
 
             string[] userProfiles = Directory.GetDirectories(usersDirectory);
 
@@ -220,7 +217,7 @@ namespace CloudVeilService.Services
 
             var valuesThatNeedToBeSet = new Dictionary<string, string>();
 
-            var firefoxUserCfgValuesUri = "CitadelService.Resources.FireFoxUserCFG.txt";
+            var firefoxUserCfgValuesUri = "CloudVeilService.Resources.FireFoxUserCFG.txt";
             using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(firefoxUserCfgValuesUri))
             {
                 if (resourceStream != null && resourceStream.CanRead)
@@ -250,7 +247,7 @@ namespace CloudVeilService.Services
                 }
                 else
                 {
-                    m_logger.Error("Cannot read from firefox cfg resource file.");
+                    logger.Error("Cannot read from firefox cfg resource file.");
                 }
             }
 
@@ -280,11 +277,11 @@ namespace CloudVeilService.Services
                             if (!fileText[entryIndex].EndsWith(kvp.Value))
                             {
                                 fileText[entryIndex] = kvp.Key + kvp.Value;
-                                m_logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                                logger.Info("Firefox profile {0} has has preference {1}) adjusted to be set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
                             }
                             else
                             {
-                                m_logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
+                                logger.Info("Firefox profile {0} has preference {1}) set correctly already.", Directory.GetParent(prefFile).Name, kvp.Key);
                             }
                         }
                         else
@@ -297,7 +294,7 @@ namespace CloudVeilService.Services
 
                     foreach (var nfk in notFound)
                     {
-                        m_logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
+                        logger.Info("Firefox profile {0} is having preference {1}) added.", Directory.GetParent(prefFile).Name, nfk.Key);
                         fileTextList.Add(nfk.Key + nfk.Value);
                     }
 

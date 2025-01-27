@@ -8,56 +8,37 @@
 using Filter.Platform.Common.Extensions;
 using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
-using CitadelCore.Net.Proxy;
+using CloudVeilCore.Net.Proxy;
 using Microsoft.Win32;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Gui.CloudVeil.Util;
-using CloudVeilService.Util;
 
-using FirewallAction = CitadelCore.Net.Proxy.FirewallAction;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Services;
 using Filter.Platform.Common;
 using CloudVeilService.Platform;
 using FilterProvider.Common.Platform;
-using CloudVeil.Core.WinAPI;
 using System.Runtime.InteropServices;
 using FilterNativeWindows;
-using CitadelCore.Windows.Diversion;
+using CloudVeilCore.Windows.Diversion;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using FilterProvider.Common.Util;
 
-/**
- * TODO:
- *
- *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * A lot of this code is obsolete and needs to be trimmed out!
- * 
- * 
- */
 namespace CloudVeilService.Services
 {
     public class FilterServiceProvider
     {
         #region Windows Service API
 
-        private CommonFilterServiceProvider m_provider;
+        private CommonFilterServiceProvider provider;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -79,13 +60,23 @@ namespace CloudVeilService.Services
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var baseDirectory = Path.GetDirectoryName(assembly.Location);
+                var dllFolderName = "x64";
+                var procAcrchitecture = RuntimeInformation.ProcessArchitecture;
+                if(procAcrchitecture == Architecture.X86)
+                {
+                    dllFolderName = "x86";
+                } 
+                else if(procAcrchitecture == Architecture.Arm64)
+                {
+                    dllFolderName = "arm64";
+                }
 
-                var dllDirectory = Path.Combine(baseDirectory, Environment.Is64BitProcess ? "x64" : "x86");
+                var dllDirectory = Path.Combine(baseDirectory, dllFolderName);
                 SetDllDirectory(dllDirectory);
 
-                m_logger = LoggerUtil.GetAppWideLogger();
+                logger = LoggerUtil.GetAppWideLogger();
 
-                return m_provider.Start(isTestRun);
+                return provider.Start(isTestRun);
             }
             catch (Exception e)
             {
@@ -100,7 +91,7 @@ namespace CloudVeilService.Services
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
                 }
 
-                //LoggerUtil.RecursivelyLogException(m_logger, e);
+                //LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
             }
         }
@@ -108,66 +99,42 @@ namespace CloudVeilService.Services
         public bool Stop()
         {
             // We always return false because we don't let anyone tell us that we're going to stop.
-            return m_provider.Stop();
+            return provider.Stop();
         }
 
         public bool Shutdown()
         {
             // Called on a shutdown event.
-            return m_provider.Shutdown();
+            return provider.Shutdown();
         }
 
         public void OnSessionChanged()
         {
-            m_provider.OnSessionChanged();
+            provider.OnSessionChanged();
         }
 
         #endregion Windows Service API
 
-        /// <summary>
-        /// Applications we never ever want to filter. Right now, this is just OS binaries. 
-        /// </summary>
-        private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Constant for port 80 TCP HTTP
-        /// </summary>
-        private readonly ushort m_httpStandardPort;
-
-        /// <summary>
-        /// Constant for port 443 TCP HTTPS
-        /// </summary>
-        private readonly ushort m_httpsStandardPort;
-
-        /// <summary>
-        /// Constant for port 8080 TCP HTTP
-        /// </summary>
-        private readonly ushort m_httpAltPort;
-
-        /// <summary>
-        /// Constant for port 8443 TCP HTTPS
-        /// </summary>
-        private readonly ushort m_httpsAltPort;
 
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
-        private volatile bool m_cleanShutdownComplete = false;
+        private volatile bool cleanShutdownComplete = false;
 
         /// <summary>
         /// Used to ensure clean shutdown once. 
         /// </summary>
-        private Object m_cleanShutdownLock = new object();
+        private Object cleanShutdownLock = new object();
 
         /// <summary>
         /// Logger. 
         /// </summary>
-        private Logger m_logger;
+        private Logger logger;
 
-        private ReaderWriterLockSlim m_appcastUpdaterLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim appcastUpdaterLock = new ReaderWriterLockSlim();
 
-        private TrustManager m_trustManager = new TrustManager();
+        private TrustManager trustManager = new TrustManager();
 
         /// <summary>
         /// Default ctor. 
@@ -176,9 +143,9 @@ namespace CloudVeilService.Services
         {
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                if (m_logger != null)
+                if (logger != null)
                 {
-                    m_logger.Error((Exception)e.ExceptionObject);
+                    logger.Error((Exception)e.ExceptionObject);
                 }
                 else
                 {
@@ -194,22 +161,7 @@ namespace CloudVeilService.Services
 
             CloudVeil.Core.Windows.Platform.Init();
 
-            m_provider = new CommonFilterServiceProvider(OnExtension);
-
-            if (BitConverter.IsLittleEndian)
-            {
-                m_httpAltPort = (ushort)IPAddress.HostToNetworkOrder((short)8080);
-                m_httpsAltPort = (ushort)IPAddress.HostToNetworkOrder((short)8443);
-                m_httpsStandardPort = (ushort)IPAddress.HostToNetworkOrder((short)443);
-                m_httpStandardPort = (ushort)IPAddress.HostToNetworkOrder((short)80);
-            }
-            else
-            {
-                m_httpAltPort = ((ushort)8080);
-                m_httpsAltPort = ((ushort)8443);
-                m_httpsStandardPort = ((ushort)443);
-                m_httpStandardPort = ((ushort)80);
-            }
+            provider = new CommonFilterServiceProvider(OnExtension);
         }
 
         const string SystemAccountIdentifier = "S-1-5-18";
@@ -250,7 +202,7 @@ namespace CloudVeilService.Services
             RawSecurityDescriptor securityDescriptor = null;
             if(!Security.GetServiceSecurity(name, out securityDescriptor))
             {
-                m_logger.Warn($"Unable to get proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
+                logger.Warn($"Unable to get proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
             }
             else
             {
@@ -272,11 +224,12 @@ namespace CloudVeilService.Services
 
                 if(!Security.SetServiceSecurity(name, securityDescriptor))
                 {
-                    m_logger.Warn($"Unable to set proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
+                    logger.Warn($"Unable to set proper service permissions for {name} because of Win32 error {Marshal.GetLastWin32Error()}");
                 }
             }
         }
 
+        WindowsDiverter diverter = new WindowsDiverter();
         private void OnExtension(CommonFilterServiceProvider provider)
         {
             IPCServer server = provider.IPCServer;
@@ -298,22 +251,25 @@ namespace CloudVeilService.Services
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error(ex, "Failed to check connectivity.");
+                    logger.Error(ex, "Failed to check connectivity.");
                 }
 
                 try
                 {
-                    WindowsDiverter diverter = new WindowsDiverter();
-                    diverter.UpdatePorts(AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort);
-                    diverter.ConfirmDenyFirewallAccess = this.OnAppFirewallCheck;
-                    m_provider.OnPortsChanged += () =>
+                    diverter.UpdatePorts(AppSettings.Default.HttpsPort);
+                    this.provider.OnPortsChanged += () =>
                     {
-                        diverter.UpdatePorts(AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort, AppSettings.Default.HttpsPort);
+                        diverter.UpdatePorts(AppSettings.Default.HttpsPort);
                     };
 
-                    diverter.Start(1, () =>
+                    this.provider.PolicyConfiguration.OnConfigurationLoaded += (sender, e) =>
                     {
-                        m_logger.Info("Diverter was started successfully.");
+                        FillApplicationLists();
+                    };
+
+                    diverter.Start(() =>
+                    {
+                        logger.Info("Diverter was started successfully.");
 
                         IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
                         ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
@@ -326,21 +282,55 @@ namespace CloudVeilService.Services
                         {
                             server.Send<bool>(IpcCall.InternetAccessible, true);
                         }
+                        FillApplicationLists();
                     });
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error($"Error occurred while starting the diverter.");
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    logger.Error($"Error occurred while starting the diverter.");
+                    LoggerUtil.RecursivelyLogException(logger, ex);
                 }
                 
             });
 
         }
 
+        private void FillApplicationLists()
+        {
+            if(provider == null || provider.PolicyConfiguration == null || provider.PolicyConfiguration.Configuration == null)
+            {
+                return;
+            }
+
+            diverter.CleanApplist();
+            foreach(var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
+            {
+                diverter.AddBlackListedApp(app);
+            }
+            foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
+            {
+                var processes = Process.GetProcessesByName(app);
+                foreach (var process in processes)
+                {
+                    logger.Info("App: {0}, PID={1}", app, process.Id);
+                }
+                diverter.AddWhiteListedApp(app);
+            }
+            diverter.AddWhiteListedApp("windows\\system32"); //everything from that folder
+
+            foreach (var app in provider.PolicyConfiguration.Configuration.BlockedApplications)
+            {
+                diverter.AddBlockedApp(app);
+            }
+            foreach (var app in provider.PolicyConfiguration.Configuration.CustomBlockedApps)
+            {
+                diverter.AddBlockedApp(app);
+            }
+        }
+
         private void OnAppSessionEnding(object sender, SessionEndingEventArgs e)
         {
-            m_logger.Info("Session ending.");
+            logger.Info("Session ending.");
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
@@ -348,150 +338,7 @@ namespace CloudVeilService.Services
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }
 
-        private bool IsStandardHttpPort(ushort port)
-        {
-            return port == m_httpStandardPort ||
-                port == m_httpsStandardPort ||
-                port == m_httpAltPort ||
-                port == m_httpsAltPort;
-        }
-
-    #region EngineCallbacks
-    private AppListCheck appListCheck;
-
-        /// <summary>
-        /// Called whenever the Engine want's to check if the application at the supplied absolute
-        /// path should have its traffic forced through itself or not.
-        /// </summary>
-        /// <param name="appAbsolutePath">
-        /// The absolute path to an application that the filter is inquiring about. 
-        /// </param>
-        /// <returns>
-        /// True if the application at the specified absolute path should have its traffic forced
-        /// through the filtering engine, false otherwise.
-        /// </returns>
-        public FirewallResponse OnAppFirewallCheck(FirewallRequest request)
-        {
-            if (!IsStandardHttpPort(request.RemotePort))
-            {
-                return new FirewallResponse(FirewallAction.DontFilterApplication, null);
-            }
-
-            if(appListCheck == null && m_provider.PolicyConfiguration != null)
-            {
-                appListCheck = new AppListCheck(m_provider.PolicyConfiguration);
-            }
-
-            // XXX TODO - The engine shouldn't even tell us about SYSTEM processes and just silently
-            // let them through.
-            if (request.BinaryAbsolutePath.OIEquals("SYSTEM"))
-            {
-                return new FirewallResponse(FirewallAction.DontFilterApplication);
-            }
-
-            // Lets completely avoid piping anything from the operating system in the filter, with
-            // the sole exception of Microsoft edge.
-            if((request.BinaryAbsolutePath.IndexOf("MicrosoftEdge", StringComparison.OrdinalIgnoreCase) == -1) && request.BinaryAbsolutePath.IndexOf(@"\Windows\", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                lock(s_foreverWhitelistedApplications)
-                {
-                    if(s_foreverWhitelistedApplications.Contains(request.BinaryAbsolutePath))
-                    {
-                        return new FirewallResponse(FirewallAction.DontFilterApplication);
-                    }
-                }
-
-                // Here we'll simply check if the binary is signed. If so, we'll validate the
-                // certificate. If the cert is good, let's just go and bypass this binary altogether.
-                // However, note that this does not verify that the signed binary is actually valid
-                // for the certificate. That is, it doesn't ensure file integrity. Also, note that
-                // even if we went all the way as to use WinVerifyTrust() from wintrust.dll to
-                // completely verify integrity etc, this can still be bypassed by adding a self
-                // signed signing authority to the windows trusted certs.
-                //
-                // So, all we can do is kick the can further down the road. This should be sufficient
-                // to prevent the lay person from dropping a browser into the Windows folder.
-                //
-                // Leaving above notes just for the sake of knowledge. We can kick the can pretty
-                // darn far down the road by asking Windows Resource Protection if the file really
-                // belongs to the OS. Viruses are known to call SfcIsFileProtected in order to avoid
-                // getting caught messing with these files so if viruses avoid them, I think we've
-                // booted the can so far down the road that we need not worry about being exploited
-                // here. The OS would need to be funamentally compromised and that wouldn't be our fault.
-                //
-                // The only other way we could get exploited here by getting our hook to sfc.dll
-                // hijacked. There are countermeasures of course but not right now.
-
-                // If the result is greater than zero, then this is a protected operating system file
-                // according to the operating system.
-                if(SFC.SfcIsFileProtected(IntPtr.Zero, request.BinaryAbsolutePath) > 0)
-                {
-                    lock(s_foreverWhitelistedApplications)
-                    {
-                        s_foreverWhitelistedApplications.Add(request.BinaryAbsolutePath);
-                    }
-
-                    return new FirewallResponse(FirewallAction.DontFilterApplication);
-                }
-            }
-
-            try
-            {
-                m_provider.PolicyConfiguration.PolicyLock.EnterReadLock();
-
-                if(m_provider.PolicyConfiguration.BlacklistedApplications.Count == 0 && m_provider.PolicyConfiguration.WhitelistedApplications.Count == 0)
-                {
-                    // Just filter anything accessing port 80 and 443.
-                    return new FirewallResponse(FirewallAction.FilterApplication);
-                }
-
-                var appName = Path.GetFileName(request.BinaryAbsolutePath);
-
-                if(m_provider.PolicyConfiguration.WhitelistedApplications.Count > 0)
-                {
-                    bool inList = appListCheck.IsAppInWhitelist(request.BinaryAbsolutePath, appName);
-
-                    if(inList)
-                    {
-                        return new FirewallResponse(FirewallAction.DontFilterApplication);
-                    }
-                    else
-                    {
-                        // Whitelist is in effect, and this app is not whitelisted, so force it through.
-                        return new FirewallResponse(FirewallAction.FilterApplication);
-                    }
-                }
-
-                if(m_provider.PolicyConfiguration.BlacklistedApplications.Count > 0)
-                {
-                    bool inList = appListCheck.IsAppInBlacklist(request.BinaryAbsolutePath, appName);
-
-                    if(inList)
-                    {
-                        return new FirewallResponse(FirewallAction.FilterApplication);
-                    }
-
-                    return new FirewallResponse(FirewallAction.DontFilterApplication);
-                }
-
-                // This app was not hit by either an enforced whitelist or blacklist. So, by default
-                // we will filter everything. We should never get here, but just in case.
-                return new FirewallResponse(FirewallAction.FilterApplication);
-            }
-            catch(Exception e)
-            {
-                m_logger.Error("Error in {0}", nameof(OnAppFirewallCheck));
-                LoggerUtil.RecursivelyLogException(m_logger, e);
-                return new FirewallResponse(FirewallAction.DontFilterApplication);
-            }
-            finally
-            {
-                m_provider?.PolicyConfiguration?.PolicyLock?.ExitReadLock();
-            }
-        }
-#endregion EngineCallbacks
-
-        /// <summary>
+         /// <summary>
         /// Called whenever the app is shut down with an authorized key, or when the system is
         /// shutting down, or when the user is logging off.
         /// </summary>
@@ -504,9 +351,9 @@ namespace CloudVeilService.Services
         {
             // No matter what, ensure that all GUI instances for all users are
             // immediately shut down, because we, the service, are shutting down.
-            lock(m_cleanShutdownLock)
+            lock(cleanShutdownLock)
             {
-                if(!m_cleanShutdownComplete)
+                if(!cleanShutdownComplete)
                 {
                     try
                     {
@@ -515,7 +362,7 @@ namespace CloudVeilService.Services
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
 
                     if(installSafeguards)
@@ -531,12 +378,12 @@ namespace CloudVeilService.Services
                         }
                         catch(Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
 
                         try
                         {
-                            var cfg = m_provider.PolicyConfiguration.Configuration;
+                            var cfg = provider.PolicyConfiguration.Configuration;
                             if(cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user
@@ -550,18 +397,18 @@ namespace CloudVeilService.Services
                         }
                         catch(Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }
                     else
                     {
                         // Means that our user got a granted deactivation request, or installed but
                         // never activated.
-                        m_logger.Info("Shutting down without safeguards.");
+                        logger.Info("Shutting down without safeguards.");
                     }
 
                     // Flag that clean shutdown was completed already.
-                    m_cleanShutdownComplete = true;
+                    cleanShutdownComplete = true;
                 }
             }
         }

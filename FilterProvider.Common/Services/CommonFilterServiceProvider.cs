@@ -107,14 +107,14 @@ namespace FilterProvider.Common.Services
 
         public bool Stop()
         {
-            m_logger.Info("FilterServiceProvider stop called");
+            logger.Info("FilterServiceProvider stop called");
             // We always return false because we don't let anyone tell us that we're going to stop.
             return false;
         }
 
         public bool Shutdown()
         {
-            m_logger.Info("FilterServiceProvider shutdown called");
+            logger.Info("FilterServiceProvider shutdown called");
             // Called on a shutdown event.
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
             return true;
@@ -151,7 +151,7 @@ namespace FilterProvider.Common.Services
 
         public void OnSessionChanged()
         {
-            m_systemServices.EnsureGuiRunning(runInTray: true);
+            systemServices.EnsureGuiRunning(runInTray: true);
         }
 
         #endregion Windows Service API
@@ -164,13 +164,13 @@ namespace FilterProvider.Common.Services
             {
                 try
                 {
-                    m_currentStatusLock.EnterReadLock();
+                    currentStatusLock.EnterReadLock();
 
-                    return m_currentStatus;
+                    return currentStatus;
                 }
                 finally
                 {
-                    m_currentStatusLock.ExitReadLock();
+                    currentStatusLock.ExitReadLock();
                 }
             }
 
@@ -178,16 +178,16 @@ namespace FilterProvider.Common.Services
             {
                 try
                 {
-                    m_currentStatusLock.EnterWriteLock();
+                    currentStatusLock.EnterWriteLock();
 
-                    m_currentStatus = value;
+                    currentStatus = value;
                 }
                 finally
                 {
-                    m_currentStatusLock.ExitWriteLock();
+                    currentStatusLock.ExitWriteLock();
                 }
 
-                m_ipcServer.NotifyStatus(m_currentStatus);
+                ipcServer.NotifyStatus(currentStatus);
             }
         }
 
@@ -195,161 +195,160 @@ namespace FilterProvider.Common.Services
         {
             get
             {
-                return Interlocked.CompareExchange(ref m_connectedClients, m_connectedClients, 0);
+                return Interlocked.CompareExchange(ref connectedClients, connectedClients, 0);
             }
 
             set
             {
-                Interlocked.Exchange(ref m_connectedClients, value);
+                Interlocked.Exchange(ref connectedClients, value);
             }
         }
 
         /// <summary>
         /// Our current filter status. 
         /// </summary>
-        private FilterStatus m_currentStatus = FilterStatus.Synchronizing;
+        private FilterStatus currentStatus = FilterStatus.Synchronizing;
 
         /// <summary>
         /// Our status lock. 
         /// </summary>
-        private ReaderWriterLockSlim m_currentStatusLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim currentStatusLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// The number of IPC clients connected to this server. 
         /// </summary>
-        private int m_connectedClients = 0;
+        private int connectedClients = 0;
 
         #region FilteringEngineVars
 
-        private IPCServer m_ipcServer;
+        private IPCServer ipcServer;
 
-        public IPCServer IPCServer => m_ipcServer;
+        public IPCServer IPCServer => ipcServer;
         /// <summary>
         /// Used for synchronization whenever our NLP model gets updated while we're already initialized. 
         /// </summary>
-        private ReaderWriterLockSlim m_doccatSlimLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim doccatSlimLock = new ReaderWriterLockSlim();
 
 #if WITH_NLP
-        private List<CategoryMappedDocumentCategorizerModel> m_documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
+        private List<CategoryMappedDocumentCategorizerModel> documentClassifiers = new List<CategoryMappedDocumentCategorizerModel>();
 #endif
 
-        private IProxyServer m_filteringEngine;
+        private IProxyServer filteringEngine;
 
-        private BackgroundWorker m_filterEngineStartupBgWorker;
+        private BackgroundWorker filterEngineStartupBgWorker;
 
-        private static readonly DateTime s_Epoch = new DateTime(1970, 1, 1);
+        private static readonly DateTime epoch = new DateTime(1970, 1, 1);
 
-        private static readonly string s_EpochHttpDateTime = s_Epoch.ToString("r");
+        private static readonly string epochHttpDateTime = epoch.ToString("r");
 
         /// <summary>
         /// Applications we never ever want to filter. Right now, this is just OS binaries. 
         /// </summary>
-        private static readonly HashSet<string> s_foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> foreverWhitelistedApplications = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         #endregion FilteringEngineVars
 
-        private ReaderWriterLockSlim m_updateRwLock = new ReaderWriterLockSlim();
+        private ReaderWriterLockSlim updateRwLock = new ReaderWriterLockSlim();
 
-        private UpdateSystem m_updateSystem;
+        private UpdateSystem updateSystem;
 
         /// <summary>
         /// Timer used to query for filter list changes every X minutes, as well as application updates. 
         /// </summary>
-        private Timer m_updateCheckTimer;
+        private Timer updateCheckTimer;
 
         /// <summary>
         /// Timer used to cleanup logs every 12 hours.
         /// </summary>
-        private Timer m_cleanupLogsTimer;
+        private Timer cleanupLogsTimer;
 
         /// <summary>
         /// Keep track of the last time we printed the username of the current user so we can output it
         /// to the diagnostics log.
         /// </summary>
-        private DateTime m_lastUsernamePrintTime = DateTime.MinValue;
+        private DateTime lastUsernamePrintTime = DateTime.MinValue;
 
         /// <summary>
         /// Since clean shutdown can be called from a couple of different places, we'll use this and
         /// some locks to ensure it's only done once.
         /// </summary>
-        private volatile bool m_cleanShutdownComplete = false;
+        private volatile bool cleanShutdownComplete = false;
 
         /// <summary>
         /// Used to ensure clean shutdown once. 
         /// </summary>
-        private Object m_cleanShutdownLock = new object();
+        private Object cleanShutdownLock = new object();
 
         /// <summary>
         /// Logger. 
         /// </summary>
-        private Logger m_logger;
+        private Logger logger;
 
         /// <summary>
         /// This BackgroundWorker object handles initializing the application off the UI thread.
         /// Allows the splash screen to function.
         /// </summary>
-        private BackgroundWorker m_backgroundInitWorker;
+        private BackgroundWorker backgroundInitWorker;
 
         /// <summary>
         /// App function config file. 
         /// </summary>
-        IPolicyConfiguration m_policyConfiguration;
+        IPolicyConfiguration policyConfiguration;
 
         public IPolicyConfiguration PolicyConfiguration
         {
             get
             {
-                return m_policyConfiguration;
+                return policyConfiguration;
             }
         }
 
         /// <summary>
         /// The class containing the relaxed policy logic.
         /// </summary>
-        RelaxedPolicy m_relaxedPolicy;
+        RelaxedPolicy relaxedPolicy;
 
         /// <summary>
         /// This int stores the number of block actions that have elapsed within the given threshold timespan.
         /// </summary>
-        private long m_thresholdTicks;
+        private long thresholdTicks;
 
         /// <summary>
         /// This timer resets the threshold tick count. 
         /// </summary>
-        private Timer m_thresholdCountTimer;
+        private Timer thresholdCountTimer;
 
         /// <summary>
         /// This timer is used when the threshold has been hit. It is used to set an expiry period
         /// for the internet lockout once the threshold has been hit.
         /// </summary>
-        private Timer m_thresholdEnforcementTimer;
+        private Timer thresholdEnforcementTimer;
 
         /// <summary>
         /// Allows us to periodically check status of time restrictions.
         /// </summary>
-        private Timer m_timeRestrictionsTimer;
-        private Timer m_retrieveTokenTimer;
+        private Timer timeRestrictionsTimer;
+        private Timer retrieveTokenTimer;
 
-        private SiteFiltering m_siteFiltering;
+        private SiteFiltering siteFiltering;
 
-        private DnsEnforcement m_dnsEnforcement;
+        private DnsEnforcement dnsEnforcement;
 
-        private Accountability m_accountability;
+        private Accountability accountability;
 
-        private TimeDetection m_timeDetection;
+        private TimeDetection timeDetection;
 
-        private IPlatformTrust m_trustManager;
+        private IPlatformTrust trustManager;
 
-        private CertificateExemptions m_certificateExemptions = new CertificateExemptions();
+        private CertificateExemptions certificateExemptions = new CertificateExemptions();
 
-        private Server m_controlServer;
+        private Server controlServer;
 
-        private IPathProvider m_platformPaths;
+        private IPathProvider platformPaths;
 
-        private ISystemServices m_systemServices;
+        private ISystemServices systemServices;
 
-        private ExtensionDelegate m_extensionDelegate;
-        private PortsChangedDelegate portChangedDelegate;
+        private ExtensionDelegate extensionDelegate;
 
         public event PortsChangedDelegate OnPortsChanged;
 
@@ -358,10 +357,10 @@ namespace FilterProvider.Common.Services
         /// </summary>
         public CommonFilterServiceProvider(ExtensionDelegate extensionDelegate)
         {
-            m_trustManager = PlatformTypes.New<IPlatformTrust>();
-            m_platformPaths = PlatformTypes.New<IPathProvider>();
-            m_systemServices = PlatformTypes.New<ISystemServices>();
-            m_extensionDelegate = extensionDelegate;
+            trustManager = PlatformTypes.New<IPlatformTrust>();
+            platformPaths = PlatformTypes.New<IPathProvider>();
+            systemServices = PlatformTypes.New<ISystemServices>();
+            this.extensionDelegate = extensionDelegate;
         }
 
         /// <summary>
@@ -379,7 +378,7 @@ namespace FilterProvider.Common.Services
             if(RetrieveToken())
             {
                 onAuthSuccess();
-                m_retrieveTokenTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                retrieveTokenTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
@@ -409,7 +408,7 @@ namespace FilterProvider.Common.Services
         private void RestartFiltering()
         {
             StopFiltering();
-            m_controlServer.Dispose(); 
+            controlServer.Dispose(); 
             InitEngine();
         }
 
@@ -427,9 +426,9 @@ namespace FilterProvider.Common.Services
                 pc.Close();
                 pc.Dispose();
 
-                if(m_logger != null)
+                if(logger != null)
                 {
-                    m_logger.Info("MEMORY CONSUMPTION IS " + memsize + "KB");
+                    logger.Info("MEMORY CONSUMPTION IS " + memsize + "KB");
                 }
                 Thread.Sleep(30000);
             }
@@ -437,11 +436,11 @@ namespace FilterProvider.Common.Services
 
         private CertificateExemptionsController createControlServerCertificateExemptionsController()
         {
-            return new CertificateExemptionsController(m_certificateExemptions);
+            return new CertificateExemptionsController(certificateExemptions);
         }
         private RelaxedPolicyController createControlServerRelaxedPolicyController()
         {
-            return new RelaxedPolicyController(m_relaxedPolicy);
+            return new RelaxedPolicyController(relaxedPolicy);
         }
 
         private void OnStartup()
@@ -461,11 +460,11 @@ namespace FilterProvider.Common.Services
             {
                 // I have reason to suspect that on some 1803 computers, this statement (or some of this initialization) was hanging, causing an error.
                 // on service control manager.
-                m_logger = LoggerUtil.GetAppWideLogger();
+                logger = LoggerUtil.GetAppWideLogger();
             }
             catch (Exception ex)
             {
-                File.AppendAllText(Path.Combine(m_platformPaths.ApplicationDataFolder, "FatalCrashLog.log"), $"Fatal crash. {ex.ToString()}");
+                File.AppendAllText(Path.Combine(platformPaths.ApplicationDataFolder, "FatalCrashLog.log"), $"Fatal crash. {ex.ToString()}");
             }
 
             try
@@ -490,7 +489,7 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception ex)
             {
-                m_logger.Error(ex, "Unable to set proxy log file.");
+                logger.Error(ex, "Unable to set proxy log file.");
             }
 
             string appVerStr = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -507,22 +506,22 @@ namespace FilterProvider.Common.Services
             appVerStr += " " + version.ToString(3);
             appVerStr += " " + (Environment.Is64BitProcess ? "x64" : "x86");
 
-            m_logger.Info("CitadelService Version: {0}", appVerStr);
+            logger.Info("CloudVeilService Version: {0}", appVerStr);
 
             try
             {
-                m_ipcServer = new IPCServer();
-                m_policyConfiguration = new DefaultPolicyConfiguration(m_ipcServer, m_logger);
+                ipcServer = new IPCServer();
+                policyConfiguration = new DefaultPolicyConfiguration(ipcServer, logger);
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
                 return;
             }
 
             if (!consoleOutStatus)
             {
-                m_logger.Warn("Failed to link console output to file.");
+                logger.Warn("Failed to link console output to file.");
             }
 
             // Enforce good/proper protocols
@@ -535,12 +534,10 @@ namespace FilterProvider.Common.Services
             }
 
             // Hook the shutdown/logoff event.
-
-            // TODO:X_PLAT
-            m_systemServices.SessionEnding += OnAppSessionEnding;
+            systemServices.SessionEnding += OnAppSessionEnding;
             //SystemEvents.SessionEnding += OnAppSessionEnding;
 
-            m_systemServices.OnStartProxy += (sender, e) =>
+            systemServices.OnStartProxy += (sender, e) =>
             {
                 try
                 {
@@ -548,20 +545,20 @@ namespace FilterProvider.Common.Services
 
                     AsymmetricCipherKeyPair keyPair = BCCertificateMaker.CreateKeyPair(2048);
 
-                    X509Certificate2 cert = maker.MakeCertificate("localhost", false, m_systemServices.RootCertificate, keyPair, alternateNames: new Asn1Encodable[] {
+                    X509Certificate2 cert = maker.MakeCertificate("localhost", false, systemServices.RootCertificate, keyPair, alternateNames: new Asn1Encodable[] {
                         new GeneralName(GeneralName.DnsName, "localhost"),
                         new GeneralName(GeneralName.IPAddress, "127.0.0.1"),
                         new GeneralName(GeneralName.IPAddress, "::1")
                         });
 
-                    m_controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
-                    m_controlServer.RegisterController(typeof(CertificateExemptionsController), createControlServerCertificateExemptionsController);
-                    m_controlServer.RegisterController(typeof(RelaxedPolicyController), createControlServerRelaxedPolicyController);
-                    m_controlServer.Start();
+                    controlServer = new Server(AppSettings.Default.ConfigServerPort, cert);
+                    controlServer.RegisterController(typeof(CertificateExemptionsController), createControlServerCertificateExemptionsController);
+                    controlServer.RegisterController(typeof(RelaxedPolicyController), createControlServerRelaxedPolicyController);
+                    controlServer.Start();
                 }
                 catch(Exception ex)
                 {
-                    m_logger.Error(ex, "An error occurred while attempting to start the control server. " + ex.Message);
+                    logger.Error(ex, "An error occurred while attempting to start the control server. " + ex.Message);
                 }
             };
 
@@ -572,57 +569,52 @@ namespace FilterProvider.Common.Services
 
             try
             {
-                m_updateSystem = new UpdateSystem(m_policyConfiguration, m_ipcServer, "cv4w");
+                updateSystem = new UpdateSystem(policyConfiguration, ipcServer, "cv4w");
             }
             catch (Exception e)
             {
                 // This is a critical error. We cannot recover from this.
-                m_logger.Error("Critical error - Could not create application updater.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Critical error - Could not create application updater.");
+                LoggerUtil.RecursivelyLogException(logger, e);
 
                 Environment.Exit(-1);
             }
 
             WebServiceUtil.Default.AuthTokenRejected += () =>
             {
-                m_systemServices.EnsureGuiRunning();
-                m_ipcServer.NotifyAuthenticationStatus(CloudVeil.IPC.Messages.AuthenticationAction.Required);                
+                systemServices.EnsureGuiRunning();
+                ipcServer.NotifyAuthenticationStatus(CloudVeil.IPC.Messages.AuthenticationAction.Required);                
             };
 
             try
             {
                 // Start subsystems
-                m_policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadSelfModeratedSites;
+                policyConfiguration.OnConfigurationLoaded += OnConfigLoaded_LoadSelfModeratedSites;
 
-                m_relaxedPolicy = new RelaxedPolicy(m_ipcServer, m_policyConfiguration);
+                relaxedPolicy = new RelaxedPolicy(ipcServer, policyConfiguration);
 
-                m_dnsEnforcement = new DnsEnforcement(m_policyConfiguration, m_logger);
+                dnsEnforcement = new DnsEnforcement(policyConfiguration, logger);
 
-                m_dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
+                dnsEnforcement.OnCaptivePortalMode += (isCaptivePortal, isActive) =>
                 {
-                    m_ipcServer.SendCaptivePortalState(isCaptivePortal, isActive);
+                    ipcServer.SendCaptivePortalState(isCaptivePortal, isActive);
                 };
 
-                m_dnsEnforcement.OnDnsEnforcementUpdate += (isEnforcementActive) =>
-                {
+                accountability = new Accountability();
 
-                };
+                timeDetection = new TimeDetection(SystemClock.Instance);
+                timeDetection.ZoneTamperingDetected += OnZoneTampering;
 
-                m_accountability = new Accountability();
+                timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
+                retrieveTokenTimer = new Timer(onRetrieveTokenTimeout, null, Timeout.Infinite, Timeout.Infinite);
 
-                m_timeDetection = new TimeDetection(SystemClock.Instance);
-                m_timeDetection.ZoneTamperingDetected += OnZoneTampering;
+                siteFiltering = new SiteFiltering(ipcServer, timeDetection, PolicyConfiguration, certificateExemptions);
+                siteFiltering.RequestBlocked += OnRequestBlocked;
 
-                m_timeRestrictionsTimer = new Timer(timeRestrictionsCheck, null, 0, 1000);
-                m_retrieveTokenTimer = new Timer(onRetrieveTokenTimeout, null, Timeout.Infinite, Timeout.Infinite);
+                policyConfiguration.OnConfigurationLoaded += configureThreshold;
+                policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
 
-                m_siteFiltering = new SiteFiltering(m_ipcServer, m_timeDetection, PolicyConfiguration, m_certificateExemptions);
-                m_siteFiltering.RequestBlocked += OnRequestBlocked;
-
-                m_policyConfiguration.OnConfigurationLoaded += configureThreshold;
-                m_policyConfiguration.OnConfigurationLoaded += updateTimerFrequency;
-
-                m_ipcServer.AttemptAuthentication = (args) =>
+                ipcServer.AttemptAuthentication = (args) =>
                 {
                     try
                     {
@@ -650,10 +642,11 @@ namespace FilterProvider.Common.Services
                                         {
                                             if (authOverEmail)
                                             {
-                                                m_retrieveTokenTimer.Change(RETRIEVE_TOKEN_TIMEOUT, RETRIEVE_TOKEN_TIMEOUT);
+                                                retrieveTokenTimer.Change(RETRIEVE_TOKEN_TIMEOUT, RETRIEVE_TOKEN_TIMEOUT);
                                             } 
                                             else
                                             {
+                                                WebServiceUtil.Default.UserEmail = args.Username;
                                                 onAuthSuccess();
                                             }
                                         }
@@ -661,14 +654,14 @@ namespace FilterProvider.Common.Services
 
                                     case AuthenticationResult.Failure:
                                         {
-                                            m_systemServices.EnsureGuiRunning(runInTray: false);
-                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
+                                            systemServices.EnsureGuiRunning(runInTray: false);
+                                            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                         }
                                         break;
 
                                     case AuthenticationResult.ConnectionFailed:
                                         {
-                                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
+                                            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
                                         }
                                         break;
                                 }
@@ -685,13 +678,13 @@ namespace FilterProvider.Common.Services
                     }
                     catch (Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 };
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.Update, m_updateSystem.OnRequestUpdate);
-                m_ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateResult, m_updateSystem.OnUpdateDialogResult);
-                m_ipcServer.RegisterRequestHandler<BugReportSetting>(IpcCall.BugReportConfirmationValue, (message) =>
+                ipcServer.RegisterRequestHandler(IpcCall.Update, updateSystem.OnRequestUpdate);
+                ipcServer.RegisterResponseHandler<UpdateDialogResult>(IpcCall.UpdateResult, updateSystem.OnUpdateDialogResult);
+                ipcServer.RegisterRequestHandler<BugReportSetting>(IpcCall.BugReportConfirmationValue, (message) =>
                 {
                     var res = message.Data;
                     var needTrigger = AppSettings.Default.BugReportSettings == null || AppSettings.Default.BugReportSettings.Allowed != res.Allowed;
@@ -715,7 +708,7 @@ namespace FilterProvider.Common.Services
                 });
 
 
-                m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.RandomizePortsValue, (message) =>
+                ipcServer.RegisterRequestHandler<Boolean>(IpcCall.RandomizePortsValue, (message) =>
                 {
                     if (AppSettings.Default.RandomizePorts != message.Data)
                     {
@@ -732,19 +725,19 @@ namespace FilterProvider.Common.Services
                         RestartFiltering();
                         OnPortsChanged?.Invoke();
 
-                        m_ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
+                        ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
                         AppSettings.Default.Save();
-                        message.SendReply<bool>(m_ipcServer, IpcCall.RandomizePortsValue, true);                        
+                        message.SendReply<bool>(ipcServer, IpcCall.RandomizePortsValue, true);                        
                     } 
                     else
                     {
-                        message.SendReply<bool>(m_ipcServer, IpcCall.RandomizePortsValue, true);
+                        message.SendReply<bool>(ipcServer, IpcCall.RandomizePortsValue, true);
                     }
 
                     return true;
                 } );
 
-                m_ipcServer.RegisterRequestHandler<Boolean>(IpcCall.DumpSystemEventLog, (message) => {
+                ipcServer.RegisterRequestHandler<Boolean>(IpcCall.DumpSystemEventLog, (message) => {
                     string logSource = "System";
                     string query = "*[System/Provider/@Name=\"Service Control Manager\"]";
 
@@ -779,7 +772,7 @@ namespace FilterProvider.Common.Services
                     return true;
                 });
                 
-                m_ipcServer.DeactivationRequested = (args) =>
+                ipcServer.DeactivationRequested = (args) =>
                 {
                     Status = FilterStatus.Synchronizing;
 
@@ -809,19 +802,19 @@ namespace FilterProvider.Common.Services
                     }
                     catch (Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                         Status = FilterStatus.Running;
                     }
                 };
 
-                m_ipcServer.ClientServerStateQueried = (args) =>
+                ipcServer.ClientServerStateQueried = (args) =>
                 {
-                    m_ipcServer.NotifyStatus(Status);
+                    ipcServer.NotifyStatus(Status);
                 };
 
-                m_ipcServer.RelaxedPolicyRequested = m_relaxedPolicy.OnRelaxedPolicyRequested;
+                ipcServer.RelaxedPolicyRequested = relaxedPolicy.OnRelaxedPolicyRequested;
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.AddCustomTextTrigger, (message) =>
+                ipcServer.RegisterRequestHandler(IpcCall.AddCustomTextTrigger, (message) =>
                 {
                     string trigger = message.DataObject as string;
                     if (trigger == null) return false;
@@ -840,25 +833,25 @@ namespace FilterProvider.Common.Services
 
                     if(responseReceived && code == HttpStatusCode.NoContent)
                     {
-                        m_logger.Info("Added custom text trigger {0}", trigger);
+                        logger.Info("Added custom text trigger {0}", trigger);
 
-                        if(m_policyConfiguration?.Configuration != null)
+                        if(policyConfiguration?.Configuration != null)
                         {
-                            m_policyConfiguration.Configuration.CustomTriggerBlacklist.Add(trigger);
-                            m_policyConfiguration.LoadLists();
+                            policyConfiguration.Configuration.CustomTriggerBlacklist.Add(trigger);
+                            policyConfiguration.LoadLists();
 
-                            message.SendReply(m_ipcServer, IpcCall.AddCustomTextTrigger, m_policyConfiguration.Configuration.CustomTriggerBlacklist);
+                            message.SendReply(ipcServer, IpcCall.AddCustomTextTrigger, policyConfiguration.Configuration.CustomTriggerBlacklist);
                         }
                     }
                     else
                     {
-                        m_logger.Error("Failed to add custom text trigger site");
+                        logger.Error("Failed to add custom text trigger site");
                     }
 
                     return true;
                 });
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
+                ipcServer.RegisterRequestHandler(IpcCall.AddSelfModeratedSite, (message) =>
                 {
                     string site = message.DataObject as string;
                     if (site == null)
@@ -877,25 +870,25 @@ namespace FilterProvider.Common.Services
 
                     if (responseReceived && code == HttpStatusCode.NoContent)
                     {
-                        m_logger.Info("Added self moderation site {0}", site);
+                        logger.Info("Added self moderation site {0}", site);
 
-                        if (m_policyConfiguration?.Configuration != null)
+                        if (policyConfiguration?.Configuration != null)
                         {
-                            m_policyConfiguration.Configuration.SelfModeration.Add(site);
-                            m_policyConfiguration.LoadLists();
+                            policyConfiguration.Configuration.SelfModeration.Add(site);
+                            policyConfiguration.LoadLists();
 
-                            message.SendReply(m_ipcServer, IpcCall.AddSelfModeratedSite, m_policyConfiguration.Configuration.SelfModeration);
+                            message.SendReply(ipcServer, IpcCall.AddSelfModeratedSite, policyConfiguration.Configuration.SelfModeration);
                         }
                     }
                     else
                     {
-                        m_logger.Error("Failed to add self-moderation site");
+                        logger.Error("Failed to add self-moderation site");
                     }
 
                     return true;
                 });
 
-                m_ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
+                ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
                 {
                     var curAuthToken = WebServiceUtil.Default.AuthToken;
 
@@ -928,144 +921,141 @@ namespace FilterProvider.Common.Services
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }
                 };
 
-                m_ipcServer.ClientConnected = () =>
+                ipcServer.ClientConnected = () =>
                 {
                     try
                     {
                         ConnectedClients++;
 
-                        var cfg = m_policyConfiguration.Configuration;
+                        var cfg = policyConfiguration.Configuration;
 
                         if (cfg != null)
-                            m_ipcServer.SendConfigurationInfo(cfg);
+                            ipcServer.SendConfigurationInfo(cfg);
 
-                        m_relaxedPolicy.SendRelaxedPolicyInfo();
+                        relaxedPolicy.SendRelaxedPolicyInfo();
 
-                        m_ipcServer.NotifyStatus(Status);
+                        ipcServer.NotifyStatus(Status);
 
-                        m_dnsEnforcement.Trigger();
+                        dnsEnforcement.Trigger();
 
-                        if (m_ipcServer.WaitingForAuth)
+                        if (ipcServer.WaitingForAuth)
                         {
-                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
+                            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required);
                         }
                         else
                         {
-                            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
+                            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
 
                             string fingerprint = FingerprintService.Default.Value;
-                            m_logger.Info("I am sending a fingerprint value of {0} to client.", fingerprint);
+                            logger.Info("I am sending a fingerprint value of {0} to client.", fingerprint);
 
-                            m_ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
-                            m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
-                            m_ipcServer.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, AppSettings.Default.BugReportSettings);
-                            m_ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
-                            m_ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
-                            m_ipcServer.Send<bool>(IpcCall.RandomizePortsValue, AppSettings.Default.RandomizePorts);
+                            ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, AppSettings.Default.UpdateCheckResult));
+                            ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, AppSettings.Default.ConfigUpdateResult));
+                            ipcServer.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, AppSettings.Default.BugReportSettings);
+                            ipcServer.Send<string>(IpcCall.ActivationIdentifier, fingerprint);
+                            ipcServer.Send<ushort[]>(IpcCall.PortsValue, new ushort[] { AppSettings.Default.ConfigServerPort, AppSettings.Default.HttpPort, AppSettings.Default.HttpsPort });
+                            ipcServer.Send<bool>(IpcCall.RandomizePortsValue, AppSettings.Default.RandomizePorts);
                         }
                     }
                     catch (Exception ex)
                     {
-                        m_logger.Warn("Error occurred while trying to connect to IPC server.");
-                        LoggerUtil.RecursivelyLogException(m_logger, ex);
+                        logger.Warn("Error occurred while trying to connect to IPC server.");
+                        LoggerUtil.RecursivelyLogException(logger, ex);
                     }
                 };
 
-                m_ipcServer.ClientDisconnected = () =>
+                ipcServer.ClientDisconnected = () =>
                 {
                     ConnectedClients--;
 
                     // All GUI clients are gone and no one logged in. Shut it down.
-                    if (ConnectedClients <= 0 && m_ipcServer.WaitingForAuth)
+                    if (ConnectedClients <= 0 && ipcServer.WaitingForAuth)
                     {
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                     }
                 };
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.CheckForUpdates, (msg) =>
+                ipcServer.RegisterRequestHandler(IpcCall.CheckForUpdates, (msg) =>
                 {
                     var checkResult = CheckForApplicationUpdate(true);
 
                     // Code smell. It's a little unclear who updates LastUpdateCheck. We should really be accessing a different property, or make it more explicit.
-                    msg.SendReply<UpdateCheckInfo>(m_ipcServer, IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, checkResult));
+                    msg.SendReply<UpdateCheckInfo>(ipcServer, IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, checkResult));
 
                     return true;
                 });
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.SynchronizeSettings, (msg) =>
+                ipcServer.RegisterRequestHandler(IpcCall.SynchronizeSettings, (msg) =>
                 {
-                    m_dnsEnforcement.InvalidateDnsResult();
-                    m_dnsEnforcement.Trigger();
+                    dnsEnforcement.InvalidateDnsResult();
+                    dnsEnforcement.Trigger();
 
                     var result = this.UpdateAndWriteList(true);
 
                     // Code smell. It's a little unclear who updates LastSettingsCheck. We should really make the accessing of this property more direct.
-                    msg.SendReply<ConfigCheckInfo>(m_ipcServer, IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, result));
+                    msg.SendReply<ConfigCheckInfo>(ipcServer, IpcCall.SynchronizeSettings, new ConfigCheckInfo(AppSettings.Default.LastSettingsCheck, result));
 
                     return true;
                 });
 
-                m_ipcServer.RegisterRequestHandler(IpcCall.CollectComputerInfo, (msg) =>
+                ipcServer.RegisterRequestHandler(IpcCall.CollectComputerInfo, (msg) =>
                 {
-                    m_logger.Info("Collecting computer information");
+                    logger.Info("Collecting computer information");
 
-                    ComputerInfo info = m_systemServices.GetComputerInfo();
-                    m_logger.Info("Collected computer information {0}", info?.DiagnosticsText);
+                    ComputerInfo info = systemServices.GetComputerInfo();
+                    logger.Info("Collected computer information {0}", info?.DiagnosticsText);
 
-                    msg.SendReply<ComputerInfo>(m_ipcServer, IpcCall.CollectComputerInfo, info);
+                    msg.SendReply<ComputerInfo>(ipcServer, IpcCall.CollectComputerInfo, info);
 
                     return true;
                 });
 
-                m_ipcServer.RequestCaptivePortalDetection = (msg) =>
+                ipcServer.RequestCaptivePortalDetection = (msg) =>
                 {
-                    m_dnsEnforcement.Trigger();
+                    dnsEnforcement.Trigger();
                 };
 
-                m_ipcServer.OnDiagnosticsEnable = (msg) =>
+                ipcServer.OnDiagnosticsEnable = (msg) =>
                 {
-                    // TODO:X_PLAT
-                    //CitadelCore.Diagnostics.Collector.IsDiagnosticsEnabled = msg.EnableDiagnostics;
                 };
 
-                m_ipcServer.Start();
+                ipcServer.Start();
             }
             catch (Exception ipce)
             {
                 // This is a critical error. We cannot recover from this.
-                m_logger.Error("Critical error - Could not start IPC server.");
-                LoggerUtil.RecursivelyLogException(m_logger, ipce);
+                logger.Error("Critical error - Could not start IPC server.");
+                LoggerUtil.RecursivelyLogException(logger, ipce);
 
                 Environment.Exit(-1);
             }
 
             LogTime("Done with OnStartup initialization.");
 
-            // Before we do any network stuff, ensure we have windows firewall access.
-            m_systemServices.EnsureFirewallAccess();
+            // Before we do any network stuff, ensure we have windows firewall access.            
+            systemServices.EnsureFirewallAccess();
 
             LogTime("EnsureWindowsFirewallAccess() is done");
-
             // Run the background init worker for non-UI related initialization.
-            m_backgroundInitWorker = new BackgroundWorker();
-            m_backgroundInitWorker.DoWork += DoBackgroundInit;
-            m_backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
+            backgroundInitWorker = new BackgroundWorker();
+            backgroundInitWorker.DoWork += DoBackgroundInit;
+            backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
-            m_backgroundInitWorker.RunWorkerAsync();
+            backgroundInitWorker.RunWorkerAsync();
         }
 
         private void onAuthSuccess()
         {
             Status = FilterStatus.Running;
-            m_ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated);
+            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Authenticated, WebServiceUtil.Default.UserEmail);
 
             // Probe server for updates now.
-            m_updateSystem.ProbeMasterForApplicationUpdates(false);
+            updateSystem.ProbeMasterForApplicationUpdates(false);
             OnUpdateTimerElapsed(null);
         }
 
@@ -1077,23 +1067,23 @@ namespace FilterProvider.Common.Services
             {
                 try
                 {
-                    if (m_policyConfiguration == null || m_policyConfiguration.Configuration == null)
+                    if (policyConfiguration == null || policyConfiguration.Configuration == null)
                     {
-                        m_timeRestrictionsTimer.Change(1000, 1000);
+                        timeRestrictionsTimer.Change(1000, 1000);
                         return;
                     }
 
-                    TimeRestrictionModel currentDay = m_policyConfiguration?.TimeRestrictions?[(int)DateTime.Now.DayOfWeek];
+                    TimeRestrictionModel currentDay = policyConfiguration?.TimeRestrictions?[(int)DateTime.Now.DayOfWeek];
 
                     if (currentDay == null)
                     {
-                        m_timeRestrictionsTimer.Change(30000, 30000);
+                        timeRestrictionsTimer.Change(30000, 30000);
                         return;
                     }
 
-                    ZonedDateTime currentTime = m_timeDetection.GetRealTime();
+                    ZonedDateTime currentTime = timeDetection.GetRealTime();
 
-                    if (m_timeDetection.IsDateTimeAllowed(m_timeDetection.GetRealTime(), currentDay))
+                    if (timeDetection.IsDateTimeAllowed(timeDetection.GetRealTime(), currentDay))
                     {
                         areTimeRestrictionsActive = false;
                     }
@@ -1104,58 +1094,59 @@ namespace FilterProvider.Common.Services
                 }
                 finally
                 {
-                    if (!(m_policyConfiguration?.TimeRestrictions?.Any(t => t?.RestrictionsEnabled ?? false) ?? false))
+                    if (!(policyConfiguration?.TimeRestrictions?.Any(t => t?.RestrictionsEnabled ?? false) ?? false))
                     {
                         areTimeRestrictionsActive = null;
                     }
 
-                    m_ipcServer.Send<bool?>(IpcCall.TimeRestrictionsEnabled, areTimeRestrictionsActive);
+                    ipcServer.Send<bool?>(IpcCall.TimeRestrictionsEnabled, areTimeRestrictionsActive);
                 }
             }
             catch(Exception ex)
             {
-                m_logger.Error("timeRestrictionsCheck error occurred.");
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                logger.Error("timeRestrictionsCheck error occurred.");
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
         }
 
         private void OnZoneTampering(object sender, ZoneTamperingEventArgs e)
         {
-            ZonedDateTime currentTime = m_timeDetection.GetRealTime();
+            ZonedDateTime currentTime = timeDetection.GetRealTime();
 
             var date = currentTime.ToDateTimeOffset();
 
-            if (m_policyConfiguration.AreAnyTimeRestrictionsEnabled)
+            if (policyConfiguration.AreAnyTimeRestrictionsEnabled)
             {
-                m_accountability.NotifyTimeZoneChanged(e.OldZone, e.NewZone);
+                accountability.NotifyTimeZoneChanged(e.OldZone, e.NewZone);
             }
         }
 
         private void OnConfigLoaded_LoadSelfModeratedSites(object sender, EventArgs e)
         {
-            m_ipcServer.SendConfigurationInfo(m_policyConfiguration.Configuration);
+            ipcServer.SendConfigurationInfo(policyConfiguration.Configuration);
         }
 
         private Assembly CurrentDomain_TypeResolve(object sender, ResolveEventArgs args)
         {
-            m_logger.Error($"Type resolution failed. Type name: {args.Name}, loading assembly: {args.RequestingAssembly.FullName}");
+            logger.Error($"Type resolution failed. Type name: {args.Name}, loading assembly: {args.RequestingAssembly.FullName}");
 
             return null;
         }
 
         private void updateTimerFrequency(object sender, EventArgs e)
         {
-            if (m_policyConfiguration.Configuration != null)
+            if (policyConfiguration.Configuration != null)
             {
                 // Put the new update frequence into effect.
-                this.m_updateCheckTimer?.Change(m_policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                logger.Info($"updateTimerFrequency Setting update timer to {policyConfiguration.Configuration.UpdateFrequency}"); ;
+                this.updateCheckTimer?.Change(policyConfiguration.Configuration.UpdateFrequency, Timeout.InfiniteTimeSpan);
             }
         }
 
         #region Configuration event functions
         private void configureThreshold(object sender, EventArgs e)
         {
-            if (m_policyConfiguration.Configuration != null && m_policyConfiguration.Configuration.UseThreshold)
+            if (policyConfiguration.Configuration != null && policyConfiguration.Configuration.UseThreshold)
             {
                 InitThresholdData();
             }
@@ -1165,7 +1156,7 @@ namespace FilterProvider.Common.Services
 
         private void OnAppSessionEnding(object sender, EventArgs e)
         {
-            m_logger.Info("Session ending.");
+            logger.Info("Session ending.");
 
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             var antitampering = PlatformTypes.New<IAntitampering>();
@@ -1183,17 +1174,17 @@ namespace FilterProvider.Common.Services
         private void InitThresholdData()
         {
             // If exists, stop it first.
-            if (m_thresholdCountTimer != null)
+            if (thresholdCountTimer != null)
             {
-                m_thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
 
             // Create the threshold count timer and start it with the configured timespan.
-            var cfg = m_policyConfiguration.Configuration;
-            m_thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
+            var cfg = policyConfiguration.Configuration;
+            thresholdCountTimer = new Timer(OnThresholdTriggerPeriodElapsed, null, cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(1), Timeout.InfiniteTimeSpan);
 
             // Create the enforcement timer, but don't start it.
-            m_thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
+            thresholdEnforcementTimer = new Timer(OnThresholdTimeoutPeriodElapsed, null, Timeout.Infinite, Timeout.Infinite);
         }
 
         /// <summary>
@@ -1209,30 +1200,30 @@ namespace FilterProvider.Common.Services
             // Init the engine with our callbacks, the path to the ca-bundle, let it pick whatever
             // ports it wants for listening, and give it our total processor count on this machine as
             // a hint for how many threads to use.
-            //m_filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
+            //filteringEngine = new WindowsProxyServer(OnAppFirewallCheck, OnHttpMessageBegin, OnHttpMessageEnd, OnBadCertificate);
 
             // TODO: Code smell. Do we instantiate types with special functions, or do we use PlatformTypes.New<T>() ?
-            m_filteringEngine = m_systemServices.StartProxyServer(new ProxyConfiguration()
+            filteringEngine = systemServices.StartProxyServer(new ProxyConfiguration()
             {
                 AuthorityName = "CloudVeil for Windows",
-                BeforeRequest = m_siteFiltering.OnBeforeRequest,
-                BeforeResponse = m_siteFiltering.OnBeforeResponse,
-                Blacklisted = m_siteFiltering.OnBlacklist,
-                Whitelisted = m_siteFiltering.OnWhitelist
+                BeforeRequest = siteFiltering.OnBeforeRequest,
+                BeforeResponse = siteFiltering.OnBeforeResponse,
+                Blacklisted = siteFiltering.OnBlacklist,
+                Whitelisted = siteFiltering.OnWhitelist
             });
 
             // Setup general info, warning and error events.
 
             // Start filtering, always.
-            if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
+            if (filteringEngine != null && !filteringEngine.IsRunning)
             {
-                m_filterEngineStartupBgWorker = new BackgroundWorker();
-                m_filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
+                filterEngineStartupBgWorker = new BackgroundWorker();
+                filterEngineStartupBgWorker.DoWork += ((object sender, DoWorkEventArgs e) =>
                 {
                     StartFiltering();
                 });
 
-                m_filterEngineStartupBgWorker.RunWorkerAsync();
+                filterEngineStartupBgWorker.RunWorkerAsync();
             }
 
             // Now establish trust with FireFox. XXX TODO - This can actually be done elsewhere. We
@@ -1241,11 +1232,11 @@ namespace FilterProvider.Common.Services
             // option to trust the local certificate store, we don't have to do that anymore.
             try
             {
-                m_trustManager.EstablishTrust();
+                trustManager.EstablishTrust();
             }
             catch (Exception ffe)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ffe);
+                LoggerUtil.RecursivelyLogException(logger, ffe);
             }
 
             LogTime("Trust established with user apps.");
@@ -1255,7 +1246,7 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Used to strip multiple whitespace. 
         /// </summary>
-        private Regex m_whitespaceRegex;
+        private Regex whitespaceRegex;
 
         /// <summary>
         /// Loads the given NLP model and list of categories from within the model that we'll
@@ -1278,14 +1269,14 @@ namespace FilterProvider.Common.Services
         {
             try
             {
-                m_doccatSlimLock.EnterWriteLock();
+                doccatSlimLock.EnterWriteLock();
 
                 var selectedCategoriesHashset = new HashSet<string>(nlpConfig.SelectedCategoryNames, StringComparer.OrdinalIgnoreCase);
 
                 var mappedAllCategorySet = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 // Init our regexes
-                m_whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
+                whitespaceRegex = new Regex(@"\s+", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
                 // Init Document classifier.
                 var doccatModel = new DoccatModel(new java.io.ByteArrayInputStream(nlpModelBytes));
@@ -1308,26 +1299,26 @@ namespace FilterProvider.Common.Services
 
                     if(selectedCategoriesHashset.Contains(modelCategory))
                     {
-                        m_logger.Info("Setting up NLP classification category: {0}", modelCategory);
+                        logger.Info("Setting up NLP classification category: {0}", modelCategory);
 
                         MappedFilterListCategoryModel existingCategory = null;
                         if(TryFetchOrCreateCategoryMap(mappedModelCategory, out existingCategory))
                         {
-                            m_categoryIndex.SetIsCategoryEnabled(existingCategory.CategoryId, true);
+                            categoryIndex.SetIsCategoryEnabled(existingCategory.CategoryId, true);
                         }
                         else
                         {
-                            m_logger.Error("Failed to get category map for NLP model.");
+                            logger.Error("Failed to get category map for NLP model.");
                         }
                     }
                 }
 
                 // Push this classifier to our list of classifiers.
-                m_documentClassifiers.Add(new CategoryMappedDocumentCategorizerModel(classifier, mappedAllCategorySet));
+                documentClassifiers.Add(new CategoryMappedDocumentCategorizerModel(classifier, mappedAllCategorySet));
             }
             finally
             {
-                m_doccatSlimLock.ExitWriteLock();
+                doccatSlimLock.ExitWriteLock();
             }
         }
 #endif
@@ -1352,17 +1343,17 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception ie)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ie);
+                LoggerUtil.RecursivelyLogException(logger, ie);
             }
 
             // Run our extension method if it exists.
             try
             {
-                m_extensionDelegate?.Invoke(this);
+                extensionDelegate?.Invoke(this);
             }
             catch(Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
 
@@ -1371,25 +1362,25 @@ namespace FilterProvider.Common.Services
             {
                 if (!isTestRun)
                 {
-                    m_systemServices.RunProtectiveServices();
+                    systemServices.RunProtectiveServices();
                 }
             }
             catch (Exception se)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, se);
+                LoggerUtil.RecursivelyLogException(logger, se);
             }
 
             // Init update timer.
-            m_updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            updateCheckTimer = new Timer(OnUpdateTimerElapsed, null, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
             // Run log cleanup and schedule for next run.
             OnCleanupLogsElapsed(null);
 
             // Set up our network availability checks so we can run captive portal detection on a changed network.
-            NetworkChange.NetworkAddressChanged += m_dnsEnforcement.OnNetworkChange;
+            NetworkChange.NetworkAddressChanged += dnsEnforcement.OnNetworkChange;
 
             // Run on startup so we can get the network state right away.
-            m_dnsEnforcement.Trigger();
+            dnsEnforcement.Trigger();
         }
 
         /// <summary>
@@ -1403,7 +1394,7 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnApplicationExiting(object sender, EventArgs e)
         {
-            m_logger.Info("Filter service provider process exiting.");
+            logger.Info("Filter service provider process exiting.");
 
             try
             {
@@ -1412,20 +1403,20 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception err)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, err);
+                LoggerUtil.RecursivelyLogException(logger, err);
             }
 
             try
             {
                 if (Environment.ExitCode == (int)ExitCodes.ShutdownWithoutSafeguards)
                 {
-                    m_logger.Info("Filter service provider process shutting down without safeguards.");
+                    logger.Info("Filter service provider process shutting down without safeguards.");
 
                     DoCleanShutdown(false);
                 }
                 else
                 {
-                    m_logger.Info("Filter service provider process shutting down with safeguards.");
+                    logger.Info("Filter service provider process shutting down with safeguards.");
 
                     // Unless explicitly told not to, always use safeguards.
                     DoCleanShutdown(true);
@@ -1433,7 +1424,7 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception err)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, err);
+                LoggerUtil.RecursivelyLogException(logger, err);
             }
         }
 
@@ -1449,14 +1440,14 @@ namespace FilterProvider.Common.Services
         private void OnBackgroundInitComplete(object sender, RunWorkerCompletedEventArgs e)
         {
             // Must ensure we're not blocking internet now that we're running.
-            m_systemServices.EnableInternet();
+            systemServices.EnableInternet();
 
             if (e.Cancelled || e.Error != null)
             {
-                m_logger.Error("Error during initialization.");
-                if (e.Error != null && m_logger != null)
+                logger.Error("Error during initialization.");
+                if (e.Error != null && logger != null)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, e.Error);
+                    LoggerUtil.RecursivelyLogException(logger, e.Error);
                 }
 
                 Environment.Exit((int)ExitCodes.ShutdownInitializationError);
@@ -1467,7 +1458,7 @@ namespace FilterProvider.Common.Services
 
             Status = FilterStatus.Running;
 
-            m_systemServices.EnsureGuiRunning(runInTray: true);
+            systemServices.EnsureGuiRunning(runInTray: true);
         }
 
         #region EngineCallbacks
@@ -1492,11 +1483,11 @@ namespace FilterProvider.Common.Services
         {
             bool internetShutOff = false;
 
-            var cfg = m_policyConfiguration.Configuration;
+            var cfg = policyConfiguration.Configuration;
 
             if (cfg != null && cfg.UseThreshold)
             {
-                var currentTicks = Interlocked.Increment(ref m_thresholdTicks);
+                var currentTicks = Interlocked.Increment(ref thresholdTicks);
 
                 if (currentTicks >= cfg.ThresholdLimit)
                 {
@@ -1504,28 +1495,28 @@ namespace FilterProvider.Common.Services
 
                     try
                     {
-                        m_logger.Warn("Block action threshold met or exceeded. Disabling internet.");
-                        m_systemServices.DisableInternet();
+                        logger.Warn("Block action threshold met or exceeded. Disabling internet.");
+                        systemServices.DisableInternet();
                     }
                     catch (Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
 
-                    this.m_thresholdEnforcementTimer.Change(cfg.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
+                    this.thresholdEnforcementTimer.Change(cfg.ThresholdTimeoutPeriod, Timeout.InfiniteTimeSpan);
                 }
             }
 
             string categoryNameString = "Unknown";
-            var mappedCategory = m_policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
+            var mappedCategory = policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == category).FirstOrDefault();
 
             if (mappedCategory != null)
             {
                 categoryNameString = mappedCategory.CategoryName;
             }
 
-            m_ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule);
-            m_accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
+            ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule);
+            accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if (internetShutOff)
             {
@@ -1533,10 +1524,10 @@ namespace FilterProvider.Common.Services
 
                 var cooldownPeriod = (restoreDate - DateTime.Now);
 
-                m_ipcServer.NotifyCooldownEnforced(cooldownPeriod);
+                ipcServer.NotifyCooldownEnforced(cooldownPeriod);
             }
 
-            m_logger.Info("Request {0} blocked by rule {1} in category {2}.", requestUri.ToString(), matchingRule, categoryNameString);
+            logger.Info("Request {0} blocked by rule {1} in category {2}.", requestUri.ToString(), matchingRule, categoryNameString);
         }
 
         /// <summary>
@@ -1595,15 +1586,15 @@ namespace FilterProvider.Common.Services
             try
             {
                 // Reset count to zero.
-                Interlocked.Exchange(ref m_thresholdTicks, 0);
+                Interlocked.Exchange(ref thresholdTicks, 0);
 
-                var cfg = m_policyConfiguration.Configuration;
+                var cfg = policyConfiguration.Configuration;
 
-                this.m_thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                this.thresholdCountTimer.Change(cfg != null ? cfg.ThresholdTriggerPeriod : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
                 // TODO: Tell Sentry about this problem.
             }
 
@@ -1619,39 +1610,44 @@ namespace FilterProvider.Common.Services
         {
             try
             {
-                m_systemServices.EnableInternet();
+                systemServices.EnableInternet();
             }
             catch (Exception e)
             {
-                m_logger.Warn("Error when trying to reinstate internet on threshold timeout period elapsed.");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Warn("Error when trying to reinstate internet on threshold timeout period elapsed.");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
 
             Status = FilterStatus.Running;
 
             // Disable the timer before we leave.
-            this.m_thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            this.thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         public UpdateCheckResult CheckForApplicationUpdate(bool isCheckButton)
         {
-            m_logger.Info("Checking for application updates.");
-            return m_updateSystem.ProbeMasterForApplicationUpdates(isCheckButton);
+            logger.Info("Checking for application updates.");
+            return updateSystem.ProbeMasterForApplicationUpdates(isCheckButton);
         }
 
         public ConfigUpdateResult UpdateAndWriteList(bool isSyncButton)
         {
             LogTime("UpdateAndWriteList");
+            if (!NetworkStatus.Default.HasConnection)
+            {
+                NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
+                return ConfigUpdateResult.NoInternet;
+            }
 
             ConfigUpdateResult result = ConfigUpdateResult.ErrorOccurred;
 
             try
             {
-                m_logger.Info("Checking for filter list updates.");
+                logger.Info("Checking for filter list updates.");
 
-                m_updateRwLock.EnterWriteLock();
+                updateRwLock.EnterWriteLock();
 
-                bool? configurationDownloaded = m_policyConfiguration.DownloadConfiguration();
+                bool? configurationDownloaded = policyConfiguration.DownloadConfiguration();
 
                 if (configurationDownloaded == null)
                 {
@@ -1668,35 +1664,35 @@ namespace FilterProvider.Common.Services
 
                 bool doLoadLists = !AdBlockMatcherApi.AreListsLoaded();
 
-                if (m_policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && m_policyConfiguration.Configuration == null))
+                if (policyConfiguration.Configuration == null || configurationDownloaded == true || (configurationDownloaded == null && policyConfiguration.Configuration == null))
                 {
                     // Got new data. Gotta reload.
-                    bool configLoaded = m_policyConfiguration.LoadConfiguration();
+                    bool configLoaded = policyConfiguration.LoadConfiguration();
                     doLoadLists = true;
 
                     result = ConfigUpdateResult.Updated;
 
                     // Enforce DNS if present.
-                    m_dnsEnforcement.Trigger();
+                    dnsEnforcement.Trigger();
                 }
 
-                bool? listsDownloaded = m_policyConfiguration.DownloadLists();
+                bool? listsDownloaded = policyConfiguration.DownloadLists();
 
                 doLoadLists = doLoadLists || listsDownloaded == true || (listsDownloaded == null && !AdBlockMatcherApi.AreListsLoaded());
 
                 if (doLoadLists)
                 {
-                    m_policyConfiguration.LoadLists();
+                    policyConfiguration.LoadLists();
                 }
-                else if (listsDownloaded == null && m_policyConfiguration.Configuration == null)
+                else if (listsDownloaded == null && policyConfiguration.Configuration == null)
                 {
-                    m_logger.Error("Was not able to download rulesets due to configuration being null");
+                    logger.Error("Was not able to download rulesets due to configuration being null");
                 }
 
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
@@ -1714,38 +1710,48 @@ namespace FilterProvider.Common.Services
                     AppSettings.Default.ConfigUpdateResult = result;
                     AppSettings.Default.Save();
 
-                    m_ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
+                    ipcServer.Send<ConfigCheckInfo>(IpcCall.SynchronizeSettings, new ConfigCheckInfo(DateTime.Now, result));
 
                     // Enable the timer again.
-                    if (!(NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection))
+                    if (!NetworkStatus.Default.HasConnection)
                     {
-                        // If we have no internet, keep polling every 15 seconds. We need that data ASAP.
-                        this.m_updateCheckTimer.Change(TimeSpan.FromSeconds(15), Timeout.InfiniteTimeSpan);
+                        NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
                     }
                     else
                     {
-                        var cfg = m_policyConfiguration.Configuration;
+                        var cfg = policyConfiguration.Configuration;
                         if (cfg != null)
                         {
-                            this.m_updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
+                            logger.Info($"UpdateAndWriteList Setting update timer to {policyConfiguration.Configuration.UpdateFrequency}"); ;
+                            this.updateCheckTimer.Change(cfg.UpdateFrequency, Timeout.InfiniteTimeSpan);
                         }
                         else
                         {
-                            this.m_updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                            logger.Info($"Setting update timer to fallback"); ;
+                            this.updateCheckTimer.Change(TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
                         }
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    m_logger.Error("Finally block exception");
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    logger.Error("Finally block exception");
+                    LoggerUtil.RecursivelyLogException(logger, ex);
                 }
 
-                m_updateRwLock.ExitWriteLock();
+                updateRwLock.ExitWriteLock();
             }
 
             return result;
+        }
+
+        private void Default_ConnectionStateChanged()
+        {
+            if (NetworkStatus.Default.HasConnection)
+            {
+                OnUpdateTimerElapsed(null);
+                NetworkStatus.Default.ConnectionStateChanged -= Default_ConnectionStateChanged;
+            }
         }
 
         /// <summary>
@@ -1757,9 +1763,9 @@ namespace FilterProvider.Common.Services
         /// </param>
         private void OnUpdateTimerElapsed(object state)
         {
-            m_logger.Info("Running OnUpdateTimerElapsed");
+            logger.Info("Running OnUpdateTimerElapsed");
 
-            if (m_ipcServer != null && m_ipcServer.WaitingForAuth)
+            if (ipcServer != null && ipcServer.WaitingForAuth)
             {
                 return;
             }
@@ -1769,10 +1775,10 @@ namespace FilterProvider.Common.Services
 
             this.CleanupLogs();
 
-            if (m_lastUsernamePrintTime.Date < DateTime.Now.Date)
+            if (lastUsernamePrintTime.Date < DateTime.Now.Date)
             {
-                m_lastUsernamePrintTime = DateTime.Now;
-                m_logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
+                lastUsernamePrintTime = DateTime.Now;
+                logger.Info($"Currently logged in user is {WebServiceUtil.Default.UserEmail}");
             }
         }
 
@@ -1783,17 +1789,17 @@ namespace FilterProvider.Common.Services
         {
             this.CleanupLogs();
 
-            if (m_cleanupLogsTimer == null)
+            if (cleanupLogsTimer == null)
             {
-                m_cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                cleanupLogsTimer = new Timer(OnCleanupLogsElapsed, null, TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
             }
             else
             {
-                m_cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
+                cleanupLogsTimer.Change(TimeSpan.FromHours(LogCleanupIntervalInHours), Timeout.InfiniteTimeSpan);
             }
         }
 
-        Stopwatch m_logTimeStopwatch = null;
+        Stopwatch logTimeStopwatch = null;
         /// <summary>
         /// Logs the amount of time that has passed since the last time this function was called.
         /// </summary>
@@ -1802,20 +1808,20 @@ namespace FilterProvider.Common.Services
         {
             string timeInfo = null;
 
-            if (m_logTimeStopwatch == null)
+            if (logTimeStopwatch == null)
             {
-                m_logTimeStopwatch = Stopwatch.StartNew();
+                logTimeStopwatch = Stopwatch.StartNew();
                 timeInfo = "Initialized:";
             }
             else
             {
-                long ms = m_logTimeStopwatch.ElapsedMilliseconds;
+                long ms = logTimeStopwatch.ElapsedMilliseconds;
                 timeInfo = string.Format("{0}ms:", ms);
 
-                m_logTimeStopwatch.Restart();
+                logTimeStopwatch.Restart();
             }
 
-            m_logger.Info("TIME {0} {1}", timeInfo, message);
+            logger.Info("TIME {0} {1}", timeInfo, message);
         }
 
         private DateTime? lastCleanupLogDate = null;
@@ -1851,7 +1857,7 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
                 // TODO: Tell sentry about this.
             }
         }
@@ -1861,30 +1867,30 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StartFiltering()
         {
-            m_logger.Info(nameof(StartFiltering));
+            logger.Info(nameof(StartFiltering));
             // Let's make sure we've pulled our internet block.
             try
             {
-                m_systemServices.EnableInternet();
+                systemServices.EnableInternet();
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
             try
             {
-                if (m_filteringEngine != null && !m_filteringEngine.IsRunning)
+                if (filteringEngine != null && !filteringEngine.IsRunning)
                 {
-                    m_logger.Info("Start engine.");
+                    logger.Info("Start engine.");
 
                     // Start the engine right away, to ensure the atomic bool IsRunning is set.
-                    m_filteringEngine.Start();
+                    filteringEngine.Start();
                 }
             }
             catch (Exception e)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
@@ -1899,10 +1905,10 @@ namespace FilterProvider.Common.Services
         private void StopFiltering()
         {
 
-            m_logger.Info("Stop filtering");
-            if (m_filteringEngine != null && m_filteringEngine.IsRunning)
+            logger.Info("Stop filtering");
+            if (filteringEngine != null && filteringEngine.IsRunning)
             {
-                m_filteringEngine.Stop();
+                filteringEngine.Stop();
             }
 
             try
@@ -1911,8 +1917,8 @@ namespace FilterProvider.Common.Services
             }
             catch (Exception e)
             {
-                m_logger.Error("Error occurred in OnStopFiltering event");
-                LoggerUtil.RecursivelyLogException(m_logger, e);
+                logger.Error("Error occurred in OnStopFiltering event");
+                LoggerUtil.RecursivelyLogException(logger, e);
             }
         }
 
@@ -1929,13 +1935,13 @@ namespace FilterProvider.Common.Services
         {
             // No matter what, ensure that all GUI instances for all users are
             // immediately shut down, because we, the service, are shutting down.
-            m_systemServices.KillAllGuis();
+            systemServices.KillAllGuis();
 
-            lock (m_cleanShutdownLock)
+            lock (cleanShutdownLock)
             {
-                if (!m_cleanShutdownComplete)
+                if (!cleanShutdownComplete)
                 {
-                    m_ipcServer.Dispose();
+                    ipcServer.Dispose();
 
                     try
                     {
@@ -1944,7 +1950,7 @@ namespace FilterProvider.Common.Services
                     }
                     catch (Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
 
                     try
@@ -1954,7 +1960,7 @@ namespace FilterProvider.Common.Services
                     }
                     catch (Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
 
                     if (installSafeguards)
@@ -1970,37 +1976,37 @@ namespace FilterProvider.Common.Services
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
 
                         try
                         {
-                            var cfg = m_policyConfiguration.Configuration;
+                            var cfg = policyConfiguration.Configuration;
                             if (cfg != null && cfg.BlockInternet)
                             {
                                 // While we're here, let's disable the internet so that the user
                                 // can't browse the web without us. Only do this of course if configured.
                                 try
                                 {
-                                    m_systemServices.DisableInternet();
+                                    systemServices.DisableInternet();
                                 }
                                 catch { }
                             }
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }
                     else
                     {
                         // Means that our user got a granted deactivation request, or installed but
                         // never activated.
-                        m_logger.Info("Shutting down without safeguards.");
+                        logger.Info("Shutting down without safeguards.");
                     }
 
                     // Flag that clean shutdown was completed already.
-                    m_cleanShutdownComplete = true;
+                    cleanShutdownComplete = true;
                 }
             }
         }

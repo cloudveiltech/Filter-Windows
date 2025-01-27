@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Runtime.InteropServices;
 
-namespace CitadelCore.Windows.WinAPI
+namespace CloudVeilCore.Windows.WinAPI
 {
     internal enum TcpConnectionOffloadState : uint
     {
@@ -159,11 +159,11 @@ namespace CitadelCore.Windows.WinAPI
 
     internal class Tcp4ConnectionInfo : ITcpConnectionInfo
     {
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
         public Tcp4ConnectionInfo()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public ushort LocalPort
@@ -206,7 +206,7 @@ namespace CitadelCore.Windows.WinAPI
                 }
                 catch(Exception e)
                 {
-                    m_logger.Error(e);
+                    logger.Error(e);
                 }
 
                 return string.Empty;

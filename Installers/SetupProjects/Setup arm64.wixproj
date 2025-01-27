@@ -1,0 +1,119 @@
+﻿<Project Sdk="WixToolset.Sdk/4.0.0">
+    <PropertyGroup>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    </PropertyGroup>
+    <PropertyGroup>
+        <Platform Condition=" '$(Platform)' == '' ">ARM64</Platform>
+        <Name>Setup ARM64</Name>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <SignOutput>true</SignOutput>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="InstallationUi.wxs" />
+        <Compile Include="CustomActions.wxs" />
+        <Compile Include="InstallGuardDialog.wxs" />
+        <Compile Include="Product-arm64.wxs" />
+    </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <OutputPath>Release\</OutputPath>
+  </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="WixToolset.NetFx.wixext" Version="4.0.0" />
+        <PackageReference Include="WixToolset.Heat" Version="4.0.0" />
+    </ItemGroup>
+    <Target Name="UsesFrameworkSdk">
+        <GetFrameworkSdkPath>
+            <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
+        </GetFrameworkSdkPath>
+        <PropertyGroup>
+            <WinSDK>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0@InstallationFolder)</WinSDK>
+            <WinSDK Condition="('@(WinSDK)'=='')">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots@KitsRoot10)</WinSDK>
+            <Win10SDKBinPath>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@InstallationFolder)bin\</Win10SDKBinPath>
+            <Win10SDKVersion>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@ProductVersion).0\</Win10SDKVersion>
+            <Win10SDKVerBinPath>$(Win10SDKBinPath)$(Win10SDKVersion)</Win10SDKVerBinPath>
+        </PropertyGroup>
+    </Target>
+    <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="4.0.0" />
+    <Target Name="BeforeBuild">
+        <!-- Create temporary directory for XML files -->
+        <MakeDir Directories="$(IntermediateOutputPath)Harvested XML" />
+        <!-- Create a directory for harvested WSX files -->
+        <MakeDir Directories="$(IntermediateOutputPath)Harvested Output" />
+        <!-- Read the RegisterForCOM.xml file and create a file with the list of files which should be registered for COM -->
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='HeatFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)'/&gt;" Condition="$(MSBuildToolsVersion) &lt;= 12" />
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" UseTrustedSettings="true" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='HeatFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)'/&gt;" Condition="$(MSBuildToolsVersion) &gt;= 14" />
+        <!-- Load the list of COM files to the COMFilelist variable -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)_COMFiles.txt">
+            <Output TaskParameter="Lines" ItemName="COMFilelist" />
+        </ReadLinesFromFile>
+        <!-- Resolve paths to the COM files -->
+        <ConvertToAbsolutePath Paths="@(COMFilelist)">
+            <Output TaskParameter="AbsolutePaths" ItemName="ResolvedCOMFilelist" />
+        </ConvertToAbsolutePath>
+        <!-- Extract the registy information from the list of COM files and store it to temporary XML files -->
+        <Exec Command="&quot;$(Wix)Bin\heat.exe&quot; file &quot;%(ResolvedCOMFilelist.Identity)&quot; -sw -gg -sfrag -nologo -srd -out &quot;$(IntermediateOutputPath)Harvested XML\_%(Filename).com.xml&quot;" IgnoreExitCode="false" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="'%(ResolvedCOMFilelist.Identity)'!=''" />
+        <!-- Read the RegisterForCOM.xml file and create a file with the list of XML files created in the previous operation -->
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='TransformFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested XML\'/&gt;" Condition="$(MSBuildToolsVersion) &lt;= 12" />
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" UseTrustedSettings="true" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='TransformFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested XML\'/&gt;" Condition="$(MSBuildToolsVersion) &gt;= 14" />
+        <!-- Load the list of XML files to the XMLFileList variable -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)_COMFiles.txt">
+            <Output TaskParameter="Lines" ItemName="XMLFileList" />
+        </ReadLinesFromFile>
+        <!-- Process the XML files to create the final WSX files with the registy information -->
+        <XslTransformation XmlInputPaths="%(XMLFileList.Identity)" XslInputPath="XSLT\XslFile.xslt" OutputPaths="$(IntermediateOutputPath)Harvested Output\%(Filename).wsx" Parameters="&lt;Parameter Name='sourceFilePath' Value='%(XMLFileList.Identity)'/&gt;" Condition="'%(XMLFileList.Identity)'!='' And $(MSBuildToolsVersion) &lt;= 12" />
+        <XslTransformation XmlInputPaths="%(XMLFileList.Identity)" XslInputPath="XSLT\XslFile.xslt" UseTrustedSettings="true" OutputPaths="$(IntermediateOutputPath)Harvested Output\%(Filename).wsx" Parameters="&lt;Parameter Name='sourceFilePath' Value='%(XMLFileList.Identity)'/&gt;" Condition="'%(XMLFileList.Identity)'!='' And $(MSBuildToolsVersion) &gt;= 14" />
+        <!-- Generate WSX files from project references -->
+        <Exec Command="&quot;$(Wix)Bin\heat.exe&quot; project &quot;%(ProjectReference.FullPath)&quot; -projectname &quot;%(ProjectReference.Name)&quot; -pog %(ProjectReference.RefProjectOutputGroups) -gg -sfrag -nologo -out &quot;$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml&quot;" IgnoreExitCode="false" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="'%(ProjectReference.FullPath)'!='' And '%(ProjectReference.DoNotHarvest)'!='True' And '%(ProjectReference.ImportedFromVDProj)'=='True'" />
+        <HeatProject Project="%(ProjectReference.FullPath)" ProjectName="%(ProjectReference.Name)" OutputFile="$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml" ProjectOutputGroups="%(ProjectReference.RefProjectOutputGroups)" ToolPath="$(Wix)Bin\" SuppressAllWarnings="true" AutogenerateGuids="false" GenerateGuidsNow="true" SuppressFragments="true" SuppressUniqueIds="false" Condition="'%(ProjectReference.FullPath)'!='' And '%(ProjectReference.DoNotHarvest)'!='True' And '%(ProjectReference.ImportedFromVDProj)'!='True'" />
+        <!-- Process the XML files to create the final WSX files with the registy information for each project reference -->
+        <XslTransformation XmlInputPaths="$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml" XslInputPath="XSLT\XslProjectOutput.xslt" OutputPaths="$(IntermediateOutputPath)Harvested Output\_%(ProjectReference.Name).wxs" Parameters="&lt;Parameter Name='projectName' Value='%(ProjectReference.Name)'/&gt;&lt;Parameter Name='projectFilePath' Value='%(ProjectReference.FullPath)'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested Output\'/&gt;" Condition="'%(ProjectReference.FullPath)'!='' And '%(ProjectReference.DoNotHarvest)'!='True' And Exists('$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml') And $(MSBuildToolsVersion) &lt;= 12" />
+        <XslTransformation XmlInputPaths="$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml" XslInputPath="XSLT\XslProjectOutput.xslt" UseTrustedSettings="true" OutputPaths="$(IntermediateOutputPath)Harvested Output\_%(ProjectReference.Name).wxs" Parameters="&lt;Parameter Name='projectName' Value='%(ProjectReference.Name)'/&gt;&lt;Parameter Name='projectFilePath' Value='%(ProjectReference.FullPath)'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested Output\'/&gt;" Condition="'%(ProjectReference.FullPath)'!='' And '%(ProjectReference.DoNotHarvest)'!='True' And Exists('$(IntermediateOutputPath)Harvested XML\_%(ProjectReference.Name).xml') And $(MSBuildToolsVersion) &gt;= 14" />
+        <!-- Read the RegisterForCOM.xml file and create a file with the list of WSX files which should be included in the project -->
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='CompileFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested Output\'/&gt;" Condition="$(MSBuildToolsVersion) &lt;= 12" />
+        <XslTransformation XmlInputPaths="XSLT\RegisterForCOM.xml" XslInputPath="XSLT\XslRegisterForCOM.xslt" UseTrustedSettings="true" OutputPaths="$(IntermediateOutputPath)_COMFiles.txt" Parameters="&lt;Parameter Name='operationType' Value='CompileFiles'/&gt;&lt;Parameter Name='intermediateDir' Value='$(IntermediateOutputPath)Harvested Output\'/&gt;" Condition="$(MSBuildToolsVersion) &gt;= 14" />
+        <!-- Load the list of WSX files to the WSXFileList variable -->
+        <ReadLinesFromFile File="$(IntermediateOutputPath)_COMFiles.txt">
+            <Output TaskParameter="Lines" ItemName="WSXFileList" />
+        </ReadLinesFromFile>
+        <!-- Include generated WSX files in the project -->
+        <CreateItem Include="$(IntermediateOutputPath)Harvested Output\_%(ProjectReference.Name).wxs" Condition="'%(ProjectReference.FullPath)'!='' And '%(ProjectReference.DoNotHarvest)'!='True' And Exists('$(IntermediateOutputPath)Harvested Output\_%(ProjectReference.Name).wxs')">
+            <Output TaskParameter="Include" ItemName="Compile" />
+        </CreateItem>
+        <CreateItem Include="@(WSXFileList)" Condition="Exists('%(WSXFileList.Identity)')">
+            <Output TaskParameter="Include" ItemName="Compile" />
+        </CreateItem>
+    </Target>
+    <Target Name="AfterBuild">
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM64' ">
+            <!-- Add bootstrapper items here -->
+            <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
+                <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
+            </BootstrapperFile>
+        </ItemGroup>
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM64' ">
+            <!-- Add bootstrapper items here -->
+            <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
+                <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
+            </BootstrapperFile>
+        </ItemGroup>
+        <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|ARM64' ">
+            <!-- Add bootstrapper items here -->
+            <BootstrapperFile Include=".NETFramework,Version=v4.6.1">
+                <ProductName>Microsoft .NET Framework 4.6.1 (x86 and x64)</ProductName>
+            </BootstrapperFile>
+        </ItemGroup>
+        <!--<GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="CloudVeil For Windows" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\BootStrapper" ApplicationRequiresElevation="True" Culture="en-US" Condition=" '$(Configuration)|$(Platform)' == 'Release Signed|x64' " />-->
+    </Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="&quot;$(ProjectDir)add_reinstall_prop.vbs&quot; &quot;$(TargetDir)$(TargetFileName)&quot;" />
+    </Target>
+    <ItemGroup>
+        <EmbeddedResource Remove="XSLT\**" />
+    </ItemGroup>
+</Project>

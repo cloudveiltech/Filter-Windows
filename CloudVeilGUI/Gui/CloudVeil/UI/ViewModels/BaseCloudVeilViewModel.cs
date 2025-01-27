@@ -57,14 +57,14 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// <summary>
         /// Logger for views.
         /// </summary>
-        protected readonly Logger m_logger;
+        protected readonly Logger logger;
 
         /// <summary>
         /// Constructs a new BaseCloudVeilViewModel instance. 
         /// </summary>        
         public BaseCloudVeilViewModel()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
             ViewManager = ((CloudVeilApp)CloudVeilApp.Current).ViewManager;
         }

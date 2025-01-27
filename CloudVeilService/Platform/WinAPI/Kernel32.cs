@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace CitadelCore.Windows.WinAPI
+namespace CloudVeilCore.Windows.WinAPI
 {
     internal static class Kernel32
     {

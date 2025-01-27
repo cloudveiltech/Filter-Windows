@@ -19,13 +19,13 @@ namespace CloudVeilService.Platform
 {
     public class WindowsWifiManager : IWifiManager
     {
-        private static WlanClient s_wlanClient = null;
+        private static WlanClient wlanClient = null;
 
         static WindowsWifiManager()
         {
             try
             {
-                s_wlanClient = new WlanClient();
+                wlanClient = new WlanClient();
             }
             catch (Win32Exception ex)
             {
@@ -44,14 +44,14 @@ namespace CloudVeilService.Platform
         {
             try
             {
-                if(s_wlanClient == null)
+                if(wlanClient == null)
                 {
                     return new List<string>();
                 }
 
                 List<string> connectedSsids = new List<string>();
 
-                foreach (WlanClient.WlanInterface wlanInterface in s_wlanClient.Interfaces)
+                foreach (WlanClient.WlanInterface wlanInterface in wlanClient.Interfaces)
                 {
                     Wlan.Dot11Ssid ssid = wlanInterface.CurrentConnection.wlanAssociationAttributes.dot11Ssid;
                     connectedSsids.Add(new string(Encoding.ASCII.GetChars(ssid.SSID, 0, (int)ssid.SSIDLength)));

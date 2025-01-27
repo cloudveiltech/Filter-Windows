@@ -19,7 +19,7 @@ namespace CloudVeil.Core.Windows.Util.Net
     /// </summary>
     internal class NetworkListUtil : INetworkListManagerEvents, INetworkEvents, INetworkConnectionEvents, INetworkInfo
     {
-        private Logger m_logger;
+        private Logger logger;
 
         public event ConnectionStateChangeHandler ConnectionStateChanged;
 
@@ -39,11 +39,11 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
-                        INetwork network = m_networkListManager.GetNetwork(nw.GetNetworkId());
+                        INetwork network = networkListManager.GetNetwork(nw.GetNetworkId());
                         IPropertyBag nwp = (IPropertyBag)network;
 
                         object resv4;
@@ -57,7 +57,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -74,11 +74,11 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
-                        INetwork network = m_networkListManager.GetNetwork(nw.GetNetworkId());
+                        INetwork network = networkListManager.GetNetwork(nw.GetNetworkId());
                         IPropertyBag nwp = (IPropertyBag)network;
 
                         object resv6;
@@ -92,7 +92,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -109,11 +109,11 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
-                        INetwork network = m_networkListManager.GetNetwork(nw.GetNetworkId());
+                        INetwork network = networkListManager.GetNetwork(nw.GetNetworkId());
                         IPropertyBag nwp = (IPropertyBag)network;
 
                         object resv4;
@@ -127,7 +127,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -144,11 +144,11 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
-                        INetwork network = m_networkListManager.GetNetwork(nw.GetNetworkId());
+                        INetwork network = networkListManager.GetNetwork(nw.GetNetworkId());
                         IPropertyBag nwp = (IPropertyBag)network;
 
                         object resv6;
@@ -162,7 +162,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -181,7 +181,7 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
@@ -192,7 +192,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -211,7 +211,7 @@ namespace CloudVeil.Core.Windows.Util.Net
         {
             get
             {
-                foreach(INetwork nw in m_networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
+                foreach(INetwork nw in networkListManager.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED))
                 {
                     try
                     {
@@ -222,7 +222,7 @@ namespace CloudVeil.Core.Windows.Util.Net
                     }
                     catch(Exception e)
                     {
-                        LoggerUtil.RecursivelyLogException(m_logger, e);
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 }
 
@@ -230,15 +230,15 @@ namespace CloudVeil.Core.Windows.Util.Net
             }
         }
 
-        private INetworkListManager m_networkListManager;
-        private IConnectionPoint m_connectionPoint;
-        private int m_cookie = 0;
+        private INetworkListManager networkListManager;
+        private IConnectionPoint connectionPoint;
+        private int cookie = 0;
 
         public NetworkListUtil()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
-            m_networkListManager = new NETWORKLIST.NetworkListManager();
+            networkListManager = new NETWORKLIST.NetworkListManager();
             ConnectToNetworkListManagerEvents();
         }
 
@@ -253,15 +253,15 @@ namespace CloudVeil.Core.Windows.Util.Net
 
         private void ConnectToNetworkListManagerEvents()
         {
-            IConnectionPointContainer icpc = (IConnectionPointContainer)m_networkListManager;
+            IConnectionPointContainer icpc = (IConnectionPointContainer)networkListManager;
             Guid typeGuid = typeof(INetworkListManagerEvents).GUID;
-            icpc.FindConnectionPoint(ref typeGuid, out m_connectionPoint);
-            m_connectionPoint.Advise(this, out m_cookie);
+            icpc.FindConnectionPoint(ref typeGuid, out connectionPoint);
+            connectionPoint.Advise(this, out cookie);
         }
 
         private void DisconnectFromNetworkListManagerEvents()
         {
-            m_connectionPoint.Unadvise(m_cookie);
+            connectionPoint.Unadvise(cookie);
         }
 
         public void ConnectivityChanged(NLM_CONNECTIVITY newConnectivity)

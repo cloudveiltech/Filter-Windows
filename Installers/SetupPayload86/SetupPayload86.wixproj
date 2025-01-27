@@ -1,20 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
+  <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.0" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>3.11</ProductVersion>
-    <ProjectGuid>{BC7647AC-B8CC-404C-B601-63044479C586}</ProjectGuid>
-    <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>SetupPayload86</OutputName>
     <OutputType>Module</OutputType>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <Name>SetupPayload86</Name>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants />
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
@@ -24,9 +15,6 @@
     <SuppressSpecificWarnings>1076;1072</SuppressSpecificWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Module.wxs" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="XSLT\RegisterForCOM.xml" />
     <Content Include="XSLT\XslFile.xslt" />
     <Content Include="XSLT\XslRegisterForCOM.xslt" />
@@ -34,15 +22,13 @@
     <Content Include="XSLT\readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <WixExtension Include="WixNetFxExtension">
-      <HintPath>$(WixExtDir)\WixNetFxExtension.dll</HintPath>
-      <Name>WixNetFxExtension</Name>
-    </WixExtension>
+    <PackageReference Include="WixToolset.NetFx.wixext" Version="4.0.0" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="XSLT\" />
   </ItemGroup>
-  <Import Project="$(WixTargetsPath)" />
+  <Import Project="Sdk.targets" Sdk="WixToolset.Sdk" Version="4.0.0" />
   <Target Name="BeforeBuild">
     <!-- Create temporary directory for XML files -->
     <MakeDir Directories="$(IntermediateOutputPath)Harvested XML" />
@@ -106,11 +92,7 @@
       </BootstrapperFile>
     </ItemGroup>
   </Target>
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)\wix-verify-bin\wix-verify.exe" check-output "$(SolutionDir)\CloudVeilGUI\bin\Release x86" "$(SolutionDir)\Installers\SetupProjects\Product-x86.wxs" "$(SolutionDir)\Installers\SetupPayload86\Module.wxs"</PreBuildEvent>
-  </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="&quot;$(SolutionDir)\wix-verify-bin\wix-verify.exe&quot; check-output &quot;$(SolutionDir)\CloudVeilGUI\bin\Release x86&quot; &quot;$(SolutionDir)\Installers\SetupProjects\Product-x86.wxs&quot; &quot;$(SolutionDir)\Installers\SetupPayload86\Module.wxs&quot;" />
+  </Target>
 </Project>

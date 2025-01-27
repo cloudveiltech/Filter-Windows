@@ -14,7 +14,7 @@ namespace CloudVeil.Core.Windows.Util
 {
     public class HttpUtils
     {
-        private static readonly HashSet<string> s_ValidHttpMethods = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> validHttpMethods = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             // We ignore CONNECT stuff for now.
             //"CONNECT",
@@ -28,7 +28,7 @@ namespace CloudVeil.Core.Windows.Util
 
         public static bool IsValidHttpMethod(string method)
         {
-            return s_ValidHttpMethods.Contains(method);
+            return validHttpMethods.Contains(method);
         }
     }
 }

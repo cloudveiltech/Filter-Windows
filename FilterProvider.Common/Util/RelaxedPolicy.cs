@@ -31,14 +31,14 @@ namespace FilterProvider.Common.Util
         /// <summary>
         /// This timer is used to count down to the expiry time for relaxed policy use. 
         /// </summary>
-        private Timer m_relaxedPolicyExpiryTimer;
+        private Timer relaxedPolicyExpiryTimer;
 
         /// <summary>
         /// This timer is used to track a 24 hour cooldown period after the exhaustion of all
         /// available relaxed policy uses. Once the timer is expired, it will reset the count to the
         /// config default and then disable itself.
         /// </summary>
-        private Timer m_relaxedPolicyResetTimer;
+        private Timer relaxedPolicyResetTimer;
 
         public RelaxedPolicy(IPCServer server, IPolicyConfiguration configuration)
         {
@@ -200,15 +200,15 @@ namespace FilterProvider.Common.Util
                 logger.Info("Using local bypass logic since server does not yet support bypasses.");
 
                 // Start the count down timer.
-                if (m_relaxedPolicyExpiryTimer == null)
+                if (relaxedPolicyExpiryTimer == null)
                 {
-                    m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
+                    relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                 }
 
                 enableRelaxedPolicy();
 
                 var cfg = policyConfiguration.Configuration;
-                m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
                 DecrementRelaxedPolicy_Local();
             }
@@ -219,16 +219,16 @@ namespace FilterProvider.Common.Util
                     logger.Info("Relaxed policy granted.");
 
                     // Start the count down timer.
-                    if (m_relaxedPolicyExpiryTimer == null)
+                    if (relaxedPolicyExpiryTimer == null)
                     {
-                        m_relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
+                        relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                     }
 
                     enableRelaxedPolicy();
                     
 
                     var cfg = policyConfiguration.Configuration;
-                    m_relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+                    relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
 
                     cfg.BypassesUsed = bypassesUsed;
                     cfg.BypassesPermitted = bypassesPermitted;
@@ -293,12 +293,12 @@ namespace FilterProvider.Common.Util
                 }
                 var span = resetTime - DateTime.UtcNow;
 
-                if (m_relaxedPolicyResetTimer == null)
+                if (relaxedPolicyResetTimer == null)
                 {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
+                    relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
 
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
+                relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -335,12 +335,12 @@ namespace FilterProvider.Common.Util
                 var tomorrow = today.AddDays(1);
                 var span = tomorrow - DateTime.Now;
 
-                if (m_relaxedPolicyResetTimer == null)
+                if (relaxedPolicyResetTimer == null)
                 {
-                    m_relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
+                    relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
 
-                m_relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
+                relaxedPolicyResetTimer.Change(span, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -405,7 +405,7 @@ namespace FilterProvider.Common.Util
                 ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.Deactivated);
 
                 // Disable the expiry timer.
-                m_relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -456,7 +456,7 @@ namespace FilterProvider.Common.Util
             {
                 UpdateNumberOfBypassesFromServer();
                 // Disable the reset timer.
-                m_relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             catch (Exception ex)
             {

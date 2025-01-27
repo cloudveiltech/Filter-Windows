@@ -18,11 +18,11 @@ namespace CloudVeilService.Util
 {
     public static class ConsoleLog
     {
-        private static NLog.Logger s_logger;
+        private static NLog.Logger logger;
 
         static ConsoleLog()
         {
-            s_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
         }
 
         public const int LogRotateDays = 3;
@@ -47,7 +47,7 @@ namespace CloudVeilService.Util
             }
             catch(Exception ex)
             {
-                s_logger.Error(ex, "Couldn't rotate log files");
+                logger.Error(ex, "Couldn't rotate log files");
             }
         }
     }

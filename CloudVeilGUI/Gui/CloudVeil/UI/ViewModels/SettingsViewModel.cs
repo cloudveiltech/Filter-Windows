@@ -100,37 +100,37 @@ namespace Gui.CloudVeil.UI.ViewModels
         public string RelaxedPolicySetupUri
             => global::CloudVeil.CompileSecrets.ServiceProviderUserRelaxedPolicyPath;
 
-        private RelayCommand m_useRelaxedPolicyCommand;
+        private RelayCommand useRelaxedPolicyCommand;
         public RelayCommand UseRelaxedPolicyCommand
         {
             get
             {
-                if (m_useRelaxedPolicyCommand == null)
+                if (useRelaxedPolicyCommand == null)
                 {
-                    m_useRelaxedPolicyCommand = new RelayCommand(() =>
+                    useRelaxedPolicyCommand = new RelayCommand(() =>
                     {
                         this.RequestRelaxedPolicy();
                     }, () => AvailableRelaxedRequests > 0);
                 }
 
-                return m_useRelaxedPolicyCommand;
+                return useRelaxedPolicyCommand;
             }
         }
 
-        private RelayCommand m_relinquishRelaxedPolicyCommand;
+        private RelayCommand relinquishRelaxedPolicyCommand;
         public RelayCommand RelinquishRelaxedPolicyCommand
         {
             get
             {
-                if (m_relinquishRelaxedPolicyCommand == null)
+                if (relinquishRelaxedPolicyCommand == null)
                 {
-                    m_relinquishRelaxedPolicyCommand = new RelayCommand(() =>
+                    relinquishRelaxedPolicyCommand = new RelayCommand(() =>
                     {
                         this.RelinquishRelaxedPolicy();
                     }, () => true);
                 }
 
-                return m_relinquishRelaxedPolicyCommand;
+                return relinquishRelaxedPolicyCommand;
             }
         }
     }

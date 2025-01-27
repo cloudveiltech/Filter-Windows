@@ -51,8 +51,6 @@ namespace Filter.Platform.Common.IPC
         public bool IsReceivingMessage { get; set; }
         public int CompletedBufferLength { get; set; }
 
-        private bool isInvalidSocket = false;
-
         private IAsyncResult receiveResult;
         private byte[] receiveBuffer;
 
@@ -66,7 +64,6 @@ namespace Filter.Platform.Common.IPC
             }
             catch (SocketException)
             {
-                isInvalidSocket = true;
             }
         }
 
@@ -219,8 +216,9 @@ namespace Filter.Platform.Common.IPC
         public event ConnectionHandler ClientConnected;
         public event ConnectionHandler ClientDisconnected;
         public event MessageHandler ClientMessage;
+#pragma warning disable 067
         public event PipeExceptionHandler Error;
-
+#pragma warning restore 067
         private Socket serverSocket;
         private List<ClientRepresentation> connectedClients;
 

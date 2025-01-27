@@ -173,7 +173,7 @@ namespace FilterProvider.Common.Util
             //
 
             // Don't bother if we don't have internet.
-            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            var hasInternet = NetworkStatus.Default.HasConnection;
             if(hasInternet == false)
             {
                 logger.Info("Aborting authentication attempt because no internet connection could be detected.");
@@ -387,7 +387,7 @@ namespace FilterProvider.Common.Util
             }
 
             // Don't bother if we don't have internet.
-            var hasInternet = NetworkStatus.Default.HasIpv4InetConnection || NetworkStatus.Default.HasIpv6InetConnection;
+            var hasInternet = NetworkStatus.Default.HasConnection;
             if (hasInternet == false)
             {
                 logger.Info("Aborting authentication attempt because no internet connection could be detected.");
@@ -686,9 +686,17 @@ namespace FilterProvider.Common.Util
                 return null;
             }
 
-            Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
 
-            return responseDict;
+            try
+            {
+                Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
+                return responseDict;
+            } catch(Exception ex)
+            {
+
+            }
+
+            return new Dictionary<string, bool?>();
         }
 
         public byte[] GetFilterLists(List<FilteringPlainTextListModel> toFetch, out HttpStatusCode code, out bool responseReceived)
@@ -1059,23 +1067,31 @@ namespace FilterProvider.Common.Util
                 return null;
             }
         }
+
         private void reportTokenRejected()
         {
             var neverAuthorized = UserEmail == null || UserEmail.Length == 0;
             logger.Info("reportTokenRejected " + UserEmail + " " + neverAuthorized);
-            if (neverAuthorized)
-            {
+            if (neverAuthorized) {
                 AuthTokenRejected?.Invoke();
+                dropUserLoginData();
                 return;
             }
             if (tokenRejectedFirstDateTime == DateTime.MinValue)
             {
                 tokenRejectedFirstDateTime = DateTime.Now;
-            }
-            else if (DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT)
+            } 
+            else if(DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT)
             {
                 AuthTokenRejected?.Invoke();
+                dropUserLoginData();
             }
+        }
+
+        private void dropUserLoginData()
+        {
+            AuthToken = "";
+            UserEmail = "";
         }
 
         private void reportTokenAccepted()

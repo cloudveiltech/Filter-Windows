@@ -14,20 +14,20 @@ namespace Filter.Platform.Common
 {
     public static class PlatformTypes
     {
-        private static ConcurrentDictionary<Type, Func<object[], object>> s_typeDictionary;
+        private static ConcurrentDictionary<Type, Func<object[], object>> typeDictionary;
 
         static PlatformTypes()
         {
-            s_typeDictionary = new ConcurrentDictionary<Type, Func<object[], object>>();
+            typeDictionary = new ConcurrentDictionary<Type, Func<object[], object>>();
         }
 
         public static T New<T>(params object[] parameters)
         {
             Type type = typeof(T);
 
-            if (s_typeDictionary.ContainsKey(type))
+            if (typeDictionary.ContainsKey(type))
             {
-                return (T)s_typeDictionary[type](parameters);
+                return (T)typeDictionary[type](parameters);
             }
             else
             {
@@ -39,7 +39,7 @@ namespace Filter.Platform.Common
         {
             Type type = typeof(T);
 
-            s_typeDictionary[type] = instantiationFunc;
+            typeDictionary[type] = instantiationFunc;
         }
     }
 }

@@ -37,14 +37,14 @@ namespace Gui.CloudVeil.UI.Views
 
         public void ShowDisabledInternetMessage(DateTime restoreTime)
         {
-            m_disabledInternetGrid.Visibility = Visibility.Visible;
+            disabledInternetGrid.Visibility = Visibility.Visible;
 
-            m_internetRestorationTimeLabel.Content = restoreTime.ToLongDateString() + " " + restoreTime.ToShortTimeString();
+            internetRestorationTimeLabel.Content = restoreTime.ToLongDateString() + " " + restoreTime.ToShortTimeString();
         }
 
         public void HideDisabledInternetMessage()
         {
-            m_disabledInternetGrid.Visibility = Visibility.Hidden;
+            disabledInternetGrid.Visibility = Visibility.Hidden;
         }
 
         private void OnHyperlinkClicked(object sender, RequestNavigateEventArgs e)

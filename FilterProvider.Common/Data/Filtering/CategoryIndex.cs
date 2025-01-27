@@ -11,28 +11,28 @@ namespace FilterProvider.Common.Data.Filtering
 {
     public class CategoryIndex
     {
-        private bool[] m_categoryIndex;
+        private bool[] categoryIndex;
 
         public CategoryIndex(short numCategories)
         {
-            m_categoryIndex = new bool[numCategories];
+            categoryIndex = new bool[numCategories];
         }
 
         public bool GetIsCategoryEnabled(short categoryId)
         {
             Thread.MemoryBarrier();
-            return m_categoryIndex[categoryId];
+            return categoryIndex[categoryId];
         }
 
         public void SetIsCategoryEnabled(short categoryId, bool value)
         {
             Thread.MemoryBarrier();
-            m_categoryIndex[categoryId] = value;
+            categoryIndex[categoryId] = value;
         }
 
         public void SetAll(bool value)
         {
-            var len = m_categoryIndex.Length;
+            var len = categoryIndex.Length;
             for(short i = 0; i < len; ++i)
             {
                 SetIsCategoryEnabled(i, value);

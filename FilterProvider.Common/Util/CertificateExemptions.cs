@@ -30,20 +30,20 @@ namespace FilterProvider.Common.Util
 
     public class CertificateExemptions
     {
-        private static string s_dbPath;
+        private static string dbPath;
 
         static CertificateExemptions()
         {
-            s_dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "ssl-exemptions.db");
+            dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CloudVeil", "ssl-exemptions.db");
         }
 
         public CertificateExemptions()
         {
-            m_logger = LoggerUtil.GetAppWideLogger();
+            logger = LoggerUtil.GetAppWideLogger();
 
             try
             {
-                SqliteConnection conn = openConnection(s_dbPath);
+                SqliteConnection conn = openConnection(dbPath);
 
                 SqliteCommand command = conn.CreateCommand();
 
@@ -55,18 +55,18 @@ namespace FilterProvider.Common.Util
                 command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS idx_thumbprint_host ON cert_exemptions (Thumbprint, Host)";
                 command.ExecuteNonQuery();
 
-                m_connection = conn;
+                connection = conn;
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
             }
         }
 
-        private NLog.Logger m_logger;
+        private NLog.Logger logger;
 
-        private SqliteConnection m_connection;
-        private object m_connectionLock = new object();
+        private SqliteConnection connection;
+        private object connectionLock = new object();
 
         private SqliteConnection openConnection(string dbPath)
         {
@@ -127,7 +127,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                using (SqliteCommand command = m_connection.CreateCommand())
+                using (SqliteCommand command = connection.CreateCommand())
                 {
                     bool createExemptionData = false;
 
@@ -160,7 +160,7 @@ namespace FilterProvider.Common.Util
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
                 if (triesLeft > 0)
                 {
                     attemptConnectionRecovery();
@@ -176,9 +176,9 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (m_connectionLock)
+                lock (connectionLock)
                 {
-                    using (SqliteCommand command = m_connection.CreateCommand())
+                    using (SqliteCommand command = connection.CreateCommand())
                     {
                         command.CommandText = "SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
                         command.Parameters.Add(new SqliteParameter("$certHash", certificate.GetCertHashString()));
@@ -201,7 +201,7 @@ namespace FilterProvider.Common.Util
             }
             catch (Exception ex)
             {
-                LoggerUtil.RecursivelyLogException(m_logger, ex);
+                LoggerUtil.RecursivelyLogException(logger, ex);
 
                 if (triesLeft > 0)
                 {
@@ -217,12 +217,12 @@ namespace FilterProvider.Common.Util
 
         private void attemptConnectionRecovery()
         {
-            lock (m_connectionLock)
+            lock (connectionLock)
             {
                 try
                 {
-                    m_connection.Dispose();
-                    m_connection = null;
+                    connection.Dispose();
+                    connection = null;
                 }
                 catch
                 {
@@ -231,11 +231,11 @@ namespace FilterProvider.Common.Util
 
                 try
                 {
-                    m_connection = openConnection(s_dbPath);
+                    connection = openConnection(dbPath);
                 }
                 catch (Exception ex)
                 {
-                    LoggerUtil.RecursivelyLogException(m_logger, ex);
+                    LoggerUtil.RecursivelyLogException(logger, ex);
                 }
             }
         }

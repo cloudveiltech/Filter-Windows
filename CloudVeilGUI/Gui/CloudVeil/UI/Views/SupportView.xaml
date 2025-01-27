@@ -102,7 +102,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                    Content="Activation Identifier:"
                    VerticalAlignment="Center"/>
 
-            <Label Content="{Binding ActivationIdentifier}"
+            <Label PreviewMouseDown="Identifier_Mouse_Down"  Content="{Binding ActivationIdentifier}"
                    VerticalAlignment="Center"/>
         </StackPanel>
     </Grid>

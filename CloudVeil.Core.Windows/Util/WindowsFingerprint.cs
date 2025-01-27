@@ -82,20 +82,20 @@ namespace CloudVeil.Core.Windows.Util
                 LoggerUtil.GetAppWideLogger()?.Info("Fingerprint seed is " + sb.ToString());
                 LoggerUtil.GetAppWideLogger()?.Info("Fingerprint short seed is " + sbShort.ToString());
                 byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
-                s_fingerPrintLong = BitConverter.ToString(bt).Replace("-", "");
+                fingerPrintLong = BitConverter.ToString(bt).Replace("-", "");
                 
                 bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sbShort.ToString()));
-                s_fingerPrintShort = BitConverter.ToString(bt).Replace("-", "");
+                fingerPrintShort = BitConverter.ToString(bt).Replace("-", "");
 
-                LoggerUtil.GetAppWideLogger()?.Info("My fingerprint is {0} and {1}", s_fingerPrintLong, s_fingerPrintShort);
+                LoggerUtil.GetAppWideLogger()?.Info("My fingerprint is {0} and {1}", fingerPrintLong, fingerPrintShort);
             }
         }
 
         /// <summary>
         /// Container for the device unique ID.
         /// </summary>
-        private static string s_fingerPrintLong;
-        private static string s_fingerPrintShort;
+        private static string fingerPrintLong;
+        private static string fingerPrintShort;
 
         /// <summary>
         /// Gets a unique identifier for this device based on miscelleneous unique ID's.
@@ -104,7 +104,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                return s_fingerPrintLong;
+                return fingerPrintLong;
             }
         }
 
@@ -112,7 +112,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                return s_fingerPrintShort;
+                return fingerPrintShort;
             }
         }
     }

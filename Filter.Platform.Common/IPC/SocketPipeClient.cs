@@ -32,7 +32,9 @@ namespace Filter.Platform.Common.IPC
         public event ClientConnectionHandler Connected;
         public event ClientConnectionHandler Disconnected;
         public event ServerMessageHandler ServerMessage;
+#pragma warning disable 0067 //never used warning
         public event PipeExceptionHandler Error;
+#pragma warning restore 0067
 
         Socket clientSocket;
         ClientRepresentation client;

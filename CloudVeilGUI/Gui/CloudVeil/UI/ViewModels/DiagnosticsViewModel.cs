@@ -24,21 +24,18 @@ namespace Gui.CloudVeil.UI.ViewModels
             DiagnosticsEntries = new ObservableCollection<DiagnosticsEntryViewModel>();
         }
 
-        private RelayCommand m_testFilterCommand;
+        private RelayCommand testFilterCommand;
         public RelayCommand TestFilterCommand
         {
             get
             {
-                if (m_testFilterCommand == null)
+                if (testFilterCommand == null)
                 {
-                    m_testFilterCommand = new RelayCommand(() =>
+                    testFilterCommand = new RelayCommand(() =>
                     {
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
-
                         Task.Run(() =>
                         {
                             test.TestFilter();
@@ -46,25 +43,23 @@ namespace Gui.CloudVeil.UI.ViewModels
                     });
                 }
 
-                return m_testFilterCommand;
+                return testFilterCommand;
             }
         }
 
-        private RelayCommand m_testDnsCommand;
+        private RelayCommand testDnsCommand;
 
         public RelayCommand TestDnsCommand
         {
             get
             {
-                if (m_testDnsCommand == null)
+                if (testDnsCommand == null)
                 {
-                    m_testDnsCommand = new RelayCommand(() =>
+                    testDnsCommand = new RelayCommand(() =>
                     {
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
 
                         Task.Run(() =>
                         {
@@ -73,20 +68,20 @@ namespace Gui.CloudVeil.UI.ViewModels
                     });
                 }
 
-                return m_testDnsCommand;
+                return testDnsCommand;
             }
         }
 
-        private Visibility m_dnsTestButtonVisibility;
+        private Visibility dnsTestButtonVisibility;
         public Visibility DnsTestButtonVisibility
         {
             get
             {
-                return m_dnsTestButtonVisibility;
+                return dnsTestButtonVisibility;
             }
             set
             {
-                m_dnsTestButtonVisibility = value;
+                dnsTestButtonVisibility = value;
                 RaisePropertyChanged(nameof(DnsTestButtonVisibility));
             }
         }
@@ -95,7 +90,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                return m_dnsTestButtonVisibility == Visibility.Visible;
+                return dnsTestButtonVisibility == Visibility.Visible;
             }
             set
             {
@@ -109,21 +104,19 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        private RelayCommand m_testSafeSearchCommand;
+        private RelayCommand testSafeSearchCommand;
 
         public RelayCommand TestSafeSearchCommand
         {
             get
             {
-                if (m_testSafeSearchCommand == null)
+                if (testSafeSearchCommand == null)
                 {
-                    m_testSafeSearchCommand = new RelayCommand(() =>
+                    testSafeSearchCommand = new RelayCommand(() =>
                     {
                         FilterTesting test = new FilterTesting();
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
-                        testsPassed = 0;
-                        testsTotal = 0;
 
                         if (IsDnsEnforcementEnabled)
                         {
@@ -138,12 +131,9 @@ namespace Gui.CloudVeil.UI.ViewModels
                     });
                 }
 
-                return m_testSafeSearchCommand;
+                return testSafeSearchCommand;
             }
         }
-
-        private int testsPassed = 0;
-        private int testsTotal = 0;
 
         /// <summary>
         /// Used by filter test to propagate results back to the UI.
@@ -153,10 +143,10 @@ namespace Gui.CloudVeil.UI.ViewModels
         private void Test_OnFilterTestResult(DiagnosticsEntry entry)
         {
             // TODO: Build UI for this.
-            m_logger.Info("OnFilterTestResult {0} {1}", entry.Test.ToString(), entry.Passed);
+            logger.Info("OnFilterTestResult {0} {1}", entry.Test.ToString(), entry.Passed);
             if (entry.Exception != null)
             {
-                m_logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
+                logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
             }
 
             if (entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
@@ -178,32 +168,32 @@ namespace Gui.CloudVeil.UI.ViewModels
             });
         }
 
-        private ObservableCollection<DiagnosticsEntryViewModel> m_diagnosticsEntries;
+        private ObservableCollection<DiagnosticsEntryViewModel> diagnosticsEntries;
         public ObservableCollection<DiagnosticsEntryViewModel> DiagnosticsEntries
         {
             get
             {
-                return m_diagnosticsEntries;
+                return diagnosticsEntries;
             }
 
             set
             {
-                m_diagnosticsEntries = value;
+                diagnosticsEntries = value;
                 RaisePropertyChanged(nameof(DiagnosticsEntries));
             }
         }
 
-        private string m_diagnosticsLog;
+        private string diagnosticsLog;
         public string DiagnosticsLog
         {
             get
             {
-                return m_diagnosticsLog;
+                return diagnosticsLog;
             }
 
             set
             {
-                m_diagnosticsLog = value;
+                diagnosticsLog = value;
                 RaisePropertyChanged(nameof(DiagnosticsLog));
             }
         }

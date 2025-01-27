@@ -31,14 +31,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         /// <summary>
         /// Private data member for the public DeactivateCommand property.
         /// </summary>
-        private RelayCommand m_deactivationCommand;
-
-        /// <summary>
-        /// Private data member for the public ViewLogsCommand property.
-        /// </summary>
-        private RelayCommand m_viewLogsCommand;
-
-        private RelayCommand m_viewSslExemptionsCommand;
+        private RelayCommand deactivationCommand;
 
         private string updateText;
         public string UpdateText
@@ -205,26 +198,26 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        private string m_errorText = "";
+        private string errorText = "";
         public string ErrorText
         {
-            get { return m_errorText; }
+            get { return errorText; }
             set
             {
-                m_errorText = value;
+                errorText = value;
                 RaisePropertyChanged(nameof(ErrorText));
             }
         }
 
         private bool shouldUpdateButtonInstall = false;
 
-        private bool m_isUpdateButtonEnabled = true;
+        private bool isUpdateButtonEnabled = true;
         public bool IsUpdateButtonEnabled
         {
-            get { return m_isUpdateButtonEnabled; }
+            get { return isUpdateButtonEnabled; }
             set
             {
-                m_isUpdateButtonEnabled = value;
+                isUpdateButtonEnabled = value;
                 RaisePropertyChanged(nameof(IsUpdateButtonEnabled));
             }
         }
@@ -484,9 +477,9 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (m_deactivationCommand == null)
+                if (deactivationCommand == null)
                 {
-                    m_deactivationCommand = new RelayCommand((Action)(() =>
+                    deactivationCommand = new RelayCommand((Action)(() =>
                     {
                         try
                         {
@@ -506,12 +499,12 @@ namespace Gui.CloudVeil.UI.ViewModels
                         }
                         catch (Exception e)
                         {
-                            LoggerUtil.RecursivelyLogException(m_logger, e);
+                            LoggerUtil.RecursivelyLogException(logger, e);
                         }
                     }));
                 }
 
-                return m_deactivationCommand;
+                return deactivationCommand;
             }
         }
     }

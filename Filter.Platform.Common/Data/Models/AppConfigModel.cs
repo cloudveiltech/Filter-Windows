@@ -52,6 +52,11 @@ namespace Filter.Platform.Common.Data.Models
             get;
             set;
         } = new HashSet<string>();
+        public HashSet<string> BlockedApplications
+        {
+            get;
+            set;
+        } = new HashSet<string>();
 
         /// <summary>
         /// Indicates whether or not the application should employ countermeasures to ensure that it
@@ -233,6 +238,7 @@ namespace Filter.Platform.Common.Data.Models
         /// List of all text triggers that the user wants blocked on their devices.
         /// </summary>
         public List<string> CustomTriggerBlacklist { get; set; } = new List<string>();
+        public List<string> CustomBlockedApps { get; set; } = new List<string>();
 
         public Dictionary<string, TimeRestrictionModel> TimeRestrictions = new Dictionary<string, TimeRestrictionModel>();
 

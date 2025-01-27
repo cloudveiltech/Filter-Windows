@@ -110,22 +110,22 @@ namespace CloudVeil.IPC
         /// <summary>
         /// All message handlers get added to this IPC client as it will stick around and handle all the incoming messages.
         /// </summary>
-        private static IPCClient s_default;
+        private static IPCClient defaultClient;
         public static IPCClient Default
         {
             get
             {
-                if(s_default == null)
+                if(defaultClient == null)
                 {
                     throw new NullReferenceException("You must specify a Default IPCClient before using it.");
                 }
 
-                return s_default;
+                return defaultClient;
             }
 
             set
             {
-                s_default = value;
+                defaultClient = value;
             }
         }
 
@@ -159,7 +159,7 @@ namespace CloudVeil.IPC
 
             client.Start();
 
-            m_callbacks.Add(typeof(IpcMessage), (msg) =>
+            callbacks.Add(typeof(IpcMessage), (msg) =>
             {
                 HandleIpcMessage(msg as IpcMessage);
             });
@@ -200,7 +200,7 @@ namespace CloudVeil.IPC
             client.WaitForConnection();
         }
 
-        private Dictionary<Type, Action<BaseMessage>> m_callbacks = new Dictionary<Type, Action<BaseMessage>>();
+        private Dictionary<Type, Action<BaseMessage>> callbacks = new Dictionary<Type, Action<BaseMessage>>();
 
         protected void OnServerMessage(BaseMessage message)
         {
@@ -223,7 +223,7 @@ namespace CloudVeil.IPC
             var msgRealType = message.GetType();
 
             Action<BaseMessage> callback = null;
-            if(m_callbacks.TryGetValue(msgRealType, out callback))
+            if(callbacks.TryGetValue(msgRealType, out callback))
             {
                 logger.Debug("Server message is {0}", msgRealType.Name);
                 callback?.Invoke(message);

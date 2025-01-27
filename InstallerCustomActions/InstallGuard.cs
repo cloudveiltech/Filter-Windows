@@ -17,20 +17,14 @@ namespace InstallerCustomActions
 {
     public class InstallGuard
     {
+
         [CustomAction]
         public static ActionResult GuardInstall(Session session)
         {
+            Debugger.Break();
             try
             {
-                string installDir = null;
-                if (!session.CustomActionData.TryGetValue("TargetDirectory", out installDir))
-                {
-                    session.Log($"InstallGuard: Could not find TargetDirectory variable");
-                }
-                else
-                {
-                    session.Log($"InstallGuard: Install directory is {installDir}");
-                }
+                string installDir = session.CustomActionData["TargetDirectory"];
 
                 foreach (var proc in Process.GetProcesses())
                 {

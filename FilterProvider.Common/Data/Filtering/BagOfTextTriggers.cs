@@ -34,12 +34,12 @@ namespace FilterProvider.Common.Data.Filtering
         /// <summary>
         /// Our Sqlite connection.
         /// </summary>
-        private SqliteConnection m_connection;
+        private SqliteConnection connection;
 
         /// <summary>
         /// Holds whether or not this instance has any triggers loaded.
         /// </summary>
-        private volatile bool m_hasTriggers = false;
+        private volatile bool hasTriggers = false;
 
         /// <summary>
         /// Get whether or not this instance has any triggers loaded.
@@ -48,7 +48,7 @@ namespace FilterProvider.Common.Data.Filtering
         {
             get
             {
-                return m_hasTriggers;
+                return hasTriggers;
             }
         }
 
@@ -62,7 +62,7 @@ namespace FilterProvider.Common.Data.Filtering
         /// </summary>
         public BloomFilter<string> FirstWordFilter { get; set; }
 
-        private Logger m_logger;
+        private Logger logger;
 
         /// <summary>
         /// Constructs a new BagOfTextTriggers.
@@ -79,7 +79,7 @@ namespace FilterProvider.Common.Data.Filtering
         /// </param>
         public BagOfTextTriggers(string dbAbsolutePath, bool overwrite = true, bool useMemory = false, Logger logger = null)
         {
-            m_logger = logger;
+            this.logger = logger;
 
             if(!useMemory && overwrite && File.Exists(dbAbsolutePath))
             {
@@ -100,9 +100,9 @@ namespace FilterProvider.Common.Data.Filtering
                 cb.Mode = SqliteOpenMode.Memory;
                 cb.Cache = SqliteCacheMode.Shared;
                 cb.DataSource = generatedDbName;
-                m_connection = new SqliteConnection(cb.ToString());
+                connection = new SqliteConnection(cb.ToString());
 
-                //m_connection = new SqliteConnection("FullUri=file::memory:?cache=shared;Version=3;");
+                //connection = new SqliteConnection("FullUri=file::memory:?cache=shared;Version=3;");
             }
             else
             {
@@ -111,12 +111,12 @@ namespace FilterProvider.Common.Data.Filtering
                 cb.Cache = SqliteCacheMode.Shared;
                 cb.DataSource = dbAbsolutePath;
 
-                m_connection = new SqliteConnection(cb.ToString());
-                //m_connection = new SqliteConnection(string.Format("Data Source={0};Version=3;", dbAbsolutePath));
+                connection = new SqliteConnection(cb.ToString());
+                //connection = new SqliteConnection(string.Format("Data Source={0};Version=3;", dbAbsolutePath));
             }
 
-            //m_connection.Flags = SQLiteConnectionFlags.UseConnectionPool | SQLiteConnectionFlags.NoConvertSettings | SQLiteConnectionFlags.NoVerifyTypeAffinity;
-            m_connection.Open();
+            //connection.Flags = SQLiteConnectionFlags.UseConnectionPool | SQLiteConnectionFlags.NoConvertSettings | SQLiteConnectionFlags.NoVerifyTypeAffinity;
+            connection.Open();
 
             ConfigureDatabase();
 
@@ -129,7 +129,7 @@ namespace FilterProvider.Common.Data.Filtering
         /// </summary>
         private async void ConfigureDatabase()
         {
-            using(var cmd = m_connection.CreateCommand())
+            using(var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "PRAGMA page_size=65536;";
                 await cmd.ExecuteNonQueryAsync();
@@ -174,8 +174,8 @@ namespace FilterProvider.Common.Data.Filtering
         /// </summary>
         private async void CreateTables()
         {
-            using(var tsx = m_connection.BeginTransaction())
-            using(var command = m_connection.CreateCommand())
+            using(var tsx = connection.BeginTransaction())
+            using(var command = connection.CreateCommand())
             {
                 command.CommandText = "CREATE TABLE IF NOT EXISTS TriggerIndex (TriggerText VARCHAR(255), CategoryId INT16)";
                 await command.ExecuteNonQueryAsync();
@@ -192,7 +192,7 @@ namespace FilterProvider.Common.Data.Filtering
         /// </summary>
         private void CreatedIndexes()
         {
-            using(var command = m_connection.CreateCommand())
+            using(var command = connection.CreateCommand())
             {
                 command.CommandText = "CREATE INDEX IF NOT EXISTS trigger_index ON TriggerIndex (TriggerText)";
                 command.ExecuteNonQuery();
@@ -217,7 +217,7 @@ namespace FilterProvider.Common.Data.Filtering
         {
             int firstWordCount;
 
-            using (var countCmd = m_connection.CreateCommand())
+            using (var countCmd = connection.CreateCommand())
             {
                 countCmd.CommandText = "SELECT COUNT(1) FROM FirstWordIndex;";
 
@@ -230,7 +230,7 @@ namespace FilterProvider.Common.Data.Filtering
 
             FirstWordFilter = new BloomFilter<string>(firstWordCount == 0 ? 100 : firstWordCount);
 
-            using (var cmd = m_connection.CreateCommand())
+            using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT FirstWordText FROM FirstWordIndex;";
 
@@ -246,7 +246,7 @@ namespace FilterProvider.Common.Data.Filtering
 
             int triggerCount;
 
-            using (var countCmd = m_connection.CreateCommand())
+            using (var countCmd = connection.CreateCommand())
             {
                 countCmd.CommandText = "SELECT COUNT(1) FROM TriggerIndex;";
 
@@ -259,7 +259,7 @@ namespace FilterProvider.Common.Data.Filtering
 
             TriggerFilter = new BloomFilter<string>(triggerCount == 0 ? 100 : triggerCount);
             
-            using (var cmd = m_connection.CreateCommand())
+            using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT TriggerText FROM TriggerIndex;";
 
@@ -273,7 +273,7 @@ namespace FilterProvider.Common.Data.Filtering
                 }
             }
 
-            m_logger.Info($"trigger count = {triggerCount}, first word count = {firstWordCount}");
+            logger.Info($"trigger count = {triggerCount}, first word count = {firstWordCount}");
         }
 
         private class StoreCommands : IDisposable
@@ -370,9 +370,9 @@ namespace FilterProvider.Common.Data.Filtering
         public async Task<int> LoadStoreFromList(IEnumerable<string> inputList, short categoryId)
         {
             int loaded = 0;
-            using (var transaction = m_connection.BeginTransaction())
+            using (var transaction = connection.BeginTransaction())
             {
-                using (var storeCommands = new StoreCommands(m_connection))
+                using (var storeCommands = new StoreCommands(connection))
                 {
                     foreach(string line in inputList)
                     {
@@ -385,7 +385,7 @@ namespace FilterProvider.Common.Data.Filtering
                 transaction.Commit();
             }
 
-            m_hasTriggers = loaded > 0;
+            hasTriggers = loaded > 0;
 
             return loaded;
         }
@@ -405,9 +405,9 @@ namespace FilterProvider.Common.Data.Filtering
         public async Task<int> LoadStoreFromStream(Stream inputStream, short categoryId)
         {
             int loaded = 0;
-            using(var transaction = m_connection.BeginTransaction())
+            using(var transaction = connection.BeginTransaction())
             {
-                using (var storeCommands = new StoreCommands(m_connection))
+                using (var storeCommands = new StoreCommands(connection))
                 {
                     string line = null;
                     using (var sw = new StreamReader(inputStream))
@@ -422,7 +422,7 @@ namespace FilterProvider.Common.Data.Filtering
                 transaction.Commit();
             }
 
-            m_hasTriggers = loaded > 0;
+            hasTriggers = loaded > 0;
 
             return loaded;
         }
@@ -438,7 +438,7 @@ namespace FilterProvider.Common.Data.Filtering
         /// </returns>
         public bool IsTrigger(string input, out short firstMatchCategory, Func<short, bool> categoryAppliesCb)
         {
-            using(var cmd = m_connection.CreateCommand())
+            using(var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = @"SELECT * from TriggerIndex where TriggerText = $trigger";
 
@@ -506,7 +506,7 @@ namespace FilterProvider.Common.Data.Filtering
             firstMatchCategory = -1;
             matchedTrigger = null;
 
-            if(!m_hasTriggers)
+            if(!hasTriggers)
             {
                 return false;
             }
@@ -517,7 +517,7 @@ namespace FilterProvider.Common.Data.Filtering
 
             /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
             using (StreamWriter writer = new StreamWriter(debugStream))*/
-            using (var myConn = new SqliteConnection(m_connection.ConnectionString))
+            using (var myConn = new SqliteConnection(connection.ConnectionString))
             {
                 myConn.Open();
 
@@ -867,10 +867,10 @@ namespace FilterProvider.Common.Data.Filtering
             {
                 if(disposing)
                 {
-                    if(m_connection != null)
+                    if(connection != null)
                     {
-                        m_connection.Close();
-                        m_connection = null;
+                        connection.Close();
+                        connection = null;
                     }
                 }
 

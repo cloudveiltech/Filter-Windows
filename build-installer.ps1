@@ -90,8 +90,6 @@ $msbuildPath = Find-MsBuild
 $signtoolPath = Find-SignTool
 $currentLocation = Get-Location
 
-$wixVerifyPath = Join-Path $currentLocation "wix-verify-bin\wix-verify.exe"
-
 $cleanBuild = "Clean,Build"
 
 $builds = @(
@@ -99,12 +97,16 @@ $builds = @(
     @("AnyCPU", "InstallerCheckPackageCache\InstallerCheckPackageCache.csproj", $cleanBuild),
     @("x86", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x64", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
+    @("AnyCPU", "InstallerCustomActions\InstallerCustomActions.csproj", $cleanBuild),
     @("x86", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
+    @("AnyCPU", "FilterAgent.Windows\FilterAgent.Windows.csproj", $cleanBuild),
     @("x64", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
     @("x86", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
+    @("ARM64", "CloudVeilService\CloudVeilService.csproj", $cleanBuild),
     @("x64", "CloudVeilGUI\CloudVeilGUI.csproj", "Build"),
     @("x86", "CloudVeilGUI\CloudVeilGUI.csproj", "Build"),
+    @("ARM64", "CloudVeilGUI\CloudVeilGUI.csproj", "Build"),
     @("AnyCPU", "CloudVeilInstallerUI\CloudVeilInstallerUI.csproj", $cleanBuild)
 )
 
@@ -162,33 +164,57 @@ $product64 = Join-Path $currentLocation "Installers\SetupProjects\Product-x64.wx
 $output64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\Setup x64.msi"
 $bundle64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-x64.exe"
 
+$payloadArm64 = Join-Path $currentLocation "Installers\SetupPayloadArm64\SetupPayloadArm64.wixproj"
+$setupArm64 = Join-Path $currentLocation "Installers\SetupProjects\Setup Arm64.wixproj"
+$productArm64 = Join-Path $currentLocation "Installers\SetupProjects\Product-Arm64.wxs"
+$outputArm64 = Join-Path $currentLocation "Installers\SetupProjects\$configuration\Setup Arm64.msi"
+$bundleArm64 = Join-Path $currentLocation "CloudVeilInstaller\bin\$configuration\CloudVeilInstaller-Arm64.exe"
+
+
 <# Sign executable files x64 #>
 echo "Signing x64 executables"
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x64\CloudVeil.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x64\FilterServiceProvider.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x64\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration x64\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x64\Sentinel.exe"
 
 echo "Building MSI x64"
 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload64 /t:Clean,Build 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup64 /t:Clean,Build,SignMsi 
 
-# echo "Signing MSI x64"
-# & $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a $output64 
+
+
+<# Sign executable files arm64 #>
+echo "Signing arm64 executables"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc."/a "CloudVeilGUI\bin\$configuration arm64\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration arm64\Sentinel.exe"
+
+echo "Building MSI arm64"
+
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payloadArm64 /t:Clean,Build 
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setupArm64 /t:Clean,Build,SignMsi 
+
 
 <# Sign executable files x86 #>
 echo "Signing x86 executables" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x86\CloudVeil.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x86\FilterServiceProvider.exe" 
-& $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a "CloudVeilGUI\bin\$configuration x86\FilterAgent.Windows.exe" 
-
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\CloudVeil.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterServiceProvider.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\FilterAgent.Windows.exe" 
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Warden.exe"
+& $signtoolPath sign /td SHA256 /fd SHA512 /tr http://timestamp.digicert.com /n "CloudVeil Technology, Inc." /a "CloudVeilGUI\bin\$configuration x86\Sentinel.exe"
 echo "Building MSI x86"
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $payload86 /t:Clean,Build 
 & $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $setup86 /t:Clean,Build,SignMsi 
 
 # & $signtoolPath sign /fd SHA512 /tr http://timestamp.digicert.com /a $output86
 
-$versionString = & $wixVerifyPath get $product64 wix.product.version
+[xml]$xmlElm = Get-Content $product64
+$versionString = $xmlElm.Wix.Package.Version
 $versionObj = [System.Version]::Parse($versionString)
 $version = $versionObj.ToString(3)
 
@@ -207,3 +233,12 @@ $finalBundle64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$vers
 $final64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winx64.msi"
 Copy-Item $bundle64 -Destination $finalBundle64
 Copy-Item $output64 -Destination $final64
+
+
+echo "Building installer bundle arm64"
+& $msbuildPath /p:Configuration=$configuration /p:SolutionDir=$currentLocation $bundleProject /p:Platform=x86 /p:MsiPlatform=arm64 /t:Clean,Build,SignBundleEngine,SignBundle 
+
+$finalBundleArm64 = Join-Path $currentLocation "Installers\CloudVeilInstaller-$version-cv4w-arm64.exe"
+$finalArm64 = Join-Path $currentLocation "Installers\CloudVeil-$version-winArm64.msi"
+Copy-Item $bundleArm64 -Destination $finalBundleArm64
+Copy-Item $outputArm64 -Destination $finalArm64

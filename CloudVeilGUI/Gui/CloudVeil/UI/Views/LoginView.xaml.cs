@@ -20,11 +20,11 @@ namespace Gui.CloudVeil.UI.Views
             InitializeComponent();
         }
 
-        private Keys m_keyCode;
+        private Keys keyCode;
 
         private void Form1_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            this.m_keyCode = e.KeyCode;
+            this.keyCode = e.KeyCode;
         }
 
         private void True(object sender, System.Windows.Input.KeyEventArgs e)
