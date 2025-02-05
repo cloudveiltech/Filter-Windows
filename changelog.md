@@ -1,3 +1,9 @@
+# v2.2.54 - 5 Feb 2025
+
+Installer now reports OS version on non compatible versions.
+
+#public
+
 # v2.2.52 - 9 Dec 2024
 
 Fixes an issue with slow Google searches.  
