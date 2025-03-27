@@ -47,6 +47,7 @@ namespace Gui.CloudVeil.UI.Views
                         if (tabType.IsAssignableFrom(item.Tag.GetType()))
                         {
                             MenuControl.SelectedIndex = i;
+                            MenuControl.Content = item;
                             break;
                         }
                     }

@@ -135,7 +135,6 @@
     <Compile Include="Platform\Common\ITrayIcon.cs" />
     <Compile Include="Platform\Common\StatusIconMenuItem.cs" />
     <Compile Include="Platform\Windows\WindowsGuiServices.cs" />
-    <Compile Include="Platform\Windows\WindowsTrayIconController.cs" />
     <Compile Include="Gui\CloudVeil\CloudVeilGuiMain.cs" />
     <Compile Include="CompileSecrets.cs" />
     <Compile Include="Gui\CloudVeil\ConflictInfo.cs" />
