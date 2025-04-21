@@ -178,11 +178,23 @@ namespace Filter.Platform.Common.Data.Models
             set;
         } = string.Empty;
 
+        public string PrimaryDnsV6
+        {
+            get;
+            set;
+        } = string.Empty;
+
         /// <summary>
         /// A string representation of the secondary DNS server that should be set for the local
         /// device. May be empty, and thus not defined.
         /// </summary>
         public string SecondaryDns
+        {
+            get;
+            set;
+        } = string.Empty; 
+        
+        public string SecondaryDnsV6
         {
             get;
             set;
