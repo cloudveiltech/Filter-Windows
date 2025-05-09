@@ -1,6 +1,12 @@
+# v2.2.56 - 21 Apr 2025
+
+Added support for IPv6 DNS.
+
+#public
+
 # v2.2.54 - 5 Feb 2025
 
-Installer now reports OS version on non compatible versions.
+Installer now reports OS version on non-compatible versions.
 
 #public
 
