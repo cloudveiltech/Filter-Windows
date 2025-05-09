@@ -193,7 +193,7 @@ namespace FilterProvider.Common.Util
             };
         }
 
-        private void SetDnsToDhcp(bool sendDnsChangeEvents)
+        public void SetDnsToDhcp(bool sendDnsChangeEvents)
         {
             logger.Info("Setting DNS to DHCP.");
 
@@ -449,7 +449,7 @@ namespace FilterProvider.Common.Util
                 isBehindCaptivePortal = isCaptivePortal;
                 logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
                 
-		TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
+		        TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
             {

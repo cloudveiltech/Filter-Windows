@@ -1911,13 +1911,17 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Stops the filtering engine, shuts it down. 
         /// </summary>
-        private void StopFiltering()
+        private async void StopFiltering()
         {
-
             logger.Info("Stop filtering");
             if (filteringEngine != null && filteringEngine.IsRunning)
             {
                 filteringEngine.Stop();
+            }
+            
+            bool isDnsUp = await dnsEnforcement.IsDnsUp();
+            if (isDnsUp) {
+                dnsEnforcement.SetDnsToDhcp(false);
             }
 
             try
