@@ -508,6 +508,8 @@ namespace FilterProvider.Common.Configuration
 
                     // XXX TODO - Maybe make it a compiler flag to toggle if this is going to
                     // be an in-memory DB or not.
+                    var textTriggersDb = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat");
+
                     textTriggers = new BagOfTextTriggers(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "t.dat"), true, true, logger);
 
                     // Now clear all generated categories. These will be re-generated as needed.
@@ -643,13 +645,8 @@ namespace FilterProvider.Common.Configuration
                         AddCustomConfiguredSiteList(Configuration.SelfModeration, tempFolder, ".user.self_moderation.rules.txt", "/user/self_moderation", PlainTextFilteringListType.Blacklist, ListType.Blacklist);
                     }
 
-                    //filterCollection.FinalizeForRead();
-                    //filterCollection.InitializeBloomFilters();
-
                     textTriggers.FinalizeForRead();
                     textTriggers.InitializeBloomFilters();
-
-               //     AdBlockMatcherApi.Save(s_paths.GetPath("rules.dat"));
 
                     ListsReloaded?.Invoke(this, new EventArgs());
 
