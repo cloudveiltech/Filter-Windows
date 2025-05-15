@@ -53,8 +53,11 @@ namespace FilterProvider.Common.Util
 
         #region DnsEnforcement.Enforce
         
-        IPAddress lastPrimary = null;
-        IPAddress lastSecondary = null;
+        IPAddress lastPrimaryV4 = null;
+        IPAddress lastSecondaryV4 = null;
+        IPAddress lastPrimaryV6 = null;
+        IPAddress lastSecondaryV6 = null;
+
 
         /// <summary>
         /// 
@@ -89,40 +92,48 @@ namespace FilterProvider.Common.Util
                     }
                     else
                     {
-                        IPAddress primaryDns = null;
-                        IPAddress secondaryDns = null;
+                        IPAddress primaryDnsV4 = null;
+                        IPAddress primaryDnsV6 = null;
+                        IPAddress secondaryDnsV4 = null;
+                        IPAddress secondaryDnsV6 = null;
 
                         var cfg = policyConfiguration.Configuration;
 
                         // Check if any DNS servers are defined, and if so, set them.
-                        if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+                        if (cfg != null)
                         {
-                            IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
+                            primaryDnsV4 = cfg.PrimaryDns.TryParseAsIpAddress();
+                            secondaryDnsV4 = cfg.SecondaryDns.TryParseAsIpAddress();
+                            primaryDnsV6 = cfg.PrimaryDnsV6.TryParseAsIpAddress();
+                            secondaryDnsV6 = cfg.SecondaryDnsV6.TryParseAsIpAddress();
                         }
 
-                        if (cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
+                        if (primaryDnsV4 != null || secondaryDnsV4 != null || primaryDnsV6 != null || secondaryDnsV6 != null)
                         {
-                            IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
-                        }
+                            logger.Info("Settings DNS To {0}, {1}, {2}, {3}", primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6);
+                            platformDns.SetDnsForAllInterfaces(primaryDnsV4, secondaryDnsV4);
 
-                        if (primaryDns != null || secondaryDns != null)
-                        {
-                            bool ranUpdate = platformDns.SetDnsForAllInterfaces(primaryDns, secondaryDns);
+                            platformDns.SetDnsForAllInterfaces(primaryDnsV6, secondaryDnsV6); 
 
-                            if(areDnsServersChanging(primaryDns, secondaryDns))
+                            if (areDnsServersChanging(primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6))
                             {
                                 OnDnsChanging(sendDnsChangeEvents);
                             }
 
-                            lastPrimary = primaryDns;
-                            lastSecondary = secondaryDns;
+
+                            lastPrimaryV4 = primaryDnsV4;
+                            lastSecondaryV4 = secondaryDnsV4;
+                            lastPrimaryV6 = primaryDnsV6;
+                            lastSecondaryV6 = secondaryDnsV6;
                         }
                         else
                         {
                             // Neither primary nor secondary DNS are set. Clear them for our users.
                             SetDnsToDhcp(sendDnsChangeEvents);
-                            lastPrimary = null;
-                            lastSecondary = null;
+                            lastPrimaryV4 = null;
+                            lastSecondaryV4 = null;
+                            lastPrimaryV6 = null;
+                            lastSecondaryV6 = null;
                         }
                     }
                 }
@@ -131,6 +142,11 @@ namespace FilterProvider.Common.Util
                     LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
+        }
+
+        private void parseDnsIps()
+        {
+
         }
 
         private bool isDnsServerChanged(IPAddress ip, IPAddress last)
@@ -153,12 +169,12 @@ namespace FilterProvider.Common.Util
             return false;
         }
 
-        private bool areDnsServersChanging(IPAddress primary, IPAddress secondary)
+        private bool areDnsServersChanging(IPAddress primaryV4, IPAddress secondaryV4, IPAddress primaryV6, IPAddress secondaryV6)
         {
-            bool primaryChanged = isDnsServerChanged(primary, lastPrimary);
-            bool secondaryChanged = isDnsServerChanged(secondary, lastSecondary);
-
-            return primaryChanged || secondaryChanged;
+            return isDnsServerChanged(primaryV4, lastPrimaryV4) ||
+                   isDnsServerChanged(secondaryV4, lastSecondaryV4) ||
+                   isDnsServerChanged(primaryV6, lastPrimaryV6) || 
+                   isDnsServerChanged(secondaryV6, lastPrimaryV6);
         }
 
         public event DnsChangeEventHandler DnsChanged;
@@ -177,38 +193,28 @@ namespace FilterProvider.Common.Util
             };
         }
 
-        private void SetDnsToDhcp(bool sendDnsChangeEvents)
+        public void SetDnsToDhcp(bool sendDnsChangeEvents)
         {
             logger.Info("Setting DNS to DHCP.");
 
             // Is configuration loaded?
-            IPAddress primaryDns = null;
-            IPAddress secondaryDns = null;
+            IPAddress primaryDnsV4 = null;
+            IPAddress secondaryDnsV4 = null;
+            IPAddress primaryDnsV6 = null;
+            IPAddress secondaryDnsV6 = null;
 
             var cfg = policyConfiguration.Configuration;
-
-            // Check if any DNS servers are defined, and if so, set them.
-            if (cfg != null && StringExtensions.Valid(cfg.PrimaryDns))
+            if (cfg != null)
             {
-                IPAddress.TryParse(cfg.PrimaryDns.Trim(), out primaryDns);
+                primaryDnsV4 = cfg.PrimaryDns.TryParseAsIpAddress();
+                secondaryDnsV4 = cfg.SecondaryDns.TryParseAsIpAddress();
+                primaryDnsV6 = cfg.PrimaryDnsV6.TryParseAsIpAddress();
+                secondaryDnsV6 = cfg.SecondaryDnsV6.TryParseAsIpAddress();
             }
 
-            if (cfg != null && StringExtensions.Valid(cfg.SecondaryDns))
-            {
-                IPAddress.TryParse(cfg.SecondaryDns.Trim(), out secondaryDns);
-            }
+            logger.Info("Stored DNS in configuration {0}, {1}", primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6);
 
-            logger.Info("Stored DNS in configuration {0}, {1}", primaryDns, secondaryDns);
-
-            if (lastPrimary == null && lastSecondary == null && primaryDns == null && secondaryDns == null)
-            {
-                // Don't mangle with the user's DNS settings, since our filter isn't controlling them.
-                logger.Info("Primary and Secondary DNS servers are both null.");
-
-                return;
-            }
-
-            if(areDnsServersChanging(primaryDns, secondaryDns))
+            if(areDnsServersChanging(primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6))
             {
                 OnDnsChanging(sendDnsChangeEvents);
             }
@@ -443,7 +449,7 @@ namespace FilterProvider.Common.Util
                 isBehindCaptivePortal = isCaptivePortal;
                 logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
                 
-		TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
+		        TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
             catch (Exception ex)
             {

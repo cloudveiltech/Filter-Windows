@@ -6,6 +6,7 @@
 */
 
 using System;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -170,6 +171,16 @@ namespace Filter.Platform.Common.Extensions
         /// False if the string is null, empty or whitespace only. True otherwise.
         /// </returns>
         public static bool Valid(string str) => !string.IsNullOrWhiteSpace(str);
+        public static IPAddress TryParseAsIpAddress(this string str)
+        {
+            if(str != null && str.Length > 0)
+            {
+                IPAddress result = null;
+                IPAddress.TryParse(str, out result);
+                return result;
+            }
+            return null;            
+        }
     }
 }
  

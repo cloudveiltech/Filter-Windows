@@ -31,6 +31,7 @@ using CloudVeilCore.Windows.Diversion;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using FilterProvider.Common.Util;
+using static Filter.Platform.Common.Util.ConnectivityCheck;
 
 namespace CloudVeilService.Services
 {
@@ -266,24 +267,17 @@ namespace CloudVeilService.Services
                     {
                         FillApplicationLists();
                     };
-
-                    diverter.Start(() =>
+                    
+                    WebServiceUtil.Default.AuthTokenRejected += () =>
                     {
-                        logger.Info("Diverter was started successfully.");
+                        diverter.Stop();
+                    };
 
-                        IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
-                        ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
-
-                        if (accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
-                        {
-                            server.Send<bool>(IpcCall.InternetAccessible, false);
-                        }
-                        else
-                        {
-                            server.Send<bool>(IpcCall.InternetAccessible, true);
-                        }
-                        FillApplicationLists();
-                    });
+                    WebServiceUtil.Default.AuthTokenAccepted += () =>
+                    {
+                        logger.Info("AuthTokenAccepted StartDiverter");
+                        StartDiverter(accessible, server);
+                    };
                 }
                 catch(Exception ex)
                 {
@@ -293,6 +287,27 @@ namespace CloudVeilService.Services
                 
             });
 
+        }
+
+        private void StartDiverter(ConnectivityCheck.Accessible accessible, IPCServer server)
+        {
+            diverter.Start(() =>
+            {
+                logger.Info("Diverter was started successfully.");
+
+                IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
+                ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
+
+                if (accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
+                {
+                    server.Send<bool>(IpcCall.InternetAccessible, false);
+                }
+                else
+                {
+                    server.Send<bool>(IpcCall.InternetAccessible, true);
+                }
+                FillApplicationLists();
+            });
         }
 
         private void FillApplicationLists()

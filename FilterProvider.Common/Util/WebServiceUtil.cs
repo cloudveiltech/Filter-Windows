@@ -29,7 +29,7 @@ using NodaTime.Text;
 
 namespace FilterProvider.Common.Util
 {
-    internal enum ServiceResource
+    public enum ServiceResource
     {
         UserConfigSumCheck,
         UserConfigRequest,
@@ -58,12 +58,13 @@ namespace FilterProvider.Common.Util
     /// application lifetime, because this application was only ever designed to support, by
     /// requirement, a single validated/authenticated user.
     /// </summary>
-    internal class WebServiceUtil
+    public class WebServiceUtil
     {
         private DateTime tokenRejectedFirstDateTime = DateTime.MinValue;
         private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1);
 
         public event GenericWebServiceUtilDelegate AuthTokenRejected;
+        public event GenericWebServiceUtilDelegate AuthTokenAccepted;
 
         private static readonly Dictionary<ServiceResource, string> namedResourceMap = new Dictionary<ServiceResource, string>
         {
@@ -251,6 +252,7 @@ namespace FilterProvider.Common.Util
 
                         authStorage.DeviceId = deviceName;
                         authStorage.AuthId = FingerprintService.Default.Value;
+                        reportTokenAccepted();
                         return ret;
                     }
                     else
@@ -452,6 +454,7 @@ namespace FilterProvider.Common.Util
 
                         authStorage.DeviceId = deviceName;
                         authStorage.AuthId = FingerprintService.Default.Value;
+                        reportTokenAccepted();
                         return ret;
                     }
                     else
@@ -632,7 +635,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-            //request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+          //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -839,9 +842,7 @@ namespace FilterProvider.Common.Util
 
                 //logger.Info("RequestResource1: accessToken=" + accessToken);
                 IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
-                string version = versionProvider.GetApplicationVersion().ToString(3);
-
-          
+                string version = versionProvider.GetApplicationVersion().ToString(3);          
 
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
@@ -938,6 +939,7 @@ namespace FilterProvider.Common.Util
                         // Check if response code is considered a success code.
                         if (intCode >= 200 && intCode <= 299)
                         {
+                            reportTokenAccepted();
                             authStorage.DeviceId = deviceName;
                             authStorage.AuthId = FingerprintService.Default.Value;
 
@@ -967,8 +969,6 @@ namespace FilterProvider.Common.Util
                         request.Abort();
                     }
                 }
-
-                reportTokenAccepted();
             }
             catch(WebException e)
             {
@@ -992,11 +992,12 @@ namespace FilterProvider.Common.Util
                         code = (HttpStatusCode)intCode;
 
                         // Auth failure means re-log EXCEPT when requesting deactivation.
-                        if((intCode == 401 || intCode == 403) && resource != ServiceResource.DeactivationRequest)
+                        if((intCode == 401 || intCode == 403 || intCode == 406) && resource != ServiceResource.DeactivationRequest)
                         {
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             logger.Info("RequestResource2: Authorization failed.");
-                            reportTokenRejected();
+                            var bannedReponse = intCode == 406;
+                            reportTokenRejected(bannedReponse);
                         }
                         else if(intCode > 399 && intCode <= 499 && resource != ServiceResource.DeactivationRequest)
                         {
@@ -1068,11 +1069,11 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        private void reportTokenRejected()
+        private void reportTokenRejected(bool skipTimeout = false)
         {
             var neverAuthorized = UserEmail == null || UserEmail.Length == 0;
             logger.Info("reportTokenRejected " + UserEmail + " " + neverAuthorized);
-            if (neverAuthorized) {
+            if (neverAuthorized || skipTimeout) {
                 AuthTokenRejected?.Invoke();
                 dropUserLoginData();
                 return;
@@ -1097,6 +1098,7 @@ namespace FilterProvider.Common.Util
         private void reportTokenAccepted()
         {
             tokenRejectedFirstDateTime = DateTime.MinValue;
+            AuthTokenAccepted?.Invoke();            
         }
 
         /// <summary>
@@ -1182,6 +1184,7 @@ namespace FilterProvider.Common.Util
                         // Check if response code is considered a success code.
                         if(intCode >= 200 && intCode <= 299)
                         {
+                            reportTokenAccepted();
                             return true;
                         }
                     }

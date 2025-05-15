@@ -418,18 +418,27 @@ namespace FilterProvider.Common.Services
             var process = Process.GetCurrentProcess();
             while(!exiting)
             {
-                PerformanceCounter pc = new PerformanceCounter();
-                pc.CategoryName = "Process";
-                pc.CounterName = "Working Set - Private";
-                pc.InstanceName = process.ProcessName;
-                var memsize = Convert.ToInt32(pc.NextValue()) / (int)(1024);
-                pc.Close();
-                pc.Dispose();
-
-                if(logger != null)
+                try
                 {
-                    logger.Info("MEMORY CONSUMPTION IS " + memsize + "KB");
+                    PerformanceCounter pc = new PerformanceCounter();
+                    pc.CategoryName = "Process";
+                    pc.CounterName = "Working Set - Private";
+                    pc.InstanceName = process.ProcessName;
+                    var memsize = Convert.ToInt32(pc.NextValue()) / (int)(1024);
+                    pc.Close();
+                    pc.Dispose(); 
+                    if (logger != null)
+                    {
+                        logger.Info("MEMORY CONSUMPTION IS " + memsize + "KB");
+                    }
                 }
+                catch(Exception e) {
+                    if(logger != null) { 
+                        logger.Error("Can't get mem counter");
+                        logger.Error(e);
+                    }
+                }
+               
                 Thread.Sleep(30000);
             }
         }
@@ -1902,13 +1911,17 @@ namespace FilterProvider.Common.Services
         /// <summary>
         /// Stops the filtering engine, shuts it down. 
         /// </summary>
-        private void StopFiltering()
+        private async void StopFiltering()
         {
-
             logger.Info("Stop filtering");
             if (filteringEngine != null && filteringEngine.IsRunning)
             {
                 filteringEngine.Stop();
+            }
+            
+            bool isDnsUp = await dnsEnforcement.IsDnsUp();
+            if (isDnsUp) {
+                dnsEnforcement.SetDnsToDhcp(false);
             }
 
             try

@@ -1,5 +1,6 @@
 ﻿using CloudVeil.Core.Windows.Util;
 using CloudVeilInstallerUI.IPC;
+using CloudVeilInstallerUI.Models;
 using CloudVeilInstallerUI.ViewModels;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using NamedPipeWrapper;
@@ -98,6 +99,11 @@ namespace CloudVeilInstallerUI
                     {
                         UserId = arg.Replace("/userid=", "");
                     }
+                }
+
+                if (UserId.Length > 0)
+                {
+                    _ = WebUtil.PostVersionStringAsync(UserId);
                 }
 
                 if(Updating == false && WaitForFilterExit == true)

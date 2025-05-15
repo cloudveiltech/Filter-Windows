@@ -5,13 +5,9 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.WinAPI;
-using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
-using CloudVeil.Windows;
 using CloudVeil.Windows.Platform;
 using CloudVeilGUI.Platform.Common;
-using CloudVeilGUI.Platform.Windows;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Util;
@@ -19,12 +15,8 @@ using NLog;
 using Sentry;
 using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Gui.CloudVeil.Util;
-using System.Windows.Forms;
 
 namespace CloudVeil.Windows
 {
@@ -186,7 +178,7 @@ namespace CloudVeil.Windows
                 CloudVeil.Core.Windows.Platform.Init();
 
                 PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
-                PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
+               // PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
             }
             catch(Exception e)
             {

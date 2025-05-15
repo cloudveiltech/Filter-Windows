@@ -511,7 +511,7 @@ namespace FilterProvider.Common.Data.Filtering
                 return false;
             }
 
-       //     LoggerUtil.GetAppWideLogger().Info("Triggers for input: " + input);
+          //  LoggerUtil.GetAppWideLogger().Info("Triggers for input: " + input);
 
             var split = Split(input);
 

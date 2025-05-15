@@ -15,6 +15,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
+using WindowsFirewallHelper;
 
 namespace CloudVeilService.Platform
 {
@@ -28,85 +30,40 @@ namespace CloudVeilService.Platform
 
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
         {
-            using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
+            var ipVersion = "ipv4";
+            
+            if(primary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
-                using (var networkConfigs = networkConfigMng.GetInstances())
-                {
-                    foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
-                    {
-                        using (var newDNS = managementObject.GetMethodParameters("SetDNSServerSearchOrder"))
-                        {
-                            List<string> dnsServers = new List<string>();
-                            var existingDns = (string[])newDNS["DNSServerSearchOrder"];
-                            if (existingDns != null && existingDns.Length > 0)
-                            {
-                                dnsServers = new List<string>(existingDns);
-                            }
-
-                            bool changed = false;
-
-                            if (primary != null)
-                            {
-                                if (!dnsServers.Contains(primary.ToString()))
-                                {
-                                    dnsServers.Insert(0, primary.ToString());
-                                    changed = true;
-                                }
-                            }
-                            if (secondary != null)
-                            {
-                                if (!dnsServers.Contains(secondary.ToString()))
-                                {
-                                    changed = true;
-
-                                    if (dnsServers.Count > 0)
-                                    {
-                                        dnsServers.Insert(1, secondary.ToString());
-                                    }
-                                    else
-                                    {
-                                        dnsServers.Add(secondary.ToString());
-                                    }
-                                }
-                            }
-
-                            if (changed)
-                            {
-                                logger.Info("Changed DNS settings for NIC {0}", nicName);
-
-                                newDNS["DNSServerSearchOrder"] = dnsServers.ToArray();
-                                managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
-                            }
-                        }
-                    }
-                }
+                ipVersion = "ipv6";
             }
+            var command = $"interface {ipVersion} add dnsservers \"{nicName}\" address=";
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo("netsh", command + primary.ToString() + " index=1");
+            process.Start();
+            process.WaitForExit();
+
+
+            process = new Process();
+            process.StartInfo = new ProcessStartInfo("netsh", command + secondary.ToString() + " index=2");
+            process.Start();
+            process.WaitForExit();
+
+            logger.Info("Changed DNS settings for NIC {0}", nicName);
         }
 
         public void SetDnsForNicToDHCP(string nicName)
         {
-            using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
-            {
-                using (var networkConfigs = networkConfigMng.GetInstances())
-                {
-                    foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"] && objMO["Description"].Equals(nicName)))
-                    {
-                        ManagementBaseObject inParams = managementObject.GetMethodParameters("SetDNSServerSearchOrder");
-                        inParams["DNSServerSearchOrder"] = new string[0];
-                        ManagementBaseObject result = managementObject.InvokeMethod("SetDNSServerSearchOrder", inParams, null);
-                        UInt32 ret = (UInt32)result.Properties["ReturnValue"].Value;
+            var command = $"interface ipv4 set dnsservers \"{nicName}\" source=dhcp";
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo("netsh", command);
+            process.Start();
+            process.WaitForExit();
 
-                        if (ret != 0)
-                        {
-                            logger.Warn("Unable to change DNS Server settings back to DHCP. Error code {0} https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx for more info.", ret);
-                        }
-                        else
-                        {
-                            logger.Info("Changed adapter {0} to DHCP.", managementObject["Description"]);
-                        }
-                    }
-                }
-            }
+            command = $"interface ipv6 set dnsservers \"{nicName}\" source=dhcp";
+            process = new Process();
+            process.StartInfo = new ProcessStartInfo("netsh", command);
+            process.Start();
+            process.WaitForExit();
         }
 
         public bool SetDnsForAllInterfaces(IPAddress primaryDns, IPAddress secondaryDns)
@@ -130,7 +87,7 @@ namespace CloudVeilService.Platform
                 if (needsUpdate)
                 {
                     ranUpdate = true;
-                    SetDnsForNic(iface.Description, primaryDns, secondaryDns);
+                    SetDnsForNic(iface.Name, primaryDns, secondaryDns);
                 }
             }
 
@@ -143,7 +100,7 @@ namespace CloudVeilService.Platform
 
             foreach (var iface in ifaces)
             {
-                SetDnsForNicToDHCP(iface.Description);
+                SetDnsForNicToDHCP(iface.Name);
             }
 
             return true;

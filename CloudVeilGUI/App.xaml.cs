@@ -1076,6 +1076,7 @@ namespace CloudVeil.Windows
             menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
             menuItems.Add(new System.Windows.Forms.MenuItem("Block History", TrayIcon_OpenBlockHistory));
             menuItems.Add(new System.Windows.Forms.MenuItem("Use Relaxed Policy", TrayIcon_UseRelaxedPolicy));
+            menuItems.Add(new System.Windows.Forms.MenuItem("Sync Settings", TrayIcon_Sync));
 
             trayIcon.ContextMenu = new System.Windows.Forms.ContextMenu(menuItems.ToArray());
         }
@@ -1091,10 +1092,19 @@ namespace CloudVeil.Windows
             viewManager.Get<DashboardView>()?.SwitchTab(typeof(HistoryView));
         }
 
+        private void TrayIcon_Sync(object sender, EventArgs e)
+        {
+            BringAppToFocus();
+            viewManager.Get<DashboardView>()?.SwitchTab(typeof(AdvancedView));
+            ModelManager.Get<AdvancedViewModel>().SyncSettingsCommand.Execute(null);
+        }
+
         private void TrayIcon_UseRelaxedPolicy(object sender, EventArgs e)
         {
             OnRelaxedPolicyRequested(true);
         }
+
+
 
         /// <summary>
         /// Brings the main application window into focus for the user and removes it from the tray
