@@ -163,6 +163,7 @@ namespace Gui.CloudVeil.UI.Models
                             if (msg.AuthenticationResult.AuthenticationMessage != null)
                             {
                                 loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                                loginViewModel.Message = "";
                             }
                         };
 
@@ -196,6 +197,7 @@ namespace Gui.CloudVeil.UI.Models
                     ipcClient.ConnectedToServer = () =>
                     {
                         ipcClient.AttemptAuthenticationWithEmail(userName);
+                        loginViewModel.ErrorMessage = "";
                         loginViewModel.Message = "Request sent. Please check your E-Mail.";
                     };
 
@@ -204,6 +206,7 @@ namespace Gui.CloudVeil.UI.Models
                         if (msg.AuthenticationResult.AuthenticationMessage != null)
                         {
                             loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
+                            loginViewModel.Message = "";
                         }
                         loginViewModel.hideProgessView();
                     };

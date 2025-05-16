@@ -115,33 +115,32 @@
                 Content="Sign In With E-Mail"
                 Style="{StaticResource AccentedSquareButtonStyle}" />
         
-        <!--  Error messages.  -->
-        <TextBlock Width="420"
-                   Height="60"
-                   Margin="148,362,148,0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontFamily="Segoe UI"
-                   FontSize="18"
-                   FontWeight="Light"
-                   Foreground="Red"
-                   Text="{Binding Path=ErrorMessage,
-                                  Mode=OneWay}"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap" />
-
-        <TextBlock Width="420"
-                   Height="60"
-                   Margin="148,362,148,0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontFamily="Segoe UI"
-                   FontSize="18"
-                   Foreground="Green"
-                   FontWeight="Light"
-                   Text="{Binding Path=Message,
-                                  Mode=OneWay}"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap" />
+            <!--  Error messages.  -->
+            <TextBlock Width="420"
+                       Height="60"
+                       Margin="148,362,148,0"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Top"
+                       FontFamily="Segoe UI"
+                       FontSize="18"
+                       FontWeight="Light"
+                       Foreground="Red"
+                       Text="{Binding Path=ErrorMessage,
+                                      Mode=OneWay}"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap" />
+            <TextBlock Width="420"
+                       Height="60"
+                       Margin="148,362,148,0"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Top"
+                       FontFamily="Segoe UI"
+                       FontSize="18"
+                       Foreground="Green"
+                       FontWeight="Light"
+                       Text="{Binding Path=Message,
+                                      Mode=OneWay}"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap" />
     </Grid>
 </local:BaseView>

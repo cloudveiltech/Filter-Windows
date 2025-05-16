@@ -505,7 +505,6 @@ namespace CloudVeil.IPC
 
         public override void PushMessage(BaseMessage msg, ReplyHandlerClass replyHandler = null, int retryNum = 0)
         {
-            logger.Debug(new Exception("TEST PUSH"));
             logger.Debug("MSG is " + msg.ToString());
             var bf = new BinaryFormatter();
             using(var ms = new MemoryStream())
