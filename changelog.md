@@ -1,6 +1,7 @@
 # v2.2.60 - 15 May 2025
 
-Improved process to remove activations.
+Improved process to remove activations.  
+Added support for IPv6 DNS.
 
 #public
 
