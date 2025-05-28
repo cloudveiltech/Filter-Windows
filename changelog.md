@@ -8,7 +8,7 @@ Improved process to remove activations.
 
 Added support for IPv6 DNS.
 
-#public
+#alpha
 
 # v2.2.54 - 5 Feb 2025
 
