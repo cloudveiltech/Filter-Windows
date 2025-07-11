@@ -1,8 +1,15 @@
+# v2.2.60 - 15 May 2025
+
+Improved process to remove activations.  
+Added support for IPv6 DNS.
+
+#public
+
 # v2.2.56 - 21 Apr 2025
 
 Added support for IPv6 DNS.
 
-#public
+#alpha
 
 # v2.2.54 - 5 Feb 2025
 
