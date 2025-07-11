@@ -205,28 +205,36 @@ namespace FilterProvider.Common.Util
 
             LocalDateTime startDateLocal, endDateLocal;
 
-            int hour, minute;
-            getHoursMinutes(model.EnabledThrough[0], out hour, out minute);
-            if (hour == 24)
+            for (int i = 0; i < model.EnabledThrough.Length; i += 2)
             {
-                startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
-            }
-            else
-            {
-                startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
-            }
+                int hour, minute;
+                getHoursMinutes(model.EnabledThrough[i], out hour, out minute);
+                if (hour == 24)
+                {
+                    startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
+                }
+                else
+                {
+                    startDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+                }
 
-            getHoursMinutes(model.EnabledThrough[1], out hour, out minute);
-            if (hour == 24)
-            {
-                endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
-            }
-            else
-            {
-                endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
-            }
+                getHoursMinutes(model.EnabledThrough[i+1], out hour, out minute);
+                if (hour == 24)
+                {
+                    endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, 23, 59, 59, 999);
+                }
+                else
+                {
+                    endDateLocal = new LocalDateTime(d.Year, d.Month, d.Day, hour, minute);
+                }
 
-            return (d.CompareTo(startDateLocal) >= 0 && d.CompareTo(endDateLocal) <= 0);
+                var timeInInterval = d.CompareTo(startDateLocal) >= 0 && d.CompareTo(endDateLocal) <= 0;
+                if (timeInInterval)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static void getHoursMinutes(decimal hourDecimal, out int hour, out int minute)
@@ -238,7 +246,6 @@ namespace FilterProvider.Common.Util
         private static void getHoursMinutesSeconds(decimal hourDecimal, out int hour, out int minute, out int second)
         {
             decimal hourTruncated = Math.Truncate(hourDecimal);
-
 
             decimal secondPart = (hourDecimal - hourTruncated) * 3600; // Here this holds the number of seconds in the hour.
             decimal minutePart = Math.Truncate(secondPart / 60); // Number of minutes in the hour.
@@ -255,6 +262,19 @@ namespace FilterProvider.Common.Util
             getHoursMinutesSeconds(hourDecimal, out hour, out minute, out second);
 
             return new TimeSpan(hour, minute, second);
+        }
+
+        public static string FormatMinutes(int minutes)
+        {
+            var hh = minutes / 60;
+            var mm = minutes % 60;
+            
+            var res = hh < 10 ? "0" : "";
+            res += hh;
+            res += mm < 10 ? ":0" : ":";
+            res += mm;
+
+            return res;
         }
     }
 }

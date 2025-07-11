@@ -1,4 +1,7 @@
 ﻿using Filter.Platform.Common.Data.Models;
+using FilterProvider.Common.Util;
+using Gui.CloudVeil.UI.Controls;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -111,6 +115,7 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
+        
         private double currentTime;
         public double CurrentTime
         {

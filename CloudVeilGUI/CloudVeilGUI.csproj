@@ -131,6 +131,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.xaml.cs">
+      <DependentUpon>TimeRestrictionSlider.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Platform\Common\IGuiServices.cs" />
     <Compile Include="Platform\Common\ITrayIcon.cs" />
     <Compile Include="Platform\Common\StatusIconMenuItem.cs" />
@@ -149,11 +152,6 @@
     <Compile Include="Gui\CloudVeil\Testing\FilterTesting.cs" />
     <Compile Include="Gui\CloudVeil\UI\Controls\RangeParameterChangedEventArgs.cs" />
     <Compile Include="Gui\CloudVeil\UI\Controls\RangeSelectionChangedEventArgs.cs" />
-    <Compile Include="Gui\CloudVeil\UI\Controls\SliderHelper.cs" />
-    <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.cs" />
-    <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSliderView.xaml.cs">
-      <DependentUpon>TimeRestrictionSliderView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Gui\CloudVeil\UI\ModelManager.cs" />
     <Compile Include="Gui\CloudVeil\UI\Models\DashboardModel.cs" />
     <Compile Include="Gui\CloudVeil\UI\Models\MainWindowModel.cs" />
@@ -187,11 +185,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Styles\AppStyle.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
-    <Page Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSliderView.xaml">
+    <Page Include="Styles\AppStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -200,10 +198,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\TimeRestrictionSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -361,6 +355,10 @@
     <ProjectReference Include="..\Filter.Platform.Common\Filter.Platform.Common.csproj">
       <Project>{f72dac71-b748-4d81-b7f6-51f6dc4449f2}</Project>
       <Name>Filter.Platform.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FilterProvider.Common\FilterProvider.Common.csproj">
+      <Project>{C5CF6D3F-967F-4BB2-BAC9-5A47C6C1867B}</Project>
+      <Name>FilterProvider.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sentinel\Sentinel.csproj">
       <Project>{0e495b33-f43f-48d6-82cd-ece35ba8f529}</Project>

@@ -90,6 +90,7 @@ namespace CloudVeil.Core.Windows.Util.Update
                     }
 #else
                     appInfo = await cli.GetStringAsync(appcastLocationUri);
+                    logger.Info("Update from url " + appcastLocationUri);
 #endif
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 

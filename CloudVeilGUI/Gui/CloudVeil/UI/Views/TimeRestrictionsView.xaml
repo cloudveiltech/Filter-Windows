@@ -9,56 +9,85 @@
              mc:Ignorable="d">
     <StackPanel MaxWidth="800">
         <Label Content="{Binding Path=TimeRestrictionsDescription}" />
-        
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[1].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[1].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[1]}"
-            Caption="Monday" />
 
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[2].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[2].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[2]}"
-            Caption="Tuesday" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Monday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[1]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[1]}"
+            />
+        </Grid>
 
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[3].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[3].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[3]}"
-            Caption="Wednesday" />
-
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[4].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[4].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[4]}"
-            Caption="Thursday" />
-
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[5].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[5].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[5]}"
-            Caption="Friday" />
-
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[6].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[6].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[6]}"
-            Caption="Saturday" />
-
-        <localControls:TimeRestrictionSliderView
-            UpperValue="{Binding Path=TimeRestrictions[0].EnabledThrough[1]}"
-            LowerValue="{Binding Path=TimeRestrictions[0].EnabledThrough[0]}"
-            IndicatorValue="{Binding Path=CurrentTime}"
-            IndicatorVisible="{Binding Path=Visibilities[0]}"
-            Caption="Sunday" />
-
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Tuesday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider  Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[2]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[2]}"
+            />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Wednesday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider  Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[3]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[3]}"
+            />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Thursday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[4]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[4]}"
+            />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Friday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[5]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[5]}"
+            />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Saturday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[6]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[6]}"
+            />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Sunday" Grid.Column="0" VerticalAlignment="Center"/>
+            <localControls:TimeRestrictionSlider Grid.Column="1"
+                TimerEnabled="{Binding Path=Visibilities[0]}"
+                TimeRestriction="{Binding Path=TimeRestrictions[0]}"
+            />
+        </Grid>
         <TextBlock Margin="0,20,0,0">
             <Hyperlink NavigateUri="{Binding Path=TimeRestrictionsUri}" RequestNavigate="Hyperlink_RequestNavigate">Edit</Hyperlink>
         </TextBlock>
