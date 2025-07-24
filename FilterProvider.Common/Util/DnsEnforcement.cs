@@ -79,7 +79,8 @@ namespace FilterProvider.Common.Util
 
                             fn = (sender, e) =>
                             {
-                                this.SetDnsToDhcp(sendDnsChangeEvents);
+                                logger.Info("Setting DNS to User Controlled.");
+                                //  this.SetDnsToDhcp(sendDnsChangeEvents);
                                 policyConfiguration.OnConfigurationLoaded -= fn;
                             };
 
@@ -87,7 +88,8 @@ namespace FilterProvider.Common.Util
                         }
                         else
                         {
-                            SetDnsToDhcp(sendDnsChangeEvents);
+                            logger.Info("Setting DNS to User Controlled.");
+                            //SetDnsToDhcp(sendDnsChangeEvents);
                         }
                     }
                     else
@@ -129,7 +131,8 @@ namespace FilterProvider.Common.Util
                         else
                         {
                             // Neither primary nor secondary DNS are set. Clear them for our users.
-                            SetDnsToDhcp(sendDnsChangeEvents);
+
+                           // SetDnsToDhcp(sendDnsChangeEvents);
                             lastPrimaryV4 = null;
                             lastSecondaryV4 = null;
                             lastPrimaryV6 = null;
@@ -142,11 +145,6 @@ namespace FilterProvider.Common.Util
                     LoggerUtil.RecursivelyLogException(logger, e);
                 }
             }
-        }
-
-        private void parseDnsIps()
-        {
-
         }
 
         private bool isDnsServerChanged(IPAddress ip, IPAddress last)

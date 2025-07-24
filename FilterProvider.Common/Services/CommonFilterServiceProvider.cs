@@ -1919,10 +1919,11 @@ namespace FilterProvider.Common.Services
                 filteringEngine.Stop();
             }
             
-            bool isDnsUp = await dnsEnforcement.IsDnsUp();
+           /* Disable DNS Controlling
+            * bool isDnsUp = await dnsEnforcement.IsDnsUp();
             if (isDnsUp) {
-                dnsEnforcement.SetDnsToDhcp(false);
-            }
+               dnsEnforcement.SetDnsToDhcp(false);
+            }*/
 
             try
             {
