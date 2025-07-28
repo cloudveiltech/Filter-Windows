@@ -675,7 +675,6 @@ namespace FilterProvider.Common.Configuration
             // that the user can't whitelist sites by adding something with a "@@" in front of it.
 
             // The easiest way to do this is to limit the characters to 'safe' characters.
-            Regex isCleanRule = new Regex(@"^[a-zA-Z0-9\-_\:\.\/]+$", RegexOptions.Compiled);
             string rulesetPath = Path.Combine(tempFolder, fileName);
 
             using (var rulesetStream = File.OpenWrite(rulesetPath))
@@ -684,11 +683,8 @@ namespace FilterProvider.Common.Configuration
                 foreach (string site in ruleSet)
                 {
                     if (site == null) continue;
-
-                    if (isCleanRule.IsMatch(site))
-                    {
-                        writer.WriteLine($"||{site}");
-                    }
+                    
+                    writer.WriteLine(site);
                 }
             }
 
