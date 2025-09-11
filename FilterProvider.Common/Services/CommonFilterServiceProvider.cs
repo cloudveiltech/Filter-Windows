@@ -384,6 +384,7 @@ namespace FilterProvider.Common.Services
 
         public bool RetrieveToken()
         {
+            logger.Info("RetrieveToken");
             HttpStatusCode status;
             byte[] tokenResponse = WebServiceUtil.Default.RequestResource(ServiceResource.RetrieveToken, out status);
             if (tokenResponse != null && status == HttpStatusCode.OK)
@@ -392,14 +393,14 @@ namespace FilterProvider.Common.Services
                 {
                     string jsonText = Encoding.UTF8.GetString(tokenResponse);
                     JsonAuthData jsonData = JsonConvert.DeserializeObject<JsonAuthData>(jsonText);
-
+                    logger.Info($"RetrieveToken {jsonData.userEmail}");
                     WebServiceUtil.Default.AuthToken = jsonData.authToken;
                     WebServiceUtil.Default.UserEmail = jsonData.userEmail;
                     return true;
                 }
-                catch
+                catch(Exception e)
                 {
-
+                    LoggerUtil.RecursivelyLogException(logger, e);
                 }
             } // else let them continue. They'll have to enter their password if this if isn't taken.
             return false;

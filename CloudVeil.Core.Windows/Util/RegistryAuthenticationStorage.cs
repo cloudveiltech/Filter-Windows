@@ -5,15 +5,18 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 using Filter.Platform.Common;
+using Filter.Platform.Common.Util;
+using Gui.CloudVeil.Util;
 using Microsoft.Win32;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Windows.Util
 {
@@ -41,6 +44,7 @@ namespace CloudVeil.Core.Windows.Util
 
                 RegistryKey sub = null;
 
+                var logger = LoggerUtil.GetAppWideLogger();
                 if (!createKey)
                 {
                     sub = key.OpenSubKey(applicationNiceName, writeable);
@@ -51,9 +55,9 @@ namespace CloudVeil.Core.Windows.Util
                     {
                         sub = key.OpenSubKey(applicationNiceName, writeable);
                     }
-                    catch
+                    catch(Exception ex) 
                     {
-
+                        LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
                     }
 
                     if (sub == null)
@@ -63,15 +67,20 @@ namespace CloudVeil.Core.Windows.Util
                             key.DeleteSubKey(applicationNiceName, false);
                             sub = key.CreateSubKey(applicationNiceName);
                         }
-                        catch
+                        catch(Exception ex)
                         {
+                            LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
                             sub = null;
-                        }
+                        }                           
                     }
+                }
+                
+                if(sub == null)
+                {
+                    logger.Warn("Can't open reg key");
                 }
 
                 return sub;
-
             }
         }
 
@@ -84,19 +93,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 lock (emailLock)
                 {
-                    string machineName = string.Empty;
-
-                    try
-                    {
-                        machineName = System.Environment.MachineName;
-                    }
-                    catch
-                    {
-                        machineName = "Unknown";
-                    }
-
-                    // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName + @"\email-address").ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\email-address").ToString();
 
                     using (var sub = getAppRegistryKey(createKey: false))
                     {
@@ -108,6 +105,7 @@ namespace CloudVeil.Core.Windows.Util
 
                             if (emailAddress == null || emailAddress.Length == 0)
                             {
+                                LoggerUtil.GetAppWideLogger().Warn("Can't read email address");
                                 return null;
                             }
                         }
@@ -123,19 +121,8 @@ namespace CloudVeil.Core.Windows.Util
 
                 lock (emailLock)
                 {
-                    string machineName = string.Empty;
-
-                    try
-                    {
-                        machineName = System.Environment.MachineName;
-                    }
-                    catch
-                    {
-                        machineName = "Unknown";
-                    }
-
                     // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName + @"\email-address").ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\email-address").ToString();
 
                     // Get the name of our process, aka the Executable name.
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
@@ -170,19 +157,8 @@ namespace CloudVeil.Core.Windows.Util
             {
                 lock (authenticationLock)
                 {
-                    string machineName = string.Empty;
-
-                    try
-                    {
-                        machineName = System.Environment.MachineName;
-                    }
-                    catch
-                    {
-                        machineName = "Unknown";
-                    }
-
                     // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName).ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\auth-token").ToString();
 
                     // Get the name of our process, aka the Executable name.
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
@@ -200,6 +176,7 @@ namespace CloudVeil.Core.Windows.Util
 
                             if (authToken == null || authToken.Length == 0)
                             {
+                                LoggerUtil.GetAppWideLogger().Warn("Can't read auth token");
                                 return null;
                             }
                         }
@@ -215,19 +192,9 @@ namespace CloudVeil.Core.Windows.Util
 
                 lock (authenticationLock)
                 {
-                    string machineName = string.Empty;
-
-                    try
-                    {
-                        machineName = System.Environment.MachineName;
-                    }
-                    catch
-                    {
-                        machineName = "Unknown";
-                    }
 
                     // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName).ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\auth-token").ToString();
 
                     // Get the name of our process, aka the Executable name.
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
