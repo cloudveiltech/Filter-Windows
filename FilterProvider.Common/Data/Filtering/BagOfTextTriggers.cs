@@ -542,7 +542,7 @@ namespace FilterProvider.Common.Data.Filtering
                     List<string> newSplit = new List<string>();
                     List<List<string>> wordLists = new List<List<string>>();
 
-                    List<List<string>> listsToRemove = new List<List<string>>(maxRebuildLen);
+                    List<List<string>> listsToRemove = new List<List<string>>();
 
                     foreach (var s in split)
                     {
