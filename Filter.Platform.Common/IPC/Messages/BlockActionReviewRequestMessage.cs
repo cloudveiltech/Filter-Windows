@@ -28,10 +28,17 @@ namespace CloudVeil.IPC.Messages
             private set;
         }
 
-        public BlockActionReviewRequestMessage(string categoryName, string fullRequestUrl)
+        public string TextTrigger 
+        {
+            get;
+            private set;
+        }
+
+        public BlockActionReviewRequestMessage(string categoryName, string fullRequestUrl, string textTrigger)
         {
             CategoryName = categoryName;
             FullRequestUrl = fullRequestUrl;
+            TextTrigger = textTrigger;
         }
     }
 }

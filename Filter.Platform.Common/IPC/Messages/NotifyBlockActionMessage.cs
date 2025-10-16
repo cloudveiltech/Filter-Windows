@@ -104,6 +104,12 @@ namespace CloudVeil.IPC.Messages
             private set;
         }
 
+        public string TextTrigger
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Constructs a new NotifyBlockActionMessage instance. 
         /// </summary>
@@ -119,14 +125,15 @@ namespace CloudVeil.IPC.Messages
         /// <param name="category">
         /// The cateogry 
         /// </param>
-        public NotifyBlockActionMessage(BlockType type, Uri resource, string rule, string category, DateTime blockDate)
+        public NotifyBlockActionMessage(BlockType type, Uri resource, string rule, string category, DateTime blockDate, string textTrigger)
         {
             Type = type;
             Resource = resource;
             Category = category;
             BlockDate = blockDate;
+            TextTrigger = textTrigger;
 
-            switch(type)
+            switch (type)
             {
                 case BlockType.ImageClassification:
                 {

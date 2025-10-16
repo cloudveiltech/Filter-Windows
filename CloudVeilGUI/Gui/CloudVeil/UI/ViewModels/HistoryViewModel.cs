@@ -46,12 +46,18 @@ namespace Gui.CloudVeil.UI.ViewModels
             get;
             private set;
         }
+        public string TextTrigger 
+        { 
+            get; 
+            private set;
+        }
 
-        public ViewableBlockedRequest(string category, string fullRequest, DateTime blockDate)
+        public ViewableBlockedRequest(string category, string fullRequest, DateTime blockDate, string textTrigger)
         {
             this.CategoryName = category;
             this.FullRequest = fullRequest;
             this.BlockDate = blockDate.ToString(CultureInfo.CurrentCulture);
+            this.TextTrigger = textTrigger;
         }
     }
 
@@ -171,7 +177,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                 {
                                     ipcClient.ConnectedToServer = () =>
                                     {
-                                        ipcClient.RequestBlockActionReview(category, fullUrl);
+                                        ipcClient.RequestBlockActionReview(category, fullUrl, args.TextTrigger);
                                     };
 
                                     ipcClient.WaitForConnection();
@@ -190,7 +196,7 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        public void AppendBlockActionEvent(string category, string fullRequest, DateTime blockDate)
+        public void AppendBlockActionEvent(string category, string fullRequest, DateTime blockDate, string textTrigger)
         {
             try
             {
@@ -202,7 +208,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 }
 
                 // Add the item to view.
-                dataCtx.BlockEvents.Add(new ViewableBlockedRequest(category, fullRequest, blockDate));
+                dataCtx.BlockEvents.Add(new ViewableBlockedRequest(category, fullRequest, blockDate, textTrigger));
             }
             catch (Exception e)
             {

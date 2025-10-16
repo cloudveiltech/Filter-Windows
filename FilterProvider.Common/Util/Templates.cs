@@ -66,7 +66,7 @@ namespace FilterProvider.Common.Util
             return Encoding.UTF8.GetBytes(pageTemplate);
         }
 
-        public byte[] ResolveBlockedSiteTemplate(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        public byte[] ResolveBlockedSiteTemplate(Uri requestUri, int matchingCategory, List<MappedFilterListCategoryModel> appliedCategories, BlockType blockType = BlockType.None, string triggerCategory = "", string triggerText = "")
         {
             Dictionary<string, object> blockPageContext = new Dictionary<string, object>();
 
@@ -76,13 +76,12 @@ namespace FilterProvider.Common.Util
             string urlText = requestUri.ToString();
 
             bool showUnblockRequestButton = true;
-            string unblockRequest = getUnblockRequestUrl(urlText);
 
             string message = "was blocked because it was in the following category:";
 
             // Collect category information: Blocked category, other categories, and whether the blocked category is in the relaxed policy.
             MappedFilterListCategoryModel matchingCategoryModel = policyConfiguration.GeneratedCategoriesMap.Values.FirstOrDefault(m => m.CategoryId == matchingCategory);
-            string matching_category = matchingCategoryModel?.ShortCategoryName;
+            string matchingCatergoryName = matchingCategoryModel?.ShortCategoryName;
 
             List<string> otherCategories = appliedCategories?
                 .Where(c => c.CategoryId != matchingCategory)
@@ -91,6 +90,8 @@ namespace FilterProvider.Common.Util
                 .ToList();
 
             bool isRelaxedPolicy = (matchingCategoryModel is MappedBypassListCategoryModel);
+
+            string unblockRequest = getUnblockRequestUrl(urlText, triggerText, matchingCatergoryName);
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText;
@@ -104,20 +105,20 @@ namespace FilterProvider.Common.Util
                 switch (blockType)
                 {
                     case BlockType.None:
-                        matching_category = "unknown reason";
+                        matchingCatergoryName = "unknown reason";
                         break;
 
                     case BlockType.ImageClassification:
-                        matching_category = "naughty image";
+                        matchingCatergoryName = "naughty image";
                         break;
 
                     case BlockType.Url:
-                        matching_category = "bad webpage";
+                        matchingCatergoryName = "bad webpage";
                         break;
 
                     case BlockType.TextClassification:
                     case BlockType.TextTrigger:
-                        matching_category = string.Format("offensive text: {0}", triggerCategory);
+                        matchingCatergoryName = string.Format("offensive text: {0}", triggerCategory);
                         break;
 
                     case BlockType.TimeRestriction:
@@ -128,15 +129,15 @@ namespace FilterProvider.Common.Util
 
                     case BlockType.OtherContentClassification:
                     default:
-                        matching_category = "other content classification";
+                        matchingCatergoryName = "other content classification";
                         break;
                 }
             }
-
+            
             blockPageContext.Add("url_text", url_text);
             blockPageContext.Add("friendly_url_text", friendlyUrlText);
             blockPageContext.Add("message", message);
-            blockPageContext.Add("matching_category", matching_category);
+            blockPageContext.Add("matching_category", matchingCatergoryName);
             blockPageContext.Add("other_categories", otherCategories);
             blockPageContext.Add("showUnblockRequestButton", showUnblockRequestButton);
             blockPageContext.Add("passcodeSetupUrl", CompileSecrets.ServiceProviderUserRelaxedPolicyPath);
@@ -148,10 +149,10 @@ namespace FilterProvider.Common.Util
             return Encoding.UTF8.GetBytes(blockedHtmlPage(blockPageContext));
         }
 
-        private static string getUnblockRequestUrl(string urlText)
+        public static string getUnblockRequestUrl(string blockedUrl, string blockedTerm, string category)
         {
-            string deviceName;
-
+            var userEmail = WebServiceUtil.Default.UserEmail; 
+            string deviceName = string.Empty;
             try
             {
                 deviceName = Environment.MachineName;
@@ -161,15 +162,17 @@ namespace FilterProvider.Common.Util
                 deviceName = "Unknown";
             }
 
-            string blockedRequestBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(urlText));
-
-            string unblockRequest = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-            string username = WebServiceUtil.Default.UserEmail ?? "DNS";
-
-            string query = string.Format("category_name=LOOKUP_UNKNOWN&user_id={0}&device_name={1}&blocked_request={2}", Uri.EscapeDataString(username), deviceName, Uri.EscapeDataString(blockedRequestBase64));
-            unblockRequest += "?" + query;
-
-            return unblockRequest;
+            var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
+            return string.Format(
+                @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}&platform=cv4w&token={5}&trigger={6}",
+                reportPath,
+                Uri.EscapeDataString(category),
+                Uri.EscapeDataString(userEmail),
+                Uri.EscapeDataString(Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName))),
+                Uri.EscapeDataString(Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockedUrl))),
+                Uri.EscapeDataString(WebServiceUtil.Default.AuthId),
+                Uri.EscapeDataString(Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockedTerm)))
+                );
         }
     }
 }

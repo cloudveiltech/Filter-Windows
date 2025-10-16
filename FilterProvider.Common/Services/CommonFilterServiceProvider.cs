@@ -900,39 +900,15 @@ namespace FilterProvider.Common.Services
 
                 ipcServer.ClientRequestsBlockActionReview += (NotifyBlockActionMessage blockActionMsg) =>
                 {
-                    var curAuthToken = WebServiceUtil.Default.AuthToken;
-
-                    if (curAuthToken != null && curAuthToken.Length > 0)
+                    try
                     {
-                        string deviceName = string.Empty;
-
-                        try
-                        {
-                            deviceName = Environment.MachineName;
-                        }
-                        catch
-                        {
-                            deviceName = "Unknown";
-                        }
-
-                        try
-                        {
-                            var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
-                            reportPath = string.Format(
-                                @"{0}?category_name={1}&user_id={2}&device_name={3}&blocked_request={4}",
-                                reportPath,
-                                Uri.EscapeDataString(blockActionMsg.Category),
-                                Uri.EscapeDataString(curAuthToken),
-                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(deviceName)),
-                                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(blockActionMsg.Resource.ToString()))
-                                );
-
-                            PlatformTypes.New<ISystemServices>().OpenUrlInSystemBrowser(new Uri(reportPath));
-                        }
-                        catch (Exception e)
-                        {
-                            LoggerUtil.RecursivelyLogException(logger, e);
-                        }
+                        var shortCategory = blockActionMsg.Category.Trim('/').Split('/')[1];
+                        var reportPath = Templates.getUnblockRequestUrl(blockActionMsg.Resource.ToString(), blockActionMsg.TextTrigger, shortCategory);
+                        PlatformTypes.New<ISystemServices>().OpenUrlInSystemBrowser(new Uri(reportPath));
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerUtil.RecursivelyLogException(logger, e);
                     }
                 };
 
@@ -1489,7 +1465,7 @@ namespace FilterProvider.Common.Services
         /// The raw rule that caused the block action. May not be applicable for all block actions.
         /// Default is empty string.
         /// </param>
-        private void OnRequestBlocked(short category, BlockType cause, Uri requestUri, string matchingRule = "")
+        private void OnRequestBlocked(short category, BlockType cause, Uri requestUri, string matchingRule = "", string textTrigger = "")
         {
             bool internetShutOff = false;
 
@@ -1525,7 +1501,7 @@ namespace FilterProvider.Common.Services
                 categoryNameString = mappedCategory.CategoryName;
             }
 
-            ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule);
+            ipcServer.NotifyBlockAction(cause, requestUri, categoryNameString, DateTime.Now, matchingRule, textTrigger);
             accountability.AddBlockAction(cause, requestUri, categoryNameString, matchingRule);
 
             if (internetShutOff)

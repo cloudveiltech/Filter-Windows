@@ -116,6 +116,14 @@ namespace FilterProvider.Common.Util
             }
         }
 
+        public string AuthId
+        {
+            get
+            {
+                return authStorage.AuthId;
+            }
+        }
+
         public string ServiceProviderApiPath
             => CloudVeil.CompileSecrets.ServiceProviderApiPath;
 

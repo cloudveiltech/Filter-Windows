@@ -19,7 +19,7 @@ using GoProxyWrapper;
 
 namespace FilterProvider.Common.Util
 {
-    public delegate void RequestBlockedHandler(short category, BlockType cause, Uri requestUri, string matchingRule);
+    public delegate void RequestBlockedHandler(short category, BlockType cause, Uri requestUri, string matchingRule, string textTrigger);
 
     public class SiteFiltering
     {
@@ -147,7 +147,7 @@ namespace FilterProvider.Common.Util
             return useHtmlBlockPage;
         }
 
-        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.None, string triggerCategory = "")
+        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.None, string triggerCategory = "", string textTrigger="")
         {
             bool useHtmlBlockPage = this.useHtmlBlockPage(args);
 
@@ -173,7 +173,7 @@ namespace FilterProvider.Common.Util
                         ).ToList();
                 }
 
-                byte[] contentBytes = templates.ResolveBlockedSiteTemplate(new Uri(url), matchCategory, appliedCategories, blockType, triggerCategory);
+                byte[] contentBytes = templates.ResolveBlockedSiteTemplate(new Uri(url), matchCategory, appliedCategories, blockType, triggerCategory, textTrigger);
                 string contentType = "text/html";
 
                 args.SendCustomResponse((int)HttpStatusCode.OK, contentType, contentBytes);
@@ -207,7 +207,7 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                RequestBlocked?.Invoke((short)categories[0], BlockType.None, new Uri(url), "NOT AVAILABLE");
+                RequestBlocked?.Invoke((short)categories[0], BlockType.None, new Uri(url), "NOT AVAILABLE", "");
 
                 sendBlockResponse(args, url, categories);
             }
@@ -295,7 +295,7 @@ namespace FilterProvider.Common.Util
                         if (contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
-                            customBlockResponse = templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory);
+                            customBlockResponse = templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory, textTrigger);
                         }
                         else if (contentType.IndexOf("application/json", StringComparison.InvariantCultureIgnoreCase) != -1)
                         {
@@ -303,7 +303,7 @@ namespace FilterProvider.Common.Util
                             customBlockResponse = new byte[0];
                         }
 
-                        RequestBlocked?.Invoke(contentClassResult, blockType, new Uri(args.Request.Url), "");
+                        RequestBlocked?.Invoke(contentClassResult, blockType, new Uri(args.Request.Url), "", textTrigger);
                         logger.Info("Response blocked by content classification.");
                     }
                 }

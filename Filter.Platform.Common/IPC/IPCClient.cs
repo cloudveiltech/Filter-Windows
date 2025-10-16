@@ -358,9 +358,9 @@ namespace CloudVeil.IPC
         /// <param name="fullRequestUrl">
         /// The full URL that was blocked by the rule.
         /// </param>
-        public void RequestBlockActionReview(string category, string fullRequestUrl)
+        public void RequestBlockActionReview(string category, string fullRequestUrl, string textTrigger)
         {
-            var msg = new BlockActionReviewRequestMessage(category, fullRequestUrl);
+            var msg = new BlockActionReviewRequestMessage(category, fullRequestUrl, textTrigger);
             PushMessage(msg);
         }
 
