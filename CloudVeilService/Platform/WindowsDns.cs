@@ -30,6 +30,7 @@ namespace CloudVeilService.Platform
 
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
         {
+            
             var ipVersion = "ipv4";
             
             if(primary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
@@ -37,17 +38,21 @@ namespace CloudVeilService.Platform
                 ipVersion = "ipv6";
             }
             var command = $"interface {ipVersion} add dnsservers \"{nicName}\" address=";
-            Process process = new Process();
-            process.StartInfo = new ProcessStartInfo("netsh", command + primary.ToString() + " index=1");
-            process.Start();
-            process.WaitForExit();
+            if (primary != null)
+            {
+                var process = new Process();
+                process.StartInfo = new ProcessStartInfo("netsh", command + primary.ToString() + " index=1");
+                process.Start();
+                process.WaitForExit();
+            }
 
-
-            process = new Process();
-            process.StartInfo = new ProcessStartInfo("netsh", command + secondary.ToString() + " index=2");
-            process.Start();
-            process.WaitForExit();
-
+            if (secondary != null)
+            {
+                var process = new Process();
+                process.StartInfo = new ProcessStartInfo("netsh", command + secondary.ToString() + " index=2");
+                process.Start();
+                process.WaitForExit();
+            }
             logger.Info("Changed DNS settings for NIC {0}", nicName);
         }
 
