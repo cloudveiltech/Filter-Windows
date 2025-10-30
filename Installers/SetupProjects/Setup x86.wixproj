@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <Import Project="Sdk.props" Sdk="WixToolset.Sdk" Version="4.0.0" />
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -123,6 +123,6 @@
     </ItemGroup>
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="&quot;$(ProjectDir)add_reinstall_prop.vbs&quot; &quot;$(TargetDir)$(TargetFileName)&quot;" />
+    <Exec Command="&quot;$(ProjectDir)add_reinstall_prop.vbs&quot; &quot;$(TargetDir)$(TargetFileName)&quot;&#xD;&#xA;%systemroot%\System32\xcopy /E /Y /C &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(TargetDir)..\..\Release&quot;" />
   </Target>
 </Project>
