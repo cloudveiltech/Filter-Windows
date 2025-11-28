@@ -5,53 +5,53 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using CloudVeil;
 using CloudVeil.Core.Windows.Util;
 using CloudVeil.Core.Windows.Util.Update;
 using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
+using Filter.Platform.Common;
 using Filter.Platform.Common.Data.Models;
+using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.IPC.Messages;
+using Filter.Platform.Common.Net;
+using Filter.Platform.Common.Types;
+using Filter.Platform.Common.Util;
+using FilterProvider.Common.Configuration;
+using FilterProvider.Common.ControlServer;
+using FilterProvider.Common.Data;
+using FilterProvider.Common.Data.Filtering;
+using FilterProvider.Common.Platform;
+using FilterProvider.Common.Proxy.Certificate;
+using FilterProvider.Common.Util;
+using GoproxyWrapper;
+using GoProxyWrapper;
+using Gui.CloudVeil.Util;
+using HandlebarsDotNet;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
+using NodaTime;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using Sentry;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
-
-using Filter.Platform.Common.Util;
-using Filter.Platform.Common.Extensions;
-using FilterProvider.Common.Platform;
-using FilterProvider.Common.Configuration;
-using FilterProvider.Common.Util;
-using Filter.Platform.Common;
-using FilterProvider.Common.Data;
-using Filter.Platform.Common.Net;
-using Filter.Platform.Common.Types;
-using NodaTime;
-using GoproxyWrapper;
-using FilterProvider.Common.Data.Filtering;
-using FilterProvider.Common.ControlServer;
-using FilterProvider.Common.Proxy.Certificate;
-using Org.BouncyCastle.Crypto;
-using System.Security.Cryptography.X509Certificates;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X509;
-using Filter.Platform.Common.IPC.Messages;
-using HandlebarsDotNet;
-using CloudVeil;
-using GoProxyWrapper;
-using System.Diagnostics.Eventing.Reader;
-using Sentry;
 
 namespace FilterProvider.Common.Services
 {
@@ -87,6 +87,7 @@ namespace FilterProvider.Common.Services
     {
         #region Windows Service API
 
+        const string CUSTOM_PROTOCOL = "cloudveil";
         private bool isTestRun = false;
 
         /// <summary>
@@ -1033,7 +1034,53 @@ namespace FilterProvider.Common.Services
             backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             backgroundInitWorker.RunWorkerAsync();
+            RegisterProtocol();
         }
+
+        private void RegisterProtocol()
+        {
+            string guiPath = getGuiPath();
+
+            // Check if the custom protocol already exists
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(CUSTOM_PROTOCOL);
+            if(key != null)
+            {
+                key.Close();
+                key = null;
+                Registry.ClassesRoot.DeleteSubKeyTree(CUSTOM_PROTOCOL);
+            }
+
+            if (key == null) // If the protocol is not registered we need to register it  
+            {
+                key = Registry.ClassesRoot.CreateSubKey(CUSTOM_PROTOCOL);
+                key.SetValue(string.Empty, "URL: " + CUSTOM_PROTOCOL);
+                key.SetValue("URL Protocol", string.Empty);
+
+                key = key.CreateSubKey(@"shell\open\command");
+                key.SetValue(string.Empty, guiPath + " " + "%1");   //%1 is the parameter that windows can pass to the application 
+                LoggerUtil.GetAppWideLogger().Info($"Registered url protocol for {guiPath}");
+            }
+
+            key.Close();
+        }
+
+        private void UnRegisterProtocol()
+        {
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(CUSTOM_PROTOCOL);
+            if (key != null)
+            {
+                Registry.ClassesRoot.DeleteSubKeyTree(CUSTOM_PROTOCOL);
+            }
+        }
+
+        private string getGuiPath()
+        {
+            string servicePath = Process.GetCurrentProcess().MainModule.FileName;
+            string exeName = Process.GetCurrentProcess().MainModule.ModuleName;
+            string guiPath = servicePath.Replace(exeName, "CloudVeil.exe");
+            return guiPath;
+        }
+
 
         private void onAuthSuccess()
         {
@@ -1147,7 +1194,8 @@ namespace FilterProvider.Common.Services
             // THIS MUST BE DONE HERE ALWAYS, otherwise, we get BSOD.
             var antitampering = PlatformTypes.New<IAntitampering>();
             antitampering.DisableProcessProtection();
-
+            
+            UnRegisterProtocol();
             exiting = true;
 
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);

@@ -5,15 +5,18 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+using CloudVeil.Core.Windows.Client;
 using CloudVeil.Core.Windows.Util;
-using Filter.Platform.Common.Util;
-using System;
-using System.Diagnostics;
-using Gui.CloudVeil.UI.ViewModels;
-using System.Windows.Interop;
-using System.Windows;
 using CloudVeil.Core.Windows.WinAPI;
 using CloudVeil.Windows;
+using Filter.Platform.Common.Util;
+using Gui.CloudVeil.UI.ViewModels;
+using Sentry.Protocol;
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace Gui.CloudVeil.UI.Windows
 {
@@ -47,12 +50,6 @@ namespace Gui.CloudVeil.UI.Windows
         }
 
 
-
-        public void SwitchDashboardViewTab(int tabIdx)
-        {
-            
-        }
-
         public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -69,9 +66,31 @@ namespace Gui.CloudVeil.UI.Windows
 
         IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if(msg == (int)WindowMessages.CV_SHOW_WINDOW)
+            var app = (Application.Current as CloudVeilApp);
+            if (msg == (int)WindowMessages.CV_SHOW_WINDOW)
             {
-                (Application.Current as CloudVeilApp).BringAppToFocus();
+                app.BringAppToFocus();
+            }
+            if (msg == (int)WindowMessages.WM_COPY_DATA)
+            {
+
+                try
+                {
+                    if (lParam != IntPtr.Zero)
+                    {
+                        var cds = Marshal.PtrToStructure<COPYDATASTRUCT>(lParam);
+
+                        if (cds.lpData != IntPtr.Zero)
+                        {
+                            app.processCustomScheme(cds.AsUnicodeString);
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
+                app.BringAppToFocus();
             }
 
             return IntPtr.Zero;

@@ -4,6 +4,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
+using CloudVeil.Core.Windows.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -81,5 +82,9 @@ namespace CloudVeil.Core.Windows.WinAPI
 
         [DllImport("user32.dll", EntryPoint = "ShowWindow", CharSet = CharSet.Ansi)]
         public static extern bool ShowWindow(IntPtr hwnd, int cmdShow);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
+
     }
 }

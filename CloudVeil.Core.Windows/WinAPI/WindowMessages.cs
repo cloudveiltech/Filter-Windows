@@ -1602,6 +1602,7 @@ namespace CloudVeil.Core.Windows.WinAPI
         /// </summary>
         HSHELL_WINDOWREPLACED = 13,
 
+        WM_COPY_DATA = 0x004A,
         CV_SHOW_WINDOW = USER + 1
     }
 }

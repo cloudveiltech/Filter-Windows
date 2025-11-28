@@ -198,15 +198,16 @@ The line below is used by the filter tester to determine whether the filter is w
 
         <!-- if isRelaxedPolicy && passcode required -->
         {{#if isRelaxedPolicy}}
-        <div class="relaxed-policy">
+    <div class="relaxed-policy">
         {{#if isRelaxedPolicyPasscodeRequired}}
-            <div class="passcode-form">
-                <label class="control-label">Passcode</label>
-                <input type="password" id="passcodeInput" />
-            </div>
-        {{/if}}
-            <a class="request-unblock button primary" id="relaxedPolicyButton">Request Relaxed Policy</a>
+        <div class="passcode-form">
+            <label class="control-label">Passcode</label>
+            <input type="password" id="passcodeInput" />
         </div>
+        {{/if}}
+        <a class="request-unblock button primary" id="relaxedPolicyButton">Request Relaxed Policy</a>
+        <a class="request-unblock button primary" id="reloadButton" style="display:none;">Reload page</a>
+    </div>
         <div id="relaxedPolicyMessage">
             This is a test relaxed policy message from an error.
         </div>
@@ -261,9 +262,14 @@ The line below is used by the filter tester to determine whether the filter is w
 
         function onload() {
             var relaxedPolicyButton = document.getElementById("relaxedPolicyButton");
+            var reloadButton = document.getElementById("reloadButton");
             var relaxedPolicyMessage = document.getElementById("relaxedPolicyMessage");
             var passcodeInput = document.getElementById("passcodeInput");
 
+            reloadButton.addEventListener('click', function () {
+                window.location.reload()
+            });
+            
             relaxedPolicyButton.addEventListener('click', function () {
                 var delay = relaxedPolicyMessage.style.display == 'block';
 
@@ -296,7 +302,10 @@ The line below is used by the filter tester to determine whether the filter is w
                                 json = JSON.parse(xhr.responseText);
                             } catch (e) {
                                 json = {};
-                                json.message = "JSON parse error occurred. response text was " + xhr.responseText;
+                                json.message = "Request failed. Please use the app instead.";
+                                window.open("cloudveil://relaxedpolicy?password=" + passcode)
+                                reloadButton.style.display = "block";
+                                relaxedPolicyButton.style.display = "none";
                             }
 
                             if (!json.message) {

@@ -153,6 +153,10 @@ namespace Gui.CloudVeil.UI.Controls
 
         private static Interval[] convertTimeRestrictionsToIntervals(TimeRestrictionModel model)
         {
+            if(model == null)
+            {
+                return new Interval[0];
+            }
             List<Interval> intervals = new List<Interval>();
             for (int i = 0; i < model.EnabledThrough.Length-1; i++)
             {

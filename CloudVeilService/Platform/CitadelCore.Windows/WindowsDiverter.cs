@@ -112,47 +112,53 @@ namespace CloudVeilCore.Windows.Diversion
             }
         }
 
-        public void AddWhiteListedApp(string appName)
+        public void AddWhiteListedApp(string appName, Process[] allRunningProcesses)
         {
             if (IsRunning)
             {
-                logger.Info("Whitelisted: " + appName);
+                // logger.Info("Whitelisted: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                var processes = Process.GetProcessesByName(appNameTruncated);
-                foreach (var process in processes)
+                foreach (var process in allRunningProcesses)
                 {
-                    logger.Info("Whitelisted: id " + process.Id);
-                    WinDivert.WinDivertAddWhitelistedPID(diversionHandle, (ulong)process.Id);
+                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    {
+                        //   logger.Info("Whitelisted: id " + process.Id);
+                        WinDivert.WinDivertAddWhitelistedPID(diversionHandle, (ulong)process.Id);
+                    }
                 }
                 WinDivert.WinDivertAddWhitelistedApp(diversionHandle, appName);
             }
         }
 
-        public void AddBlackListedApp(string appName)
+        public void AddBlackListedApp(string appName, Process[] allRunningProcesses)
         {
             if (IsRunning)
             {
-                logger.Info("Blacklisted: " + appName);
+               // logger.Info("Blacklisted: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                var processes = Process.GetProcessesByName(appNameTruncated);
-                foreach (var process in processes)
+                foreach (var process in allRunningProcesses)
                 {
-                    WinDivert.WinDivertAddBlacklistedPID(diversionHandle, (ulong)process.Id);
+                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    {
+                        WinDivert.WinDivertAddBlacklistedPID(diversionHandle, (ulong)process.Id);
+                    }
                 }
                 WinDivert.WinDivertAddBlacklistedApp(diversionHandle, appName);
             }
         }
 
-        public void AddBlockedApp(string appName)
+        public void AddBlockedApp(string appName, Process[] allRunningProcesses)
         {
             if (IsRunning)
             {
-                logger.Info("Blocked: " + appName);
+                //  logger.Info("Blocked: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                var processes = Process.GetProcessesByName(appNameTruncated);
-                foreach (var process in processes)
+                foreach (var process in allRunningProcesses)
                 {
-                    WinDivert.WinDivertAddBlockedPID(diversionHandle, (ulong)process.Id);
+                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    {
+                        WinDivert.WinDivertAddBlockedPID(diversionHandle, (ulong)process.Id);
+                    }
                 }
                 WinDivert.WinDivertAddBlockedApp(diversionHandle, appName);
             }

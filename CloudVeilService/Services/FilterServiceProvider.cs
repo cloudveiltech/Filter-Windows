@@ -318,28 +318,24 @@ namespace CloudVeilService.Services
             }
 
             diverter.CleanApplist();
+            var allProcesess = Process.GetProcesses();
             foreach(var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
             {
-                diverter.AddBlackListedApp(app);
+                diverter.AddBlackListedApp(app, allProcesess);
             }
             foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
             {
-                var processes = Process.GetProcessesByName(app);
-                foreach (var process in processes)
-                {
-                    logger.Info("App: {0}, PID={1}", app, process.Id);
-                }
-                diverter.AddWhiteListedApp(app);
+                diverter.AddWhiteListedApp(app, allProcesess);
             }
-            diverter.AddWhiteListedApp("windows\\system32"); //everything from that folder
+            diverter.AddWhiteListedApp("windows\\system32", allProcesess); //everything from that folder
 
             foreach (var app in provider.PolicyConfiguration.Configuration.BlockedApplications)
             {
-                diverter.AddBlockedApp(app);
+                diverter.AddBlockedApp(app, allProcesess);
             }
             foreach (var app in provider.PolicyConfiguration.Configuration.CustomBlockedApps)
             {
-                diverter.AddBlockedApp(app);
+                diverter.AddBlockedApp(app, allProcesess);
             }
         }
 

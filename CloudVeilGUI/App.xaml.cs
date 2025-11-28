@@ -5,36 +5,38 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Filter.Platform.Common.Extensions;
+using CloudVeil.Core.Windows.Services;
 using CloudVeil.Core.Windows.Util;
+using CloudVeil.Core.Windows.Util.Update;
 using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
+using Filter.Platform.Common;
+using Filter.Platform.Common.Client;
+using Filter.Platform.Common.Data.Models;
+using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.IPC.Messages;
+using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
-using NLog;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
+using FilterNativeWindows;
+using Gui.CloudVeil;
 using Gui.CloudVeil.UI;
 using Gui.CloudVeil.UI.ViewModels;
 using Gui.CloudVeil.UI.Views;
 using Gui.CloudVeil.UI.Windows;
 using Gui.CloudVeil.Util;
-using Filter.Platform.Common;
-using Filter.Platform.Common.Client;
-using Filter.Platform.Common.Data.Models;
-using CloudVeil.Core.Windows.Util.Update;
-using Filter.Platform.Common.Types;
-using Filter.Platform.Common.IPC.Messages;
-using FilterNativeWindows;
-using Gui.CloudVeil;
 using MahApps.Metro.Controls.Dialogs;
-using CloudVeil.Core.Windows.Services;
+using NLog;
+using Sentry.Protocol;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Net;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Windows;
 
 namespace CloudVeil.Windows
 {
@@ -191,7 +193,7 @@ namespace CloudVeil.Windows
                 {
                     try
                     {
-                        guiChecks.DisplayExistingUI();
+                        guiChecks.DisplayExistingUI("");
                     }
                     catch (Exception e)
                     {
@@ -836,6 +838,28 @@ namespace CloudVeil.Windows
             backgroundInitWorker.RunWorkerCompleted += OnBackgroundInitComplete;
 
             backgroundInitWorker.RunWorkerAsync(e);
+
+        }
+
+        public void processCustomScheme(string uri)
+        {
+            if (uri.StartsWith("cloudveil:"))
+            {
+                var url = new Uri(uri);
+                if (uri.Contains("relaxedpolicy"))
+                {
+                    var queryParams = HttpUtility.ParseQueryString(url.Query);
+                    if (queryParams != null)
+                    {
+                        var relaxedPolicyPassword = queryParams["password"];
+                        OnRelaxedPolicyRequested(false, relaxedPolicyPassword);
+
+                        viewManager.Get<DashboardView>()?.SwitchTab(typeof(RelaxedPolicyView));
+
+                        LoggerUtil.GetAppWideLogger().Info("relaxedPolicyRequested relaxedPolicyPassword " + relaxedPolicyPassword);
+                    }
+                }
+            }
         }
 
         private void SwitchSentry(bool enabled)
@@ -961,7 +985,8 @@ namespace CloudVeil.Windows
                 bool startMinimized = false;
                 for(int i = 0; i != startupArgs.Args.Length; ++i)
                 {
-                    if(startupArgs.Args[i].OIEquals("/StartMinimized"))
+                    var arg = startupArgs.Args[i];
+                    if(arg.OIEquals("/StartMinimized"))
                     {
                         startMinimized = true;
                         break;
@@ -972,6 +997,8 @@ namespace CloudVeil.Windows
                 {
                     MinimizeToTray(false);
                 }
+
+
             }
         }
 
@@ -1259,10 +1286,9 @@ namespace CloudVeil.Windows
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        private async void OnRelaxedPolicyRequested(bool fromTray)
+        public async void OnRelaxedPolicyRequested(bool fromTray, string passcode="")
         {
             LoginDialogData passcodeData = null;
-            string passcode = "";
             if(appConfig != null && appConfig.EnableRelaxedPolicyPasscode)
             {
                 if(fromTray)
@@ -1270,16 +1296,20 @@ namespace CloudVeil.Windows
                     BringAppToFocus();
                 }
 
-                passcodeData = await mainWindow.PromptUserForPassword("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
-                if(passcodeData != null)
+                if (passcode == "")
                 {
-                    passcode = passcodeData.Password;
-                }
+                    passcodeData = await mainWindow.PromptUserForPassword("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
 
-                if(fromTray)
-                {
-                    MinimizeToTray(false);
-                }
+                    if (passcodeData != null)
+                    {
+                        passcode = passcodeData.Password;
+                    }
+
+                    if (fromTray)
+                    {
+                        MinimizeToTray(false);
+                    }
+                } 
             }
 
             using(var ipcClient = new IPCClient())

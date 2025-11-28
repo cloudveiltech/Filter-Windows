@@ -35,6 +35,6 @@ namespace Filter.Platform.Common.Client
         /// If there is a platform-specific way for the app to bring another instance to the front, implement this.
         /// This is an optional implementation as we have a second way to bring up client GUIs if this fails.
         /// </summary>
-        void DisplayExistingUI();
+        void DisplayExistingUI(string url);
     }
 }

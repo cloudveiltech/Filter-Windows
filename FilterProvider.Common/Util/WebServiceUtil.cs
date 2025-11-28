@@ -941,6 +941,7 @@ namespace FilterProvider.Common.Util
 
                     code = (HttpStatusCode)intCode;
 
+                    logger.Info("Response for: uri={0} httpCode: {1}", request.RequestUri, code);
                     try
                     {
                         // Check if response code is considered a success code.

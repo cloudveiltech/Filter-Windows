@@ -11,12 +11,14 @@ using CloudVeilGUI.Platform.Common;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Client;
 using Filter.Platform.Common.Util;
+using Gui.CloudVeil.Util;
 using NLog;
 using Sentry;
 using System;
 using System.Diagnostics;
+using System.Security.Policy;
 using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
+using System.Web;
 
 namespace CloudVeil.Windows
 {
@@ -26,7 +28,7 @@ namespace CloudVeil.Windows
 
         private static IGUIChecks guiChecks;
 
-        private static void RunGuiChecks(bool startMinimized)
+        private static void RunGuiChecks(bool startMinimized, string args)
         {
             guiChecks = PlatformTypes.New<IGUIChecks>();
 
@@ -62,7 +64,7 @@ namespace CloudVeil.Windows
                     {
                         if (!startMinimized)
                         {
-                            guiChecks.DisplayExistingUI();
+                            guiChecks.DisplayExistingUI(args);
                         }
                     }
                     catch (Exception e)
@@ -146,7 +148,7 @@ namespace CloudVeil.Windows
             LoggerUtil.LoggerName = "CloudVeilGUI";
 
             bool startMinimized = false;
-
+            string url = "";
             foreach (string arg in args)
             {
                 LoggerUtil.GetAppWideLogger().Info("Start args " + arg);
@@ -154,6 +156,10 @@ namespace CloudVeil.Windows
                 {
                     startMinimized = true;
                     break;
+                }
+                else if(arg.StartsWith("cloudveil:"))
+                {
+                    url = arg;
                 }
             }
 
@@ -192,7 +198,7 @@ namespace CloudVeil.Windows
 
             try
             {
-                RunGuiChecks(startMinimized);
+                RunGuiChecks(startMinimized, url);
             }
             catch(Exception e)
             {
@@ -212,7 +218,11 @@ namespace CloudVeil.Windows
             {
                 var app = new CloudVeilApp();
                 app.InitializeComponent();
+                if (url.Length > 0) {
+                    app.processCustomScheme(args[0]);
+                }
                 app.Run();
+                
                 
                 // Always release mutex.
                 guiChecks.UnpublishRunningApp();
