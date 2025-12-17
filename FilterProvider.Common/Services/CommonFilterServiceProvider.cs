@@ -5,9 +5,6 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil;
-using CloudVeil.Core.Windows.Util;
-using CloudVeil.Core.Windows.Util.Update;
 using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
 using Filter.Platform.Common;
@@ -20,14 +17,11 @@ using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
 using FilterProvider.Common.ControlServer;
 using FilterProvider.Common.Data;
-using FilterProvider.Common.Data.Filtering;
 using FilterProvider.Common.Platform;
 using FilterProvider.Common.Proxy.Certificate;
 using FilterProvider.Common.Util;
 using GoproxyWrapper;
 using GoProxyWrapper;
-using Gui.CloudVeil.Util;
-using HandlebarsDotNet;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLog;
@@ -38,7 +32,6 @@ using Org.BouncyCastle.Crypto;
 using Sentry;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
@@ -49,7 +42,6 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -124,6 +116,10 @@ namespace FilterProvider.Common.Services
 
         public static void StartSentry()
         {
+            if(SentrySdk.IsEnabled)
+            {
+                return;
+            }
             var sentry = SentrySdk.Init(o =>
             {
                 o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
@@ -1901,7 +1897,7 @@ namespace FilterProvider.Common.Services
         /// </summary>
         private void StartFiltering()
         {
-            logger.Info(nameof(StartFiltering));
+            logger.Info("StartFiltering");
             // Let's make sure we've pulled our internet block.
             try
             {

@@ -98,9 +98,8 @@ namespace CloudVeilCore.Windows.Diversion
                 }));
 
                 diversionThreads.Last().Start();
-
-                startHandler?.Invoke();
             }
+            startHandler?.Invoke();
         }
         
         public void CleanApplist()

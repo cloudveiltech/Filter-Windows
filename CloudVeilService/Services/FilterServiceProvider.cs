@@ -275,8 +275,11 @@ namespace CloudVeilService.Services
 
                     WebServiceUtil.Default.AuthTokenAccepted += () =>
                     {
-                        logger.Info("AuthTokenAccepted StartDiverter");
-                        StartDiverter(accessible, server);
+                        logger.Info("AuthTokenAccepted");
+                        if (!diverter.IsRunning)
+                        {
+                            StartDiverter(accessible, server);
+                        }
                     };
                 }
                 catch(Exception ex)
