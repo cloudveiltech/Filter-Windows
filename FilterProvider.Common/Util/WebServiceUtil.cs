@@ -47,6 +47,7 @@ namespace FilterProvider.Common.Util
         AccountabilityNotify,
         AddSelfModerationEntry,
         ServerTime,
+        SendLogs,
         Custom
     };
 
@@ -83,7 +84,8 @@ namespace FilterProvider.Common.Util
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
             { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
-            { ServiceResource.ServerTime, "/api/v2/time" }
+            { ServiceResource.ServerTime, "/api/v2/time" },
+            { ServiceResource.SendLogs, "/api/v2/debug/log" }
         };
 
         private readonly Logger logger;
@@ -579,7 +581,7 @@ namespace FilterProvider.Common.Util
 
 
         public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-        {            
+        {
             if (sslpolicyerrors != SslPolicyErrors.None)
             {
                 return false;
@@ -642,7 +644,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-          //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+            //request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -1046,6 +1048,28 @@ namespace FilterProvider.Common.Util
             }
 
             return null;
+        }
+        
+        public bool PostLogFiles(string logFilePath)
+        {
+            HttpStatusCode statusCode;
+            bool responseReceived;
+
+            byte[] response = RequestResource(ServiceResource.SendLogs, out statusCode, out responseReceived, new ResourceOptions()
+            {
+                Method = "POST",
+                ContentType = "application/json",
+                Parameters = new Dictionary<string, object>()
+                {
+                    { "log", Convert.ToBase64String(File.ReadAllBytes(logFilePath)) }
+                }
+            });
+
+            if (!responseReceived || statusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+            return true;
         }
 
         public ZonedDateTime? GetServerTime()

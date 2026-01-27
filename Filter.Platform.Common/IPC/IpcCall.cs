@@ -26,6 +26,7 @@ namespace CloudVeil.IPC
         ActivationIdentifier,
         AddCustomTextTrigger,
         DumpSystemEventLog,
+        SendEventLog,
         BugReportConfirmationValue,
         PortsValue,
         RandomizePortsValue

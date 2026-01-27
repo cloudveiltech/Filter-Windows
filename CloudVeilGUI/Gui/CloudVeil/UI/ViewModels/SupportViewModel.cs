@@ -3,22 +3,23 @@ using CloudVeil.Windows;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.Command;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Gui.CloudVeil.UI.Views;
-using System.Windows.Input;
-using System.Windows;
+using Gui.CloudVeil.UI.Windows;
+using Swan;
+using System;
+using System.Diagnostics;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
     public class SupportViewModel : BaseCloudVeilViewModel
     {
+        private MainWindow mainWindow;
+
+        public SupportViewModel(MainWindow mainWindow)
+        {
+            this.mainWindow = mainWindow;
+
+        }
         private string activationIdentifier;
         public string ActivationIdentifier
         {
@@ -84,6 +85,43 @@ namespace Gui.CloudVeil.UI.ViewModels
                 }
 
                 return viewLogsCommand;
+            }
+        }
+
+        private RelayCommand sendLogsCommand;
+        public RelayCommand SendLogsCommand
+        {
+            get
+            {
+                if (sendLogsCommand == null)
+                {
+                    sendLogsCommand = new RelayCommand(() =>
+                    {
+                        var app = (CloudVeilApp.Current as CloudVeilApp);
+                        app.IpcClient.Request(IpcCall.SendEventLog).OnReply((h, msg) =>
+                        {
+                            mainWindow.Dispatcher.InvokeAsync(async () =>
+                            {
+                                var result = await mainWindow.AskUserYesNoQuestion("Sending logs", "Do you want to send the logs to CloudVeil support?");
+                                if (result)
+                                {
+                                    if (msg.DataObject != null && msg.DataObject.ToBoolean())
+                                    {
+                                        mainWindow.ShowUserMessage("Logs Sent", "The logs have been sent to CloudVeil support. Thank you!");
+                                    }
+                                    else
+                                    {
+                                        mainWindow.ShowUserMessage("Logs Not Sent", "There was an error sending the logs to CloudVeil support. Please try again later.");
+                                    }
+                                }
+                            });
+                            
+                            return true;
+                        });
+                    });
+                }
+
+                return sendLogsCommand;
             }
         }
     }

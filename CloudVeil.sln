@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.3.32819.101
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cloudveil.Core.Windows", "CloudVeil.Core.Windows\Cloudveil.Core.Windows.csproj", "{21FEED3B-6E82-4FED-874E-2EEC12C4B28C}"
 EndProject
@@ -202,6 +202,7 @@ Global
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release Signed|x86.Build.0 = Release|Win32
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|Any CPU.ActiveCfg = Release|Win32
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|ARM64.ActiveCfg = Release|ARM64
+		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|ARM64.Build.0 = Release|ARM64
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|x64.ActiveCfg = Release|x64
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|x64.Build.0 = Release|x64
 		{D408BC68-1372-4760-BC98-D2DFE86B2704}.Release|x86.ActiveCfg = Release|Win32

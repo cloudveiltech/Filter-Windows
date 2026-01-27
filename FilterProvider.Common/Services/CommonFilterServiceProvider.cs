@@ -36,6 +36,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -778,7 +779,53 @@ namespace FilterProvider.Common.Services
                     }
                     return true;
                 });
-                
+
+                ipcServer.RegisterRequestHandler<Boolean>(IpcCall.SendEventLog, (message) => {
+                    var copiedLogsDirectory = Path.GetTempPath() + "\\cvlogs";
+                    var zipPath = Path.GetTempPath() + "\\logs.zip";
+                    var dirInfo = new DirectoryInfo(LoggerUtil.LogFolderPath);
+
+                    try
+                    {
+                        if (Directory.Exists(copiedLogsDirectory))
+                        {
+                            Directory.Delete(copiedLogsDirectory, true);
+                        }
+                        if (File.Exists(zipPath))
+                        {
+                            File.Delete(zipPath);
+                        }
+                        Directory.CreateDirectory(copiedLogsDirectory);
+                        foreach (var file in dirInfo.GetFiles())
+                        {
+                            file.CopyTo(copiedLogsDirectory + "\\" + file.Name);
+                        }
+
+                        ZipFile.CreateFromDirectory(copiedLogsDirectory, zipPath, CompressionLevel.Optimal, true);
+                        if (WebServiceUtil.Default.PostLogFiles(zipPath))
+                        {
+                            message.SendReply<bool>(ipcServer, IpcCall.SendEventLog, true);
+                        }
+                        else
+                        {
+                            logger.Error("Failed to send log files to server.");
+                            message.SendReply<bool>(ipcServer, IpcCall.SendEventLog, false);
+                        }
+                    }
+                    finally
+                    {
+                        if (Directory.Exists(copiedLogsDirectory))
+                        {
+                            Directory.Delete(copiedLogsDirectory, true);
+                        }
+                        if (File.Exists(zipPath))
+                        {
+                            File.Delete(zipPath);
+                        }
+                    }
+                    return true;
+                });
+
                 ipcServer.DeactivationRequested = (args) =>
                 {
                     Status = FilterStatus.Synchronizing;
