@@ -30,13 +30,17 @@ namespace CloudVeilService.Platform
 
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
         {
-            
             var ipVersion = "ipv4";
             
-            if(primary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+            if(primary != null && primary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+            {
+                ipVersion = "ipv6";
+            } 
+            else if (secondary != null && secondary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
                 ipVersion = "ipv6";
             }
+              
             var command = $"interface {ipVersion} add dnsservers \"{nicName}\" address=";
             if (primary != null)
             {
