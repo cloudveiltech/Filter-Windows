@@ -1,4 +1,5 @@
-﻿using CloudVeilInstallerUI.Models;
+﻿using CloudVeilInstallerUI.IPC;
+using CloudVeilInstallerUI.Models;
 using InstallerCheckPackageCache;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
@@ -10,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
@@ -478,6 +480,14 @@ namespace CloudVeilInstallerUI.ViewModels
                 return;
             }
 
+            var msiPlatform = ba.Engine.StringVariables["MsiPlatform"];
+
+            if (msiPlatform != null && msiPlatform.ToLower() != RuntimeInformation.OSArchitecture.ToString().ToLower())
+            {
+                TriggerFailed($"Failed to {installTypeVerb} CloudVeil for Windows because this type of Windows ({RuntimeInformation.OSArchitecture}) is not supported.");
+                return;
+            }
+            
             LaunchAction desiredPlan = ba.Command.Action;
 
             switch (ba.Command.Display)
@@ -727,7 +737,16 @@ namespace CloudVeilInstallerUI.ViewModels
                 string message = null;
                 bool needsRestart = false;
 
-                message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {(uint)e.Status:x}. Please restart your computer and try again. If the issue persists, please contact support.";
+                
+                uint ustatus = (uint)e.Status;
+                if (ustatus == ApplyStatus.FAIL_UNSUPPORTED_ARCH)
+                {
+                    message = $"Failed to {installTypeVerb} CloudVeil for Windows because this type of Windows ({RuntimeInformation.OSArchitecture}) is not supported.";                    
+                }
+                else 
+                {
+                    message = $"Failed to {installTypeVerb} CloudVeil for Windows with error code {(uint)e.Status:x}. Please restart your computer and try again. If the issue persists, please contact support.";
+                }
 
                 if ((installType == CVInstallType.Update || installType == CVInstallType.Uninstall) && failedPackageId == "CloudVeilForWindows")
                 {

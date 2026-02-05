@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
   <Bundle DisableRepair="yes" Name="CloudVeil for Windows" Version="2.4.3" Manufacturer="CloudVeil Technology, Inc." UpgradeCode="f034362e-0800-43d6-be30-721747f8a948" IconSourceFile="..\CloudVeilGUI\appicon.ico">
+  
+    <Variable Name="MsiPlatform" Type="string" Value="$(var.MsiPlatform)" Persisted="yes"/>
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <PayloadGroupRef Id="InstallerPayload" />
     </BootstrapperApplicationRef>
@@ -10,6 +12,7 @@
       <ExePackage Compressed="yes" PerMachine="yes" Cache="always" Id="InstallerCheckPackageCache_UnInstall" InstallCondition="0" DetectCondition="1" SourceFile="..\InstallerCheckPackageCache\bin\Release\InstallerCheckPackageCache.exe" />
       <MsiPackage DisplayInternalUI="no" ForcePerMachine="yes" Visible="no" Id="CloudVeilForWindows" Cache="yes" Compressed="yes" Vital="yes" Name="CloudVeil.msi" SourceFile="..\Installers\SetupProjects\Release\Setup $(var.MsiPlatform).msi" />
     </Chain>
+	
   </Bundle>
   <!-- The following snippet (and the rest of this file) are covered by the following licenses -->
   <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. -->
@@ -24,6 +27,7 @@
   <?define NetFx472WebLink = http://go.microsoft.com/fwlink/?LinkId=863262 ?>
   <?define NetFx472RedistLink = http://go.microsoft.com/fwlink/?LinkId=863265 ?>
   <?define NetFx472EulaLink = http://referencesource.microsoft.com/license.html ?>
+
   <Fragment>
     <PropertyRef Id="WIXNETFX4RELEASEINSTALLED" />
     <Property Id="WIX_IS_NETFRAMEWORK_472_OR_LATER_INSTALLED" Secure="yes" />

@@ -3,6 +3,7 @@
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Warden.exe -->
   <!-- ignore-file:..\..\CloudVeilGUI\bin\Release x64\Sentinel.exe -->
   <Package Name="CloudVeil For Windows" Language="1033" Version="2.4.3" Manufacturer="CloudVeil" UpgradeCode="{57058EEC-162C-4D48-993E-4AE6095F66CA}" Codepage="1252" InstallerVersion="405" ShortNames="no" ProductCode="*">
+     
     <SummaryInformation Description="CloudVeil For Windows Setup" Keywords="internet content filter" Manufacturer="CloudVeil" />
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="CloudVeil For Windows Installation [1]" />
@@ -15,7 +16,8 @@
     <!-- The '.NET Framework' launch condition. -->
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Launch Condition="Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again." />
-    <Launch Condition="Installed OR (VersionNT &gt;= 603) OR (VersionNT64 &gt;= 603)" Message="Required OS is Win10 or higher" />
+    <Launch Condition="Installed OR (VersionNT64 &gt;= 603)" Message="Required OS is Win10 or higher" />
+    <Launch Condition="VersionNT64" Message="Required x64 OS" />
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\x64\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->
