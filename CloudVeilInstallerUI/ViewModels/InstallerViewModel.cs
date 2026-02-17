@@ -1,23 +1,42 @@
-﻿using CloudVeilInstallerUI.IPC;
-using CloudVeilInstallerUI.Models;
-using InstallerCheckPackageCache;
+﻿using CloudVeilInstallerUI.Models;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CVInstallType = CloudVeilInstallerUI.Models.InstallType;
 
 namespace CloudVeilInstallerUI.ViewModels
 {
+    class ArmHelper
+    {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool IsWow64Process2(IntPtr hProcess, out ushort processMachine, out ushort nativeMachine);
+        const ushort IMAGE_FILE_MACHINE_ARM64 = 0xAA64;
+
+        internal static bool IsArm64
+        {
+            get
+            {
+                if (IsWow64Process2(Process.GetCurrentProcess().Handle,
+                        out ushort procArch,
+                        out ushort osArch))
+                {
+                    if (osArch == IMAGE_FILE_MACHINE_ARM64)
+                        return true;
+                }
+                return false;
+
+                // !!! This doesn't work on .NET 4.x
+                //return RuntimeInformation.OSArchitecture == Architecture.Arm64;
+            }
+        }
+    }
     public interface ISetupUI
     {
         void ShowWelcome();
@@ -482,9 +501,16 @@ namespace CloudVeilInstallerUI.ViewModels
 
             var msiPlatform = ba.Engine.StringVariables["MsiPlatform"];
 
-            if (msiPlatform != null && msiPlatform.ToLower() != RuntimeInformation.OSArchitecture.ToString().ToLower())
+            var currentArch = RuntimeInformation.OSArchitecture;
+            var isArm64 = ArmHelper.IsArm64;
+            if(isArm64 && currentArch != Architecture.Arm64)
             {
-                TriggerFailed($"Failed to {installTypeVerb} CloudVeil for Windows because this type of Windows ({RuntimeInformation.OSArchitecture}) is not supported.");
+                currentArch = Architecture.Arm64;
+            }
+
+            if (msiPlatform != null && msiPlatform.ToLower() != currentArch.ToString().ToLower())
+            {
+                TriggerFailed($"Failed to {installTypeVerb} CloudVeil for Windows because this type of Windows ({currentArch}) is not supported.");
                 return;
             }
             

@@ -34,7 +34,7 @@ namespace CloudVeil.Core.Windows
                 string executingProcess = Process.GetCurrentProcess().MainModule.FileName;
 
                 filename = update.UpdateFileLocalPath;
-                args = $"\"{filename}\" /upgrade /passive /waitforexit /userid={userId}"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
+                args = $"\"{filename}\" /SILENT /upgrade /passive /waitforexit /userid={userId}"; // The /waitforexit argument makes sure FilterServiceProvider.exe is stopped before displaying its UI.
             }
             else
             {

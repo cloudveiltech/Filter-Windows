@@ -16,7 +16,6 @@
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
     <Launch Condition="Installed OR WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" Message="This setup requires the .NET Framework version v4.6.1.  Please install the .NET Framework and run this setup again." />
     <Launch Condition="Installed OR (VersionNT &gt;= 603) OR (VersionNT64 &gt;= 603)" Message="Required OS is Win10 or higher" />
-    <Launch Condition="WIX_NATIVE_MACHINE=43690" Message="Required arm64 OS" />
     <Icon Id="_D1707FE3B808" SourceFile="..\..\CloudVeilGUI\appicon.ico" />
     <Binary Id="B.CustomInstallerActions" SourceFile="..\..\InstallerCustomActions\bin\$(var.Configuration)\InstallerCustomActions.CA.dll" />
     <!-- The directory tree of the installation package. -->

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.3.32819.101
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11505.172 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallGuard", "InstallGuard\InstallGuard.csproj", "{58ECE8F6-84E8-4B49-A3C2-6F9CE57594FE}"
 EndProject
@@ -731,8 +731,8 @@ Global
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release Signed|x86.Build.0 = Release|Any CPU
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|ARM64.Build.0 = Release|Any CPU
+		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|ARM64.ActiveCfg = Release|ARM64
+		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|ARM64.Build.0 = Release|ARM64
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|x64.ActiveCfg = Release|Any CPU
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|x64.Build.0 = Release|Any CPU
 		{2DDCC56D-59FC-4030-B339-E3560D68563E}.Release|x86.ActiveCfg = Release|Any CPU
