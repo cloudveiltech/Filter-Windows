@@ -33,6 +33,44 @@ WelcomeLabel2=This installer will download and install {#MyAppName} on your comp
 Source: "appicon.ico"; Flags: dontcopy
 
 [Code]
+#ifdef UNICODE
+  #define AW "W"
+#else
+  #define AW "A"
+#endif
+type
+  HINSTANCE = THandle;
+  
+function ParamExists(const ParamName: string): Boolean;
+var
+  I: Integer;
+  Param, Key: string;
+  ParamNameIndex: Integer;
+begin
+  Result := False;
+  
+  for I := 1 to ParamCount do
+  begin
+    Param := ParamStr(I);
+    
+    if (Length(Param) > 0) and (Param[1] in ['/']) then
+    begin
+      Delete(Param, 1, 1); 
+      ParamNameIndex := Pos('=', Param) 
+      if ParamNameIndex <= 0 then
+      begin
+        ParamNameIndex := MaxInt;
+      end;
+      
+      Key := Copy(Param, 1, ParamNameIndex - 1);
+      if CompareText(Key, ParamName) = 0 then
+      begin
+        Result := True;
+        Break;
+      end;
+    end;
+  end;
+end;
 
 function GetParamValue(const ParamName: string; Default: string): string;
 var
@@ -61,6 +99,22 @@ begin
   end;
 end;
 
+procedure LaunchCv4wGUI();
+var 
+  ResultCode: Integer;
+  Cv4wPath: String;
+begin
+  case ProcessorArchitecture of
+      paArm64, paX64: Cv4wPath := ExpandConstant('{commonpf64}');
+      paX86: Cv4wPath := ExpandConstant('{commonpf32}');
+  end;
+  
+  Cv4wPath := Cv4wPath + '\CloudVeil\CloudVeil For Windows\CloudVeil.exe';
+  
+  MsgBox(Cv4wPath, mbError, MB_OK);
+  Exec(Cv4wPath, '', '', SW_SHOW, ewNoWait, ResultCode);  
+end;
+
 var
   DownloadPage: TDownloadWizardPage;
   CancelPressed: Boolean;
@@ -78,6 +132,39 @@ begin
   Confirm := False;  
 end;
 
+  
+function ShellExecute(hwnd: HWND; lpOperation: string; lpFile: string;
+  lpParameters: string; lpDirectory: string; nShowCmd: Integer): HINSTANCE;
+  external 'ShellExecute{#AW}@shell32.dll stdcall';
+
+function InitializeSetup: Boolean;
+var
+  InstallerParams: String;
+  I: Integer;
+  ShellRes: Integer;
+begin
+  Result := True;
+  if ParamExists('passive') then
+  begin
+    Result := WizardSilent;
+    if not Result then
+    begin
+        InstallerParams := '';
+        for I := 1 to ParamCount do
+        begin
+            InstallerParams := InstallerParams + ' ' + ParamStr(I);
+        end;
+
+        ShellRes := ShellExecute(0, '', ExpandConstant('{srcexe}'), '/SILENT ' + InstallerParams, '', SW_SHOW);
+        
+        if ShellRes <= 32 then
+        begin
+          Result := False;
+          LaunchCv4wGUI();
+        end;
+    end;
+  end;
+end;
 
 procedure InitializeWizard;
 begin
@@ -128,7 +215,7 @@ begin
         UserIdHash := '/' + Copy(UserIdParam, Pos(':', UserIdParam) + 1, MaxInt);
     end;
 
-  PlatformParam := 'cv4w-';
+    PlatformParam := 'cv4w-';
     case ProcessorArchitecture of
         paX86: PlatformParam := PlatformParam + 'x86';
         paX64: PlatformParam := PlatformParam + 'x64';
@@ -141,6 +228,7 @@ begin
     begin
       MsgBox('Failed to download the installer. Please check your internet connection and try again.', mbError, MB_OK);
       WizardForm.Close;
+      LaunchCv4wGUI();
       Exit;
     end;
 
@@ -157,6 +245,7 @@ begin
     else
     begin
       MsgBox('Failed to launch the installer. Error code: ' + IntToStr(ResultCode), mbError, MB_OK);
+      LaunchCv4wGUI();
     end;
     
     Abort;
