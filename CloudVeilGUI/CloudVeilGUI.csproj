@@ -131,9 +131,13 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Gui\CloudVeil\UI\Controls\NumberCodeInput.xaml.cs">
+      <DependentUpon>NumberCodeInput.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.xaml.cs">
       <DependentUpon>TimeRestrictionSlider.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Gui\CloudVeil\UI\Converters\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="Platform\Common\IGuiServices.cs" />
     <Compile Include="Platform\Common\ITrayIcon.cs" />
     <Compile Include="Platform\Common\StatusIconMenuItem.cs" />
@@ -184,6 +188,10 @@
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Gui\CloudVeil\UI\Controls\NumberCodeInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Gui\CloudVeil\UI\Controls\TimeRestrictionSlider.xaml">
       <Generator>MSBuild:Compile</Generator>

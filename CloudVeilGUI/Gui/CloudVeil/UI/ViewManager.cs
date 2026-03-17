@@ -88,6 +88,11 @@ namespace Gui.CloudVeil.UI
             return null;
         }
 
+        public BaseCloudVeilViewModel GetViewModel(Type t)
+        {
+            return getView(t)?.ViewType.GetProperty("DataContext")?.GetValue(this.Get(t)) as BaseCloudVeilViewModel;
+        }
+
         private void showViewWithHighestZIndex()
         {
             int highestZIndex = 0;

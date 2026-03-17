@@ -398,9 +398,9 @@ namespace CloudVeil.IPC
             }
         }
 
-        public void AttemptAuthenticationWithEmail(string email)
+        public void AttemptAuthenticationWithEmail(string email, SecureString oneTimeCode)
         {
-            var msg = new AuthenticationMessage(AuthenticationAction.RequestedWithEmail, email);
+            var msg = new AuthenticationMessage(AuthenticationAction.RequestedWithEmail, email, oneTimeCode);
 
             var logger = LoggerUtil.GetAppWideLogger();
 

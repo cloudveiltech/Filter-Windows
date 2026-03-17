@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Filter.Platform.Common.Data.Models
 {
     [Serializable]
-    public class ComputerInfo
+    public class EmailAuthResponse
     {
-        public string DiagnosticsText { get; set; }
+        public const string TWO_FACTOR_TYPE = "2fa";
+        public string type { get; set; }
     }
 }

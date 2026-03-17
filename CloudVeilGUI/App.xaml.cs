@@ -284,27 +284,21 @@ namespace CloudVeil.Windows
 
                                 viewManager.PushView(LoginView.ModalZIndex, typeof(LoginView));
                             }
-                            break;
+                            break;                   
 
                         case AuthenticationAction.Authenticated:
                         case AuthenticationAction.ErrorNoInternet:
                         case AuthenticationAction.ErrorUnknown:
                             {
-                                logger.Info($"The logged in user is {authenticationFailureResult.Username}");
+                                logger.Info($"The logged in user is {authenticationFailureResult.Username}");                                
 
-                                mainWindow.Dispatcher.InvokeAsync(() =>
+                                if (authenticationFailureResult.Action == AuthenticationAction.Authenticated && hasStateBeenFetched)
                                 {
-                                    ((MainWindowViewModel)mainWindow.DataContext).LoggedInUser = authenticationFailureResult.Username;
-                                    ((MainWindowViewModel)mainWindow.DataContext).IsUserLoggedIn = true;
-                                });
-
-                                // This code prevents the progress->dashboard->progress flash for authenticated users, but not for error'd users.
-                                if (authenticationFailureResult.Action != AuthenticationAction.Authenticated)
-                                {
-                                    viewManager.PopView(typeof(LoginView));
-                                }
-                                else if (hasStateBeenFetched)
-                                {
+                                    mainWindow.Dispatcher.InvokeAsync(() =>
+                                    {
+                                        ((MainWindowViewModel)mainWindow.DataContext).LoggedInUser = authenticationFailureResult.Username;
+                                        ((MainWindowViewModel)mainWindow.DataContext).IsUserLoggedIn = true;
+                                    });
                                     viewManager.PopView(typeof(LoginView));
                                 }
                             }

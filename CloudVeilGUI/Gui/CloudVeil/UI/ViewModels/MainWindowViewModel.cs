@@ -40,6 +40,8 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
+        public bool OneTimeCodeWaiting { get; set; } = false;
+
         private string loggedInUser;
         public string LoggedInUser
         {

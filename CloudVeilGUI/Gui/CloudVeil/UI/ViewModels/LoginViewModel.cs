@@ -68,14 +68,13 @@ namespace Gui.CloudVeil.UI.ViewModels
                         }
                     }), model.CanAttemptAuthenticationWithPassword);
                 }
-
                 return authenticateWithPasswordCommand;
             }
         }
 
         public RelayCommand AuthenticateWithEmailCommand
         {
-            get 
+            get
             {
                 if (authenticateWithEmailCommand == null)
                 {
@@ -84,6 +83,11 @@ namespace Gui.CloudVeil.UI.ViewModels
                         try
                         {
                             ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
+
+                            if (!WaitingForOneTimeCode)
+                            {
+                                UserPassword = new SecureString();
+                            }
                             await model.AuthenticateWithEmail();
                         }
                         catch (Exception e)
@@ -94,6 +98,19 @@ namespace Gui.CloudVeil.UI.ViewModels
                 }
 
                 return authenticateWithEmailCommand;
+            }
+        }
+
+
+
+        public RelayCommand CancelOneTimeCodeMode
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    WaitingForOneTimeCode = false;
+                });
             }
         }
 
@@ -175,6 +192,16 @@ namespace Gui.CloudVeil.UI.ViewModels
                     model.UserPassword = value;
                     RaisePropertyChanged(nameof(UserPassword));
                 }
+            }
+        }
+
+        public bool WaitingForOneTimeCode 
+        {
+            get => model.WaitingForOneTimeCode;
+            set
+            {
+                model.WaitingForOneTimeCode = value;
+                RaisePropertyChanged(nameof(WaitingForOneTimeCode));
             }
         }
     }

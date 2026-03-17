@@ -43,6 +43,7 @@ namespace FilterProvider.Common.Util
         RevokeToken,
         RetrieveToken,
         ActiveateByEmail,
+        SendOneTimeCode,
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
@@ -81,6 +82,7 @@ namespace FilterProvider.Common.Util
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
             { ServiceResource.ActiveateByEmail, "/api/v2/user/activation/email" },
+            { ServiceResource.SendOneTimeCode, "/api/v2/user/activation/2fa" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
             { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
@@ -384,7 +386,7 @@ namespace FilterProvider.Common.Util
             return ret;
 
         }
-        public AuthenticationResultObject AuthenticateByEmail(string email)
+        public AuthenticationResultObject AuthenticateByEmail(string email, string oneTimeCode="")
         {
             logger.Error(nameof(AuthenticateByEmail));
 
@@ -428,11 +430,18 @@ namespace FilterProvider.Common.Util
             HttpWebRequest authRequest = null;
             try
             {
-                authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
+                if (oneTimeCode.Length != 0)
+                {
+                    authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.SendOneTimeCode], new ResourceOptions());
+                }
+                else
+                {
+                    authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
+                }
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", email, FingerprintService.Default.Value, deviceName, authStorage.DeviceId, authStorage.AuthId));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&code={1}&identifier={2}&device_id={3}&device_id_2={4}&identifier_2={5}", email, oneTimeCode, FingerprintService.Default.Value, deviceName, authStorage.DeviceId, authStorage.AuthId));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -453,6 +462,9 @@ namespace FilterProvider.Common.Util
                     // Get the response code as an int so we can range check it.
                     var code = (int)response.StatusCode;
 
+                    var reader = new StreamReader(response.GetResponseStream());
+                    var authResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<EmailAuthResponse>(reader.ReadToEnd());
+
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed. We include redirect codes (3XX) as success,
                     // since our server side will just redirect us if we're already authed.
@@ -460,7 +472,14 @@ namespace FilterProvider.Common.Util
                     {
                         response.Close();
                         authRequest.Abort();
-                        ret.AuthenticationResult = AuthenticationResult.Success;
+                        if (authResponse == null || authResponse.type != EmailAuthResponse.TWO_FACTOR_TYPE || oneTimeCode.Length > 0)
+                        {
+                            ret.AuthenticationResult = AuthenticationResult.Success;
+                        } 
+                        else
+                        {
+                            ret.AuthenticationResult = AuthenticationResult.WaitingForOneTimeCode;
+                        }
 
                         authStorage.DeviceId = deviceName;
                         authStorage.AuthId = FingerprintService.Default.Value;
@@ -499,7 +518,10 @@ namespace FilterProvider.Common.Util
                     using (WebResponse response = e.Response)
                     {
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        if (httpResponse != null)
+                        {
+                            logger.Error("Error code: {0}", httpResponse.StatusCode);
+                        }
 
                         string errorText = string.Empty;
 

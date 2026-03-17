@@ -634,13 +634,13 @@ namespace FilterProvider.Common.Services
                                 AuthenticationResultObject authResult = AuthenticationResultObject.FailedResult;
                                 bool authOverEmail = args.Action == AuthenticationAction.RequestedWithEmail;
 
+                                unencrypedPwordBytes = args.Password.SecureStringBytes();
                                 if (authOverEmail)
                                 {
-                                    authResult = WebServiceUtil.Default.AuthenticateByEmail(args.Username);
+                                    authResult = WebServiceUtil.Default.AuthenticateByEmail(args.Username, Encoding.ASCII.GetString(unencrypedPwordBytes));
                                 } 
                                 else
                                 {
-                                    unencrypedPwordBytes = args.Password.SecureStringBytes();
                                     authResult = WebServiceUtil.Default.AuthenticateByPassword(args.Username, unencrypedPwordBytes);
                                 }
 
@@ -651,7 +651,7 @@ namespace FilterProvider.Common.Services
                                             if (authOverEmail)
                                             {
                                                 retrieveTokenTimer.Change(RETRIEVE_TOKEN_TIMEOUT, RETRIEVE_TOKEN_TIMEOUT);
-                                            } 
+                                            }
                                             else
                                             {
                                                 WebServiceUtil.Default.UserEmail = args.Username;
@@ -666,10 +666,16 @@ namespace FilterProvider.Common.Services
                                             ipcServer.NotifyAuthenticationStatus(AuthenticationAction.Required, null, new AuthenticationResultObject(AuthenticationResult.Failure, authResult.AuthenticationMessage));
                                         }
                                         break;
-
                                     case AuthenticationResult.ConnectionFailed:
                                         {
                                             ipcServer.NotifyAuthenticationStatus(AuthenticationAction.ErrorNoInternet);
+                                        }
+                                        break;
+                                    case AuthenticationResult.WaitingForOneTimeCode:
+                                        {
+                                            systemServices.EnsureGuiRunning(runInTray: false);
+                                            ipcServer.NotifyAuthenticationStatus(AuthenticationAction.RequestedWithEmail, args.Username, new AuthenticationResultObject(AuthenticationResult.WaitingForOneTimeCode, authResult.AuthenticationMessage));
+
                                         }
                                         break;
                                 }

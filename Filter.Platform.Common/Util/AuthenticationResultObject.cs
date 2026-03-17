@@ -27,7 +27,8 @@ namespace Filter.Platform.Common.Util
         /// <summary>
         /// Indicates that, during the auth request, a connection using the provided URI could not be established.
         /// </summary>
-        ConnectionFailed
+        ConnectionFailed,
+        WaitingForOneTimeCode
     }
 
     /// <summary>

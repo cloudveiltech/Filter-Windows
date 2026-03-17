@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Gui.CloudVeil.UI.ViewModels;
 using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.Util;
 
 namespace Gui.CloudVeil.UI.Models
 {
@@ -77,6 +78,12 @@ namespace Gui.CloudVeil.UI.Models
             {
                 userPassword = value;
             }
+        }
+
+        public bool WaitingForOneTimeCode
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -165,6 +172,7 @@ namespace Gui.CloudVeil.UI.Models
                                 loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
                                 loginViewModel.Message = "";
                             }
+
                         };
 
                         ipcClient.WaitForConnection();
@@ -196,7 +204,7 @@ namespace Gui.CloudVeil.UI.Models
                 {
                     ipcClient.ConnectedToServer = () =>
                     {
-                        ipcClient.AttemptAuthenticationWithEmail(userName);
+                        ipcClient.AttemptAuthenticationWithEmail(userName, userPassword);
                         loginViewModel.ErrorMessage = "";
                         loginViewModel.Message = "Request sent. Please check your E-Mail.";
                     };
@@ -209,6 +217,11 @@ namespace Gui.CloudVeil.UI.Models
                             loginViewModel.Message = "";
                         }
                         loginViewModel.hideProgessView();
+
+                        if (msg.AuthenticationResult.AuthenticationResult == AuthenticationResult.WaitingForOneTimeCode)
+                        {
+                            loginViewModel.WaitingForOneTimeCode = true;
+                        }
                     };
 
                     ipcClient.WaitForConnection();
