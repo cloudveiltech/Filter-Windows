@@ -101,8 +101,6 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-
-
         public RelayCommand CancelOneTimeCodeMode
         {
             get
@@ -111,6 +109,14 @@ namespace Gui.CloudVeil.UI.ViewModels
                 {
                     WaitingForOneTimeCode = false;
                 });
+            }
+        }
+        public RelayCommand ResendOneTimeCode
+        {
+            get
+            {
+                UserPassword = new SecureString();
+                return AuthenticateWithEmailCommand;
             }
         }
 

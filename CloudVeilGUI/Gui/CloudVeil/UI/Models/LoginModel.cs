@@ -202,11 +202,19 @@ namespace Gui.CloudVeil.UI.Models
             {
                 using (var ipcClient = new IPCClient())
                 {
+                    loginViewModel.Message = "";
                     ipcClient.ConnectedToServer = () =>
                     {
                         ipcClient.AttemptAuthenticationWithEmail(userName, userPassword);
                         loginViewModel.ErrorMessage = "";
-                        loginViewModel.Message = "Request sent. Please check your E-Mail.";
+                        if (UserPassword.Length > 0)
+                        {
+                            loginViewModel.Message = "Validating the code.";
+                        }
+                        else
+                        {
+                            loginViewModel.Message = "Request sent. Please check your E-Mail.";
+                        }
                     };
 
                     ipcClient.AuthenticationResultReceived = (msg) =>
@@ -216,11 +224,19 @@ namespace Gui.CloudVeil.UI.Models
                             loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
                             loginViewModel.Message = "";
                         }
-                        loginViewModel.hideProgessView();
 
                         if (msg.AuthenticationResult.AuthenticationResult == AuthenticationResult.WaitingForOneTimeCode)
                         {
+                            loginViewModel.Message = "";
+                            if (UserPassword.Length == 0)
+                            {
+                                loginViewModel.hideProgessView();
+                            }
                             loginViewModel.WaitingForOneTimeCode = true;
+                        } 
+                        else
+                        {
+                            loginViewModel.hideProgessView();
                         }
                     };
 
