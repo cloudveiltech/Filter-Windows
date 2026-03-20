@@ -42,8 +42,7 @@ namespace FilterProvider.Common.Util
         GetToken,
         RevokeToken,
         RetrieveToken,
-        ActiveateByEmail,
-        SendOneTimeCode,
+        ActiveateOneTimePassword,
         BypassRequest,
         AccountabilityNotify,
         AddSelfModerationEntry,
@@ -81,8 +80,7 @@ namespace FilterProvider.Common.Util
             { ServiceResource.GetToken, "/api/v2/user/gettoken" },
             { ServiceResource.RevokeToken, "/api/v2/me/revoketoken" },
             { ServiceResource.RetrieveToken, "/api/v2/user/retrievetoken" },
-            { ServiceResource.ActiveateByEmail, "/api/v2/user/activation/email" },
-            { ServiceResource.SendOneTimeCode, "/api/v2/user/activation/2fa" },
+            { ServiceResource.ActiveateOneTimePassword, "/api/v2/user/activation/otp" },
             { ServiceResource.BypassRequest, "/api/v2/me/bypass" },
             { ServiceResource.AccountabilityNotify, "/api/v2/me/accountability" },
             { ServiceResource.AddSelfModerationEntry, "/api/v2/me/self_moderation/add" },
@@ -386,9 +384,9 @@ namespace FilterProvider.Common.Util
             return ret;
 
         }
-        public AuthenticationResultObject AuthenticateByEmail(string email, string oneTimeCode="")
+        public AuthenticationResultObject AuthenticateByOtpEmail(string email,string oneTimeCode="")
         {
-            logger.Error(nameof(AuthenticateByEmail));
+            logger.Error(nameof(AuthenticateByOtpEmail));
 
             AuthenticationResultObject ret = new AuthenticationResultObject();
 
@@ -430,14 +428,13 @@ namespace FilterProvider.Common.Util
             HttpWebRequest authRequest = null;
             try
             {
+                var options = new ResourceOptions();
                 if (oneTimeCode.Length != 0)
                 {
-                    authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.SendOneTimeCode], new ResourceOptions());
+                    options.Method = "PUT";
                 }
-                else
-                {
-                    authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateByEmail], new ResourceOptions());
-                }
+                authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateOneTimePassword], options);
+        
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                

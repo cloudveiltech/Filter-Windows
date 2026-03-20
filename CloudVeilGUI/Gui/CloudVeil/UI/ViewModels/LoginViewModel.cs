@@ -22,19 +22,22 @@ namespace Gui.CloudVeil.UI.ViewModels
     /// The LoginViewModel class serves as the ViewModel for the LoginView UserControl.
     /// </summary>
     public class LoginViewModel : BaseCloudVeilViewModel
-    {
+    {        
+        const int OTP_PAGE_INDEX = 1;
         /// <summary>
         /// The model.
         /// </summary>
         private LoginModel model = null;
+        private int selectedLoginPageIndex = 0;
 
         /// <summary>
         /// Private data member for the public AuthenticateCommand property.
         /// </summary>
         private RelayCommand authenticateWithPasswordCommand;
 
-        private RelayCommand authenticateWithEmailCommand;
+        private RelayCommand authenticateWithEmailOtpCommand;
 
+        private RelayCommand validateEmailOtpCommand;
         public LoginViewModel()
         {
             // We have to pass the LoginViewModel into our LoginModel so that changes to the LoginModel can RaisePropertyChanged() on the view model.
@@ -58,9 +61,8 @@ namespace Gui.CloudVeil.UI.ViewModels
                     {
                         try
                         {
-                            ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
+                            Message = "validating..";
                             await model.AuthenticateWithPassword();
-                            ViewManager?.PopView(typeof(ProgressWait));
                         }
                         catch(Exception e)
                         {
@@ -72,23 +74,19 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        public RelayCommand AuthenticateWithEmailCommand
+        public RelayCommand AuthenticateWithEmailOtpCommand
         {
             get
             {
-                if (authenticateWithEmailCommand == null)
+                if (authenticateWithEmailOtpCommand == null)
                 {
-                    authenticateWithEmailCommand = new RelayCommand((Action)(async () =>
+                    authenticateWithEmailOtpCommand = new RelayCommand((Action)(async () =>
                     {
                         try
                         {
-                            ViewManager?.PushView(LoginView.ModalZIndex * 2, typeof(ProgressWait));
-
-                            if (!WaitingForOneTimeCode)
-                            {
-                                UserPassword = new SecureString();
-                            }
-                            await model.AuthenticateWithEmail();
+                            UserPassword = new SecureString();
+                            SelectedLoginPageIndex = OTP_PAGE_INDEX;
+                            await model.AuthenticateWithEmailOtp();
                         }
                         catch (Exception e)
                         {
@@ -97,32 +95,56 @@ namespace Gui.CloudVeil.UI.ViewModels
                     }), model.CanAttemptAuthenticationWithEmail);
                 }
 
-                return authenticateWithEmailCommand;
+                return authenticateWithEmailOtpCommand;
             }
         }
 
-        public RelayCommand CancelOneTimeCodeMode
+        public RelayCommand ValidateEmailOtpCommand
+        {
+            get
+            {
+                if (validateEmailOtpCommand == null)
+                {
+                    validateEmailOtpCommand = new RelayCommand((Action)(async () =>
+                    {
+                        try
+                        {
+                            Message = "validating..";
+                            await model.AuthenticateWithEmailOtp();
+                        }
+                        catch (Exception e)
+                        {
+                            LoggerUtil.RecursivelyLogException(logger, e);
+                        }
+                    }), model.CanValidateOtp);
+                }
+
+                return validateEmailOtpCommand;
+            }
+        }
+
+        public RelayCommand GoToStartPage
         {
             get
             {
                 return new RelayCommand(() =>
                 {
-                    WaitingForOneTimeCode = false;
+                    UserPassword = new SecureString();
+                    ErrorMessage = "";
+                    Message = "";
+                    SelectedLoginPageIndex = 0;
                 });
             }
         }
-        public RelayCommand ResendOneTimeCode
-        {
-            get
-            {
-                UserPassword = new SecureString();
-                return AuthenticateWithEmailCommand;
-            }
-        }
 
-        public void hideProgessView()
+        public int SelectedLoginPageIndex
         {
-            ViewManager?.PopView(typeof(ProgressWait));
+            get => selectedLoginPageIndex;
+            set
+            {
+                selectedLoginPageIndex = value;
+                RaisePropertyChanged(nameof(SelectedLoginPageIndex));
+            }
         }
 
         /// <summary>
@@ -198,16 +220,6 @@ namespace Gui.CloudVeil.UI.ViewModels
                     model.UserPassword = value;
                     RaisePropertyChanged(nameof(UserPassword));
                 }
-            }
-        }
-
-        public bool WaitingForOneTimeCode 
-        {
-            get => model.WaitingForOneTimeCode;
-            set
-            {
-                model.WaitingForOneTimeCode = value;
-                RaisePropertyChanged(nameof(WaitingForOneTimeCode));
             }
         }
     }

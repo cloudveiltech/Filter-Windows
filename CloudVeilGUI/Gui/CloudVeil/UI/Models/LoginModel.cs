@@ -143,6 +143,28 @@ namespace Gui.CloudVeil.UI.Models
 
             return true;
         }
+        public bool CanValidateOtp()
+        {
+            // Can't auth when we're in the middle of it.
+            if (currentlyAuthenticating)
+            {
+                return false;
+            }
+
+            // Ensure some sort of username has been supplied.
+            if (!StringExtensions.Valid(UserName))
+            {
+                return false;
+            }
+
+            // Ensure some sort of password has been supplied.
+            if (UserPassword == null || UserPassword.Length < 6)
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         public async Task AuthenticateWithPassword()
         {
@@ -154,7 +176,6 @@ namespace Gui.CloudVeil.UI.Models
             {
                 // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
                 loginViewModel.ErrorMessage = "";
-                loginViewModel.Message = "";
 
                 await Task.Run(() =>
                 {
@@ -190,53 +211,29 @@ namespace Gui.CloudVeil.UI.Models
             }
         }
 
-        public async Task AuthenticateWithEmail()
+        public async Task AuthenticateWithEmailOtp()
         {
             ErrorMessage = string.Empty;
 
             // Clear error message before running the authentication again. Makes it clearer to the user what's going on.
             loginViewModel.ErrorMessage = "";
-            loginViewModel.Message = "";
 
             await Task.Run(() =>
             {
                 using (var ipcClient = new IPCClient())
                 {
-                    loginViewModel.Message = "";
                     ipcClient.ConnectedToServer = () =>
                     {
                         ipcClient.AttemptAuthenticationWithEmail(userName, userPassword);
                         loginViewModel.ErrorMessage = "";
-                        if (UserPassword.Length > 0)
-                        {
-                            loginViewModel.Message = "Validating the code.";
-                        }
-                        else
-                        {
-                            loginViewModel.Message = "Request sent. Please check your E-Mail.";
-                        }
                     };
 
                     ipcClient.AuthenticationResultReceived = (msg) =>
                     {
                         if (msg.AuthenticationResult.AuthenticationMessage != null)
                         {
+                            loginViewModel.Message = "";
                             loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
-                            loginViewModel.Message = "";
-                        }
-
-                        if (msg.AuthenticationResult.AuthenticationResult == AuthenticationResult.WaitingForOneTimeCode)
-                        {
-                            loginViewModel.Message = "";
-                            if (UserPassword.Length == 0)
-                            {
-                                loginViewModel.hideProgessView();
-                            }
-                            loginViewModel.WaitingForOneTimeCode = true;
-                        } 
-                        else
-                        {
-                            loginViewModel.hideProgessView();
                         }
                     };
 

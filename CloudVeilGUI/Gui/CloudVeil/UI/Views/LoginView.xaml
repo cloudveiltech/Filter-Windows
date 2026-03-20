@@ -10,13 +10,14 @@
                 xmlns:CloudVeilControls="clr-namespace:Gui.CloudVeil.UI.Controls"
                 xmlns:CloudVeilConverters="clr-namespace:Gui.CloudVeil.UI.Converters"
                 xmlns:CloudVeilViewModels="clr-namespace:Gui.CloudVeil.UI.ViewModels"
+                xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                 xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:local="clr-namespace:Gui.CloudVeil.UI.Views"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:mvvmlight="clr-namespace:GalaSoft.MvvmLight;assembly=GalaSoft.MvvmLight"
                 Width="716"
-                Height="416"
+                Height="816"
                 mc:Ignorable="d" PreviewKeyDown="True">
 
     <!--  Set data context to LoginViewModel.  -->
@@ -25,183 +26,260 @@
     </UserControl.DataContext>
     <UserControl.Resources>
         <CloudVeilConverters:InvertableBooleanToVisibilityConverter x:Key="InvertableBooleanToVisibilityConverter"/>
+
+        <Style TargetType="TextBlock">
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
+    <mah:MetroAnimatedTabControl Width="250" SelectedIndex="{Binding SelectedLoginPageIndex}" mah:TabControlHelper.Transition="Up">
+        <TabItem>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,0,150">
+                <Grid Width="96"
+                  Height="96"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Center"
+                  Margin="0,57,0,0">
+                    <Border BorderThickness="1"
+                        CornerRadius="12" 
+                        VerticalAlignment="Stretch"
+                        BorderBrush="Transparent" 
+                        Background="#c3d6df" 
+                        HorizontalAlignment="Stretch"/>
 
-        <Grid>
-        <!--  Simple title/user call to action.  -->
-        <Label Width="258"
-               Margin="229,7,229,0"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Top"
-               HorizontalContentAlignment="Center"
-               Content="Please Sign In"
-               FontFamily="Segoe UI"
-               FontSize="22"
-               FontWeight="UltraLight"
-               Foreground="Black" />
+                    <IconPacks:PackIconFontAwesome Width="48"
+                                         Height="48"                                           
+                                         VerticalAlignment="Center"
+                                         HorizontalAlignment="Center"
+                                         Foreground="{StaticResource AccentColorBrush2}"
+                                         Kind="UserSolid" />
 
-        <!--  Graphics representing user and action.  -->
-        <IconPacks:PackIconFontAwesome Width="82"
-                                       Height="82"
-                                       Margin="317,60,317,0"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Top"
-                                       Foreground="{StaticResource AccentColorBrush2}"
-                                       Kind="UserSolid" />
+                    <IconPacks:PackIconFontAwesome 
+                    Width="24" 
+                    Height="24"                                       
+                    Margin="0,0,20,20"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Right"
+                    Foreground="Gray" 
+                    Kind="PlugSolid"
+                
+                    />
+                </Grid>
 
-        <IconPacks:PackIconFontAwesome Width="46" Height="46" Margin="374,111,0,0" Foreground="Gray" Kind="PlugSolid" />
-
-        <!--  User name for authentication purposes. Expected to have a length greater than 0 and not be whitespace before relevant commands will be executable.  -->
-        <TextBlock Width="220"
-                   Margin="248,167,248,0"
+                <Label 
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
+                   HorizontalContentAlignment="Center"
+                   Content="Please Sign In"
                    FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
-                   Text="E-mail"
-                   TextWrapping="Wrap" />
+                   FontSize="24"
+                   FontWeight="Bold"
+                    Margin="0,20,0,20"/>
 
-        <TextBox Width="220"
-                 Height="23"
-                 Margin="248,191,248,0"
-                 HorizontalAlignment="Center"
-                 VerticalAlignment="Top"
-                 AcceptsReturn="False"
-                 AcceptsTab="False"
-                 TabIndex="2"
-                 Text="{Binding Path=UserName,
-                                Mode=TwoWay,
-                                UpdateSourceTrigger=PropertyChanged}"
-                 TextWrapping="Wrap" />
+                <TextBlock 
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       FontFamily="Segoe UI"
+                       FontSize="12"
+                       FontWeight="DemiBold"
+                       Foreground="#466270"
+                       Text="E-mail"
+                       TextWrapping="Wrap"                    
+                       Margin="0,0,0,5" />
 
-        <!--  User password input for authentication purposes. Expected to have a length greater than zero before relevant commands with be executable.  -->
-        <TextBlock Width="220"
-                   Margin="248,226,248,0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontFamily="Segoe UI"
-                   FontSize="14"
-                   FontWeight="UltraLight"
-                   Foreground="Black"
-                   Text="Password"
-                   TextWrapping="Wrap"
-                   Visibility="{Binding Path=WaitingForOneTimeCode, Converter={StaticResource InvertableBooleanToVisibilityConverter}, ConverterParameter=Inverted}"  />
+                <TextBox
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Top"
+                     AcceptsReturn="False"
+                     AcceptsTab="False"
+                     TabIndex="2"
+                     Padding="3"
+                     Text="{Binding Path=UserName,
+                                    Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap" />
 
-        <CloudVeilControls:SecureInputBox Width="220"
-                                        Height="26"
-                                        Margin="248,248,248,0"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Top"
-                                        HorizontalContentAlignment="Stretch"
-                                        VerticalContentAlignment="Stretch"
-                                         Visibility="{Binding Path=WaitingForOneTimeCode, Converter={StaticResource InvertableBooleanToVisibilityConverter}, ConverterParameter=Inverted}" 
-                                        Password="{Binding Path=UserPassword,
-                                                           Mode=TwoWay,
-                                                           UpdateSourceTrigger=PropertyChanged}"
-                                        TabIndex="3" />
+                <!--  User password input for authentication purposes. Expected to have a length greater than zero before relevant commands with be executable.  -->
+                <TextBlock 
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       FontFamily="Segoe UI"
+                       FontSize="12"
+                       FontWeight="DemiBold"
+                       Foreground="#466270"
+                       Text="Password"                           
+                       Margin="0,10,0,5"
+                       TextWrapping="Wrap"/>
 
-        <StackPanel Orientation="Vertical"  
-                   Margin="248,226,248,0"
-            Visibility="{Binding Path=WaitingForOneTimeCode, Converter={StaticResource InvertableBooleanToVisibilityConverter}, ConverterParameter=Normal}"    >
-                <TextBlock Width="220"
-                           HorizontalAlignment="Center"
+                <CloudVeilControls:SecureInputBox
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"                    
+                                            Password="{Binding Path=UserPassword,
+                                                               Mode=TwoWay,
+                                                               UpdateSourceTrigger=PropertyChanged}"
+                                TabIndex="3" />
+                    
+                    <TextBlock             
+                            Margin="0,15,0,0"
+                           HorizontalAlignment="Stretch"
                            VerticalAlignment="Top"
                            FontFamily="Segoe UI"
-                           FontSize="14"
-                           FontWeight="UltraLight"
-                           Foreground="Black"
-                           Text="One-Time Code"
-                           TextWrapping="Wrap"     
-                           />
-            
-                <CloudVeilControls:NumberCodeInput
-                    NumberCount="6"
-                    Width="220"
-                    Height="32"
-                    Margin="20,10,0,0"
-                    Value="{Binding Path=UserPassword,
-                                        Mode=TwoWay,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                    />
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="#c02f2f"
+                           Text="{Binding Path=ErrorMessage,
+                                          Mode=OneWay}"
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
+                    <TextBlock 
+                            Margin="0,5,0,0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Top"
+                           FontFamily="Segoe UI"
+                           FontSize="12"
+                           Foreground="Green"
+                           FontWeight="Bold"
+                           Text="{Binding Path=Message,
+                                          Mode=OneWay}"
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
+                <Button
+                    HorizontalAlignment="Stretch"
+                    IsDefault="True"
+                    Command="{Binding AuthenticateWithPasswordCommand}"
+                    Content="Sign In"                                    
+                    Margin="0,20,0,0"
+                    Style="{StaticResource AccentedSquareButtonStyle}" />
 
-                <Button Width="120"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
+                <Grid                                 
+                    Margin="20">
+                    <Separator HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                               Opacity="0.6"
+                               Foreground="#a4adb1"/>
+                    <TextBlock Text="OR CONTINUE WITH" 
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Background="#fff"
+                               FontSize="10"
+                               Padding="5,0,5,4"
+                               Foreground="#a4adb1"
+                        />
+                </Grid>
+  
+                <Border Background="#f0f4f8" 
+                        CornerRadius="8" >
+                    <Button
+                        Padding="0,10,0,10"
                         IsDefault="False"
-                        Margin="0,10,0,0"
-                        Command="{Binding AuthenticateWithEmailCommand}"
-                        Content="Validate Code"
-                        Style="{StaticResource AccentedSquareButtonStyle}" />
-
-
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
-                <TextBlock Text="Didn't get the code?" VerticalAlignment="Center"/>
-
-                <Button Margin="10,0,0,0" Style="{StaticResource BaseMetroWindowButtonStyle}">
-                    <Hyperlink Command="{Binding CancelOneTimeCodeMode}">
-                        Back
-                    </Hyperlink>
-                </Button>
-
-                <Button Margin="10,0,0,0" Style="{StaticResource BaseMetroWindowButtonStyle}">
-                    <Hyperlink Command="{Binding ResendOneTimeCode}">
-                        Resend
-                    </Hyperlink>
-                </Button>
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding AuthenticateWithEmailOtpCommand}"
+                        Style="{StaticResource BaseMetroWindowButtonStyle}">
+                        <StackPanel Orientation="Vertical">
+                            <IconPacks:PackIconFontAwesome Width="16"
+                            Height="16"                                           
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Foreground="#466270"
+                            Kind="MobileAltSolid"
+                            Margin="0,0,0,5"/>
+                            <TextBlock Text="REQUEST OTP"
+                                        FontSize="11"
+                                    Foreground="#466270"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
             </StackPanel>
-        </StackPanel>
-        <!--  Auth action button bound to auth command.  -->
-        <Button Width="120"
-                Margin="348,292,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                IsDefault="True"
-                Command="{Binding AuthenticateWithPasswordCommand}"
-                Content="Sign In"
-                
-                Visibility="{Binding Path=WaitingForOneTimeCode, Converter={StaticResource InvertableBooleanToVisibilityConverter}, ConverterParameter=Inverted}" 
-                Style="{StaticResource AccentedSquareButtonStyle}" />
+        </TabItem>
+        <TabItem>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,0,150">
 
-        <Button Width="120"
-                Margin="348,325,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                IsDefault="False"
-                Command="{Binding AuthenticateWithEmailCommand}"
-                Content="Sign In With E-Mail"
+                <TextBlock 
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Text="Verify your identity"
+                   FontFamily="Segoe UI"
+                   FontSize="24"
+                   FontWeight="Bold"
+                    Margin="0,20,0,5"/>
+                <TextBlock 
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Text="Enter the 6-digit code sent to your e-mail."
+                    TextWrapping="Wrap"
+                        Margin="0,10,0,10"
+                    FontFamily="Segoe UI"
+                   FontSize="14"/>
+
+                    <CloudVeilControls:NumberCodeInput
+                        NumberCount="6"
+                        Margin="0,10,0,20"
+                        HorizontalAlignment="Center"
+                        Value="{Binding Path=UserPassword,
+                                            Mode=TwoWay,
+                                            UpdateSourceTrigger=PropertyChanged}"
+                        />
+
+
+                            <TextBlock   
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontFamily="Segoe UI"
+                                        FontSize="12"
+                                        FontWeight="Bold"
+                                        Foreground="#c02f2f"
+                                        Text="{Binding Path=ErrorMessage,
+                                                       Mode=OneWay}"
+                                        TextAlignment="Left"
+                                        TextWrapping="Wrap" />
+                            <TextBlock 
+                                     Margin="0,5,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    FontFamily="Segoe UI"
+                                    FontSize="12"
+                                    Foreground="Green"
+                                    FontWeight="Bold"
+                                    Text="{Binding Path=Message,
+                                                   Mode=OneWay}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap" />
+
+                <Button 
+                            HorizontalAlignment="Stretch"
+                            IsDefault="False"
+                            Margin="0,15,0,10"
+                            Command="{Binding ValidateEmailOtpCommand}"
+                            Content="Verify"
+                            Style="{StaticResource AccentedSquareButtonStyle}" />
                 
-                Visibility="{Binding Path=WaitingForOneTimeCode, Converter={StaticResource InvertableBooleanToVisibilityConverter}, ConverterParameter=Inverted}" 
-                
-                Style="{StaticResource AccentedSquareButtonStyle}" />
-            
-        <!--  Error messages.  -->
-            <TextBlock Width="420"
-                       Height="60"
-                       Margin="148,362,148,0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Top"
-                       FontFamily="Segoe UI"
-                       FontSize="18"
-                       FontWeight="Light"
-                       Foreground="Red"
-                       Text="{Binding Path=ErrorMessage,
-                                      Mode=OneWay}"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap" />
-            <TextBlock Width="420"
-                       Height="60"
-                       Margin="148,362,148,0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Top"
-                       FontFamily="Segoe UI"
-                       FontSize="18"
-                       Foreground="Green"
-                       FontWeight="Light"
-                       Text="{Binding Path=Message,
-                                      Mode=OneWay}"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap" />
-    </Grid>
+                <Button Margin="0,10,0,10" 
+                        Style="{StaticResource BaseMetroWindowButtonStyle}" 
+                        Command="{Binding AuthenticateWithEmailOtpCommand}"
+                        Foreground="#41B1E1" 
+                        FontWeight="Bold" 
+                        FontSize="12">
+                        Resend code                            
+                </Button>
+
+                <Button Margin="0,5,0,0"
+                        Style="{StaticResource BaseMetroWindowButtonStyle}"
+                        Command="{Binding GoToStartPage}"
+                        FontWeight="Bold" 
+                        FontSize="11">
+                     CHANGE METHOD
+                </Button>
+
+               
+            </StackPanel>
+        </TabItem>        
+    </mah:MetroAnimatedTabControl>
 </local:BaseView>

@@ -637,7 +637,7 @@ namespace FilterProvider.Common.Services
                                 unencrypedPwordBytes = args.Password.SecureStringBytes();
                                 if (authOverEmail)
                                 {
-                                    authResult = WebServiceUtil.Default.AuthenticateByEmail(args.Username, Encoding.ASCII.GetString(unencrypedPwordBytes));
+                                    authResult = WebServiceUtil.Default.AuthenticateByOtpEmail(args.Username, Encoding.ASCII.GetString(unencrypedPwordBytes));
                                 } 
                                 else
                                 {
@@ -1315,7 +1315,10 @@ namespace FilterProvider.Common.Services
             // option to trust the local certificate store, we don't have to do that anymore.
             try
             {
-                trustManager.EstablishTrust();
+                if (WebServiceUtil.Default.AuthToken.Length > 0)
+                {
+                    trustManager.EstablishTrust();
+                }
             }
             catch (Exception ffe)
             {
