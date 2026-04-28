@@ -5,7 +5,7 @@
 
         <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
         <CustomAction Id="CA.StartServiceOnCommit.SetProperty" Property="CA.StartServiceOnCommit" Value="TargetDirectory=[TARGETDIR]" />
-        <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" DllEntry="StartServicePostInstall" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
+        <CustomAction Id="CA.StartServiceOnCommit" Execute="commit" Return="ignore" DllEntry="StartServicePostInstall" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.GuardInstall.SetProperty" Property="CA.GuardInstall" Value="TargetDirectory=[TARGETDIR]" />
         <CustomAction Id="CA.GuardInstall" Execute="deferred" DllEntry="GuardInstall" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
         <CustomAction Id="CA.RemoveWinDivert" Execute="deferred" DllEntry="RemoveWinDivert" Impersonate="no" BinaryRef="B.CustomInstallerActions" />
