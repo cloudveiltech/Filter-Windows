@@ -10,11 +10,15 @@ using System;
 using System.Management;
 using System.Security.Cryptography;
 using System.Text;
+using static Topshelf.Runtime.Windows.NativeMethods;
 
 namespace CloudVeil.Core.Windows.Util
 {
     public class WindowsFingerprint : IFingerprint
-    {   
+    {
+        const string DEFAULT_STRING = "Default string";
+        const string NOT_APPLICABLE_STRING = "Not Applicable";
+        const string EMPTY_UUID_STRING = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF";
         static WindowsFingerprint()
         {
             using(var sec = new SHA1CryptoServiceProvider())
@@ -25,14 +29,22 @@ namespace CloudVeil.Core.Windows.Util
                 ManagementObjectCollection collection = null;
                 ManagementObjectSearcher searcher = null;
 
+                var emptySerialNumber = false;
                 searcher = new ManagementObjectSearcher("Select * From Win32_BIOS");
                 collection = searcher.Get();
                 foreach(ManagementObject mo in collection)
                 {
                     try
                     {
-                        sb.Append(mo["SerialNumber"].ToString());
-                        sbShort.Append(mo["SerialNumber"].ToString());
+                        var serialNumber = mo["SerialNumber"].ToString();
+                        if(serialNumber == NOT_APPLICABLE_STRING || serialNumber == DEFAULT_STRING)
+                        {
+                            serialNumber = string.Empty;
+                            emptySerialNumber = true;
+                        }
+
+                        sb.Append(serialNumber);
+                        sbShort.Append(serialNumber);
                     }
                     catch { }
 
@@ -58,8 +70,14 @@ namespace CloudVeil.Core.Windows.Util
                 {
                     try
                     {
-                        sb.Append(mo["SerialNumber"].ToString());
-                        sbShort.Append(mo["SerialNumber"].ToString());
+                        var serialNumber = mo["SerialNumber"].ToString();
+                        if (serialNumber == NOT_APPLICABLE_STRING || serialNumber == DEFAULT_STRING)
+                        {
+                            serialNumber = string.Empty;
+                            emptySerialNumber = true;
+                        }
+                        sb.Append(serialNumber);
+                        sbShort.Append(serialNumber);
                     }
                     catch { }
 
@@ -76,6 +94,40 @@ namespace CloudVeil.Core.Windows.Util
                     }
                     catch { }
                 }
+
+                if(emptySerialNumber)
+                {//fallback to uuid
+                    LoggerUtil.GetAppWideLogger()?.Info("Fingerprint Fallback to UUID");
+                    var emptyUuid = true;
+                    searcher = new ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct");
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        var uuid = obj["UUID"].ToString();
+                        if(uuid !=  NOT_APPLICABLE_STRING && uuid != DEFAULT_STRING && uuid != EMPTY_UUID_STRING)
+                        {
+                            emptyUuid = false;
+                            sb.Append(uuid);
+                            sbShort.Append(uuid);
+                        }
+                    }
+                    if(emptyUuid)
+                    {//fallback to Disk ID
+                        LoggerUtil.GetAppWideLogger()?.Info("Fingerprint Fallback to DISK ID");
+
+                        searcher = new ManagementObjectSearcher("SELECT SerialNumber, Model FROM Win32_DiskDrive");
+
+                        foreach (ManagementObject disk in searcher.Get())
+                        {
+                            var serial = disk["SerialNumber"]?.ToString()?.Trim();
+                            if (serial != NOT_APPLICABLE_STRING && serial != DEFAULT_STRING)
+                            {
+                                sb.Append(serial);
+                                sbShort.Append(serial);
+                            }
+                        }
+                    }
+                }
+
                 collection.Dispose();
                 searcher.Dispose();
 
