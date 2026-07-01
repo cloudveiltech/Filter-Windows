@@ -390,7 +390,6 @@ namespace FilterProvider.Common.Util
                             // dataToAnalyzeStr = ext.Extract(dataToAnalyzeStr.ToCharArray(), true);
                         }
 
-                        logger.Info("Run trigger matcher");
                         short matchedCategory = -1;
                         string trigger = null;
                         var cfg = policyConfiguration.Configuration;

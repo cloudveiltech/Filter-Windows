@@ -161,6 +161,9 @@ namespace FilterProvider.Common.Util
             {
                 deviceName = "Unknown";
             }
+            blockedUrl = blockedUrl == null ? "NULL!" : blockedUrl;
+            blockedTerm = blockedTerm == null ? "NULL!" : blockedTerm;
+            category = category == null ? "NULL!" : category;
 
             var reportPath = WebServiceUtil.Default.ServiceProviderUnblockRequestPath;
             return string.Format(
