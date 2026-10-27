@@ -79,6 +79,14 @@ namespace CloudVeilService.Services
                     x.SetServiceName(nameof(Warden));
                     x.StartAutomatically();
                     x.RunAsLocalSystem();
+                    x.EnableServiceRecovery(r =>
+                    {
+                        r.RestartService(0);
+                        r.RestartService(0);
+                        r.RestartService(1);
+                        r.RestartService(5);
+                        r.SetResetPeriod(1);
+                    });
                 });
             }
             else

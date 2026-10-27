@@ -86,19 +86,14 @@ namespace CloudVeilService
 
                         x.RunAsLocalSystem();
 
-                        // We don't need recovery options, because there will be multiple services all
-                        // watching eachother that will all record eachother in the event of a failure or
-                        // forced termination.
-                        /*
-                        //http://docs.topshelf-project.com/en/latest/configuration/config_api.html#id1
-                        x.EnableServiceRecovery(rc =>
+                        x.EnableServiceRecovery(r =>
                         {
-                            rc.OnCrashOnly();
-                            rc.RestartService(0);
-                            rc.RestartService(0);
-                            rc.RestartService(0);
+                            r.RestartService(0);
+                            r.RestartService(0);
+                            r.RestartService(1);
+                            r.RestartService(5);
+                            r.SetResetPeriod(1);
                         });
-                        */
                     });
 
                     LoggerUtil.GetAppWideLogger().Info("Service exit code is " + exitCode.ToString() + "(" + exitCode + ")");

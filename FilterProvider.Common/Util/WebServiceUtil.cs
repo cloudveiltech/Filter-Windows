@@ -62,7 +62,10 @@ namespace FilterProvider.Common.Util
     public class WebServiceUtil
     {
         private DateTime tokenRejectedFirstDateTime = DateTime.MinValue;
-        private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1);
+        private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1); 
+        private readonly object rejectLock = new object();
+        private int consecutiveRejections = 0;
+        private const int REJECTIONS_REQUIRED = 5;
 
         public event GenericWebServiceUtilDelegate AuthTokenRejected;
         public event GenericWebServiceUtilDelegate AuthTokenAccepted;
@@ -601,6 +604,7 @@ namespace FilterProvider.Common.Util
 
         public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
         {
+            //return true;
             if (sslpolicyerrors != SslPolicyErrors.None)
             {
                 return false;
@@ -663,7 +667,7 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-            //request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+          //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
             
             if (options.ETag != null)
             {
@@ -1023,7 +1027,6 @@ namespace FilterProvider.Common.Util
                         // Auth failure means re-log EXCEPT when requesting deactivation.
                         if((intCode == 401 || intCode == 403 || intCode == 406) && resource != ServiceResource.DeactivationRequest)
                         {
-                            WebServiceUtil.Default.AuthToken = string.Empty;
                             logger.Info("RequestResource2: Authorization failed.");
                             var bannedReponse = intCode == 406;
                             reportTokenRejected(bannedReponse);
@@ -1122,21 +1125,24 @@ namespace FilterProvider.Common.Util
 
         private void reportTokenRejected(bool skipTimeout = false)
         {
-            var neverAuthorized = UserEmail == null || UserEmail.Length == 0;
-            logger.Info("reportTokenRejected " + UserEmail + " " + neverAuthorized);
-            if (neverAuthorized || skipTimeout) {
-                AuthTokenRejected?.Invoke();
-                dropUserLoginData();
-                return;
+            bool logout;
+            lock (rejectLock)
+            {
+                consecutiveRejections++;
+                if (tokenRejectedFirstDateTime == DateTime.MinValue)
+                {
+                    tokenRejectedFirstDateTime = DateTime.Now;
+                }
+
+                logout = skipTimeout ||
+                         (consecutiveRejections >= REJECTIONS_REQUIRED &&
+                          DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT);
             }
-            if (tokenRejectedFirstDateTime == DateTime.MinValue)
+            logger.Info("reportTokenRejected count={0} logout={1}", consecutiveRejections, logout);
+            if (logout)
             {
-                tokenRejectedFirstDateTime = DateTime.Now;
-            } 
-            else if(DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT)
-            {
-                AuthTokenRejected?.Invoke();
                 dropUserLoginData();
+                AuthTokenRejected?.Invoke();
             }
         }
 
@@ -1148,8 +1154,12 @@ namespace FilterProvider.Common.Util
 
         private void reportTokenAccepted()
         {
-            tokenRejectedFirstDateTime = DateTime.MinValue;
-            AuthTokenAccepted?.Invoke();            
+            lock (rejectLock)
+            {
+                consecutiveRejections = 0;
+                tokenRejectedFirstDateTime = DateTime.MinValue;
+            }
+            AuthTokenAccepted?.Invoke();
         }
 
         /// <summary>
@@ -1264,7 +1274,6 @@ namespace FilterProvider.Common.Util
 
                         if(intCode == 401 || intCode == 403)
                         {
-                            WebServiceUtil.Default.AuthToken = string.Empty;
                             logger.Info("SendResource2: Authorization failed.");
                             reportTokenRejected();
                         }

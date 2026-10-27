@@ -67,6 +67,7 @@ namespace CloudVeilService.Services
                         s.ConstructUsing(name => new Sentinel());
                         s.WhenStarted((guardian, hostCtl) => guardian.Start());
                         s.WhenStopped((guardian, hostCtl) => guardian.Stop());
+                        
 
                         s.WhenShutdown((guardian, hostCtl) =>
                         {
@@ -81,6 +82,14 @@ namespace CloudVeilService.Services
                     x.SetDisplayName(nameof(Sentinel));
                     x.SetServiceName(nameof(Sentinel));
                     x.StartAutomatically();
+                    x.EnableServiceRecovery(r =>
+                    {
+                        r.RestartService(0);
+                        r.RestartService(0);
+                        r.RestartService(1);
+                        r.RestartService(5);
+                        r.SetResetPeriod(1);
+                    });
 
                     x.RunAsLocalSystem();
                 });
