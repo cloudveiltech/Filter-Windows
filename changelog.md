@@ -1,3 +1,63 @@
+# v2.2.73 - 11 Apr 2026
+
+Testing bad cert page workaround.
+
+#alpha
+
+# v2.2.72 - 02 Jul 2026
+
+Installer fixes.
+Fix install IDs for matching motherboards.
+
+#public
+
+# v2.2.69 - 15 Apr 2026
+
+Web installer added.
+OTP authorization flow implemented.
+
+#public
+
+# v2.2.67 - 18 Feb 2026
+
+Send logs button added.
+Bugfixes.
+Installer updated.
+
+#public
+
+# v2.2.66 - 18 Dec 2025
+
+Filtering core improvements.
+
+#public
+
+# v2.2.65 - 02 Dec 2025
+
+Custom url protocol implementation for CloudVeil.
+
+#public
+
+# v2.2.64 - 31 Oct 2025
+
+Filtering core fixes.
+Crash fixes.
+Support PC name change.
+
+#public
+
+# v2.2.63 - 25 July 2025
+
+Fix DNS settings support.
+
+#public
+
+# v2.2.61 - 22 July 2025
+
+Http2 Proto fixes.
+
+#public
+
 # v2.2.60 - 15 May 2025
 
 Improved process to remove activations.  
