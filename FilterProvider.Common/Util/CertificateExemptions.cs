@@ -127,34 +127,37 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                using (SqliteCommand command = connection.CreateCommand())
+                lock (connectionLock)
                 {
-                    bool createExemptionData = false;
-
-                    SqliteParameter dateString = new SqliteParameter("$dateExempted", DateTime.UtcNow.ToString("o"));
-                    SqliteParameter param0 = new SqliteParameter("$certHash", thumbprint);
-                    SqliteParameter param1 = new SqliteParameter("$host", host);
-
-                    command.CommandText = $"SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
-                    command.Parameters.Add(param0);
-                    command.Parameters.Add(param1);
-
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (SqliteCommand command = connection.CreateCommand())
                     {
-                        createExemptionData = !reader.Read();
-                    }
+                        bool createExemptionData = false;
 
-                    command.Parameters.Add(dateString);
+                        SqliteParameter dateString = new SqliteParameter("$dateExempted", DateTime.UtcNow.ToString("o"));
+                        SqliteParameter param0 = new SqliteParameter("$certHash", thumbprint);
+                        SqliteParameter param1 = new SqliteParameter("$host", host);
 
-                    if (!createExemptionData)
-                    {
-                        command.CommandText = $"UPDATE cert_exemptions SET DateExempted = $dateExempted, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
-                        command.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES ($dateExempted, NULL, $certHash, $host)";
-                        command.ExecuteNonQuery();
+                        command.CommandText = $"SELECT Thumbprint, Host, DateExempted, ExpireDate FROM cert_exemptions WHERE Thumbprint = $certHash AND Host = $host";
+                        command.Parameters.Add(param0);
+                        command.Parameters.Add(param1);
+
+                        using (SqliteDataReader reader = command.ExecuteReader())
+                        {
+                            createExemptionData = !reader.Read();
+                        }
+
+                        command.Parameters.Add(dateString);
+
+                        if (!createExemptionData)
+                        {
+                            command.CommandText = $"UPDATE cert_exemptions SET DateExempted = $dateExempted, ExpireDate = NULL WHERE Thumbprint = $certHash AND Host = $host";
+                            command.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            command.CommandText = $"INSERT INTO cert_exemptions (DateExempted, ExpireDate, Thumbprint, Host) VALUES ($dateExempted, NULL, $certHash, $host)";
+                            command.ExecuteNonQuery();
+                        }
                     }
                 }
             }
@@ -164,7 +167,7 @@ namespace FilterProvider.Common.Util
                 if (triesLeft > 0)
                 {
                     attemptConnectionRecovery();
-                    TrustCertificateInternal(host, thumbprint, triesLeft--);
+                    TrustCertificateInternal(host, thumbprint, --triesLeft);
                 }
             }
         }

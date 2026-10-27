@@ -172,7 +172,7 @@ namespace FilterProvider.Common.Util
             return isDnsServerChanged(primaryV4, lastPrimaryV4) ||
                    isDnsServerChanged(secondaryV4, lastSecondaryV4) ||
                    isDnsServerChanged(primaryV6, lastPrimaryV6) || 
-                   isDnsServerChanged(secondaryV6, lastPrimaryV6);
+                   isDnsServerChanged(secondaryV6, lastSecondaryV6);
         }
 
         public event DnsChangeEventHandler DnsChanged;

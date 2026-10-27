@@ -234,11 +234,7 @@ namespace FilterProvider.Common.Configuration
 
             foreach (var result in filterListResults)
             {
-                if (result.Value == null)
-                {
-                    return null;
-                }
-                else if (result.Value == false)
+                if(result.Value == null || result.Value == false)
                 {
                     return false;
                 }
@@ -338,6 +334,11 @@ namespace FilterProvider.Common.Configuration
             HttpStatusCode code;
 
             bool? isVerified = VerifyLists();
+            if(isVerified == null)
+            {
+                return null;
+            }
+
             if (isVerified == true)
             {
                 return false;
@@ -428,7 +429,7 @@ namespace FilterProvider.Common.Configuration
                 }
             }
 
-            return true;
+            return listBytes != null;
         }
 
         private bool decryptLists(string listFolderPath, string tempFolderPath)
@@ -887,7 +888,7 @@ namespace FilterProvider.Common.Configuration
 
                     if (TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", PlainTextFilteringListType.Whitelist, out secondCategory))
                     {
-                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((byte)((generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
+                        var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((short)((generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
                         generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                         model = newModel;
                         return true;
@@ -900,7 +901,7 @@ namespace FilterProvider.Common.Configuration
                 }
                 else
                 {
-                    var newModel = (T)new MappedFilterListCategoryModel((byte)((generatedCategoriesMap.Count) + 1), categoryName, listType);
+                    var newModel = (T)new MappedFilterListCategoryModel((short)((generatedCategoriesMap.Count) + 1), categoryName, listType);
                     generatedCategoriesMap.GetOrAdd(categoryName, newModel);
                     model = newModel;
                     return true;

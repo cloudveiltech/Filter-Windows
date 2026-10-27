@@ -220,7 +220,7 @@ namespace FilterProvider.Common.Util
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", username, FingerprintService.Default.Value, deviceName, authStorage.DeviceId, authStorage.AuthId));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", Uri.EscapeDataString(username), FingerprintService.Default.Value, Uri.EscapeDataString(deviceName), Uri.EscapeDataString(authStorage.DeviceId), Uri.EscapeDataString(authStorage.AuthId)));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -251,7 +251,7 @@ namespace FilterProvider.Common.Util
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed. We include redirect codes (3XX) as success,
                     // since our server side will just redirect us if we're already authed.
-                    if(code > 199 && code < 299)
+                    if(code > 199 && code <= 299)
                     {
                         using(var tr = new StreamReader(response.GetResponseStream()))
                         {
@@ -468,7 +468,7 @@ namespace FilterProvider.Common.Util
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed. We include redirect codes (3XX) as success,
                     // since our server side will just redirect us if we're already authed.
-                    if (code > 199 && code < 299)
+                    if (code > 199 && code <= 299)
                     {
                         response.Close();
                         authRequest.Abort();
@@ -904,7 +904,7 @@ namespace FilterProvider.Common.Util
                 switch(options.ContentType)
                 {
                     case "application/x-www-form-urlencoded":
-                        postString = string.Join("&", parameters.Select(kv => $"{kv.Key}={kv.Value}"));
+                        postString = string.Join("&", parameters.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString((string)kv.Value)}"));
                         break;
 
                     case "application/json":

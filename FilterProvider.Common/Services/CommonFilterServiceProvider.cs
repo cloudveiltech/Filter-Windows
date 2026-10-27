@@ -1155,7 +1155,8 @@ namespace FilterProvider.Common.Services
                         return;
                     }
 
-                    TimeRestrictionModel currentDay = policyConfiguration?.TimeRestrictions?[(int)DateTime.Now.DayOfWeek];
+                    ZonedDateTime currentTime = timeDetection.GetRealTime();
+                    TimeRestrictionModel currentDay = policyConfiguration?.TimeRestrictions?[((int)currentTime.DayOfWeek) % 7];
 
                     if (currentDay == null)
                     {
@@ -1163,7 +1164,6 @@ namespace FilterProvider.Common.Services
                         return;
                     }
 
-                    ZonedDateTime currentTime = timeDetection.GetRealTime();
 
                     if (timeDetection.IsDateTimeAllowed(timeDetection.GetRealTime(), currentDay))
                     {
@@ -1260,6 +1260,12 @@ namespace FilterProvider.Common.Services
             if (thresholdCountTimer != null)
             {
                 thresholdCountTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                thresholdCountTimer.Dispose();
+            }
+            if (thresholdEnforcementTimer != null)
+            {
+                thresholdEnforcementTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                thresholdEnforcementTimer.Dispose();
             }
 
             // Create the threshold count timer and start it with the configured timespan.
@@ -1721,6 +1727,7 @@ namespace FilterProvider.Common.Services
             LogTime("UpdateAndWriteList");
             if (!NetworkStatus.Default.HasConnection)
             {
+                NetworkStatus.Default.ConnectionStateChanged -= Default_ConnectionStateChanged;
                 NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
                 return ConfigUpdateResult.NoInternet;
             }
@@ -1801,6 +1808,7 @@ namespace FilterProvider.Common.Services
                     // Enable the timer again.
                     if (!NetworkStatus.Default.HasConnection)
                     {
+                        NetworkStatus.Default.ConnectionStateChanged -= Default_ConnectionStateChanged;
                         NetworkStatus.Default.ConnectionStateChanged += Default_ConnectionStateChanged;
                     }
                     else

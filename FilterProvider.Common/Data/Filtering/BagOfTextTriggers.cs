@@ -385,7 +385,7 @@ namespace FilterProvider.Common.Data.Filtering
                 transaction.Commit();
             }
 
-            hasTriggers = loaded > 0;
+            hasTriggers |= loaded > 0;
 
             return loaded;
         }
@@ -422,7 +422,7 @@ namespace FilterProvider.Common.Data.Filtering
                 transaction.Commit();
             }
 
-            hasTriggers = loaded > 0;
+            hasTriggers |= loaded > 0;
 
             return loaded;
         }
@@ -704,7 +704,7 @@ namespace FilterProvider.Common.Data.Filtering
                                 }
                                 else
                                 {
-                                    var newList = new List<string>(maxRebuildLen);
+                                    var newList = new List<string>();
                                     newList.Add(s);
                                     wordLists.Add(newList);
 
