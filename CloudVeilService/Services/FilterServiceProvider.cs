@@ -5,32 +5,32 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Filter.Platform.Common.Extensions;
 using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
 using CloudVeilCore.Net.Proxy;
+using CloudVeilCore.Windows.Diversion;
+using CloudVeilService.Platform;
+using Filter.Platform.Common;
+using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.Util;
+using FilterNativeWindows;
+using FilterProvider.Common.Platform;
+using FilterProvider.Common.Services;
+using FilterProvider.Common.Util;
+using Gui.CloudVeil.Util;
 using Microsoft.Win32;
 using NLog;
+using Sentry.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
-
-using Filter.Platform.Common.Util;
-using FilterProvider.Common.Services;
-using Filter.Platform.Common;
-using CloudVeilService.Platform;
-using FilterProvider.Common.Platform;
 using System.Runtime.InteropServices;
-using FilterNativeWindows;
-using CloudVeilCore.Windows.Diversion;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using FilterProvider.Common.Util;
+using System.Threading;
+using System.Threading.Tasks;
 using static Filter.Platform.Common.Util.ConnectivityCheck;
 
 namespace CloudVeilService.Services
@@ -326,6 +326,8 @@ namespace CloudVeilService.Services
             {
                 diverter.AddBlackListedApp(app, allProcesess);
             }
+            diverter.AddBlackListedApp("CloudVeil.exe", allProcesess);//self gui app should be always filtered
+
             foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
             {
                 diverter.AddWhiteListedApp(app, allProcesess);
