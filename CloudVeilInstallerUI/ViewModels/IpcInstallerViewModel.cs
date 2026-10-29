@@ -13,7 +13,6 @@ namespace CloudVeilInstallerUI.ViewModels
 {
     public class RemoteInstallerViewModel : IInstallerViewModel
     {
-
         UpdateIPCClient client;
 
         public RemoteInstallerViewModel(UpdateIPCClient client)

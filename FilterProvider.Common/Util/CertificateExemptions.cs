@@ -209,7 +209,7 @@ namespace FilterProvider.Common.Util
                 if (triesLeft > 0)
                 {
                     attemptConnectionRecovery();
-                    return IsExemptedInternal(host, certificate, triesLeft--);
+                    return IsExemptedInternal(host, certificate, --triesLeft);
                 }
                 else
                 {

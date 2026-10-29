@@ -61,7 +61,7 @@ namespace CloudVeilService.Services
 
             public override void Shutdown(ExitCodes code)
             {
-                // Do nothing.
+                base.Shutdown(code);
             }
         }
 
@@ -193,7 +193,7 @@ namespace CloudVeilService.Services
                     def.Principal.LogonType = TaskLogonType.ServiceAccount;
 
                     var thisAppDir = AppDomain.CurrentDomain.BaseDirectory;
-                    ExecAction action = new ExecAction(string.Format("{0}{1}.exe", thisAppDir, "FilterAgent.Windows.exe"), "start");
+                    ExecAction action = new ExecAction(string.Format("{0}{1}.exe", thisAppDir, "FilterAgent.Windows"), "start");
 
                     def.Actions.Add(action);
 

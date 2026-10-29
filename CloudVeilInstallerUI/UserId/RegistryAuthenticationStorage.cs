@@ -91,7 +91,7 @@ namespace CloudVeil.Core.Windows.Util
                     }
 
                     // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName + @"\email-address").ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\email-address").ToString();
 
                     using (var sub = getAppRegistryKey(createKey: false))
                     {

@@ -14,6 +14,7 @@ using Filter.Platform.Common.Util;
 using Gui.CloudVeil.Util;
 using NLog;
 using Sentry;
+using Sentry.Protocol;
 using System;
 using System.Diagnostics;
 using System.Security.Policy;
@@ -148,7 +149,7 @@ namespace CloudVeil.Windows
             LoggerUtil.LoggerName = "CloudVeilGUI";
 
             bool startMinimized = false;
-            string url = "";
+            var url = "";
             foreach (string arg in args)
             {
                 LoggerUtil.GetAppWideLogger().Info("Start args " + arg);
@@ -218,11 +219,9 @@ namespace CloudVeil.Windows
             {
                 var app = new CloudVeilApp();
                 app.InitializeComponent();
-                if (url.Length > 0) {
-                    app.processCustomScheme(args[0]);
-                }
+                app.Startup += App_Startup;
+              
                 app.Run();
-                
                 
                 // Always release mutex.
                 guiChecks.UnpublishRunningApp();
@@ -245,6 +244,22 @@ namespace CloudVeil.Windows
 
             // No matter what, always ensure that critical flags are removed from our process before exiting.
             CriticalKernelProcessUtility.SetMyProcessAsNonKernelCritical();
+        }
+
+        private static void App_Startup(object sender, System.Windows.StartupEventArgs e)
+        {
+            foreach (string arg in e.Args)
+            {
+                LoggerUtil.GetAppWideLogger().Info("App_Startup args " + arg);
+                if (arg.StartsWith("cloudveil:"))
+                {
+                    if (sender is CloudVeilApp)
+                    {
+                        var app = sender as CloudVeilApp;
+                        app.processCustomScheme(arg);
+                    }
+                }
+            }
         }
     }
 }

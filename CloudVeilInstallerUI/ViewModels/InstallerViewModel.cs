@@ -668,9 +668,16 @@ namespace CloudVeilInstallerUI.ViewModels
 
         private async void executeOnFilterExited(Action action)
         {
+            var attempts = 60;
             while (!allFiltersHaveExited())
             {
-                await Task.Delay(100);
+                await Task.Delay(1000);
+                attempts--;
+                if(attempts <= 0)
+                {
+                    ba.Engine.Log(LogLevel.Error, "Failed to wait for filter exit. Proceeding with apply.");
+                    break;
+                }
             }
 
             action?.Invoke();

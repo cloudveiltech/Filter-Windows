@@ -53,6 +53,7 @@ namespace CloudVeil.Windows
 
             public override void Shutdown(ExitCodes code)
             {
+                base.Shutdown(code);
                 // If our service has exited cleanly while we're running, lets assume that we should
                 // exit WITH safeguards. XXX TODO.
                 Current.Dispatcher.BeginInvoke((Action)delegate ()
@@ -374,7 +375,10 @@ namespace CloudVeil.Windows
 
                 ipcClient.RegisterRequestHandler(IpcCall.ShutdownForUpdate, (msg) =>
                 {
-                    Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
+                    Dispatcher.BeginInvoke((Action)delegate ()
+                    {
+                        Application.Current.Shutdown((int)ExitCodes.ShutdownForUpdate);
+                    });
                     return true;
                 });
 
@@ -454,7 +458,10 @@ namespace CloudVeil.Windows
                         logger.Info("Deactivation request granted on client.");
 
                         // Init the shutdown of this application.
-                        Application.Current.Shutdown((int)ExitCodes.ShutdownWithoutSafeguards);
+                        Dispatcher.BeginInvoke((Action)delegate ()
+                        {
+                            Application.Current.Shutdown((int)ExitCodes.ShutdownWithoutSafeguards);
+                        });
                     }
                     else
                     {
@@ -631,9 +638,12 @@ namespace CloudVeil.Windows
                                     synchronizingTimer = new Timer((state) =>
                                     {
                                         ipcClient.RequestStatusRefresh();
-                                        synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-                                        synchronizingTimer.Dispose();
-                                        synchronizingTimer = null;
+                                        lock (synchronizingTimerLockObj)
+                                        {
+                                            synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                                            synchronizingTimer.Dispose();
+                                            synchronizingTimer = null;
+                                        }
                                     });
 
                                     synchronizingTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);

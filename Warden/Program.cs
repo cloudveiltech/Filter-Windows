@@ -38,6 +38,7 @@ namespace CloudVeilService.Services
 
         public override void Shutdown(ExitCodes code)
         {
+            base.Shutdown(code);
             // Quit our application with a safe code so that whoever
             // is watching us knows it's time to shut down.
             Environment.Exit((int)code);

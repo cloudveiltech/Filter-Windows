@@ -30,6 +30,7 @@ namespace Gui.CloudVeil.UI
         }
 
         private MainWindow window;
+        private object viewLock = new object();
         private List<ViewWithZIndex> views;
 
         public void Register<T>(T view, Action<BaseView> viewModelAction)
@@ -56,35 +57,41 @@ namespace Gui.CloudVeil.UI
         /// <param name="t">The type of the view to show.</param>
         public void SetBaseView(Type t)
         {
-            for(int i = 0; i < views.Count; i++)
+            lock (viewLock)
             {
-                if(views[i].ZIndex == 0)
+                for (int i = 0; i < views.Count; i++)
                 {
-                    views.RemoveAt(i);
-                    i--;
-                    continue;
+                    if (views[i].ZIndex == 0)
+                    {
+                        views.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
                 }
+
+                views.Add(new ViewWithZIndex()
+                {
+                    ZIndex = 0,
+                    ViewType = t
+                });
+
+                showViewWithHighestZIndex();
             }
-
-            views.Add(new ViewWithZIndex()
-            {
-                ZIndex = 0,
-                ViewType = t
-            });
-
-            showViewWithHighestZIndex();
         }
 
         private ViewWithZIndex getView(Type t, int zIndex = -1)
         {
-            for (int i = 0; i < views.Count; i++)
+            lock (viewLock)
             {
-                if(views[i].ViewType == t && (zIndex == -1 || views[i].ZIndex == zIndex))
+                for (int i = 0; i < views.Count; i++)
                 {
-                    return views[i];
+                    if (views[i].ViewType == t && (zIndex == -1 || views[i].ZIndex == zIndex))
+                    {
+                        return views[i];
+                    }
                 }
-            }
 
+            }
             return null;
         }
 
@@ -95,56 +102,65 @@ namespace Gui.CloudVeil.UI
 
         private void showViewWithHighestZIndex()
         {
-            int highestZIndex = 0;
-            ViewWithZIndex viewToShow = null;
-
-            foreach(var view in views)
+            lock (viewLock)
             {
-                if(view.ZIndex > highestZIndex || viewToShow == null)
-                {
-                    viewToShow = view;
-                    highestZIndex = view.ZIndex;
-                }
-            }
+                int highestZIndex = 0;
+                ViewWithZIndex viewToShow = null;
 
-            if(viewToShow != null)
-            {
-                var view = this.Get(viewToShow.ViewType);
-
-                window.Dispatcher.InvokeAsync(() =>
+                foreach(var view in views)
                 {
-                    if (view != null && window.CurrentView.Content != view)
+                    if(view.ZIndex > highestZIndex || viewToShow == null)
                     {
-                        window.CurrentView.Content = view;
+                        viewToShow = view;
+                        highestZIndex = view.ZIndex;
                     }
-                });
+                }
+
+                if(viewToShow != null)
+                {
+                    var view = this.Get(viewToShow.ViewType);
+
+                    window.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (view != null && window.CurrentView.Content != view)
+                        {
+                            window.CurrentView.Content = view;
+                        }
+                    });
+                }
             }
         }
 
         public void PushView(int zIndex, Type t)
         {
-            var existingView = getView(t);
-            if(existingView == null)
+            lock (viewLock)
             {
-                views.Add(new ViewWithZIndex()
+                var existingView = getView(t);
+                if (existingView == null)
                 {
-                    ZIndex = zIndex,
-                    ViewType = t
-                });
-            }
+                    views.Add(new ViewWithZIndex()
+                    {
+                        ZIndex = zIndex,
+                        ViewType = t
+                    });
+                }
 
-            showViewWithHighestZIndex();
+                showViewWithHighestZIndex();
+            }
         }
 
         public void PopView(Type t, int zIndex = -1)
         {
-            var existingView = getView(t, zIndex);
-            if(existingView != null)
+            lock (viewLock)
             {
-                views.Remove(existingView);
-            }
+                var existingView = getView(t, zIndex);
+                if (existingView != null)
+                {
+                    views.Remove(existingView);
+                }
 
-            showViewWithHighestZIndex();
+                showViewWithHighestZIndex();
+            }
         }
     }
 }

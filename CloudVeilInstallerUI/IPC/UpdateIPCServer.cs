@@ -119,9 +119,9 @@ namespace CloudVeilInstallerUI.IPC
         public event ConnectionMessageEventHandler<Message, Message> MessageReceived;
         public event ConnectionEventHandler<Message, Message> Disconnected;
 
-        private static void Error(NamedPipeConnection<Message, Message> conn)
+        private static void Error(Guid id, NamedPipeConnection<Message, Message> conn)
         {
-            conn.PushMessage(new Message()
+            conn.PushMessage(new Message(id)
             {
                 Command = Command.Error,
                 Data = null
@@ -149,13 +149,13 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (!variableObjects.TryGetValue(message.VariableName, out obj))
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
                         if (obj == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -165,7 +165,7 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (propInfo == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -175,7 +175,7 @@ namespace CloudVeilInstallerUI.IPC
                         }
                         catch (Exception ex)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                         }
                     }
                     break;
@@ -186,13 +186,13 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (!variableObjects.TryGetValue(message.VariableName, out obj))
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
                         if (obj == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -202,7 +202,7 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (propInfo == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -220,7 +220,7 @@ namespace CloudVeilInstallerUI.IPC
                         }
                         catch (Exception ex)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                         }
                     }
                     break;
@@ -231,13 +231,13 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (!variableObjects.TryGetValue(message.VariableName, out obj))
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
                         if (obj == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -247,7 +247,7 @@ namespace CloudVeilInstallerUI.IPC
 
                         if (methodInfo == null)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                             return;
                         }
 
@@ -264,7 +264,7 @@ namespace CloudVeilInstallerUI.IPC
                         }
                         catch (Exception ex)
                         {
-                            Error(connection);
+                            Error(message.Id, connection);
                         }
                     }
                     break;

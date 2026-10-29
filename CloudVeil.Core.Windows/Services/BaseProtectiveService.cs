@@ -5,6 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 using Filter.Platform.Common.Util;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,6 +47,7 @@ namespace CloudVeil.Core.Windows.Services
         private Process processHandle = null;
 
         private string mutexName = string.Empty;
+        private Logger  logger = Filter.Platform.Common.Util.LoggerUtil.GetAppWideLogger();
 
         private static readonly HashSet<char> toRemoveFromPath = new HashSet<char>
         {
@@ -90,14 +92,15 @@ namespace CloudVeil.Core.Windows.Services
 
         public void EnsureAlreadyRunning()
         {
-            Console.WriteLine($"EnsureAlreadyRunning {processToWatch}");
+            
+            logger.Info($"EnsureAlreadyRunning {processToWatch}");
 
             foreach(var proc in Process.GetProcesses())
             {
                 if(proc.ProcessName.Equals(processToWatch, StringComparison.OrdinalIgnoreCase) && !proc.HasExited)
                 {
                     // Found the process already alive. Return and do nothing.
-                    Console.WriteLine($"Process was alive {proc.HasExited}");
+                    logger.Info($"Process was alive {!proc.HasExited}");
 
                     SetProcessHandle(proc);
                     return;
@@ -123,12 +126,13 @@ namespace CloudVeil.Core.Windows.Services
 
             try
             {
-                processHandle.EnableRaisingEvents = true;
                 processHandle.Exited += OnProcExit;
+                processHandle.EnableRaisingEvents = true;
+                logger.Info($"Watching {processToWatch} pid={proc.Id}");
             }
             catch(Exception ex)
             {
-                Console.WriteLine($"Error occurred while enabling event raising. {ex}");
+                logger.Info($"Error occurred while enabling event raising. {ex}");
             }
         }
 
@@ -154,8 +158,9 @@ namespace CloudVeil.Core.Windows.Services
             {
                 exitCode = processHandle.ExitCode;
             }
+            logger.Info($"OnProcExit {processBinaryAbsPath}, {exitCode}");
 
-            if(exitCode < (int)ExitCodes.ShutdownWithSafeguards)
+            if (exitCode < (int)ExitCodes.ShutdownWithSafeguards)
             {
                 InfinitelyStartAwaitTarget();
             }
@@ -165,12 +170,42 @@ namespace CloudVeil.Core.Windows.Services
             }
         }
 
+        protected void Uninstall()
+        {
+            logger.Info($"Uninstall called for {processBinaryAbsPath}");
+            var scDelete = new ProcessStartInfo("sc");
+            scDelete.Arguments = "delete Warden";
+            scDelete.UseShellExecute = false;
+            scDelete.CreateNoWindow = true;
+            var deleteProc = Process.Start(scDelete);
+            deleteProc.WaitForExit(); 
+            
+            scDelete.Arguments = "delete Sentinel";
+            scDelete.UseShellExecute = false;
+            scDelete.CreateNoWindow = true;
+            deleteProc = Process.Start(scDelete);
+            deleteProc.WaitForExit();
+
+            scDelete.Arguments = "delete FilterServiceProvider";
+            scDelete.UseShellExecute = false;
+            scDelete.CreateNoWindow = true;
+            deleteProc = Process.Start(scDelete);
+            deleteProc.WaitForExit();
+        }
+
         protected virtual bool Resuscitate()
         {
             bool success = false;
 
             bool createdNew = true;
             var mutex = new Mutex(true, string.Format(@"Global\{0}", mutexName), out createdNew);
+
+            var alive = Process.GetProcessesByName(processToWatch).FirstOrDefault(p => !p.HasExited);
+            if (alive != null)
+            { 
+                SetProcessHandle(alive); 
+                return true; 
+            }
 
             try
             {
@@ -182,15 +217,10 @@ namespace CloudVeil.Core.Windows.Services
                         {
                             case true:
                             {
-                                var uninstallStartInfo = new ProcessStartInfo(processBinaryAbsPath);
-                                uninstallStartInfo.Arguments = "Uninstall";
-                                uninstallStartInfo.UseShellExecute = false;
-                                uninstallStartInfo.CreateNoWindow = true;
-                                var uninstallProc = Process.Start(uninstallStartInfo);
-                                uninstallProc.WaitForExit();
+                                Uninstall();
 
                                 var installStartInfo = new ProcessStartInfo(processBinaryAbsPath);
-                                installStartInfo.Arguments = "Install";
+                                installStartInfo.Arguments = "install";
                                 installStartInfo.UseShellExecute = false;
                                 installStartInfo.CreateNoWindow = true;
 
@@ -231,7 +261,7 @@ namespace CloudVeil.Core.Windows.Services
                                     startInfo.Verb = "runas";
                                     Process.Start(startInfo);
 
-                                    return true;
+                                    success = true;
                                 }
                                 catch(Exception e)
                                 {
@@ -291,6 +321,12 @@ namespace CloudVeil.Core.Windows.Services
         /// This will be called when the base class has determined that the function of this object
         /// is fundamentally over.
         /// </summary>
-        public abstract void Shutdown(ExitCodes code);
+        public virtual void Shutdown(ExitCodes code)
+        {
+            if(code == ExitCodes.ShutdownWithoutSafeguards)
+            {
+                Uninstall();
+            }
+        }
     }
 }

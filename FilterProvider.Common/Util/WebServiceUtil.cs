@@ -220,7 +220,7 @@ namespace FilterProvider.Common.Util
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
-                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", Uri.EscapeDataString(username), FingerprintService.Default.Value, Uri.EscapeDataString(deviceName), Uri.EscapeDataString(authStorage.DeviceId), Uri.EscapeDataString(authStorage.AuthId)));
+                formData = System.Text.Encoding.UTF8.GetBytes(string.Format("email={0}&identifier={1}&device_id={2}&device_id_2={3}&identifier_2={4}", Uri.EscapeDataString(username), FingerprintService.Default.Value, Uri.EscapeDataString(deviceName), Uri.EscapeDataString(authStorage.DeviceId ?? ""), Uri.EscapeDataString(authStorage.AuthId ?? "")));
 
                 // Don't forget to the set the content length to the total length of our form POST data!
                 authRequest.ContentLength = formData.Length;
@@ -879,8 +879,8 @@ namespace FilterProvider.Common.Util
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
                 parameters.Add("device_id", deviceName);
-                parameters.Add("identifier_2", authStorage.AuthId);
-                parameters.Add("device_id_2", authStorage.DeviceId);
+                parameters.Add("identifier_2", authStorage.AuthId ?? "");
+                parameters.Add("device_id_2", authStorage.DeviceId ?? "");
                 parameters.Add("os", "WIN");
                 parameters.Add("os_version", GetOsVersion());
 
@@ -891,7 +891,7 @@ namespace FilterProvider.Common.Util
                 {
                     foreach (var parameter in options.Parameters)
                     {
-                        parameters.Add(parameter.Key, parameter.Value);
+                        parameters.Add(parameter.Key, parameter.Value ?? "");
                     }
                 }
 
@@ -1148,6 +1148,11 @@ namespace FilterProvider.Common.Util
 
         private void dropUserLoginData()
         {
+            lock (rejectLock)
+            {
+                consecutiveRejections = 0;
+                tokenRejectedFirstDateTime = DateTime.MinValue;
+            }
             AuthToken = "";
             UserEmail = "";
         }
