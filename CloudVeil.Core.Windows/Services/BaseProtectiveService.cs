@@ -179,7 +179,7 @@ namespace CloudVeil.Core.Windows.Services
             scDelete.CreateNoWindow = true;
             var deleteProc = Process.Start(scDelete);
             deleteProc.WaitForExit(); 
-            
+
             scDelete.Arguments = "delete Sentinel";
             scDelete.UseShellExecute = false;
             scDelete.CreateNoWindow = true;
@@ -323,7 +323,7 @@ namespace CloudVeil.Core.Windows.Services
         /// </summary>
         public virtual void Shutdown(ExitCodes code)
         {
-            if(code == ExitCodes.ShutdownWithoutSafeguards)
+            if(code == ExitCodes.ShutdownWithoutSafeguards || code == ExitCodes.ShutdownForUpdate)
             {
                 Uninstall();
             }
