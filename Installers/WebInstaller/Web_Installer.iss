@@ -1,7 +1,7 @@
 #define MyAppName "CloudVeil For Windows"
 #define MyAppPublisher "CloudVeil"
 #define MyAppURL "https://www.cloudveil.org/"
-#define DownloadURL "https://manage.cloudveil.org/citadel/update/latest/%s%s"
+#define DownloadURL "https://cv4x.cloudveil.org/citadel/update/latest/%s%s"
 #define LocalInstallerName "cv4w.exe"
 
 [Setup]
@@ -38,8 +38,6 @@ Source: "appicon.ico"; Flags: dontcopy
 #else
   #define AW "A"
 #endif
-type
-  HINSTANCE = THandle;
   
 function ParamExists(const ParamName: string): Boolean;
 var
@@ -111,7 +109,6 @@ begin
   
   Cv4wPath := Cv4wPath + '\CloudVeil\CloudVeil For Windows\CloudVeil.exe';
   
-  MsgBox(Cv4wPath, mbError, MB_OK);
   Exec(Cv4wPath, '', '', SW_SHOW, ewNoWait, ResultCode);  
 end;
 
@@ -172,12 +169,16 @@ begin
 end;
 
 function DownloadFile(Url, FileName: string): Boolean;
+var
+  Attempt: Integer;
 begin
   try
     DownloadPage.Clear;
     DownloadPage.Add(Url, FileName, '');
     DownloadPage.Show;
+
     try
+      Sleep(2000);
       CancelPressed := False;
       DownloadPage.Download;
       Result := True;
@@ -188,6 +189,21 @@ begin
         SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
       Result := False;
     end;
+    for Attempt := 1 to 3 do
+    begin
+    try
+      CancelPressed := False;
+      DownloadPage.Download;
+      Result := True;
+      Break;  // успех
+    except
+      Log(Format('Download attempt %d failed: %s', [Attempt, GetExceptionMessage]));
+      if DownloadPage.AbortedByUser or (Attempt = 3) then
+        RaiseException(GetExceptionMessage); 
+      Sleep(2000);
+    end;
+  end;
+    
   finally
     DownloadPage.Hide;
   end;
@@ -209,7 +225,7 @@ begin
     InstallerPath := ExpandConstant('{tmp}\{#LocalInstallerName}');
     
     UserIdParam := GetParamValue('userid', '');
-    UserIdHash := '';
+    UserIdHash := '/' + UserIdParam;
     if Pos(':', UserIdParam) > 0 then
     begin
         UserIdHash := '/' + Copy(UserIdParam, Pos(':', UserIdParam) + 1, MaxInt);
