@@ -53,7 +53,6 @@ namespace CloudVeil.Windows
 
             public override void Shutdown(ExitCodes code)
             {
-                base.Shutdown(code);
                 // If our service has exited cleanly while we're running, lets assume that we should
                 // exit WITH safeguards. XXX TODO.
                 Current.Dispatcher.BeginInvoke((Action)delegate ()
