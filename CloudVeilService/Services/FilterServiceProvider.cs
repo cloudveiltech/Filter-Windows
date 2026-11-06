@@ -315,18 +315,21 @@ namespace CloudVeilService.Services
 
         private void FillApplicationLists()
         {
-            if(provider == null || provider.PolicyConfiguration == null || provider.PolicyConfiguration.Configuration == null)
+            if (provider == null || provider.PolicyConfiguration == null || provider.PolicyConfiguration.Configuration == null)
             {
                 return;
             }
 
             diverter.CleanApplist();
             var allProcesess = Process.GetProcesses();
-            foreach(var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
+            foreach (var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
             {
                 diverter.AddBlackListedApp(app, allProcesess);
             }
-            diverter.AddBlackListedApp("CloudVeil.exe", allProcesess);//self gui app should be always filtered
+            if (provider.PolicyConfiguration.Configuration.BlacklistedApplications.Count > 0)
+            {
+                diverter.AddBlackListedApp("CloudVeil.exe", allProcesess);//self gui app should be always filtered
+            }
 
             foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
             {
