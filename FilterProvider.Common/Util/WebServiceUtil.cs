@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -1125,11 +1125,13 @@ namespace FilterProvider.Common.Util
 
         private void reportTokenRejected(bool skipTimeout = false)
         {
+            var neverAuthorized = AuthToken == null || AuthToken.Length == 0;
+
             bool logout;
-            lock (rejectLock)
+            lock(rejectLock)
             {
                 consecutiveRejections++;
-                if (tokenRejectedFirstDateTime == DateTime.MinValue)
+                if(tokenRejectedFirstDateTime == DateTime.MinValue)
                 {
                     tokenRejectedFirstDateTime = DateTime.Now;
                 }
@@ -1139,7 +1141,7 @@ namespace FilterProvider.Common.Util
                           DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT);
             }
             logger.Info("reportTokenRejected count={0} logout={1}", consecutiveRejections, logout);
-            if (logout)
+            if(logout || neverAuthorized)
             {
                 dropUserLoginData();
                 AuthTokenRejected?.Invoke();
