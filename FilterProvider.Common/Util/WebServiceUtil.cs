@@ -12,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -62,7 +61,7 @@ namespace FilterProvider.Common.Util
     public class WebServiceUtil
     {
         private DateTime tokenRejectedFirstDateTime = DateTime.MinValue;
-        private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1); 
+        private TimeSpan REJECTED_TIMEOUT = TimeSpan.FromHours(1);
         private readonly object rejectLock = new object();
         private int consecutiveRejections = 0;
         private const int REJECTIONS_REQUIRED = 5;
@@ -265,7 +264,7 @@ namespace FilterProvider.Common.Util
 
                         authStorage.DeviceId = deviceName;
                         authStorage.AuthId = FingerprintService.Default.Value;
-                        reportTokenAccepted();
+                        ReportTokenAccepted();
                         return ret;
                     }
                     else
@@ -304,8 +303,8 @@ namespace FilterProvider.Common.Util
 
                         string errorText = string.Empty;
 
-                        using (Stream data = response.GetResponseStream())
-                        using (var reader = new StreamReader(data))
+                        using(Stream data = response.GetResponseStream())
+                        using(var reader = new StreamReader(data))
                         {
                             errorText = reader.ReadToEnd();
 
@@ -320,12 +319,12 @@ namespace FilterProvider.Common.Util
 
                         int code = (int)httpResponse.StatusCode;
 
-                        if (code == 401 || code == 403)
+                        if(code == 401 || code == 403)
                         {
                             AuthToken = string.Empty;
                         }
 
-                        if (code > 399 && code < 499)
+                        if(code > 399 && code < 499)
                         {
                             logger.Info("Authentication failed with code: {0}.", code);
                             logger.Info("Athentication failure text: {0}", errorText);
@@ -387,7 +386,7 @@ namespace FilterProvider.Common.Util
             return ret;
 
         }
-        public AuthenticationResultObject AuthenticateByOtpEmail(string email,string oneTimeCode="")
+        public AuthenticationResultObject AuthenticateByOtpEmail(string email, string oneTimeCode = "")
         {
             logger.Error(nameof(AuthenticateByOtpEmail));
 
@@ -396,14 +395,14 @@ namespace FilterProvider.Common.Util
             // Enforce parameters are valid.
             Debug.Assert(StringExtensions.Valid(email));
 
-            if (!StringExtensions.Valid(email))
+            if(!StringExtensions.Valid(email))
             {
                 throw new ArgumentException("Supplied username cannot be null, empty or whitespace.", nameof(email));
             }
 
             // Don't bother if we don't have internet.
             var hasInternet = NetworkStatus.Default.HasConnection;
-            if (hasInternet == false)
+            if(hasInternet == false)
             {
                 logger.Info("Aborting authentication attempt because no internet connection could be detected.");
                 ret.AuthenticationResult = AuthenticationResult.ConnectionFailed;
@@ -432,12 +431,12 @@ namespace FilterProvider.Common.Util
             try
             {
                 var options = new ResourceOptions();
-                if (oneTimeCode.Length != 0)
+                if(oneTimeCode.Length != 0)
                 {
                     options.Method = "PUT";
                 }
                 authRequest = GetApiBaseRequest(namedResourceMap[ServiceResource.ActiveateOneTimePassword], options);
-        
+
 
                 // Build out username and password as post form data. We need to ensure that we mop
                 // up any decrypted forms of our password when we're done, and ASAP.                
@@ -449,7 +448,7 @@ namespace FilterProvider.Common.Util
                 authRequest.ContentType = "application/x-www-form-urlencoded";
 
                 // Grab the request stream so we can POST our login form data to it.
-                using (var requestStream = authRequest.GetRequestStream())
+                using(var requestStream = authRequest.GetRequestStream())
                 {
                     // Write and close.
                     requestStream.Write(formData, 0, formData.Length);
@@ -457,7 +456,7 @@ namespace FilterProvider.Common.Util
                 }
 
                 // Now that our login form data has been POST'ed, get a response.
-                using (var response = (HttpWebResponse)authRequest.GetResponse())
+                using(var response = (HttpWebResponse)authRequest.GetResponse())
                 {
                     // Get the response code as an int so we can range check it.
                     var code = (int)response.StatusCode;
@@ -468,14 +467,14 @@ namespace FilterProvider.Common.Util
                     // Check if the response status code is outside the "success" range of codes
                     // defined in HTTP. If so, we failed. We include redirect codes (3XX) as success,
                     // since our server side will just redirect us if we're already authed.
-                    if (code > 199 && code <= 299)
+                    if(code > 199 && code <= 299)
                     {
                         response.Close();
                         authRequest.Abort();
-                        if (authResponse == null || authResponse.type != EmailAuthResponse.TWO_FACTOR_TYPE || oneTimeCode.Length > 0)
+                        if(authResponse == null || authResponse.type != EmailAuthResponse.TWO_FACTOR_TYPE || oneTimeCode.Length > 0)
                         {
                             ret.AuthenticationResult = AuthenticationResult.Success;
-                        } 
+                        }
                         else
                         {
                             ret.AuthenticationResult = AuthenticationResult.WaitingForOneTimeCode;
@@ -483,19 +482,19 @@ namespace FilterProvider.Common.Util
 
                         authStorage.DeviceId = deviceName;
                         authStorage.AuthId = FingerprintService.Default.Value;
-                        reportTokenAccepted();
+                        ReportTokenAccepted();
                         return ret;
                     }
                     else
                     {
-                        if (code == 401 || code == 403)
+                        if(code == 401 || code == 403)
                         {
                             logger.Info("Authentication failed with code: {0}.", code);
                             WebServiceUtil.Default.AuthToken = string.Empty;
                             ret.AuthenticationResult = AuthenticationResult.Failure;
                             return ret;
                         }
-                        else if (code > 399 && code < 499)
+                        else if(code > 399 && code < 499)
                         {
                             logger.Info("Authentication failed with code: {0}.", code);
                             ret.AuthenticationResult = AuthenticationResult.Failure;
@@ -504,10 +503,10 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
-            catch (WebException e)
+            catch(WebException e)
             {
                 // XXX TODO - Is this sufficient?
-                if (e.Status == WebExceptionStatus.Timeout)
+                if(e.Status == WebExceptionStatus.Timeout)
                 {
                     logger.Info("Authentication failed due to timeout.");
                     connectionFailure = true;
@@ -515,18 +514,18 @@ namespace FilterProvider.Common.Util
 
                 try
                 {
-                    using (WebResponse response = e.Response)
+                    using(WebResponse response = e.Response)
                     {
                         HttpWebResponse httpResponse = (HttpWebResponse)response;
-                        if (httpResponse != null)
+                        if(httpResponse != null)
                         {
                             logger.Error("Error code: {0}", httpResponse.StatusCode);
                         }
 
                         string errorText = string.Empty;
 
-                        using (Stream data = response.GetResponseStream())
-                        using (var reader = new StreamReader(data))
+                        using(Stream data = response.GetResponseStream())
+                        using(var reader = new StreamReader(data))
                         {
                             errorText = reader.ReadToEnd();
 
@@ -541,12 +540,12 @@ namespace FilterProvider.Common.Util
 
                         int code = (int)httpResponse.StatusCode;
 
-                        if (code == 401 || code == 403)
+                        if(code == 401 || code == 403)
                         {
                             AuthToken = string.Empty;
                         }
 
-                        if (code > 399 && code < 499)
+                        if(code > 399 && code < 499)
                         {
                             logger.Info("Authentication failed with code: {0}.", code);
                             logger.Info("Athentication failure text: {0}", errorText);
@@ -558,7 +557,7 @@ namespace FilterProvider.Common.Util
 
                     }
                 }
-                catch (Exception iex)
+                catch(Exception iex)
                 {
                     LoggerUtil.RecursivelyLogException(logger, iex);
                 }
@@ -567,9 +566,9 @@ namespace FilterProvider.Common.Util
                 logger.Error(e.Message);
                 logger.Error(e.StackTrace);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                while (e != null)
+                while(e != null)
                 {
                     logger.Error(e.Message);
                     logger.Error(e.StackTrace);
@@ -583,7 +582,7 @@ namespace FilterProvider.Common.Util
             }
             finally
             {
-                if (formData != null && formData.Length > 0)
+                if(formData != null && formData.Length > 0)
                 {
                     Array.Clear(formData, 0, formData.Length);
                 }
@@ -592,7 +591,7 @@ namespace FilterProvider.Common.Util
             logger.Info("Authentication failed due to a complete failure to process the request and response. Past-catch attempted url {0}", authRequest?.RequestUri);
 
             // If we had success, we should/would have returned by now.
-            if (!connectionFailure)
+            if(!connectionFailure)
             {
                 WebServiceUtil.Default.AuthToken = string.Empty;
             }
@@ -605,7 +604,7 @@ namespace FilterProvider.Common.Util
         public static bool ValidiateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
         {
             //return true;
-            if (sslpolicyerrors != SslPolicyErrors.None)
+            if(sslpolicyerrors != SslPolicyErrors.None)
             {
                 return false;
             }
@@ -619,7 +618,7 @@ namespace FilterProvider.Common.Util
             LoggerUtil.GetAppWideLogger().Info("Cert " + certificate.Subject + " " + certificate.GetExpirationDateString());
             string publicKey = Convert.ToBase64String(certificate.GetPublicKey());
             LoggerUtil.GetAppWideLogger().Info("Key is " + publicKey);
-            if (publicKey.Equals(CompileSecrets.PinnedCertKey))
+            if(publicKey.Equals(CompileSecrets.PinnedCertKey))
             {
                 LoggerUtil.GetAppWideLogger().Info("Keys match");
                 return true;
@@ -628,7 +627,7 @@ namespace FilterProvider.Common.Util
             {
                 LoggerUtil.GetAppWideLogger().Info("Keys don't match. Skipping request");
             }
-                           
+
             return false;
         }
 
@@ -646,14 +645,14 @@ namespace FilterProvider.Common.Util
             baseRoute = baseRoute == null ? ServiceProviderApiPath : baseRoute;
             var requestString = baseRoute + route;
             var requestRoute = new Uri(requestString);
-            
-            
+
+
             // Create a new request. We don't want auto redirect, we don't want the subsystem trying
             // to look up proxy information to configure on our request, we want a 5 second timeout
             // on any and all operations and we want to look like Firefox in a generic way. Here we
             // also set the cookie container, so we can capture session cookies if we're successful.
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestRoute);
-            
+
             //Pin public key to avoid MITM attack
             request.ServerCertificateValidationCallback = ValidiateCertificate;
             request.Method = options.Method; //"POST";
@@ -667,9 +666,9 @@ namespace FilterProvider.Common.Util
             request.UserAgent = "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0";
             request.Accept = "application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-          //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
-            
-            if (options.ETag != null)
+            //  request.Proxy = new WebProxy("127.0.0.1:8888", false);       
+
+            if(options.ETag != null)
             {
                 request.Headers.Add("ETag", options.ETag);
             }
@@ -726,7 +725,8 @@ namespace FilterProvider.Common.Util
             {
                 Dictionary<string, bool?> responseDict = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool?>>(Encoding.UTF8.GetString(ret));
                 return responseDict;
-            } catch(Exception ex)
+            }
+            catch(Exception ex)
             {
 
             }
@@ -748,8 +748,8 @@ namespace FilterProvider.Common.Util
                 Parameters = parameters
             });
 
-            if (!responseReceived) { return null; }
-            if ((int)code < 200 || (int)code > 399) { return null; }
+            if(!responseReceived) { return null; }
+            if((int)code < 200 || (int)code > 399) { return null; }
 
             return ret;
         }
@@ -770,7 +770,7 @@ namespace FilterProvider.Common.Util
                 return null;
             }
 
-            if((int) code < 200 || (int)code > 399)
+            if((int)code < 200 || (int)code > 399)
             {
                 return null;
             }
@@ -874,7 +874,7 @@ namespace FilterProvider.Common.Util
 
                 //logger.Info("RequestResource1: accessToken=" + accessToken);
                 IVersionProvider versionProvider = PlatformTypes.New<IVersionProvider>();
-                string version = versionProvider.GetApplicationVersion().ToString(3);          
+                string version = versionProvider.GetApplicationVersion().ToString(3);
 
                 // Build out post data with username and identifier.
                 parameters.Add("identifier", FingerprintService.Default.Value);
@@ -887,15 +887,15 @@ namespace FilterProvider.Common.Util
                 string postString = null;
                 //string postString = string.Format("&identifier={0}&device_id={1}", FingerprintService.Default.Value, Uri.EscapeDataString(deviceName));
 
-                if (options.Parameters != null)
+                if(options.Parameters != null)
                 {
-                    foreach (var parameter in options.Parameters)
+                    foreach(var parameter in options.Parameters)
                     {
                         parameters.Add(parameter.Key, parameter.Value ?? "");
                     }
                 }
 
-                if (resource == ServiceResource.UserDataSumCheck || resource == ServiceResource.UserConfigSumCheck)
+                if(resource == ServiceResource.UserDataSumCheck || resource == ServiceResource.UserConfigSumCheck)
                 {
                     logger.Info("Sending version {0} to server", version);
                     parameters.Add("app_version", version);
@@ -912,7 +912,7 @@ namespace FilterProvider.Common.Util
                         break;
                 }
 
-                if (options.Method == "GET" || options.Method == "DELETE")
+                if(options.Method == "GET" || options.Method == "DELETE")
                 {
                     resourceUri += "?" + postString;
 
@@ -926,22 +926,22 @@ namespace FilterProvider.Common.Util
 
                 logger.Debug("WebServiceUtil.Request {0}", request.RequestUri);
 
-                if (StringExtensions.Valid(accessToken))
+                if(StringExtensions.Valid(accessToken))
                 {
                     request.Headers.Add("Authorization", string.Format("Bearer {0}", accessToken));
                 }
-                else if (resource != ServiceResource.RetrieveToken)
+                else if(resource != ServiceResource.RetrieveToken)
                 {
                     logger.Info("RequestResource1: Authorization failed.");
 
-                    reportTokenRejected();
+                    ReportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
                     return null;
                 }
 
-                if (options.Method != "GET" && options.Method != "DELETE")
+                if(options.Method != "GET" && options.Method != "DELETE")
                 {
-                    if (postString.Contains("app_version"))
+                    if(postString.Contains("app_version"))
                     {
                         logger.Info("Sending {0} to server as {1}", postString, options.Method);
                     }
@@ -949,7 +949,7 @@ namespace FilterProvider.Common.Util
                     var formData = System.Text.Encoding.UTF8.GetBytes(postString);
                     request.ContentLength = formData.Length;
 
-                    using (var requestStream = request.GetRequestStream())
+                    using(var requestStream = request.GetRequestStream())
                     {
                         requestStream.Write(formData, 0, formData.Length);
                         requestStream.Close();
@@ -957,9 +957,9 @@ namespace FilterProvider.Common.Util
                 }
 
                 logger.Info("RequestResource: uri={0}", request.RequestUri);
-                
+
                 // Now that our login form data has been POST'ed, get a response.
-                using (var response = (HttpWebResponse)request.GetResponse())
+                using(var response = (HttpWebResponse)request.GetResponse())
                 {
                     // Get the response code as an int so we can range check it.
                     var intCode = (int)response.StatusCode;
@@ -970,20 +970,20 @@ namespace FilterProvider.Common.Util
                     try
                     {
                         // Check if response code is considered a success code.
-                        if (intCode >= 200 && intCode <= 299)
+                        if(intCode >= 200 && intCode <= 299)
                         {
-                            reportTokenAccepted();
+                            ReportTokenAccepted();
                             authStorage.DeviceId = deviceName;
                             authStorage.AuthId = FingerprintService.Default.Value;
 
-                            using (var memoryStream = new MemoryStream())
+                            using(var memoryStream = new MemoryStream())
                             {
                                 response.GetResponseStream().CopyTo(memoryStream);
 
                                 // We do this just in case we get something like a 204. The idea here
                                 // is that if we return a non-null, the call was a success.
                                 var responseBody = memoryStream.ToArray();
-                                if (responseBody == null || intCode == 204)
+                                if(responseBody == null || intCode == 204)
                                 {
                                     return null;
                                 }
@@ -1029,11 +1029,11 @@ namespace FilterProvider.Common.Util
                         {
                             logger.Info("RequestResource2: Authorization failed.");
                             var bannedReponse = intCode == 406;
-                            reportTokenRejected(bannedReponse);
+                            ReportTokenRejected(bannedReponse);
                         }
                         else if(intCode > 399 && intCode <= 499 && resource != ServiceResource.DeactivationRequest)
                         {
-                            reportTokenAccepted();
+                            ReportTokenAccepted();
                             logger.Info("Error occurred in RequestResource: {0}", intCode);
                         }
 
@@ -1071,7 +1071,7 @@ namespace FilterProvider.Common.Util
 
             return null;
         }
-        
+
         public bool PostLogFiles(string logFilePath)
         {
             HttpStatusCode statusCode;
@@ -1087,7 +1087,7 @@ namespace FilterProvider.Common.Util
                 }
             });
 
-            if (!responseReceived || statusCode != HttpStatusCode.OK)
+            if(!responseReceived || statusCode != HttpStatusCode.OK)
             {
                 return false;
             }
@@ -1113,7 +1113,7 @@ namespace FilterProvider.Common.Util
 
             ParseResult<ZonedDateTime> result = ZonedDateTimePattern.GeneralFormatOnlyIso.Parse(timeString);
 
-            if (result.Success)
+            if(result.Success)
             {
                 return result.Value;
             }
@@ -1123,10 +1123,8 @@ namespace FilterProvider.Common.Util
             }
         }
 
-        private void reportTokenRejected(bool skipTimeout = false)
+        private void ReportTokenRejected(bool skipTimeout = false)
         {
-            var neverAuthorized = AuthToken == null || AuthToken.Length == 0;
-
             bool logout;
             lock(rejectLock)
             {
@@ -1141,16 +1139,16 @@ namespace FilterProvider.Common.Util
                           DateTime.Now - tokenRejectedFirstDateTime > REJECTED_TIMEOUT);
             }
             logger.Info("reportTokenRejected count={0} logout={1}", consecutiveRejections, logout);
-            if(logout || neverAuthorized)
+            if(logout)
             {
-                dropUserLoginData();
+                DropUserLoginData();
                 AuthTokenRejected?.Invoke();
             }
         }
 
-        private void dropUserLoginData()
+        private void DropUserLoginData()
         {
-            lock (rejectLock)
+            lock(rejectLock)
             {
                 consecutiveRejections = 0;
                 tokenRejectedFirstDateTime = DateTime.MinValue;
@@ -1159,9 +1157,9 @@ namespace FilterProvider.Common.Util
             UserEmail = "";
         }
 
-        private void reportTokenAccepted()
+        private void ReportTokenAccepted()
         {
-            lock (rejectLock)
+            lock(rejectLock)
             {
                 consecutiveRejections = 0;
                 tokenRejectedFirstDateTime = DateTime.MinValue;
@@ -1186,7 +1184,7 @@ namespace FilterProvider.Common.Util
         /// <returns>
         /// True if the web service gave a success response, false otherwise. 
         /// </returns>
-        public bool SendResource(ServiceResource resource, byte[] formEncodedData, out HttpStatusCode code,  bool noLogging = true)
+        public bool SendResource(ServiceResource resource, byte[] formEncodedData, out HttpStatusCode code, bool noLogging = true)
         {
             try
             {
@@ -1214,7 +1212,7 @@ namespace FilterProvider.Common.Util
                 else
                 {
                     logger.Info("SendResource1: Authorization failed.");
-                    reportTokenRejected();
+                    ReportTokenRejected();
                     code = HttpStatusCode.Unauthorized;
                     return false;
                 }
@@ -1252,7 +1250,7 @@ namespace FilterProvider.Common.Util
                         // Check if response code is considered a success code.
                         if(intCode >= 200 && intCode <= 299)
                         {
-                            reportTokenAccepted();
+                            ReportTokenAccepted();
                             return true;
                         }
                     }
@@ -1263,7 +1261,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                reportTokenAccepted();
+                ReportTokenAccepted();
             }
             catch(WebException e)
             {
@@ -1282,11 +1280,11 @@ namespace FilterProvider.Common.Util
                         if(intCode == 401 || intCode == 403)
                         {
                             logger.Info("SendResource2: Authorization failed.");
-                            reportTokenRejected();
+                            ReportTokenRejected();
                         }
                         else if(intCode > 399 && intCode < 499)
                         {
-                            reportTokenAccepted();
+                            ReportTokenAccepted();
                             logger.Info("SendResource2: Failed with client code {0}", intCode);
                         }
 
