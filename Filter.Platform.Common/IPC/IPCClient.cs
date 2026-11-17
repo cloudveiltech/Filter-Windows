@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -17,7 +17,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 
 namespace CloudVeil.IPC
-{   
+{
     public class StateChangeEventArgs : EventArgs
     {
         public FilterStatus State
@@ -155,7 +155,7 @@ namespace CloudVeil.IPC
             client.ServerMessage += OnServerMessage;
             client.AutoReconnect = autoReconnect;
 
-            client.Error += clientError;
+            client.Error += ClientError;
 
             client.Start();
 
@@ -190,7 +190,7 @@ namespace CloudVeil.IPC
             DisconnectedFromServer?.Invoke();
         }
 
-        private void clientError(Exception ex)
+        private void ClientError(Exception ex)
         {
             LoggerUtil.RecursivelyLogException(logger, ex);
         }
@@ -234,7 +234,7 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(AuthenticationMessage));
                 var cast = (AuthenticationMessage)message;
                 if(cast != null)
-                {   
+                {
                     AuthenticationResultReceived?.Invoke(cast);
                 }
             }
@@ -243,7 +243,7 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(Messages.DeactivationMessage));
                 var cast = (Messages.DeactivationMessage)message;
                 if(cast != null)
-                {   
+                {
                     DeactivationResultReceived?.Invoke(cast.Command);
                 }
             }
@@ -252,7 +252,7 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(Messages.FilterStatusMessage));
                 var cast = (Messages.FilterStatusMessage)message;
                 if(cast != null)
-                {   
+                {
                     StateChanged?.Invoke(new StateChangeEventArgs(cast));
                 }
             }
@@ -261,7 +261,7 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(Messages.NotifyBlockActionMessage));
                 var cast = (Messages.NotifyBlockActionMessage)message;
                 if(cast != null)
-                {   
+                {
                     BlockActionReceived?.Invoke(cast);
                 }
             }
@@ -270,20 +270,20 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(Messages.RelaxedPolicyMessage));
                 var cast = (Messages.RelaxedPolicyMessage)message;
                 if(cast != null)
-                {   
+                {
                     switch(cast.Command)
                     {
                         case RelaxedPolicyCommand.Info:
-                        {
-                            RelaxedPolicyInfoReceived?.Invoke(cast);
-                        }
-                        break;
+                            {
+                                RelaxedPolicyInfoReceived?.Invoke(cast);
+                            }
+                            break;
 
                         case RelaxedPolicyCommand.Expired:
-                        {
-                            RelaxedPolicyExpired?.Invoke();
-                        }
-                        break;
+                            {
+                                RelaxedPolicyExpired?.Invoke();
+                            }
+                            break;
                     }
                 }
             }
@@ -292,7 +292,7 @@ namespace CloudVeil.IPC
                 logger.Debug("Server message is {0}", nameof(Messages.ClientToClientMessage));
                 var cast = (Messages.ClientToClientMessage)message;
                 if(cast != null)
-                {   
+                {
                     ClientToClientCommandReceived?.Invoke(cast);
                 }
             }
@@ -408,7 +408,7 @@ namespace CloudVeil.IPC
             {
                 PushMessage(msg);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }
@@ -444,11 +444,11 @@ namespace CloudVeil.IPC
 
             ReplyHandlerClass h = new ReplyHandlerClass(this);
 
-            if (replyHandler != null)
+            if(replyHandler != null)
             {
                 h.OnBaseReply((reply) =>
                 {
-                    if (reply.GetType() == typeof(Messages.NotifyConfigUpdateMessage))
+                    if(reply.GetType() == typeof(Messages.NotifyConfigUpdateMessage))
                     {
                         replyHandler((Messages.NotifyConfigUpdateMessage)reply);
                     }
@@ -513,10 +513,10 @@ namespace CloudVeil.IPC
             }
 
             client.PushMessage(msg);
-            
+
             if(replyHandler != null)
             {
-                if (Default != null)
+                if(Default != null)
                 {
                     Default.ipcQueue.AddMessage(msg, replyHandler, retryNum);
                 }

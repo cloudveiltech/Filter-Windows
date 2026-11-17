@@ -1,19 +1,17 @@
-﻿using Filter.Platform.Common;
+using Filter.Platform.Common;
 using Filter.Platform.Common.IPC.Messages;
 using Filter.Platform.Common.Types;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Proxy;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace FilterProvider.Common.Util
-{ 
+{
     public class AppSettings
     {
-        private const ushort MIN_PORT_VALUE = 10000; 
+        private const ushort MIN_PORT_VALUE = 10000;
         private const ushort MAX_PORT_VALUE = 20000;
         private const ushort DEFAULT_HTTP_PORT = 15300;
         private const ushort DEFAULT_HTTPS_PORT = 15301;
@@ -30,14 +28,14 @@ namespace FilterProvider.Common.Util
         public DateTime? LastSettingsCheck { get; set; }
         public ConfigUpdateResult? ConfigUpdateResult { get; set; }
         public BugReportSetting BugReportSettings { get; set; } = new BugReportSetting(false, false);
-        
+
         public ushort ConfigServerPort { get; set; } = DEFAULT_CONFIG_PORT;
         public ushort HttpsPort { get; set; } = DEFAULT_HTTPS_PORT;
         public ushort HttpPort { get; set; } = DEFAULT_HTTP_PORT;
         public bool RandomizePorts { get; set; } = false;
 
         public static AppSettings Default { get; private set; }
-        
+
 
         static AppSettings()
         {
@@ -46,7 +44,7 @@ namespace FilterProvider.Common.Util
 
         public void ShufflePorts()
         {
-            while (!TryShufflePorts()) { }
+            while(!TryShufflePorts()) { }
         }
 
         public void SetDefaultPorts()
@@ -57,13 +55,13 @@ namespace FilterProvider.Common.Util
         }
 
         private bool TryShufflePorts()
-        {            
+        {
             ConfigServerPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
             HttpPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
             HttpsPort = CommonProxyServer.GetRandomFreePort(MIN_PORT_VALUE, MAX_PORT_VALUE);
 
-            return ConfigServerPort != HttpPort && 
-                ConfigServerPort != HttpsPort && 
+            return ConfigServerPort != HttpPort &&
+                ConfigServerPort != HttpsPort &&
                 HttpPort != HttpsPort;
         }
 
@@ -77,7 +75,7 @@ namespace FilterProvider.Common.Util
                 {
                     json = JsonConvert.SerializeObject(this);
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     LoggerUtil.GetAppWideLogger().Error(ex, "Failed to convert object to JSON.");
                     return;
@@ -88,7 +86,7 @@ namespace FilterProvider.Common.Util
                     IPathProvider paths = PlatformTypes.New<IPathProvider>();
 
                     string settingsPath = paths.GetPath(@"app.settings");
-                    using (StreamWriter writer = new StreamWriter(File.Open(settingsPath, FileMode.Create)))
+                    using(StreamWriter writer = new StreamWriter(File.Open(settingsPath, FileMode.Create)))
                     {
                         writer.Write(json);
                     }
@@ -113,7 +111,7 @@ namespace FilterProvider.Common.Util
                     return new AppSettings();
                 }
 
-                using (StreamReader reader = File.OpenText(settingsPath))
+                using(StreamReader reader = File.OpenText(settingsPath))
                 {
                     string json = reader.ReadToEnd();
                     AppSettings loaded = JsonConvert.DeserializeObject<AppSettings>(json);
@@ -124,7 +122,7 @@ namespace FilterProvider.Common.Util
 
         public bool CanUpdate()
         {
-            if (RemindLater == null || DateTime.Now >= RemindLater.Value)
+            if(RemindLater == null || DateTime.Now >= RemindLater.Value)
             {
                 return true;
             }

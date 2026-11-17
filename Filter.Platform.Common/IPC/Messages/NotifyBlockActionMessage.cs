@@ -1,5 +1,5 @@
 
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -133,25 +133,25 @@ namespace CloudVeil.IPC.Messages
             BlockDate = blockDate;
             TextTrigger = textTrigger;
 
-            switch (type)
+            switch(type)
             {
                 case BlockType.ImageClassification:
-                {
-                    Rule = "Image Classification";
-                }
-                break;
+                    {
+                        Rule = "Image Classification";
+                    }
+                    break;
 
                 case BlockType.OtherContentClassification:
-                {
-                    Rule = "Other Content Classifier";
-                }
-                break;
+                    {
+                        Rule = "Other Content Classifier";
+                    }
+                    break;
 
                 default:
-                {
-                    Rule = rule != null ? rule : string.Empty;
-                }
-                break;
+                    {
+                        Rule = rule != null ? rule : string.Empty;
+                    }
+                    break;
             }
         }
     }

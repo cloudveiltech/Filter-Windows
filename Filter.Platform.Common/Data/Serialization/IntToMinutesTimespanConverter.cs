@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,7 +26,7 @@ namespace CloudVeil.Core.Data.Serialization
         {
             // To account for errors. Default to zero when NaN, etc.
             int minutes = 0;
-            
+
             if(!int.TryParse(reader.Value.ToString(), out minutes))
             {
                 minutes = 0;

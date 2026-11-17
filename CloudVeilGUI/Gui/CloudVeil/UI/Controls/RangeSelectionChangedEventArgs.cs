@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace Gui.CloudVeil.UI.Controls
 {

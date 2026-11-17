@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -83,7 +83,8 @@ namespace Gui.CloudVeil.UI.ViewModels
                 {
                     CloudVeilGuiMain.StartSentry();
 
-                } else
+                }
+                else
                 {
                     CloudVeilGuiMain.StopSentry();
                 }
@@ -117,7 +118,8 @@ namespace Gui.CloudVeil.UI.ViewModels
         }
 
         private ushort[] ports = new ushort[0] { };
-        public ushort[] Ports { 
+        public ushort[] Ports
+        {
             get
             {
                 return ports;
@@ -141,12 +143,13 @@ namespace Gui.CloudVeil.UI.ViewModels
         }
 
         private bool isPortsRandomized;
-        public bool IsPortsRandomized { 
-            get 
+        public bool IsPortsRandomized
+        {
+            get
             {
                 return isPortsRandomized;
             }
-            set 
+            set
             {
                 if(isPortsRandomized == value)
                 {
@@ -158,23 +161,24 @@ namespace Gui.CloudVeil.UI.ViewModels
                 Task.Run(() =>
                 {
                     IPCClient.Default.Request<Boolean>(IpcCall.RandomizePortsValue, value)
-                    .OnReply((h, msg) => { IsPortsSwitchEnabled = true; return true; }); 
+                    .OnReply((h, msg) => { IsPortsSwitchEnabled = true; return true; });
                 });
             }
         }
 
         private bool isPortsSwitchEnabled = true;
-        public bool IsPortsSwitchEnabled {
+        public bool IsPortsSwitchEnabled
+        {
             get
             {
                 return isPortsSwitchEnabled;
             }
-            set 
+            set
             {
                 isPortsSwitchEnabled = value;
                 RaisePropertyChanged(nameof(IsPortsSwitchEnabled));
-            } 
-        } 
+            }
+        }
 
         private Brush updateIconForeground;
         public Brush UpdateIconForeground
@@ -242,7 +246,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                 {
                                     (CloudVeilApp.Current as CloudVeilApp).BeginUpdateRequest(msg.Data);
                                     return true;
-                                }); 
+                                });
                             });
                         }
                         else
@@ -435,7 +439,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (openEditLinkCommand == null)
+                if(openEditLinkCommand == null)
                 {
                     openEditLinkCommand = new RelayCommand(() =>
                     {
@@ -477,7 +481,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (deactivationCommand == null)
+                if(deactivationCommand == null)
                 {
                     deactivationCommand = new RelayCommand((Action)(() =>
                     {
@@ -485,7 +489,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         {
                             Task.Run(() =>
                             {
-                                using (var ipcClient = new IPCClient())
+                                using(var ipcClient = new IPCClient())
                                 {
                                     ipcClient.ConnectedToServer = () =>
                                     {
@@ -497,7 +501,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                 }
                             });
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(logger, e);
                         }

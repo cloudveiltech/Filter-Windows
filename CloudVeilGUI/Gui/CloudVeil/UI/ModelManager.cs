@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,9 +6,6 @@
 */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gui.CloudVeil.UI
 {
@@ -18,7 +15,7 @@ namespace Gui.CloudVeil.UI
 
         public ModelManager()
         {
-            this.models = new Dictionary<Type, object>();
+            models = new Dictionary<Type, object>();
         }
 
         public virtual void Register<T>(T model)
@@ -44,7 +41,7 @@ namespace Gui.CloudVeil.UI
         {
             object model;
 
-            if (models.TryGetValue(typeof(T), out model))
+            if(models.TryGetValue(typeof(T), out model))
             {
                 return (T)model;
             }

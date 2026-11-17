@@ -1,26 +1,19 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
-using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Gui.CloudVeil.Extensions;
 using Gui.CloudVeil.UI.Models;
-using Gui.CloudVeil.UI.Views;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -46,18 +39,18 @@ namespace Gui.CloudVeil.UI.ViewModels
             get;
             private set;
         }
-        public string TextTrigger 
-        { 
-            get; 
+        public string TextTrigger
+        {
+            get;
             private set;
         }
 
         public ViewableBlockedRequest(string category, string fullRequest, DateTime blockDate, string textTrigger)
         {
-            this.CategoryName = category;
-            this.FullRequest = fullRequest;
-            this.BlockDate = blockDate.ToString(CultureInfo.CurrentCulture);
-            this.TextTrigger = textTrigger;
+            CategoryName = category;
+            FullRequest = fullRequest;
+            BlockDate = blockDate.ToString(CultureInfo.CurrentCulture);
+            TextTrigger = textTrigger;
         }
     }
 
@@ -112,7 +105,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (sidebarButtonCommand == null)
+                if(sidebarButtonCommand == null)
                 {
                     sidebarButtonCommand = new RelayCommand((Action)(() =>
                     {
@@ -135,7 +128,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                     {
                         try
                         {
-                            if (args == null) { return; }
+                            if(args == null) { return; }
 
                             string fullUrl = args.FullRequest;
                             Clipboard.SetText(fullUrl);
@@ -160,11 +153,11 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (requestBlockActionReviewCommand == null)
+                if(requestBlockActionReviewCommand == null)
                 {
                     requestBlockActionReviewCommand = new RelayCommand<ViewableBlockedRequest>((Action<ViewableBlockedRequest>)((args) =>
                     {
-                        if (args == null) { return; }
+                        if(args == null) { return; }
 
                         string category = args.CategoryName;
                         string fullUrl = args.FullRequest;
@@ -173,7 +166,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         {
                             Task.Run(() =>
                             {
-                                using (var ipcClient = new IPCClient())
+                                using(var ipcClient = new IPCClient())
                                 {
                                     ipcClient.ConnectedToServer = () =>
                                     {
@@ -185,7 +178,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                 }
                             });
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(logger, e);
                         }
@@ -202,7 +195,7 @@ namespace Gui.CloudVeil.UI.ViewModels
             {
                 var dataCtx = this;
                 // Keep number of items truncated to 50.
-                if (dataCtx.BlockEvents.Count > 50)
+                if(dataCtx.BlockEvents.Count > 50)
                 {
                     dataCtx.BlockEvents.RemoveAt(0);
                 }
@@ -210,7 +203,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 // Add the item to view.
                 dataCtx.BlockEvents.Add(new ViewableBlockedRequest(category, fullRequest, blockDate, textTrigger));
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }

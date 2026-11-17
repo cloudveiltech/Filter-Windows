@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -12,6 +12,6 @@ namespace CloudVeil.Core.WinAPI
     public static class SFC
     {
         [DllImport("sfc.dll")]
-        public static extern int SfcIsFileProtected(IntPtr shouldBeNull, [MarshalAs(UnmanagedType.LPWStr)]string filePath);
+        public static extern int SfcIsFileProtected(IntPtr shouldBeNull, [MarshalAs(UnmanagedType.LPWStr)] string filePath);
     }
 }

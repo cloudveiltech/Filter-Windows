@@ -5,13 +5,9 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 
 namespace CloudVeilService.Util
@@ -35,11 +31,11 @@ namespace CloudVeilService.Util
                 IEnumerable<string> consoleFiles = Directory.EnumerateFiles(logFolder, "console-*");
                 DateTime earliestFileDate = DateTime.Now.Date.AddDays(-3);
 
-                foreach (string filePath in consoleFiles)
+                foreach(string filePath in consoleFiles)
                 {
                     var fileInfo = new FileInfo(filePath);
 
-                    if (fileInfo.CreationTime < earliestFileDate)
+                    if(fileInfo.CreationTime < earliestFileDate)
                     {
                         fileInfo.Delete();
                     }

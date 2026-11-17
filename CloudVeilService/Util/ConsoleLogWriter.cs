@@ -5,14 +5,10 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeilService.Util
 {
@@ -33,9 +29,9 @@ namespace CloudVeilService.Util
         {
             try
             {
-                if (characterCount > 0 && (characterCount % 1000) == 0)
+                if(characterCount > 0 && (characterCount % 1000) == 0)
                 {
-                    if (DateTime.Now.Date > openedDate)
+                    if(DateTime.Now.Date > openedDate)
                     {
                         writer.Close();
                         writer = openLogFile();
@@ -43,7 +39,7 @@ namespace CloudVeilService.Util
                     }
                 }
 
-                if (writer == null)
+                if(writer == null)
                 {
                     writer = openLogFile();
                     openedDate = DateTime.Now.Date;

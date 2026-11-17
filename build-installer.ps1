@@ -79,7 +79,7 @@ Function Find-SignTool()
     $win10SDKVersion = $win10SDKKey.ProductVersion + ".0\"
     $win10SDKVersionBinPath = $win10SDKBinPath + $win10SDKVersion
 
-    $signtool = $win10SDKVersionBinPath + "x86\signtool.exe"
+    $signtool = "echo"#$win10SDKVersionBinPath + "x86\signtool.exe"
 
     if(Test-Path $signtool) {
         return $signtool

@@ -8,15 +8,9 @@ using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using Gui.CloudVeil.Util;
 using Microsoft.Win32;
-using NLog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeil.Core.Windows.Util
 {
@@ -38,14 +32,14 @@ namespace CloudVeil.Core.Windows.Util
 
 
             // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", writeable))
+            using(RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", writeable))
             {
                 // Create or open our application's key.
 
                 RegistryKey sub = null;
 
                 var logger = LoggerUtil.GetAppWideLogger();
-                if (!createKey)
+                if(!createKey)
                 {
                     sub = key.OpenSubKey(applicationNiceName, writeable);
                 }
@@ -55,12 +49,12 @@ namespace CloudVeil.Core.Windows.Util
                     {
                         sub = key.OpenSubKey(applicationNiceName, writeable);
                     }
-                    catch(Exception ex) 
+                    catch(Exception ex)
                     {
                         LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
                     }
 
-                    if (sub == null)
+                    if(sub == null)
                     {
                         try
                         {
@@ -71,10 +65,10 @@ namespace CloudVeil.Core.Windows.Util
                         {
                             LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
                             sub = null;
-                        }                           
+                        }
                     }
                 }
-                
+
                 if(sub == null)
                 {
                     logger.Warn("Can't open reg key");
@@ -91,19 +85,19 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (emailLock)
+                lock(emailLock)
                 {
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\email-address").ToString();
 
-                    using (var sub = getAppRegistryKey(createKey: false))
+                    using(var sub = getAppRegistryKey(createKey: false))
                     {
                         string emailAddress = null;
 
-                        if (sub != null)
+                        if(sub != null)
                         {
                             emailAddress = sub.GetValue(keyName) as string;
 
-                            if (emailAddress == null || emailAddress.Length == 0)
+                            if(emailAddress == null || emailAddress.Length == 0)
                             {
                                 LoggerUtil.GetAppWideLogger().Warn("Can't read email address");
                                 return null;
@@ -119,7 +113,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (emailLock)
+                lock(emailLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\email-address").ToString();
@@ -128,17 +122,17 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    using(RegistryKey sub = getAppRegistryKey(true, true))
                     {
                         // Create or open our application's key.
 
-                        if (sub != null)
+                        if(sub != null)
                         {
                             try
                             {
                                 sub.SetValue(keyName, value, RegistryValueKind.String);
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                                 System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                             }
@@ -155,7 +149,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\auth-token").ToString();
@@ -164,17 +158,17 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey())
+                    using(RegistryKey sub = getAppRegistryKey())
                     {
                         // Create or open our application's key.
 
                         string authToken = null;
 
-                        if (sub != null)
+                        if(sub != null)
                         {
                             authToken = sub.GetValue(keyName) as string;
 
-                            if (authToken == null || authToken.Length == 0)
+                            if(authToken == null || authToken.Length == 0)
                             {
                                 LoggerUtil.GetAppWideLogger().Warn("Can't read auth token");
                                 return null;
@@ -190,7 +184,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
 
                     // This key will have the entropy written to it in the registry.
@@ -200,15 +194,15 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    using(RegistryKey sub = getAppRegistryKey(true, true))
                     {
-                        if (sub != null)
+                        if(sub != null)
                         {
                             try
                             {
                                 sub.SetValue(keyName, value, RegistryValueKind.String);
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                                 System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                             }
@@ -221,7 +215,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
@@ -230,17 +224,17 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey())
+                    using(RegistryKey sub = getAppRegistryKey())
                     {
                         // Create or open our application's key.
 
                         string authToken = null;
 
-                        if (sub != null)
+                        if(sub != null)
                         {
                             authToken = sub.GetValue(keyName) as string;
 
-                            if (authToken == null || authToken.Length == 0)
+                            if(authToken == null || authToken.Length == 0)
                             {
                                 return null;
                             }
@@ -255,7 +249,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\device-id").ToString();
@@ -264,15 +258,15 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    using(RegistryKey sub = getAppRegistryKey(true, true))
                     {
-                        if (sub != null)
+                        if(sub != null)
                         {
                             try
                             {
                                 sub.SetValue(keyName, value, RegistryValueKind.String);
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                                 System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                             }
@@ -285,26 +279,26 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
-                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows)+  @"\cv4w\auth-id").ToString();
+                    string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\auth-id").ToString();
 
                     // Get the name of our process, aka the Executable name.
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey())
+                    using(RegistryKey sub = getAppRegistryKey())
                     {
                         // Create or open our application's key.
 
                         string authToken = null;
 
-                        if (sub != null)
+                        if(sub != null)
                         {
                             authToken = sub.GetValue(keyName) as string;
 
-                            if (authToken == null || authToken.Length == 0)
+                            if(authToken == null || authToken.Length == 0)
                             {
                                 return null;
                             }
@@ -319,7 +313,7 @@ namespace CloudVeil.Core.Windows.Util
             {
                 Debug.Assert(value != null && value.Length > 0);
 
-                lock (authenticationLock)
+                lock(authenticationLock)
                 {
                     // This key will have the entropy written to it in the registry.
                     string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\cv4w\auth-id").ToString();
@@ -328,15 +322,15 @@ namespace CloudVeil.Core.Windows.Util
                     var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                     // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                    using (RegistryKey sub = getAppRegistryKey(true, true))
+                    using(RegistryKey sub = getAppRegistryKey(true, true))
                     {
-                        if (sub != null)
+                        if(sub != null)
                         {
                             try
                             {
                                 sub.SetValue(keyName, value, RegistryValueKind.String);
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                                 System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                             }

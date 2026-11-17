@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-Present Jesse Nicholson
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,7 +6,6 @@
 */
 
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace CloudVeilCore.Windows.WinAPI
@@ -25,12 +24,12 @@ namespace CloudVeilCore.Windows.WinAPI
         {
             StringBuilder buffer = new StringBuilder(1024);
             IntPtr hprocess = Kernel32.OpenProcess(Kernel32.ProcessAccessFlags.QueryLimitedInformation, false, (uint)processId);
-            if (hprocess != IntPtr.Zero)
+            if(hprocess != IntPtr.Zero)
             {
                 try
                 {
                     int size = buffer.Capacity;
-                    if (Kernel32.QueryFullProcessImageName(hprocess, 0, buffer, ref size))
+                    if(Kernel32.QueryFullProcessImageName(hprocess, 0, buffer, ref size))
                     {
                         return buffer.ToString();
                     }

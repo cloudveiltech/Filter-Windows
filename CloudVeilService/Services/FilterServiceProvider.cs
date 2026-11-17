@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,11 +7,9 @@
 
 using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
-using CloudVeilCore.Net.Proxy;
 using CloudVeilCore.Windows.Diversion;
 using CloudVeilService.Platform;
 using Filter.Platform.Common;
-using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using FilterNativeWindows;
 using FilterProvider.Common.Platform;
@@ -20,7 +18,6 @@ using FilterProvider.Common.Util;
 using Gui.CloudVeil.Util;
 using Microsoft.Win32;
 using NLog;
-using Sentry.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +28,6 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using static Filter.Platform.Common.Util.ConnectivityCheck;
 
 namespace CloudVeilService.Services
 {
@@ -66,7 +62,7 @@ namespace CloudVeilService.Services
                 if(procAcrchitecture == Architecture.X86)
                 {
                     dllFolderName = "x86";
-                } 
+                }
                 else if(procAcrchitecture == Architecture.Arm64)
                 {
                     dllFolderName = "arm64";
@@ -79,7 +75,7 @@ namespace CloudVeilService.Services
 
                 return provider.Start(isTestRun);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 // Critical failure.
                 try
@@ -87,7 +83,7 @@ namespace CloudVeilService.Services
                     EventLog.CreateEventSource("FilterServiceProvider", "Application");
                     EventLog.WriteEntry("FilterServiceProvider", $"Exception occurred before logger was bootstrapped: {e.ToString()}");
                 }
-                catch (Exception e2)
+                catch(Exception e2)
                 {
                     File.AppendAllText(@"C:\FilterServiceProvider.FatalCrashLog.log", $"Fatal crash.\r\n{e.ToString()}\r\n{e2.ToString()}");
                 }
@@ -144,7 +140,7 @@ namespace CloudVeilService.Services
         {
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                if (logger != null)
+                if(logger != null)
                 {
                     logger.Error((Exception)e.ExceptionObject);
                 }
@@ -267,7 +263,7 @@ namespace CloudVeilService.Services
                     {
                         FillApplicationLists();
                     };
-                    
+
                     WebServiceUtil.Default.AuthTokenRejected += () =>
                     {
                         diverter.Stop();
@@ -276,7 +272,7 @@ namespace CloudVeilService.Services
                     WebServiceUtil.Default.AuthTokenAccepted += () =>
                     {
                         logger.Info("AuthTokenAccepted");
-                        if (!diverter.IsRunning)
+                        if(!diverter.IsRunning)
                         {
                             StartDiverter(accessible, server);
                         }
@@ -287,7 +283,7 @@ namespace CloudVeilService.Services
                     logger.Error($"Error occurred while starting the diverter.");
                     LoggerUtil.RecursivelyLogException(logger, ex);
                 }
-                
+
             });
 
         }
@@ -301,7 +297,7 @@ namespace CloudVeilService.Services
                 IFilterAgent agent = PlatformTypes.New<IFilterAgent>();
                 ConnectivityCheck.Accessible afterDiverter = agent.CheckConnectivity();
 
-                if (accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
+                if(accessible == ConnectivityCheck.Accessible.Yes && afterDiverter != ConnectivityCheck.Accessible.Yes)
                 {
                     server.Send<bool>(IpcCall.InternetAccessible, false);
                 }
@@ -315,33 +311,33 @@ namespace CloudVeilService.Services
 
         private void FillApplicationLists()
         {
-            if (provider == null || provider.PolicyConfiguration == null || provider.PolicyConfiguration.Configuration == null)
+            if(provider == null || provider.PolicyConfiguration == null || provider.PolicyConfiguration.Configuration == null)
             {
                 return;
             }
 
             diverter.CleanApplist();
             var allProcesess = Process.GetProcesses();
-            foreach (var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
+            foreach(var app in provider.PolicyConfiguration.Configuration.BlacklistedApplications)
             {
                 diverter.AddBlackListedApp(app, allProcesess);
             }
-            if (provider.PolicyConfiguration.Configuration.BlacklistedApplications.Count > 0)
+            if(provider.PolicyConfiguration.Configuration.BlacklistedApplications.Count > 0)
             {
                 diverter.AddBlackListedApp("CloudVeil.exe", allProcesess);//self gui app should be always filtered
             }
 
-            foreach (var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
+            foreach(var app in provider.PolicyConfiguration.Configuration.WhitelistedApplications)
             {
                 diverter.AddWhiteListedApp(app, allProcesess);
             }
             diverter.AddWhiteListedApp("windows\\system32", allProcesess); //everything from that folder
 
-            foreach (var app in provider.PolicyConfiguration.Configuration.BlockedApplications)
+            foreach(var app in provider.PolicyConfiguration.Configuration.BlockedApplications)
             {
                 diverter.AddBlockedApp(app, allProcesess);
             }
-            foreach (var app in provider.PolicyConfiguration.Configuration.CustomBlockedApps)
+            foreach(var app in provider.PolicyConfiguration.Configuration.CustomBlockedApps)
             {
                 diverter.AddBlockedApp(app, allProcesess);
             }
@@ -357,7 +353,7 @@ namespace CloudVeilService.Services
             Environment.Exit((int)ExitCodes.ShutdownWithSafeguards);
         }
 
-         /// <summary>
+        /// <summary>
         /// Called whenever the app is shut down with an authorized key, or when the system is
         /// shutting down, or when the user is logging off.
         /// </summary>

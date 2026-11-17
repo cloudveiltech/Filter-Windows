@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,12 +6,6 @@
 */
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Navigation;
 using static Gui.CloudVeil.UI.Models.DashboardModel;
 
 namespace Gui.CloudVeil.UI.ViewModels
@@ -105,11 +99,11 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (useRelaxedPolicyCommand == null)
+                if(useRelaxedPolicyCommand == null)
                 {
                     useRelaxedPolicyCommand = new RelayCommand(() =>
                     {
-                        this.RequestRelaxedPolicy();
+                        RequestRelaxedPolicy();
                     }, () => AvailableRelaxedRequests > 0);
                 }
 
@@ -122,11 +116,11 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (relinquishRelaxedPolicyCommand == null)
+                if(relinquishRelaxedPolicyCommand == null)
                 {
                     relinquishRelaxedPolicyCommand = new RelayCommand(() =>
                     {
-                        this.RelinquishRelaxedPolicy();
+                        RelinquishRelaxedPolicy();
                     }, () => true);
                 }
 

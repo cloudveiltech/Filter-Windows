@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -10,12 +10,9 @@ using Filter.Platform.Common.Util;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.Windows
 {
@@ -48,7 +45,7 @@ namespace Gui.CloudVeil.UI.Windows
         public async Task<bool> AskUserYesNoQuestion(string title, string question)
         {
             // Check to see if a dialog is currently displaying.
-            if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
                 return false;
             }
@@ -83,7 +80,7 @@ namespace Gui.CloudVeil.UI.Windows
 
         public async Task<UpdateDialogResult> AskUserUpdateQuestion(string title, string question)
         {
-            if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
                 return UpdateDialogResult.FailedOpen;
             }
@@ -95,7 +92,7 @@ namespace Gui.CloudVeil.UI.Windows
 
             var userQueryResult = await DialogManager.ShowMessageAsync(this, title, question, MessageDialogStyle.AffirmativeAndNegative, settings);
 
-            switch (userQueryResult)
+            switch(userQueryResult)
             {
                 case MessageDialogResult.Affirmative:
                     return UpdateDialogResult.UpdateNow;
@@ -113,7 +110,7 @@ namespace Gui.CloudVeil.UI.Windows
 
         public async Task<bool> AskUser(string title, string question)
         {
-            if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
                 return false;
             }
@@ -148,7 +145,7 @@ namespace Gui.CloudVeil.UI.Windows
         public async void ShowUserMessage(string title, string message, string acceptButtonText = "Ok")
         {
             // Check to see if a dialog is currently displaying.
-            if (await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
+            if(await DialogManager.GetCurrentDialogAsync<BaseMetroDialog>(this) != null)
             {
                 return;
             }
@@ -169,12 +166,12 @@ namespace Gui.CloudVeil.UI.Windows
                 hwndSource.AddHook(WndProc);
             }
         }
-        
+
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {   
+        {
             // Show window
             if(msg == 0x0018)
-            {   
+            {
                 switch(wParam.ToInt32())
                 {
                     // Handle all show/restore commands, ignore everything else.
@@ -187,11 +184,11 @@ namespace Gui.CloudVeil.UI.Windows
                     case 8:
                     case 4:
                     case 1:
-                    {
-                        WindowRestoreRequested?.Invoke();
-                        handled = true;
-                    }
-                    break;
+                        {
+                            WindowRestoreRequested?.Invoke();
+                            handled = true;
+                        }
+                        break;
                 }
             }
 

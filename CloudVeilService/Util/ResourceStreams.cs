@@ -5,13 +5,9 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeilService.Util
 {
@@ -21,11 +17,11 @@ namespace CloudVeilService.Util
         {
             try
             {
-                using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+                using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
                 {
-                    if (resourceStream != null && resourceStream.CanRead)
+                    if(resourceStream != null && resourceStream.CanRead)
                     {
-                        using (TextReader tsr = new StreamReader(resourceStream))
+                        using(TextReader tsr = new StreamReader(resourceStream))
                         {
                             return Encoding.UTF8.GetBytes(tsr.ReadToEnd());
                         }

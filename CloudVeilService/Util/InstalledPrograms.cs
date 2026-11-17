@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Globalization;
@@ -13,13 +13,13 @@ namespace CloudVeilService.Util
         public string DisplayVersion { get; set; }
 
         public int? EstimatedSize { get; set; }
-        
+
         public DateTime? InstallDate { get; set; }
 
         public int? Language { get; set; }
 
         public string Publisher { get; set; }
-        
+
         public bool SystemComponent { get; set; }
     }
 
@@ -47,14 +47,14 @@ namespace CloudVeilService.Util
             {
                 sb.Append("\t\t");
 
-                if (program.InstallDate != null)
+                if(program.InstallDate != null)
                 {
                     sb.Append($"Installed on {program.InstallDate?.ToShortDateString()}");
                 }
 
-                if (program.EstimatedSize != null)
+                if(program.EstimatedSize != null)
                 {
-                    if (program.InstallDate != null) sb.Append(", ");
+                    if(program.InstallDate != null) sb.Append(", ");
 
                     sb.Append($" Est. Size: {program.EstimatedSize}KB");
                 }
@@ -62,7 +62,7 @@ namespace CloudVeilService.Util
                 sb.AppendLine();
             }
 
-            if (program.Publisher != null)
+            if(program.Publisher != null)
             {
                 sb.AppendLine($"\t\tPublisher: {program.Publisher}");
             }
@@ -87,11 +87,11 @@ namespace CloudVeilService.Util
                 sb.AppendLine("\tUser-installed Programs");
                 sb.AppendLine(separator);
 
-                foreach (var program in others)
+                foreach(var program in others)
                 {
                     bool printed = printProgramToStringBuilder(sb, program);
 
-                    if (printed) sb.AppendLine();
+                    if(printed) sb.AppendLine();
                 }
 
                 sb.AppendLine();
@@ -102,7 +102,7 @@ namespace CloudVeilService.Util
                 {
                     bool printed = printProgramToStringBuilder(sb, program);
 
-                    if (printed) sb.AppendLine();
+                    if(printed) sb.AppendLine();
                 }
 
                 return sb.ToString();
@@ -111,7 +111,7 @@ namespace CloudVeilService.Util
             {
                 string msg = $"Error occurred while building installed programs report. {ex}";
 
-                if (sb != null)
+                if(sb != null)
                 {
                     sb.AppendLine();
                     sb.AppendLine(msg);
@@ -142,11 +142,11 @@ namespace CloudVeilService.Util
         {
             List<InstalledProgram> programs = new List<InstalledProgram>();
 
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyName))
+            using(RegistryKey key = Registry.LocalMachine.OpenSubKey(keyName))
             {
                 foreach(string subkeyName in key.GetSubKeyNames())
                 {
-                    using (RegistryKey subkey = key.OpenSubKey(subkeyName))
+                    using(RegistryKey subkey = key.OpenSubKey(subkeyName))
                     {
                         InstalledProgram program = getInstalledProgramFromKey(subkey);
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -115,16 +115,16 @@ namespace Filter.Platform.Common.Extensions
             {
                 bstr = Marshal.SecureStringToBSTR(str);
 
-                if (bstr != IntPtr.Zero)
+                if(bstr != IntPtr.Zero)
                 {
-                    for (int i = 0; i < str.Length; i++)
+                    for(int i = 0; i < str.Length; i++)
                     {
                         // Secure strings are composed of chars (which are 16 bits), so read in all data. We'll convert these to bytes next.
                         arr[i] = Convert.ToChar((ushort)Marshal.ReadInt16(bstr, i * 2));
 
                         // Check for null char to fix #81.
                         // Issue was that SecureString's length was not accurate and so it appended garbage to the password, causing login to fail.
-                        if (arr[i] == 0)
+                        if(arr[i] == 0)
                         {
                             strLength = i;
                             break;
@@ -135,24 +135,24 @@ namespace Filter.Platform.Common.Extensions
                 managed = encoding.GetBytes(arr);
 
                 // Zero and release intermediate array immediately.
-                for (int i = 0; i < arr.Length; i++)
+                for(int i = 0; i < arr.Length; i++)
                 {
                     arr[i] = Convert.ToChar(0);
                 }
             }
-            catch (Exception)
+            catch(Exception)
             {
 
             }
             finally
             {
-                if (arr != null)
+                if(arr != null)
                 {
                     GCHandle arrHandle = GCHandle.Alloc(arr);
                     arrHandle.Free();
                 }
 
-                if (bstr != IntPtr.Zero)
+                if(bstr != IntPtr.Zero)
                 {
                     Marshal.ZeroFreeBSTR(bstr);
                 }
@@ -179,8 +179,7 @@ namespace Filter.Platform.Common.Extensions
                 IPAddress.TryParse(str, out result);
                 return result;
             }
-            return null;            
+            return null;
         }
     }
 }
- 

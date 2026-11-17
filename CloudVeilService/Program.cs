@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,10 +8,7 @@
 using CloudVeilService.Services;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Services;
-using NLog;
-using Sentry;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using Topshelf;
 
@@ -35,10 +32,10 @@ namespace CloudVeilService
 
             CommonFilterServiceProvider.StartSentry();
 
-            if (createdNew)
+            if(createdNew)
             {
                 // Having problems with the service not starting? Run FilterServiceProvider.exe test-me in admin mode to figure out why.
-                if (args.Length > 0 && args[0] == "test-me")
+                if(args.Length > 0 && args[0] == "test-me")
                 {
                     FilterServiceProvider provider = new FilterServiceProvider();
                     provider.Start(true);
@@ -60,10 +57,11 @@ namespace CloudVeilService
                         {
                             s.ConstructUsing(name => new FilterServiceProvider());
                             s.WhenStarted((fsp, hostCtl) => fsp.Start());
-                            s.WhenStopped((fsp, hostCtl) => {
+                            s.WhenStopped((fsp, hostCtl) =>
+                            {
                                 LoggerUtil.GetAppWideLogger().Info("Service stop called");
 
-                                return fsp.Stop(); 
+                                return fsp.Stop();
                             });
                             s.WhenShutdown((fsp, hostCtl) =>
                             {

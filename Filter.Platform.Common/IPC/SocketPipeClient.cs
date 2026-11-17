@@ -1,4 +1,4 @@
-﻿// Copyright © 2018 CloudVeil Technology, Inc.
+// Copyright © 2018 CloudVeil Technology, Inc.
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -45,7 +45,7 @@ namespace Filter.Platform.Common.IPC
 
             IFormatter formatter = new BinaryFormatter();
 
-            using (MemoryStream stream = new MemoryStream())
+            using(MemoryStream stream = new MemoryStream())
             {
                 formatter.Serialize(stream, msg);
 
@@ -75,16 +75,16 @@ namespace Filter.Platform.Common.IPC
             IFormatter formatter = new BinaryFormatter();
 
             MessageType type = SocketPipeHelper.GetMessageType(buffer);
-            if (type == MessageType.Message || type == MessageType.BroadcastMessage)
+            if(type == MessageType.Message || type == MessageType.BroadcastMessage)
             {
-                using (MemoryStream ms = new MemoryStream())
+                using(MemoryStream ms = new MemoryStream())
                 {
                     ms.Write(buffer, 8, buffer.Length - 8);
                     ms.Position = 0;
 
                     object o = formatter.Deserialize(ms);
 
-                    if (o is BaseMessage)
+                    if(o is BaseMessage)
                     {
                         ProcessMessage(o as BaseMessage);
                     }
@@ -117,12 +117,12 @@ namespace Filter.Platform.Common.IPC
                 LoggerUtil.RecursivelyLogException(logger, ex);
             }
 
-            
+
         }
 
         internal void ProcessMessage(BaseMessage msg)
         {
-            this.ServerMessage?.Invoke(msg);
+            ServerMessage?.Invoke(msg);
         }
 
         public void Stop()

@@ -4,16 +4,11 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.IPC;
-using System;
-using System.Collections.Generic;
 using System.IO.Pipes;
-using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeil.Core.Windows.IPC
 {

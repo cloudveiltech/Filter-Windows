@@ -67,9 +67,9 @@ namespace CloudVeilService.Platform
 
                 // Get all existing rules matching our process name and destroy them.
                 var myRules = FirewallManager.Instance.Rules.Where(r => r.Name.Equals(thisProcessName, StringComparison.OrdinalIgnoreCase)).ToArray();
-                if (myRules != null && myRules.Length > 0)
+                if(myRules != null && myRules.Length > 0)
                 {
-                    foreach (var rule in myRules)
+                    foreach(var rule in myRules)
                     {
                         FirewallManager.Instance.Rules.Remove(rule);
                     }
@@ -94,7 +94,7 @@ namespace CloudVeilService.Platform
 
                 FirewallManager.Instance.Rules.Add(outboundRule);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 logger.Error("Error while attempting to configure firewall application exception.");
                 LoggerUtil.RecursivelyLogException(logger, e);
@@ -136,14 +136,14 @@ namespace CloudVeilService.Platform
 
             AsymmetricCipherKeyPair pair = BCCertificateMaker.CreateKeyPair(2048);
 
-            using (StreamWriter writer = new StreamWriter(new FileStream(keyPath, FileMode.Create, FileAccess.Write)))
-            { 
+            using(StreamWriter writer = new StreamWriter(new FileStream(keyPath, FileMode.Create, FileAccess.Write)))
+            {
                 BCCertificateMaker.ExportPrivateKey(pair.Private, writer);
             }
 
             X509Certificate2 cert = certMaker.MakeCertificate(config.AuthorityName, true, null, pair);
 
-            using (StreamWriter writer = new StreamWriter(new FileStream(certPath, FileMode.Create, FileAccess.Write)))
+            using(StreamWriter writer = new StreamWriter(new FileStream(certPath, FileMode.Create, FileAccess.Write)))
             {
                 BCCertificateMaker.ExportDotNetCertificate(cert, writer);
             }
@@ -185,7 +185,7 @@ namespace CloudVeilService.Platform
             try
             {
                 // Get all exe files in the same dir as this service executable.
-                foreach (var exe in allFilesWhereIam)
+                foreach(var exe in allFilesWhereIam)
                 {
                     try
                     {
@@ -194,19 +194,19 @@ namespace CloudVeilService.Platform
                         var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(exe);
 
                         // If our description notes that it's a GUI...
-                        if (fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
+                        if(fvi != null && fvi.FileDescription != null && fvi.FileDescription.IndexOf("GUI", StringComparison.OrdinalIgnoreCase) != -1)
                         {
                             fullGuiExePath = exe;
                             return true;
                         }
                     }
-                    catch (Exception le)
+                    catch(Exception le)
                     {
                         LoggerUtil.RecursivelyLogException(logger, le);
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 logger.Error("Error enumerating sibling files.");
                 LoggerUtil.RecursivelyLogException(logger, e);
@@ -221,13 +221,13 @@ namespace CloudVeilService.Platform
             try
             {
                 string guiExePath;
-                if (TryGetGuiFullPath(out guiExePath))
+                if(TryGetGuiFullPath(out guiExePath))
                 {
-                    foreach (var proc in Process.GetProcesses())
+                    foreach(var proc in Process.GetProcesses())
                     {
                         try
                         {
-                            if (proc.MainModule.FileName.OIEquals(guiExePath))
+                            if(proc.MainModule.FileName.OIEquals(guiExePath))
                             {
                                 proc.Kill();
                             }
@@ -236,7 +236,7 @@ namespace CloudVeilService.Platform
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 logger.Error("Error enumerating processes when trying to kill all GUI instances.");
                 LoggerUtil.RecursivelyLogException(logger, e);
@@ -327,11 +327,11 @@ namespace CloudVeilService.Platform
             // We cannot guarantee that any specific process is going to allow us access to its information.
             // So we must wrap each assignment from Process in a try-catch to attempt to glean as much information about
             // it as we can.
-            try { processName = p.ProcessName; } catch (Exception) { }
-            try { pid = p.Id; } catch (Exception) { }
-            try { startTime = p.StartTime; } catch (Exception) { }
-            try { totalProcessorTime = p.TotalProcessorTime; } catch (Exception) { }
-            try { workingSet = p.WorkingSet64; } catch (Exception) { }
+            try { processName = p.ProcessName; } catch(Exception) { }
+            try { pid = p.Id; } catch(Exception) { }
+            try { startTime = p.StartTime; } catch(Exception) { }
+            try { totalProcessorTime = p.TotalProcessorTime; } catch(Exception) { }
+            try { workingSet = p.WorkingSet64; } catch(Exception) { }
 
             string startTimeString = startTime != null ? startTime.Value.ToString() : "n/a";
             string totalProcessorTimeString = totalProcessorTime != null ? totalProcessorTime.ToString() : "n/a";
@@ -365,9 +365,9 @@ namespace CloudVeilService.Platform
                 {
                     hasExited = p.HasExited;
                 }
-                catch (Exception) { }
+                catch(Exception) { }
 
-                if (!hasExited)
+                if(!hasExited)
                 {
                     printProcessToStringBuilder(sb, p);
                 }
@@ -441,11 +441,11 @@ namespace CloudVeilService.Platform
             try
             {
                 string guiExePath;
-                if (TryGetGuiFullPath(out guiExePath))
+                if(TryGetGuiFullPath(out guiExePath))
                 {
                     logger.Info("Starting external GUI executable : {0}", guiExePath);
 
-                    if (runInTray)
+                    if(runInTray)
                     {
                         var sanitizedArgs = "\"" + Regex.Replace("/StartMinimized", @"(\\+)$", @"$1$1") + "\"";
                         var sanitizedPath = "\"" + Regex.Replace(guiExePath, @"(\\+)$", @"$1$1") + "\"" + " " + sanitizedArgs;
@@ -461,7 +461,7 @@ namespace CloudVeilService.Platform
                     return;
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 logger.Error("Error enumerating all files.");
                 LoggerUtil.RecursivelyLogException(logger, e);

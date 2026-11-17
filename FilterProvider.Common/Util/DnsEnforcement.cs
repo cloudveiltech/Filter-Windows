@@ -5,25 +5,19 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using Filter.Platform.Common.Extensions;
+using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
 using DNS.Client;
-using DNS.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FilterProvider.Common.Platform;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Net;
-using CloudVeil;
 
 namespace FilterProvider.Common.Util
 {
@@ -52,7 +46,7 @@ namespace FilterProvider.Common.Util
         private IPlatformDns platformDns;
 
         #region DnsEnforcement.Enforce
-        
+
         IPAddress lastPrimaryV4 = null;
         IPAddress lastSecondaryV4 = null;
         IPAddress lastPrimaryV6 = null;
@@ -67,13 +61,13 @@ namespace FilterProvider.Common.Util
         {
             logger.Info("TryEnforce DNS {0}, {1}", sendDnsChangeEvents, enableDnsFiltering);
 
-            lock (dnsEnforcementLock)
+            lock(dnsEnforcementLock)
             {
                 try
                 {
                     if(!enableDnsFiltering)
                     {
-                        if (policyConfiguration.Configuration == null)
+                        if(policyConfiguration.Configuration == null)
                         {
                             EventHandler fn = null;
 
@@ -102,7 +96,7 @@ namespace FilterProvider.Common.Util
                         var cfg = policyConfiguration.Configuration;
 
                         // Check if any DNS servers are defined, and if so, set them.
-                        if (cfg != null)
+                        if(cfg != null)
                         {
                             primaryDnsV4 = cfg.PrimaryDns.TryParseAsIpAddress();
                             secondaryDnsV4 = cfg.SecondaryDns.TryParseAsIpAddress();
@@ -110,14 +104,14 @@ namespace FilterProvider.Common.Util
                             secondaryDnsV6 = cfg.SecondaryDnsV6.TryParseAsIpAddress();
                         }
 
-                        if (primaryDnsV4 != null || secondaryDnsV4 != null || primaryDnsV6 != null || secondaryDnsV6 != null)
+                        if(primaryDnsV4 != null || secondaryDnsV4 != null || primaryDnsV6 != null || secondaryDnsV6 != null)
                         {
                             logger.Info("Settings DNS To {0}, {1}, {2}, {3}", primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6);
                             platformDns.SetDnsForAllInterfaces(primaryDnsV4, secondaryDnsV4);
 
-                            platformDns.SetDnsForAllInterfaces(primaryDnsV6, secondaryDnsV6); 
+                            platformDns.SetDnsForAllInterfaces(primaryDnsV6, secondaryDnsV6);
 
-                            if (areDnsServersChanging(primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6))
+                            if(areDnsServersChanging(primaryDnsV4, secondaryDnsV4, primaryDnsV6, secondaryDnsV6))
                             {
                                 OnDnsChanging(sendDnsChangeEvents);
                             }
@@ -132,7 +126,7 @@ namespace FilterProvider.Common.Util
                         {
                             // Neither primary nor secondary DNS are set. Clear them for our users.
 
-                           // SetDnsToDhcp(sendDnsChangeEvents);
+                            // SetDnsToDhcp(sendDnsChangeEvents);
                             lastPrimaryV4 = null;
                             lastSecondaryV4 = null;
                             lastPrimaryV6 = null;
@@ -140,7 +134,7 @@ namespace FilterProvider.Common.Util
                         }
                     }
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
                     LoggerUtil.RecursivelyLogException(logger, e);
                 }
@@ -171,7 +165,7 @@ namespace FilterProvider.Common.Util
         {
             return isDnsServerChanged(primaryV4, lastPrimaryV4) ||
                    isDnsServerChanged(secondaryV4, lastSecondaryV4) ||
-                   isDnsServerChanged(primaryV6, lastPrimaryV6) || 
+                   isDnsServerChanged(primaryV6, lastPrimaryV6) ||
                    isDnsServerChanged(secondaryV6, lastSecondaryV6);
         }
 
@@ -184,7 +178,7 @@ namespace FilterProvider.Common.Util
             process.Start();
             process.Exited += (sender, e) =>
             {
-                if (sendDnsChangeEvents)
+                if(sendDnsChangeEvents)
                 {
                     DnsChanged?.Invoke(process.ExitCode == 0);
                 }
@@ -202,7 +196,7 @@ namespace FilterProvider.Common.Util
             IPAddress secondaryDnsV6 = null;
 
             var cfg = policyConfiguration.Configuration;
-            if (cfg != null)
+            if(cfg != null)
             {
                 primaryDnsV4 = cfg.PrimaryDns.TryParseAsIpAddress();
                 secondaryDnsV4 = cfg.SecondaryDns.TryParseAsIpAddress();
@@ -230,7 +224,7 @@ namespace FilterProvider.Common.Util
         {
             bool active = await IsCaptivePortalActive();
 
-            if (active)
+            if(active)
             {
                 logger.Info("Active captive portal detected");
 
@@ -285,26 +279,26 @@ namespace FilterProvider.Common.Util
             string primaryDns = policyConfiguration.Configuration.PrimaryDns;
             string secondaryDns = policyConfiguration.Configuration.SecondaryDns;
 
-            if (string.IsNullOrWhiteSpace(primaryDns) && string.IsNullOrWhiteSpace(secondaryDns))
+            if(string.IsNullOrWhiteSpace(primaryDns) && string.IsNullOrWhiteSpace(secondaryDns))
             {
                 ret = true;
             }
             else
             {
                 List<string> dnsSearch = new List<string>();
-                if (!string.IsNullOrWhiteSpace(primaryDns))
+                if(!string.IsNullOrWhiteSpace(primaryDns))
                 {
                     dnsSearch.Add(primaryDns);
                 }
 
-                if (!string.IsNullOrWhiteSpace(secondaryDns))
+                if(!string.IsNullOrWhiteSpace(secondaryDns))
                 {
                     dnsSearch.Add(secondaryDns);
                 }
 
                 int failedDnsServers = 0;
 
-                foreach (string dnsServer in dnsSearch)
+                foreach(string dnsServer in dnsSearch)
                 {
                     try
                     {
@@ -312,7 +306,7 @@ namespace FilterProvider.Common.Util
 
                         IList<IPAddress> ips = await client.Lookup("testdns.cloudveil.org");
 
-                        if (ips != null && ips.Count > 0)
+                        if(ips != null && ips.Count > 0)
                         {
                             ret = true;
                             break;
@@ -322,7 +316,7 @@ namespace FilterProvider.Common.Util
                             failedDnsServers++;
                         }
                     }
-                    catch (Exception ex)
+                    catch(Exception ex)
                     {
                         failedDnsServers++;
                         logger.Error($"Failed to contact DNS server {dnsServer}");
@@ -340,14 +334,14 @@ namespace FilterProvider.Common.Util
         /// </summary>
         private async Task<bool> IsCaptivePortalActive()
         {
-            if (!NetworkStatus.Default.HasConnection)
+            if(!NetworkStatus.Default.HasConnection)
             {
                 // No point in checking further if no internet available.
                 try
                 {
                     IPHostEntry entry = Dns.GetHostEntry("connectivitycheck.cloudveil.org");
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     logger.Info("No DNS servers detected as up by captive portal.");
                     LoggerUtil.RecursivelyLogException(logger, ex);
@@ -359,7 +353,7 @@ namespace FilterProvider.Common.Util
             }
 
             CaptivePortalDetected ret = checkCaptivePortalState();
-            if (ret == CaptivePortalDetected.NoResponseReturned)
+            if(ret == CaptivePortalDetected.NoResponseReturned)
             {
                 logger.Info("Captive Portal no response returned.");
 
@@ -375,7 +369,7 @@ namespace FilterProvider.Common.Util
 
                 return false;
             }
-            else if (ret == CaptivePortalDetected.Yes)
+            else if(ret == CaptivePortalDetected.Yes)
             {
                 logger.Info("Captive portal detected.");
                 return true;
@@ -397,7 +391,7 @@ namespace FilterProvider.Common.Util
         /// <returns>true if captive portal.</returns>
         private CaptivePortalDetected checkCaptivePortalState()
         {
-            if (NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
+            if(NetworkStatus.Default.BehindIPv4CaptivePortal || NetworkStatus.Default.BehindIPv6CaptivePortal)
             {
                 return CaptivePortalDetected.Yes;
             }
@@ -446,10 +440,10 @@ namespace FilterProvider.Common.Util
 
                 isBehindCaptivePortal = isCaptivePortal;
                 logger.Info("DnsEnforcement isCaptivePortal = {0}", isCaptivePortal);
-                
-		        TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
+
+                TryEnforce(sendDnsChangeEvents, enableDnsFiltering: !isCaptivePortal && isDnsUp);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 logger.Error("Failed to trigger DnsEnforcement");
                 LoggerUtil.RecursivelyLogException(logger, ex);
@@ -468,7 +462,7 @@ namespace FilterProvider.Common.Util
 
             lock(dnsEnforcementLock)
             {
-                if (dnsEnforcementTimer == null)
+                if(dnsEnforcementTimer == null)
                 {
                     dnsEnforcementTimer = new Timer(TriggerTimer, null, timerTime, timerTime);
                 }
@@ -477,14 +471,14 @@ namespace FilterProvider.Common.Util
                     dnsEnforcementTimer.Change(TimeSpan.FromMilliseconds(timerTime), TimeSpan.FromMilliseconds(timerTime));
                 }
             }
-            
+
         }
 
         public void OnNetworkChange(object sender, EventArgs e)
         {
             logger.Info("Network Change Detected");
 
-            if (policyConfiguration.Configuration == null)
+            if(policyConfiguration.Configuration == null)
             {
                 EventHandler fn = null;
 

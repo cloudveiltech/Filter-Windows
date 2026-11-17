@@ -1,10 +1,6 @@
-﻿using Filter.Platform.Common.Util;
+using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -51,7 +47,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         {
                             System.Diagnostics.Process.Start("http://connectivitycheck.cloudveil.org");
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(logger, e);
                         }

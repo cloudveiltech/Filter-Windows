@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -192,8 +192,8 @@ namespace Filter.Platform.Common.Data.Models
         {
             get;
             set;
-        } = string.Empty; 
-        
+        } = string.Empty;
+
         public string SecondaryDnsV6
         {
             get;
@@ -204,7 +204,7 @@ namespace Filter.Platform.Common.Data.Models
         /// The minimum threshold, that is the match probability, that any NLP classification must
         /// meet or exceed in order to be considered a true match.
         /// </summary>
-        [JsonConverter(typeof(SafeFloatConverter))]        
+        [JsonConverter(typeof(SafeFloatConverter))]
         public float NlpThreshold
         {
             get;
@@ -288,7 +288,7 @@ namespace Filter.Platform.Common.Data.Models
 
         public AppConfigModel()
         {
-            
+
         }
     }
 }

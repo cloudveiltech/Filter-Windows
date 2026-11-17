@@ -1,9 +1,7 @@
-﻿using CloudVeil.IPC;
+using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
-using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
-using FilterProvider.Common.Services;
 using GoProxyWrapper;
 using Newtonsoft.Json;
 using System;
@@ -57,7 +55,7 @@ namespace FilterProvider.Common.Util
         {
             var cfg = policyConfiguration.Configuration;
 
-            if (cfg != null && cfg.BypassesPermitted > 0)
+            if(cfg != null && cfg.BypassesPermitted > 0)
             {
                 ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, getRelaxedPolicyStatus());
             }
@@ -85,7 +83,7 @@ namespace FilterProvider.Common.Util
                 BypassesUsed = 0
             };
 
-            if (config != null)
+            if(config != null)
             {
                 info.BypassesPermitted = config.BypassesPermitted;
                 info.BypassesUsed = config.BypassesUsed;
@@ -103,9 +101,9 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                this.UpdateNumberOfBypassesFromServer();
+                UpdateNumberOfBypassesFromServer();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 // TODO: Tell Sentry about this.
                 LoggerUtil.RecursivelyLogException(logger, ex);
@@ -147,7 +145,7 @@ namespace FilterProvider.Common.Util
             }
 
             var parameters = new Dictionary<string, object>();
-            if (passcode != null)
+            if(passcode != null)
             {
                 parameters.Add("passcode", passcode);
             }
@@ -161,9 +159,9 @@ namespace FilterProvider.Common.Util
             int bypassesUsed = 0;
             int bypassesPermitted = 0;
 
-            if (bypassResponse != null)
+            if(bypassResponse != null)
             {
-                if (statusCode == HttpStatusCode.NotFound)
+                if(statusCode == HttpStatusCode.NotFound)
                 {
                     // Fallback on local bypass logic if server does not support relaxed policy checks.
                     useLocalBypassLogic = true;
@@ -174,7 +172,7 @@ namespace FilterProvider.Common.Util
 
                 var bypassObject = JsonConvert.DeserializeObject<RelaxedPolicyResponseObject>(jsonString);
 
-                if (bypassObject.allowed)
+                if(bypassObject.allowed)
                 {
                     grantBypass = true;
                 }
@@ -195,12 +193,12 @@ namespace FilterProvider.Common.Util
                 grantBypass = false;
             }
 
-            if (useLocalBypassLogic)
+            if(useLocalBypassLogic)
             {
                 logger.Info("Using local bypass logic since server does not yet support bypasses.");
 
                 // Start the count down timer.
-                if (relaxedPolicyExpiryTimer == null)
+                if(relaxedPolicyExpiryTimer == null)
                 {
                     relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                 }
@@ -214,18 +212,18 @@ namespace FilterProvider.Common.Util
             }
             else
             {
-                if (grantBypass)
+                if(grantBypass)
                 {
                     logger.Info("Relaxed policy granted.");
 
                     // Start the count down timer.
-                    if (relaxedPolicyExpiryTimer == null)
+                    if(relaxedPolicyExpiryTimer == null)
                     {
                         relaxedPolicyExpiryTimer = new Timer(OnRelaxedPolicyTimerExpired, null, Timeout.Infinite, Timeout.Infinite);
                     }
 
                     enableRelaxedPolicy();
-                    
+
 
                     var cfg = policyConfiguration.Configuration;
                     relaxedPolicyExpiryTimer.Change(cfg != null ? cfg.BypassDuration : TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
@@ -240,7 +238,7 @@ namespace FilterProvider.Common.Util
                     var cfg = policyConfiguration.Configuration;
 
                     RelaxedPolicyStatus status = RelaxedPolicyStatus.AllUsed;
-                    if (bypassNotification.IndexOf("incorrect passcode", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    if(bypassNotification.IndexOf("incorrect passcode", StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
                         status = RelaxedPolicyStatus.Unauthorized;
                     }
@@ -271,7 +269,7 @@ namespace FilterProvider.Common.Util
         {
             bool allUsesExhausted = (bypassesUsed >= bypassesPermitted);
 
-            if (allUsesExhausted)
+            if(allUsesExhausted)
             {
                 logger.Info("All uses exhausted.");
 
@@ -282,7 +280,7 @@ namespace FilterProvider.Common.Util
                 ipcServer.NotifyRelaxedPolicyChange(bypassesPermitted - bypassesUsed, bypassDuration, RelaxedPolicyStatus.Granted);
             }
 
-            if (allUsesExhausted)
+            if(allUsesExhausted)
             {
                 // Reset our bypasses at 8:15 UTC.
                 var resetTime = DateTime.UtcNow.Date.AddHours(8).AddMinutes(15);
@@ -293,7 +291,7 @@ namespace FilterProvider.Common.Util
                 }
                 var span = resetTime - DateTime.UtcNow;
 
-                if (relaxedPolicyResetTimer == null)
+                if(relaxedPolicyResetTimer == null)
                 {
                     relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
@@ -308,13 +306,13 @@ namespace FilterProvider.Common.Util
 
             var cfg = policyConfiguration.Configuration;
 
-            if (cfg != null)
+            if(cfg != null)
             {
                 cfg.BypassesUsed++;
 
                 allUsesExhausted = cfg.BypassesPermitted - cfg.BypassesUsed <= 0;
 
-                if (allUsesExhausted)
+                if(allUsesExhausted)
                 {
                     ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.AllUsed);
                 }
@@ -328,14 +326,14 @@ namespace FilterProvider.Common.Util
                 ipcServer.NotifyRelaxedPolicyChange(0, TimeSpan.Zero, RelaxedPolicyStatus.Granted);
             }
 
-            if (allUsesExhausted)
+            if(allUsesExhausted)
             {
                 // Refresh tomorrow at midnight.
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
                 var span = tomorrow - DateTime.Now;
 
-                if (relaxedPolicyResetTimer == null)
+                if(relaxedPolicyResetTimer == null)
                 {
                     relaxedPolicyResetTimer = new Timer(OnRelaxedPolicyResetExpired, null, span, Timeout.InfiniteTimeSpan);
                 }
@@ -348,13 +346,13 @@ namespace FilterProvider.Common.Util
         {
             bool relaxedInEffect = AdBlockMatcherApi.GetBypassEnabled();
 
-            if (relaxedInEffect)
+            if(relaxedInEffect)
             {
                 return RelaxedPolicyStatus.Activated;
             }
             else
             {
-                if (policyConfiguration.Configuration != null && policyConfiguration.Configuration.BypassesPermitted - policyConfiguration.Configuration.BypassesUsed == 0)
+                if(policyConfiguration.Configuration != null && policyConfiguration.Configuration.BypassesPermitted - policyConfiguration.Configuration.BypassesUsed == 0)
                 {
                     return RelaxedPolicyStatus.AllUsed;
                 }
@@ -373,7 +371,7 @@ namespace FilterProvider.Common.Util
             RelaxedPolicyStatus status = getRelaxedPolicyStatus();
 
             // Ensure timer is stopped and re-enable categories by simply calling the timer's expiry callback.
-            if (status == RelaxedPolicyStatus.Activated)
+            if(status == RelaxedPolicyStatus.Activated)
             {
                 var cfg = policyConfiguration.Configuration;
 
@@ -381,7 +379,7 @@ namespace FilterProvider.Common.Util
             }
 
             // We want to inform the user that there is no relaxed policy in effect currently for this installation.
-            if (status == RelaxedPolicyStatus.Deactivated)
+            if(status == RelaxedPolicyStatus.Deactivated)
             {
                 var cfg = policyConfiguration.Configuration;
                 ipcServer.NotifyRelaxedPolicyChange(cfg.BypassesPermitted - cfg.BypassesUsed, cfg.BypassDuration, RelaxedPolicyStatus.AlreadyRelinquished);
@@ -407,7 +405,7 @@ namespace FilterProvider.Common.Util
                 // Disable the expiry timer.
                 relaxedPolicyExpiryTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(logger, ex);
             }
@@ -421,7 +419,7 @@ namespace FilterProvider.Common.Util
 
             byte[] response = WebServiceUtil.Default.RequestResource(ServiceResource.BypassRequest, out statusCode, parameters);
 
-            if (response == null)
+            if(response == null)
             {
                 return false;
             }
@@ -433,7 +431,7 @@ namespace FilterProvider.Common.Util
             logger.Info("Bypass info: {0}/{1}", bypassInfo.used, bypassInfo.permitted);
             var cfg = policyConfiguration.Configuration;
 
-            if (cfg != null)
+            if(cfg != null)
             {
                 cfg.BypassesUsed = bypassInfo.used;
                 cfg.BypassesPermitted = bypassInfo.permitted;
@@ -458,7 +456,7 @@ namespace FilterProvider.Common.Util
                 // Disable the reset timer.
                 relaxedPolicyResetTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 // TODO: Tell sentry about this.
                 LoggerUtil.RecursivelyLogException(logger, ex);

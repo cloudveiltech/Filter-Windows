@@ -5,10 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Filter.Platform.Common.IPC
 {

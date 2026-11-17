@@ -1,15 +1,13 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil;
 using NLog;
 using System;
 using System.Diagnostics;
-using Sentry.NLog;
 using System.IO;
 
 namespace Filter.Platform.Common.Util
@@ -111,15 +109,15 @@ namespace Filter.Platform.Common.Util
 
                 var targets = NLog.LogManager.Configuration.AllTargets;
 
-                foreach (var target in targets)
+                foreach(var target in targets)
                 {
-                    if (target is NLog.Targets.FileTarget)
+                    if(target is NLog.Targets.FileTarget)
                     {
                         var fTarget = (NLog.Targets.FileTarget)target;
                         var logEventInfo = new NLog.LogEventInfo { TimeStamp = DateTime.Now };
                         var fName = fTarget.FileName.Render(logEventInfo);
 
-                        if (!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
+                        if(!string.IsNullOrEmpty(fName) && !string.IsNullOrWhiteSpace(fName))
                         {
                             logDir = Directory.GetParent(fName).FullName;
                             break;
@@ -127,7 +125,7 @@ namespace Filter.Platform.Common.Util
                     }
                 }
 
-                if (string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
+                if(string.IsNullOrEmpty(logDir) || string.IsNullOrWhiteSpace(logDir))
                 {
                     // Fallback, just in case.
                     logDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);

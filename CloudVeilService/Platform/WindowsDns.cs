@@ -5,18 +5,12 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using Filter.Platform.Common.Util;
+using Filter.Platform.Common.Util;
 using FilterProvider.Common.Platform;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Management;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
-using WindowsFirewallHelper;
 
 namespace CloudVeilService.Platform
 {
@@ -31,18 +25,18 @@ namespace CloudVeilService.Platform
         public void SetDnsForNic(string nicName, IPAddress primary, IPAddress secondary)
         {
             var ipVersion = "ipv4";
-            
+
             if(primary != null && primary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
                 ipVersion = "ipv6";
-            } 
-            else if (secondary != null && secondary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+            }
+            else if(secondary != null && secondary.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
                 ipVersion = "ipv6";
             }
-              
+
             var command = $"interface {ipVersion} add dnsservers \"{nicName}\" address=";
-            if (primary != null)
+            if(primary != null)
             {
                 var process = new Process();
                 process.StartInfo = new ProcessStartInfo("netsh", command + primary.ToString() + " index=1");
@@ -50,7 +44,7 @@ namespace CloudVeilService.Platform
                 process.WaitForExit();
             }
 
-            if (secondary != null)
+            if(secondary != null)
             {
                 var process = new Process();
                 process.StartInfo = new ProcessStartInfo("netsh", command + secondary.ToString() + " index=2");
@@ -80,20 +74,20 @@ namespace CloudVeilService.Platform
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
             bool ranUpdate = false;
 
-            foreach (var iface in ifaces)
+            foreach(var iface in ifaces)
             {
                 bool needsUpdate = false;
 
-                if (primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
+                if(primaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(primaryDns))
                 {
                     needsUpdate = true;
                 }
-                if (secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
+                if(secondaryDns != null && !iface.GetIPProperties().DnsAddresses.Contains(secondaryDns))
                 {
                     needsUpdate = true;
                 }
 
-                if (needsUpdate)
+                if(needsUpdate)
                 {
                     ranUpdate = true;
                     SetDnsForNic(iface.Name, primaryDns, secondaryDns);
@@ -107,7 +101,7 @@ namespace CloudVeilService.Platform
         {
             var ifaces = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up && x.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
 
-            foreach (var iface in ifaces)
+            foreach(var iface in ifaces)
             {
                 SetDnsForNicToDHCP(iface.Name);
             }

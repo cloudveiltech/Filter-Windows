@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,7 +26,6 @@ using Gui.CloudVeil.UI.Windows;
 using Gui.CloudVeil.Util;
 using MahApps.Metro.Controls.Dialogs;
 using NLog;
-using Sentry.Protocol;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -59,6 +58,11 @@ namespace CloudVeil.Windows
                 {
                     Application.Current.Shutdown((int)code);
                 });
+            }
+
+            protected override bool Resuscitate()
+            {
+                return true;
             }
         }
 
@@ -156,7 +160,7 @@ namespace CloudVeil.Windows
             // Enforce good/proper protocols
             ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
 
-            this.Startup += CloudVeilOnStartup;
+            Startup += CloudVeilOnStartup;
         }
 
         private void RunGuiChecks()
@@ -166,7 +170,7 @@ namespace CloudVeil.Windows
             // First, lets check to see if the user started the GUI in an isolated session.
             try
             {
-                if (guiChecks.IsInIsolatedSession())
+                if(guiChecks.IsInIsolatedSession())
                 {
                     LoggerUtil.GetAppWideLogger().Error("GUI client start in an isolated session. This should not happen.");
                     Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
@@ -182,20 +186,20 @@ namespace CloudVeil.Windows
             try
             {
                 bool createdNew = false;
-                if (guiChecks.PublishRunningApp())
+                if(guiChecks.PublishRunningApp())
                 {
                     createdNew = true;
                 }
 
                 /**/
 
-                if (!createdNew)
+                if(!createdNew)
                 {
                     try
                     {
                         guiChecks.DisplayExistingUI("");
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                     }
@@ -206,7 +210,7 @@ namespace CloudVeil.Windows
                     try
                     {
                         // Something about instantiating an IPCClient here is making it all blow up in my face.
-                        using (var ipcClient = IPCClient.InitDefault())
+                        using(var ipcClient = IPCClient.InitDefault())
                         {
                             ipcClient.RequestPrimaryClientShowUI();
 
@@ -214,7 +218,7 @@ namespace CloudVeil.Windows
                             Task.Delay(500).Wait();
                         }
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         // The only way we got here is if the server isn't running, in which case we
                         // can do nothing because its beyond our domain.
@@ -228,7 +232,7 @@ namespace CloudVeil.Windows
                     return;
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 // The only way we got here is if the server isn't running, in which case we can do
                 // nothing because its beyond our domain.
@@ -248,7 +252,7 @@ namespace CloudVeil.Windows
             Current.SessionEnding += OnAppSessionEnding;
 
             // Hook app exiting function. This must be done on this main app thread.
-            this.Exit += OnApplicationExiting;
+            Exit += OnApplicationExiting;
 
             // Do stuff that must be done on the UI thread first. Here we HAVE to set our initial
             // view state BEFORE we initialize IPC. If we change it after, then we're going to get
@@ -284,15 +288,15 @@ namespace CloudVeil.Windows
 
                                 viewManager.PushView(LoginView.ModalZIndex, typeof(LoginView));
                             }
-                            break;                   
+                            break;
 
                         case AuthenticationAction.Authenticated:
                         case AuthenticationAction.ErrorNoInternet:
                         case AuthenticationAction.ErrorUnknown:
                             {
-                                logger.Info($"The logged in user is {authenticationFailureResult.Username}");                                
+                                logger.Info($"The logged in user is {authenticationFailureResult.Username}");
 
-                                if (authenticationFailureResult.Action == AuthenticationAction.Authenticated && hasStateBeenFetched)
+                                if(authenticationFailureResult.Action == AuthenticationAction.Authenticated && hasStateBeenFetched)
                                 {
                                     mainWindow.Dispatcher.InvokeAsync(() =>
                                     {
@@ -329,7 +333,7 @@ namespace CloudVeil.Windows
                         return true;
                     }
 
-                    this.BeginUpdateRequest(msg.Data);
+                    BeginUpdateRequest(msg.Data);
 
                     return true;
                 });
@@ -354,7 +358,7 @@ namespace CloudVeil.Windows
 
                 ipcClient.RegisterResponseHandler<bool>(IpcCall.InstallerDownloadFinished, (msg) =>
                 {
-                    if (msg.Data)
+                    if(msg.Data)
                     {
                         mainWindow.Dispatcher.InvokeAsync(() => mainWindow.ViewModel.DownloadProgress = 100);
 
@@ -387,20 +391,20 @@ namespace CloudVeil.Windows
                     string header;
 
                     // Rather than viewManager.PushView, we want to show the conflict reasons
-                    if (msg.Data != null)
+                    if(msg.Data != null)
                     {
                         List<ConflictInfo> conflicts = new List<ConflictInfo>();
 
-                        foreach (var reason in msg.Data)
+                        foreach(var reason in msg.Data)
                         {
                             ConflictInfo info = new ConflictInfo();
 
-                            if (ConflictReasonInformation.ConflictReasonMessages.TryGetValue(reason, out message))
+                            if(ConflictReasonInformation.ConflictReasonMessages.TryGetValue(reason, out message))
                             {
                                 info.Message = message;
                             }
 
-                            if (ConflictReasonInformation.ConflictReasonHeaders.TryGetValue(reason, out header))
+                            if(ConflictReasonInformation.ConflictReasonHeaders.TryGetValue(reason, out header))
                             {
                                 info.Header = header;
                             }
@@ -413,7 +417,7 @@ namespace CloudVeil.Windows
                         mainWindow.Dispatcher.InvokeAsync(() =>
                         {
                             mainWindow.ViewModel.ConflictReasons.Clear();
-                            
+
                             foreach(var conflict in conflicts)
                             {
                                 mainWindow.ViewModel.ConflictReasons.Add(conflict);
@@ -478,28 +482,28 @@ namespace CloudVeil.Windows
                                 switch(deactivationCmd)
                                 {
                                     case DeactivationCommand.Requested:
-                                    message = "Your deactivation request has been received, but approval is still pending.";
-                                    title = "Request Received";
-                                    break;
+                                        message = "Your deactivation request has been received, but approval is still pending.";
+                                        title = "Request Received";
+                                        break;
 
                                     case DeactivationCommand.Denied:
-                                    // A little bit of tact will keep the mob and their pitchforks
-                                    // from slaughtering us.
-                                    message = "Your deactivation request has been received, but approval is still pending.";
-                                    title = "Request Received";
-                                    //message = "Your deactivation request has been denied.";
-                                    //title = "Request Denied";
-                                    break;
+                                        // A little bit of tact will keep the mob and their pitchforks
+                                        // from slaughtering us.
+                                        message = "Your deactivation request has been received, but approval is still pending.";
+                                        title = "Request Received";
+                                        //message = "Your deactivation request has been denied.";
+                                        //title = "Request Denied";
+                                        break;
 
                                     case DeactivationCommand.Granted:
-                                    message = "Your request was granted.";
-                                    title = "Request Granted";
-                                    break;
+                                        message = "Your request was granted.";
+                                        title = "Request Granted";
+                                        break;
 
                                     case DeactivationCommand.NoResponse:
-                                    message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
-                                    title = "No Response Received";
-                                    break;
+                                        message = "Your deactivation request did not reach the server. Check your internet connection and try again.";
+                                        title = "No Response Received";
+                                        break;
                                 }
 
                                 mainWindow.ShowUserMessage(title, message);
@@ -551,7 +555,7 @@ namespace CloudVeil.Windows
                                 rpModel.AvailableRelaxedRequests = args.PolicyInfo.NumberAvailableToday;
 
                                 long relaxDurationTicks = args.PolicyInfo.RelaxDuration.Ticks;
-                                if (relaxDurationTicks < DateTime.MinValue.Ticks || relaxDurationTicks > DateTime.MaxValue.Ticks)
+                                if(relaxDurationTicks < DateTime.MinValue.Ticks || relaxDurationTicks > DateTime.MaxValue.Ticks)
                                 {
                                     rpModel.RelaxedDuration = "(n/a)";
                                 }
@@ -637,7 +641,7 @@ namespace CloudVeil.Windows
                                     synchronizingTimer = new Timer((state) =>
                                     {
                                         ipcClient.RequestStatusRefresh();
-                                        lock (synchronizingTimerLockObj)
+                                        lock(synchronizingTimerLockObj)
                                         {
                                             synchronizingTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
                                             synchronizingTimer.Dispose();
@@ -697,7 +701,7 @@ namespace CloudVeil.Windows
 
                         viewModel.AreTimeRestrictionsActive = areTimeRestrictionsEnabled;
                     });
-                    
+
                     return true;
                 });
 
@@ -712,14 +716,14 @@ namespace CloudVeil.Windows
 
                         viewModel.SelfModerationSites.Clear();
 
-                        foreach (string site in cfg.SelfModeration)
+                        foreach(string site in cfg.SelfModeration)
                         {
                             viewModel.SelfModerationSites.Add(site);
                         }
 
                         viewModel.TriggerBlacklist.Clear();
 
-                        foreach (string site in cfg.CustomTriggerBlacklist)
+                        foreach(string site in cfg.CustomTriggerBlacklist)
                         {
                             viewModel.TriggerBlacklist.Add(site);
                         }
@@ -771,19 +775,19 @@ namespace CloudVeil.Windows
 
                             (Action)async delegate ()
                             {
-                                if (mainWindow != null)
+                                if(mainWindow != null)
                                 {
                                     var result = await mainWindow.AskUser("Bug report", "Do you want to share bug reports with CloudVeil?");
                                     var newSettings = new BugReportSetting(result, true);
                                     ipcClient.Send<BugReportSetting>(IpcCall.BugReportConfirmationValue, newSettings);
                                     advancedViewModel.BugReportSettings = newSettings;
 
-                                    if (data.Allowed != result)
+                                    if(data.Allowed != result)
                                     {
                                         SwitchSentry(result);
                                     }
                                 }
-                        });
+                            });
                         return true;
                     }
                     SwitchSentry(data.Allowed && data.DialogShown);
@@ -844,15 +848,15 @@ namespace CloudVeil.Windows
 
         }
 
-        public void processCustomScheme(string uri)
+        public void ProcessCustomScheme(string uri)
         {
-            if (uri.StartsWith("cloudveil:"))
+            if(uri.StartsWith("cloudveil:"))
             {
                 var url = new Uri(uri);
-                if (uri.Contains("relaxedpolicy"))
+                if(uri.Contains("relaxedpolicy"))
                 {
                     var queryParams = HttpUtility.ParseQueryString(url.Query);
-                    if (queryParams != null)
+                    if(queryParams != null)
                     {
                         var relaxedPolicyPassword = queryParams["password"];
                         OnRelaxedPolicyRequested(false, relaxedPolicyPassword);
@@ -867,7 +871,7 @@ namespace CloudVeil.Windows
 
         private void SwitchSentry(bool enabled)
         {
-            if (enabled)
+            if(enabled)
             {
                 CloudVeilGuiMain.StartSentry();
             }
@@ -935,7 +939,7 @@ namespace CloudVeil.Windows
 
             mainWindow.WindowRestoreRequested += (() =>
             {
-        //        BringAppToFocus();
+                //        BringAppToFocus();
             });
 
             mainWindow.Closing += ((object sender, CancelEventArgs e) =>
@@ -950,7 +954,7 @@ namespace CloudVeil.Windows
                 }
 
                 // When the main window closes, go to tray and show notification.
-                MinimizeToTray(true);         
+                MinimizeToTray(true);
             });
 
             BaseCloudVeilViewModel dashboardVm = ModelManager.Get<DashboardViewModel>();
@@ -960,7 +964,7 @@ namespace CloudVeil.Windows
             }
 
             // Set the current view to ProgressWait because we're gonna do background init next.
-            this.MainWindow = mainWindow;
+            MainWindow = mainWindow;
             mainWindow.Show();
 
             viewManager.SetBaseView(typeof(DashboardView));
@@ -1021,7 +1025,7 @@ namespace CloudVeil.Windows
                 logger.Info("Application shutdown detected with code {0}.", e.ApplicationExitCode);
 
                 // Unhook first.
-                this.Exit -= OnApplicationExiting;
+                Exit -= OnApplicationExiting;
             }
             catch(Exception err)
             {
@@ -1100,7 +1104,7 @@ namespace CloudVeil.Windows
                 trayIcon.Visible = true;
             };
 
-            trayIcon.BalloonTipClicked += bringAppToFromBallonClicked;
+            trayIcon.BalloonTipClicked += BringAppToFromBallonClicked;
 
             var menuItems = new List<System.Windows.Forms.MenuItem>();
             menuItems.Add(new System.Windows.Forms.MenuItem("Open", TrayIcon_Open));
@@ -1146,12 +1150,12 @@ namespace CloudVeil.Windows
                 System.Windows.Threading.DispatcherPriority.Normal,
                 (Action)delegate ()
                 {
-                    if(this.mainWindow != null)
+                    if(mainWindow != null)
                     {
-                        this.mainWindow.Show();
-                        this.mainWindow.WindowState = WindowState.Normal;
-                        this.mainWindow.Topmost = true;
-                        this.mainWindow.Topmost = false;
+                        mainWindow.Show();
+                        mainWindow.WindowState = WindowState.Normal;
+                        mainWindow.Topmost = true;
+                        mainWindow.Topmost = false;
                     }
 
                     if(trayIcon != null)
@@ -1162,7 +1166,7 @@ namespace CloudVeil.Windows
             );
         }
 
-        private void bringAppToFromBallonClicked(object sender, EventArgs e)
+        private void BringAppToFromBallonClicked(object sender, EventArgs e)
         {
             BringAppToFocus();
         }
@@ -1175,9 +1179,9 @@ namespace CloudVeil.Windows
         }
 #endif
 
-        private void captivePortalToolTipClicked(object sender, EventArgs e)
+        private void CaptivePortalToolTipClicked(object sender, EventArgs e)
         {
-            trayIcon.BalloonTipClicked -= captivePortalToolTipClicked;
+            trayIcon.BalloonTipClicked -= CaptivePortalToolTipClicked;
 
             System.Diagnostics.Process.Start(CloudVeil.CompileSecrets.ConnectivityCheck);
         }
@@ -1205,7 +1209,7 @@ namespace CloudVeil.Windows
         {
             var updateAvailableString = string.Format("An update to version {0} is available. You are currently running version {1}. Would you like to update now?", update.UpdateVersion.ToString(), update.CurrentVersion.ToString());
 
-            if (update.IsRestartRequired)
+            if(update.IsRestartRequired)
             {
                 updateAvailableString += "\r\n\r\nThis update WILL require a reboot. Save all your work before continuing.";
             }
@@ -1215,7 +1219,7 @@ namespace CloudVeil.Windows
 
                 (Action)async delegate ()
                 {
-                    if (mainWindow != null)
+                    if(mainWindow != null)
                     {
                         if(trayIcon != null)
                         {
@@ -1232,7 +1236,7 @@ namespace CloudVeil.Windows
             string title = "Relaxed Policy";
             string message = "";
 
-            switch (msg.PolicyInfo.Status)
+            switch(msg.PolicyInfo.Status)
             {
                 case RelaxedPolicyStatus.Activated:
                     message = msg.Message;
@@ -1267,9 +1271,9 @@ namespace CloudVeil.Windows
                     break;
             }
 
-            if (fromTray)
+            if(fromTray)
             {
-                if (message != null)
+                if(message != null)
                 {
                     trayIcon.ShowBalloonTip(3000, title, message, System.Windows.Forms.ToolTipIcon.Info);
                 }
@@ -1278,7 +1282,7 @@ namespace CloudVeil.Windows
             {
                 Dispatcher.InvokeAsync(() =>
                 {
-                    if (message != null)
+                    if(message != null)
                     {
                         mainWindow.ShowUserMessage(title, message, "OK");
                     }
@@ -1289,7 +1293,7 @@ namespace CloudVeil.Windows
         /// <summary>
         /// Called whenever a relaxed policy has been requested. 
         /// </summary>
-        public async void OnRelaxedPolicyRequested(bool fromTray, string passcode="")
+        public async void OnRelaxedPolicyRequested(bool fromTray, string passcode = "")
         {
             LoginDialogData passcodeData = null;
             if(appConfig != null && appConfig.EnableRelaxedPolicyPasscode)
@@ -1299,20 +1303,20 @@ namespace CloudVeil.Windows
                     BringAppToFocus();
                 }
 
-                if (passcode == "")
+                if(passcode == "")
                 {
                     passcodeData = await mainWindow.PromptUserForPassword("Enter Passcode", "The relaxed policy passcode restriction is enabled. To continue enabling relaxed policy, please enter your passcode.");
 
-                    if (passcodeData != null)
+                    if(passcodeData != null)
                     {
                         passcode = passcodeData.Password;
                     }
 
-                    if (fromTray)
+                    if(fromTray)
                     {
                         MinimizeToTray(false);
                     }
-                } 
+                }
             }
 
             using(var ipcClient = new IPCClient())

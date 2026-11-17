@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,13 +6,8 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Filter.Platform.Common;
 
@@ -101,7 +96,7 @@ namespace CloudVeil.Core.Windows.Util.Update
             private set;
         }
 
-        public bool IsNewerThanCurrentVersion => IsNewerThan(this.CurrentVersion);
+        public bool IsNewerThanCurrentVersion => IsNewerThan(CurrentVersion);
 
         [NonSerialized]
         private IPathProvider paths;
@@ -148,7 +143,7 @@ namespace CloudVeil.Core.Windows.Util.Update
                     cli.DownloadFileCompleted += (sender, e) =>
                     {
 
-                        if (e.Cancelled || e.Error != null)
+                        if(e.Cancelled || e.Error != null)
                         {
                             tcs.SetResult(false);
                         }
@@ -169,7 +164,7 @@ namespace CloudVeil.Core.Windows.Util.Update
         {
             return UpdateVersion > v;
         }
-       
+
         /// <summary>
         /// Begins the external installation after a N second delay specified. 
         /// </summary>

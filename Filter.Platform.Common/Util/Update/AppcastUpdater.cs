@@ -1,12 +1,10 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Extensions;
-using Filter.Platform.Common;
 using Filter.Platform.Common.Extensions;
 using Filter.Platform.Common.Util;
 using NLog;
@@ -68,7 +66,7 @@ namespace CloudVeil.Core.Windows.Util.Update
 
             try
             {
-                using (var cli = new HttpClient())
+                using(var cli = new HttpClient())
                 {
                     string appInfo = null;
 
@@ -94,18 +92,18 @@ namespace CloudVeil.Core.Windows.Util.Update
 #endif
                     var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(appInfo)));
 
-                    foreach (var item in feed.Items)
+                    foreach(var item in feed.Items)
                     {
                         var enclosure = item.Links.Where(x => x.RelationshipType == "enclosure").FirstOrDefault();
 
-                        if (enclosure != null)
+                        if(enclosure != null)
                         {
                             var sparkleVersion = enclosure.AttributeExtensions.Where(x => x.Key.Name == "version").FirstOrDefault().Value;
                             var sparkleOs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "os").FirstOrDefault().Value;
                             var updateChannel = enclosure.AttributeExtensions.Where(x => x.Key.Name == "channel").FirstOrDefault().Value;
                             var sparkleInstallerArgs = enclosure.AttributeExtensions.Where(x => x.Key.Name == "installerArguments").FirstOrDefault().Value;
 
-                            if (StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
+                            if(StringExtensions.Valid(updateChannel) && StringExtensions.Valid(myUpdateChannel) && !updateChannel.OIEquals(myUpdateChannel))
                             {
                                 logger.Info($"Skipping app update in channel {updateChannel} because it doesn't match required channel {myUpdateChannel}.", updateChannel, myUpdateChannel);
                                 continue;
@@ -126,13 +124,13 @@ namespace CloudVeil.Core.Windows.Util.Update
                     }
                 }
             }
-            catch (WebException we)
+            catch(WebException we)
             {
                 // Failed to load. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.
                 LoggerUtil.RecursivelyLogException(logger, we);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 // Other unknown failure. Doesn't matter, we could not find an update. Maybe later
                 // return an error or something.

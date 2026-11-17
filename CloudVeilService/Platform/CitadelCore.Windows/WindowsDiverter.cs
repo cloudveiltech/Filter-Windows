@@ -1,16 +1,11 @@
-﻿/*
+/*
 * Copyright © 2017-Present Jesse Nicholson
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeilCore.Extensions;
-using CloudVeilCore.Net.Proxy;
-using CloudVeilCore.Windows.WinAPI;
 using Filter.Platform.Common.Util;
-using Sentry.Protocol;
-using Swan;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +22,7 @@ namespace CloudVeilCore.Windows.Diversion
     {
         private NLog.Logger logger;
 
-        private ushort proxyPort;        
+        private ushort proxyPort;
         private volatile bool isRunning = false;
         private readonly object startStopLock = new object();
         private IntPtr diversionHandle = IntPtr.Zero;
@@ -68,16 +63,16 @@ namespace CloudVeilCore.Windows.Diversion
         /// </remarks>
         public void Start(StartEventHandler startHandler = null)
         {
-            lock (startStopLock)
+            lock(startStopLock)
             {
-                if (isRunning)
+                if(isRunning)
                 {
                     return;
                 }
                 string mainFilterString = "outbound and !loopback and (tcp or (udp and (remotePort == 80 or remotePort == 443)))";
                 diversionHandle = WinDivert.WinDivertOpen(mainFilterString, WinDivertLayer.Redirect, -1000, 0);
 
-                if (diversionHandle == s_InvalidHandleValue || diversionHandle == IntPtr.Zero)
+                if(diversionHandle == s_InvalidHandleValue || diversionHandle == IntPtr.Zero)
                 {
                     // Invalid handle value.
                     throw new Exception(string.Format("Failed to open main diversion handle. Got Win32 error code {0}.", Marshal.GetLastWin32Error()));
@@ -86,7 +81,7 @@ namespace CloudVeilCore.Windows.Diversion
 
                 // Set everything to maximum values.
                 WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.QueueLen, 16384);
-                WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.QueueTime, 8000); 
+                WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.QueueTime, 8000);
                 WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.QueueSize, 33554432);
                 WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.ProxyPort, proxyPort);
                 WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.ProxyPid, (ulong)Process.GetCurrentProcess().Id);
@@ -101,10 +96,10 @@ namespace CloudVeilCore.Windows.Diversion
             }
             startHandler?.Invoke();
         }
-        
+
         public void CleanApplist()
         {
-            if (IsRunning)
+            if(IsRunning)
             {
                 logger.Info("Cleaning app list");
                 WinDivert.WinDivertSetParam(diversionHandle, WinDivertParam.CleanApps, 0);
@@ -113,13 +108,13 @@ namespace CloudVeilCore.Windows.Diversion
 
         public void AddWhiteListedApp(string appName, Process[] allRunningProcesses)
         {
-            if (IsRunning)
+            if(IsRunning)
             {
                 // logger.Info("Whitelisted: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                foreach (var process in allRunningProcesses)
+                foreach(var process in allRunningProcesses)
                 {
-                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    if(process.ProcessName.ToLower().Contains(appNameTruncated))
                     {
                         //   logger.Info("Whitelisted: id " + process.Id);
                         WinDivert.WinDivertAddWhitelistedPID(diversionHandle, (ulong)process.Id);
@@ -131,13 +126,13 @@ namespace CloudVeilCore.Windows.Diversion
 
         public void AddBlackListedApp(string appName, Process[] allRunningProcesses)
         {
-            if (IsRunning)
+            if(IsRunning)
             {
-               // logger.Info("Blacklisted: " + appName);
+                // logger.Info("Blacklisted: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                foreach (var process in allRunningProcesses)
+                foreach(var process in allRunningProcesses)
                 {
-                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    if(process.ProcessName.ToLower().Contains(appNameTruncated))
                     {
                         WinDivert.WinDivertAddBlacklistedPID(diversionHandle, (ulong)process.Id);
                     }
@@ -148,13 +143,13 @@ namespace CloudVeilCore.Windows.Diversion
 
         public void AddBlockedApp(string appName, Process[] allRunningProcesses)
         {
-            if (IsRunning)
+            if(IsRunning)
             {
                 //  logger.Info("Blocked: " + appName);
                 var appNameTruncated = appName.ToLower().Replace(".exe", "");
-                foreach (var process in allRunningProcesses)
+                foreach(var process in allRunningProcesses)
                 {
-                    if (process.ProcessName.ToLower().Contains(appNameTruncated))
+                    if(process.ProcessName.ToLower().Contains(appNameTruncated))
                     {
                         WinDivert.WinDivertAddBlockedPID(diversionHandle, (ulong)process.Id);
                     }
@@ -162,7 +157,7 @@ namespace CloudVeilCore.Windows.Diversion
                 WinDivert.WinDivertAddBlockedApp(diversionHandle, appName);
             }
         }
-        
+
 
         private unsafe void RunDiversion()
         {
@@ -175,7 +170,7 @@ namespace CloudVeilCore.Windows.Diversion
             IntPtr recvEvent = IntPtr.Zero;
             recvEvent = WinDivertSharp.WinAPI.Kernel32.CreateEvent(IntPtr.Zero, false, false, IntPtr.Zero);
 
-            if (recvEvent == IntPtr.Zero || recvEvent == new IntPtr(-1))
+            if(recvEvent == IntPtr.Zero || recvEvent == new IntPtr(-1))
             {
                 logger.Error("Failed to initialize receive IO event.");
                 return;
@@ -185,7 +180,7 @@ namespace CloudVeilCore.Windows.Diversion
 
             Span<byte> payloadBufferPtr = null;
 
-            while (isRunning)
+            while(isRunning)
             {
                 try
                 {
@@ -201,24 +196,24 @@ namespace CloudVeilCore.Windows.Diversion
                     recvOverlapped.EventHandle = recvEvent;
                     uint addrLen = (uint)sizeof(WinDivertAddress);
 
-                    if (!WinDivert.WinDivertRecvEx(diversionHandle, packet, ref recvLength, 0, ref addr, ref addrLen, ref recvOverlapped))
+                    if(!WinDivert.WinDivertRecvEx(diversionHandle, packet, ref recvLength, 0, ref addr, ref addrLen, ref recvOverlapped))
                     {
                         var error = Marshal.GetLastWin32Error();
 
                         // 997 == ERROR_IO_PENDING
-                        if (error != 997)
+                        if(error != 997)
                         {
                             logger.Warn(string.Format("Unknown IO error ID {0}while awaiting overlapped result.", error));
                             continue;
                         }
 
                         // 258 == WAIT_TIMEOUT
-                        while (isRunning && WinDivertSharp.WinAPI.Kernel32.WaitForSingleObject(recvEvent, 1000) == (uint)WaitForSingleObjectResult.WaitTimeout)
+                        while(isRunning && WinDivertSharp.WinAPI.Kernel32.WaitForSingleObject(recvEvent, 1000) == (uint)WaitForSingleObjectResult.WaitTimeout)
                         {
-                           // logger.Info("Diverter: wait");
+                            // logger.Info("Diverter: wait");
                         }
 
-                        if (!WinDivertSharp.WinAPI.Kernel32.GetOverlappedResult(diversionHandle, ref recvOverlapped, ref recvAsyncIoLen, false))
+                        if(!WinDivertSharp.WinAPI.Kernel32.GetOverlappedResult(diversionHandle, ref recvOverlapped, ref recvAsyncIoLen, false))
                         {
                             logger.Warn("Failed to get overlapped result.");
                             continue;
@@ -226,23 +221,24 @@ namespace CloudVeilCore.Windows.Diversion
 
                         recvLength = recvAsyncIoLen;
                     }
-                    
+
                     var localPort = (int)IPAddress.HostToNetworkOrder((short)addr.LocalPort);
                     var remotePort = (int)IPAddress.HostToNetworkOrder((short)addr.RemotePort);
 
                     List<byte> ipBytes = new List<byte>();
-                    if (addr.RemoteAddr1 != 0 || addr.RemoteAddr2 != 0 || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0) 
+                    if(addr.RemoteAddr1 != 0 || addr.RemoteAddr2 != 0 || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr1));
                     }
-                    if ((addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue) || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0) {                     
+                    if((addr.RemoteAddr2 != 0 && addr.RemoteAddr2 != UInt16.MaxValue) || addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
+                    {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr2));
                     }
-                    if (addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
+                    if(addr.RemoteAddr3 != 0 || addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr3));
                     }
-                    if (addr.RemoteAddr4 != 0)
+                    if(addr.RemoteAddr4 != 0)
                     {
                         ipBytes.AddRange(BitConverter.GetBytes(addr.RemoteAddr4));
                     }
@@ -253,11 +249,11 @@ namespace CloudVeilCore.Windows.Diversion
 
                     GoproxyWrapper.GoProxy.Instance.SetDestPortForLocalPort(localPort, remotePort, ip.ToString());
                 }
-                catch (Exception loopException)
+                catch(Exception loopException)
                 {
                     logger.Error(loopException);
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -265,16 +261,16 @@ namespace CloudVeilCore.Windows.Diversion
         /// </summary>
         public void Stop()
         {
-            lock (startStopLock)
+            lock(startStopLock)
             {
-                if (!isRunning)
+                if(!isRunning)
                 {
                     return;
                 }
 
                 isRunning = false;
 
-                foreach (var dt in diversionThreads)
+                foreach(var dt in diversionThreads)
                 {
                     dt.Join();
                 }

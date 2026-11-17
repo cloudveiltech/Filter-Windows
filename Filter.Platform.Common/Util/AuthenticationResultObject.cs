@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using System;
 
 namespace Filter.Platform.Common.Util
 {

@@ -1,9 +1,6 @@
-﻿using FilterProvider.Common.Platform;
+using FilterProvider.Common.Platform;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using GoproxyWrapper;
-using Filter.Platform.Common.Util;
 using GoProxyWrapper;
 using System.Net.NetworkInformation;
 
@@ -11,7 +8,7 @@ namespace FilterProvider.Common.Proxy
 {
     public class CommonProxyServer : IProxyServer, IDisposable
     {
-        public bool IsRunning => GoProxy.Instance.IsRunning; 
+        public bool IsRunning => GoProxy.Instance.IsRunning;
 
         public CommonProxyServer()
         {
@@ -42,7 +39,7 @@ namespace FilterProvider.Common.Proxy
         public static ushort GetRandomFreePort(ushort minPortRange, ushort maxPortRange)
         {
             ushort port = (ushort)random.Next(minPortRange, maxPortRange);
-            while (!IsPortAvailable(port))
+            while(!IsPortAvailable(port))
             {
                 port = (ushort)random.Next(minPortRange, maxPortRange);
             }
@@ -60,9 +57,9 @@ namespace FilterProvider.Common.Proxy
             IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
-            foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+            foreach(TcpConnectionInformation tcpi in tcpConnInfoArray)
             {
-                if (tcpi.LocalEndPoint.Port == port)
+                if(tcpi.LocalEndPoint.Port == port)
                 {
                     isAvailable = false;
                     break;
@@ -82,12 +79,12 @@ namespace FilterProvider.Common.Proxy
 
         public event AdBlockMatcherApi.AdBlockCallbackDelegate Whitelisted;
         public event AdBlockMatcherApi.AdBlockCallbackDelegate Blacklisted;
-        
+
         public int OnBeforeRequest(Session session)
         {
             Int32? blocked = BeforeRequest?.Invoke(session);
 
-            if (blocked.HasValue)
+            if(blocked.HasValue)
             {
                 return blocked.Value;
             }
@@ -118,9 +115,9 @@ namespace FilterProvider.Common.Proxy
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if(!disposedValue)
             {
-                if (disposing)
+                if(disposing)
                 {
                     // TODO: dispose managed state (managed objects).
                     Stop();

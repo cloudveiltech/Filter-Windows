@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,12 +14,9 @@ using Filter.Platform.Common.Util;
 using Gui.CloudVeil.Util;
 using NLog;
 using Sentry;
-using Sentry.Protocol;
 using System;
 using System.Diagnostics;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace CloudVeil.Windows
 {
@@ -36,7 +33,7 @@ namespace CloudVeil.Windows
             // First, lets check to see if the user started the GUI in an isolated session.
             try
             {
-                if (guiChecks.IsInIsolatedSession())
+                if(guiChecks.IsInIsolatedSession())
                 {
                     LoggerUtil.GetAppWideLogger().Error("GUI client start in an isolated session. This should not happen.");
                     Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
@@ -52,23 +49,23 @@ namespace CloudVeil.Windows
             try
             {
                 bool createdNew = false;
-                if (guiChecks.PublishRunningApp())
+                if(guiChecks.PublishRunningApp())
                 {
                     createdNew = true;
                 }
 
                 /**/
 
-                if (!createdNew)
+                if(!createdNew)
                 {
                     try
                     {
-                        if (!startMinimized)
+                        if(!startMinimized)
                         {
                             guiChecks.DisplayExistingUI(args);
                         }
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                     }
@@ -79,9 +76,9 @@ namespace CloudVeil.Windows
                     try
                     {
                         // Something about instantiating an IPCClient here is making it all blow up in my face.
-                        using (var ipcClient = IPCClient.InitDefault())
+                        using(var ipcClient = IPCClient.InitDefault())
                         {
-                            if (!startMinimized)
+                            if(!startMinimized)
                             {
                                 ipcClient.RequestPrimaryClientShowUI();
                             }
@@ -90,7 +87,7 @@ namespace CloudVeil.Windows
                             Task.Delay(500).Wait();
                         }
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         // The only way we got here is if the server isn't running, in which case we
                         // can do nothing because its beyond our domain.
@@ -104,7 +101,7 @@ namespace CloudVeil.Windows
                     return;
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 // The only way we got here is if the server isn't running, in which case we can do
                 // nothing because its beyond our domain.
@@ -120,7 +117,7 @@ namespace CloudVeil.Windows
                 o.Dsn = new Dsn(CloudVeil.CompileSecrets.SentryDsn);
                 o.BeforeBreadcrumb = (breadcrumb) =>
                 {
-                    if (breadcrumb.Message.Contains("Request"))
+                    if(breadcrumb.Message.Contains("Request"))
                     {
                         return null;
                     }
@@ -134,7 +131,7 @@ namespace CloudVeil.Windows
         }
 
         public static void StopSentry()
-        {            
+        {
             SentrySdk.Close();
             LoggerUtil.GetAppWideLogger().Info("Stop sentry");
         }
@@ -150,10 +147,10 @@ namespace CloudVeil.Windows
 
             bool startMinimized = false;
             var url = "";
-            foreach (string arg in args)
+            foreach(string arg in args)
             {
                 LoggerUtil.GetAppWideLogger().Info("Start args " + arg);
-                if (arg.IndexOf("StartMinimized") != -1)
+                if(arg.IndexOf("StartMinimized") != -1)
                 {
                     startMinimized = true;
                     break;
@@ -166,7 +163,7 @@ namespace CloudVeil.Windows
 
             try
             {
-                if (Process.GetCurrentProcess().SessionId <= 0)
+                if(Process.GetCurrentProcess().SessionId <= 0)
                 {
                     try
                     {
@@ -174,7 +171,7 @@ namespace CloudVeil.Windows
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
                         return;
                     }
-                    catch (Exception)
+                    catch(Exception)
                     {
                         // XXX TODO - We can't really log here unless we do a direct to-file write.
                         Environment.Exit((int)ExitCodes.ShutdownWithoutSafeguards);
@@ -185,7 +182,7 @@ namespace CloudVeil.Windows
                 CloudVeil.Core.Windows.Platform.Init();
 
                 PlatformTypes.Register<IGuiServices>((arr) => new WindowsGuiServices());
-               // PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
+                // PlatformTypes.Register<ITrayIconController>((arr) => new WindowsTrayIconController());
             }
             catch(Exception e)
             {
@@ -220,9 +217,9 @@ namespace CloudVeil.Windows
                 var app = new CloudVeilApp();
                 app.InitializeComponent();
                 app.Startup += App_Startup;
-              
+
                 app.Run();
-                
+
                 // Always release mutex.
                 guiChecks.UnpublishRunningApp();
             }
@@ -248,15 +245,15 @@ namespace CloudVeil.Windows
 
         private static void App_Startup(object sender, System.Windows.StartupEventArgs e)
         {
-            foreach (string arg in e.Args)
+            foreach(string arg in e.Args)
             {
                 LoggerUtil.GetAppWideLogger().Info("App_Startup args " + arg);
-                if (arg.StartsWith("cloudveil:"))
+                if(arg.StartsWith("cloudveil:"))
                 {
-                    if (sender is CloudVeilApp)
+                    if(sender is CloudVeilApp)
                     {
                         var app = sender as CloudVeilApp;
-                        app.processCustomScheme(arg);
+                        app.ProcessCustomScheme(arg);
                     }
                 }
             }

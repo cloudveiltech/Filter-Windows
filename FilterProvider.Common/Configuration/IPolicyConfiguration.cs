@@ -9,9 +9,6 @@ using Filter.Platform.Common.Data.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FilterProvider.Common.Data.Filtering;
 using DotNet.Globbing;
 using System.Threading;
@@ -67,7 +64,7 @@ namespace FilterProvider.Common.Configuration
         //FilterDbCollection FilterCollection { get; }
 
         BagOfTextTriggers TextTriggers { get; }
-       
+
         HashSet<string> BlacklistedApplications { get; }
         HashSet<string> WhitelistedApplications { get; }
 

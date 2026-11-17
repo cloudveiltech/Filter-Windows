@@ -1,7 +1,5 @@
-﻿using Filter.Platform.Common.Types;
+using Filter.Platform.Common.Types;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Filter.Platform.Common.IPC.Messages
 {

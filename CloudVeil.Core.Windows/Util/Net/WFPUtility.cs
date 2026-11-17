@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -97,7 +97,7 @@ namespace CloudVeil.Core.Windows.Util
                 // PERSIST OR BOOT?
                 fwpFilter.flags = NativeConstants.FWPM_FILTER_FLAG_PERSISTENT;
                 //fwpFilter.flags = NativeConstants.FWPM_FILTER_FLAG_BOOTTIME;
-                
+
                 fwpFilter.action.type = FWP_ACTION_TYPE.FWP_ACTION_BLOCK;
                 fwpFilter.weight.type = FWP_DATA_TYPE_.FWP_EMPTY; // auto-weight.
                 fwpFilter.numFilterConditions = 0; // this applies to all application traffic                
@@ -913,7 +913,7 @@ namespace CloudVeil.Core.Windows.Util
         ///session: FWPM_SESSION0*
         ///engineHandle: HANDLE*
         [System.Runtime.InteropServices.DllImportAttribute("Fwpuclnt.dll", EntryPoint = "FwpmEngineOpen0")]
-        public static extern uint FwpmEngineOpen0([System.Runtime.InteropServices.InAttribute()] [System.Runtime.InteropServices.MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.LPWStr)] string serverName, uint authnService, System.IntPtr authIdentity, System.IntPtr session, ref System.IntPtr engineHandle);
+        public static extern uint FwpmEngineOpen0([System.Runtime.InteropServices.InAttribute()][System.Runtime.InteropServices.MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.LPWStr)] string serverName, uint authnService, System.IntPtr authIdentity, System.IntPtr session, ref System.IntPtr engineHandle);
 
         /// Return Type: DWORD->unsigned int
         ///engineHandle: HANDLE->void*
@@ -926,7 +926,7 @@ namespace CloudVeil.Core.Windows.Util
         ///sd: SECURITY_DESCRIPTOR->_SECURITY_DESCRIPTOR
         ///id: UINT64*
         [System.Runtime.InteropServices.DllImportAttribute("Fwpuclnt.dll", EntryPoint = "FwpmFilterAdd0")]
-        public static extern uint FwpmFilterAdd0(System.IntPtr engineHandle, [MarshalAs(UnmanagedType.Struct)]ref FWPM_FILTER0_ filter, IntPtr sd, ref ulong id);
+        public static extern uint FwpmFilterAdd0(System.IntPtr engineHandle, [MarshalAs(UnmanagedType.Struct)] ref FWPM_FILTER0_ filter, IntPtr sd, ref ulong id);
 
         /// Return Type: DWORD->unsigned int
         ///engineHandle: HANDLE->void*

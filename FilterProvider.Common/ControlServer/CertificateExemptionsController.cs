@@ -1,9 +1,8 @@
-﻿using EmbedIO;
+using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
 using FilterProvider.Common.Util;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
 namespace FilterProvider.Common.ControlServer
 {
     public class CertificateExemptionsController : WebApiController
@@ -11,7 +10,7 @@ namespace FilterProvider.Common.ControlServer
         private CertificateExemptions exemptions;
 
         public CertificateExemptionsController(CertificateExemptions exemptions)
-        {          
+        {
             this.exemptions = exemptions;
         }
 

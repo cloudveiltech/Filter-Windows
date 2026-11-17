@@ -1,4 +1,4 @@
-﻿
+
 namespace CloudVeilService.Services
 {
     public enum ServiceAccessFlags : uint

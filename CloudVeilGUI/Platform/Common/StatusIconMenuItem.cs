@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿namespace CloudVeilGUI.Platform.Common
+namespace CloudVeilGUI.Platform.Common
 {
     /// <summary>
     /// This is a custom model class that should represent a cross-platform menu entry.

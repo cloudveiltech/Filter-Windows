@@ -5,16 +5,13 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Platform;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace FilterProvider.Common.Util
 {
@@ -41,7 +38,7 @@ namespace FilterProvider.Common.Util
 
     public class CaptivePortalHelper
     {
-        private const long CACHE_TIMEOUT_TICKS = 12*TimeSpan.TicksPerHour;
+        private const long CACHE_TIMEOUT_TICKS = 12 * TimeSpan.TicksPerHour;
 
         public static CaptivePortalHelper Default { get; private set; }
 
@@ -90,15 +87,15 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (captivePortalSettingsLock)
+                lock(captivePortalSettingsLock)
                 {
-                    if (File.Exists(portalSettingsPath))
+                    if(File.Exists(portalSettingsPath))
                     {
                         File.Delete(portalSettingsPath);
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 var logger = LoggerUtil.GetAppWideLogger();
 
@@ -111,20 +108,20 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (captivePortalSettingsLock)
+                lock(captivePortalSettingsLock)
                 {
                     if(!File.Exists(portalSettingsPath))
                     {
                         return;
                     }
 
-                    using (Stream fileStream = File.Open(portalSettingsPath, FileMode.Open))
+                    using(Stream fileStream = File.Open(portalSettingsPath, FileMode.Open))
                     {
                         StreamReader reader = new StreamReader(fileStream);
                         string ssidLine = reader.ReadLine();
                         string dateLine = reader.ReadLine();
 
-                        if (ssidLine == null || dateLine == null)
+                        if(ssidLine == null || dateLine == null)
                         {
                             currentCaptivePortalSSIDs = null;
                             return;
@@ -137,7 +134,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
             }
@@ -145,7 +142,7 @@ namespace FilterProvider.Common.Util
 
         private void deleteCacheIfExpired()
         {
-            if (captivePortalDetectedAt + new TimeSpan(CACHE_TIMEOUT_TICKS) < DateTime.Now)
+            if(captivePortalDetectedAt + new TimeSpan(CACHE_TIMEOUT_TICKS) < DateTime.Now)
             {
                 deleteCaptivePortalSSIDsFile();
                 currentCaptivePortalSSIDs = null;
@@ -156,9 +153,9 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                lock (captivePortalSettingsLock)
+                lock(captivePortalSettingsLock)
                 {
-                    using (Stream fileStream = File.Open(portalSettingsPath, FileMode.Create))
+                    using(Stream fileStream = File.Open(portalSettingsPath, FileMode.Create))
                     {
                         StreamWriter writer = new StreamWriter(fileStream);
 
@@ -172,7 +169,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 var logger = LoggerUtil.GetAppWideLogger();
                 logger.Error("Failed to save captive portal SSIDs");
@@ -223,14 +220,14 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                if (currentCaptivePortalSSIDs == null)
+                if(currentCaptivePortalSSIDs == null)
                 {
                     loadCaptivePortalSSIDs();
                 }
 
                 deleteCacheIfExpired();
 
-                if (currentCaptivePortalSSIDs == null)
+                if(currentCaptivePortalSSIDs == null)
                 {
                     return false;
                 }
@@ -241,7 +238,7 @@ namespace FilterProvider.Common.Util
                     return false;
                 }
 
-                foreach (string currentSSID in currentSSIDs)
+                foreach(string currentSSID in currentSSIDs)
                 {
                     foreach(string SSID in currentCaptivePortalSSIDs)
                     {
@@ -254,7 +251,7 @@ namespace FilterProvider.Common.Util
 
                 return false;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), e);
                 return false;

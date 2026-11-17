@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
@@ -23,7 +19,7 @@ namespace Gui.CloudVeil.UI.Converters
             var boolValue = (bool)value;
             var direction = (Parameters)Enum.Parse(typeof(Parameters), (string)parameter);
 
-            if (direction == Parameters.Inverted)
+            if(direction == Parameters.Inverted)
             {
                 return !boolValue ? Visibility.Visible : Visibility.Collapsed;
             }
@@ -37,7 +33,7 @@ namespace Gui.CloudVeil.UI.Converters
             var visibilityValue = (Visibility)value;
             var direction = (Parameters)Enum.Parse(typeof(Parameters), (string)parameter);
 
-            if (direction == Parameters.Inverted)
+            if(direction == Parameters.Inverted)
             {
                 return visibilityValue == Visibility.Collapsed ? true : false;
             }

@@ -1,8 +1,6 @@
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace CloudVeil.IPC
 {
@@ -20,7 +18,7 @@ namespace CloudVeil.IPC
         /// </summary>
         public ReplyHandlerClass(ReplyHandlerClass inner) : base(inner.Communicator)
         {
-            
+
         }
 
         /// <summary>
@@ -36,7 +34,7 @@ namespace CloudVeil.IPC
         }
     }
 
-    
+
     public class ReplyHandlerClass
     {
         public ReplyHandlerClass(IpcCommunicator comm)
@@ -68,7 +66,7 @@ namespace CloudVeil.IPC
             }
             else
             {
-                if (BaseHandler != null)
+                if(BaseHandler != null)
                 {
                     BaseHandler.Invoke(msg);
                     return true;
@@ -98,7 +96,7 @@ namespace CloudVeil.IPC
 
         public bool DisposeIfDiscarded()
         {
-            if (!ExpectsReply && lifetime.ElapsedMilliseconds > 2000)
+            if(!ExpectsReply && lifetime.ElapsedMilliseconds > 2000)
             {
                 lifetime.Stop();
                 return true;

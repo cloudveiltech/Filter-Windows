@@ -1,11 +1,10 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -15,7 +14,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Gui.CloudVeil.UI.Windows;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.Views
 {
@@ -46,7 +44,7 @@ namespace Gui.CloudVeil.UI.Views
         {
             base.OnVisualParentChanged(oldParent);
 
-            if(this.Parent != null)
+            if(Parent != null)
             {
                 parentWindow = this.TryFindParent<BaseWindow>();
             }

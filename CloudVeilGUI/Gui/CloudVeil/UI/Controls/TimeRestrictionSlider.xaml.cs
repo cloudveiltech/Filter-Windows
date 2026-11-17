@@ -1,31 +1,20 @@
-﻿using Filter.Platform.Common.Data.Models;
+using Filter.Platform.Common.Data.Models;
 using FilterProvider.Common.Util;
-using GalaSoft.MvvmLight;
-using Newtonsoft.Json.Linq;
-using Sentry.Protocol;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Gui.CloudVeil.UI.Controls
 {
     public class PercentageTimeConverter : IMultiValueConverter
     {
-        public const double MINUTES_IN_DAY= 1440;
+        public const double MINUTES_IN_DAY = 1440;
 
         public object Convert(
         object[] values, Type targetType, object parameter, CultureInfo culture)
@@ -45,11 +34,11 @@ namespace Gui.CloudVeil.UI.Controls
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var intervals = value as TimeRestrictionSlider.Interval[];
-            if (intervals.Length >= 1 && intervals[0].Width == PercentageTimeConverter.MINUTES_IN_DAY)
+            if(intervals.Length >= 1 && intervals[0].Width == PercentageTimeConverter.MINUTES_IN_DAY)
             {
                 return "Internet allowed all day";
             }
-            if (intervals.Length >= 1 && intervals[0].Width == 0)
+            if(intervals.Length >= 1 && intervals[0].Width == 0)
             {
                 return "Internet blocked all day";
             }
@@ -60,9 +49,9 @@ namespace Gui.CloudVeil.UI.Controls
 
             var description = "Internet allowed: ";
             var isEnabled = false;
-            foreach (var interval in intervals)
+            foreach(var interval in intervals)
             {
-                if (interval.Enabled)
+                if(interval.Enabled)
                 {
                     var from = TimeDetection.FormatMinutes(interval.Start);
                     var to = TimeDetection.FormatMinutes(interval.Start + interval.Width);
@@ -94,7 +83,7 @@ namespace Gui.CloudVeil.UI.Controls
     {
         static SolidColorBrush FILLED_BRUSH = new SolidColorBrush(Color.FromArgb(255, 65, 177, 227));
         static SolidColorBrush TRANSPARENT_BRUSH = new SolidColorBrush(Colors.Transparent);
-        
+
         DispatcherTimer timer = new DispatcherTimer();
         public TimeRestrictionSlider()
         {
@@ -124,7 +113,7 @@ namespace Gui.CloudVeil.UI.Controls
         static void OnIntervalPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             var obj = o as TimeRestrictionSlider;
-            if (obj == null)
+            if(obj == null)
                 return;
             TimeRestrictionSlider timeRestrictionSlider = (TimeRestrictionSlider)o;
             timeRestrictionSlider.ListBox.ItemsSource = (Interval[])e.NewValue;
@@ -133,7 +122,7 @@ namespace Gui.CloudVeil.UI.Controls
         static void OnTimeRestrictionPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             var obj = o as TimeRestrictionSlider;
-            if (obj == null)
+            if(obj == null)
                 return;
             TimeRestrictionSlider timeRestrictionSlider = (TimeRestrictionSlider)o;
             var model = (TimeRestrictionModel)e.NewValue;
@@ -141,11 +130,11 @@ namespace Gui.CloudVeil.UI.Controls
             timeRestrictionSlider.ListBox.ItemsSource = intervals;
             timeRestrictionSlider.Intervals = intervals;
         }
-        
+
         static void OnArrowPositionSliderPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             var obj = o as TimeRestrictionSlider;
-            if (obj == null)
+            if(obj == null)
                 return;
             TimeRestrictionSlider timeRestrictionSlider = (TimeRestrictionSlider)o;
             timeRestrictionSlider.ArrowPosition = (int)e.NewValue;
@@ -158,7 +147,7 @@ namespace Gui.CloudVeil.UI.Controls
                 return new Interval[0];
             }
             List<Interval> intervals = new List<Interval>();
-            for (int i = 0; i < model.EnabledThrough.Length-1; i++)
+            for(int i = 0; i < model.EnabledThrough.Length - 1; i++)
             {
                 var start = TimeDetection.GetTimeSpanFromDecimal(model.EnabledThrough[i]);
                 var end = TimeDetection.GetTimeSpanFromDecimal(model.EnabledThrough[i + 1]);
@@ -169,12 +158,12 @@ namespace Gui.CloudVeil.UI.Controls
                     Start = (int)start.TotalMinutes,
                     Color = i % 2 == 0 ? FILLED_BRUSH : TRANSPARENT_BRUSH,
                     Width = (int)length.TotalMinutes,
-                    Enabled = i%2 == 0,
+                    Enabled = i % 2 == 0,
                     ToolTipText = (i % 2 == 0 ? "Enabed: " : "Disabled: ") + TimeDetection.FormatMinutes((int)start.TotalMinutes) + " - " + TimeDetection.FormatMinutes((int)end.TotalMinutes)
                 });
             }
 
-            if (intervals[0].Start > 0)
+            if(intervals[0].Start > 0)
             {
                 intervals.Insert(0, new Interval
                 {
@@ -185,7 +174,7 @@ namespace Gui.CloudVeil.UI.Controls
                     ToolTipText = "Disabled until " + TimeDetection.FormatMinutes(intervals[0].Start)
                 });
             }
-            if (intervals[intervals.Count - 1].Width + intervals[intervals.Count - 1].Start < PercentageTimeConverter.MINUTES_IN_DAY)
+            if(intervals[intervals.Count - 1].Width + intervals[intervals.Count - 1].Start < PercentageTimeConverter.MINUTES_IN_DAY)
             {
                 var start = intervals[intervals.Count - 1].Width + intervals[intervals.Count - 1].Start;
                 intervals.Add(new Interval
@@ -193,7 +182,7 @@ namespace Gui.CloudVeil.UI.Controls
                     Start = start,
                     Color = TRANSPARENT_BRUSH,
                     Enabled = false,
-                    Width = (int)PercentageTimeConverter.MINUTES_IN_DAY-start,
+                    Width = (int)PercentageTimeConverter.MINUTES_IN_DAY - start,
                     ToolTipText = "Disabled until next day"
                 });
             }
@@ -202,15 +191,15 @@ namespace Gui.CloudVeil.UI.Controls
         private static void OnTimerEnabledSliderPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             var obj = o as TimeRestrictionSlider;
-            if (obj == null)
+            if(obj == null)
                 return;
             TimeRestrictionSlider timeRestrictionSlider = (TimeRestrictionSlider)o;
             var visible = (Boolean)e.NewValue;
             timeRestrictionSlider.Arrows.Visibility = visible ? Visibility.Visible : Visibility.Hidden;
-            if (visible)
+            if(visible)
             {
                 timeRestrictionSlider.timer.Start();
-            } 
+            }
             else
             {
                 timeRestrictionSlider.timer.Stop();

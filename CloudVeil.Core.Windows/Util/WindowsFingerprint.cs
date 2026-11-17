@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -10,7 +10,6 @@ using System;
 using System.Management;
 using System.Security.Cryptography;
 using System.Text;
-using static Topshelf.Runtime.Windows.NativeMethods;
 
 namespace CloudVeil.Core.Windows.Util
 {
@@ -71,7 +70,7 @@ namespace CloudVeil.Core.Windows.Util
                     try
                     {
                         var serialNumber = mo["SerialNumber"].ToString();
-                        if (serialNumber == NOT_APPLICABLE_STRING || serialNumber == DEFAULT_STRING)
+                        if(serialNumber == NOT_APPLICABLE_STRING || serialNumber == DEFAULT_STRING)
                         {
                             serialNumber = string.Empty;
                             emptySerialNumber = true;
@@ -100,10 +99,10 @@ namespace CloudVeil.Core.Windows.Util
                     LoggerUtil.GetAppWideLogger()?.Info("Fingerprint Fallback to UUID");
                     var emptyUuid = true;
                     searcher = new ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct");
-                    foreach (ManagementObject obj in searcher.Get())
+                    foreach(ManagementObject obj in searcher.Get())
                     {
                         var uuid = obj["UUID"].ToString();
-                        if(uuid !=  NOT_APPLICABLE_STRING && uuid != DEFAULT_STRING && uuid != EMPTY_UUID_STRING)
+                        if(uuid != NOT_APPLICABLE_STRING && uuid != DEFAULT_STRING && uuid != EMPTY_UUID_STRING)
                         {
                             emptyUuid = false;
                             sb.Append(uuid);
@@ -116,10 +115,10 @@ namespace CloudVeil.Core.Windows.Util
 
                         searcher = new ManagementObjectSearcher("SELECT SerialNumber, Model FROM Win32_DiskDrive");
 
-                        foreach (ManagementObject disk in searcher.Get())
+                        foreach(ManagementObject disk in searcher.Get())
                         {
                             var serial = disk["SerialNumber"]?.ToString()?.Trim();
-                            if (serial != NOT_APPLICABLE_STRING && serial != DEFAULT_STRING)
+                            if(serial != NOT_APPLICABLE_STRING && serial != DEFAULT_STRING)
                             {
                                 sb.Append(serial);
                                 sbShort.Append(serial);
@@ -135,7 +134,7 @@ namespace CloudVeil.Core.Windows.Util
                 LoggerUtil.GetAppWideLogger()?.Info("Fingerprint short seed is " + sbShort.ToString());
                 byte[] bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
                 fingerPrintLong = BitConverter.ToString(bt).Replace("-", "");
-                
+
                 bt = sec.ComputeHash(Encoding.UTF8.GetBytes(sbShort.ToString()));
                 fingerPrintShort = BitConverter.ToString(bt).Replace("-", "");
 

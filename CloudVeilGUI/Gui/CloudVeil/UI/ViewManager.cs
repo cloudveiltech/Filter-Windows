@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,9 +6,6 @@
 */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Gui.CloudVeil.UI.ViewModels;
 using Gui.CloudVeil.UI.Views;
 using Gui.CloudVeil.UI.Windows;
@@ -26,7 +23,7 @@ namespace Gui.CloudVeil.UI
         public ViewManager(MainWindow window)
         {
             this.window = window;
-            this.views = new List<ViewWithZIndex>();
+            views = new List<ViewWithZIndex>();
         }
 
         private MainWindow window;
@@ -35,7 +32,7 @@ namespace Gui.CloudVeil.UI
 
         public void Register<T>(T view, Action<BaseView> viewModelAction)
         {
-            if (view is BaseView)
+            if(view is BaseView)
             {
                 var context = (view as BaseView).DataContext;
 
@@ -57,11 +54,11 @@ namespace Gui.CloudVeil.UI
         /// <param name="t">The type of the view to show.</param>
         public void SetBaseView(Type t)
         {
-            lock (viewLock)
+            lock(viewLock)
             {
-                for (int i = 0; i < views.Count; i++)
+                for(int i = 0; i < views.Count; i++)
                 {
-                    if (views[i].ZIndex == 0)
+                    if(views[i].ZIndex == 0)
                     {
                         views.RemoveAt(i);
                         i--;
@@ -81,11 +78,11 @@ namespace Gui.CloudVeil.UI
 
         private ViewWithZIndex getView(Type t, int zIndex = -1)
         {
-            lock (viewLock)
+            lock(viewLock)
             {
-                for (int i = 0; i < views.Count; i++)
+                for(int i = 0; i < views.Count; i++)
                 {
-                    if (views[i].ViewType == t && (zIndex == -1 || views[i].ZIndex == zIndex))
+                    if(views[i].ViewType == t && (zIndex == -1 || views[i].ZIndex == zIndex))
                     {
                         return views[i];
                     }
@@ -97,12 +94,12 @@ namespace Gui.CloudVeil.UI
 
         public BaseCloudVeilViewModel GetViewModel(Type t)
         {
-            return getView(t)?.ViewType.GetProperty("DataContext")?.GetValue(this.Get(t)) as BaseCloudVeilViewModel;
+            return getView(t)?.ViewType.GetProperty("DataContext")?.GetValue(Get(t)) as BaseCloudVeilViewModel;
         }
 
         private void showViewWithHighestZIndex()
         {
-            lock (viewLock)
+            lock(viewLock)
             {
                 int highestZIndex = 0;
                 ViewWithZIndex viewToShow = null;
@@ -118,11 +115,11 @@ namespace Gui.CloudVeil.UI
 
                 if(viewToShow != null)
                 {
-                    var view = this.Get(viewToShow.ViewType);
+                    var view = Get(viewToShow.ViewType);
 
                     window.Dispatcher.InvokeAsync(() =>
                     {
-                        if (view != null && window.CurrentView.Content != view)
+                        if(view != null && window.CurrentView.Content != view)
                         {
                             window.CurrentView.Content = view;
                         }
@@ -133,10 +130,10 @@ namespace Gui.CloudVeil.UI
 
         public void PushView(int zIndex, Type t)
         {
-            lock (viewLock)
+            lock(viewLock)
             {
                 var existingView = getView(t);
-                if (existingView == null)
+                if(existingView == null)
                 {
                     views.Add(new ViewWithZIndex()
                     {
@@ -151,10 +148,10 @@ namespace Gui.CloudVeil.UI
 
         public void PopView(Type t, int zIndex = -1)
         {
-            lock (viewLock)
+            lock(viewLock)
             {
                 var existingView = getView(t, zIndex);
-                if (existingView != null)
+                if(existingView != null)
                 {
                     views.Remove(existingView);
                 }

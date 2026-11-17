@@ -1,7 +1,4 @@
-﻿using CloudVeil.Core.Windows.Util.Update;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using CloudVeil.Core.Windows.Util.Update;
 
 namespace Filter.Platform.Common
 {

@@ -1,21 +1,17 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using Filter.Platform.Common;
 using CloudVeil.IPC;
-using CloudVeil.IPC.Messages;
 using GalaSoft.MvvmLight;
 using System;
 using System.Security;
 using System.Threading.Tasks;
-using System.Windows;
 using Gui.CloudVeil.UI.ViewModels;
 using Filter.Platform.Common.Extensions;
-using Filter.Platform.Common.Util;
 
 namespace Gui.CloudVeil.UI.Models
 {
@@ -117,13 +113,13 @@ namespace Gui.CloudVeil.UI.Models
         public bool CanAttemptAuthenticationWithEmail()
         {
             // Can't auth when we're in the middle of it.
-            if (currentlyAuthenticating)
+            if(currentlyAuthenticating)
             {
                 return false;
             }
 
             // Ensure some sort of username has been supplied.
-            if (!StringExtensions.Valid(UserName))
+            if(!StringExtensions.Valid(UserName))
             {
                 return false;
             }
@@ -146,19 +142,19 @@ namespace Gui.CloudVeil.UI.Models
         public bool CanValidateOtp()
         {
             // Can't auth when we're in the middle of it.
-            if (currentlyAuthenticating)
+            if(currentlyAuthenticating)
             {
                 return false;
             }
 
             // Ensure some sort of username has been supplied.
-            if (!StringExtensions.Valid(UserName))
+            if(!StringExtensions.Valid(UserName))
             {
                 return false;
             }
 
             // Ensure some sort of password has been supplied.
-            if (UserPassword == null || UserPassword.Length < 6)
+            if(UserPassword == null || UserPassword.Length < 6)
             {
                 return false;
             }
@@ -170,7 +166,7 @@ namespace Gui.CloudVeil.UI.Models
         {
             ErrorMessage = string.Empty;
 
-            var unencrypedPwordBytes = this.userPassword.SecureStringBytes();
+            var unencrypedPwordBytes = userPassword.SecureStringBytes();
 
             try
             {
@@ -188,7 +184,7 @@ namespace Gui.CloudVeil.UI.Models
 
                         ipcClient.AuthenticationResultReceived = (msg) =>
                         {
-                            if (msg.AuthenticationResult.AuthenticationMessage != null)
+                            if(msg.AuthenticationResult.AuthenticationMessage != null)
                             {
                                 loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;
                                 loginViewModel.Message = "";
@@ -220,7 +216,7 @@ namespace Gui.CloudVeil.UI.Models
 
             await Task.Run(() =>
             {
-                using (var ipcClient = new IPCClient())
+                using(var ipcClient = new IPCClient())
                 {
                     ipcClient.ConnectedToServer = () =>
                     {
@@ -230,7 +226,7 @@ namespace Gui.CloudVeil.UI.Models
 
                     ipcClient.AuthenticationResultReceived = (msg) =>
                     {
-                        if (msg.AuthenticationResult.AuthenticationMessage != null)
+                        if(msg.AuthenticationResult.AuthenticationMessage != null)
                         {
                             loginViewModel.Message = "";
                             loginViewModel.ErrorMessage = msg.AuthenticationResult.AuthenticationMessage;

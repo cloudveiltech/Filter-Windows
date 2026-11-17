@@ -5,12 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FilterProvider.Common.Data.Filtering
 {
@@ -19,9 +15,9 @@ namespace FilterProvider.Common.Data.Filtering
         public BlockInfo(BlockType cause, Uri requestUri, string categoryNameString, string matchingRule)
         {
             this.cause = cause.ToString();
-            this.request_uri = requestUri.ToString();
-            this.category_name_string = categoryNameString;
-            this.matching_rule = matchingRule;
+            request_uri = requestUri.ToString();
+            category_name_string = categoryNameString;
+            matching_rule = matchingRule;
         }
 
         public string cause { get; set; }

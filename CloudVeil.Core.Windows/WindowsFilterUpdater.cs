@@ -1,9 +1,9 @@
-﻿using CloudVeil.Core.Windows.Util.Update;
+using CloudVeil.Core.Windows.Util.Update;
 using Filter.Platform.Common;
 using System;
 using System.IO;
-using FilterNativeWindows;
 using System.Diagnostics;
+using FilterNativeWindows;
 
 namespace CloudVeil.Core.Windows
 {
@@ -17,9 +17,9 @@ namespace CloudVeil.Core.Windows
 
         private NLog.Logger logger;
 
-        private void beginInstallUpdateExe(ApplicationUpdate update,bool restartApplication = true)
+        private void BeginInstallUpdateExe(ApplicationUpdate update, bool restartApplication = true)
         {
-            if (!File.Exists(update.UpdateFileLocalPath))
+            if(!File.Exists(update.UpdateFileLocalPath))
             {
                 throw new Exception("Target update installer does not exist at the expected location.");
             }
@@ -29,7 +29,7 @@ namespace CloudVeil.Core.Windows
             var fingerPrint = FingerprintService.Default.Value;
             var userId = email + ":" + fingerPrint;
             string filename, args;
-            if (restartApplication)
+            if(restartApplication)
             {
                 string executingProcess = Process.GetCurrentProcess().MainModule.FileName;
 
@@ -45,21 +45,22 @@ namespace CloudVeil.Core.Windows
             try
             {
                 logger.Info("Starting update process " + filename + " " + args);
-                if (!ProcessCreation.CreateElevatedProcessInCurrentSession(filename, args))
+                if(!ProcessCreation.CreateElevatedProcessInCurrentSession(filename, args))
                 {
                     logger.Error($"Failed to create elevated process with {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
                 }
-            } catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 logger.Error(ex);
             }
         }
 
-        private void beginInstallUpdateDelayedMsi(ApplicationUpdate update, int secondDelay = 5, bool restartApplication = true)
+        private void BeginInstallUpdateDelayedMsi(ApplicationUpdate update, int secondDelay = 5, bool restartApplication = true)
         {
             // TODO: Implement cross platform stuff.
 
-            if (!File.Exists(update.UpdateFileLocalPath))
+            if(!File.Exists(update.UpdateFileLocalPath))
             {
                 throw new Exception("Target update installer does not exist at the expected location.");
             }
@@ -68,7 +69,7 @@ namespace CloudVeil.Core.Windows
 
             var systemFolder = Environment.GetFolderPath(Environment.SpecialFolder.System);
 
-            if (restartApplication)
+            if(restartApplication)
             {
                 var executingProcess = Process.GetCurrentProcess().MainModule.FileName;
                 var args = string.Format("\"{0}\\cmd.exe\" /C TIMEOUT {1} && \"{2}\\msiexec\" /I \"{3}\" {4} && \"{5}\"", systemFolder, secondDelay, systemFolder, update.UpdateFileLocalPath, update.UpdaterArguments, executingProcess);
@@ -104,14 +105,14 @@ namespace CloudVeil.Core.Windows
         /// </exception>
         public void BeginInstallUpdate(ApplicationUpdate update, bool restartApplication = true)
         {
-            switch (update.Kind)
+            switch(update.Kind)
             {
                 case UpdateKind.InstallerPackage:
-                    beginInstallUpdateDelayedMsi(update, 5, restartApplication);
+                    BeginInstallUpdateDelayedMsi(update, 5, restartApplication);
                     break;
 
                 case UpdateKind.ExecutablePackage:
-                    beginInstallUpdateExe(update, restartApplication);
+                    BeginInstallUpdateExe(update, restartApplication);
                     break;
             }
         }

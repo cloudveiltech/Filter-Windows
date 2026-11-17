@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,16 +7,12 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using NLog;
-using Gui.CloudVeil.Util;
 using System.Diagnostics;
 using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 
@@ -27,7 +23,6 @@ using Win32Task = Microsoft.Win32.TaskScheduler.Task;
 // linked to us, so we can easily fetch everything they'll need
 // during compilation by grabbing a list of our own referenced
 // assemblies.
-using Topshelf;
 using Filter.Platform.Common.Util;
 using Microsoft.Win32.TaskScheduler;
 using CloudVeilService.Util;
@@ -56,7 +51,7 @@ namespace CloudVeilService.Services
 
             public Governor() : base("warden", true)
             {
-                logger = LoggerUtil.GetAppWideLogger();    
+                logger = LoggerUtil.GetAppWideLogger();
             }
 
             public override void Shutdown(ExitCodes code)
@@ -96,7 +91,7 @@ namespace CloudVeilService.Services
 
                 var thisAppDir = AppDomain.CurrentDomain.BaseDirectory;
 
-                foreach(var name in this.GetType().Assembly.GetManifestResourceNames())
+                foreach(var name in GetType().Assembly.GetManifestResourceNames())
                 {
                     // Compile everything except our base protective service.
                     if(name.IndexOf("Services", StringComparison.OrdinalIgnoreCase) != -1)
@@ -121,7 +116,7 @@ namespace CloudVeilService.Services
                             {
                                 List<Process> lockingProcesses = FileLockingUtil.WhoIsLocking(fileName);
 
-                                if (lockingProcesses.Count == 0)
+                                if(lockingProcesses.Count == 0)
                                 {
                                     logger.Warn("IOException occurred, but no locking processes detected.");
                                     LoggerUtil.RecursivelyLogException(logger, e);
@@ -180,7 +175,7 @@ namespace CloudVeilService.Services
 
             try
             {
-                using (TaskService service = new TaskService())
+                using(TaskService service = new TaskService())
                 {
                     Win32Task task = service.GetTask(serviceCheckTaskName);
                     if(task != null)
@@ -232,7 +227,7 @@ namespace CloudVeilService.Services
         {
             logger.Info("Compiling internal service: {0} to output {1}.", sourceResourcePath, absOutputPath);
             string scriptContents = string.Empty;
-            
+
             using(var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(sourceResourcePath))
             {
                 using(TextReader tsr = new StreamReader(resourceStream))
@@ -328,7 +323,7 @@ namespace CloudVeilService.Services
                     logger.Error("Failed to generate service assembly for service {0}.", Path.GetFileNameWithoutExtension(absOutputPath));
 
                     foreach(var diag in result.Diagnostics)
-                    {   
+                    {
                         logger.Error(diag.GetMessage());
                     }
                 }
@@ -390,7 +385,7 @@ namespace CloudVeilService.Services
                 }
                 catch
                 {
-                   
+
                 }
             }
 

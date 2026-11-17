@@ -6,9 +6,6 @@
 */
 
 using GoProxyWrapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FilterProvider.Common.Data
 {

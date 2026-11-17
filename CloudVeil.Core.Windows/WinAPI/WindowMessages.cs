@@ -5,15 +5,15 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿/*
- * Note that this file comes from:
- * http://pinvoke.net/default.aspx/Enums/WindowsMessages.html
- *
- * Which comes from winuser.h. So, you're bound to the license terms of the Windows SDK
- * for that file, whatever they may be. Actually, it says pulled from documentation
- * on MSDN, and Microsoft permits limited copying of documentation data for
- * reasonably use without license/limitation. Look into it.
- */
+/*
+* Note that this file comes from:
+* http://pinvoke.net/default.aspx/Enums/WindowsMessages.html
+*
+* Which comes from winuser.h. So, you're bound to the license terms of the Windows SDK
+* for that file, whatever they may be. Actually, it says pulled from documentation
+* on MSDN, and Microsoft permits limited copying of documentation data for
+* reasonably use without license/limitation. Look into it.
+*/
 
 using System;
 

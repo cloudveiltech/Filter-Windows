@@ -1,4 +1,4 @@
-﻿using CloudVeil.IPC;
+using CloudVeil.IPC;
 using CloudVeil.Windows;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
@@ -36,7 +36,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (collectDiagnosticsCommand == null)
+                if(collectDiagnosticsCommand == null)
                 {
                     collectDiagnosticsCommand = new RelayCommand(() =>
                     {
@@ -45,7 +45,7 @@ namespace Gui.CloudVeil.UI.ViewModels
 
                         app.IpcClient.Request(IpcCall.CollectComputerInfo).OnReply((h, msg) =>
                         {
-                            if (!(msg.DataObject is ComputerInfo))
+                            if(!(msg.DataObject is ComputerInfo))
                             {
                                 throw new InvalidCastException("DataObject is not ComputerInfo like expected.");
                             }
@@ -69,7 +69,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (viewLogsCommand == null)
+                if(viewLogsCommand == null)
                 {
                     viewLogsCommand = new RelayCommand(() =>
                     {
@@ -93,7 +93,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (sendLogsCommand == null)
+                if(sendLogsCommand == null)
                 {
                     sendLogsCommand = new RelayCommand(() =>
                     {
@@ -103,9 +103,9 @@ namespace Gui.CloudVeil.UI.ViewModels
                             mainWindow.Dispatcher.InvokeAsync(async () =>
                             {
                                 var result = await mainWindow.AskUserYesNoQuestion("Sending logs", "Do you want to send the logs to CloudVeil support?");
-                                if (result)
+                                if(result)
                                 {
-                                    if (msg.DataObject != null && msg.DataObject.ToBoolean())
+                                    if(msg.DataObject != null && msg.DataObject.ToBoolean())
                                     {
                                         mainWindow.ShowUserMessage("Logs Sent", "The logs have been sent to CloudVeil support. Thank you!");
                                     }
@@ -115,7 +115,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                                     }
                                 }
                             });
-                            
+
                             return true;
                         });
                     });

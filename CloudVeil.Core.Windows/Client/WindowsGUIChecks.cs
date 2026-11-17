@@ -5,13 +5,12 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 using CloudVeil.Core.Windows.WinAPI;
-﻿using Filter.Platform.Common.Client;
+using Filter.Platform.Common.Client;
 using Gui.CloudVeil.Util;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.ServiceModel.Channels;
 using System.Threading;
 
 namespace CloudVeil.Core.Windows.Client
@@ -24,7 +23,7 @@ namespace CloudVeil.Core.Windows.Client
         public IntPtr lpData;
         public void Dispose()
         {
-            if (lpData != IntPtr.Zero)
+            if(lpData != IntPtr.Zero)
             {
                 Marshal.FreeCoTaskMem(lpData);
                 lpData = IntPtr.Zero;
@@ -38,7 +37,7 @@ namespace CloudVeil.Core.Windows.Client
             var result = new COPYDATASTRUCT();
             result.dwData = (IntPtr)dwData;
             result.lpData = Unicode ? Marshal.StringToCoTaskMemUni(value) : Marshal.StringToCoTaskMemAnsi(value);
-            result.cbData = (Unicode ? 2 : 1)*value.Length + 1;
+            result.cbData = (Unicode ? 2 : 1) * value.Length + 1;
             return result;
         }
     }
@@ -50,11 +49,12 @@ namespace CloudVeil.Core.Windows.Client
             var thisProcess = Process.GetCurrentProcess();
             var processes = Process.GetProcessesByName(thisProcess.ProcessName).Where(p => p.Id != thisProcess.Id);
 
-            foreach (Process runningProcess in processes)
+            foreach(Process runningProcess in processes)
             {
-                foreach (var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
+                foreach(var handle in WindowHelpers.EnumerateProcessWindowHandles(runningProcess.Id))
                 {
-                    if(url.Length > 0) {
+                    if(url.Length > 0)
+                    {
                         var data = COPYDATASTRUCT.CreateForString(1, url, true);
                         WindowHelpers.SendMessage(handle, (int)WindowMessages.WM_COPY_DATA, IntPtr.Zero, ref data);
                     }
@@ -78,7 +78,7 @@ namespace CloudVeil.Core.Windows.Client
                 var instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
                 instanceMutex.ReleaseMutex();
             }
-            catch (Exception)
+            catch(Exception)
             {
                 // We can get access denied if SYSTEM is running this.
                 createdNew = false;
@@ -105,7 +105,7 @@ namespace CloudVeil.Core.Windows.Client
             {
                 instanceMutex = new Mutex(true, $"Local\\{GuidUtility.Create(GuidUtility.DnsNamespace, appVerStr).ToString("B")}", out createdNew);
             }
-            catch (Exception)
+            catch(Exception)
             {
                 // We can get access denied if SYSTEM is running this.
                 createdNew = false;
@@ -116,7 +116,7 @@ namespace CloudVeil.Core.Windows.Client
 
         public void UnpublishRunningApp()
         {
-            if (instanceMutex != null)
+            if(instanceMutex != null)
             {
                 instanceMutex.ReleaseMutex();
             }

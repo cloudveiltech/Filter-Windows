@@ -1,8 +1,6 @@
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Util;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CloudVeil.IPC
 {

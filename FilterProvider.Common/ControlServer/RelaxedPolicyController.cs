@@ -1,4 +1,4 @@
-﻿using EmbedIO;
+using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
 using Filter.Platform.Common.Util;
@@ -49,7 +49,7 @@ namespace FilterProvider.Common.ControlServer
                 string bypassNotification = null;
                 bool ret = relaxedPolicy.RequestRelaxedPolicy(data.passcode, out bypassNotification);
 
-                if (ret)
+                if(ret)
                 {
                     Response.StatusCode = 200;
                 }

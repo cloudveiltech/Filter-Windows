@@ -1,4 +1,60 @@
-# Just so GitHub doesn't make ma codez so fugly.
+root = true
+
 [*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
 indent_style = space
 indent_size = 4
+
+# --- Space after control-flow keywords: if (x), for (...), while (...) ---
+csharp_space_after_keywords_in_control_flow_statements = false
+csharp_space_between_parentheses = none
+
+# --- Redundant "this.": remove it unless it resolves a name conflict ---
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# --- Unused using directives ---
+dotnet_diagnostic.IDE0005.severity = warning
+
+# --- var: no enforced preference, keep the current code as is ---
+csharp_style_var_elsewhere = true:silent
+csharp_style_var_when_type_is_apparent = true:silent
+csharp_style_var_for_built_in_types = true:silent
+
+# --- Method names: PascalCase for all methods, private included ---
+dotnet_naming_symbols.all_methods.applicable_kinds = method
+dotnet_naming_symbols.all_methods.applicable_accessibilities = *
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+dotnet_naming_rule.methods_should_be_pascal_case.symbols = all_methods
+dotnet_naming_rule.methods_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.methods_should_be_pascal_case.severity = error
+
+# --- Private fields: camelCase without underscore (codifies the existing convention) ---
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, internal
+
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case_style
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
+
+# --- Avoid public fields; expose state through properties ---
+dotnet_diagnostic.CA1051.severity = warning
+
+[NLog.config]
+indent_style = space
+indent_size = 2
+
+[*.{csproj,config,xml}]
+indent_style = space
+indent_size = 2

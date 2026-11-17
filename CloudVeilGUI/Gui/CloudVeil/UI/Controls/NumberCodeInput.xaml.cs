@@ -1,7 +1,4 @@
-﻿using Filter.Platform.Common.Extensions;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
+using Filter.Platform.Common.Extensions;
 using System.Security;
 using System.Text;
 using System.Windows;
@@ -37,7 +34,7 @@ namespace Gui.CloudVeil.UI.Controls
         private static void OnFieldCountChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             var obj = o as NumberCodeInput;
-            if (obj == null)
+            if(obj == null)
                 return;
             NumberCodeInput numberCodeInput = (NumberCodeInput)o;
             var fieldCount = (int)e.NewValue;
@@ -47,7 +44,7 @@ namespace Gui.CloudVeil.UI.Controls
         private void initFields(int fieldCount)
         {
             stackPanel.Children.Clear();
-            for (int i = 0; i < fieldCount; i++)
+            for(int i = 0; i < fieldCount; i++)
             {
                 var textBox = new TextBox()
                 {
@@ -67,34 +64,35 @@ namespace Gui.CloudVeil.UI.Controls
                 textBox.TextChanged += (sender, args) =>
                 {
                     TextBox textBoxSender = sender as TextBox;
-                    if (textBoxSender != null && textBoxSender.Text.Length == 1)
+                    if(textBoxSender != null && textBoxSender.Text.Length == 1)
                     {
                         textBoxSender.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                         updateValue();
                     }
                 };
-                textBox.GotFocus += (sender, args) => {
+                textBox.GotFocus += (sender, args) =>
+                {
                     textBox.SelectAll();
                 };
-              
+
                 stackPanel.Children.Add(textBox);
             }
         }
 
         private static void OnValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-           
+
         }
-        
+
         private void updateValue()
         {
             var value = new SecureString();
-            foreach (var child in stackPanel.Children)
+            foreach(var child in stackPanel.Children)
             {
-                if (child is TextBox)
+                if(child is TextBox)
                 {
                     var text = (child as TextBox).Text;
-                    if (text != null && text.Length > 0)
+                    if(text != null && text.Length > 0)
                     {
                         value.AppendChar(text[0]);
                     }
@@ -125,9 +123,9 @@ namespace Gui.CloudVeil.UI.Controls
                 var charArray = Encoding.ASCII.GetString(value.SecureStringBytes()).ToCharArray();
 
                 int i = 0;
-                foreach (var child in stackPanel.Children)
+                foreach(var child in stackPanel.Children)
                 {
-                    if (child is TextBox && i < charArray.Length)
+                    if(child is TextBox && i < charArray.Length)
                     {
                         (child as TextBox).Text = charArray[i].ToString();
                         i++;

@@ -5,16 +5,12 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace FilterProvider.Common.Platform
 {
     public interface IProxyServer
     {
         void Start();
-        
+
         void Restart();
 
         void Stop();

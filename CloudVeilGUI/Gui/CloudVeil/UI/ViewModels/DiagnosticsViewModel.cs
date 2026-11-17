@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,17 +7,14 @@
 using CloudVeil.Windows;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Gui.CloudVeil.Testing;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
-    public class DiagnosticsViewModel : BaseCloudVeilViewModel 
+    public class DiagnosticsViewModel : BaseCloudVeilViewModel
     {
         public DiagnosticsViewModel()
         {
@@ -29,7 +26,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (testFilterCommand == null)
+                if(testFilterCommand == null)
                 {
                     testFilterCommand = new RelayCommand(() =>
                     {
@@ -53,7 +50,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (testDnsCommand == null)
+                if(testDnsCommand == null)
                 {
                     testDnsCommand = new RelayCommand(() =>
                     {
@@ -97,7 +94,8 @@ namespace Gui.CloudVeil.UI.ViewModels
                 if(value)
                 {
                     DnsTestButtonVisibility = Visibility.Visible;
-                } else
+                }
+                else
                 {
                     DnsTestButtonVisibility = Visibility.Hidden;
                 }
@@ -110,7 +108,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (testSafeSearchCommand == null)
+                if(testSafeSearchCommand == null)
                 {
                     testSafeSearchCommand = new RelayCommand(() =>
                     {
@@ -118,13 +116,14 @@ namespace Gui.CloudVeil.UI.ViewModels
                         test.OnFilterTestResult += Test_OnFilterTestResult;
                         DiagnosticsEntries.Clear();
 
-                        if (IsDnsEnforcementEnabled)
+                        if(IsDnsEnforcementEnabled)
                         {
                             Task.Run(() =>
                             {
                                 test.TestDNSSafeSearch();
                             });
-                        } else
+                        }
+                        else
                         {
                             Test_OnFilterTestResult(new DiagnosticsEntry(FilterTest.DnsFilterTest, false, "DNS Enforcement is Disabled"));
                         }
@@ -144,12 +143,12 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             // TODO: Build UI for this.
             logger.Info("OnFilterTestResult {0} {1}", entry.Test.ToString(), entry.Passed);
-            if (entry.Exception != null)
+            if(entry.Exception != null)
             {
                 logger.Error("OnFilterTestResult Exception: {0}", entry.Exception.ToString());
             }
 
-            if (entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
+            if(entry.Test == FilterTest.BlockingTest || entry.Test == FilterTest.DnsFilterTest)
             {
                 CloudVeilApp.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -157,7 +156,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 });
             }
 
-            if (entry.Test == FilterTest.AllTestsCompleted)
+            if(entry.Test == FilterTest.AllTestsCompleted)
             {
                 return;
             }

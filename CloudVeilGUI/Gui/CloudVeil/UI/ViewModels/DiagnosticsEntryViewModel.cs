@@ -1,4 +1,4 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
+using GalaSoft.MvvmLight.CommandWpf;
 using System.Windows;
 using Gui.CloudVeil.Testing;
 using Gui.CloudVeil.UI.Windows;
@@ -23,7 +23,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (viewTestDetails == null)
+                if(viewTestDetails == null)
                 {
                     viewTestDetails = new RelayCommand(() =>
                     {

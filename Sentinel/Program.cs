@@ -1,19 +1,13 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using Topshelf;
 using CloudVeil.Core.Windows.Services;
 
@@ -59,7 +53,7 @@ namespace CloudVeilService.Services
             bool createdNew;
             InstanceMutex = new Mutex(true, string.Format(@"Global\{0}", appVerStr.Replace(" ", "")), out createdNew);
 
-            if (createdNew)
+            if(createdNew)
             {
                 var exitCode = HostFactory.Run(x =>
                 {
@@ -68,7 +62,7 @@ namespace CloudVeilService.Services
                         s.ConstructUsing(name => new Sentinel());
                         s.WhenStarted((guardian, hostCtl) => guardian.Start());
                         s.WhenStopped((guardian, hostCtl) => guardian.Stop());
-                        
+
 
                         s.WhenShutdown((guardian, hostCtl) =>
                         {
@@ -90,7 +84,7 @@ namespace CloudVeilService.Services
                         r.RestartService(1);
                         r.RestartService(5);
                         r.SetResetPeriod(1);
-                    });                    
+                    });
 
                     x.RunAsLocalSystem();
                 });

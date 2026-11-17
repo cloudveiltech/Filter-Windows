@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -43,7 +43,7 @@ namespace CloudVeil.IPC.Messages
                 }
                 catch { }
 
-                if (procId == 0)
+                if(procId == 0)
                 {
                     throw new InvalidOperationException("This IPC message type is designed exclusively for use by the client side of the IPC channel. The client side should never be in session 0 isolation. You are constructing this class from a session 0 process.");
                 }

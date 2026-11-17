@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -303,7 +303,7 @@ namespace CloudVeil.IPC
             server = PlatformTypes.New<IPipeServer>(channel);
 
             //server = new NamedPipeServer<BaseMessage>(channel, security);
-            
+
             server.ClientConnected += OnClientConnected;
             server.ClientDisconnected += OnClientDisconnected;
             server.ClientMessage += OnClientMessage;
@@ -400,7 +400,7 @@ namespace CloudVeil.IPC
                 if(cast != null && cast.Command == DeactivationCommand.Requested)
                 {
                     var args = new DeactivationRequestEventArgs();
-                    
+
                     // This fills args.DeactivationCommand.
                     DeactivationRequested?.Invoke(args);
 
@@ -454,7 +454,7 @@ namespace CloudVeil.IPC
                     {
                         logger.Debug("Client has accepted update.");
                         ClientAcceptedPendingUpdate?.Invoke();
-                    }                    
+                    }
                 }
             }
             else if(msgRealType == typeof(Messages.BlockActionReviewRequestMessage))
@@ -474,14 +474,14 @@ namespace CloudVeil.IPC
                     else
                     {
                         logger.Info("Failed to create absolute URI for string \"{0}\".", cast.FullRequestUrl);
-                    }                    
+                    }
                 }
             }
-            else if (msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
+            else if(msgRealType == typeof(Messages.CaptivePortalDetectionMessage))
             {
                 logger.Debug("Server message is {0}", nameof(Messages.CaptivePortalDetectionMessage));
                 var cast = (Messages.CaptivePortalDetectionMessage)message;
-                if (cast != null)
+                if(cast != null)
                 {
                     RequestCaptivePortalDetection?.Invoke(cast);
                 }
@@ -492,16 +492,16 @@ namespace CloudVeil.IPC
                 var cast = (Messages.CertificateExemptionMessage)message;
                 if(cast != null)
                 {
-                    this.OnCertificateExemptionGranted?.Invoke(new CertificateExemptionEventArgs(cast));
+                    OnCertificateExemptionGranted?.Invoke(new CertificateExemptionEventArgs(cast));
                 }
             }
-            else if (msgRealType == typeof(Messages.DiagnosticsMessage))
+            else if(msgRealType == typeof(Messages.DiagnosticsMessage))
             {
                 logger.Debug("Server message is {0}", nameof(Messages.DiagnosticsMessage));
                 var cast = (Messages.DiagnosticsMessage)message;
-                if (cast != null)
+                if(cast != null)
                 {
-                    this.OnDiagnosticsEnable?.Invoke(cast);
+                    OnDiagnosticsEnable?.Invoke(cast);
                 }
             }
             else
@@ -546,7 +546,7 @@ namespace CloudVeil.IPC
         /// The status to send to all clients. 
         /// </param>
         public void NotifyStatus(FilterStatus status)
-        {   
+        {
             var msg = new FilterStatusMessage(status);
             PushMessage(msg);
         }
@@ -572,7 +572,7 @@ namespace CloudVeil.IPC
         /// <param name="rule">
         /// The matching rule, if applicable. Defaults to null; 
         /// </param>
-        public void NotifyBlockAction(BlockType type, Uri resource, string category, DateTime blockDate, string rule = null, string textTrigger=null)
+        public void NotifyBlockAction(BlockType type, Uri resource, string category, DateTime blockDate, string rule = null, string textTrigger = null)
         {
             var msg = new NotifyBlockActionMessage(type, resource, rule, category, blockDate, textTrigger);
             PushMessage(msg);
@@ -587,19 +587,19 @@ namespace CloudVeil.IPC
         public void NotifyAuthenticationStatus(AuthenticationAction action, string username = null, AuthenticationResultObject authenticationResult = null)
         {
             // KF - I edited this function to take two arguments instead of one and then refactored all the code that calls it to pass in an AuthenticationResultObject
-            switch (waitingForAuth)
+            switch(waitingForAuth)
             {
                 case true:
-                {
-                    waitingForAuth = action == AuthenticationAction.Authenticated ? false : true;
-                }
-                break;
+                    {
+                        waitingForAuth = action == AuthenticationAction.Authenticated ? false : true;
+                    }
+                    break;
 
                 case false:
-                {
-                    waitingForAuth = action == AuthenticationAction.Required;
-                }
-                break;
+                    {
+                        waitingForAuth = action == AuthenticationAction.Required;
+                    }
+                    break;
             }
 
 
@@ -699,7 +699,7 @@ namespace CloudVeil.IPC
 
         private void addMessageHandler(BaseMessage msg, ReplyHandlerClass handler)
         {
-            if (handler != null)
+            if(handler != null)
             {
                 ipcQueue.AddMessage(msg, handler, 0);
             }

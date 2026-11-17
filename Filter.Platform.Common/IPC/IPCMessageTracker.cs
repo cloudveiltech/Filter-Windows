@@ -4,7 +4,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Util;
 using System;
 using System.Collections.Generic;
@@ -49,7 +49,7 @@ namespace CloudVeil.IPC
         /// <param name="handler">The handler for the reply message.</param>
         public void AddMessage(BaseMessage message, ReplyHandlerClass handler, int retryNum)
         {
-            lock (lockobj)
+            lock(lockobj)
             {
                 messageList.Add(new IPCMessageData() { Message = message, Handler = handler, Retries = retryNum });
             }
@@ -64,12 +64,12 @@ namespace CloudVeil.IPC
             const int MaxRetries = 3;
 
             logger.Info("Retrying IPC messages.");
-            lock (lockobj)
+            lock(lockobj)
             {
-                for(int i=0;i < messageList.Count; i++)
+                for(int i = 0; i < messageList.Count; i++)
                 {
                     var message = messageList[i];
-                    if (message.Retries < MaxRetries)
+                    if(message.Retries < MaxRetries)
                     {
                         communicator.PushMessage(message.Message, message.Handler, message.Retries + 1);
                     }
@@ -88,9 +88,9 @@ namespace CloudVeil.IPC
         {
             try
             {
-                lock (lockobj)
+                lock(lockobj)
                 {
-                    for (int i = 0; i < messageList.Count; i++)
+                    for(int i = 0; i < messageList.Count; i++)
                     {
                         IPCMessageData data = null;
                         data = messageList[i];
@@ -102,11 +102,11 @@ namespace CloudVeil.IPC
                             continue;
                         }
 
-                        if (data.Message.Id == message.ReplyToId)
+                        if(data.Message.Id == message.ReplyToId)
                         {
                             messageList.Remove(data);
 
-                            if (data.Handler != null)
+                            if(data.Handler != null)
                             {
                                 bool ret = data.Handler.TriggerHandler(message);
                                 return ret;
@@ -121,7 +121,7 @@ namespace CloudVeil.IPC
                     return false;
                 }
             }
-            catch (Exception)
+            catch(Exception)
             {
                 return false;
             }

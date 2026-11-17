@@ -1,4 +1,4 @@
-﻿using CloudVeil.IPC.Messages;
+using CloudVeil.IPC.Messages;
 using CloudVeil;
 using Filter.Platform.Common.Data.Models;
 using System;
@@ -25,12 +25,12 @@ namespace FilterProvider.Common.Util
 
             badSslHtmlPage = ResourceStreams.Get("FilterProvider.Common.Resources.BadCertPage.html");
 
-            if (blockedHtmlPage == null)
+            if(blockedHtmlPage == null)
             {
                 logger.Error("Could not load packed HTML block page.");
             }
 
-            if (badSslHtmlPage == null)
+            if(badSslHtmlPage == null)
             {
                 logger.Error("Could not load packed HTML bad SSL page.");
             }
@@ -95,14 +95,14 @@ namespace FilterProvider.Common.Util
 
             // Get category or block type.
             string url_text = urlText == null ? "" : urlText;
-            if (matchingCategory > 0 && blockType == BlockType.None)
+            if(matchingCategory > 0 && blockType == BlockType.None)
             {
                 // matching_category name already set.
             }
             else
             {
                 otherCategories = null;
-                switch (blockType)
+                switch(blockType)
                 {
                     case BlockType.None:
                         matchingCatergoryName = "unknown reason";
@@ -133,7 +133,7 @@ namespace FilterProvider.Common.Util
                         break;
                 }
             }
-            
+
             blockPageContext.Add("url_text", url_text);
             blockPageContext.Add("friendly_url_text", friendlyUrlText);
             blockPageContext.Add("message", message);
@@ -151,7 +151,7 @@ namespace FilterProvider.Common.Util
 
         public static string getUnblockRequestUrl(string blockedUrl, string blockedTerm, string category)
         {
-            var userEmail = WebServiceUtil.Default.UserEmail; 
+            var userEmail = WebServiceUtil.Default.UserEmail;
             string deviceName = string.Empty;
             try
             {

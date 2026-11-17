@@ -1,15 +1,7 @@
-﻿using Filter.Platform.Common.Data.Models;
-using FilterProvider.Common.Util;
-using Gui.CloudVeil.UI.Controls;
-using Newtonsoft.Json.Linq;
+using Filter.Platform.Common.Data.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -39,7 +31,7 @@ namespace Gui.CloudVeil.UI.ViewModels
 
             PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == nameof(AreTimeRestrictionsActive))
+                if(e.PropertyName == nameof(AreTimeRestrictionsActive))
                 {
                     UpdateTimeRestrictionsDescription();
                 }
@@ -48,7 +40,7 @@ namespace Gui.CloudVeil.UI.ViewModels
 
         public void UpdateRestrictions(Dictionary<string, TimeRestrictionModel> restrictions)
         {
-            if (restrictions == null) return;
+            if(restrictions == null) return;
 
             var restrictionsArray = new TimeRestrictionModel[7];
             TimeRestrictionModel model;
@@ -67,13 +59,13 @@ namespace Gui.CloudVeil.UI.ViewModels
                 restrictionsArray[i] = model;
             }
 
-            this.TimeRestrictions = restrictionsArray;
+            TimeRestrictions = restrictionsArray;
         }
 
         public void UpdateCurrentTime()
         {
             DateTime now = DateTime.Now;
-            
+
             double currentTime = now.Hour + (now.Minute / 60.0) + (now.Second / 3600.0);
             CurrentTime = currentTime;
 
@@ -115,7 +107,7 @@ namespace Gui.CloudVeil.UI.ViewModels
             }
         }
 
-        
+
         private double currentTime;
         public double CurrentTime
         {

@@ -1,4 +1,3 @@
-﻿using CloudVeil.Core.Extensions;
 using CloudVeil.Core.Windows.Util.Update;
 using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
@@ -10,11 +9,9 @@ using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
 using FilterProvider.Common.Platform;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -34,7 +31,7 @@ namespace FilterProvider.Common.Util
             this.platformId = platformId;
 
             var bitVersionUri = string.Empty;
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+            if(RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
             {
                 bitVersionUri = "/update/cv4w-arm64/update.xml";
             }
@@ -84,18 +81,18 @@ namespace FilterProvider.Common.Util
         private void initializeUpdateEnvironment()
         {
             Task.Delay(200).Wait();
-             
+
             logger.Info("Shutting down to update.");
 
-            if (appcastUpdaterLock.IsWriteLockHeld)
+            if(appcastUpdaterLock.IsWriteLockHeld)
             {
                 appcastUpdaterLock.ExitWriteLock();
             }
 
-            if (lastFetchedUpdate.IsRestartRequired)
+            if(lastFetchedUpdate.IsRestartRequired)
             {
                 string restartFlagPath = Path.Combine(platformPaths.ApplicationDataFolder, "restart.flag");
-                using (StreamWriter writer = File.CreateText(restartFlagPath))
+                using(StreamWriter writer = File.CreateText(restartFlagPath))
                 {
                     writer.Write("# This file left intentionally blank (tee-hee)\n");
                 }
@@ -106,27 +103,27 @@ namespace FilterProvider.Common.Util
 
             try
             {
-                if (StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
+                if(StringExtensions.Valid(WebServiceUtil.Default.AuthToken))
                 {
                     string authTokenPath = Path.Combine(appDataPath, "authtoken.data");
 
-                    using (StreamWriter writer = File.CreateText(authTokenPath))
+                    using(StreamWriter writer = File.CreateText(authTokenPath))
                     {
                         writer.Write(WebServiceUtil.Default.AuthToken);
                     }
                 }
 
-                if (StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
+                if(StringExtensions.Valid(WebServiceUtil.Default.UserEmail))
                 {
                     string emailPath = Path.Combine(appDataPath, "email.data");
 
-                    using (StreamWriter writer = File.CreateText(emailPath))
+                    using(StreamWriter writer = File.CreateText(emailPath))
                     {
                         writer.Write(WebServiceUtil.Default.UserEmail);
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 logger.Warn("Could not save authtoken or email before update.");
                 LoggerUtil.RecursivelyLogException(logger, e);
@@ -145,18 +142,18 @@ namespace FilterProvider.Common.Util
             {
                 appcastUpdaterLock.EnterWriteLock();
 
-                if (msg.Data == UpdateDialogResult.RemindLater)
+                if(msg.Data == UpdateDialogResult.RemindLater)
                 {
                     AppSettings.Default.RemindLater = DateTime.Now.AddDays(1);
                     AppSettings.Default.Save();
                 }
 
-                if (msg.Data != UpdateDialogResult.UpdateNow)
+                if(msg.Data != UpdateDialogResult.UpdateNow)
                 {
                     return true;
                 }
 
-                if (lastFetchedUpdate != null)
+                if(lastFetchedUpdate != null)
                 {
                     ipcServer.Send<object>(IpcCall.InstallerDownloadStarted, null);
 
@@ -182,13 +179,13 @@ namespace FilterProvider.Common.Util
                     });
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
-                if (appcastUpdaterLock.IsWriteLockHeld)
+                if(appcastUpdaterLock.IsWriteLockHeld)
                 {
                     appcastUpdaterLock.ExitWriteLock();
                 }
@@ -212,7 +209,7 @@ namespace FilterProvider.Common.Util
             {
                 appcastUpdaterLock.EnterWriteLock();
 
-                if (policyConfiguration.Configuration != null)
+                if(policyConfiguration.Configuration != null)
                 {
                     var config = policyConfiguration.Configuration;
                     lastFetchedUpdate = updater.GetLatestUpdate(config != null ? config.UpdateChannel : string.Empty).Result;
@@ -224,11 +221,11 @@ namespace FilterProvider.Common.Util
 
                 result = UpdateCheckResult.UpToDate;
 
-                if (lastFetchedUpdate?.IsNewerThan(lastFetchedUpdate?.CurrentVersion) == true)
+                if(lastFetchedUpdate?.IsNewerThan(lastFetchedUpdate?.CurrentVersion) == true)
                 {
                     logger.Info("Found update. Asking clients to accept update.");
 
-                    if (!isCheckButton && AppSettings.Default.CanUpdate())
+                    if(!isCheckButton && AppSettings.Default.CanUpdate())
                     {
                         systemServices.EnsureGuiRunning(true);
                         Task.Delay(500).Wait();
@@ -239,18 +236,18 @@ namespace FilterProvider.Common.Util
 
                     result = UpdateCheckResult.UpdateAvailable;
                 }
-                else if (lastFetchedUpdate != null)
+                else if(lastFetchedUpdate != null)
                 {
                     result = UpdateCheckResult.UpToDate;
 
                     // We send an update check response here for only !isCheckButton because the other case returns a reply directly to its request message.
-                    if (!isCheckButton)
+                    if(!isCheckButton)
                     {
                         ipcServer.Send<UpdateCheckInfo>(IpcCall.CheckForUpdates, new UpdateCheckInfo(AppSettings.Default.LastUpdateCheck, result));
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
                 hadError = true;
@@ -259,7 +256,7 @@ namespace FilterProvider.Common.Util
             {
                 try
                 {
-                    switch (result)
+                    switch(result)
                     {
                         case UpdateCheckResult.UpdateAvailable:
                         case UpdateCheckResult.UpToDate:
@@ -270,7 +267,7 @@ namespace FilterProvider.Common.Util
                     AppSettings.Default.UpdateCheckResult = result;
                     AppSettings.Default.Save();
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     logger.Error(ex, "AppSettings update threw.");
                 }
@@ -278,7 +275,7 @@ namespace FilterProvider.Common.Util
                 appcastUpdaterLock.ExitWriteLock();
             }
 
-            if (!hadError)
+            if(!hadError)
             {
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it

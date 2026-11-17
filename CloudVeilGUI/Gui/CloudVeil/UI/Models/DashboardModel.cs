@@ -1,18 +1,16 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-using CloudVeil.Core.Windows.Util;
 using CloudVeil.IPC;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight;
 using NLog;
 using System;
 using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.Models
 {
@@ -20,7 +18,7 @@ namespace Gui.CloudVeil.UI.Models
     {
         public delegate void RelaxedPolicyRequestDelegate();
 
-        
+
 
         private readonly Logger logger;
 

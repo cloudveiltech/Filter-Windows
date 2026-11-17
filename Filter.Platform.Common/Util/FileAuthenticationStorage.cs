@@ -1,10 +1,9 @@
-﻿// Copyright © 2018 CloudVeil Technology, Inc.
+// Copyright © 2018 CloudVeil Technology, Inc.
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 
-using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -21,7 +20,7 @@ namespace Filter.Platform.Common.Util
 
         private void initializeDictionary()
         {
-            if (authDict == null)
+            if(authDict == null)
             {
                 authDict = new Dictionary<string, string>();
 
@@ -35,16 +34,16 @@ namespace Filter.Platform.Common.Util
         {
             string fileName = Path.Combine(pathProvider.ApplicationDataFolder, "authentication.settings");
 
-            if (!File.Exists(fileName))
+            if(!File.Exists(fileName))
             {
                 return;
             }
 
-            using (FileStream stream = new FileStream(fileName, FileMode.Open))
-            using (StreamReader reader = new StreamReader(stream))
+            using(FileStream stream = new FileStream(fileName, FileMode.Open))
+            using(StreamReader reader = new StreamReader(stream))
             {
                 string line = null;
-                while ((line = reader.ReadLine()) != null)
+                while((line = reader.ReadLine()) != null)
                 {
                     string[] lineParts = line.Split(new char[] { '=' }, 1);
 
@@ -57,10 +56,10 @@ namespace Filter.Platform.Common.Util
         {
             string fileName = Path.Combine(pathProvider.ApplicationDataFolder, "authentication.settings");
 
-            using (FileStream stream = new FileStream(fileName, FileMode.Create))
-            using (StreamWriter writer = new StreamWriter(stream))
+            using(FileStream stream = new FileStream(fileName, FileMode.Create))
+            using(StreamWriter writer = new StreamWriter(stream))
             {
-                foreach (var pair in authDict)
+                foreach(var pair in authDict)
                 {
                     writer.WriteLine($"{pair.Key}={pair.Value}");
                 }

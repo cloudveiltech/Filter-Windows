@@ -1,4 +1,4 @@
-﻿// Copyright © 2018 CloudVeil Technology, Inc.
+// Copyright © 2018 CloudVeil Technology, Inc.
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -62,7 +62,7 @@ namespace Filter.Platform.Common.IPC
             {
                 ClientSocket.Send(msg);
             }
-            catch (SocketException)
+            catch(SocketException)
             {
             }
         }
@@ -74,7 +74,7 @@ namespace Filter.Platform.Common.IPC
                 return;
             }
 
-            if (receiveResult == null)
+            if(receiveResult == null)
             {
                 receiveBuffer = receiveBuffer ?? new byte[4096];
                 SocketError error;
@@ -83,7 +83,7 @@ namespace Filter.Platform.Common.IPC
 
                 if(error != SocketError.Success && error != SocketError.IOPending)
                 {
-                    if (server != null)
+                    if(server != null)
                     {
                         server.RemoveClient(this);
                     }
@@ -126,12 +126,12 @@ namespace Filter.Platform.Common.IPC
             // There might be the end of one message and the start of another in the receive buffer.
 
 
-            if (error != SocketError.Success)
+            if(error != SocketError.Success)
             {
                 server.RemoveClient(this);
                 continueAwaitingBytes = false;
             }
-            else if (receiveRet != 0)
+            else if(receiveRet != 0)
             {
                 int loops = 0;
                 // Process messages.
@@ -144,9 +144,9 @@ namespace Filter.Platform.Common.IPC
                     }
 
                     // If buffer is null, see if this is the beginning of a message.
-                    if (MyBuffer == null)
+                    if(MyBuffer == null)
                     {
-                        if (receiveBuffer[receiveBufferIdx] == SocketPipeHelper.MagicByte)
+                        if(receiveBuffer[receiveBufferIdx] == SocketPipeHelper.MagicByte)
                         {
                             int length = 0;
                             length = BitConverter.ToInt32(receiveBuffer, receiveBufferIdx + 4);
@@ -156,7 +156,7 @@ namespace Filter.Platform.Common.IPC
                         }
                     }
 
-                    if (MyBuffer != null)
+                    if(MyBuffer != null)
                     {
                         try
                         {
@@ -166,7 +166,7 @@ namespace Filter.Platform.Common.IPC
                             Buffer.BlockCopy(receiveBuffer, receiveBufferIdx, MyBuffer, BytesReceived, lengthLeft);
                             BytesReceived += lengthLeft;
 
-                            if (BytesReceived >= CompletedBufferLength)
+                            if(BytesReceived >= CompletedBufferLength)
                             {
                                 handleBuffer(MyBuffer);
                                 MyBuffer = null;
@@ -182,7 +182,7 @@ namespace Filter.Platform.Common.IPC
                                 break;
                             }
                         }
-                        catch (Exception ex)
+                        catch(Exception ex)
                         {
                             LoggerUtil.RecursivelyLogException(LoggerUtil.GetAppWideLogger(), ex);
                         }
@@ -244,14 +244,14 @@ namespace Filter.Platform.Common.IPC
 
                 IFormatter formatter = new BinaryFormatter();
 
-                using (MemoryStream stream = new MemoryStream())
+                using(MemoryStream stream = new MemoryStream())
                 {
                     formatter.Serialize(stream, msg);
 
                     byte[] arr = stream.ToArray();
 
                     byte[] message = SocketPipeHelper.BuildMessage(MessageType.Message, arr);
-                    foreach (var client in connectedClients)
+                    foreach(var client in connectedClients)
                     {
                         client.SendBytes(message);
                     }
@@ -295,8 +295,8 @@ namespace Filter.Platform.Common.IPC
         internal void RemoveClient(ClientRepresentation client)
         {
             Console.WriteLine("Removing a client --------");
-            this.connectedClients.Remove(client);
-            this.ClientDisconnected?.Invoke(this);
+            connectedClients.Remove(client);
+            ClientDisconnected?.Invoke(this);
         }
 
         internal void ProcessMessageBytes(byte[] buffer)
@@ -306,16 +306,16 @@ namespace Filter.Platform.Common.IPC
             IFormatter formatter = new BinaryFormatter();
 
             MessageType type = SocketPipeHelper.GetMessageType(buffer);
-            if (type == MessageType.Message || type == MessageType.BroadcastMessage)
+            if(type == MessageType.Message || type == MessageType.BroadcastMessage)
             {
-                using (MemoryStream ms = new MemoryStream())
+                using(MemoryStream ms = new MemoryStream())
                 {
                     ms.Write(buffer, 8, buffer.Length - 8);
                     ms.Position = 0;
 
                     object o = formatter.Deserialize(ms);
 
-                    if (o is BaseMessage)
+                    if(o is BaseMessage)
                     {
                         ProcessMessage(o as BaseMessage);
                     }
@@ -325,7 +325,7 @@ namespace Filter.Platform.Common.IPC
 
         internal void ProcessMessage(BaseMessage msg)
         {
-            this.ClientMessage?.Invoke(this, msg);
+            ClientMessage?.Invoke(this, msg);
         }
 
         private void publishSocketPort()
@@ -338,7 +338,7 @@ namespace Filter.Platform.Common.IPC
 
                 File.WriteAllText(publishPath, myPort.ToString());
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(logger, ex);
             }
@@ -353,10 +353,10 @@ namespace Filter.Platform.Common.IPC
 
                 bool isAsync = false;
 
-                while (!(isAsync = serverSocket.AcceptAsync(args)))
+                while(!(isAsync = serverSocket.AcceptAsync(args)))
                 {
                     // Accept completed synchronously.
-                    if (args.SocketError == SocketError.Success)
+                    if(args.SocketError == SocketError.Success)
                     {
                         acceptCompleted(args.AcceptSocket);
                         args.AcceptSocket = null;
@@ -393,7 +393,7 @@ namespace Filter.Platform.Common.IPC
             }
             finally
             {
-                if (!isStopped)
+                if(!isStopped)
                 {
                     serverAccept();
                 }
@@ -404,14 +404,14 @@ namespace Filter.Platform.Common.IPC
         {
             try
             {
-                if (e.SocketError == SocketError.Success)
+                if(e.SocketError == SocketError.Success)
                 {
                     acceptCompleted(e.AcceptSocket);
                 }
             }
             finally
             {
-                if (!isStopped)
+                if(!isStopped)
                 {
                     serverAccept();
                 }
@@ -420,4 +420,3 @@ namespace Filter.Platform.Common.IPC
 
     }
 }
- 

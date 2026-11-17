@@ -1,11 +1,9 @@
-﻿/**
+/**
  * Covered under Ms-PL. Copyright Microsoft
  */
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FilterProvider.Common.Data
 {
@@ -63,21 +61,21 @@ namespace FilterProvider.Common.Data
         public BloomFilter(int capacity, float errorRate, HashFunction hashFunction, int m, int k)
         {
             // validate the params are in range
-            if (capacity < 1)
+            if(capacity < 1)
                 throw new ArgumentOutOfRangeException("capacity", capacity, "capacity must be > 0");
-            if (errorRate >= 1 || errorRate <= 0)
+            if(errorRate >= 1 || errorRate <= 0)
                 throw new ArgumentOutOfRangeException("errorRate", errorRate, String.Format("errorRate must be between 0 and 1, exclusive. Was {0}", errorRate));
-            if (m < 1) // from overflow in bestM calculation
+            if(m < 1) // from overflow in bestM calculation
                 throw new ArgumentOutOfRangeException(String.Format("The provided capacity and errorRate values would result in an array of length > int.MaxValue. Please reduce either of these values. Capacity: {0}, Error rate: {1}", capacity, errorRate));
 
             // set the secondary hash function
-            if (hashFunction == null)
+            if(hashFunction == null)
             {
-                if (typeof(T) == typeof(String))
+                if(typeof(T) == typeof(String))
                 {
                     getHashSecondary = hashString;
                 }
-                else if (typeof(T) == typeof(int))
+                else if(typeof(T) == typeof(int))
                 {
                     getHashSecondary = hashInt32;
                 }
@@ -102,7 +100,7 @@ namespace FilterProvider.Common.Data
             // start flipping bits for each hash of item
             int primaryHash = item.GetHashCode();
             int secondaryHash = getHashSecondary(item);
-            for (int i = 0; i < hashFunctionCount; i++)
+            for(int i = 0; i < hashFunctionCount; i++)
             {
                 int hash = computeHash(primaryHash, secondaryHash, i);
                 hashBits[hash] = true;
@@ -118,10 +116,10 @@ namespace FilterProvider.Common.Data
         {
             int primaryHash = item.GetHashCode();
             int secondaryHash = getHashSecondary(item);
-            for (int i = 0; i < hashFunctionCount; i++)
+            for(int i = 0; i < hashFunctionCount; i++)
             {
                 int hash = computeHash(primaryHash, secondaryHash, i);
-                if (hashBits[hash] == false)
+                if(hashBits[hash] == false)
                     return false;
             }
             return true;
@@ -141,9 +139,9 @@ namespace FilterProvider.Common.Data
         private int trueBits()
         {
             int output = 0;
-            foreach (bool bit in hashBits)
+            foreach(bool bit in hashBits)
             {
-                if (bit == true)
+                if(bit == true)
                     output++;
             }
             return output;
@@ -175,12 +173,12 @@ namespace FilterProvider.Common.Data
         private static float bestErrorRate(int capacity)
         {
             float c = (float)(1.0 / capacity);
-            if (c == 1.0f)
+            if(c == 1.0f)
             {
                 c = 0.05f;
             }
 
-            if (c != 0)
+            if(c != 0)
                 return c;
             else
                 return (float)Math.Pow(0.6185, int.MaxValue / capacity); // http://www.cs.princeton.edu/courses/archive/spring02/cs493/lec7.pdf
@@ -218,7 +216,7 @@ namespace FilterProvider.Common.Data
             string s = input as string;
             int hash = 0;
 
-            for (int i = 0; i < s.Length; i++)
+            for(int i = 0; i < s.Length; i++)
             {
                 hash += s[i];
                 hash += (hash << 10);

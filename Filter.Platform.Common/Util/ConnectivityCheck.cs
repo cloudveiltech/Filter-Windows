@@ -1,9 +1,6 @@
-﻿using CloudVeil;
-using Filter.Platform.Common.Util;
+using CloudVeil;
 using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Filter.Platform.Common.Util
 {
@@ -31,14 +28,14 @@ namespace Filter.Platform.Common.Util
             {
                 captivePortalCheck = client.DownloadString(CompileSecrets.ConnectivityCheck + "/ncsi.txt");
 
-                if (captivePortalCheck.Trim(' ', '\r', '\n', '\t') != CompileSecrets.NCSIString)
+                if(captivePortalCheck.Trim(' ', '\r', '\n', '\t') != CompileSecrets.NCSIString)
                 {
                     return Accessible.UnexpectedResponse;
                 }
             }
-            catch (WebException ex)
+            catch(WebException ex)
             {
-                if (ex.Response == null)
+                if(ex.Response == null)
                 {
                     return Accessible.No;
                 }
@@ -46,7 +43,7 @@ namespace Filter.Platform.Common.Util
                 logger.Info("Got an error response from captive portal check. {0}", ex.Status);
                 return Accessible.UnexpectedResponse;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 LoggerUtil.RecursivelyLogException(logger, ex);
                 return Accessible.Yes;

@@ -27,7 +27,6 @@ using Filter.Platform.Common.Util;
 using FilterProvider.Common.Data.Filtering;
 using FilterProvider.Common.Util;
 using Filter.Platform.Common;
-using System.Text.RegularExpressions;
 using DotNet.Globbing;
 using GoProxyWrapper;
 using CloudVeil.IPC;
@@ -145,7 +144,7 @@ namespace FilterProvider.Common.Configuration
             Stream stream = null;
             try
             {
-                using (var fs = File.OpenRead(filePath))
+                using(var fs = File.OpenRead(filePath))
                 {
                     if(isEncrypted)
                     {
@@ -156,7 +155,7 @@ namespace FilterProvider.Common.Configuration
                         stream = fs;
                     }
 
-                    using (SHA1 sec = new SHA1CryptoServiceProvider())
+                    using(SHA1 sec = new SHA1CryptoServiceProvider())
                     {
                         byte[] bt = sec.ComputeHash(stream);
                         var lHash = BitConverter.ToString(bt).Replace("-", "");
@@ -174,7 +173,7 @@ namespace FilterProvider.Common.Configuration
             {
                 try
                 {
-                    if (isEncrypted) stream?.Dispose();
+                    if(isEncrypted) stream?.Dispose();
                 }
                 catch(Exception ex)
                 {
@@ -232,7 +231,7 @@ namespace FilterProvider.Common.Configuration
                 return null;
             }
 
-            foreach (var result in filterListResults)
+            foreach(var result in filterListResults)
             {
                 if(result.Value == null || result.Value == false)
                 {
@@ -248,7 +247,7 @@ namespace FilterProvider.Common.Configuration
             HttpStatusCode code;
             var rHashBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserConfigSumCheck, out code);
 
-            if (code == HttpStatusCode.OK && rHashBytes != null)
+            if(code == HttpStatusCode.OK && rHashBytes != null)
             {
                 // Notify all clients that we just successfully made contact with the server.
                 // We don't set the status here, because we'd have to store it and set it
@@ -260,7 +259,7 @@ namespace FilterProvider.Common.Configuration
                 bool needsUpdate = false;
                 string filePathSHA1 = getSHA1ForFilePath(configFilePath, isEncrypted: false);
 
-                if (filePathSHA1 == null)
+                if(filePathSHA1 == null)
                 {
                     needsUpdate = true;
                 }
@@ -296,7 +295,7 @@ namespace FilterProvider.Common.Configuration
             HttpStatusCode code;
 
             bool? isVerified = VerifyConfiguration();
-            if (isVerified == true)
+            if(isVerified == true)
             {
                 return false;
             }
@@ -304,7 +303,7 @@ namespace FilterProvider.Common.Configuration
             logger.Info("Updating filtering rules, rules missing or integrity violation.");
             var configBytes = WebServiceUtil.Default.RequestResource(ServiceResource.UserConfigRequest, out code);
 
-            if (code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
+            if(code == HttpStatusCode.OK && configBytes != null && configBytes.Length > 0)
             {
                 File.WriteAllBytes(configFilePath, configBytes);
                 return true;
@@ -339,7 +338,7 @@ namespace FilterProvider.Common.Configuration
                 return null;
             }
 
-            if (isVerified == true)
+            if(isVerified == true)
             {
                 return false;
             }
@@ -367,12 +366,12 @@ namespace FilterProvider.Common.Configuration
             bool responseReceived;
             byte[] listBytes = WebServiceUtil.Default.GetFilterLists(listsToFetch, out code, out responseReceived);
 
-            if (listBytes != null)
+            if(listBytes != null)
             {
                 Dictionary<string, string> rulesets = new Dictionary<string, string>();
 
-                using (MemoryStream ms = new MemoryStream(listBytes))
-                using (StreamReader reader = new StreamReader(ms))
+                using(MemoryStream ms = new MemoryStream(listBytes))
+                using(StreamReader reader = new StreamReader(ms))
                 {
                     string currentList = null;
                     bool errorList = false;
@@ -394,15 +393,15 @@ namespace FilterProvider.Common.Configuration
                             }
                             else
                             {
-                                fileBuilder.Replace("\n", "", fileBuilder.Length-1, 1);
+                                fileBuilder.Replace("\n", "", fileBuilder.Length - 1, 1);
                                 rulesets[currentList] = fileBuilder.ToString();
                                 fileBuilder.Clear();
-                                
+
                                 try
                                 {
                                     byte[] fileBytes = Encoding.UTF8.GetBytes(rulesets[currentList]);
-                                    using (FileStream stream = new FileStream(getListFilePath(currentList), FileMode.Create))
-                                    using (CryptoStream cs = RulesetEncryption.EncryptionStream(stream))
+                                    using(FileStream stream = new FileStream(getListFilePath(currentList), FileMode.Create))
+                                    using(CryptoStream cs = RulesetEncryption.EncryptionStream(stream))
                                     {
                                         cs.Write(fileBytes, 0, fileBytes.Length);
 
@@ -452,9 +451,9 @@ namespace FilterProvider.Common.Configuration
                 {
                     string tempPath = Path.Combine(tempFolderPath, Path.GetFileName(path));
 
-                    using (var encryptedStream = File.OpenRead(path))
-                    using (var cs = RulesetEncryption.DecryptionStream(encryptedStream))
-                    using (var output = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
+                    using(var encryptedStream = File.OpenRead(path))
+                    using(var cs = RulesetEncryption.DecryptionStream(encryptedStream))
+                    using(var output = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
                     {
                         cs.CopyTo(output);
                     }
@@ -462,7 +461,7 @@ namespace FilterProvider.Common.Configuration
                 catch(Exception ex)
                 {
                     logger.Error($"decryptLists threw exception for {path}: {ex}");
-                //    return false;
+                    //    return false;
                 }
             }
 
@@ -480,7 +479,7 @@ namespace FilterProvider.Common.Configuration
 
                 Directory.Delete(getTempFolder());
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 logger.Error($"Failed to delete temporary ruleset folder. {ex}");
             }
@@ -494,13 +493,13 @@ namespace FilterProvider.Common.Configuration
 
                 var listFolderPath = getListFolder();
 
-                if (Directory.Exists(listFolderPath))
+                if(Directory.Exists(listFolderPath))
                 {
                     // Recreate our filter collection and reset all categories to be disabled.
                     AdBlockMatcherApi.Initialize();
 
                     // Recreate our triggers container.
-                    if (textTriggers != null)
+                    if(textTriggers != null)
                     {
                         textTriggers.Dispose();
                     }
@@ -527,11 +526,11 @@ namespace FilterProvider.Common.Configuration
 
                     var rulePath = paths.GetPath("rules.dat");
 
-                    if (File.Exists(rulePath))
+                    if(File.Exists(rulePath))
                     {
-                      //  AdBlockMatcherApi.Load(rulePath);
+                        //  AdBlockMatcherApi.Load(rulePath);
                     }
-                    foreach (var listModel in Configuration.ConfiguredLists)
+                    foreach(var listModel in Configuration.ConfiguredLists)
                     {
                         var rulesetPath = getListFilePath(listModel.RelativeListPath, tempFolder);
 
@@ -541,11 +540,11 @@ namespace FilterProvider.Common.Configuration
 
                             MappedFilterListCategoryModel categoryModel = null;
 
-                            switch (listModel.ListType)
+                            switch(listModel.ListType)
                             {
                                 case PlainTextFilteringListType.Blacklist:
                                     {
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
+                                        if(TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
                                             AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, ListType.Blacklist);
                                             categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
@@ -558,7 +557,7 @@ namespace FilterProvider.Common.Configuration
                                         MappedBypassListCategoryModel bypassCategoryModel = null;
 
                                         // Must be loaded twice. Once as a blacklist, once as a whitelist.
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out bypassCategoryModel))
+                                        if(TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out bypassCategoryModel))
                                         {
                                             AdBlockMatcherApi.ParseRuleFile(rulesetPath, bypassCategoryModel.CategoryId, ListType.BypassList);
                                             categoryIndex.SetIsCategoryEnabled(bypassCategoryModel.CategoryId, true);
@@ -570,9 +569,9 @@ namespace FilterProvider.Common.Configuration
                                 case PlainTextFilteringListType.TextTrigger:
                                     {
                                         // Always load triggers as blacklists.
-                                        if (TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
+                                        if(TryFetchOrCreateCategoryMap(thisListCategoryName, listModel.ListType, out categoryModel))
                                         {
-                                            using (var listStream = File.OpenRead(rulesetPath))
+                                            using(var listStream = File.OpenRead(rulesetPath))
                                             {
                                                 try
                                                 {
@@ -580,7 +579,7 @@ namespace FilterProvider.Common.Configuration
 
                                                     totalTriggersLoaded += (uint)triggersLoaded;
 
-                                                    if (triggersLoaded > 0)
+                                                    if(triggersLoaded > 0)
                                                     {
                                                         categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                                                     }
@@ -622,7 +621,7 @@ namespace FilterProvider.Common.Configuration
 
                             totalTriggersLoaded += (uint)triggersLoaded;
 
-                            if (triggersLoaded > 0)
+                            if(triggersLoaded > 0)
                             {
                                 categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
                             }
@@ -636,12 +635,12 @@ namespace FilterProvider.Common.Configuration
                         AddCustomConfiguredSiteList(Configuration.CustomWhitelist, tempFolder, ".user.custowhitelist.rules.txt", "/user/custowhitelist", PlainTextFilteringListType.Whitelist, ListType.Whitelist);
                     }
 
-                    if (Configuration != null && Configuration.CustomBypasslist != null && Configuration.CustomBypasslist.Count > 0)
+                    if(Configuration != null && Configuration.CustomBypasslist != null && Configuration.CustomBypasslist.Count > 0)
                     {
                         AddCustomConfiguredSiteList(Configuration.CustomBypasslist, tempFolder, ".user.custobypasslist.rules.txt", "/user/custobypasslist", PlainTextFilteringListType.BypassList, ListType.BypassList);
                     }
 
-                    if (Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
+                    if(Configuration != null && Configuration.SelfModeration != null && Configuration.SelfModeration.Count > 0)
                     {
                         AddCustomConfiguredSiteList(Configuration.SelfModeration, tempFolder, ".user.self_moderation.rules.txt", "/user/self_moderation", PlainTextFilteringListType.Blacklist, ListType.Blacklist);
                     }
@@ -678,19 +677,19 @@ namespace FilterProvider.Common.Configuration
             // The easiest way to do this is to limit the characters to 'safe' characters.
             string rulesetPath = Path.Combine(tempFolder, fileName);
 
-            using (var rulesetStream = File.OpenWrite(rulesetPath))
-            using (var writer = new StreamWriter(rulesetStream))
+            using(var rulesetStream = File.OpenWrite(rulesetPath))
+            using(var writer = new StreamWriter(rulesetStream))
             {
-                foreach (string site in ruleSet)
+                foreach(string site in ruleSet)
                 {
-                    if (site == null) continue;
-                    
+                    if(site == null) continue;
+
                     writer.WriteLine(site);
                 }
             }
 
             MappedBypassListCategoryModel categoryModel = null;
-            if (TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
+            if(TryFetchOrCreateCategoryMap(categoryPath, plainTextFilteringListType, out categoryModel))
             {
                 AdBlockMatcherApi.ParseRuleFile(rulesetPath, categoryModel.CategoryId, mappedListType);
                 categoryIndex.SetIsCategoryEnabled(categoryModel.CategoryId, true);
@@ -705,16 +704,16 @@ namespace FilterProvider.Common.Configuration
 
                 if(File.Exists(configFilePath))
                 {
-                    using (var cfgStream = File.OpenRead(configFilePath))
+                    using(var cfgStream = File.OpenRead(configFilePath))
                     {
                         return LoadConfiguration(cfgStream);
                     }
                 }
 
                 logger.Error("Configuration file does not exist.");
-                return false;          
+                return false;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
@@ -738,7 +737,7 @@ namespace FilterProvider.Common.Configuration
                 {
                     string cfgJson = string.Empty;
 
-                    using (TextReader textReader = new StreamReader(cfgStream))
+                    using(TextReader textReader = new StreamReader(cfgStream))
                     {
                         cfgJson = textReader.ReadToEnd();
                     }
@@ -761,7 +760,7 @@ namespace FilterProvider.Common.Configuration
                         return false;
                     }
 
-                    if (Configuration.UpdateFrequency.TotalMinutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
+                    if(Configuration.UpdateFrequency.TotalMinutes <= 0 || Configuration.UpdateFrequency == Timeout.InfiniteTimeSpan)
                     {
                         // Just to ensure that we enforce a minimum value here.
                         logger.Info($"UpdateFrequency set to fallback because response can't be parsed"); ;
@@ -772,7 +771,7 @@ namespace FilterProvider.Common.Configuration
                     loadAppList(WhitelistedApplications, Configuration.WhitelistedApplications, WhitelistedApplicationGlobs);
 
                     TimeRestrictions = new TimeRestrictionModel[7];
-                    
+
                     for(int i = 0; i < 7; i++)
                     {
                         DayOfWeek day = (DayOfWeek)i;
@@ -788,7 +787,7 @@ namespace FilterProvider.Common.Configuration
 
                     AreAnyTimeRestrictionsEnabled = TimeRestrictions.Any(r => r?.RestrictionsEnabled == true);
 
-                    if (Configuration.CannotTerminate)
+                    if(Configuration.CannotTerminate)
                     {
                         // Turn on process protection if requested.
                         PlatformTypes.New<IAntitampering>().EnableProcessProtection();
@@ -801,7 +800,7 @@ namespace FilterProvider.Common.Configuration
                     // Don't do list loading in the same function as configuration loading, because those are now indeed two separate functions.
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
                 return false;
@@ -816,7 +815,7 @@ namespace FilterProvider.Common.Configuration
 
             globs?.Clear();
 
-            foreach (var app in appList)
+            foreach(var app in appList)
             {
                 myAppList.Add(app);
 
@@ -840,10 +839,10 @@ namespace FilterProvider.Common.Configuration
                             }
                         });
 
-                        if (glob != null)
+                        if(glob != null)
                             globs.Add(glob);
                     }
-                    catch (Exception)
+                    catch(Exception)
                     {
                         logger.Warn("Invalid glob '{0}'. Not adding.", app);
                     }
@@ -872,21 +871,21 @@ namespace FilterProvider.Common.Configuration
             logger.Info("CATEGORY {0}", categoryName);
 
             MappedFilterListCategoryModel existingCategory = null;
-            if (!generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
+            if(!generatedCategoriesMap.TryGetValue(categoryName, out existingCategory))
             {
                 // We can't generate anymore categories. Sorry, but the rest get ignored.
-                if (generatedCategoriesMap.Count >= short.MaxValue)
+                if(generatedCategoriesMap.Count >= short.MaxValue)
                 {
                     logger.Error("The maximum number of filtering categories has been exceeded.");
                     model = null;
                     return false;
                 }
 
-                if (typeof(T) == typeof(MappedBypassListCategoryModel))
+                if(typeof(T) == typeof(MappedBypassListCategoryModel))
                 {
                     MappedFilterListCategoryModel secondCategory = null;
 
-                    if (TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", PlainTextFilteringListType.Whitelist, out secondCategory))
+                    if(TryFetchOrCreateCategoryMap(categoryName + "_as_whitelist", PlainTextFilteringListType.Whitelist, out secondCategory))
                     {
                         var newModel = (T)(MappedFilterListCategoryModel)new MappedBypassListCategoryModel((short)((generatedCategoriesMap.Count) + 1), secondCategory.CategoryId, categoryName, secondCategory.CategoryName);
                         generatedCategoriesMap.GetOrAdd(categoryName, newModel);

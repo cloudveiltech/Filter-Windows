@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,19 +7,14 @@
 
 using CloudVeil.Core.Windows.Util;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Gui.CloudVeil.Util;
 
 namespace CloudVeil.Core.Extensions
 {
     public static class NameValueCollectionExtensions
     {
         public static bool TryGetHostDeclaration(this NameValueCollection collection, out string host)
-        {   
+        {
             if((host = collection["Host"]) != null)
             {
                 return true;
@@ -98,6 +93,6 @@ namespace CloudVeil.Core.Extensions
 
             result = null;
             return false;
-        }       
+        }
     }
 }

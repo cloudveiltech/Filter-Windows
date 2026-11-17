@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -47,7 +47,7 @@ namespace CloudVeil.Core.Windows.Services
         private Process processHandle = null;
 
         private string mutexName = string.Empty;
-        private Logger  logger = Filter.Platform.Common.Util.LoggerUtil.GetAppWideLogger();
+        private Logger logger = Filter.Platform.Common.Util.LoggerUtil.GetAppWideLogger();
 
         private static readonly HashSet<char> toRemoveFromPath = new HashSet<char>
         {
@@ -82,7 +82,7 @@ namespace CloudVeil.Core.Windows.Services
 
             isTargetService = isService;
 
-            if (ensureRunning)
+            if(ensureRunning)
             {
                 var t = new Thread(EnsureAlreadyRunning);
                 t.IsBackground = true;
@@ -92,7 +92,7 @@ namespace CloudVeil.Core.Windows.Services
 
         public void EnsureAlreadyRunning()
         {
-            
+
             logger.Info($"EnsureAlreadyRunning {processToWatch}");
 
             foreach(var proc in Process.GetProcesses())
@@ -160,7 +160,7 @@ namespace CloudVeil.Core.Windows.Services
             }
             logger.Info($"OnProcExit {processBinaryAbsPath}, {exitCode}");
 
-            if (exitCode < (int)ExitCodes.ShutdownWithSafeguards)
+            if(exitCode < (int)ExitCodes.ShutdownWithSafeguards)
             {
                 InfinitelyStartAwaitTarget();
             }
@@ -178,7 +178,7 @@ namespace CloudVeil.Core.Windows.Services
             scDelete.UseShellExecute = false;
             scDelete.CreateNoWindow = true;
             var deleteProc = Process.Start(scDelete);
-            deleteProc.WaitForExit(); 
+            deleteProc.WaitForExit();
 
             scDelete.Arguments = "delete Sentinel";
             scDelete.UseShellExecute = false;
@@ -191,6 +191,8 @@ namespace CloudVeil.Core.Windows.Services
             scDelete.CreateNoWindow = true;
             deleteProc = Process.Start(scDelete);
             deleteProc.WaitForExit();
+
+
         }
 
         protected virtual bool Resuscitate()
@@ -201,10 +203,10 @@ namespace CloudVeil.Core.Windows.Services
             var mutex = new Mutex(true, string.Format(@"Global\{0}", mutexName), out createdNew);
 
             var alive = Process.GetProcessesByName(processToWatch).FirstOrDefault(p => !p.HasExited);
-            if (alive != null)
-            { 
-                SetProcessHandle(alive); 
-                return true; 
+            if(alive != null)
+            {
+                SetProcessHandle(alive);
+                return true;
             }
 
             try
@@ -216,68 +218,68 @@ namespace CloudVeil.Core.Windows.Services
                         switch(isTargetService)
                         {
                             case true:
-                            {
-                                Uninstall();
-
-                                var installStartInfo = new ProcessStartInfo(processBinaryAbsPath);
-                                installStartInfo.Arguments = "install";
-                                installStartInfo.UseShellExecute = false;
-                                installStartInfo.CreateNoWindow = true;
-
-                                var installProc = Process.Start(installStartInfo);
-                                installProc.WaitForExit();
-
-                                TimeSpan timeout = TimeSpan.FromSeconds(60);
-
-                                foreach(var service in ServiceController.GetServices())
                                 {
-                                    if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
-                                    {
-                                        if(service.Status == ServiceControllerStatus.StartPending)
-                                        {
-                                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-                                        }
+                                    Uninstall();
 
-                                        if(service.Status != ServiceControllerStatus.Running)
+                                    var installStartInfo = new ProcessStartInfo(processBinaryAbsPath);
+                                    installStartInfo.Arguments = "install";
+                                    installStartInfo.UseShellExecute = false;
+                                    installStartInfo.CreateNoWindow = true;
+
+                                    var installProc = Process.Start(installStartInfo);
+                                    installProc.WaitForExit();
+
+                                    TimeSpan timeout = TimeSpan.FromSeconds(60);
+
+                                    foreach(var service in ServiceController.GetServices())
+                                    {
+                                        if(service.ServiceName.IndexOf(Path.GetFileNameWithoutExtension(processBinaryAbsPath), StringComparison.OrdinalIgnoreCase) != -1)
                                         {
-                                            service.Start();
-                                            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                            if(service.Status == ServiceControllerStatus.StartPending)
+                                            {
+                                                service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                            }
+
+                                            if(service.Status != ServiceControllerStatus.Running)
+                                            {
+                                                service.Start();
+                                                service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                                            }
                                         }
                                     }
-                                }
-
-                                success = true;
-                            }
-                            break;
-
-                            case false:
-                            {
-                                try
-                                {
-                                    var startInfo = new ProcessStartInfo(processBinaryAbsPath);
-                                    startInfo.LoadUserProfile = true;
-                                    startInfo.UseShellExecute = false;
-                                    startInfo.CreateNoWindow = false;
-                                    startInfo.Verb = "runas";
-                                    Process.Start(startInfo);
 
                                     success = true;
                                 }
-                                catch(Exception e)
+                                break;
+
+                            case false:
                                 {
-                                    var sb = new StringBuilder();
-
-                                    while(e != null)
+                                    try
                                     {
-                                        sb.Append(e.Message);
-                                        sb.Append(e.StackTrace);
-                                        e = e.InnerException;
-                                    }
+                                        var startInfo = new ProcessStartInfo(processBinaryAbsPath);
+                                        startInfo.LoadUserProfile = true;
+                                        startInfo.UseShellExecute = false;
+                                        startInfo.CreateNoWindow = false;
+                                        startInfo.Verb = "runas";
+                                        Process.Start(startInfo);
 
-                                    success = false;
+                                        success = true;
+                                    }
+                                    catch(Exception e)
+                                    {
+                                        var sb = new StringBuilder();
+
+                                        while(e != null)
+                                        {
+                                            sb.Append(e.Message);
+                                            sb.Append(e.StackTrace);
+                                            e = e.InnerException;
+                                        }
+
+                                        success = false;
+                                    }
                                 }
-                            }
-                            break;
+                                break;
                         }
                     }
                     else

@@ -5,7 +5,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using System;
 using System.Security.Principal;
 using System.IO;
 using System.Diagnostics;
@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Filter.Platform.Common.Util;
 using System.ServiceProcess;
-using System.Net;
 
 namespace FilterAgent.Windows
 {
@@ -128,7 +127,8 @@ namespace FilterAgent.Windows
                     {
                         Console.WriteLine("Service seems to be running already.");
                     }
-                } else
+                }
+                else
                 {
                     Console.WriteLine("File does not exist '{0}'", processBinaryAbsPath);
                 }
@@ -183,7 +183,7 @@ namespace FilterAgent.Windows
                     Environment.Exit(2);
                 }
                 // Find FilterServiceProvider.exe
-                if (!File.Exists("FilterServiceProvider.exe"))
+                if(!File.Exists("FilterServiceProvider.exe"))
                 {
                     Console.WriteLine("Couldn't find FilterServiceProvider.exe");
                     Environment.Exit(3);
@@ -199,7 +199,7 @@ namespace FilterAgent.Windows
                 mutexName = string.Join("", processBinaryPath.Where(x => !s_toRemoveFromPath.Contains(x)).ToList());
                 processBinaryAbsPath = processBinaryPath;
 
-                if (getRunningProcess("FilterServiceProvider") != null)
+                if(getRunningProcess("FilterServiceProvider") != null)
                 {
                     Environment.Exit(0);
                 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright � 2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -247,7 +247,7 @@ namespace CloudVeil.Core.Windows.Util.Net
         /// we disconnect from COM stuff.
         /// </summary>
         ~NetworkListUtil()
-        {   
+        {
             DisconnectFromNetworkListManagerEvents();
         }
 
@@ -271,7 +271,7 @@ namespace CloudVeil.Core.Windows.Util.Net
 
         public void NetworkConnectivityChanged(Guid networkId, NLM_CONNECTIVITY newConnectivity)
         {
-            ConnectionStateChanged?.Invoke();            
+            ConnectionStateChanged?.Invoke();
         }
 
         public void NetworkPropertyChanged(Guid networkId, NLM_NETWORK_PROPERTY_CHANGE Flags)

@@ -1,4 +1,4 @@
-﻿// Copyright © 2018 CloudVeil Technology, Inc.
+// Copyright © 2018 CloudVeil Technology, Inc.
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -38,7 +38,7 @@ namespace Filter.Platform.Common.IPC
             byte[] lenBytes = BitConverter.GetBytes(length);
             Buffer.BlockCopy(lenBytes, 0, msg, 4, 4);
 
-            if (messageBuffer != null)
+            if(messageBuffer != null)
             {
                 Buffer.BlockCopy(messageBuffer, 0, msg, 8, length);
             }

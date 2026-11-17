@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -96,9 +96,9 @@ namespace Gui.CloudVeil
             /// </remarks>
             public static Guid Create(Guid namespaceId, string name, int version)
             {
-                if (name == null)
+                if(name == null)
                     throw new ArgumentNullException("name");
-                if (version != 3 && version != 5)
+                if(version != 3 && version != 5)
                     throw new ArgumentOutOfRangeException("version", "version must be either 3 or 5.");
 
                 // convert the name to a sequence of octets (as defined by the standard or conventions of
@@ -112,7 +112,7 @@ namespace Gui.CloudVeil
 
                 // comput the hash of the name space ID concatenated with the name (step 4)
                 byte[] hash;
-                using (HashAlgorithm algorithm = version == 3 ? (HashAlgorithm)MD5.Create() : SHA1.Create())
+                using(HashAlgorithm algorithm = version == 3 ? (HashAlgorithm)MD5.Create() : SHA1.Create())
                 {
                     algorithm.TransformBlock(namespaceBytes, 0, namespaceBytes.Length, null, 0);
                     algorithm.TransformFinalBlock(nameBytes, 0, nameBytes.Length);
@@ -187,13 +187,13 @@ namespace Gui.CloudVeil
 
 
                 // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", writeable))
+                using(RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", writeable))
                 {
                     // Create or open our application's key.
 
                     RegistryKey sub = null;
 
-                    if (!createKey)
+                    if(!createKey)
                     {
                         sub = key.OpenSubKey(applicationNiceName, writeable);
                     }
@@ -208,7 +208,7 @@ namespace Gui.CloudVeil
 
                         }
 
-                        if (sub == null)
+                        if(sub == null)
                         {
                             try
                             {
@@ -234,7 +234,7 @@ namespace Gui.CloudVeil
             {
                 get
                 {
-                    lock (emailLock)
+                    lock(emailLock)
                     {
                         string machineName = string.Empty;
 
@@ -250,15 +250,15 @@ namespace Gui.CloudVeil
                         // This key will have the entropy written to it in the registry.
                         string keyName = GuidUtility.Create(GuidUtility.UrlNamespace, Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\" + machineName + @"\email-address").ToString();
 
-                        using (var sub = getAppRegistryKey(createKey: false))
+                        using(var sub = getAppRegistryKey(createKey: false))
                         {
                             string emailAddress = null;
 
-                            if (sub != null)
+                            if(sub != null)
                             {
                                 emailAddress = sub.GetValue(keyName) as string;
 
-                                if (emailAddress == null || emailAddress.Length == 0)
+                                if(emailAddress == null || emailAddress.Length == 0)
                                 {
                                     return null;
                                 }
@@ -273,7 +273,7 @@ namespace Gui.CloudVeil
                 {
                     Debug.Assert(value != null && value.Length > 0);
 
-                    lock (emailLock)
+                    lock(emailLock)
                     {
                         string machineName = string.Empty;
 
@@ -293,17 +293,17 @@ namespace Gui.CloudVeil
                         var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                         // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                        using (RegistryKey sub = getAppRegistryKey(true, true))
+                        using(RegistryKey sub = getAppRegistryKey(true, true))
                         {
                             // Create or open our application's key.
 
-                            if (sub != null)
+                            if(sub != null)
                             {
                                 try
                                 {
                                     sub.SetValue(keyName, value, RegistryValueKind.String);
                                 }
-                                catch (Exception e)
+                                catch(Exception e)
                                 {
                                     System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                                 }
@@ -320,7 +320,7 @@ namespace Gui.CloudVeil
             {
                 get
                 {
-                    lock (authenticationLock)
+                    lock(authenticationLock)
                     {
                         string machineName = string.Empty;
 
@@ -340,17 +340,17 @@ namespace Gui.CloudVeil
                         var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                         // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                        using (RegistryKey sub = getAppRegistryKey())
+                        using(RegistryKey sub = getAppRegistryKey())
                         {
                             // Create or open our application's key.
 
                             string authToken = null;
 
-                            if (sub != null)
+                            if(sub != null)
                             {
                                 authToken = sub.GetValue(keyName) as string;
 
-                                if (authToken == null || authToken.Length == 0)
+                                if(authToken == null || authToken.Length == 0)
                                 {
                                     return null;
                                 }
@@ -365,7 +365,7 @@ namespace Gui.CloudVeil
                 {
                     Debug.Assert(value != null && value.Length > 0);
 
-                    lock (authenticationLock)
+                    lock(authenticationLock)
                     {
                         string machineName = string.Empty;
 
@@ -385,15 +385,15 @@ namespace Gui.CloudVeil
                         var applicationNiceName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
 
                         // Open the LOCAL_MACHINE\SYSTEM sub key for read/write.
-                        using (RegistryKey sub = getAppRegistryKey(true, true))
+                        using(RegistryKey sub = getAppRegistryKey(true, true))
                         {
-                            if (sub != null)
+                            if(sub != null)
                             {
                                 try
                                 {
                                     sub.SetValue(keyName, value, RegistryValueKind.String);
                                 }
-                                catch (Exception e)
+                                catch(Exception e)
                                 {
                                     System.Diagnostics.Debug.WriteLine("sub.SetValue threw exception {0}", e.ToString());
                                 }
@@ -473,7 +473,7 @@ namespace Gui.CloudVeil
         }
 
         public override void Commit(IDictionary savedState)
-        {   
+        {
             base.Commit(savedState);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
@@ -499,7 +499,7 @@ namespace Gui.CloudVeil
 
             // 'norestart' not defined in Context.Parameters, so we can't use Context.IsParameterTrue.
             // This file gets defined by the filter service before shutting down.
-            if (File.Exists(restartFlagPath))
+            if(File.Exists(restartFlagPath))
             {
                 File.Delete(restartFlagPath);
                 InitiateShutdown(null, null, 0, (uint)(ShutdownFlags.SHUTDOWN_FORCE_OTHERS | ShutdownFlags.SHUTDOWN_RESTART | ShutdownFlags.SHUTDOWN_RESTARTAPPS), 0);
@@ -507,7 +507,7 @@ namespace Gui.CloudVeil
 
             RegistryUtil registry = new RegistryUtil();
 
-            if (savedState.Contains("__my_registry_auth_token"))
+            if(savedState.Contains("__my_registry_auth_token"))
             {
                 registry.AuthToken = savedState["__my_registry_auth_token"] as string;
             }
@@ -572,7 +572,7 @@ namespace Gui.CloudVeil
             var applicationNiceName = "FilterServiceProvider";
 
             // Open the LOCAL_MACHINE\Software sub key for read/write.
-            using (RegistryKey softwareKey = Registry.LocalMachine.OpenSubKey("Software", true))
+            using(RegistryKey softwareKey = Registry.LocalMachine.OpenSubKey("Software", true))
             {
                 try
                 {

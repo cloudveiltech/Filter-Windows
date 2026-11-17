@@ -4,7 +4,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
-﻿using Filter.Platform.Common;
+using Filter.Platform.Common;
 using System;
 using System.IO;
 
@@ -19,7 +19,7 @@ namespace CloudVeil.Core.Windows.Util
         {
             get
             {
-                if (appDataFolder == null)
+                if(appDataFolder == null)
                 {
                     appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"CloudVeil");
                 }

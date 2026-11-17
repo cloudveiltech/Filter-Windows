@@ -5,16 +5,11 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common;
 using Filter.Platform.Common.Util;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeil.Core.Windows
 {
@@ -29,7 +24,7 @@ namespace CloudVeil.Core.Windows
                 startupInfo.Arguments = arguments;
                 startupInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                if (runasAdmin)
+                if(runasAdmin)
                 {
                     startupInfo.Verb = "runas";
                 }

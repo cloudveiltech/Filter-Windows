@@ -1,4 +1,4 @@
-﻿using EmbedIO;
+using EmbedIO;
 using EmbedIO.WebApi;
 using Filter.Platform.Common.Util;
 using System;
@@ -66,8 +66,8 @@ namespace FilterProvider.Common.ControlServer
             };
             options.AddUrlPrefix($"https://127.0.0.1:{port}");
 
-            server = new WebServer(options);            
-            
+            server = new WebServer(options);
+
         }
 
         public List<Tuple<Type, Func<WebApiController>>> ControllerFactories { get; set; } = new List<Tuple<Type, Func<WebApiController>>>();
@@ -84,11 +84,11 @@ namespace FilterProvider.Common.ControlServer
                             .WithModule(module)
                             .WithLocalSessionManager();
 
-            foreach (var factory in ControllerFactories)
+            foreach(var factory in ControllerFactories)
             {
                 module.RegisterController(factory.Item1, factory.Item2);
             }
-            
+
             serverTask = server.RunAsync(cts.Token);
         }
 
@@ -97,9 +97,9 @@ namespace FilterProvider.Common.ControlServer
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if(!disposedValue)
             {
-                if (disposing)
+                if(disposing)
                 {
                     cts.Cancel();
                     serverTask.Wait();

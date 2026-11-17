@@ -1,15 +1,11 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gui.CloudVeil.Testing
 {
-    public enum FilterTest {
+    public enum FilterTest
+    {
         BlockingTest = 1,
         GoogleSafeSearchTest,
         BingSafeSearchTest,
@@ -92,10 +88,10 @@ namespace Gui.CloudVeil.Testing
 
                 HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
 
-                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                using(StreamReader reader = new StreamReader(response.GetResponseStream()))
                 {
                     string ret = reader.ReadToEnd();
-                    if (ret.Contains(filterMagicString))
+                    if(ret.Contains(filterMagicString))
                     {
                         OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, true, "Your filter is up and running!"));
                     }
@@ -105,9 +101,9 @@ namespace Gui.CloudVeil.Testing
                     }
                 }
             }
-            catch (WebException ex)
+            catch(WebException ex)
             {
-                if (ex.Response == null)
+                if(ex.Response == null)
                 {
                     OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "No response detected from test site. Check your internet connection and try again.")
                     {
@@ -122,7 +118,7 @@ namespace Gui.CloudVeil.Testing
                     });
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 // FIXME: Any exception needs to get logged for transmission to the cloudveil server.
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.BlockingTest, false, "Unexpected error occurred. " + ex.Message + ". Please contact support.")
@@ -154,7 +150,7 @@ namespace Gui.CloudVeil.Testing
 
         private bool doUrlIpsMatch(string url1, string url2, out string ip1, out string ip2)
         {
-            string ip = this.getIpFromRequest(url1);
+            string ip = getIpFromRequest(url1);
             string strictIp = null;
 
             Uri uri = new Uri(url2);
@@ -162,7 +158,7 @@ namespace Gui.CloudVeil.Testing
 
             IPHostEntry strictIpEntry = Dns.GetHostEntry(url2);
 
-            if (strictIpEntry != null)
+            if(strictIpEntry != null)
             {
                 strictIp = strictIpEntry.AddressList[0].ToString();
             }
@@ -191,14 +187,14 @@ namespace Gui.CloudVeil.Testing
 
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.DnsFilterTest, result, details));
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.ExceptionOccurred, false, ex.ToString()) { Exception = ex });
             }
         }
 
         public void TestDNSSafeSearch()
-        {           
+        {
             try
             {
                 string ip1, ip2, ip3, details;
@@ -225,14 +221,14 @@ namespace Gui.CloudVeil.Testing
                 {
                     result = doUrlIpsMatch("https://www.youtube.com", "https://restrictmoderate.youtube.com", out ip1, out ip3);
                     details = string.Format("IP {0} {1} IP {2}, type: restrict/moderate", ip1, "matches", ip3);
-                } 
+                }
                 if(!result)
                 {
                     details = string.Format("IP {0} {1} IP {2} or {3}", ip1, "does not match expected", ip2, ip3);
                 }
-                
+
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.YoutubeSafeSearchTest, result, details));
-                
+
                 OnFilterTestResult?.Invoke(new DiagnosticsEntry(FilterTest.AllTestsCompleted, true, ""));
             }
             catch(Exception ex)

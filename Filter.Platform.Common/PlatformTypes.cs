@@ -5,10 +5,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-﻿using System;
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Filter.Platform.Common
 {
@@ -25,7 +23,7 @@ namespace Filter.Platform.Common
         {
             Type type = typeof(T);
 
-            if (typeDictionary.ContainsKey(type))
+            if(typeDictionary.ContainsKey(type))
             {
                 return (T)typeDictionary[type](parameters);
             }

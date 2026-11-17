@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,8 +6,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CloudVeil.IPC.Messages
 {
@@ -18,7 +16,7 @@ namespace CloudVeil.IPC.Messages
         {
             Site = site;
         }
-    
+
         public string Site { get; set; }
     }
 }

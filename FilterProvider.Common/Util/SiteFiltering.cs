@@ -1,21 +1,17 @@
-﻿using CloudVeil.IPC;
+using CloudVeil.IPC;
 using CloudVeil.IPC.Messages;
 using Filter.Platform.Common.Data.Models;
 using Filter.Platform.Common.Util;
 using FilterProvider.Common.Configuration;
-using FilterProvider.Common.Data;
 using GoproxyWrapper;
 using NodaTime;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
 using System.Linq;
-using System.Threading;
 using System.Net;
 using CloudVeil;
 using System.Diagnostics;
-using GoProxyWrapper;
 
 namespace FilterProvider.Common.Util
 {
@@ -77,7 +73,7 @@ namespace FilterProvider.Common.Util
         {
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
-            if (ipcServer != null && ipcServer.WaitingForAuth)
+            if(ipcServer != null && ipcServer.WaitingForAuth)
             {
                 return 0;
             }
@@ -87,7 +83,7 @@ namespace FilterProvider.Common.Util
                 ZonedDateTime date = timeDetection.GetRealTime();
                 TimeRestrictionModel todayRestriction = null;
 
-                if (policyConfiguration != null && policyConfiguration.TimeRestrictions != null && date != null)
+                if(policyConfiguration != null && policyConfiguration.TimeRestrictions != null && date != null)
                 {
                     todayRestriction = policyConfiguration.TimeRestrictions[(int)date.ToDateTimeOffset().DayOfWeek];
                 }
@@ -96,18 +92,18 @@ namespace FilterProvider.Common.Util
                 Uri url = new Uri(urlString);
                 Uri serviceProviderPath = new Uri(CompileSecrets.ServiceProviderApiPath);
 
-                if (url.Host == serviceProviderPath.Host)
+                if(url.Host == serviceProviderPath.Host)
                 {
                     return 0;
                 }
-                else if (todayRestriction != null && todayRestriction.RestrictionsEnabled && !timeDetection.IsDateTimeAllowed(date, todayRestriction))
+                else if(todayRestriction != null && todayRestriction.RestrictionsEnabled && !timeDetection.IsDateTimeAllowed(date, todayRestriction))
                 {
                     sendBlockResponse(args, urlString, null, BlockType.TimeRestriction);
                     return 1;
                 }
-              
+
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }
@@ -121,11 +117,11 @@ namespace FilterProvider.Common.Util
 
             bool useHtmlBlockPage = false;
 
-            if (acceptHeader != null)
+            if(acceptHeader != null)
             {
-                foreach (string headerVal in htmlMimeTypes)
+                foreach(string headerVal in htmlMimeTypes)
                 {
-                    if (acceptHeader.Value.IndexOf(headerVal, StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    if(acceptHeader.Value.IndexOf(headerVal, StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
                         useHtmlBlockPage = true;
                         break;
@@ -138,7 +134,7 @@ namespace FilterProvider.Common.Util
                 useHtmlBlockPage = true;
             }
 
-            if (!args.Request.Headers.HeaderExists("Referer"))
+            if(!args.Request.Headers.HeaderExists("Referer"))
             {
                 // Use the HTML block page if this is a direct navigation.
                 useHtmlBlockPage = true;
@@ -147,11 +143,11 @@ namespace FilterProvider.Common.Util
             return useHtmlBlockPage;
         }
 
-        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.None, string triggerCategory = "", string textTrigger="")
+        private void sendBlockResponse(Session args, string url, int[] categories, BlockType blockType = BlockType.None, string triggerCategory = "", string textTrigger = "")
         {
             bool useHtmlBlockPage = this.useHtmlBlockPage(args);
 
-            if (useHtmlBlockPage)
+            if(useHtmlBlockPage)
             {
                 int matchCategory = categories?[0] ?? 0;
 
@@ -221,14 +217,14 @@ namespace FilterProvider.Common.Util
         }
 
         internal void OnBeforeResponse(GoproxyWrapper.Session args)
-        {             
+        {
             bool shouldBlock = false;
             string customBlockResponseContentType = null;
             byte[] customBlockResponse = null;
 
             // Don't allow filtering if our user has been denied access and they
             // have not logged back in.
-            if (ipcServer != null && ipcServer.WaitingForAuth)
+            if(ipcServer != null && ipcServer.WaitingForAuth)
             {
                 return;
             }
@@ -246,7 +242,7 @@ namespace FilterProvider.Common.Util
                 }
 
                 // Check our certificate exemptions to see if we should allow this site through or not.
-                if (args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
+                if(args.Response.CertificateCount > 0 && !args.Response.IsCertificateVerified && !certificateExemptions.IsExempted(uri.Host, args.Response.Certificates[0]))
                 {
                     customBlockResponseContentType = "text/html";
                     customBlockResponse = templates.ResolveBadSslTemplate(new Uri(args.Request.Url), args.Response.Certificates[0].Thumbprint);
@@ -255,7 +251,7 @@ namespace FilterProvider.Common.Util
                 }
 
                 string contentType = null;
-                if (args.Response.Headers.HeaderExists("Content-Type"))
+                if(args.Response.Headers.HeaderExists("Content-Type"))
                 {
                     contentType = args.Response.Headers.GetFirstHeader("Content-Type").Value;
 
@@ -269,13 +265,13 @@ namespace FilterProvider.Common.Util
                     // text/plain
                     // text/html
                     // application/json
-                    if (!(isHtml || isJson || isTextPlain))
+                    if(!(isHtml || isJson || isTextPlain))
                     {
                         return;
                     }
                 }
 
-                if (contentType != null && args.Response.HasBody)
+                if(contentType != null && args.Response.HasBody)
                 {
                     contentType = contentType.ToLower();
 
@@ -286,18 +282,18 @@ namespace FilterProvider.Common.Util
                     byte[] responseBody = args.Response.Body;
                     var contentClassResult = OnClassifyContent(responseBody, contentType, out blockType, out textTrigger, out textCategory);
 
-                    if (contentClassResult > 0)
+                    if(contentClassResult > 0)
                     {
                         shouldBlock = true;
 
                         List<MappedFilterListCategoryModel> categories = new List<MappedFilterListCategoryModel>();
 
-                        if (contentType.IndexOf("html") != -1)
+                        if(contentType.IndexOf("html") != -1)
                         {
                             customBlockResponseContentType = "text/html";
                             customBlockResponse = templates.ResolveBlockedSiteTemplate(new Uri(args.Request.Url), contentClassResult, categories, blockType, textCategory, textTrigger);
                         }
-                        else if (contentType.IndexOf("application/json", StringComparison.InvariantCultureIgnoreCase) != -1)
+                        else if(contentType.IndexOf("application/json", StringComparison.InvariantCultureIgnoreCase) != -1)
                         {
                             customBlockResponseContentType = "application/json";
                             customBlockResponse = new byte[0];
@@ -308,18 +304,18 @@ namespace FilterProvider.Common.Util
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }
             finally
             {
-                if (shouldBlock)
+                if(shouldBlock)
                 {
                     // TODO: Do we really need this as Info?
                     logger.Info("Response blocked: {0}", args.Request.Url);
 
-                    if (customBlockResponse != null)
+                    if(customBlockResponse != null)
                     {
                         args.SendCustomResponse((int)HttpStatusCode.OK, customBlockResponseContentType, customBlockResponse);
                     }
@@ -333,11 +329,11 @@ namespace FilterProvider.Common.Util
 
             int length = matchingCategories.Count;
             var categoryValues = policyConfiguration.GeneratedCategoriesMap.Values;
-            foreach (var category in categoryValues)
+            foreach(var category in categoryValues)
             {
-                for (int i = 0; i < length; i++)
+                for(int i = 0; i < length; i++)
                 {
-                    if (category.CategoryId == matchingCategories[i])
+                    if(category.CategoryId == matchingCategories[i])
                     {
                         categories.Add(category);
                     }
@@ -374,14 +370,14 @@ namespace FilterProvider.Common.Util
 
                 stopwatch = Stopwatch.StartNew();
 
-                if (policyConfiguration.TextTriggers != null && policyConfiguration.TextTriggers.HasTriggers)
+                if(policyConfiguration.TextTriggers != null && policyConfiguration.TextTriggers.HasTriggers)
                 {
                     var isHtml = contentType.IndexOf("html") != -1;
                     var isJson = contentType.IndexOf("json") != -1;
-                    if (isHtml || isJson)
+                    if(isHtml || isJson)
                     {
                         var dataToAnalyzeStr = Encoding.UTF8.GetString(data.ToArray());
-                        if (isHtml)
+                        if(isHtml)
                         {
                             // This doesn't work anymore because google has started sending bad stuff directly
                             // embedded inside HTML responses, instead of sending JSON a separate response.
@@ -394,13 +390,13 @@ namespace FilterProvider.Common.Util
                         string trigger = null;
                         var cfg = policyConfiguration.Configuration;
 
-                        if (policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
+                        if(policyConfiguration.TextTriggers.ContainsTrigger(dataToAnalyzeStr, out matchedCategory, out trigger, policyConfiguration.CategoryIndex.GetIsCategoryEnabled, cfg != null && cfg.MaxTextTriggerScanningSize > 1, cfg != null ? cfg.MaxTextTriggerScanningSize : -1))
                         {
                             logger.Info("Triggers successfully run. matchedCategory = {0}, trigger = '{1}'", matchedCategory, trigger);
 
                             var mappedCategory = policyConfiguration.GeneratedCategoriesMap.Values.Where(xx => xx.CategoryId == matchedCategory).FirstOrDefault();
 
-                            if (mappedCategory != null)
+                            if(mappedCategory != null)
                             {
                                 logger.Info("Response blocked by text trigger \"{0}\" in category {1}.", trigger, mappedCategory.CategoryName);
                                 blockedBecause = BlockType.TextTrigger;
@@ -409,8 +405,9 @@ namespace FilterProvider.Common.Util
                                 return mappedCategory.CategoryId;
                             }
                         }
-                    } 
-                } else
+                    }
+                }
+                else
                 {
                     logger.Info("No text triggers loaded");
                 }
@@ -418,7 +415,7 @@ namespace FilterProvider.Common.Util
 
                 //logger.Info("Text triggers took {0} on {1}", stopwatch.ElapsedMilliseconds, url);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 LoggerUtil.RecursivelyLogException(logger, e);
             }
@@ -533,7 +530,7 @@ namespace FilterProvider.Common.Util
 
         #region Block Page Templates
 
-        
+
 
         #endregion
     }

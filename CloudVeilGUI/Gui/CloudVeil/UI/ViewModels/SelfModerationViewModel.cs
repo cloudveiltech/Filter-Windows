@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2019 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,15 +6,9 @@
 */
 using CloudVeil.IPC;
 using CloudVeil.Windows;
-using CloudVeilGUI;
 using GalaSoft.MvvmLight.CommandWpf;
-using MahApps.Metro.Controls;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Gui.CloudVeil.UI.Windows;
 
 namespace Gui.CloudVeil.UI.ViewModels
@@ -102,7 +96,7 @@ namespace Gui.CloudVeil.UI.ViewModels
 
                         bool result = await (CloudVeilApp.Current.MainWindow as BaseWindow).AskUserYesNoQuestion("Are you sure?", $"This will add '{site}' to your list of blocked sites. Are you sure you want to continue?");
 
-                        if (!result)
+                        if(!result)
                             return;
 
                         IPCClient.Default.RequestAddSelfModeratedSite(site)

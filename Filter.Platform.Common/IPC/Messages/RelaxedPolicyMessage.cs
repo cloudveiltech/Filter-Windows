@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -107,7 +107,7 @@ namespace CloudVeil.IPC.Messages
         } = 0;
 
         public RelaxedPolicyStatus Status { get; private set; }
-        
+
         /// <summary>
         /// Constructs a new RelaxedPolicyInfo instance. 
         /// </summary>

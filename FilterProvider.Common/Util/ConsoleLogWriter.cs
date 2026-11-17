@@ -15,7 +15,7 @@ namespace FilterProvider.Common.Util
 {
     class ConsoleLogWriter : TextWriter
     {
-        public ConsoleLogWriter(string prefix="console") : base()
+        public ConsoleLogWriter(string prefix = "console") : base()
         {
             pathsProvider = PlatformTypes.New<IPathProvider>();
             this.prefix = prefix;
@@ -40,9 +40,9 @@ namespace FilterProvider.Common.Util
         {
             try
             {
-                if (characterCount > 0 && (characterCount % 1000) == 0)
+                if(characterCount > 0 && (characterCount % 1000) == 0)
                 {
-                    if (DateTime.Now.Date > openedDate)
+                    if(DateTime.Now.Date > openedDate)
                     {
                         writer.Close();
                         writer = openLogFile();
@@ -50,7 +50,7 @@ namespace FilterProvider.Common.Util
                     }
                 }
 
-                if (writer == null)
+                if(writer == null)
                 {
                     writer = openLogFile();
                     openedDate = DateTime.Now.Date;

@@ -1,10 +1,7 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
+using GalaSoft.MvvmLight.CommandWpf;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Gui.CloudVeil.UI.Views;
@@ -28,7 +25,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                         dialog.Title = "Save Report";
 
                         bool? result = dialog.ShowDialog();
-                        if (result == true)
+                        if(result == true)
                         {
                             string text = DiagnosticsText; // Prevent cross-thread errors by creating a new variable.
                             Task.Run(() =>

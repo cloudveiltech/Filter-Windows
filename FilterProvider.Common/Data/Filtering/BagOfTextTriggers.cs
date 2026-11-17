@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,9 +15,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using NLog;
-using System.Diagnostics;
-using CloudVeil.Core.Windows.Util;
-using Filter.Platform.Common.Util;
 
 namespace FilterProvider.Common.Data.Filtering
 {
@@ -217,11 +214,11 @@ namespace FilterProvider.Common.Data.Filtering
         {
             int firstWordCount;
 
-            using (var countCmd = connection.CreateCommand())
+            using(var countCmd = connection.CreateCommand())
             {
                 countCmd.CommandText = "SELECT COUNT(1) FROM FirstWordIndex;";
 
-                using (var reader = countCmd.ExecuteReader())
+                using(var reader = countCmd.ExecuteReader())
                 {
                     reader.Read();
                     firstWordCount = reader.GetInt32(0);
@@ -230,11 +227,11 @@ namespace FilterProvider.Common.Data.Filtering
 
             FirstWordFilter = new BloomFilter<string>(firstWordCount == 0 ? 100 : firstWordCount);
 
-            using (var cmd = connection.CreateCommand())
+            using(var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT FirstWordText FROM FirstWordIndex;";
 
-                using (var reader = cmd.ExecuteReader())
+                using(var reader = cmd.ExecuteReader())
                 {
                     while(reader.Read())
                     {
@@ -246,11 +243,11 @@ namespace FilterProvider.Common.Data.Filtering
 
             int triggerCount;
 
-            using (var countCmd = connection.CreateCommand())
+            using(var countCmd = connection.CreateCommand())
             {
                 countCmd.CommandText = "SELECT COUNT(1) FROM TriggerIndex;";
 
-                using (var reader = countCmd.ExecuteReader())
+                using(var reader = countCmd.ExecuteReader())
                 {
                     reader.Read();
                     triggerCount = reader.GetInt32(0);
@@ -258,14 +255,14 @@ namespace FilterProvider.Common.Data.Filtering
             }
 
             TriggerFilter = new BloomFilter<string>(triggerCount == 0 ? 100 : triggerCount);
-            
-            using (var cmd = connection.CreateCommand())
+
+            using(var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT TriggerText FROM TriggerIndex;";
 
-                using (var reader = cmd.ExecuteReader())
+                using(var reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    while(reader.Read())
                     {
                         string triggerWord = reader.GetString(0);
                         TriggerFilter.Add(triggerWord);
@@ -308,7 +305,7 @@ namespace FilterProvider.Common.Data.Filtering
             public async Task<bool> StoreTrigger(string line, short categoryId)
             {
                 string trimmedLine = line.Trim();
-                if (trimmedLine.Length > 0)
+                if(trimmedLine.Length > 0)
                 {
                     List<string> trimmedLineParts = Split(trimmedLine);
 
@@ -335,9 +332,9 @@ namespace FilterProvider.Common.Data.Filtering
 
             protected virtual void Dispose(bool disposing)
             {
-                if (!disposedValue)
+                if(!disposedValue)
                 {
-                    if (disposing)
+                    if(disposing)
                     {
                         firstWordCommand.Dispose();
                         triggerCommand.Dispose();
@@ -370,15 +367,15 @@ namespace FilterProvider.Common.Data.Filtering
         public async Task<int> LoadStoreFromList(IEnumerable<string> inputList, short categoryId)
         {
             int loaded = 0;
-            using (var transaction = connection.BeginTransaction())
+            using(var transaction = connection.BeginTransaction())
             {
-                using (var storeCommands = new StoreCommands(connection))
+                using(var storeCommands = new StoreCommands(connection))
                 {
                     foreach(string line in inputList)
                     {
-                        if (line == null) continue;
+                        if(line == null) continue;
 
-                        if (await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
+                        if(await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
                     }
                 }
 
@@ -407,14 +404,14 @@ namespace FilterProvider.Common.Data.Filtering
             int loaded = 0;
             using(var transaction = connection.BeginTransaction())
             {
-                using (var storeCommands = new StoreCommands(connection))
+                using(var storeCommands = new StoreCommands(connection))
                 {
                     string line = null;
-                    using (var sw = new StreamReader(inputStream))
+                    using(var sw = new StreamReader(inputStream))
                     {
-                        while ((line = await sw.ReadLineAsync()) != null)
+                        while((line = await sw.ReadLineAsync()) != null)
                         {
-                            if (await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
+                            if(await storeCommands.StoreTrigger(line, categoryId)) ++loaded;
                         }
                     }
                 }
@@ -511,13 +508,13 @@ namespace FilterProvider.Common.Data.Filtering
                 return false;
             }
 
-          //  LoggerUtil.GetAppWideLogger().Info("Triggers for input: " + input);
+            //  LoggerUtil.GetAppWideLogger().Info("Triggers for input: " + input);
 
             var split = Split(input);
 
             /*using (FileStream debugStream = new FileStream(@"C:\ProgramData\CloudVeil\textTriggerDebug.txt", FileMode.Append))
             using (StreamWriter writer = new StreamWriter(debugStream))*/
-            using (var myConn = new SqliteConnection(connection.ConnectionString))
+            using(var myConn = new SqliteConnection(connection.ConnectionString))
             {
                 myConn.Open();
 
@@ -525,8 +522,8 @@ namespace FilterProvider.Common.Data.Filtering
 
                 SqliteCommand triggerCommand = null;
 
-                using (var tsx = myConn.BeginTransaction())
-                using (var cmd = myConn.CreateCommand())
+                using(var tsx = myConn.BeginTransaction())
+                using(var cmd = myConn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT * from FirstWordIndex where FirstWordText = $trigger";
 
@@ -544,23 +541,23 @@ namespace FilterProvider.Common.Data.Filtering
 
                     List<List<string>> listsToRemove = new List<List<string>>();
 
-                    foreach (var s in split)
+                    foreach(var s in split)
                     {
 
                         // Completely skip closing tags.
-                        if (s.Length > 2 && s[0] == '<' && s[1] == '/' && s[s.Length - 1] == '>')
+                        if(s.Length > 2 && s[0] == '<' && s[1] == '/' && s[s.Length - 1] == '>')
                         {
                             isClosingTag = true;
                         }
 
                         // We require some more complex determinations for opening tags as they may have important
                         // text inside them.
-                        if (s.Length >= 2 && s[0] == '<' && s[1] != '/' && s.Length > 1 && s.Length < 10)
+                        if(s.Length >= 2 && s[0] == '<' && s[1] != '/' && s.Length > 1 && s.Length < 10)
                         {
                             skippingTags = true;
                         }
 
-                        switch (s.ToLower())
+                        switch(s.ToLower())
                         {
                             case "<script":
                             case "<style":
@@ -585,7 +582,7 @@ namespace FilterProvider.Common.Data.Filtering
                             case "\"":
                             case "\'":
                                 quoteReached = !quoteReached;
-                                if (!quoteReached)
+                                if(!quoteReached)
                                 {
                                     collectingImportantAttributes = false;
                                 }
@@ -594,24 +591,24 @@ namespace FilterProvider.Common.Data.Filtering
 
                         }
 
-                        if (isClosingTag)
+                        if(isClosingTag)
                         {
                             isClosingTag = false;
                             continue;
                         }
 
-                        if (collectingImportantAttributes)
+                        if(collectingImportantAttributes)
                         {
                             newSplit.Add(s);
                             itr++;
                         }
-                        else if (!skippingTags && !skippingScript && s != ">")
+                        else if(!skippingTags && !skippingScript && s != ">")
                         {
                             newSplit.Add(s);
                             itr++;
                         }
 
-                        if (skippingTags && !collectingImportantAttributes)
+                        if(skippingTags && !collectingImportantAttributes)
                         {
                             continue;
                         }
@@ -619,9 +616,9 @@ namespace FilterProvider.Common.Data.Filtering
                         listsToRemove.Clear();
 
                         // Check word lists.
-                        foreach (var list in wordLists)
+                        foreach(var list in wordLists)
                         {
-                            if (list.Count >= maxRebuildLen)
+                            if(list.Count >= maxRebuildLen)
                             {
                                 listsToRemove.Add(list);
                             }
@@ -631,22 +628,22 @@ namespace FilterProvider.Common.Data.Filtering
                             }
                         }
 
-                        foreach (var l in listsToRemove)
+                        foreach(var l in listsToRemove)
                         {
                             wordLists.Remove(l);
                         }
 
                         // Check word lists.
-                        foreach (var list in wordLists)
+                        foreach(var list in wordLists)
                         {
                             string triggerCandidate = string.Join(" ", list);
 
-                            if (!TriggerFilter.Contains(triggerCandidate))
+                            if(!TriggerFilter.Contains(triggerCandidate))
                             {
                                 continue;
                             }
 
-                            if (triggerCommand == null)
+                            if(triggerCommand == null)
                             {
                                 triggerCommand = myConn.CreateCommand();
                                 triggerCommand.CommandText = "SELECT * FROM TriggerIndex WHERE TriggerText = $trigger";
@@ -656,12 +653,12 @@ namespace FilterProvider.Common.Data.Filtering
                             }
 
                             triggerCommand.Parameters[0].Value = triggerCandidate;
-                            using (var triggerReader = triggerCommand.ExecuteReader())
+                            using(var triggerReader = triggerCommand.ExecuteReader())
                             {
-                                while (triggerReader.Read())
+                                while(triggerReader.Read())
                                 {
                                     var thisCat = triggerReader.GetInt16(1);
-                                    if (categoryAppliesCb(thisCat))
+                                    if(categoryAppliesCb(thisCat))
                                     {
                                         firstMatchCategory = thisCat;
                                         matchedTrigger = string.Join(" ", list);
@@ -674,28 +671,28 @@ namespace FilterProvider.Common.Data.Filtering
 
                         // TODO: Apply bloom filters to this problem.
                         // We need a bloom filter for first words and a bloom filter for triggers for maximum effect.
-                        if (!FirstWordFilter.Contains(s))
+                        if(!FirstWordFilter.Contains(s))
                         {
                             continue;
                         }
 
                         cmd.Parameters[0].Value = s;
-                        using (var reader = cmd.ExecuteReader())
+                        using(var reader = cmd.ExecuteReader())
                         {
 
-                            if (!reader.HasRows)
+                            if(!reader.HasRows)
                             {
                                 continue;
                             }
 
-                            while (reader.Read())
+                            while(reader.Read())
                             {
                                 var isWholeTrigger = reader.GetInt16(1);
 
-                                if (isWholeTrigger > 0)
+                                if(isWholeTrigger > 0)
                                 {
                                     var thisCat = reader.GetInt16(2);
-                                    if (categoryAppliesCb(thisCat))
+                                    if(categoryAppliesCb(thisCat))
                                     {
                                         firstMatchCategory = thisCat;
                                         matchedTrigger = s;
@@ -739,12 +736,13 @@ namespace FilterProvider.Common.Data.Filtering
 
                         sb.Append('<');
 
-                        if(i < len-1 && input[i + 1] == '/')
+                        if(i < len - 1 && input[i + 1] == '/')
                         {
                             while(input[i] != '>')
                             {
                                 i++;
-                                if(i >= len) {
+                                if(i >= len)
+                                {
                                     break;
                                 }
                                 sb.Append(input[i]);
@@ -818,10 +816,10 @@ namespace FilterProvider.Common.Data.Filtering
                     case '8':
                     case '9':
                     case '0':
-                    {
-                        sb.Append(char.ToLower(input[i]));
-                    }
-                    break;
+                        {
+                            sb.Append(char.ToLower(input[i]));
+                        }
+                        break;
 
                     case '>':
                         res.Add(sb.ToString());
@@ -837,14 +835,14 @@ namespace FilterProvider.Common.Data.Filtering
                         break;
 
                     default:
-                    {
-                        if(sb.Length > 0)
                         {
-                            res.Add(sb.ToString());
-                            sb.Clear();
+                            if(sb.Length > 0)
+                            {
+                                res.Add(sb.ToString());
+                                sb.Clear();
+                            }
                         }
-                    }
-                    break;
+                        break;
                 }
             }
 

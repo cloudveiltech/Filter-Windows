@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,15 +6,11 @@
 */
 
 using Filter.Platform.Common.Extensions;
-using CloudVeil.Core.Windows.Util;
 using Filter.Platform.Common.Util;
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Security;
-using Gui.CloudVeil.Extensions;
 using Gui.CloudVeil.UI.Models;
-using Gui.CloudVeil.UI.Views;
-using Gui.CloudVeil.Util;
 
 namespace Gui.CloudVeil.UI.ViewModels
 {
@@ -22,7 +18,7 @@ namespace Gui.CloudVeil.UI.ViewModels
     /// The LoginViewModel class serves as the ViewModel for the LoginView UserControl.
     /// </summary>
     public class LoginViewModel : BaseCloudVeilViewModel
-    {        
+    {
         const int OTP_PAGE_INDEX = 1;
         /// <summary>
         /// The model.
@@ -78,7 +74,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (authenticateWithEmailOtpCommand == null)
+                if(authenticateWithEmailOtpCommand == null)
                 {
                     authenticateWithEmailOtpCommand = new RelayCommand((Action)(async () =>
                     {
@@ -88,7 +84,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                             SelectedLoginPageIndex = OTP_PAGE_INDEX;
                             await model.AuthenticateWithEmailOtp();
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(logger, e);
                         }
@@ -103,7 +99,7 @@ namespace Gui.CloudVeil.UI.ViewModels
         {
             get
             {
-                if (validateEmailOtpCommand == null)
+                if(validateEmailOtpCommand == null)
                 {
                     validateEmailOtpCommand = new RelayCommand((Action)(async () =>
                     {
@@ -112,7 +108,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                             Message = "validating..";
                             await model.AuthenticateWithEmailOtp();
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             LoggerUtil.RecursivelyLogException(logger, e);
                         }
@@ -194,7 +190,7 @@ namespace Gui.CloudVeil.UI.ViewModels
                 if(value != null && !value.OIEquals(model.UserName))
                 {
                     authenticateWithPasswordCommand.RaiseCanExecuteChanged();
-                   
+
                     model.UserName = value;
                     RaisePropertyChanged(nameof(UserName));
                 }

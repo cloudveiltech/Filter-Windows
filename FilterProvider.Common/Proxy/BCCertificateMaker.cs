@@ -26,7 +26,6 @@ SOFTWARE.
 
 using System;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -141,7 +140,7 @@ namespace FilterProvider.Common.Proxy.Certificate
             certificateGenerator.SetNotBefore(validFrom);
             certificateGenerator.SetNotAfter(validTo);
 
-            if (hostName != null)
+            if(hostName != null)
             {
                 // add subject alternative names
                 var subjectAlternativeNames = alternateNames ?? new Asn1Encodable[] { new GeneralName(GeneralName.DnsName, hostName) };
@@ -162,7 +161,7 @@ namespace FilterProvider.Common.Proxy.Certificate
             // Set certificate intended purposes to only Server Authentication
             certificateGenerator.AddExtension(X509Extensions.ExtendedKeyUsage.Id, false,
                 new ExtendedKeyUsage(KeyPurposeID.IdKPServerAuth));
-            if (issuerPrivateKey == null)
+            if(issuerPrivateKey == null)
             {
                 certificateGenerator.AddExtension(X509Extensions.BasicConstraints.Id, true, new BasicConstraints(true));
             }
@@ -178,7 +177,7 @@ namespace FilterProvider.Common.Proxy.Certificate
 
             var seq = (Asn1Sequence)Asn1Object.FromByteArray(privateKeyInfo.ParsePrivateKey().GetDerEncoded());
 
-            if (seq.Count != 9)
+            if(seq.Count != 9)
             {
                 throw new PemException("Malformed sequence in RSA private key");
             }
@@ -196,13 +195,13 @@ namespace FilterProvider.Common.Proxy.Certificate
             var x509Certificate = withPrivateKey(certificate, rsaparams);
 #endif
 
-            if (!doNotSetFriendlyName)
+            if(!doNotSetFriendlyName)
             {
                 try
                 {
                     x509Certificate.FriendlyName = CNRemoverRegex.Replace(subjectName, string.Empty);
                 }
-                catch (PlatformNotSupportedException)
+                catch(PlatformNotSupportedException)
                 {
                     doNotSetFriendlyName = true;
                 }
@@ -224,7 +223,7 @@ namespace FilterProvider.Common.Proxy.Certificate
             store.SetCertificateEntry(certificate.SubjectDN.ToString(), entry);
 
             store.SetKeyEntry(certificate.SubjectDN.ToString(), new AsymmetricKeyEntry(privateKey), new[] { entry });
-            using (var ms = new MemoryStream())
+            using(var ms = new MemoryStream())
             {
                 store.Save(ms, password.ToCharArray(), new SecureRandom(new CryptoApiRandomGenerator()));
 
@@ -250,14 +249,14 @@ namespace FilterProvider.Common.Proxy.Certificate
             string hostName, string subjectName,
             DateTime validFrom, DateTime validTo, X509Certificate2 signingCertificate, AsymmetricCipherKeyPair subjectKeyPair = null, Asn1Encodable[] alternateNames = null)
         {
-            if (isRoot != (null == signingCertificate))
+            if(isRoot != (null == signingCertificate))
             {
                 throw new ArgumentException(
                     "You must specify a Signing Certificate if and only if you are not creating a root.",
                     nameof(signingCertificate));
             }
 
-            if (isRoot)
+            if(isRoot)
             {
                 return generateCertificate(null, subjectName, subjectName, validFrom, validTo, subjectKeyPair: subjectKeyPair, alternateNames: alternateNames);
             }
@@ -333,7 +332,7 @@ namespace FilterProvider.Common.Proxy.Certificate
 
             var seq = (Asn1Sequence)Asn1Object.FromByteArray(info.ParsePrivateKey().GetDerEncoded());
 
-            if (seq.Count != 9)
+            if(seq.Count != 9)
             {
                 throw new PemException("Malformed sequence in RSA private key");
             }
@@ -343,11 +342,11 @@ namespace FilterProvider.Common.Proxy.Certificate
                 rsa.Prime1, rsa.Prime2, rsa.Exponent1,
                 rsa.Exponent2, rsa.Coefficient);
 
-            using (var stream = new MemoryStream())
+            using(var stream = new MemoryStream())
             {
                 var writer = new BinaryWriter(stream);
                 writer.Write((byte)0x30); // SEQUENCE
-                using (var innerStream = new MemoryStream())
+                using(var innerStream = new MemoryStream())
                 {
                     var innerWriter = new BinaryWriter(innerStream);
                     EncodeIntegerBigEndian(innerWriter, new byte[] { 0x00 }); // Version
@@ -367,7 +366,7 @@ namespace FilterProvider.Common.Proxy.Certificate
                 var base64 = Convert.ToBase64String(stream.GetBuffer(), 0, (int)stream.Length).ToCharArray();
                 outputStream.WriteLine("-----BEGIN RSA PRIVATE KEY-----");
                 // Output as Base64 with lines chopped at 64 characters
-                for (var i = 0; i < base64.Length; i += 64)
+                for(var i = 0; i < base64.Length; i += 64)
                 {
                     outputStream.WriteLine(base64, i, Math.Min(64, base64.Length - i));
                 }
@@ -377,8 +376,8 @@ namespace FilterProvider.Common.Proxy.Certificate
 
         private static void EncodeLength(BinaryWriter stream, int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException("length", "Length must be non-negative");
-            if (length < 0x80)
+            if(length < 0) throw new ArgumentOutOfRangeException("length", "Length must be non-negative");
+            if(length < 0x80)
             {
                 // Short form
                 stream.Write((byte)length);
@@ -388,13 +387,13 @@ namespace FilterProvider.Common.Proxy.Certificate
                 // Long form
                 var temp = length;
                 var bytesRequired = 0;
-                while (temp > 0)
+                while(temp > 0)
                 {
                     temp >>= 8;
                     bytesRequired++;
                 }
                 stream.Write((byte)(bytesRequired | 0x80));
-                for (var i = bytesRequired - 1; i >= 0; i--)
+                for(var i = bytesRequired - 1; i >= 0; i--)
                 {
                     stream.Write((byte)(length >> (8 * i) & 0xff));
                 }
@@ -405,19 +404,19 @@ namespace FilterProvider.Common.Proxy.Certificate
         {
             stream.Write((byte)0x02); // INTEGER
             var prefixZeros = 0;
-            for (var i = 0; i < value.Length; i++)
+            for(var i = 0; i < value.Length; i++)
             {
-                if (value[i] != 0) break;
+                if(value[i] != 0) break;
                 prefixZeros++;
             }
-            if (value.Length - prefixZeros == 0)
+            if(value.Length - prefixZeros == 0)
             {
                 EncodeLength(stream, 1);
                 stream.Write((byte)0);
             }
             else
             {
-                if (forceUnsigned && value[prefixZeros] > 0x7f)
+                if(forceUnsigned && value[prefixZeros] > 0x7f)
                 {
                     // Add a prefix zero to force unsigned if the MSB is 1
                     EncodeLength(stream, value.Length - prefixZeros + 1);
@@ -427,7 +426,7 @@ namespace FilterProvider.Common.Proxy.Certificate
                 {
                     EncodeLength(stream, value.Length - prefixZeros);
                 }
-                for (var i = prefixZeros; i < value.Length; i++)
+                for(var i = prefixZeros; i < value.Length; i++)
                 {
                     stream.Write(value[i]);
                 }

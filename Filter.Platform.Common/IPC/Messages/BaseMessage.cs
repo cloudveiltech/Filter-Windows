@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright © 2017-2018 Cloudveil Technology Inc.  
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,11 +6,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudVeil.IPC.Messages
 {
@@ -38,7 +33,7 @@ namespace CloudVeil.IPC.Messages
             var dataType = DataObject?.GetType();
 
             // Throw InvalidCastException to help devs trace mismatched types.
-            if (DataObject != null && !dataType.Equals(genericType))
+            if(DataObject != null && !dataType.Equals(genericType))
             {
                 // Sometimes typeof(T) is Nullable. This takes care of InvalidCastException in that issue.
                 Type nullableUnderlying = Nullable.GetUnderlyingType(genericType);
@@ -50,11 +45,11 @@ namespace CloudVeil.IPC.Messages
 
             return new IpcMessage<T>()
             {
-                Call = this.Call,
-                Method = this.Method,
-                DataObject = this.DataObject,
-                Id = this.Id,
-                ReplyToId = this.ReplyToId
+                Call = Call,
+                Method = Method,
+                DataObject = DataObject,
+                Id = Id,
+                ReplyToId = ReplyToId
             };
         }
 
