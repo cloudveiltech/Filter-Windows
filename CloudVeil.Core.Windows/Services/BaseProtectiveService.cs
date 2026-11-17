@@ -205,6 +205,16 @@ namespace CloudVeil.Core.Windows.Services
             var alive = Process.GetProcessesByName(processToWatch).FirstOrDefault(p => !p.HasExited);
             if(alive != null)
             {
+                if(mutex != null)
+                {
+                    if(createdNew)
+                    {
+                        mutex.ReleaseMutex();
+                    }
+
+                    mutex.Dispose();
+                }
+
                 SetProcessHandle(alive);
                 return true;
             }

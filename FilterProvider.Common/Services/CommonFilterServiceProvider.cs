@@ -1331,7 +1331,7 @@ namespace FilterProvider.Common.Services
             // option to trust the local certificate store, we don't have to do that anymore.
             try
             {
-                if(WebServiceUtil.Default.AuthToken.Length > 0)
+                if(!string.IsNullOrEmpty(WebServiceUtil.Default.AuthToken))
                 {
                     trustManager.EstablishTrust();
                 }
